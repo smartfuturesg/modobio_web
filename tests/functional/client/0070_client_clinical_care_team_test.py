@@ -269,7 +269,7 @@ def test_clinical_care_team_access(test_client, care_team):
         content_type='application/json')
 
     # no content submitted yet but, sucessful request
-    assert response.status_code == 204
+    assert response.status_code == 200
 
     response = test_client.get(
         f'/doctor/medicalinfo/social/{test_client.client_id}/',
@@ -295,7 +295,7 @@ def test_clinical_care_team_access(test_client, care_team):
         headers=client_care_team_auth_header,
         content_type='application/json')
 
-    assert response.status_code == 204 # no content submitted yet but, sucessful request
+    assert response.status_code == 200
 
     response = test_client.get(
         f'/doctor/medicalinfo/social/{test_client.client_id}/',

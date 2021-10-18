@@ -19,7 +19,7 @@ def test_post_practitioner_affiliations(test_client):
         content_type='application/json')
 
     assert response.status_code == 400
-    assert response.json['message'] == 'Invalid Organization Index'
+    assert response.json['message'] == 'Invalid organization.'
 
     # post affiliation to organization with idx 1 again
     response = test_client.post(
@@ -29,7 +29,7 @@ def test_post_practitioner_affiliations(test_client):
         content_type='application/json')
 
     assert response.status_code == 400
-    assert response.json['message'] == 'Practitioner is already affiliated with organization_idx 1'
+    assert response.json['message'] == 'Practitioner is already affiliated with organization 1.'
 
     # post affiliation for a client
     response = test_client.post(
@@ -39,7 +39,7 @@ def test_post_practitioner_affiliations(test_client):
         content_type='application/json')
 
     assert response.status_code == 400
-    assert response.json['message'] == 'Not a Practitioner'
+    assert response.json['message'] == 'Not a practitioner.'
 
     # post affiliation to organization with idx 1
     response = test_client.post(
@@ -65,7 +65,7 @@ def test_delte_practitioner_affiliations(test_client):
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 400
-    assert response.json['message'] == 'organization_idx must be a positive integer'
+    assert response.json['message'] == 'Organization_idx must be a positive integer.'
 
     # test deleting affiliation with organization index null
     response = test_client.delete(
@@ -73,7 +73,7 @@ def test_delte_practitioner_affiliations(test_client):
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 400
-    assert response.json['message'] == 'organization_idx must be a positive integer'
+    assert response.json['message'] == 'Organization_idx must be a positive integer.'
 
     # test deleting affiliation with organization index 50
     response = test_client.delete(

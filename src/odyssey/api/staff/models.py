@@ -2,6 +2,9 @@
 Database tables staff member information for the Modo Bio Staff application.
 All tables in this module are prefixed with ``Staff``.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from odyssey import db

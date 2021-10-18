@@ -169,8 +169,8 @@ INSERT INTO "StaffRoles" ("user_id", "role", "granter_id") VALUES
 (21, 'nutritionist', 14); 
 -- (30, 'medical_doctor', 14),
 -- (31, 'medical_doctor', 14), 
--- (32, 'nurse_practitioner', 14), 
--- (33, 'nurse_practitioner', 14); 
+-- (32, 'nurse', 14), 
+-- (33, 'nurse', 14); 
 
 
 -- insert into "TelehealthStaffSettings" ("user_id", "auto_confirm", "timezone") Values

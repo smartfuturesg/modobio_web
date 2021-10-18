@@ -1,4 +1,7 @@
 """ Various constants used throughout the Odyssey package. """
+import logging
+logger = logging.getLogger(__name__)
+
 import enum
 
 from sqlalchemy import text
@@ -442,9 +445,7 @@ ACCESS_ROLES = (
     'dietitian',
     'nutritionist',
     'therapist',
-    'nurse_practitioner',
     'nurse',
-    'physician_assistant',
     'client_services',
     'medical_doctor',
     'trainer',

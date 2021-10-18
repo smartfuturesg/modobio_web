@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from base64 import b64decode
 import jwt
 
@@ -5,13 +8,13 @@ from flask import current_app, request, g
 from functools import wraps
 from sqlalchemy import select
 from werkzeug.datastructures import Authorization
+from werkzeug.exceptions import Unauthorized, BadRequest
 from werkzeug.security import check_password_hash
 
 from odyssey import db
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
-from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES 
-from odyssey.utils.errors import LoginNotAuthorized, EmailNotVerified
+from odyssey.utils.constants import ACCESS_ROLES, DB_SERVER_TIME, USER_TYPES
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 
@@ -74,8 +77,7 @@ class BasicAuth(object):
                     - staff_role: roles specified in utils/constants
                     - internal_required: some resources are meant only for 'internal' or 'beta' users
                     
-                Any issues coming from the above should raise a 401 error with no message. In general, the LoginNotAuthorized error
-                is used. 
+                Any issues coming from the above should raise a 401 error with no message.
                 """
                 auth = self.get_auth()
 
@@ -83,11 +85,11 @@ class BasicAuth(object):
                 user, user_login, user_context = self.authenticate(auth)
 
                 if user in (False, None):
-                    
-                    raise LoginNotAuthorized
+                    raise Unauthorized
 
                 if email_required and not user.email_verified:
-                    raise EmailNotVerified
+                    raise BadRequest('Please verify your email address.')
+
                 # If user_type exists (Staff or Client, etc)
                 # Check user and role access
                 if user_type:
@@ -98,8 +100,7 @@ class BasicAuth(object):
                 # If necessary, restrict access to internal users
                 if internal_required:
                     if not user.is_internal:
-                        
-                        raise LoginNotAuthorized
+                        raise Unauthorized
 
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
@@ -126,22 +127,22 @@ class BasicAuth(object):
                 else:
                     return
             else:
-                raise LoginNotAuthorized
+                raise Unauthorized
         # if the user is logged in as a client, follow the client authorization routine
         elif user_context == 'client' and 'client' in user_type:
             if user.is_client:
                 self.client_access_check(user, resources)
             else:
-                raise LoginNotAuthorized
+                raise Unauthorized
         elif user_context == 'basic_auth':
             if 'staff' in user_type and user.is_staff:
                 return
             elif 'client' in user_type and user.is_client:
                 return
             else:
-                raise LoginNotAuthorized
+                raise Unauthorized
         else:
-            raise LoginNotAuthorized
+            raise Unauthorized
 
     def client_access_check(self, user, resources):
         """
@@ -162,11 +163,11 @@ class BasicAuth(object):
             else:
                 # ensure request is GET
                 if request.method != 'GET':
-                    raise LoginNotAuthorized
+                    raise Unauthorized
                 # resources must be specified for endpoint designated by table name
                 # e.g. @token_auth.login_required(resources=('MedicalSocialHistory','MedicalSTDHistory'))
                 if len(resources) == 0:
-                    raise LoginNotAuthorized
+                    raise Unauthorized
                 # set the context and successful authorizations list in the g object
                 g.clinical_care_context = True
                 g.clinical_care_authorized_resources = []
@@ -185,7 +186,7 @@ class BasicAuth(object):
                         continue
                 if len(g.clinical_care_authorized_resources) == 0:
                     # this user does not have access to this content
-                    raise LoginNotAuthorized
+                    raise Unauthorized
         return
 
     def staff_access_check(self, user, user_type, resources, staff_roles=None):
@@ -234,7 +235,7 @@ class BasicAuth(object):
         # request args will either contain user_id or staff_user_id which must match the logged-in user
         if 'staff_self' in user_type:
             if request.view_args.get('user_id', request.view_args.get('staff_user_id')) != user.user_id:
-                raise LoginNotAuthorized
+                raise Unauthorized
 
         # check if resource access check is necessary
         elif len(resources) > 0:
@@ -259,17 +260,17 @@ class BasicAuth(object):
                     continue
             if len(g.clinical_care_authorized_resources) == 0:
                 # this user does not have access to any resource in this endpoint
-                raise LoginNotAuthorized
+                raise Unauthorized
 
             # if the request method is not GET, verify user has role access to edit data
             if request.method != 'GET' and staff_roles is not None:
                 if not any(role in staff_user_roles for role in staff_roles):
-                    raise LoginNotAuthorized
+                    raise Unauthorized
 
         # check Staff member's roles match the role requirement in the endpoint
         elif staff_roles is not None:
             if not any(role in staff_user_roles for role in staff_roles):
-                raise LoginNotAuthorized
+                raise Unauthorized
 
         # Staff is accessing client resources without role or resource authorization
         # TODO: leaving this here for debugging and (enventually) logging
@@ -301,7 +302,7 @@ class BasicAuth(object):
         if not user_details:
             db.session.add(UserTokenHistory(event='login', ua_string=request.headers.get('User-Agent')))
             db.session.commit()
-            raise LoginNotAuthorized
+            raise Unauthorized
 
         user, user_login = user_details
 
@@ -313,7 +314,7 @@ class BasicAuth(object):
         else:
             db.session.add(UserTokenHistory(event='login', user_id=user.user_id, ua_string=request.headers.get('User-Agent')))
             db.session.commit()
-            raise LoginNotAuthorized         
+            raise Unauthorized
 
     def get_auth(self):
         ''' This method is to authorize basic connections '''
@@ -360,17 +361,19 @@ class TokenAuth(BasicAuth):
     def verify_token(self, token):
         ''' verify_token is a method that is used as a decorator to store 
             the token checking process that is defined in auth.py '''
+        if not token:
+            raise Unauthorized
+
         # decode and validate token 
         secret = current_app.config['SECRET_KEY']
         try:
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
-        except:
-            raise LoginNotAuthorized
+        except jwt.exceptions.DecodeError:
+            raise Unauthorized
 
         # ensure token is an access token type
         if decoded_token['ttype'] != 'access':
-            
-            raise LoginNotAuthorized()
+            raise Unauthorized
 
         query = db.session.execute(
             select(User, UserLogin
