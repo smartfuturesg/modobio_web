@@ -867,8 +867,11 @@ TWILIO_ACCESS_KEY_TTL = 14400
 
 BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed', 'Document Review')
 
-#image types allowed for upload removing: '.bmp', '.gif', '.webp', '.psd', '.pdf'
+#profile and other image types allowed for upload
 ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg')
+
+#medical image types allowed for upload
+MED_ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', 'DCOM','.bmp', '.gif', '.webp', '.psd', '.pdf')
 
 #image resize thumbnail demensions (w, h) two-tuple
 IMAGE_DIMENSIONS = ((512,512),(256,256),(128,128),(64,64))
@@ -892,8 +895,23 @@ CREDENTIAL_TYPE = {
 
 DEV_EMAIL_DOMAINS = ('3pillarglobal.com', 'modobio.com', 'atventurepartners.com', 'atlanticventurepartners.tech')
 
-# bookings must be made this many hours in advance
+# bookings must be made at least this many hours in advance
 TELEHEALTH_BOOKING_LEAD_TIME_HRS = 2
+
+# allow a pre and post buffer for each telehealth appointment
+# 1 because one index is the same as 5 minutes
+TELEHEALTH_START_END_BUFFER = 0
+
+from odyssey.config import Config
+config = Config()
+# clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
+TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 2 if any((config.TESTING, config.DEV)) else 48
+
+INSTAMED_OUTLET = {
+                "MerchantID": '894805',
+                "StoreID": '0001',
+                "TerminalID": '0002'
+            }
 
 MODOBIO_ADDRESS = {
     "firstname": "Modo",

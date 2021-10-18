@@ -94,6 +94,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     client_location_id = fields.Integer(required=False)
     start_time_utc = fields.Time()
     booking_url = fields.String()
+    transcript_url = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -207,3 +208,31 @@ class TelehealthConversationsNestedSchema(Schema):
 
     conversations = fields.Nested(TelehealthConversationsSchema(many=True))
     twilio_token = fields.String()
+
+class TelehealthTransciptMedia(Schema):
+    """
+    Nests media file details when returning telehelath transcripts
+    """
+    category = fields.String()
+    filename = fields.String()
+    content_type = fields.String() # MIME type
+    media_link = fields.String() # temp link to media on s3
+
+class TelehealthTranscriptsMessage(Schema):
+    """
+    Schema for indivisual messages as part of a telehealth transcipt stored on the modobio end. 
+    """
+    media = fields.Nested(TelehealthTransciptMedia(many=True))
+    index = fields.Integer()
+    body = fields.String()
+    author = fields.String()
+    attributes = fields.String()
+    date_created = fields.DateTime()
+    date_updated = fields.DateTime()
+
+class TelehealthTranscriptsSchema(Schema):
+    """
+    Telehealth transcript response for stored transcipts
+    """
+    booking_id = fields.Integer()
+    transcript = fields.Nested(TelehealthTranscriptsMessage(many=True))
