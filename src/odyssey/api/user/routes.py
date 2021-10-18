@@ -52,6 +52,9 @@ from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
+from odyssey.utils.file_handling import FileHandling
+from odyssey.utils import search
+from odyssey import db
 from odyssey.utils.message import (
     send_email_password_reset,
     send_email_delete_account,
@@ -60,8 +63,7 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
-    verify_jwt,
-    FileHandling)
+    verify_jwt)
 
 ns = Namespace('user', description='Endpoints for user accounts.')
 
@@ -899,6 +901,9 @@ class UserLegalDocsApi(BaseResource):
     """
     Endpoints related to legal documents that users have viewed and signed.
     """
+    
+    # Multiple docs per user allowed.
+    __check_resource__ = False
 
     @token_auth.login_required
     @responds(schema=UserLegalDocsSchema(many=True), api=ns, status_code=200)

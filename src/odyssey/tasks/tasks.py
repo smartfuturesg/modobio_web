@@ -2,11 +2,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
+from io import BytesIO
 from typing import Any, Dict
+from PIL import Image
 
 from bson import ObjectId
 from flask_migrate import current_app
+import imghdr
 from sqlalchemy import select
+from werkzeug.datastructures import FileStorage
 
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
@@ -18,6 +22,8 @@ from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.user.models import User
 from odyssey.integrations.instamed import Instamed
+from odyssey.utils.file_handling import FileHandling
+from odyssey.integrations.twilio import Twilio
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -327,3 +333,74 @@ def charge_telehealth_appointment(booking_id):
     session_cost = SystemTelehealthSessionCosts.query.filter_by(profession_type='medical_doctor').one_or_none().session_cost
 
     Instamed().charge_user(payment.payment_id, session_cost, booking)
+
+@celery.task()
+def store_telehealth_transcript(booking_id: int):
+    """
+    Cache the telehealth transcript related to the booking id provided. Delete the conversation on twilio's platform once
+    this is acheived. 
+
+    Params
+    ------
+    booking_id: TelehealthBookings.idx for a booking that has been completed and is beyond the telehealth review period. 
+    """
+    twilio = Twilio()
+
+    # bring up booking
+    # For now, the boooking state does not matter. 
+    booking = db.session.execute(select(TelehealthBookings
+        ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
+
+    # close conversation so that no more messages can be added to transcript
+    twilio.close_telehealth_chatroom(booking.idx)
+    
+    transcript = twilio.get_booking_transcript(booking.idx)
+
+    # s3 bucket path for the media associated with this booking transcript
+    transcript_images_prefix = f'id{booking.client_user_id:05d}/telehealth/{booking_id}/transcript/images'
+
+    # if there is media present in the transcript, store it in an s3 bucket
+    fh = FileHandling()
+    for idx, message in enumerate(transcript):
+        img_id = 0
+        if message['media']:
+            for media_idx, media in enumerate(message['media']):
+                # download media from twilio 
+                media_content = twilio.get_media(media['sid'])
+
+                img = BytesIO(media_content)
+                img_extension = '.' + imghdr.what('', media_content)
+
+                tmp = Image.open(img)
+                tfile = BytesIO()
+                tmp.save(tfile, format='jpeg')
+                save_file_path_s3 = f'{transcript_images_prefix}/{img_id}{img_extension}'
+                img_file = FileStorage(tfile, filename=f'{img_id}{img_extension}', content_type=media['content_type'])
+
+                fh.save_file_to_s3(img_file, save_file_path_s3)
+
+                media['s3_path'] = save_file_path_s3 #+ f'{img_id}{img_extension}'
+                transcript[idx]['media'][media_idx] = media
+                img_id+=1
+
+    payload = {
+        'booking_id': booking.idx,
+        'transcript': transcript
+    }
+
+    # insert transcript into mongo db under the telehealth_transcripts collection
+    if current_app.config['MONGO_URI']:
+        _id = mongo.db.telehealth_transcripts.insert(payload)
+    else:
+        _id = None  
+
+    # delete the conversation from twilio
+    twilio.delete_conversation(booking.chat_room.conversation_sid)
+
+    # delete the conversation sid entry, add transcript_object_id from mongodb
+    booking.chat_room.conversation_sid = None
+    booking.chat_room.transcript_object_id = str(_id)
+
+    db.session.commit()
+
+    return payload
