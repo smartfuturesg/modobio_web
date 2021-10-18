@@ -1334,7 +1334,7 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
         #ensure that this client does not already have this user as a care team member
         staff_user_id=request.parsed_obj['staff_user_id']
         if ClientClinicalCareTeam.query.filter_by(user_id=user_id, team_member_user_id=staff_user_id).one_or_none():
-            raise BNadRequest(f'User {staff_user_id} already a member of the care team.')
+            raise BadRequest(f'User {staff_user_id} already a member of the care team.')
 
         #retrieve staff account, staff account must exist because of the above check in the bookings table
         team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']).one_or_none()

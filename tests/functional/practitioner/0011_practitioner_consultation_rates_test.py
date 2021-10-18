@@ -7,7 +7,6 @@ def test_post_practitioner_consultation_rates(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(pracitioner_consultation_rate_data),
         content_type='application/json')
-
     assert response.status_code == 201
 
 def test_get_practitioner_consultation_rates(test_client):

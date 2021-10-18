@@ -55,18 +55,19 @@ class PractitionerConsultationRates(BaseResource):
         for roleObj in staff_user_roles:
             if roleObj.role not in lookup_role:
                 lookup_role[roleObj.role] = roleObj
-        
+
         cost_range = LookupCurrencies.query.one_or_none()
         inc = cost_range.increment
         
         for pract in payload['items']:
             if pract['role'] in lookup_role:
-                if float(pract['rate'])%inc == 0:
+                if float(pract['rate'])%inc == 0.0:
                     lookup_role[pract['role']].update({'consult_rate':float(pract['rate'])})
                 else:
-                    raise InputError(status_code=405,message='Cost is not valid')
+                    raise BadRequest('Cost is not valid')
             else:
-                raise InputError(status_code=405,message='Practitioner does not have selected role.')
+                raise BadRequest('Practitioner does not have selected role.')
+
         db.session.commit()
         return
 
