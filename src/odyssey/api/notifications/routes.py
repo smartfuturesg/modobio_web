@@ -133,10 +133,10 @@ class PushRegistrationEndpoint(BaseResource):
                 user_id=user_id,
                 device_id=device_id)
             .one_or_none())
-
+            
         if device:
             # Token may have changed with existing device. Even if token is the same,
-            # the endpoint may have been disables or settings may have changed.
+            # the endpoint may have been disabled or settings may have changed.
             # Re-registering will fix that.
             device.arn = pn.register_device(
                 device_token,

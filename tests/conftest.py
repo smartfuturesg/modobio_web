@@ -1,5 +1,7 @@
 import os
 import pathlib
+import uuid
+from bson import ObjectId
 import pytest
 import subprocess
 import sys
@@ -14,16 +16,22 @@ from flask.json import dumps
 from flask_migrate import upgrade
 from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
+from twilio.base.exceptions import TwilioRestException
 from werkzeug.exceptions import BadRequest
 
-from odyssey import create_app, db
+from odyssey import create_app, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupClinicalCareTeamResources
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
+from odyssey.integrations.twilio import Twilio
+from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS
 from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils import search
+
+# import fixtures from telehealth
+# from tests.functional.telehealth.conftest import *
 
 from .utils import login
 
@@ -150,6 +158,8 @@ def test_client():
             # Add everything we want to pass to tests
             # into the test_client instance as parameters.
             tc.db = db
+
+            tc.mongo = mongo
 
             tc.client = client
             tc.client_id = client.user_id
@@ -328,11 +338,10 @@ def care_team(test_client):
 
 
 
-# Used by tests in client/ and in doctor/
-@pytest.fixture(scope='module')
-def wheel_telehealth_booking(test_client):
+@pytest.fixture(scope='function')
+def booking_tmp(test_client, wheel = False):
     """ 
-    Create a new telehealth booking between one of the wheel test users and client user 22
+    Create a new telehealth booking between one of the test users and client user 22
 
     Yields
     ------
@@ -347,31 +356,75 @@ def wheel_telehealth_booking(test_client):
         number = 123,
         expiration = '05/26',
         is_default = True,
-        user_id = 22
+        user_id = test_client.client_id
     )
 
     test_client.db.session.add(pm)
     test_client.db.session.flush()
 
 
-    # # make a telehealth booking by direct db call
-    target_date = datetime.now() + timedelta(days=1)
+    # make a telehealth booking by direct db call
+    # booking is made with minimum lead time
+    target_datetime = datetime.now() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    target_datetime = target_datetime.replace(minute = 45, second=0)
+    time_inc = LookupBookingTimeIncrements.query.all()
+        
+    start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
+    
+    booking_start_idx = start_time_idx_dict.get(target_datetime.time().strftime('%H:%M:%S'))
+
+    # below is to account for bookings starting at the very end of the day so that the booking end time
+    # falls on the following day
+    if time_inc[-1].idx - (booking_start_idx + 3) < 0:
+        booking_end_idx = time_inc[-1].idx - (booking_start_idx + 3)
+    else:
+        booking_end_idx = booking_start_idx + 3
 
     booking = TelehealthBookings(
-        staff_user_id = 30,
-        client_user_id = 22,
-        target_date = target_date.date(),
-        booking_window_id_start_time = 1,
-        booking_window_id_end_time = 4,
-        booking_window_id_start_time_utc = 1,
-        booking_window_id_end_time_utc = 4,
+        staff_user_id = 30 if wheel else 1,
+        client_user_id = test_client.client_id,
+        target_date = target_datetime.date(),
+        target_date_utc = target_datetime.date(),
+        booking_window_id_start_time = booking_start_idx,
+        booking_window_id_end_time = booking_end_idx,
+        booking_window_id_start_time_utc = booking_start_idx,
+        booking_window_id_end_time_utc = booking_end_idx,
         client_location_id = 1,
         payment_method_id = pm.idx,
         external_booking_id = uuid.uuid4()
     )
 
     
+    
     test_client.db.session.add(booking)
+    test_client.db.session.flush()
+
+    # add booking transcript
+    twilio = Twilio()
+    conversation_sid = twilio.create_telehealth_chatroom(booking.idx)
+
     test_client.db.session.commit()
 
     yield booking
+
+    # delete chatroom, booking, and payment method
+    chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == booking.idx)).scalars().one_or_none()
+    
+    # remove transcript from mongo db
+    if chat_room.transcript_object_id:
+        test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
+
+    for status in booking.status_history:
+        test_client.db.session.delete(status)
+        
+    test_client.db.session.delete(chat_room)
+    test_client.db.session.delete(booking)
+    test_client.db.session.flush()
+    
+    test_client.db.session.delete(pm)
+    test_client.db.session.commit()
+    try:
+        twilio.delete_conversation(conversation_sid)
+    except TwilioRestException:
+        # conversation was already removed as part of a test
+        pass
