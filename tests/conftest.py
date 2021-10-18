@@ -27,7 +27,6 @@ from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRoom
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS
-from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils import search
 
 # import fixtures from telehealth
