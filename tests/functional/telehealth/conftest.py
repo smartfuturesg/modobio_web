@@ -27,7 +27,6 @@ from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRoom
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS
-from odyssey.utils.misc import grab_twilio_credentials
 from odyssey.utils import search
 
 # import fixtures from telehealth
@@ -120,11 +119,12 @@ def clear_db():
 
 def clear_twilio(modobio_ids=None):
     """ Delete all Twilio conversations. """
+    twilio = Twilio()
     if not modobio_ids:
         modobio_ids = db.session.execute(select(User.modobio_id)).scalars().all()
 
     try:
-        twilio_credentials = grab_twilio_credentials()
+        twilio_credentials = twilio.grab_twilio_credentials()
     except BadRequest:
         return
 

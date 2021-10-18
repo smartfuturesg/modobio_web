@@ -66,7 +66,7 @@ def setup_db(app):
     proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True, env=os.environ)
 
     if proc.returncode != 0:
-        pytest.exit(f'Database scripts failed to run: {proc.stderr}')
+        pytest.exit(f'Database scripts failed to run: {proc.stderr.read().strip()}')
 
     # Sending output to stderr, because that is where flask-migrate sends debug/info output.
     print(proc.stdout, file=sys.stderr)

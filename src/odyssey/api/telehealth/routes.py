@@ -1660,6 +1660,7 @@ class TelehealthAllChatRoomApi(BaseResource):
             raise Unauthorized('Unsupported user type.')
 
         # add chat grants to a new twilio access token
+        twilio = Twilio()
         twilio_credentials = twilio.grab_twilio_credentials()
         token = AccessToken(twilio_credentials['account_sid'], 
                     twilio_credentials['api_key'], 
