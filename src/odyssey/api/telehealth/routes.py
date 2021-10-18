@@ -1,3 +1,7 @@
+import os, boto3, secrets, pathlib
+from bson import ObjectId
+from datetime import datetime, time, timedelta
+from dateutil import tz
 import logging
 logger = logging.getLogger(__name__)
 
@@ -12,7 +16,7 @@ import secrets
 from datetime import datetime, time, timedelta
 from dateutil import tz
 
-from flask import request, current_app, g
+from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy import select
@@ -21,7 +25,7 @@ from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
 
-from odyssey import db
+from odyssey import db, mongo
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
@@ -62,6 +66,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthBookingDetailsGetSchema,
     TelehealthStaffSettingsSchema,
     TelehealthBookingsPUTSchema,
+    TelehealthTranscriptsSchema,
     TelehealthUserSchema
 )
 from odyssey.api.user.models import User
@@ -365,7 +370,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             # get 2 letter text abbreviation for operational territory in order to match it with the
             # PractitionerCredentials table
             client_location = LookupTerritoriesOfOperations.query.filter_by(idx=client_in_queue.location_id).one_or_none().sub_territory_abbreviation
-
+            
             # query staff availabilites filtering by day of week, role, operation location, and gender
             # staff availbilities are stored in UTC time which may be different from the client's tz
             # to handle this case, we make this query knowing that availabilities may span two days
@@ -707,6 +712,13 @@ class TelehealthBookingsApi(BaseResource):
             if current_user.user_id == booking.staff_user_id:
                 image_paths = {pic.width: pic.image_path for pic in booking.client.client_info.profile_pictures}
                 client['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
+            
+            # if the associated chat room has an id for the mongo db entry of the transcript, generate a link to retrieve the 
+            # transcript messages
+            if booking.chat_room.transcript_object_id:
+                transcript_url = request.url_root[:-1] + url_for('api.telehealth_telehealth_transcripts', booking_id = booking.idx)
+            else: 
+                transcript_url = None
 
             bookings_payload.append({
                 'booking_id': booking.idx,
@@ -719,7 +731,8 @@ class TelehealthBookingsApi(BaseResource):
                 'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
                 'client': client,
-                'practitioner': practitioner
+                'practitioner': practitioner,
+                'transcript_url': transcript_url
             })
 
         # Sort bookings by time then sort by date
@@ -2087,4 +2100,44 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         db.session.add(status_history)
         db.session.commit()
 
-        return
+        return 
+
+@ns.route('/bookings/transcript/<int:booking_id>/')
+class TelehealthTranscripts(Resource):
+    """
+    Operations related to stored telehealth transcripts
+    """
+    @token_auth.login_required()
+    @responds(api=ns, schema = TelehealthTranscriptsSchema, status_code=200)
+    def get(self, booking_id):
+        """
+        Retrieve messages from booking transscripts that have been stored on modobio's end
+        """
+        current_user, _ = token_auth.current_user()
+        
+        booking = TelehealthBookings.query.get(booking_id)
+
+        if not booking:
+            raise InputError(status_code=405, message='Meeting does not exist yet.')
+
+        # make sure the requester is one of the participants
+        if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
+            raise InputError(status_code=405, message='logged in user must be a booking participant')
+
+        # bring up the transcript messages from mongo db
+        transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
+
+
+        # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
+        fh = FileHandling()
+        for message_idx, message in enumerate(transcript.get('transcript',[])):
+            if message['media']:
+                for media_idx, media in enumerate(message['media']):
+                    _prefix = media['s3_path']
+                    s3_link = fh.get_presigned_urls(prefix=_prefix)
+
+                    media['media_link'] = [val for val in s3_link.values()][0]
+                    transcript['transcript'][message_idx]['media'][media_idx] = media
+                    
+        return transcript
+

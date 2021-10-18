@@ -256,6 +256,7 @@ def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_n
 def create_twilio_access_token(modobio_id, meeting_room_name=None):
     """
     Generate a twilio access token for the provided modobio_id
+
     """
     if current_app.config['TESTING']:
         return

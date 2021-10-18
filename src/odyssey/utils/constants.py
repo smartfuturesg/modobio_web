@@ -897,6 +897,9 @@ DEV_EMAIL_DOMAINS = ('3pillarglobal.com', 'modobio.com', 'atventurepartners.com'
 # bookings must be made this many hours in advance
 TELEHEALTH_BOOKING_LEAD_TIME_HRS = 2
 
+# clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
+TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 24
+
 INSTAMED_OUTLET = {
                 "MerchantID": '894805',
                 "StoreID": '0001',
