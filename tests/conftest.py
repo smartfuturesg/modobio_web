@@ -23,7 +23,7 @@ from odyssey import create_app, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS
@@ -119,11 +119,12 @@ def clear_db():
 
 def clear_twilio(modobio_ids=None):
     """ Delete all Twilio conversations. """
+    twilio_obj= Twilio()
     if not modobio_ids:
         modobio_ids = db.session.execute(select(User.modobio_id)).scalars().all()
 
     try:
-        twilio_credentials = grab_twilio_credentials()
+        twilio_credentials = twilio_obj.grab_twilio_credentials()
     except BadRequest:
         return
 
@@ -390,13 +391,23 @@ def booking_tmp(test_client, wheel = False):
         booking_window_id_end_time_utc = booking_end_idx,
         client_location_id = 1,
         payment_method_id = pm.idx,
-        external_booking_id = uuid.uuid4()
+        external_booking_id = uuid.uuid4(),
+        status = 'Accepted'
     )
 
     
     
     test_client.db.session.add(booking)
     test_client.db.session.flush()
+
+    # add booking status
+    status_history = TelehealthBookingStatus(
+        booking_id = booking.idx,
+        status = booking.status,
+        reporter_role = 'practitioner',
+        reporter_id = STAFF_ID
+    )
+    test_client.db.session.add(status_history)
 
     # add booking transcript
     twilio = Twilio()

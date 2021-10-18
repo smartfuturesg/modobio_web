@@ -901,6 +901,9 @@ class UserLegalDocsApi(BaseResource):
     """
     Endpoints related to legal documents that users have viewed and signed.
     """
+    
+    # Multiple docs per user allowed.
+    __check_resource__ = False
 
     @token_auth.login_required
     @responds(schema=UserLegalDocsSchema(many=True), api=ns, status_code=200)
