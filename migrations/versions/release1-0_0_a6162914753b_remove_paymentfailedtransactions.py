@@ -1,7 +1,7 @@
 """remove PaymentFailedTransactions
 
 Revision ID: a6162914753b
-Revises: 0bebaad7e4a1
+Revises: eb7f1d60c891
 Create Date: 2021-09-28 15:06:16.471030
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'a6162914753b'
-down_revision = '0bebaad7e4a1'
+down_revision = 'eb7f1d60c891'
 branch_labels = None
 depends_on = None
 
