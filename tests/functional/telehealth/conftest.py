@@ -126,7 +126,7 @@ def staff_credentials(test_client):
     creds = PractitionerCredentials(
         user_id=test_client.staff_id,
         country_id=1,
-        state='CA',
+        state='FL',
         credential_type='NPI',
         credentials='good doc',
         status='verified',

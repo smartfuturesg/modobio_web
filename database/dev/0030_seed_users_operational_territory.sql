@@ -35,10 +35,10 @@ insert into "StaffOperationalTerritories" ("user_id", "operational_territory_id"
 
 insert into "PractitionerCredentials" ("user_id", "country_id", "state", "credential_type", "credentials", "status", "role_id", "want_to_practice") values
 (10, 1, Null, 'npi', '1296336567', 'Verified', 10, True),
-(10, 1, 'AZ', 'dea', '183451435', 'Verified', 10, True),
+(10, 1, 'FL', 'dea', '183451435', 'Verified', 10, True),
 (10, 1, 'CA', 'dea', '123342534', 'Verified', 10, True),
-(10, 1, 'AZ', 'med_lic', '523746512', 'Verified', 10, True),
+(10, 1, 'FL', 'med_lic', '523746512', 'Verified', 10, True),
 (10, 1, 'CA', 'med_lic', '839547692', 'Verified', 10, True),
 (14, 1, Null, 'npi', '1296336567', 'Verified', 23, True),
 (14, 1, 'CA', 'dea', '43218470', 'Verified', 23, True),
-(14, 1, 'AZ', 'med_lic', '21323512', 'Verified', 23, True);
+(14, 1, 'FL', 'med_lic', '21323512', 'Verified', 23, True);
