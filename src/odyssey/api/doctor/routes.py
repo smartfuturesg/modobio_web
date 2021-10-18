@@ -80,21 +80,20 @@ from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('doctor', description='Operations related to doctor')
 
-@ns.route('/credentials/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route('/credentials/<int:user_id>/')
 class MedCredentials(BaseResource):
-    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor','community_manager'))
+    @token_auth.login_required(user_type=('modobio',))
     @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
-    def get(self):
+    def get(self, user_id):
         """
         GET Request for Pulling Medical Credentials for a practitioner
 
         User should be Staff Self and community manager
         """
 
-        user_id = request.args.get('user_id',type=int)
+        #user_id = request.args.get('user_id',type=int)
         if not user_id:
-            raise InputError(status_code=405,message='Missing User ID.')
+            raise BadRequest('Missing User ID.')
 
         current_user, _ = token_auth.current_user()
 
@@ -102,7 +101,7 @@ class MedCredentials(BaseResource):
             staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
             staff_user_roles = [x[0] for x in staff_user_roles]            
             if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
-                raise LoginNotAuthorized
+                raise Unauthorized()
 
         query = db.session.execute(
             select(PractitionerCredentials).
@@ -115,16 +114,16 @@ class MedCredentials(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     @accepts(schema=MedicalCredentialsInputSchema, api=ns)
     @responds(status_code=201,api=ns)
-    def post(self):
+    def post(self, user_id):
         """
         POST Request for submitting Medical Credentials for a practitioner
 
         User should be Staff Self
         """
 
-        user_id = request.args.get('user_id',type=int)
+        #user_id = request.args.get('user_id',type=int)
         if not user_id:
-            raise InputError(status_code=405,message='Missing User ID.')
+            raise BadRequest('Missing User ID.')
         
 
         curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id).all()     
@@ -188,7 +187,7 @@ class MedCredentials(BaseResource):
     @token_auth.login_required(staff_role=('community_manager',))
     @accepts(schema=MedicalCredentialsSchema(only=['idx','status']),api=ns)
     @responds(status_code=201,api=ns)
-    def put(self):
+    def put(self, user_id):
         """
         PUT Request for updating the status for medical credentials
 
@@ -196,9 +195,9 @@ class MedCredentials(BaseResource):
         """
 
         payload = request.json
-        user_id = request.args.get('user_id',type=int)
+        #user_id = request.args.get('user_id',type=int)
         if not user_id:
-            raise InputError(status_code=405,message='Missing User ID.')
+            raise BadRequest('Missing User ID.')
         
         status = ['Verified','Pending Verification', 'Rejected']
         if payload['status'] not in status:
@@ -216,15 +215,15 @@ class MedCredentials(BaseResource):
     @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
     @accepts(schema=MedicalCredentialsSchema(exclude=('status','credential_type','expiration_date','state','want_to_practice','credentials','country_id')),api=ns)
     @responds(status_code=201,api=ns)
-    def delete(self):
+    def delete(self, user_id):
         """
         DELETE Request for deleting medical credentials
 
         User for this request should be the Staff Self and Staff Admin
         """
-        user_id = request.args.get('user_id',type=int)
+        #user_id = request.args.get('user_id',type=int)
         if not user_id:
-            raise InputError(status_code=405,message='Missing User ID.')
+            raise BadRequest('Missing User ID.')
                 
         current_user, _ = token_auth.current_user()
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()

@@ -60,7 +60,7 @@ def test_bookings_payment(test_client):
 
     #run celery tasks to find and charge bookings
     bookings = find_chargable_bookings()
-    assert len(bookings) == 2
+    assert len(bookings) == 1
 
     charge_telehealth_appointment(booking.idx)
 
