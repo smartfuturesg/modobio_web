@@ -19,8 +19,8 @@ from odyssey.api.notifications.models import Notifications
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.user.models import User
+from odyssey.utils.file_handling import FileHandling
 from odyssey.integrations.twilio import Twilio
-from odyssey.utils.misc import FileHandling
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):

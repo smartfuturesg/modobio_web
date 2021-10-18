@@ -4,6 +4,13 @@ from flask.json import dumps
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.payment.models import PaymentMethods
 
+from odyssey.api.telehealth.models import (
+    TelehealthStaffAvailability,
+    TelehealthBookings,
+    TelehealthQueueClientPool,
+)
+from odyssey.api.practitioner.models import PractitionerCredentials
+
 from .data import (
     telehealth_staff_general_availability_1_post_data,
     telehealth_staff_general_availability_2_post_data,
@@ -15,14 +22,24 @@ from .data import (
     telehealth_staff_general_availability_bad_7_post_data,
     telehealth_queue_client_pool_8_post_data
 )
+from tests.functional.doctor.data import doctor_credentials_post_1_data
 
 def test_post_1_staff_general_availability(test_client, payment_method, staff_territory, staff_credentials):
+    # DEPENDENCCY - add practitioner credentials
+    response = test_client.post(
+        f'/doctor/credentials/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(doctor_credentials_post_1_data),
+        content_type='application/json')
+    
+    assert response.status_code == 201
+    # DEPENDENCCY - add practitioner availability
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(telehealth_staff_general_availability_1_post_data),
         content_type='application/json')
-
+    
     assert response.status_code == 201
 
     telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
@@ -33,9 +50,13 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
         data=dumps(telehealth_queue_client_pool_8_post_data),
         content_type='application/json')
 
-    # This get request was inserted here to show that there needs to be at least 10
-    # valid times returned. If there are less than 10 appointment times, then we increment onward a day
-    # and keep going until the 10 times is valid
+    # NOTE: At this point we have one staff member with availability 11 am - 12 pm on Mondays
+    # this allows 3 avaiablities ==> 11 am, 11:15 am and 11:30 am
+    # 11:45 and 12:00 are not valid start times bcs the practitioner's availablity ends at 12 pm
+    # and the requested duration is 20 min.
+    # NOTE: Availabilities are returned with this rule
+    # At least 10 availabilities unless we have checked a full week 7 days off.
+    # Thus, we will receive 6 availabilities, 3 on Monday 2022-04-04 & 3 on Monday 2022-04-11
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header)
@@ -44,9 +65,9 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
     assert response.json['appointment_times'][1]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][2]['target_date'] == '2022-04-04'
     assert response.json['appointment_times'][3]['target_date'] == '2022-04-11'
-    assert response.json['appointment_times'][6]['target_date'] == '2022-04-18'
-    assert response.json['appointment_times'][9]['target_date'] == '2022-04-25'
-    assert response.json['total_options'] == 12
+    assert response.json['appointment_times'][4]['target_date'] == '2022-04-11'
+    assert response.json['appointment_times'][5]['target_date'] == '2022-04-11'
+    assert response.json['total_options'] == 6
 
     # 3_midnight_bug_staff_general_availability
     response = test_client.post(
@@ -54,7 +75,7 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
         headers=test_client.staff_auth_header,
         data=dumps(telehealth_staff_general_availability_3_post_data),
         content_type='application/json')
-
+    
     assert response.status_code == 201
 
 def test_get_3_staff_availability(test_client):

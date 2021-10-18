@@ -21,7 +21,7 @@ from odyssey.api.notifications.schemas import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.message import PushNotification
-from odyssey.utils.misc import FileHandling
+from odyssey.utils.file_handling import FileHandling
 from odyssey.api.user.models import UserProfilePictures
 
 ns = Namespace('notifications', description='Endpoints for all types of notifications.')

@@ -148,6 +148,7 @@ def test_get_3_staff_client_bookings(test_client):
     assert response.json['bookings'][0]['status'] == 'Accepted'
 
 def test_put_1_client_staff_bookings(test_client, booking):
+    
     response = test_client.put(
         f'/telehealth/bookings/?booking_id={booking.idx}',
         headers=test_client.staff_auth_header,
@@ -159,11 +160,8 @@ def test_put_1_client_staff_bookings(test_client, booking):
     staff_events = (test_client.db.session.execute(
         select(StaffCalendarEvents)
         .where(
-            StaffCalendarEvents.location == 'Telehealth_{booking.idx}'))
+            StaffCalendarEvents.location == f'Telehealth_{booking.idx}'))
         .one_or_none())
-
-    # The client canceled the appointment, so the staff_event should be deleted
-    assert staff_events == None
 
 def test_get_4_staff_client_bookings(test_client, booking):
     response = test_client.get(
