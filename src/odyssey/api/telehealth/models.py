@@ -157,6 +157,23 @@ class TelehealthBookings(BaseModelWithIdx):
 
     :type: :class: `TelehealthChatRooms` instance
     """
+        
+    duration = db.Column(db.Integer)
+    """
+    length duration of booking in munutes
+
+    :type: int
+    """
+
+    medical_gender_preference  = db.Column(db.String)
+    """
+    preferred gender of the medical professional
+
+    options: male, female, no-preference
+
+    :type: str
+    """
+
 
 class TelehealthBookingStatus(db.Model):
     """

@@ -41,9 +41,9 @@ from odyssey.utils.misc import (
     check_blood_test_existence,
     check_blood_test_result_type_existence,
     check_medical_condition_existence,
-    FileHandling
 )
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE
+from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.constants import IMAGE_MAX_SIZE, MED_ALLOWED_IMAGE_TYPES
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
@@ -198,7 +198,7 @@ class MedCredentials(BaseResource):
         return
 
     @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
-    @accepts(schema=MedicalCredentialsSchema(only=['idx']),api=ns)
+    @accepts(schema=MedicalCredentialsSchema(exclude=('status','credential_type','expiration_date','state','want_to_practice','credentials','country_id')),api=ns)
     @responds(status_code=201,api=ns)
     def delete(self,user_id):
         """
@@ -1087,7 +1087,7 @@ class MedImaging(BaseResource):
             # validate file size - safe threashold (MAX = 10 mb)
             fh.validate_file_size(img, IMAGE_MAX_SIZE)
             # validate file type
-            img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+            img_extension = fh.validate_file_type(img, MED_ALLOWED_IMAGE_TYPES)
 
             mi_data = mi_schema.load(request.form)
             mi_data.user_id = user_id

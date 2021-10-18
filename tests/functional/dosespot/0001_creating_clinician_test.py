@@ -5,6 +5,7 @@ from odyssey import db
 from odyssey.api.staff.models import StaffOffices
 from tests.functional.staff.data import staff_office_data
 
+@pytest.skip('spotty DoseSpot', allow_module_level=True)
 # @pytest.mark.skip('Admin Credentials are not yet on AWS')
 def test_get_select_ds_pharmacies(test_client):
     response = test_client.get(f'/dosespot/select/pharmacies/{test_client.client_id}/',

@@ -305,8 +305,9 @@ def test_full_system_with_settings(test_client, payment_method):
 #
 # Everything else fails as a result, too many dependencies in one test.
 
-@pytest.mark.skip('Fails')
-def test_bookings_meeting_room_access(test_client, booking):
+#@pytest.mark.skip('Fails') 
+def test_bookings_meeting_room_access(test_client):
+    booking = TelehealthBookings.query.filter_by(idx=1).first()
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
         headers=test_client.staff_auth_header)
