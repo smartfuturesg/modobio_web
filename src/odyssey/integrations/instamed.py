@@ -5,6 +5,7 @@ from flask import current_app
 
 from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory
+from odyssey.utils.misc import cancel_telehealth_appointment
 
 from odyssey import db
 
@@ -151,7 +152,7 @@ class Instamed:
         if response_data['TransactionStatus'] == 'C':
             if response_data['IsPartiallyApproved']:
                 #refund partial amount and log as an unsuccessful payment
-                self.refund_payment(transaction_id, response_data['PartialApprovalAmount'])
+                self.refund_payment(response_data['TransactionID'], response_data['PartialApprovalAmount'])
 
                 #TODO: log if refund was unsuccessful
 
