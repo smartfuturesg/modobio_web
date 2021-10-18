@@ -21,7 +21,7 @@ from odyssey.api.practitioner.models import PractitionerCredentials, Practitione
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
 from odyssey.api.user.models import User, UserLogin, UserProfilePictures
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE
-from odyssey.utils.misc import FileHandling
+from odyssey.utils.file_handling import FileHandling
 
 
 class Wheel:
