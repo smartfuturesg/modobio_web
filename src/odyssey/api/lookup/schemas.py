@@ -302,6 +302,8 @@ class LookupCurrenciesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupCurrencies
         exclude = ('created_at', 'updated_at')
+    max_rate = fields.String()
+    min_rate = fields.String()
 
 class LookupCurrenciesOutputSchema(Schema):
     items = fields.Nested(LookupCurrenciesSchema(many=True), missing=[])
