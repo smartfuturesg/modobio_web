@@ -131,7 +131,7 @@ def combine_camel(*words, preserve_leading: bool=True) -> str:
     return ''.join(final)
 
 # Database
-db_uri = database_uri(docstring=__doc__)
+db_uri = database_uri()
 engine = create_engine(db_uri)
 inspector = inspect(engine)
 

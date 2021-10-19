@@ -157,6 +157,30 @@ class TelehealthBookings(BaseModelWithIdx):
 
     :type: :class: `TelehealthChatRooms` instance
     """
+        
+    duration = db.Column(db.Integer)
+    """
+    length duration of booking in munutes
+
+    :type: int
+    """
+
+    medical_gender_preference  = db.Column(db.String)
+    """
+    preferred gender of the medical professional
+
+    options: male, female, no-preference
+
+    :type: str
+    """
+
+
+    consult_rate = db.Column(db.Numeric(10,2))
+    """
+    HOURLY practitioner consultation rate
+
+    :type: Numeric
+    """
 
 class TelehealthBookingStatus(db.Model):
     """
@@ -468,6 +492,13 @@ class TelehealthChatRooms(BaseModel):
     :type: int
     """
 
+    transcript_object_id = db.Column(db.String)
+    """
+    Object id for telehealth transcript entry on mongo db
+
+    :type: str
+    """
+    
 class TelehealthStaffSettings(BaseModel):
     """
     Holds staff preferred settings for Telehealth appointments

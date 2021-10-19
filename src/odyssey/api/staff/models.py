@@ -140,6 +140,13 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key(User.user_id)
     """
 
+    consult_rate = db.Column(db.Numeric(10,2))
+    """
+    Consultation rate for the practitioner
+
+    :type: Numeric
+    """
+
 class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     """ 
     Locations where staff members operate. Each entry is tied to a role in the StaffRoles table. 

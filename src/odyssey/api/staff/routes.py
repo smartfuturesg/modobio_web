@@ -13,7 +13,7 @@ from flask.json import dumps
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from PIL import Image
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api.lookup.models import (
@@ -27,6 +27,7 @@ from odyssey.api.staff.models import (
     StaffProfile,
     StaffCalendarEvents,
     StaffOffices)
+from odyssey.utils.file_handling import FileHandling
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
     StaffProfileSchema, 
@@ -47,7 +48,7 @@ from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
-from odyssey.utils.misc import check_staff_existence, FileHandling
+from odyssey.utils.misc import check_staff_existence
 
 logger = logging.getLogger(__name__)
 
