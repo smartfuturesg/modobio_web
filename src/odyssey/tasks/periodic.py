@@ -16,7 +16,13 @@ from sqlalchemy import and_, or_, select
 
 from odyssey import celery, db, mongo
 from odyssey.tasks.base import BaseTaskWithRetry
-from odyssey.tasks.tasks import process_wheel_webhooks, upcoming_appointment_care_team_permissions, upcoming_appointment_notification_2hr, charge_telehealth_appointment
+from odyssey.tasks.tasks import (
+    process_wheel_webhooks, 
+    upcoming_appointment_care_team_permissions, 
+    upcoming_appointment_notification_2hr, 
+    charge_telehealth_appointment, 
+    store_telehealth_transcript
+)
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
@@ -25,6 +31,7 @@ from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
 
 from odyssey.config import Config
+from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS
 
 logger = get_task_logger(__name__)
 
@@ -121,6 +128,52 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
         # Deploy scheduled task to update notifications table with upcoming booking notification
         upcoming_appointment_notification_2hr.apply_async((booking.idx,),eta=notification_eta)
         upcoming_appointment_care_team_permissions.apply_async((booking.idx,),eta=ehr_permissions_eta)
+
+    return 
+
+
+@celery.task()
+def deploy_appointment_transcript_store_tasks(target_date=None):
+    """
+    Following the completion of a telehealth appointment, the practitioner and client have a window of opportunity to add messages
+    to the booking transcript. After this window, we will lock the conversation on twilio and store the transcript on the modobio end. 
+
+    This task uses the TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS constant to scan the database for bookings which are
+    approaching the end of the transcipt review window. The database is queried for bookings that fall on a target date
+     int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24) days prior to the current day. Tasks to store transcipts are then schedueld
+    approximately TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS following the start of the telehealth booking.
+    
+    Parameters
+    ----------
+    target_date : Date the bookings took place. This will be a date sometime in the past as we are looking for bookings which have been completed. 
+                To be used if testing. Otherwise date is set using system time (UTC)
+ 
+    """
+    # grab the current date for the queries below
+    if not target_date:
+        target_date = datetime.utcnow().date() - timedelta(days = int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24))
+
+    time_inc = LookupBookingTimeIncrements.query.all()
+    
+    bookings = db.session.execute(
+        select(TelehealthBookings). 
+        where(TelehealthBookings.target_date_utc==target_date
+            )).scalars().all()
+    
+    # do not deploy task in testing
+    if config.TESTING:
+        return bookings
+    
+    # schedule transcript cache tasks
+    for booking in bookings:
+        # create datetime object for scheduling tasks
+        booking_start_time =  time_inc[booking.booking_window_id_start_time_utc - 1]
+        message_cache_eta = datetime.combine(booking.target_date_utc, booking_start_time.start_time) + timedelta(hours = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS)
+        if message_cache_eta < datetime.now():
+            message_cache_eta = datetime.now() + timedelta(minutes = 5)
+        
+        # Deploy scheduled task 
+        store_telehealth_transcript.apply_async((booking.idx,),eta=message_cache_eta)
 
     return 
 
@@ -299,5 +352,10 @@ celery.conf.beat_schedule = {
     'find_chargable_bookings': {
         'task': 'odyssey.tasks.periodic.find_chargable_bookings',
         'schedule': crontab(hour=0, minute=5)
+    },
+    # search for telehealth transcripts that need to be stored, deploy those storage tasks
+    'appointment_transcript_store_scheduler': {
+        'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
+        'schedule': crontab(hour=0, minute=10)
     }
 }

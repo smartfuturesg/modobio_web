@@ -496,7 +496,7 @@ doctor_surgery_data = {
 
 doctor_credentials_post_1_data = {
   'items': [
-    {'credential_type':'npi', 'country_id':1,'credentials': '123456789'},
+    {'credential_type':'npi', 'country_id':1,'credentials': '1296336567'},
     {'credential_type':'dea', 'country_id':1,'state': 'AZ','credentials': '183451435'}, 
     {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '123342534'},
     {'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '523746512'}, 

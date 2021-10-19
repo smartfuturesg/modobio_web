@@ -66,9 +66,9 @@ from odyssey.utils.constants import TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX
 from odyssey.utils.message import send_test_email
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_drink_existence, 
-    FileHandling
+    check_drink_existence
 )
+from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 
 from odyssey.api.client.schemas import(
@@ -359,13 +359,15 @@ class Client(BaseResource):
         
         #validate primary_macro_goal_id
         if 'primary_macro_goal_id' in request.parsed_obj['client_info'].keys():
-            macro_goal = LookupMacroGoals.query.filter_by(goal_id=request.parsed_obj['client_info']['primary_macro_goal_id']).one_or_none()
+            primary_macro_goal_id = request.parsed_obj['client_info']['primary_macro_goal_id']
+            macro_goal = LookupMacroGoals.query.filter_by(goal_id=primary_macro_goal_id).one_or_none()
             if not macro_goal:
                 raise BadRequest(f'Primary macro goal {primary_macro_goal_id} not found.')
         
         #validate primary_goal_id if supplied and automatically create drink recommendation
         if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
-            goal = LookupGoals.query.filter_by(goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none()
+            primary_goal_id = request.parsed_obj['client_info']['primary_goal_id']
+            goal = LookupGoals.query.filter_by(goal_id=primary_goal_id).one_or_none()
             if not goal:
                 raise BadRequest(f'Primary goal {primary_goal_id} not found.')
 
@@ -1083,7 +1085,7 @@ class ClinicalCareTeamMembers(BaseResource):
                 if team_member_user:
                     team_member["team_member_user_id"] = team_member_user.user_id
                 else:
-                    raise BadRequest(f'Client {modobio_id} not found.')
+                    raise BadRequest(f'Client {modo_id} not found.')
 
             # only email provided. Check if the user exists, if not, create new user
             else:
