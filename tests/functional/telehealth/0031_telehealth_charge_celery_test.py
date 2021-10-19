@@ -4,7 +4,7 @@ from flask.json import dumps
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthBookingStatus, TelehealthChatRooms
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 
 from .client_select_data import payment_refund_data
@@ -23,6 +23,17 @@ Refund the payment
 Check that the refund was successful
 """
 def test_bookings_payment(test_client):
+    #delete existing booking from db to avoid problems
+    for room in TelehealthChatRooms.query.all():
+        db.session.delete(room)
+
+    for status in TelehealthBookingStatus.query.all():
+        db.session.delete(status)
+
+    for booking in TelehealthBookings.query.all():
+        db.session.delete(booking)
+    db.session.commit()
+
     #force a booking in less than 24 hours into bookings table
     payment_method_id = PaymentMethods.query.filter_by(user_id=test_client.client_id).first().idx
 
