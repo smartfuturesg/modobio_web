@@ -1,16 +1,24 @@
+from contextlib import contextmanager
+import logging
+import uuid
+from bson.objectid import ObjectId
 import pytest
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from flask.json import dumps
+from sqlalchemy import select
+from twilio.base.exceptions import TwilioRestException
 
+from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthBookingStatus
-from odyssey.utils.constants import ACCESS_ROLES
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthBookingStatus, TelehealthChatRooms
+from odyssey.integrations.twilio import Twilio
+from odyssey.utils.constants import ACCESS_ROLES, TELEHEALTH_BOOKING_LEAD_TIME_HRS
 from odyssey.utils.message import PushNotification
 
 @pytest.fixture(scope='session', autouse=True)
@@ -23,7 +31,7 @@ def telehealth_clients(test_client):
             middlename='O.',
             lastname='Sterone',
             email=f'client{i}@example.com',
-            phone_number=f'911111111{i}',
+            phone_number=f'91111111{i}',
             is_staff=False,
             is_client=True,
             email_verified=True,
@@ -95,11 +103,9 @@ def payment_method(test_client):
             'expiration': '04/25',
             'is_default': True}),
         content_type='application/json')
-
     pm = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
 
     yield pm
-
     # TODO: there is a tangled mess of left-over entries in TelehealthBooking,
     # TelehealthBookingStatus, chat room and more. Cascading is not working.
     # Disable clean up for now.
@@ -120,7 +126,7 @@ def staff_credentials(test_client):
     creds = PractitionerCredentials(
         user_id=test_client.staff_id,
         country_id=1,
-        state='AZ',
+        state='FL',
         credential_type='NPI',
         credentials='good doc',
         status='verified',
@@ -182,32 +188,73 @@ def booking(test_client, payment_method):
     """ Create a telehealth booking, needed for testing. """
     tomorrow = date.today() + timedelta(days=1)
 
+    # make a telehealth booking by direct db call
+    # booking is made with minimum lead time
+    target_datetime = datetime.now() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    target_datetime = target_datetime.replace(minute = 45, second=0)
+    time_inc = LookupBookingTimeIncrements.query.all()
+        
+    start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
+    
+    booking_start_idx = start_time_idx_dict.get(target_datetime.time().strftime('%H:%M:%S'))
+
+    # below is to account for bookings starting at the very end of the day so that the booking end time
+    # falls on the following day
+    if time_inc[-1].idx - (booking_start_idx + 3) < 0:
+        booking_end_idx = abs(time_inc[-1].idx - (booking_start_idx + 3))
+    else:
+        booking_end_idx = booking_start_idx + 3
+
     bk = TelehealthBookings(
         client_user_id=test_client.client_id,
         staff_user_id=test_client.staff_id,
         profession_type='doctor',
-        target_date=tomorrow.isoformat(),
-        booking_window_id_start_time=10,
-        booking_window_id_end_time=14,
-        status='quo',
+        target_date = target_datetime.date(),
+        target_date_utc = target_datetime.date(),
+        booking_window_id_start_time = booking_start_idx,
+        booking_window_id_end_time = booking_end_idx,
+        booking_window_id_start_time_utc = booking_start_idx,
+        booking_window_id_end_time_utc = booking_end_idx,
+        client_location_id = 1,
         client_timezone='UTC',
         staff_timezone='UTC',
-        target_date_utc=tomorrow.isoformat(),
-        booking_window_id_start_time_utc=10,
-        booking_window_id_end_time_utc=14,
-        client_location_id=1,
-        payment_method_id=payment_method.idx,
-        charged=False)
+        charged=False,
+        status='Accepted',
+        payment_method_id = payment_method.idx,
+        external_booking_id = uuid.uuid4()
+    )
 
     test_client.db.session.add(bk)
+
+    test_client.db.session.flush()
+
+    # add booking transcript
+    twilio = Twilio()
+    conversation_sid = twilio.create_telehealth_chatroom(bk.idx)
+
     test_client.db.session.commit()
 
     yield bk
 
-    # booking status never cleared, but contains references to booking.
-    status = TelehealthBookingStatus.query.all()
-    for st in status:
-        test_client.db.session.delete(st)
+    # delete chatroom, booking, and payment method
+    chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == bk.idx)).scalars().one_or_none()
+    
+    # remove transcript from mongo db
+    if chat_room.transcript_object_id:
+        test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
 
+    for status in bk.status_history:
+        test_client.db.session.delete(status)
+        
+    test_client.db.session.delete(chat_room)
     test_client.db.session.delete(bk)
+    test_client.db.session.flush()
+    
     test_client.db.session.commit()
+
+    try:
+        twilio.delete_conversation(conversation_sid)
+    except TwilioRestException:
+        # conversation was already removed as part of a test
+        pass
+

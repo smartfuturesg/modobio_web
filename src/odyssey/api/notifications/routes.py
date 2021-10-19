@@ -21,7 +21,7 @@ from odyssey.api.notifications.schemas import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.message import PushNotification
-from odyssey.utils.misc import FileHandling
+from odyssey.utils.file_handling import FileHandling
 from odyssey.api.user.models import UserProfilePictures
 
 ns = Namespace('notifications', description='Endpoints for all types of notifications.')
@@ -133,10 +133,10 @@ class PushRegistrationEndpoint(BaseResource):
                 user_id=user_id,
                 device_id=device_id)
             .one_or_none())
-
+            
         if device:
             # Token may have changed with existing device. Even if token is the same,
-            # the endpoint may have been disables or settings may have changed.
+            # the endpoint may have been disabled or settings may have changed.
             # Re-registering will fix that.
             device.arn = pn.register_device(
                 device_token,
