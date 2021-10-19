@@ -3,37 +3,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 import ast
-import boto3
 import inspect
 import jwt
-import mimetypes
-import os
-import random
 import re
 import statistics
 import textwrap
 import typing as t
 import uuid
-
-import pprint
-
 from datetime import datetime, date, time
-from io import BytesIO
-
 from flask import current_app, request
 import flask.json
-from PIL import Image
-from sqlalchemy import select
-from twilio.base.exceptions import TwilioRestException
-from twilio.rest import Client
-from twilio.jwt.access_token import AccessToken
-from twilio.jwt.access_token.grants import ChatGrant, VideoGrant
-from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import (
     BadRequest,
-    RequestEntityTooLarge,
-    Unauthorized,
-    UnsupportedMediaType)
+    Unauthorized)
 
 from odyssey import db
 from odyssey.api.client.models import ClientFacilities
@@ -44,9 +26,7 @@ from odyssey.api.doctor.models import (
     MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import LookupDrinks
-from odyssey.api.telehealth.models import TelehealthChatRooms
 from odyssey.api.user.models import User, UserTokenHistory
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -128,150 +108,6 @@ def check_std_existence(std_id):
     if not std:
         raise BadRequest(f'STD {std_id} not found.')
 
-def grab_twilio_credentials():
-    """
-    Helper funtion to bring up twilio credentials for API acces.
-    Raises an error if one or more of the credentials are None
-    """
-    twilio_account_sid = current_app.config['TWILIO_ACCOUNT_SID']
-    twilio_api_key_sid = current_app.config['TWILIO_API_KEY_SID']
-    twilio_api_key_secret = current_app.config['TWILIO_API_KEY_SECRET']
-
-    if any(x is None for x in [twilio_account_sid,twilio_api_key_sid,twilio_api_key_secret]):
-        raise BadRequest('Twilio API credentials not found.')
-
-    return {'account_sid':twilio_account_sid,
-            'api_key': twilio_api_key_sid,
-            'api_key_secret': twilio_api_key_secret}
-
-def generate_meeting_room_name(meeting_type = 'TELEHEALTH'):
-    """ Generates unique, internally used names for meeting rooms.
-
-    Parameters
-    ----------
-    meeting_type : str
-        Meeting types will be either TELEHEALTH or CHATROOM
-    """
-    _hash = "".join([random.choice(ALPHANUMERIC) for i in range(15)])
-
-    return (meeting_type+'_'+_hash).upper()
-
-def create_conversation(staff_user_id, client_user_id, booking_id):
-    """
-    Provision a Twilio conversation between the staff and client users
-    """
-    new_chat_room = TelehealthChatRooms(
-        staff_user_id=staff_user_id,
-        client_user_id=client_user_id,
-        booking_id = booking_id)
-
-    # skip twilio in testing
-    if current_app.config['TESTING']:
-        db.session.add(new_chat_room)
-        return None
-    # bring up twilio client
-    twilio_credentials = grab_twilio_credentials()
-    client = Client(twilio_credentials['api_key'], 
-                    twilio_credentials['api_key_secret'],
-                    twilio_credentials['account_sid'])
-
-    room_name = generate_meeting_room_name(meeting_type='CHATROOM')
-    # create conversation through twilio api, add participants by modobio_id
-    # TODO catch possible errors from calling Twilio
-    conversation = client.conversations.conversations.create(
-        friendly_name=room_name
-    )
-
-    users = db.session.execute(
-        select(User.modobio_id).
-        where(User.user_id.in_([staff_user_id, client_user_id]))
-    ).scalars().all()
-
-    for modobio_id in users:
-        conversation.participants.create(identity=modobio_id)
-
-    # create chatroom entry into DB
-    new_chat_room.conversation_sid = conversation.sid
-    db.session.add(new_chat_room)
-
-    return conversation.sid
-    
-
-def get_chatroom(staff_user_id, client_user_id, participant_modobio_id, create_new=False):
-    """
-    Deprecated 4.15.21
-    
-    Retrieves twilio chat room by searcing db for the user ids provided.
-    If none exist creates a new room with provided.
-    """
-    # bring up twilio client
-    twilio_credentials = grab_twilio_credentials()
-    client = Client(twilio_credentials['api_key'], 
-                    twilio_credentials['api_key_secret'],
-                    twilio_credentials['account_sid'])
-
-    # bring up the FIRST chat room, this is a small patch until we fully deprecate this function on the front end
-    # if a chat between the client and staff users 
-    # does not exist, create a new chat room
-
-    chat_room = db.session.execute(
-        select(TelehealthChatRooms
-        ).where(
-            TelehealthChatRooms.staff_user_id == staff_user_id,
-            TelehealthChatRooms.client_user_id == client_user_id
-        )).first()
-    
-    if chat_room:
-        # pull down the conversation from Twilio, add user
-        room_name = chat_room[0].room_name
-        conversation = client.conversations.conversations(chat_room[0].conversation_sid).fetch()
-    elif create_new:
-        # if no chat room exists yet, create a new one
-        room_name = generate_meeting_room_name(meeting_type='CHATROOM')
-
-        conversation = client.conversations.conversations.create(
-            friendly_name=room_name)
-
-        # create chatroom entry into DB
-        new_chat_room = TelehealthChatRooms(
-            staff_user_id=staff_user_id,
-            client_user_id=client_user_id,
-            room_name = room_name,
-            conversation_sid = conversation.sid)
-        db.session.add(new_chat_room)
-    else:
-        # no chat room exists and a new one will not be created
-        raise BadRequest('Chat room does not exist.')
-    # Add participant to chat room using their modobio_id
-    try:
-        conversation.participants.create(identity=participant_modobio_id)
-    except TwilioRestException as exc:
-        # do not error if the user is already in the conversation
-        if exc.status != 409:
-            raise
-    
-    db.session.commit()
-    return conversation
-
-def create_twilio_access_token(modobio_id, meeting_room_name=None):
-    """
-    Generate a twilio access token for the provided modobio_id
-    """
-    if current_app.config['TESTING']:
-        return
-
-    twilio_credentials = grab_twilio_credentials()
-    token = AccessToken(twilio_credentials['account_sid'],
-                    twilio_credentials['api_key'],
-                    twilio_credentials['api_key_secret'],
-                    identity=modobio_id,
-                    ttl=TWILIO_ACCESS_KEY_TTL)
-
-    token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
-    if meeting_room_name:
-        token.add_grant(VideoGrant(room=meeting_room_name))
-
-    return token.to_jwt()
 
 class JSONEncoder(flask.json.JSONEncoder):
     """ Converts :class:`datetime.datetime`, :class:`datetime.date`,
@@ -412,119 +248,6 @@ def verify_jwt(token, error_message="", refresh=False):
         raise Unauthorized(error_message)
 
     return decoded_token
-
-
-class FileHandling:
-    """ A class for handling files. """
-
-    def __init__(self):
-        """ Initiate the ImageHandling class instance
-
-        Loads the AWS s3 bucket service as part of initialization process.
-        """
-        self.s3_resource = boto3.resource('s3')
-        self.s3_bucket_name = current_app.config['AWS_S3_BUCKET']
-        self.s3_prefix = current_app.config['AWS_S3_PREFIX']
-        if self.s3_prefix and not self.s3_prefix.endswith('/'):
-            self.s3_prefix += '/'
-        self.s3_bucket = self.s3_resource.Bucket(self.s3_bucket_name)
-        mimetypes.add_type('audio/mp4', '.m4a')
-
-    def validate_file_type(self, file: FileStorage, allowed_file_types: tuple) -> str:
-        # validate the file is allowed
-        file_extension = mimetypes.guess_extension(file.mimetype)
-        if file_extension not in allowed_file_types:
-            raise UnsupportedMediaType(
-                f'File {file.name} not allowed. Allowed types are {allowed_file_types}.')
-
-        return file_extension
-
-    def validate_file_size(self, file: FileStorage, max_file_size):
-        # validate file size is below max_file_size
-        file.seek(0, os.SEEK_END)
-        file_size = file.tell()
-        if file_size > max_file_size:
-            raise RequestEntityTooLarge(f'File {file.name} exceeds maximum file size.')
-
-    def image_crop_square(self, file: FileStorage) -> FileStorage:
-        # validate_file_type(...) is an image
-        img_type = self.validate_file_type(file, ALLOWED_IMAGE_TYPES)
-        # crop into square
-        img = Image.open(file)
-        img_w, img_h = img.size
-
-        squared_img = img
-        # if image isn't a square, 
-        # find the shortest side and crop to a square with length=shortest_side.
-        if img_w != img_h:
-            crop_len= ( max(img_w,img_h) - min(img_w,img_h) ) // 2
-            extra = max(img_w, img_h) % 2 # 0 if largest is even, 1 if largest is odd
-            if img_w > img_h:
-                (left,upper,right,lower)=(crop_len, 0, img_w - crop_len - extra, img_h)
-            else:
-                (left,upper,right,lower)=(0, crop_len, img_w, img_h - crop_len - extra)
-            squared_img = img.crop((left,upper,right,lower))
-        # return image in a FileStorage object
-        temp = BytesIO()
-        default_format = 'jpeg'
-        # convert image to rgb so we can save pngs to jpegs
-        if img_type.lower() == ".png":
-            squared_img = squared_img.convert('RGB')
-        squared_img.save(temp, format=default_format, quality=90)
-        res = FileStorage(temp, filename=f'squared.{default_format}', content_type=f'image/{default_format}')
-
-        return res
-
-    def image_resize(self, file: FileStorage, dimensions: tuple) -> Image:
-        # validate_file_type(...)  is an image
-        img_type = self.validate_file_type(file, ALLOWED_IMAGE_TYPES)
-        # Resize image
-        img = Image.open(file)
-        # dimensions tuple (w, h)
-        img_w, img_h = dimensions
-        resized = img.copy()
-        resized.thumbnail((img_w, img_h))
-        # return image in a FileStorage object
-        temp = BytesIO()
-        default_format = 'jpeg'
-        # convert image to rgb so we can save pngs to jpegs
-        if img_type.lower() == ".png":
-            resized = resized.convert('RGB')
-        resized.save(temp, format=default_format , quality=90)
-        res = FileStorage(temp, filename=f'size{img_w}x{img_h}.{default_format}', content_type=f'image/{default_format}')
-        
-        return res
-    
-    def save_file_to_s3(self, file: FileStorage, filename: str):
-        # Just saves, nothing returned
-        file.seek(0)
-        self.s3_bucket.put_object(Key=self.s3_prefix + filename, Body=file.stream)
-
-    def get_presigned_urls(self, prefix: str) -> dict:
-        # returns all files found with defined prefix
-        # dictionary is {filename1: url1, filename2: url2...}
-        res = {}
-        params = {'Bucket': self.s3_bucket_name}
-        for file in self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix):
-            params['Key'] = file.key
-            url = self.s3_resource.meta.client.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-            file_name = file.key.split('/')[-1]
-            res[file_name] = url
-        return res
-    
-    def get_presigned_url(self, file_path: str) -> str:
-        # returns a single url with defined file_path
-        # if file_path doesn't exists in S3, it will return an empty string
-        params = {'Bucket': self.s3_bucket_name}
-        url = ''
-        for file in self.s3_bucket.objects.filter(Prefix=self.s3_prefix + file_path):
-            params['Key'] = file.key
-            url = self.s3_resource.meta.client.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
-        return url
-
-    def delete_from_s3(self, prefix):
-        self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
-
 
 class DecoratorVisitor(ast.NodeVisitor):
     """ Find decorators placed on functions or classes. """
