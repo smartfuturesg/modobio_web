@@ -104,6 +104,42 @@ class Instamed:
 
         return response.json()
 
+    def void_payment(self, transaction_id, booking):
+        """
+        Void a payment before it has been processed. If the transfer of funds has already
+        started, refund must be used instead.
+
+        InstaMed URI: /payment/void
+
+        Params
+        ------
+        transaction_id: (string)
+            InstaMed ID for the transaction to be refunded
+        
+        booking: (TelehealthBookings object)
+            the booking for which this transaction is associated with
+        
+        Returns
+        -------
+        dict of information regarding the void
+        """
+        request_data = {
+            "Outlet": self.outlet,
+            "TransactionID": str(transaction_id)
+        }
+
+        response = requests.post(self.url_base + '/payment/void',
+                        headers=self.request_header,
+                        json=request_data)
+        
+        #check if instamed api raised an error
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'Instamed returned the following error: {response.text}')
+
+        return response.json()
+
     def charge_user(self, payment_id, amount, booking):
         """
         Charge a user.
@@ -151,10 +187,10 @@ class Instamed:
         #(this is not an error as checked above since 200 is returned from InstaMed)
         if response_data['TransactionStatus'] == 'C':
             if response_data['IsPartiallyApproved']:
-                #refund partial amount and log as an unsuccessful payment
-                self.refund_payment(transaction_id, response_data['PartialApprovalAmount'])
+                #void the payment and cancel appointment
+                self.void_payment(transaction_id, booking)
 
-                #TODO: log if refund was unsuccessful
+                #TODO: log if void was unsuccessful
 
                 cancel_telehealth_appointment(booking)
                 return
@@ -170,5 +206,5 @@ class Instamed:
                 booking.charged = True
                 db.session.commit()
         else:
-            #transaction was declined
+            #transaction was declined, cancel appointment
             cancel_telehealth_appointment(booking)
