@@ -36,8 +36,8 @@ def test_self_registered_new_client(test_client):
     # Refresh user and ensure email is now verified
     test_client.db.session.refresh(user)
     assert user.email_verified == True
-    assert response.json['user_info']['modobio_id']
-    
+    assert user.modobio_id
+
     ####
     #Test token generation and login history
     ####
