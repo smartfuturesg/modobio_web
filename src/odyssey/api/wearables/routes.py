@@ -5,6 +5,8 @@ import base64
 import secrets
 from datetime import datetime, timedelta
 
+import boto3
+from boto3.dynamodb.conditions import Key
 from flask import current_app, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
@@ -736,3 +738,69 @@ class WearablesFreeStyleEndpoint(BaseResource):
             cid=user_id)
         db.session.execute(stmt)
         db.session.commit()
+
+
+@ns.route('/data/<string:device_type>/<int:user_id>/')
+@ns.doc(params={
+    'user_id': 'User ID number. url param', 
+    'device_type': 'fitbit, applewatch, oura, freestyle. url param',
+    'start_date': '(optional) iso formatted date. start of date range',
+    'end_date': '(optional) iso formatted date. end of date range'
+    })
+class WearablesData(BaseResource):
+    # @token_auth.login_required(user_type=('client','staff')) #TODO update permissions
+    @responds(status_code=200, api=ns)
+    def get(self, user_id, device_type):
+        """
+        Bring down the wearables data from dynamodb
+
+        Tables queried depend on environment:
+        ['Wearables-V1-dev', 'Wearables-V1-prod']
+
+        Params
+        ------
+        user_id
+
+        device_type: only the data from one device per request.
+        """
+        user_id = 22
+        device_type = 'applewatch'
+        
+
+        # connect to dynamo
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('Wearables-V1-dev')
+
+        # configure date range expression
+        # Three cases: 
+        #   - no dates specified: return last 2 weeks of data
+        #   - only start or  date specified: return start_date + 2 weeks OR end_date - 2 weeks
+        #   - both start and end date provided: return data for date range
+        from odyssey.utils.misc import date_validator
+
+        start_date = request.values.get('start_date') if date_validator(request.values.get('start_date')) else None
+        end_date = request.values.get('end_date') if date_validator(request.values.get('end_date')) else None
+        if start_date and end_date:
+            date_condition = Key('date').between(start_date, end_date)
+        elif start_date:
+            end_date = (datetime.fromisoformat(start_date) + timedelta(days=14)).date().isoformat()
+            date_condition = Key('date').between(start_date, end_date)
+        elif end_date:
+            start_date = (datetime.fromisoformat(end_date) - timedelta(days=14)).date().isoformat()
+            date_condition = Key('date').between(start_date, end_date)
+        else:
+            data_since_date = (datetime.now() - timedelta(days=14)).date().isoformat()
+            date_condition =  Key('date').gte(data_since_date)
+
+        breakpoint()
+        #https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.list_tables
+        # make reqeust for data
+        response = table.query(
+            KeyConditionExpression= Key('user_id').eq(user_id) & date_condition,
+            FilterExpression = Key('wearable').eq(device_type))
+
+
+        # only provide the data that is required
+
+
+

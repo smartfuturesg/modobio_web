@@ -495,3 +495,21 @@ def cancel_telehealth_appointment(booking):
     #to a failed payment
 
     db.session.commit()
+
+def date_validator(date_string: str):
+    """
+    check if date string is a valid iso formatted date (no time)
+
+    Returns
+    ------
+    bool
+    """
+    import re
+    regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])'
+    match_iso8601 = re.compile(regex).match
+    try:            
+        if match_iso8601(date_string) is not None:
+            return True
+    except:
+        pass
+    return False
