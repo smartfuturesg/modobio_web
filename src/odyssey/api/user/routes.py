@@ -269,6 +269,11 @@ class NewStaffUser(BaseResource):
                                 "access_roles_v2": StaffRoles.query.filter_by(user_id = user.user_id)}
     
         payload["user_info"] =  user
+
+        # respond with verification code in dev
+        if current_app.config['DEV'] and verify_email:
+            payload['email_verification_code'] = email_verification_data.get('code')
+
         return payload
 
 
@@ -439,6 +444,12 @@ class NewClientUser(BaseResource):
         db.session.commit()
 
         payload = {'user_info': user, 'token':access_token, 'refresh_token':refresh_token}
+
+        # respond with verification code in dev
+        if current_app.config['DEV'] and verify_email:
+            payload['email_verification_code'] = email_verification_data.get('code')
+
+
         return payload
 
 @ns.route('/password/forgot-password/recovery-link/')
@@ -840,6 +851,18 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
 
     @responds(status_code=200)
     def post(self, user_id):
+        """
+        Verify the user's email address.
+
+        Params
+        -------
+        user_id int
+        code: email verification code provided during client creation
+
+        Verifying an email requires both a valid code that the client retrieved from their email and a valid 
+        token stored on the modobio side. The token has a short lifetime so the email varification process must happen within
+        that time. 
+        """
 
         verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
 

@@ -376,7 +376,7 @@ def booking_tmp(test_client, wheel = False):
     # below is to account for bookings starting at the very end of the day so that the booking end time
     # falls on the following day
     if time_inc[-1].idx - (booking_start_idx + 3) < 0:
-        booking_end_idx = time_inc[-1].idx - (booking_start_idx + 3)
+        booking_end_idx = abs(time_inc[-1].idx - (booking_start_idx + 3))
     else:
         booking_end_idx = booking_start_idx + 3
 
