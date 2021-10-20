@@ -83,12 +83,13 @@ class NewClientUserSchema(Schema):
     user_info = fields.Nested(UserInfoSchema, required=True)
     token = fields.String()
     refresh_token = fields.String()
+    email_verification_code = fields.String()
 
 class NewStaffUserSchema(Schema):
     """
     General purpose user creation schema
     """
-
+    email_verification_code = fields.String()
     user_info = fields.Nested(UserInfoSchema, required=True)
     staff_info = fields.Nested(StaffInfoSchema,
                               missing={}, 
