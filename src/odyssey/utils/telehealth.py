@@ -1,3 +1,4 @@
+from typing import Any
 from flask import current_app
 import random
 from flask_restx.fields import Integer, String
@@ -259,6 +260,41 @@ def update_booking_status_history(new_status:String, booking_id:Integer, reporte
     # save TelehealthBookingStatus object connected to this booking.
     db.session.add(status_history)
     return 
+
+
+def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Participants'):
+    """
+    After booking gets started, make sure it gets completed
+    1. Update booking status
+    2. Send signal to twilio
+    """
+    # Query the booking in question & check status
+    booking = TelehealthBookings.query.get(booking_id)
+    if not booking:
+        raise BadRequest('Meeting does not exist')
+    
+    if booking.status == 'Completed':
+        return
+    
+    elif booking.status != 'In Progress':
+        raise BadRequest('Meeting has not began')
+
+    # update status
+    booking.status = 'Completed'
+
+    update_booking_status_history(
+            new_status = booking.status, 
+            booking_id = booking.idx, 
+            reporter_id = reporter_id, 
+            reporter_role = reporter)
+
+    ##### WHEEL #####        
+    # if booking.external_booking_id:
+    #     wheel = Wheel()
+    #     wheel.complete_consult(booking.external_booking_id)
+
+    db.session.commit()
+    return
 
 def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_staff_localized):
 

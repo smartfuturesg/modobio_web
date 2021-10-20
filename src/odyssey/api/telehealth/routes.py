@@ -220,6 +220,10 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         db.session.add(status_history)
         db.session.commit()
 
+        # schedule celery task to ensure call is completed 10 min after utc end date_time
+        # TODO schedule a call to complete_booking, 10 min after utc end date_time
+        complete_booking(booking.idx)
+        
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
         if g.user_type == 'staff':
@@ -1700,6 +1704,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         Complete the booking by:
         - send booking complete request to wheel
         - update booking status in TelehealthBookings
+        - update twilio??
         """
         booking = db.session.execute(select(TelehealthBookings).where(
             TelehealthBookings.idx == booking_id,
@@ -1710,7 +1715,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         current_user, _ = token_auth.current_user()
 
         # make sure the requester is one of the participants
-        if not current_user.user_id == booking.staff_user_id:
+        if not current_user.user_id == booking.staff_user_id or current_user.user_id == booking.client_user_id:
             raise Unauthorized('You must be a participant in this booking.')
 
         ##### WHEEL #####        
@@ -1718,16 +1723,10 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         #     wheel = Wheel()
         #     wheel.complete_consult(booking.external_booking_id)
 
-        booking.status = 'Completed'
-
-        status_history = TelehealthBookingStatus(
-            booking_id=booking_id,
-            reporter_id=current_user.user_id,
-            reporter_role='Practitioner',
-            status='Completed'
-        )
-        db.session.add(status_history)
-        db.session.commit()
+        complete_booking(
+            booking_id = booking.idx, 
+            reporter_id = current_user.user_id,
+            reporter = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
 
         return 
 
