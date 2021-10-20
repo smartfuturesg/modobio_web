@@ -104,7 +104,7 @@ class Instamed:
 
         return response.json()
 
-    def void_payment(self, transaction_id, booking):
+    def void_payment(self, booking_id):
         """
         Void a payment before it has been processed. If the transfer of funds has already
         started, refund must be used instead.
@@ -113,16 +113,17 @@ class Instamed:
 
         Params
         ------
-        transaction_id: (string)
-            InstaMed ID for the transaction to be refunded
-        
-        booking: (TelehealthBookings object)
-            the booking for which this transaction is associated with
+        booking_id: (integer)
+            id of the booking for which this transaction is associated with
         
         Returns
         -------
         dict of information regarding the void
         """
+        transaction_id = PaymentHistory.query.filter_by(booking_id=booking_id).one_or_none()
+        if not transaction_id:
+            raise BadRequest(f'No booking exists with booking id {booking_id}.')
+
         request_data = {
             "Outlet": self.outlet,
             "TransactionID": str(transaction_id)
@@ -188,7 +189,7 @@ class Instamed:
         if response_data['TransactionStatus'] == 'C':
             if response_data['IsPartiallyApproved']:
                 #void the payment and cancel appointment
-                self.void_payment(transaction_id, booking)
+                self.void_payment(response_data['TransactionID'], booking)
 
                 #TODO: log if void was unsuccessful
 

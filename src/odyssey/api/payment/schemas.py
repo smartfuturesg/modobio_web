@@ -54,3 +54,15 @@ class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return PaymentRefunds(**data)
+
+class PaymentTestChargeSchema(Schema):
+    payment_method_id = fields.Integer(required=True)
+    booking_id = fields.Integer(required=True)
+    amount = fields.Float(required=True)
+
+class PaymentTestRefundSchema(Schema):
+    transaction_id = fields.Integer(required=True)
+    amount = fields.Float(required=True)
+
+class PaymentTestVoidSchema(Schema):
+    booking_id = fields.Integer(required=True)

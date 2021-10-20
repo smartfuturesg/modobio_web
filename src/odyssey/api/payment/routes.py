@@ -6,7 +6,7 @@ import json
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
@@ -17,7 +17,16 @@ from odyssey.utils.misc import check_client_existence
 from odyssey.utils.base.resources import BaseResource
 from odyssey.api.lookup.models import LookupOrganizations
 from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
-from odyssey.api.payment.schemas import PaymentMethodsSchema, PaymentStatusSchema, PaymentStatusOutputSchema, PaymentHistorySchema, PaymentRefundsSchema
+from odyssey.api.payment.schemas import (
+PaymentMethodsSchema,
+PaymentStatusSchema,
+PaymentStatusOutputSchema,
+PaymentHistorySchema,
+PaymentRefundsSchema,
+PaymentTestChargeSchema,
+PaymentTestRefundSchema,
+PaymentTestVoidSchema)
+from odyssey.api.telehealth.models import TelehealthBookings
 
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
 
@@ -174,3 +183,76 @@ class PaymentRefundApi(BaseResource):
         db.session.commit()
 
         return request.parsed_obj
+
+# Development-only Namespace, sets up endpoints for testing payments.
+ns_dev = Namespace(
+    'payment',
+    path='/payment/test',
+    description='[DEV ONLY] Endpoints for testing payments.')
+
+
+@ns_dev.route('/charge/')
+class PaymentTestCharge(BaseResource):
+    """
+    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
+    charging in the InstaMed system. 
+
+    Note
+    ---
+    **This endpoint is only available in DEV environments.**
+
+    """
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @accepts(schema=PaymentTestChargeSchema, api=ns_dev)
+    @responds(schema=PaymentTestChargeSchema, api=ns_dev, status_code=201)
+    def post(self):
+        booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
+        if not booking:
+            raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
+        if booking.charged:
+            raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
+
+        Instamed().charge_user(request.parsed_obj['payment_method_id'], request.parsed_obj['amount'], booking)
+
+@ns_dev.route('/refund/')
+class PaymentTestRefund(BaseResource):
+    """
+    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
+    refunds in the InstaMed system.
+
+    Note
+    ---
+    **This endpoint is only available in DEV environments.**
+
+    """
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @accepts(schema=PaymentTestRefundSchema, api=ns_dev)
+    @responds(schema=PaymentTestRefundSchema, api=ns_dev, status_code=201)
+    def post(self):
+        #send InstaMed refund request
+        Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'])
+
+
+@ns_dev.route('/void/')
+class PaymentVoidRefund(BaseResource):
+    """
+    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
+    voids in the InstaMed system.
+    
+    Note
+    ---
+    **This endpoint is only available in DEV environments.**
+
+    """
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @accepts(schema=PaymentTestVoidSchema, api=ns_dev)
+    @responds(schema=PaymentTestVoidSchema, api=ns_dev, status_code=201)
+    def post(self):
+        #send InstaMed void request
+        booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
+        if not booking:
+            raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
+        if booking.charged:
+            raise BadRequest('The booking with booking id {booking_id}'.format(**request.parsed_obj) + \
+            'has not been charged yet,so it cannot be voided.')
+        im.void_payment(request.parsed_obj['booking_id'])
