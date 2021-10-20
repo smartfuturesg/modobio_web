@@ -133,29 +133,38 @@ class BaseResource(Resource):
         @wraps(func)
         def wrapped(*args, **kwargs):
             if not self.__check_resource__:
+                logger.debug('Not running check_resource() because __check_resource__ is False.')
                 return func(*args, **kwargs)
 
             # Only works if URL contains one or more path arguments:
             # /some/path/<int:user_id> or similar
             if len(request.view_args) == 0:
+                logger.debug(f'Not running check_resource() because no path argument in URL of {func}.')
                 return func(*args, **kwargs)
 
             try:
                 schema = find_decorator_value(func, 'accepts', keyword='schema')
             except TypeError:
+                logger.debug(f'Not running check_resource() because no @accepts decorator on {func}.')
                 return func(*args, **kwargs)
 
             if not schema:
+                logger.debug(f'Not running check_resource() because no schema declared in @accepts '
+                             f'decorator of {func}.')
                 return func(*args, **kwargs)
 
             # Schema not based on a table, nothing to check.
             if not hasattr(schema.Meta, 'model'):
+                logger.debug(f'Not running check_resource() because schema {schema} is not based '
+                             f'on a table model.')
                 return func(*args, **kwargs)
 
             table = schema.Meta.model
             try:
                 exists = table.query.filter_by(**request.view_args).one_or_none()
             except InvalidRequestError:
+                logger.debug(f'Not running check_resource() because table {table} can not be '
+                             f'filtered by any of the path arguments in the URL.')
                 return func(*args, **kwargs)
 
             if exists and request.method.lower() in ('post',):
@@ -165,5 +174,6 @@ class BaseResource(Resource):
                 raise BadRequest('The resource you are trying to change (PUT/PATCH) does not exist. '
                                  'Please use POST first.')
 
+            logger.debug(f'Running check_resource() for {func}.')
             return func(*args, **kwargs)
         return wrapped
