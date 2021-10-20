@@ -194,10 +194,10 @@ class User(db.Model):
         if all((firstname, lastname)):
             salt = firstname[0] + lastname[0]
         else:
-            salt = email[:2]
+            logger.error('Missing first and last name.')
         return (salt + rli_hash).upper()
 
-@db.event.listens_for(User, "after_insert")
+@db.event.listens_for(User, "after_update")
 def add_modobio_id(mapper, connection, target):
     """
     Listens for new entries into the User table and 
@@ -214,31 +214,34 @@ def add_modobio_id(mapper, connection, target):
     target : :class:`sqlalchemy.schema.Table`
         Target SQLAlchemy table, fixed to :class:`User` by decorator.
     """
-    mb_id = User().generate_modobio_id(
-            firstname = target.firstname, 
-            lastname = target.lastname,
-            email = target.email, 
-            user_id = target.user_id)
+    user = User.query.filter_by(user_id=target.user_id).one_or_none()
+    if user.modobio_id == None and user.email_verified:
+        mb_id = User().generate_modobio_id(
+                firstname = target.firstname, 
+                lastname = target.lastname,
+                email = target.email, 
+                user_id = target.user_id)
 
-    statement = f"""UPDATE public."User" 
-                set modobio_id = '{mb_id}'
-                where user_id = {target.user_id};"""
+        statement = f"""UPDATE public."User" 
+                    set modobio_id = '{mb_id}'
+                    where user_id = {target.user_id};"""
 
-    connection.execute(text(statement))
+        connection.execute(text(statement))
 
-    from odyssey.utils.search import update_index
-    user = {
-        'firstname': target.firstname,
-        'lastname': target.lastname,
-        'phone_number': target.phone_number,
-        'email': target.email,
-        'modobio_id': mb_id,
-        'user_id': target.user_id,
-        'is_client': target.is_client,
-        'is_staff': target.is_staff,
-        'dob': target.dob
-    }
-    update_index(user, True)
+        from odyssey.utils.search import update_index
+        user = {
+            'firstname': target.firstname,
+            'lastname': target.lastname,
+            'phone_number': target.phone_number,
+            'email': target.email,
+            'modobio_id': mb_id,
+            'user_id': target.user_id,
+            'is_client': target.is_client,
+            'is_staff': target.is_staff,
+            'dob': target.dob
+        }
+        update_index(user, True)
+
 
 
 @db.event.listens_for(User, "after_update")
