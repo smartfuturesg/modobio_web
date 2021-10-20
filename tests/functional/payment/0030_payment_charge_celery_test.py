@@ -4,10 +4,10 @@ from flask.json import dumps
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthBookingStatus, TelehealthChatRooms
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 
-from .client_select_data import payment_refund_data
+from .data import payment_refund_data
 
 from odyssey.tasks.periodic import find_chargable_bookings
 from odyssey.tasks.tasks import charge_telehealth_appointment
@@ -60,7 +60,7 @@ def test_bookings_payment(test_client):
 
     #run celery tasks to find and charge bookings
     bookings = find_chargable_bookings()
-    assert len(bookings) == 2
+    assert len(bookings) == 1
 
     charge_telehealth_appointment(booking.idx)
 
@@ -135,3 +135,6 @@ def test_bookings_payment(test_client):
 
     assert response.status_code == 200
     assert len(response.json) == 2
+
+    db.session.delete(booking)
+    db.session.commit()

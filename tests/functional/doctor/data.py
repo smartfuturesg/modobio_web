@@ -497,9 +497,9 @@ doctor_surgery_data = {
 doctor_credentials_post_1_data = {
   'items': [
     {'credential_type':'npi', 'country_id':1,'credentials': '1296336567'},
-    {'credential_type':'dea', 'country_id':1,'state': 'AZ','credentials': '183451435'}, 
+    {'credential_type':'dea', 'country_id':1,'state': 'FL','credentials': '183451435'}, 
     {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '123342534'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '523746512'}, 
     {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '839547692'}
   ]
 }
@@ -509,7 +509,7 @@ doctor_credentials_post_2_data = {
   'items': [
     {'credential_type':'npi', 'country_id':1,'credentials': '98714234'},
     {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '43218470'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '21323512'}, 
+    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '21323512'}, 
   ]
 }
 
@@ -532,9 +532,9 @@ doctor_credentials_put_3_data = {
 doctor_credentials_post_3_data = {
   'items': [
     {'credential_type':'npi', 'country_id':1,'credentials': '123456789'},
-    {'credential_type':'dea', 'country_id':1,'state': 'AZ','credentials': '183451435'}, 
+    {'credential_type':'dea', 'country_id':1,'state': 'FL','credentials': '183451435'}, 
     {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '4312079463'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '523746512'}, 
     {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '85423903'}
   ]
 }
@@ -546,9 +546,9 @@ doctor_credentials_post_3_data = {
 doctor_credentials_post_4_data = {
   'items': [
     {'credential_type':'npi', 'country_id':1,'credentials': '987654321'},
-    {'credential_type':'dea', 'country_id':1,'state': 'AZ','credentials': '183451435'}, 
+    {'credential_type':'dea', 'country_id':1,'state': 'FL','credentials': '183451435'}, 
     {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '4312079463'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '523746512'}, 
     {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '85423903'}
   ]
 }
@@ -560,9 +560,9 @@ doctor_credentials_post_4_data = {
 doctor_credentials_post_5_data = {
   'items': [
     {'credential_type':'npi', 'country_id':1,'credentials': '1296336567'},
-    {'credential_type':'dea', 'country_id':1,'state': 'AZ','credentials': '740329857'}, 
+    {'credential_type':'dea', 'country_id':1,'state': 'FL','credentials': '740329857'}, 
     {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '4312079463'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'AZ','credentials': '523746512'}, 
+    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '523746512'}, 
     {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '85423903'}
   ]
 }

@@ -137,9 +137,9 @@ staff_calendar_events_data = {
 
 staff_office_data = {
   "normal_data": {
-    "city": "Phoenix",
+    "city": "Miami",
     "phone_type": "primary",
-    "territory_id": 2,
+    "territory_id": 1,
     "zipcode": "85260",
     "email": "string@modobio.com",
     "phone": "4804389574",
@@ -147,9 +147,9 @@ staff_office_data = {
     "fax": "4804389574"
   },
   "normal_data_2": {
-    "city": "Tucson",
+    "city": "Tampa",
     "phone_type": "home",
-    "territory_id": 2,
+    "territory_id": 1,
     "zipcode": "85641",
     "email": "string@modobio.com",
     "phone": "4804389575",
@@ -157,7 +157,7 @@ staff_office_data = {
     "fax": "4804389575"
   },
   "invalid_territory_id": {
-    "city": "Phoenix",
+    "city": "Miami",
     "phone_type": "primary",
     "territory_id": 999,
     "zipcode": "85260",
@@ -167,9 +167,9 @@ staff_office_data = {
     "fax": "1234568"
   },
   "too_long": {
-    "city": "Phoenix",
+    "city": "Miami",
     "phone_type": "primary",
-    "territory_id": 2,
+    "territory_id": 1,
     "zipcode": "85260",
     "email": "string@modobio.com",
     "phone": "111111111111111111111",
@@ -177,9 +177,9 @@ staff_office_data = {
     "fax": "1234568"
   },
   "invalid_phone_type": {
-    "city": "Phoenix",
+    "city": "Miami",
     "phone_type": "invalid",
-    "territory_id": 2,
+    "territory_id": 1,
     "zipcode": "85260",
     "email": "string@modobio.com",
     "phone": "1234567",

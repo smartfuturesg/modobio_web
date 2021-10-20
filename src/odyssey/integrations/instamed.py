@@ -6,6 +6,7 @@ from flask import current_app
 from odyssey.utils.misc import cancel_telehealth_appointment
 from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory
+from odyssey.utils.misc import cancel_telehealth_appointment
 
 from odyssey import db
 
