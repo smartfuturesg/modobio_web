@@ -28,6 +28,13 @@ class User(db.Model):
 
     __tablename__ = 'User'
 
+    membersince = db.Column(db.DateTime)
+    """
+    Member since date, populated when email has been verified
+
+    :type: datetime
+    """
+
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     timestamp for when object was created. DB server time is used. 

@@ -828,7 +828,7 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
 
         #token was valid, remove the pending request, update user account and return 200
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
-        user.update({'email_verified': True})
+        user.update({'email_verified': True,'membersince': DB_SERVER_TIME})
         
         db.session.delete(verification)
         db.session.commit()
