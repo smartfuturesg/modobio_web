@@ -886,6 +886,9 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         db.session.delete(verification)
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
+        if user.email_verified == False and user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id})        
         user.update({'email_verified': True})
 
         db.session.commit()
