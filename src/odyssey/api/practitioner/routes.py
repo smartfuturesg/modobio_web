@@ -61,6 +61,8 @@ class PractitionerConsultationRates(BaseResource):
         
         for pract in payload['items']:
             if pract['role'] in lookup_role:
+                if float(pract['rate']) < float(cost_range.min_rate) or float(pract['rate']) > float(cost_range.max_rate):
+                    raise BadRequest(f'Input must be between {cost_range.min_rate} and {cost_range.max_rate}.')
                 if float(pract['rate'])%inc == 0.0:
                     lookup_role[pract['role']].update({'consult_rate':float(pract['rate'])})
                 else:
