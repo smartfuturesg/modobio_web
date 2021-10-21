@@ -28,6 +28,13 @@ class User(db.Model):
 
     __tablename__ = 'User'
 
+    membersince = db.Column(db.DateTime)
+    """
+    Member since date, populated when email has been verified
+
+    :type: datetime
+    """
+
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     timestamp for when object was created. DB server time is used. 
@@ -163,83 +170,6 @@ class User(db.Model):
 
     :type: :class:`datetime.date`
     """
-
-    @staticmethod
-    def generate_modobio_id(user_id: int, firstname: str=None, lastname: str=None, email: str=None) -> str:
-        """ Generate the user's mdobio_id.
-
-        The modo bio identifier is used as a public user id, it
-        can also be exported to other healthcare providers (clients only).
-        It is made up of the firstname and lastname initials and 10 random alphanumeric
-        characters.
-
-        Parameters
-        ----------
-        firstname : str
-            Client first name.
-
-        lastname : str
-            Client last name.
-
-        user_id : int
-            User ID number.
-
-        Returns
-        -------
-        str
-            Medical record ID
-        """
-        rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
-        
-        if all((firstname, lastname)):
-            salt = firstname[0] + lastname[0]
-        else:
-            salt = email[:2]
-        return (salt + rli_hash).upper()
-
-@db.event.listens_for(User, "after_insert")
-def add_modobio_id(mapper, connection, target):
-    """
-    Listens for new entries into the User table and 
-    automatically assigns a modibio_id to new users.
-
-    Parameters
-    ----------
-    mapper : ???
-        What does this do? Not used.
-
-    connection : :class:`sqlalchemy.engine.Connection`
-        Connection to the database engine.
-
-    target : :class:`sqlalchemy.schema.Table`
-        Target SQLAlchemy table, fixed to :class:`User` by decorator.
-    """
-    mb_id = User().generate_modobio_id(
-            firstname = target.firstname, 
-            lastname = target.lastname,
-            email = target.email, 
-            user_id = target.user_id)
-
-    statement = f"""UPDATE public."User" 
-                set modobio_id = '{mb_id}'
-                where user_id = {target.user_id};"""
-
-    connection.execute(text(statement))
-
-    from odyssey.utils.search import update_index
-    user = {
-        'firstname': target.firstname,
-        'lastname': target.lastname,
-        'phone_number': target.phone_number,
-        'email': target.email,
-        'modobio_id': mb_id,
-        'user_id': target.user_id,
-        'is_client': target.is_client,
-        'is_staff': target.is_staff,
-        'dob': target.dob
-    }
-    update_index(user, True)
-
 
 @db.event.listens_for(User, "after_update")
 def update_ES_index(mapper, connection, target):

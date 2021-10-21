@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 import ast
 import inspect
 import jwt
+import random
 import re
 import statistics
 import textwrap
@@ -26,9 +27,43 @@ from odyssey.api.doctor.models import (
     MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import LookupDrinks
+from odyssey.utils.constants import ALPHANUMERIC
 from odyssey.api.user.models import User, UserTokenHistory
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
+
+def generate_modobio_id(user_id: int, firstname: str=None, lastname: str=None) -> str:
+    """ Generate the user's mdobio_id.
+
+    The modo bio identifier is used as a public user id, it
+    can also be exported to other healthcare providers (clients only).
+    It is made up of the firstname and lastname initials and 10 random alphanumeric
+    characters.
+
+    Parameters
+    ----------
+    firstname : str
+        Client first name.
+
+    lastname : str
+        Client last name.
+
+    user_id : int
+        User ID number.
+
+    Returns
+    -------
+    str
+        Medical record ID
+    """
+    rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
+    
+    if all((firstname, lastname)):
+        salt = firstname[0] + lastname[0]
+    else:
+        raise BadRequest('Missing first and/or last name.')
+    return (salt + rli_hash).upper()
+
 
 def list_average(values_list):
     """Helper function to clean list values before attempting to find the average"""
