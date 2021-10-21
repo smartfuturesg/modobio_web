@@ -227,6 +227,9 @@ class MedCredentials(BaseResource):
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodPressures(BaseResource):
+    # Multiple blood pressure measurements per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(resources=('blood_pressure',))
     @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
     def get(self, user_id):
