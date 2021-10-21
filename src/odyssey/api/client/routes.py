@@ -1783,6 +1783,9 @@ class ClientHeightApi(BaseResource):
     Endpoints related to submitting client height and viewing
     a client's height history.
     """
+    # Multiple heights per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientHeightSchema, api=ns)
     @responds(schema=ClientHeightSchema, api=ns, status_code=201)
@@ -1819,6 +1822,9 @@ class ClientWeightApi(BaseResource):
     Endpoints related to submitting client weight and viewing
     a client's weight history.
     """
+    # Multiple weights per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientWeightSchema, api=ns)
     @responds(schema=ClientWeightSchema, api=ns, status_code=201)
@@ -1855,6 +1861,9 @@ class ClientWaistSizeApi(BaseResource):
     Endpoints related to submitting client waist size and viewing
     a client's waist size history.
     """
+    # Multiple waist sizes per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientWaistSizeSchema, api=ns)
     @responds(schema=ClientWaistSizeSchema, api=ns, status_code=201)
@@ -1955,7 +1964,7 @@ class ClientTransactionPutApi(BaseResource):
 
 @ns.route('/default-health-metrics/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientWeightApi(BaseResource):
+class ClientDefaultHealthMetricApi(BaseResource):
     """
     Endpoint for returning the recommended health metrics for the client based on age and sex
     """
