@@ -83,6 +83,9 @@ ns = Namespace('doctor', description='Operations related to doctor')
 @ns.route('/credentials/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedCredentials(BaseResource):
+    # Multiple credentials per practitioner allowed
+    __check_resource__ = False
+
     @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
     @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
     def get(self,user_id):
@@ -527,6 +530,9 @@ class MedicalGeneralInformation(BaseResource):
 @ns.route('/medicalinfo/medications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalMedicationInformation(BaseResource):
+    # Multiple medications per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalMedicationsInfoInputSchema, api=ns)
     def get(self, user_id):
@@ -646,6 +652,9 @@ class MedicalMedicationInformation(BaseResource):
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalAllergiesInformation(BaseResource):
+    # Multiple allergies per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalAllergiesInfoInputSchema, api=ns)
     def get(self, user_id):
