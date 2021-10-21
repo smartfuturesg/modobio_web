@@ -50,3 +50,33 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
         model = WearablesFreeStyle
         load_instance = True
         fields = ('activation_timestamp',)
+
+
+
+
+class WearablesSleepDataNested(Schema):
+    """
+    sleep data for one day 
+    """
+    hr_resting = fields.Float()
+    total_sleep_seconds = fields.Integer()
+class WearablesActivityDataNested(Schema):
+    """
+    Activity data for one day
+    """
+    calories_active = fields.Integer()
+    calories_total = fields.Integer()
+    steps = fields.Integer()
+class WearablesDataResponseNestedSchema(Schema):
+    """
+    Schema for each wearable data response item. Nests activity and sleep data
+    """
+    date = fields.String()
+    activity = fields.Nested(WearablesActivityDataNested)
+    sleep = fields.Nested(WearablesSleepDataNested)
+
+class WearablesDataResponseSchema(Schema):
+    start_date = fields.String()
+    end_date = fields.String()
+    total_items = fields.Integer()
+    items = fields.Nested(WearablesDataResponseNestedSchema(many=True))

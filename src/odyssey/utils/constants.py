@@ -924,3 +924,6 @@ MODOBIO_ADDRESS = {
     "zipcode": "85260",
     "phone": "4806810406"
 }
+
+# By default, the wearables data API will provide data for this range of days
+WEARABLE_DATA_DEFAULT_RANGE_DAYS = 14

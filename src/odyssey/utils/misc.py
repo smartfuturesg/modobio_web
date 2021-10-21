@@ -1,5 +1,7 @@
 """ Utility functions for the odyssey package. """
 import logging
+
+from odyssey.api.telehealth.models import TelehealthBookingStatus
 logger = logging.getLogger(__name__)
 
 import ast
@@ -502,14 +504,16 @@ def date_validator(date_string: str):
 
     Returns
     ------
-    bool
+    str: date specified if it is valid, otherwise raises an error
     """
     import re
     regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])'
     match_iso8601 = re.compile(regex).match
     try:            
         if match_iso8601(date_string) is not None:
-            return True
-    except:
-        pass
-    return False
+            return date_string
+        else:
+            # string does not match requirements
+            raise BadRequest("date requested is not formatted properly. Please user ISO format YYYY-MM-DD")
+    except TypeError:
+        raise BadRequest("date requested is not formatted properly. Please user ISO format YYYY-MM-DD")
