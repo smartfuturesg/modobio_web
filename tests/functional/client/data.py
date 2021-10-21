@@ -46,7 +46,7 @@ client_info_put_test_data = {
         "primary_pharmacy_name": "Maw and Paw Drugs Co.",
         "healthcare_contact": "United",
         "primary_goal_id": 1,
-        "territory_id": 2,
+        "territory_id": 1,
         "street": "123 Test St.",
         "city": "Phoenix",
         "zipcode": "85255",
