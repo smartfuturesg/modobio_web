@@ -1964,7 +1964,7 @@ class ClientTransactionPutApi(BaseResource):
 
 @ns.route('/default-health-metrics/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientWeightApi(BaseResource):
+class ClientDefaultHealthMetricApi(BaseResource):
     """
     Endpoint for returning the recommended health metrics for the client based on age and sex
     """
