@@ -93,14 +93,14 @@ class User(db.Model):
     :type: str, max length 50
     """
 
-    biological_sex_male =  db.Column(db.Boolean)
+    biological_sex_male =  db.Column(db.Boolean, server_default='false')
     """
     Client biological sex, true for male, false for female.
 
     :type: bool
     """
 
-    is_staff = db.Column(db.Boolean, nullable=False)
+    is_staff = db.Column(db.Boolean, nullable=False, server_default='false')
     """
     Denotes if this user is a staff member. Note: a user can be both a client and a staff member.
 
@@ -121,7 +121,7 @@ class User(db.Model):
     :type: :class:`StaffRoles` instance list 
     """
 
-    is_client = db.Column(db.Boolean, nullable=False)
+    is_client = db.Column(db.Boolean, nullable=False, server_default='false')
     """
     Denotes if this user is a client. Note: a user can be both a client and a staff member.
 
@@ -135,7 +135,7 @@ class User(db.Model):
     :type: :class: `ClientInfo` instance
     """
 
-    is_internal = db.Column(db.Boolean, nullable=False, default=False)
+    is_internal = db.Column(db.Boolean, nullable=False, server_default='false')
     """
     Whether or not the user is internal. If True, the user may be able to user features not yet 
     fully released. 
@@ -143,14 +143,14 @@ class User(db.Model):
     :type: boolean, non-null 
     """
 
-    deleted = db.Column(db.Boolean, nullable=True, default = False)
+    deleted = db.Column(db.Boolean, nullable=False, server_default='false')
     """
     Flags if the user has been deleted
 
     :type: boolean
     """
 
-    email_verified = db.Column(db.Boolean, nullable=False, default=False)
+    email_verified = db.Column(db.Boolean, nullable=False, server_default='false')
     """
     Flags if the user has verified their email
 

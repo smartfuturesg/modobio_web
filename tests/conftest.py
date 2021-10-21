@@ -34,9 +34,9 @@ from odyssey.utils import search
 
 from .utils import login
 
-# From database/0001_seed_users.sql
-STAFF_ID = 12   # staff@modobio.com
-CLIENT_ID = 22  # client@modobio.com
+# See database/1000_staff_all_roles.sql and database/3000_client.sql
+STAFF_EMAIL = 'name@modobio.com'
+CLIENT_EMAIL = 'client@modobio.com'
 
 # For care team fixture
 USER_TM = 'test_team_member_user@modobio.com'
@@ -70,21 +70,6 @@ def setup_db(app):
 
     # Sending output to stderr, because that is where flask-migrate sends debug/info output.
     print(proc.stdout, file=sys.stderr)
-
-    # For general testing pusposes, give 'staff@modobio.com' all roles.
-    # To test access for specific roles, use different staff users from the seeded list.
-    db.session.execute(text(f'DELETE FROM "StaffRoles" WHERE user_id = {STAFF_ID};'))
-
-    roles = db.session.execute(text('SELECT role_name FROM "LookupRoles";')).scalars().all()
-    tmpl = """
-        INSERT INTO "StaffRoles"
-        (user_id, role, granter_id)
-        VALUES
-        ({}, '{}', 1);"""
-    insert = [tmpl.format(STAFF_ID, role) for role in roles]
-    db.session.execute(text(' '.join(insert)))
-    db.session.commit()
-
 
     # Add elastic search index
     search.build_ES_indices()
@@ -152,8 +137,8 @@ def test_client():
             setup_db(app)
 
             # Load the main users for testing
-            client = db.session.query(User).filter_by(user_id=CLIENT_ID).one_or_none()
-            staff = db.session.query(User).filter_by(user_id=STAFF_ID).one_or_none()
+            client = db.session.query(User).filter_by(email=CLIENT_EMAIL).one_or_none()
+            staff = db.session.query(User).filter_by(email=STAFF_EMAIL).one_or_none()
 
             # Add everything we want to pass to tests
             # into the test_client instance as parameters.
@@ -212,7 +197,6 @@ def care_team(test_client):
     - care team:
         - pro@modobio.com: existing staff member added in seed users
         - name@modobio.com: existing staff member added in seed users
-        - test_client.staff: existing staff member, added here
         - test_team_member_user@modobio.com: new client user, added here
         - test_team_member_non_user@modobio.com: new team member who is not a modobio user, added here
 
@@ -225,11 +209,12 @@ def care_team(test_client):
     dict
         Dictionary containing a user_id and modobio_id for each of the newly
         addded team members:
-        - staff_id
+        - staff_id (for name@modobio.com)
         - staff_modobio_id
         - client_id
         - client_modobio_id
-        - non_user_id (no non_user_modobio_id)
+        - non_user_id
+        - non_user_modobio_id (always None)
 
     Notes
     -----
@@ -269,30 +254,13 @@ def care_team(test_client):
 
     # Add members to care team
     ccteam = []
-    for tm_id in (test_client.staff_id, tm_client.user_id, tm_non_user.user_id):
+    for tm_id in (tm_client.user_id, tm_non_user.user_id):
         cct = ClientClinicalCareTeam(
             user_id=test_client.client_id,
             team_member_user_id=tm_id)
         ccteam.append(cct)
 
     test_client.db.session.add_all(ccteam)
-
-    # Add authorizations for staff member.
-    resource_ids = (test_client.db.session.execute(
-        select(LookupClinicalCareTeamResources.resource_id))
-        .scalars()
-        .all())
-
-    ccteam_auth = []
-    for resource_id in resource_ids:
-        cct_auth = ClientClinicalCareTeamAuthorizations(
-            user_id=test_client.client_id,
-            team_member_user_id=test_client.staff_id,
-            resource_id=resource_id,
-            status='accepted')
-        ccteam_auth.append(cct_auth)
-
-    test_client.db.session.add_all(ccteam_auth)
     test_client.db.session.commit()
 
     # Return user_ids and modobio_ids
@@ -301,54 +269,43 @@ def care_team(test_client):
         'staff_modobio_id': test_client.staff.modobio_id,
         'client_id': tm_client.user_id,
         'client_modobio_id': tm_client.modobio_id,
-        'non_user_id': tm_non_user.user_id}
+        'non_user_id': tm_non_user.user_id,
+        'non_user_modobio_id': None}
 
     # Before we can delete care team members and authorizations,
     # refetch them. Tests may have already deleted them.
-
-    # Delete authorizations
-    ccteam_auth = (test_client.db.session.execute(
-        select(ClientClinicalCareTeamAuthorizations)
-        .filter_by(
-            team_member_user_id=test_client.staff_id))
-        .scalars()
-        .all())
-
-    for cct_auth in ccteam_auth:
-        test_client.db.session.delete(cct_auth)
 
     # Delete care team
     ccteam = (test_client.db.session.execute(
         select(ClientClinicalCareTeam)
         .where(
             ClientClinicalCareTeam.team_member_user_id.in_((
-                test_client.staff_id,
                 tm_client.user_id,
                 tm_non_user.user_id))))
         .scalars()
         .all())
 
     for cct in ccteam:
-        test_client.db.session.delete(cct)
+        test_client.db.session.delete(cct, confirm_deleted_rows=False)
 
     # Delete temp users
-    test_client.db.session.delete(tm_non_user)
-    test_client.db.session.delete(tm_client)
+    test_client.db.session.delete(tm_non_user, confirm_deleted_rows=False)
+    test_client.db.session.delete(tm_client, confirm_deleted_rows=False)
     test_client.db.session.commit()
 
 
 
 @pytest.fixture(scope='function')
-def booking_tmp(test_client, wheel = False):
-    """ 
-    Create a new telehealth booking between one of the test users and client user 22
+def booking_twilio(test_client, wheel = False):
+    """ Create a new telehealth booking.
+
+    This bookings fixture is used in the Twilio section of testing.
+    The Telehealth section has its own bookings fixture.
 
     Yields
     ------
-    TelehealthBookings obj        
-
+    TelehealthBookings obj
     """
-
     # prepare a payment method to be used
     pm = PaymentMethods(
         payment_id = '123456789',
@@ -381,7 +338,7 @@ def booking_tmp(test_client, wheel = False):
         booking_end_idx = booking_start_idx + 3
 
     booking = TelehealthBookings(
-        staff_user_id = 30 if wheel else 1,
+        staff_user_id = test_client.staff_id,
         client_user_id = test_client.client_id,
         target_date = target_datetime.date(),
         target_date_utc = target_datetime.date(),
@@ -389,13 +346,11 @@ def booking_tmp(test_client, wheel = False):
         booking_window_id_end_time = booking_end_idx,
         booking_window_id_start_time_utc = booking_start_idx,
         booking_window_id_end_time_utc = booking_end_idx,
-        client_location_id = 1,
+        client_location_id = 1,  # TODO: make this not hardcoded
         payment_method_id = pm.idx,
         external_booking_id = uuid.uuid4()
     )
 
-    
-    
     test_client.db.session.add(booking)
     test_client.db.session.flush()
 
@@ -415,13 +370,13 @@ def booking_tmp(test_client, wheel = False):
         test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
 
     for status in booking.status_history:
-        test_client.db.session.delete(status)
+        test_client.db.session.delete(status, confirm_deleted_rows=False)
         
-    test_client.db.session.delete(chat_room)
-    test_client.db.session.delete(booking)
+    test_client.db.session.delete(chat_room, confirm_deleted_rows=False)
+    test_client.db.session.delete(booking, confirm_deleted_rows=False)
     test_client.db.session.flush()
     
-    test_client.db.session.delete(pm)
+    test_client.db.session.delete(pm, confirm_deleted_rows=False)
     test_client.db.session.commit()
     try:
         twilio.delete_conversation(conversation_sid)
