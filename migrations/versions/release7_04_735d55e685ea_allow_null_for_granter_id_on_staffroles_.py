@@ -1,7 +1,7 @@
 """Allow NULL for granter_id on StaffRoles to prevent bootstrapping loop when adding staff users to the database.
 
 Revision ID: 735d55e685ea
-Revises: eb7f1d60c891
+Revises: 5cd302ce16c2
 Create Date: 2021-10-13 17:07:27.194229
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '735d55e685ea'
-down_revision = 'eb7f1d60c891'
+down_revision = '5cd302ce16c2'
 branch_labels = None
 depends_on = None
 
