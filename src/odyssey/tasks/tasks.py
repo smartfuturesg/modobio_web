@@ -21,6 +21,7 @@ from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBoo
 from odyssey.api.user.models import User
 from odyssey.utils.file_handling import FileHandling
 from odyssey.integrations.twilio import Twilio
+from odyssey.utils.telehealth import complete_booking
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -316,6 +317,13 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
             {"$set":{"modobio_meta.processed":True, "modobio_meta.acknowledged" :True}})
          
     return
+
+@celery.task()
+def cleanup_unended_call(booking_id: int):
+
+    completion_info = complete_booking(booking_id)
+
+    return completion_info
 
 @celery.task()
 def store_telehealth_transcript(booking_id: int):

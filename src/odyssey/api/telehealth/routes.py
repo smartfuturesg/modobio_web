@@ -1,4 +1,3 @@
-import secrets
 from bson import ObjectId
 from datetime import datetime, time, timedelta
 from dateutil import tz
@@ -19,8 +18,6 @@ from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy import select
-from sqlalchemy.sql.expression import and_, or_
-import twilio
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -92,6 +89,7 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.utils.telehealth import *
 from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.base.resources import BaseResource
+from odyssey.tasks.tasks import cleanup_unended_call
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
@@ -143,8 +141,9 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # TODO: configure meeting room
         # meeting type (group by default), participant limit , callbacks
         
-        token = twilio_obj.create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
-        
+        token, video_room_sid = twilio_obj.create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
+        meeting_room.sid = video_room_sid
+
         if g.user_type == 'staff':
             meeting_room.staff_access_token = token
 
@@ -209,20 +208,19 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
         db.session.add(meeting_room)
 
-        # Create TelehealthBookingStatus object and update booking status to 'In Progress'
+        # Update TelehealthBookingStatus to 'In Progress'
         booking.status = 'In Progress'
-        status_history = TelehealthBookingStatus(
-            booking_id=booking_id,
-            reporter_id=current_user.user_id,
-            reporter_role='Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
-            status='In Progress'
-        )
-        db.session.add(status_history)
+        update_booking_status_history(
+            new_status = booking.status,
+            booking_id = booking.idx, 
+            reporter_id = current_user.user_id, 
+            reporter_role = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
         db.session.commit()
 
         # schedule celery task to ensure call is completed 10 min after utc end date_time
-        # TODO schedule a call to complete_booking, 10 min after utc end date_time
-        complete_booking(booking.idx)
+        booking_end_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_end_time_utc).end_time
+        cleanup_eta = datetime.combine(booking.target_date_utc, booking_end_time, tz.UTC) + timedelta(minutes=10)
+        cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
@@ -538,7 +536,7 @@ class TelehealthBookingsApi(BaseResource):
         
         twilio = Twilio()
         # create twilio access token with chat grant 
-        token = twilio.create_twilio_access_token(current_user.modobio_id)
+        token, _ = twilio.create_twilio_access_token(current_user.modobio_id)
         
         payload = {
             'all_bookings': len(bookings_payload),
@@ -686,7 +684,7 @@ class TelehealthBookingsApi(BaseResource):
         conversation_sid = twilio_obj.create_telehealth_chatroom(booking_id = request.parsed_obj.idx)
 
         # create access token with chat grant for newly provisioned room
-        token = twilio_obj.create_twilio_access_token(current_user.modobio_id)
+        token, _ = twilio_obj.create_twilio_access_token(current_user.modobio_id)
 
         # Once the booking has been successful, delete the client from the queue
         if client_in_queue:
@@ -1693,7 +1691,7 @@ class TelehealthAllChatRoomApi(BaseResource):
         return payload
 
 @ns.route('/bookings/complete/<int:booking_id>/')
-class TelehealthBookingsRoomAccessTokenApi(BaseResource):
+class TelehealthBookingsCompletionApi(BaseResource):
     """
     API for completing bookings
     """
@@ -1710,7 +1708,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
             TelehealthBookings.idx == booking_id,
             TelehealthBookings.status == 'In Progress')).scalars().one_or_none()
         if not booking:
-            raise BadRequest('Meeting does not exist yet or has not started yet.')
+            raise BadRequest('Meeting does not exist or has not started yet.')
 
         current_user, _ = token_auth.current_user()
 
