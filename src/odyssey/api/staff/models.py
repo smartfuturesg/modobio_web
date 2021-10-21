@@ -96,6 +96,7 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     Some roles will be location based where verification is required for each locality
     (state, country etc.). 
     """
+
     role = db.Column(db.String, db.ForeignKey('LookupRoles.role_name'), nullable=False)
     """
     Name of the role assignment
@@ -126,16 +127,21 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: :class:`StaffOperationalTerritories` instance list
     """ 
-    
+
     credentials = db.relationship('PractitionerCredentials', uselist=True, back_populates='role')
     """
     One to many relationship with staff's opeartional territories
 
     :type: :class:`StaffOperationalTerritories` instance list
     """            
-    granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+
+    granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=True)
     """
     ID of the user who granted this role to this user.
+
+    Explicitly nullable to prevent a bootstrapping problem of adding the first staff member
+    with a role to an empty database, which must be granted by another staff member who
+    does not exist yet.
 
     :type: int, foreign key(User.user_id)
     """

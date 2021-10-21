@@ -936,6 +936,9 @@ class UserLegalDocsApi(BaseResource):
     # Multiple docs per user allowed.
     __check_resource__ = False
 
+    # Multiple docs per user allowed.
+    __check_resource__ = False
+
     @token_auth.login_required
     @responds(schema=UserLegalDocsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
