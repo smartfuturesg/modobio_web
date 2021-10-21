@@ -1,7 +1,7 @@
 """Allow longer reporter_role & Save video room sid
 
 Revision ID: bd3dcbbe533b
-Revises: eb7f1d60c891
+Revises: 08e4c602da79
 Create Date: 2021-10-20 11:33:19.071899
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'bd3dcbbe533b'
-down_revision = 'eb7f1d60c891'
+down_revision = '08e4c602da79'
 branch_labels = None
 depends_on = None
 
