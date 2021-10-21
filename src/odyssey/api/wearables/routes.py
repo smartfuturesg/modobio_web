@@ -802,7 +802,8 @@ class WearablesData(BaseResource):
         # only provide the data that is required
         if device_type == 'oura':
             payload['items'] = oura_data_shaper(response['Items'])
-        
+        if device_type == 'applewatch':
+            breakpoint()
         return payload
 
 

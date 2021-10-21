@@ -5,7 +5,7 @@ import pytest
 
 from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_get_oura_data(test_client):
     """
     Testing the wearables/data GET endpoint for retrieving oura data
@@ -56,7 +56,7 @@ def test_get_oura_data(test_client):
 @pytest.mark.skip
 def test_get_applewatch_data(test_client):
     """
-    Testing the wearables/data GET endpoint for retrieving oura data
+    Testing the wearables/data GET endpoint for retrieving applewatch data
 
     """
 
