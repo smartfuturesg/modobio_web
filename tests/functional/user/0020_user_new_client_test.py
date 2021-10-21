@@ -24,6 +24,7 @@ def test_self_registered_new_client(test_client):
     assert response.json['user_info']['modobio_id'] == None # email has not been verified
     assert response.json['token']
     assert response.json['refresh_token']
+    assert user.membersince == None
     assert response.json['user_info']['email_verified'] == False
 
     # Register the client's email address (token)
@@ -36,6 +37,7 @@ def test_self_registered_new_client(test_client):
     # Refresh user and ensure email is now verified
     test_client.db.session.refresh(user)
     assert user.email_verified == True
+    assert user.membersince
     assert user.modobio_id
 
     ####
