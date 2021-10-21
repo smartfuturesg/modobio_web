@@ -218,6 +218,18 @@ for schema in sorted(inspector.get_schema_names()):
                 update_permission_staff = staff_default_update_permission(columns=permissible_columns)
                 # delete_permission_staff = staff_default_delete_permission(columns=permissible_columns)
 
+            if tablename.startswith('Wearables'):
+                # Do not filter by user_id, staff needs access to client data
+                select_permission_staff = staff_default_select_permission(
+                    columns=permissible_columns,
+                    filtered=False)
+                insert_permission_staff = staff_default_insert_permission(
+                    columns=permissible_columns,
+                    filtered=False)
+                update_permission_staff = staff_default_update_permission(
+                    columns=permissible_columns,
+                    filtered=False)
+
         # Tables here require API in order to for the FE to work with.
         # We will allow select access only for the following.
         elif (any(col in permissible_columns for col in ['user_id','client_user_id', 'staff_user_id'])

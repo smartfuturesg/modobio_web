@@ -185,7 +185,11 @@ def register_device(test_client):
 
 @pytest.fixture(scope='session')
 def booking(test_client, payment_method):
-    """ Create a telehealth booking, needed for testing. """
+    """ Create a telehealth booking, needed for testing.
+
+    This bookings fixture is used in the Telehealth section of testing.
+    The Twilio section has its own bookings fixture.
+    """
     tomorrow = date.today() + timedelta(days=1)
 
     # make a telehealth booking by direct db call
@@ -201,7 +205,7 @@ def booking(test_client, payment_method):
     # below is to account for bookings starting at the very end of the day so that the booking end time
     # falls on the following day
     if time_inc[-1].idx - (booking_start_idx + 3) < 0:
-        booking_end_idx = time_inc[-1].idx - (booking_start_idx + 3)
+        booking_end_idx = abs(time_inc[-1].idx - (booking_start_idx + 3))
     else:
         booking_end_idx = booking_start_idx + 3
 

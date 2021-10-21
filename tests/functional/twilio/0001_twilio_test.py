@@ -8,7 +8,7 @@ from odyssey.tasks.periodic import deploy_appointment_transcript_store_tasks
 from odyssey.tasks.tasks import store_telehealth_transcript
 
 
-def test_twilio_wrapper(test_client, booking_tmp):
+def test_twilio_wrapper(test_client, booking_twilio):
     """
     Test the twilio wrapper
     - using a new telehealth booking
@@ -19,7 +19,7 @@ def test_twilio_wrapper(test_client, booking_tmp):
     """
     twilio = Twilio()
 
-    booking = booking_tmp
+    booking = booking_twilio
 
     conversation_sid = booking.chat_room.conversation_sid
 
@@ -69,7 +69,7 @@ def test_twilio_wrapper(test_client, booking_tmp):
 
     assert True
 
-def test_conversation_cache(test_client, booking_tmp):
+def test_conversation_cache(test_client, booking_twilio):
     """
     Test the conversation cache task which takes a booking_id and stores the conversation on mongo_db. All media is stored in an s3 bucket.
     
@@ -82,7 +82,7 @@ def test_conversation_cache(test_client, booking_tmp):
     - check the path to the stored media  
     """
     twilio = Twilio()
-    booking = booking_tmp
+    booking = booking_twilio
     conversation_sid = booking.chat_room.conversation_sid
 
     # add test image file to twilio 
@@ -103,11 +103,13 @@ def test_conversation_cache(test_client, booking_tmp):
         media_sid = media_sid)
 
     stored_transcript = store_telehealth_transcript(booking.idx)
-    
+
+    fname = f'id{test_client.client_id:05d}/telehealth/{booking.idx}/transcript/images/0.jpeg'
+
     assert len(stored_transcript['transcript']) == 2
-    assert stored_transcript['transcript'][1]['media'][0]['s3_path'] == f"id00022/telehealth/{booking.idx}/transcript/images/0.jpeg"
+    assert stored_transcript['transcript'][1]['media'][0]['s3_path'] == fname
     
-def test_conversation_cache_scheduler(test_client, booking_tmp):
+def test_conversation_cache_scheduler(test_client, booking_twilio):
     """
     Test the conversation cache task which takes a booking_id and stores the conversation on mongo_db. All media is stored in an s3 bucket.
     
@@ -120,7 +122,7 @@ def test_conversation_cache_scheduler(test_client, booking_tmp):
     - check the path to the stored media  
     """
     twilio = Twilio()
-    booking = booking_tmp
+    booking = booking_twilio
     conversation_sid = booking.chat_room.conversation_sid
 
     # add test image file to twilio 
@@ -144,7 +146,7 @@ def test_conversation_cache_scheduler(test_client, booking_tmp):
     # test the scheduler 
     bookings = deploy_appointment_transcript_store_tasks(booking.target_date)
 
-def test_telehealth_transcript_get(test_client, booking_tmp):
+def test_telehealth_transcript_get(test_client, booking_twilio):
     """
     Testing the API for retrieving telehealth transcripts stored on the modobio end. Only bookings which have 
     passed the post-booking review period will have transcripts stored. 
@@ -156,7 +158,7 @@ def test_telehealth_transcript_get(test_client, booking_tmp):
     -query GET /telehealth/bookings/transcript/{booking.idx}/
     """
     twilio = Twilio()
-    booking = booking_tmp
+    booking = booking_twilio
     conversation_sid = booking.chat_room.conversation_sid
 
     # add test image file to twilio 
@@ -187,7 +189,7 @@ def test_telehealth_transcript_get(test_client, booking_tmp):
     assert len(response.json['transcript'][1]['media']) == 1
     assert response.json['transcript'][1]['media'][0]['content_type'] == 'image/jpeg'
 
-def test_telehealth_bookings_get(test_client, booking_tmp):
+def test_telehealth_bookings_get(test_client, booking_twilio):
     """
     Testing the API for retrieving telehealth bookings..again. This time the focus is on retrieving the details of the
     stored transcripts along with the rest of the booking details.  
@@ -202,7 +204,7 @@ def test_telehealth_bookings_get(test_client, booking_tmp):
     """
 
     twilio = Twilio()
-    booking = booking_tmp
+    booking = booking_twilio
     conversation_sid = booking.chat_room.conversation_sid
 
     # add test image file to twilio 
