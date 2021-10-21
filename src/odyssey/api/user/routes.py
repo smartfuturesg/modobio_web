@@ -840,9 +840,10 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
 
         #token was valid, remove the pending request, update user account and return 200
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+        
         if user.email_verified == False and user.modobio_id == None:
             md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id})
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
 
         db.session.delete(verification)
@@ -885,6 +886,9 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         db.session.delete(verification)
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
+        if user.email_verified == False and user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
         user.update({'email_verified': True})
 
         db.session.commit()
@@ -929,6 +933,9 @@ class UserLegalDocsApi(BaseResource):
     Endpoints related to legal documents that users have viewed and signed.
     """
     
+    # Multiple docs per user allowed.
+    __check_resource__ = False
+
     # Multiple docs per user allowed.
     __check_resource__ = False
 
