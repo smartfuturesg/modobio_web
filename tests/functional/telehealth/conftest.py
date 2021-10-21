@@ -109,7 +109,7 @@ def payment_method(test_client):
     # TODO: there is a tangled mess of left-over entries in TelehealthBooking,
     # TelehealthBookingStatus, chat room and more. Cascading is not working.
     # Disable clean up for now.
-    # test_client.db.session.delete(pm, confirm_deleted_rows=False)
+    # test_client.db.session.delete(pm)
     # test_client.db.session.commit()
 
 @pytest.fixture(scope='session')
@@ -137,7 +137,7 @@ def staff_credentials(test_client):
 
     yield creds
 
-    test_client.db.session.delete(creds, confirm_deleted_rows=False)
+    test_client.db.session.delete(creds)
     test_client.db.session.commit()
 
 @pytest.fixture(scope='session')
@@ -160,7 +160,7 @@ def staff_territory(test_client):
 
     yield territory
 
-    test_client.db.session.delete(territory, confirm_deleted_rows=False)
+    test_client.db.session.delete(territory)
     test_client.db.session.commit()
 
 @pytest.fixture(scope='session', autouse=True)
@@ -180,7 +180,7 @@ def register_device(test_client):
     yield device
 
     pn.unregister_device(device.arn)
-    test_client.db.session.delete(device, confirm_deleted_rows=False)
+    test_client.db.session.delete(device)
     test_client.db.session.commit()
 
 @pytest.fixture(scope='session')
@@ -248,10 +248,10 @@ def booking(test_client, payment_method):
         test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
 
     for status in bk.status_history:
-        test_client.db.session.delete(status, confirm_deleted_rows=False)
+        test_client.db.session.delete(status)
         
-    test_client.db.session.delete(chat_room, confirm_deleted_rows=False)
-    test_client.db.session.delete(bk, confirm_deleted_rows=False)
+    test_client.db.session.delete(chat_room)
+    test_client.db.session.delete(bk)
     test_client.db.session.flush()
     
     test_client.db.session.commit()

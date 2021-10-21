@@ -286,11 +286,11 @@ def care_team(test_client):
         .all())
 
     for cct in ccteam:
-        test_client.db.session.delete(cct, confirm_deleted_rows=False)
+        test_client.db.session.delete(cct)
 
     # Delete temp users
-    test_client.db.session.delete(tm_non_user, confirm_deleted_rows=False)
-    test_client.db.session.delete(tm_client, confirm_deleted_rows=False)
+    test_client.db.session.delete(tm_non_user)
+    test_client.db.session.delete(tm_client)
     test_client.db.session.commit()
 
 
@@ -370,13 +370,13 @@ def booking_twilio(test_client, wheel = False):
         test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
 
     for status in booking.status_history:
-        test_client.db.session.delete(status, confirm_deleted_rows=False)
+        test_client.db.session.delete(status)
         
-    test_client.db.session.delete(chat_room, confirm_deleted_rows=False)
-    test_client.db.session.delete(booking, confirm_deleted_rows=False)
+    test_client.db.session.delete(chat_room)
+    test_client.db.session.delete(booking)
     test_client.db.session.flush()
     
-    test_client.db.session.delete(pm, confirm_deleted_rows=False)
+    test_client.db.session.delete(pm)
     test_client.db.session.commit()
     try:
         twilio.delete_conversation(conversation_sid)
