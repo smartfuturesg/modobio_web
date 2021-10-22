@@ -139,9 +139,9 @@ class Config:
 
         # Logging
         if not self.LOG_LEVEL:
-            self.LOG_LEVEL = 'INFO'
+            self.LOG_LEVEL = 'CRITICAL'
             if self.DEV:
-                self.LOG_LEVEL = 'DEBUG'
+                self.LOG_LEVEL = 'CRITICAL'
 
         # Database URI.
         if not self.DB_URI:
