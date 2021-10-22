@@ -343,4 +343,4 @@ def test_cleanup_unended_call(test_client):
 
 
 def test_delete_generated_users(test_client):
-    assert 1 == 1git s
+    assert 1 == 1
