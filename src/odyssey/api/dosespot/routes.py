@@ -38,6 +38,46 @@ from odyssey.utils.dosespot import (
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
 
+@ns.route('/allergies/<int:user_id>/')
+class DoseSpotAllergies(BaseResource):
+    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',))
+    def get(self, user_id):
+        """
+        GET - DoseSpot Patient prescribed medications
+        """
+
+        ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
+        if not ds_patient:
+            ds_patient = onboard_patient(user_id,0)
+
+        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+
+        # generating keys for ADMIN
+        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+
+        # PROXY_USER
+        proxy_user = DoseSpotProxyID.query.one_or_none()
+        if not proxy_user:
+            proxy_user = onboard_proxy_user()        
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
+
+        res = get_access_token(modobio_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),encrypted_user_id)
+        res_json = res.json()
+        if res.ok:
+            access_token = res_json['access_token']
+            headers = {'Authorization': f'Bearer {access_token}'}
+        else:
+            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+
+        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/allergies',
+                headers=headers)
+        res_json = res.json()
+        
+        if not res.ok:
+            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+        return res_json
+
 @ns.route('/create-practitioner/<int:user_id>/')
 class DoseSpotPractitionerCreation(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
@@ -56,7 +96,6 @@ class DoseSpotPractitionerCreation(BaseResource):
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
     @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',))
-    @responds(status_code=200, api=ns)
     @ns.doc(params={'start_date': 'prescriptions start range date',
                 'end_date':'prescriptions end range date'})
     def get(self, user_id):
@@ -192,7 +231,7 @@ class DoseSpotNotificationSSO(BaseResource):
         return {'url': url}
 
 @ns.route('/enrollment-status/<int:user_id>/')
-class DoseSpotNotificationSSO(BaseResource):
+class DoseSpotEnrollmentStatus(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
     @responds(schema=DoseSpotEnrollmentGET,status_code=200, api=ns)
     def get(self, user_id):
