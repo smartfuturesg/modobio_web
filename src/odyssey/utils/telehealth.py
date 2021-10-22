@@ -292,9 +292,10 @@ def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Par
             reporter_id = reporter_id, 
             reporter_role = reporter)
 
-    # TODO complete twilio room if making call over, catch error or raise if not expected error
-    twilio = Twilio()
-    twilio.clomplete_telehealth_video_room(booking_id)
+    # complete twilio room if making call over, catch error or raise if not expected error
+    if not current_app.config['TESTING']:
+        twilio = Twilio()
+        twilio.clomplete_telehealth_video_room(booking_id)
     ##### WHEEL #####        
     # if booking.external_booking_id:
     #     wheel = Wheel()
