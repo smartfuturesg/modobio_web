@@ -484,7 +484,8 @@ class TelehealthBookingsApi(BaseResource):
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
-                'transcript_url': transcript_url
+                'transcript_url': transcript_url,
+                'consult_rate': booking.consult_rate
             })
 
         # Sort bookings by time then sort by date
@@ -627,6 +628,8 @@ class TelehealthBookingsApi(BaseResource):
         # 30 minutes -> 0.5*consult_rate
         # 60 minutes -> 1*consulte_rate
         # 90 minutes -> 1.5*consulte_rate
+        if not consult_rate:
+            raise BadRequest('Practitioner has not set a consult rate')
         rate = float(consult_rate)*(telehealth_meeting_time)/60
         
         request.parsed_obj.consult_rate = str(rate)
@@ -705,7 +708,8 @@ class TelehealthBookingsApi(BaseResource):
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
-                'booking_url': booking_url
+                'booking_url': booking_url,
+                'consult_rate': booking.consult_rate
                 }
             ]
         }

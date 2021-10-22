@@ -36,12 +36,12 @@ BEGIN
     INSERT INTO "StaffProfile" (user_id, membersince)
     VALUES (_user_id, '2021-01-01');
 
-    INSERT INTO "StaffRoles" (user_id, role)
+    INSERT INTO "StaffRoles" (user_id, role, consult_rate)
     VALUES
-        (_user_id, 'medical_doctor'),
-        (_user_id, 'physical_therapist'),
-        (_user_id, 'nutritionist'),
-        (_user_id, 'trainer');
+        (_user_id, 'medical_doctor', '150.00'),
+        (_user_id, 'physical_therapist', '95.00'),
+        (_user_id, 'nutritionist', '100.00'),
+        (_user_id, 'trainer', '125.00');
 
     -- NOTE: StaffOperationalTerritories is obsolete, but will be kept
     -- until we can safely remove it. PractitionerCredentials will take
@@ -70,9 +70,9 @@ BEGIN
         want_to_practice)
     VALUES
         (_user_id, _country_id, Null, 'npi', '1296336567', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'AZ', 'dea', '183451435', 'Verified', _role_id, true),
+        (_user_id, _country_id, 'FL', 'dea', '183451435', 'Verified', _role_id, true),
         (_user_id, _country_id, 'CA', 'dea', '123342534', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'AZ', 'med_lic', '523746512', 'Verified', _role_id, true),
+        (_user_id, _country_id, 'FL', 'med_lic', '523746512', 'Verified', _role_id, true),
         (_user_id, _country_id, 'CA', 'med_lic', '839547692', 'Verified', _role_id, true);
 END;
 $$ LANGUAGE plpgsql;
