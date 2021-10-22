@@ -305,6 +305,13 @@ class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
+    state_id = db.Column(db.Integer,db.ForeignKey('LookupUSStates.idx'))
+    """
+    State ID for the staff office address
+
+    :type: int
+    """
+
     email = db.Column(db.String(100))
     """
     Email address used to contact this office.
