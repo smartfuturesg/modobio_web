@@ -220,7 +220,8 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_end_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_end_time_utc).end_time
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_end_time, tz.UTC) + timedelta(minutes=10)
-        cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
+        if not current_app.config['TESTING']:
+            cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
