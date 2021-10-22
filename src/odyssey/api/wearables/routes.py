@@ -1,7 +1,7 @@
 import logging
 
 from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS
-from odyssey.utils.wearables import oura_data_shaper
+from odyssey.utils.wearables import applewatch_data_shaper, oura_data_shaper
 logger = logging.getLogger(__name__)
 
 import base64
@@ -803,7 +803,8 @@ class WearablesData(BaseResource):
         if device_type == 'oura':
             payload['items'] = oura_data_shaper(response['Items'])
         if device_type == 'applewatch':
-            breakpoint()
+            payload['items'] = applewatch_data_shaper(response['Items'])
+       
         return payload
 
 

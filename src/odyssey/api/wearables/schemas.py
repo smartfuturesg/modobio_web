@@ -60,6 +60,15 @@ class WearablesSleepDataNested(Schema):
     """
     hr_resting = fields.Float()
     total_sleep_seconds = fields.Integer()
+
+class WearablesVitalsDataNested(Schema):
+    """
+    sleep data for one day 
+    """
+    hr_resting = fields.Float()
+    respiratory_rate_bpm_avg = fields.Float()
+    hrv_seconds_avg = fields.Float()
+
 class WearablesActivityDataNested(Schema):
     """
     Activity data for one day
@@ -74,6 +83,7 @@ class WearablesDataResponseNestedSchema(Schema):
     date = fields.String()
     activity = fields.Nested(WearablesActivityDataNested)
     sleep = fields.Nested(WearablesSleepDataNested)
+    vitals = fields.Nested(WearablesVitalsDataNested)
 
 class WearablesDataResponseSchema(Schema):
     start_date = fields.String()

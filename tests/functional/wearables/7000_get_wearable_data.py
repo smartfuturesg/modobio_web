@@ -5,7 +5,7 @@ import pytest
 
 from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_get_oura_data(test_client):
     """
     Testing the wearables/data GET endpoint for retrieving oura data
@@ -53,7 +53,7 @@ def test_get_oura_data(test_client):
 
     assert response.status_code == 400
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_get_applewatch_data(test_client):
     """
     Testing the wearables/data GET endpoint for retrieving applewatch data
@@ -63,38 +63,11 @@ def test_get_applewatch_data(test_client):
     client_user_id = 35
     # date range specified
     response = test_client.get(
-        f'/wearables/data/applewatch/{client_user_id}/?start_date=2021-08-27&end_date=2021-09-02',
+        f'/wearables/data/applewatch/{client_user_id}/?start_date=2020-08-27&end_date=2021-12-02',
         headers=test_client.client_auth_header,
         content_type='application/json')
-    
+    breakpoint()
     assert response.status_code == 200
     
-    # # only start date specified
-    # response = test_client.get(
-    #     f'/wearables/data/oura/{client_user_id}/?start_date=2021-10-05',
-    #     headers=test_client.client_auth_header,
-    #     content_type='application/json')
-    # assert response.status_code == 200
-    
-    # # only end date specified
-    # response = test_client.get(
-    #     f'/wearables/data/oura/{client_user_id}/?end_date=2021-10-15',
-    #     headers=test_client.client_auth_header,
-    #     content_type='application/json')
-    # assert response.status_code == 200
-
-    # # no date range specified
-    # response = test_client.get(
-    #     f'/wearables/data/oura/{client_user_id}/',
-    #     headers=test_client.client_auth_header,
-    #     content_type='application/json')
-    # assert response.status_code == 200
-
-    # # wrong format dates
-    # response = test_client.get(
-    #     f'/wearables/data/oura/{client_user_id}/?start_date=December&end_date=21-10-15',
-    #     headers=test_client.client_auth_header,
-    #     content_type='application/json')
-
-    # assert response.status_code == 400
+ 
 
