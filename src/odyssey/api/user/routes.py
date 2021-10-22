@@ -63,6 +63,7 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
+    generate_modobio_id,
     verify_jwt)
 
 ns = Namespace('user', description='Endpoints for user accounts.')
@@ -269,6 +270,11 @@ class NewStaffUser(BaseResource):
                                 "access_roles_v2": StaffRoles.query.filter_by(user_id = user.user_id)}
     
         payload["user_info"] =  user
+
+        # respond with verification code in dev
+        if current_app.config['DEV'] and verify_email:
+            payload['email_verification_code'] = email_verification_data.get('code')
+
         return payload
 
 
@@ -439,6 +445,12 @@ class NewClientUser(BaseResource):
         db.session.commit()
 
         payload = {'user_info': user, 'token':access_token, 'refresh_token':refresh_token}
+
+        # respond with verification code in dev
+        if current_app.config['DEV'] and verify_email:
+            payload['email_verification_code'] = email_verification_data.get('code')
+
+
         return payload
 
 @ns.route('/password/forgot-password/recovery-link/')
@@ -828,8 +840,12 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
 
         #token was valid, remove the pending request, update user account and return 200
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
-        user.update({'email_verified': True})
         
+        if user.email_verified == False and user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})
+        user.update({'email_verified': True})
+
         db.session.delete(verification)
         db.session.commit()
         
@@ -840,6 +856,18 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
 
     @responds(status_code=200)
     def post(self, user_id):
+        """
+        Verify the user's email address.
+
+        Params
+        -------
+        user_id int
+        code: email verification code provided during client creation
+
+        Verifying an email requires both a valid code that the client retrieved from their email and a valid 
+        token stored on the modobio side. The token has a short lifetime so the email varification process must happen within
+        that time. 
+        """
 
         verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
 
@@ -858,6 +886,9 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         db.session.delete(verification)
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
+        if user.email_verified == False and user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
         user.update({'email_verified': True})
 
         db.session.commit()
@@ -902,6 +933,9 @@ class UserLegalDocsApi(BaseResource):
     Endpoints related to legal documents that users have viewed and signed.
     """
     
+    # Multiple docs per user allowed.
+    __check_resource__ = False
+
     # Multiple docs per user allowed.
     __check_resource__ = False
 

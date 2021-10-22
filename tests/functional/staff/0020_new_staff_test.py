@@ -55,13 +55,21 @@ def test_creating_new_staff(test_client, new_staff):
         .one_or_none())
 
     uid = new_staff['user_id']
+
+    user = User.query.filter_by(user_id=uid).one_or_none()
+    assert user.email_verified == False
+    assert user.modobio_id == None
+    assert user.membersince == None
+
     response = test_client.post(
         f'/user/email-verification/code/{uid}/?code={verification.code}')
     assert response.status_code == 200
 
     # Fetch staff user and ensure email is now verified
-    user = User.query.filter_by(user_id=uid).one_or_none()
+    test_client.db.session.refresh(user)
     assert user.email_verified == True
+    assert user.modobio_id
+    assert user.membersince
 
 def test_get_staff_user_info(test_client, new_staff):
     uid = new_staff['user_id']
