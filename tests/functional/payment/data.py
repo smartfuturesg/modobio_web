@@ -67,7 +67,7 @@ payment_booking_data = {
     }
 
 payment_refund_data = {
-    'payment_id': 1,
-    'refund_reason': 'test',
-    'refund_amount': 30
+  "refund_amount":"50.00",
+  "payment_id": 1,
+  "refund_reason": "abcdefghijklmnopqrstuvwxyz"
 }

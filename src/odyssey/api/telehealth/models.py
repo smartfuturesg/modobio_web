@@ -175,6 +175,13 @@ class TelehealthBookings(BaseModelWithIdx):
     """
 
 
+    consult_rate = db.Column(db.Numeric(10,2))
+    """
+    HOURLY practitioner consultation rate
+
+    :type: Numeric
+    """
+
 class TelehealthBookingStatus(db.Model):
     """
     Holds all status changes a booking goes through

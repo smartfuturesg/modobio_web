@@ -28,10 +28,15 @@ class SystemTelehealthSettingsApi(BaseResource):
             select(SystemTelehealthSessionCosts, LookupCurrencies).
             join(LookupCurrencies, LookupCurrencies.idx == SystemTelehealthSessionCosts.currency_id)).all()
 
+        practitioner_rates = LookupCurrencies.query.one_or_none()
         formatted_costs = []
+        #TODO: Will we take this out?
         for cost, lookup in costs:
             cost.country = lookup.country
             cost.currency_symbol_and_code = lookup.symbol_and_code
+            cost.session_min_cost = practitioner_rates.min_rate,
+            cost.session_max_cost = practitioner_rates.max_rate,
+            cost.session_cost = 100.00 # TODO, this is useless now, but will be kept for a few more stories 10/11/2021
             formatted_costs.append(cost)
 
         session_duration = int(SystemVariables.query.filter_by(var_name='Session Duration').one_or_none().var_value)

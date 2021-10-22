@@ -27,6 +27,7 @@ from odyssey.api.doctor.models import (
     MedicalConditions,
     MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
 from odyssey.api.lookup.models import LookupDrinks
 from odyssey.api.user.models import User, UserTokenHistory
 

@@ -40,7 +40,7 @@ def test_post_staff_office(test_client):
     # some simple checks for validity
     assert response.status_code == 201
     assert response.json['country'] == 'USA'
-    assert response.json['city'] == 'Phoenix'
+    assert response.json['city'] == 'Miami'
     assert response.json['phone'] == '4804389574'
 
     # # There is a Database listener waiting for both medical credentials and staff office.
@@ -109,7 +109,7 @@ def test_put_staff_profile(test_client):
     # some simple checks for validity
     assert response.status_code == 201
     assert response.json['country'] == 'USA'
-    assert response.json['city'] == 'Tucson'
+    assert response.json['city'] == 'Tampa'
     assert response.json['phone'] == '4804389575'
 
 def test_post_2_ds_practitioner_create(test_client):

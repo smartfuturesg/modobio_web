@@ -72,19 +72,21 @@ def telehealth_staff(test_client):
         staff_login = UserLogin(user_id=staff.user_id)
         staff_login.set_password('password')
         test_client.db.session.add(staff_login)
-    
+        consult_rate = 100.00
         if i < 5:
             staff_role = StaffRoles(
                 user_id=staff.user_id,
                 role='medical_doctor',
-                granter_id=1)
+                granter_id=1,
+                consult_rate=consult_rate)
             test_client.db.session.add(staff_role)
         else:
             for role in ACCESS_ROLES:
                 staff_role = StaffRoles(
                     user_id=staff.user_id,
                     role=role,
-                    granter_id=1)
+                    granter_id=1,
+                    consult_rate=consult_rate)
                 test_client.db.session.add(staff_role)
 
         test_client.db.session.commit()
@@ -126,7 +128,7 @@ def staff_credentials(test_client):
     creds = PractitionerCredentials(
         user_id=test_client.staff_id,
         country_id=1,
-        state='CA',
+        state='FL',
         credential_type='NPI',
         credentials='good doc',
         status='verified',

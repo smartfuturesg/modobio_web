@@ -1,16 +1,25 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from marshmallow import fields, validate
+from marshmallow import fields, validate, Schema
 from marshmallow.decorators import post_load
-from odyssey import ma
+from sqlalchemy import select
+from odyssey import ma,db
 
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
+from odyssey.api.lookup.models import LookupCurrencies
 from odyssey.api.lookup.schemas import LookupOrganizationsSchema
 
 """
     Schemas for the practitioner API
 """
+
+class PractitionerConsultationRateSchema(Schema):
+    role = fields.String()
+    rate = fields.String()
+
+class PractitionerConsultationRateInputSchema(Schema):
+    items = fields.Nested(PractitionerConsultationRateSchema(many=True),missing = [])
 
 class PractitionerOrganizationAffiliationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

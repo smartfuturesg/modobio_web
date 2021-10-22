@@ -8,13 +8,70 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
-from odyssey.api.practitioner.schemas import PractitionerOrganizationAffiliationSchema
+from odyssey.api.practitioner.schemas import (
+    PractitionerOrganizationAffiliationSchema,
+    PractitionerConsultationRateInputSchema,
+)
 from odyssey.api.staff.models import StaffRoles
-from odyssey.api.lookup.models import LookupOrganizations
+from odyssey.api.lookup.models import LookupCurrencies, LookupOrganizations
+from odyssey.utils.misc import check_staff_existence
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('practitioner', description='Operations related to practitioners')
+
+@ns.route('/consult-rates/<int:user_id>/')
+class PractitionerConsultationRates(BaseResource):
+    """
+    Endpoint for practitioners to GET and SET their own HOURLY rates.
+    """
+    @token_auth.login_required()
+    @accepts(api=ns)
+    @responds(schema=PractitionerConsultationRateInputSchema,status_code=200)
+    def get(self,user_id):
+        """
+        GET - Request to get the practitioners
+        """
+        staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
+
+        items = []
+        for role in staff_user_roles:
+            items.append({'role': role.role,'rate': str(role.consult_rate)})
+
+        return {'items': items}
+    
+    @token_auth.login_required(user_type = ('staff_self',))
+    @accepts(schema=PractitionerConsultationRateInputSchema,api=ns)
+    @responds(status_code=201)
+    def post(self,user_id):
+        """
+        POST - Practitioner inputs their consultation rate
+        """
+        # grab all of the roles the practitioner may have
+        staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
+        
+        payload = request.json
+        lookup_role = {}
+        for roleObj in staff_user_roles:
+            if roleObj.role not in lookup_role:
+                lookup_role[roleObj.role] = roleObj
+
+        cost_range = LookupCurrencies.query.one_or_none()
+        inc = cost_range.increment
+        
+        for pract in payload['items']:
+            if pract['role'] in lookup_role:
+                if float(pract['rate']) < float(cost_range.min_rate) or float(pract['rate']) > float(cost_range.max_rate):
+                    raise BadRequest(f'Input must be between {cost_range.min_rate} and {cost_range.max_rate}.')
+                if float(pract['rate'])%inc == 0.0:
+                    lookup_role[pract['role']].update({'consult_rate':float(pract['rate'])})
+                else:
+                    raise BadRequest('Cost is not valid')
+            else:
+                raise BadRequest('Practitioner does not have selected role.')
+
+        db.session.commit()
+        return
 
 @ns.route('/affiliations/<int:user_id>/')
 class PractitionerOganizationAffiliationAPI(BaseResource):

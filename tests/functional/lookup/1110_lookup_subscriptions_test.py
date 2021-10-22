@@ -8,4 +8,4 @@ def test_get_subscription_types(test_client):
 
     assert response.status_code == 200
     assert response.json['items'][0]['name'] == "Monthly"
-    assert response.json['items'][1]['cost'] == 98.00
+    assert response.json['items'][1]['cost'] == 97.99
