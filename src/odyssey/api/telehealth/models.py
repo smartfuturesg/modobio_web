@@ -215,11 +215,11 @@ class TelehealthBookingStatus(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    reporter_role = db.Column(db.String(20))
+    reporter_role = db.Column(db.String(30))
     """
     role of the user reporting the status, could be client or practitioner
 
-    :type: str, max length 20
+    :type: str, max length 30
     """
 
     status = db.Column(db.String(20))
@@ -263,6 +263,13 @@ class TelehealthMeetingRooms(BaseModel):
     Name of room assigned internally and given to Twilio API. When interacting with twilio, this name
     will be under the attribute `friendly_name`. We will use this in order to call up the room 
     from twilio for access grants and webhooks. 
+
+    :type: str
+    """
+
+    sid = db.Column(db.String)
+    """
+    SID for the video room, it allows fetching the room and updating it.
 
     :type: str
     """

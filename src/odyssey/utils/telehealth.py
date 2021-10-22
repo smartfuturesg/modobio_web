@@ -1,3 +1,7 @@
+import logging
+logger = logging.getLogger(__name__)
+
+from typing import Any
 from flask import current_app
 import random
 from flask_restx.fields import Integer, String
@@ -19,12 +23,12 @@ from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.integrations.wheel import Wheel
 from werkzeug.exceptions import BadRequest
+from odyssey.integrations.twilio import Twilio
 
 from odyssey.utils.constants import DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS, TELEHEALTH_START_END_BUFFER
 
 def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
     localized_target_date = datetime.combine(target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
-    localized_end = datetime.combine(target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
     time_now_client_localized = datetime.now(tz.gettz(client_tz))
     
     # if request was for a time in the past or current time, use the present time + booking lead time window
@@ -32,6 +36,7 @@ def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
         localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
         localized_target_date = localized_target_date.replace(minute=0, second=0, microsecond=0)
 
+    localized_end = datetime.combine(localized_target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
     day_start_utc = localized_target_date.astimezone(tz.UTC)
     start_time_window_utc = LookupBookingTimeIncrements.query.filter_by(start_time=day_start_utc.time()).first()
     day_end_utc = localized_end.astimezone(tz.UTC)
@@ -259,6 +264,44 @@ def update_booking_status_history(new_status:String, booking_id:Integer, reporte
     # save TelehealthBookingStatus object connected to this booking.
     db.session.add(status_history)
     return 
+
+
+def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Participants'):
+    """
+    After booking gets started, make sure it gets completed
+    1. Update booking status
+    2. Send signal to twilio
+    """
+    # Query the booking in question & check status
+    booking = TelehealthBookings.query.get(booking_id)
+    if not booking:
+        raise BadRequest('Meeting does not exist')
+    
+    if booking.status == 'Completed':
+        return 'Booking Completed by Participants'
+    
+    elif booking.status != 'In Progress':
+        raise BadRequest('Meeting has not began')
+
+    # update status
+    booking.status = 'Completed'
+
+    update_booking_status_history(
+            new_status = booking.status, 
+            booking_id = booking.idx, 
+            reporter_id = reporter_id, 
+            reporter_role = reporter)
+
+    # complete twilio room if making call over, catch error or raise if not expected error
+    twilio = Twilio()
+    twilio.clomplete_telehealth_video_room(booking_id)
+    ##### WHEEL #####        
+    # if booking.external_booking_id:
+    #     wheel = Wheel()
+    #     wheel.complete_consult(booking.external_booking_id)
+
+    db.session.commit()
+    return 'Booking Completed by System'
 
 def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_staff_localized):
 

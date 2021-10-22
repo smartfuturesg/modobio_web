@@ -9,7 +9,7 @@ from twilio.rest import Client
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms, TelehealthMeetingRooms
 from odyssey.api.user.models import User
 from odyssey.utils.constants import ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
 
@@ -114,7 +114,7 @@ class Twilio():
         Generate a twilio access token for the provided modobio_id
         """
         if current_app.config['TESTING']:
-            return
+            return (None, None)
 
         twilio_credentials = self.grab_twilio_credentials()
         token = AccessToken(twilio_credentials['account_sid'],
@@ -125,10 +125,19 @@ class Twilio():
 
         token.add_grant(ChatGrant(service_sid=current_app.config['CONVERSATION_SERVICE_SID']))
 
+        video_room_sid = None
+
         if meeting_room_name:
+            room = db.session.execute(select(TelehealthMeetingRooms)\
+                .where(TelehealthMeetingRooms.room_name == meeting_room_name)).scalars().one_or_none()
+            
+            if not room:
+                room = self.client.video.rooms.create(unique_name=meeting_room_name)
+            
+            video_room_sid = room.sid            
             token.add_grant(VideoGrant(room=meeting_room_name))
 
-        return token.to_jwt()
+        return (token.to_jwt(), video_room_sid)
 
     @staticmethod
     def generate_meeting_room_name(meeting_type: str = 'TELEHEALTH'):
@@ -259,6 +268,29 @@ class Twilio():
         """
 
         self.client.conversations.conversations(conversation_sid).delete()
+
+        return
+
+    def clomplete_telehealth_video_room(self, booking_id: int):
+        """
+        Update the video room state to completed
+
+        Params
+        ------
+        booking_id
+
+        """
+        room = db.session.execute(
+            select(TelehealthMeetingRooms
+            ).where(TelehealthMeetingRooms.booking_id==booking_id)
+        ).scalars().one_or_none()
+
+        if room.sid:
+            room_sid = room.sid
+            t_room = self.client.video.rooms(room_sid).fetch()
+
+            if t_room.status == 'in-progress':
+                t_room.update(status='completed')
 
         return
 
