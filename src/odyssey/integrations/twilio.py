@@ -114,7 +114,7 @@ class Twilio():
         Generate a twilio access token for the provided modobio_id
         """
         if current_app.config['TESTING']:
-            return
+            return (None, None)
 
         twilio_credentials = self.grab_twilio_credentials()
         token = AccessToken(twilio_credentials['account_sid'],
@@ -285,8 +285,7 @@ class Twilio():
             ).where(TelehealthMeetingRooms.booking_id==booking_id)
         ).scalars().one_or_none()
 
-        if room:
-            room_name = room.room_name
+        if room.sid:
             room_sid = room.sid
             t_room = self.client.video.rooms(room_sid).fetch()
 
