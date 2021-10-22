@@ -1,0 +1,91 @@
+
+
+from typing import Dict, List
+
+
+def oura_data_shaper(wearable_data:List[Dict] ):
+    """
+    Take list of raw daily data entries from oura ring and responds with a schema 
+    consisting of the data to be displayed to the user
+
+    Params
+    ------
+    wearable_data: dict, one day of raw data from 
+
+    Responds
+    ------
+    dict
+    """
+    response = []
+
+    for item in wearable_data:
+        item_summary = {}
+        item_summary['date'] = item['date']
+        item_summary['activity'] = {}
+        item_summary['sleep'] = {}
+        item_summary['vitals'] = {}
+        activity = item['data'].get('activity')
+        sleep = item['data'].get('sleep', []) # sleep entry is a list of sleep events (naps, rest, sleep)
+        
+        # calories, step data
+        if activity:
+            item_summary['activity']['calories_active'] =  int(activity.get('cal_active',0))
+            item_summary['activity']['calories_total'] =  int(activity.get('cal_total',0))
+            item_summary['activity']['steps'] =  int(activity.get('steps',0))
+        
+        if len(sleep) > 0:
+            item_summary['vitals']['hr_resting'] =  float(sleep[-1].get('hr_average', 0)) # takes the last rest period of the day
+            item_summary['sleep']['hr_resting'] =  float(sleep[-1].get('hr_average', 0)) # takes the last rest period of the day
+            item_summary['sleep']['total_sleep_seconds'] =  int(sleep[-1].get('total', 0)) # takes the last rest period of the day
+
+        response.append(item_summary)
+
+    return response
+
+def applewatch_data_shaper(wearable_data:List[Dict]):
+    """
+    Take list of raw daily data entries from apple watch and responds with a schema 
+    consisting of the data to be displayed to the user
+
+    Params
+    ------
+    wearable_data: dict, one day of raw data from 
+
+    Responds
+    ------
+    dict
+    """
+    response = []
+
+    for item in wearable_data:
+        item_summary = {}
+        item_summary['date'] = item['date']
+        item_summary['activity'] = {}
+        item_summary['sleep'] = {}
+        item_summary['vitals'] = {}
+        activity = item['data'].get('activity')
+        fitness = item['data'].get('fitness')
+        sleep = item['data'].get('sleep', {}) 
+        asleep = sleep.get('asleep', []) # sleep entry is a list of sleep events (naps, rest, sleep)
+        vitals = item['data'].get('vitals') 
+        body = item['data'].get('body') 
+        
+        if fitness:
+            item_summary['activity']['steps'] =  fitness.get('stepCount')
+        if activity:
+            item_summary['activity']['calories_active'] =  fitness.get('activeEnergyBurnedCal')
+        if len(asleep) > 0:
+            item_summary['sleep']['total_sleep_seconds'] =  int(asleep[-1].get('durationMS', 0))/1000.0 if asleep[-1].get('durationMS') else None  # takes the last rest period of the day
+        if vitals:
+            rhr_data = vitals.get('restingHeartRateBmp', {})
+            hrv_data = vitals.get('heartRateVariabilitySec', {})
+            respiratory_rate_data = vitals.get('respiratoryRateBmp', {})
+            item_summary['vitals']['hr_resting'] =  rhr_data.get('average') # takes the last rest period of the day
+            item_summary['vitals']['hrv_seconds_avg'] =  hrv_data.get('average') 
+            item_summary['vitals']['respiratory_rate_bpm_avg'] = respiratory_rate_data.get('average') 
+        if body:
+            body_temp_data = body.get('bodyTemperatureCelsius',{})
+            item_summary['vitals']['body_temp_celsius'] = body_temp_data.get('average')
+          
+        response.append(item_summary)
+    return response
