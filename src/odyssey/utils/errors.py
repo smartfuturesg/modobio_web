@@ -76,8 +76,8 @@ def http_exception_handler(error: HTTPException) -> tuple:
 
     return response, error.code
 
-def exception_handler(error):
-    """ Create a JSON response from any :class:`Exception` that is not handled by :func:`http_exception_handler`.
+def exception_handler(error: Exception) -> tuple:
+    """ Create a JSON response from any :class:`Exception` that is *not* handled by :func:`http_exception_handler`.
 
     Flask usually turns any unhandled :class:`Exception` into a
     :class:`werkzeug.exceptions.InternalServerError`, but does not provide any further
