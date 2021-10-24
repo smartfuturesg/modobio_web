@@ -26,6 +26,7 @@ PaymentRefundsSchema,
 PaymentTestChargeVoidSchema,
 PaymentTestRefundSchema)
 from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.user.models import User
 
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
 
@@ -54,7 +55,7 @@ class PaymentMethodsApi(BaseResource):
 
         im = Instamed()
 
-        response_data = im.add_payment_method(request.json['token'], request.json['expiration'])
+        response_data = im.add_payment_method(request.json['token'], request.json['expiration'], User.query.filter_by(idx=user_id).one_or_none().modobio_id)
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method

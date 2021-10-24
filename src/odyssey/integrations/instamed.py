@@ -6,6 +6,7 @@ from flask import current_app
 from odyssey.utils.misc import cancel_telehealth_appointment
 from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods
+from odyssey.api.user.models import User
 from odyssey.utils.misc import cancel_telehealth_appointment
 
 from odyssey import db
@@ -27,7 +28,7 @@ class Instamed:
                 "TerminalID": '0002'
         }
 
-    def add_payment_method(self, token, expiration):
+    def add_payment_method(self, token, expiration, modobio_id):
         """
         Add a payment method for a user and save the reference token in our db.
         InstaMed URI: /payment/paymentplan
@@ -54,6 +55,9 @@ class Instamed:
                 "EntryMode": "key",
                 "CardNumber": token,
                 "Expiration": expiration
+            }
+            "Patient": {
+                "AccountNumber": modobio_id
             }
         }
 
@@ -91,6 +95,9 @@ class Instamed:
             "Outlet": self.outlet,
             "TransactionID": str(transaction_id),
             "Amount": str(amount)
+            "Patient": {
+                "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+            }
         }
 
         response = requests.post(self.url_base + '/payment/refund-simple',
@@ -128,6 +135,9 @@ class Instamed:
         request_data = {
             "Outlet": self.outlet,
             "TransactionID": str(transaction_id)
+            "Patient": {
+                "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+            }
         }
 
         response = requests.post(self.url_base + '/payment/void',
@@ -162,6 +172,9 @@ class Instamed:
             "PaymentMethod": "OnFile",
             "PaymentMethodID": str(PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none().payment_id),
             "Amount": str(booking.consult_rate)
+            "Patient": {
+                "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+            }
         }
 
         response = requests.post(self.url_base + '/payment/sale',
@@ -187,6 +200,9 @@ class Instamed:
                 request_data = {
                     "Outlet": self.outlet,
                     "TransactionID": str(response_data['TransactionID'])
+                    "Patient": {
+                        "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+                    }
                 }
 
                 response = requests.post(self.url_base + '/payment/void',
