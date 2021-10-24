@@ -55,7 +55,7 @@ class Instamed:
                 "EntryMode": "key",
                 "CardNumber": token,
                 "Expiration": expiration
-            }
+            },
             "Patient": {
                 "AccountNumber": modobio_id
             }
@@ -94,7 +94,7 @@ class Instamed:
         request_data = {
             "Outlet": self.outlet,
             "TransactionID": str(transaction_id),
-            "Amount": str(amount)
+            "Amount": str(amount),
             "Patient": {
                 "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
             }
@@ -134,7 +134,7 @@ class Instamed:
 
         request_data = {
             "Outlet": self.outlet,
-            "TransactionID": str(transaction_id)
+            "TransactionID": str(transaction_id),
             "Patient": {
                 "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
             }
@@ -171,7 +171,7 @@ class Instamed:
             "Outlet": self.outlet,
             "PaymentMethod": "OnFile",
             "PaymentMethodID": str(PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none().payment_id),
-            "Amount": str(booking.consult_rate)
+            "Amount": str(booking.consult_rate),
             "Patient": {
                 "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
             }
@@ -199,7 +199,7 @@ class Instamed:
                 #void the payment and cancel appointment
                 request_data = {
                     "Outlet": self.outlet,
-                    "TransactionID": str(response_data['TransactionID'])
+                    "TransactionID": str(response_data['TransactionID']),
                     "Patient": {
                         "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
                     }
