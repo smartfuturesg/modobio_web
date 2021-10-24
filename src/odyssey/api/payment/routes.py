@@ -23,9 +23,8 @@ PaymentStatusSchema,
 PaymentStatusOutputSchema,
 PaymentHistorySchema,
 PaymentRefundsSchema,
-PaymentTestChargeSchema,
-PaymentTestRefundSchema,
-PaymentTestVoidSchema)
+PaymentTestChargeVoidSchema,
+PaymentTestRefundSchema)
 from odyssey.api.telehealth.models import TelehealthBookings
 
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
@@ -203,8 +202,7 @@ class PaymentTestCharge(BaseResource):
 
     """
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    @accepts(schema=PaymentTestChargeSchema, api=ns_dev)
-    @responds(schema=PaymentTestChargeSchema, api=ns_dev, status_code=201)
+    @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
         if not booking:
@@ -212,7 +210,8 @@ class PaymentTestCharge(BaseResource):
         if booking.charged:
             raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
 
-        Instamed().charge_user(request.parsed_obj['payment_method_id'], request.parsed_obj['amount'], booking)
+        return  Instamed().charge_user(booking)
+
 
 @ns_dev.route('/refund/')
 class PaymentTestRefund(BaseResource):
@@ -227,10 +226,9 @@ class PaymentTestRefund(BaseResource):
     """
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @accepts(schema=PaymentTestRefundSchema, api=ns_dev)
-    @responds(schema=PaymentTestRefundSchema, api=ns_dev, status_code=201)
     def post(self):
         #send InstaMed refund request
-        Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'])
+        return Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'])
 
 
 @ns_dev.route('/void/')
@@ -245,14 +243,13 @@ class PaymentVoidRefund(BaseResource):
 
     """
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    @accepts(schema=PaymentTestVoidSchema, api=ns_dev)
-    @responds(schema=PaymentTestVoidSchema, api=ns_dev, status_code=201)
+    @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         #send InstaMed void request
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
         if not booking:
             raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
-        if booking.charged:
+        if not booking.charged:
             raise BadRequest('The booking with booking id {booking_id}'.format(**request.parsed_obj) + \
             'has not been charged yet,so it cannot be voided.')
-        im.void_payment(request.parsed_obj['booking_id'])
+        return Instamed().void_payment(booking)
