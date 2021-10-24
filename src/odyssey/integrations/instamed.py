@@ -73,7 +73,7 @@ class Instamed:
 
         return response.json()
     
-    def refund_payment(self, transaction_id, amount):
+    def refund_payment(self, transaction_id, amount, modobio_id):
         """
         Refund a payment.
         InstaMed URI: /payment/refund
@@ -96,7 +96,7 @@ class Instamed:
             "TransactionID": str(transaction_id),
             "Amount": str(amount),
             "Patient": {
-                "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+                "AccountNumber": modobio_id
             }
         }
 
@@ -136,7 +136,7 @@ class Instamed:
             "Outlet": self.outlet,
             "TransactionID": str(transaction_id),
             "Patient": {
-                "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
             }
         }
 
@@ -173,7 +173,7 @@ class Instamed:
             "PaymentMethodID": str(PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none().payment_id),
             "Amount": str(booking.consult_rate),
             "Patient": {
-                "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
             }
         }
 
@@ -201,7 +201,7 @@ class Instamed:
                     "Outlet": self.outlet,
                     "TransactionID": str(response_data['TransactionID']),
                     "Patient": {
-                        "AccountNumber": User.query.filter_by(idx=booking.client_user_id).one_or_none().modobio_id
+                        "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
                     }
                 }
 

@@ -55,7 +55,7 @@ class PaymentMethodsApi(BaseResource):
 
         im = Instamed()
 
-        response_data = im.add_payment_method(request.json['token'], request.json['expiration'], User.query.filter_by(idx=user_id).one_or_none().modobio_id)
+        response_data = im.add_payment_method(request.json['token'], request.json['expiration'], User.query.filter_by(user_id=user_id).one_or_none().modobio_id)
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method
@@ -175,7 +175,7 @@ class PaymentRefundApi(BaseResource):
                 f'has already been refunded for the transaction id {payment_id}.')
 
         im = Instamed()
-        im.refund_payment(original_transaction.transaction_id, request.parsed_obj.refund_amount)
+        im.refund_payment(original_transaction.transaction_id, request.parsed_obj.refund_amount, User.query.filter_by(user_id=user_id).one_or_none().modobio_id)
 
         request.parsed_obj.user_id = user_id
         request.parsed_obj.reporter_id = token_auth.current_user()[0].user_id
@@ -229,7 +229,12 @@ class PaymentTestRefund(BaseResource):
     @accepts(schema=PaymentTestRefundSchema, api=ns_dev)
     def post(self):
         #send InstaMed refund request
-        return Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'])
+        transaction = PaymentHistory.query.filter_by(transaction_id=request.parsed_obj['transaction_id']).one_or_none()
+        if not transaction:
+            raise BadRequest('No transaction exists with the given transaction id.')
+
+        modobio_id = User.query.filter_by(user_id=transaction.user_id).one_or_none().modobio_id
+        return Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'], modobio_id)
 
 
 @ns_dev.route('/void/')
