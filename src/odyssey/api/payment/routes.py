@@ -163,26 +163,10 @@ class PaymentRefundApi(BaseResource):
         if not original_transaction:
             raise BadRequest(f'Transaction {payment_id} not found.')
 
-        #check if requested amount plus previous refunds of this transaction exceed the original amount
-        total_refunded = 0.00
-        for transaction in PaymentRefunds.query.filter_by(payment_id=payment_id).all():
-            total_refunded += float(transaction.refund_amount)
-    
-        if (float(request.parsed_obj.refund_amount) + total_refunded) > float(original_transaction.transaction_amount):
-            raise BadRequest(
-                f'The requested refund amount combined with refunds already given '
-                f'cannot exceed the amount of the original transaction. {total_refunded} '
-                f'has already been refunded for the transaction id {payment_id}.')
-
-        im = Instamed()
-        im.refund_payment(original_transaction.transaction_id, request.parsed_obj.refund_amount, User.query.filter_by(user_id=user_id).one_or_none().modobio_id)
-
-        request.parsed_obj.user_id = user_id
-        request.parsed_obj.reporter_id = token_auth.current_user()[0].user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-        return request.parsed_obj
+        return Instamed().refund_payment(original_transaction.transaction_id,
+            request.parsed_obj.refund_amount,
+            TelehealthBookings.query.filter_by(idx=original_transaction.booking_id).one_or_none(),
+            request.parsed_obj.refund_reason)
 
 # Development-only Namespace, sets up endpoints for testing payments.
 ns_dev = Namespace(
@@ -233,8 +217,9 @@ class PaymentTestRefund(BaseResource):
         if not transaction:
             raise BadRequest('No transaction exists with the given transaction id.')
 
-        modobio_id = User.query.filter_by(user_id=transaction.user_id).one_or_none().modobio_id
-        return Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'], modobio_id)
+        booking = TelehealthBookings.query.filter_by(idx=transaction.booking_id).one_or_none()
+        return Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'],
+            booking, "Test refund functionality")
 
 
 @ns_dev.route('/void/')

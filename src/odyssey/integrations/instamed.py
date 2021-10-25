@@ -5,7 +5,7 @@ from flask import current_app
 
 from odyssey.utils.misc import cancel_telehealth_appointment
 from werkzeug.exceptions import BadRequest
-from odyssey.api.payment.models import PaymentHistory, PaymentMethods
+from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.user.models import User
 from odyssey.utils.misc import cancel_telehealth_appointment
 
@@ -73,7 +73,7 @@ class Instamed:
 
         return response.json()
     
-    def refund_payment(self, transaction_id, amount, modobio_id):
+    def refund_payment(self, transaction_id, amount, booking, reason):
         """
         Refund a payment.
         InstaMed URI: /payment/refund
@@ -96,7 +96,7 @@ class Instamed:
             "TransactionID": str(transaction_id),
             "Amount": str(amount),
             "Patient": {
-                "AccountNumber": modobio_id
+                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
             }
         }
 
@@ -110,7 +110,21 @@ class Instamed:
         except:
             raise BadRequest(f'Instamed returned the following error: {response.text}')
 
-        return response.json()
+        refund_data = {
+            'user_id': booking.client_user_id,
+            'reporter_id': booking.staff_user_id,
+            'payment_id': PaymentHistory.query.filter_by(transaction_id=transaction_id).one_or_none().idx,
+            'refund_transaction_id': response.json()['TransactionID'],
+            'refund_amount': amount,
+            'refund_reason': reason
+        }
+
+        refund = PaymentRefunds(**refund_data)
+
+        db.session.add(refund)
+        db.session.commit()
+
+        return refund_data
 
     def void_payment(self, booking):
         """
@@ -217,6 +231,7 @@ class Instamed:
                         ' voiding a partial transaction.')
 
                 cancel_telehealth_appointment(booking)
+                return "Partial payment received. Appointment has been canceled and partial payment has been voided", 400
             else:
                 #transaction was successful, store in PaymentHistory
                 history = PaymentHistory(**{
