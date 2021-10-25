@@ -5,12 +5,8 @@ from flask import current_app
 from werkzeug.exceptions import HTTPException
 from werkzeug.http import HTTP_STATUS_CODES
 
-from odyssey.api import api
-
 logger = logging.getLogger(__name__)
 
-
-@api.errorhandler(HTTPException)
 def http_exception_handler(error: HTTPException) -> tuple:
     """ Create a JSON response from any HTTPException.
 
@@ -80,9 +76,8 @@ def http_exception_handler(error: HTTPException) -> tuple:
 
     return response, error.code
 
-@api.errorhandler(Exception)
-def exception_handler(error):
-    """ Create a JSON response from any :class:`Exception` that is not handled by :func:`http_exception_handler`.
+def exception_handler(error: Exception) -> tuple:
+    """ Create a JSON response from any :class:`Exception` that is *not* handled by :func:`http_exception_handler`.
 
     Flask usually turns any unhandled :class:`Exception` into a
     :class:`werkzeug.exceptions.InternalServerError`, but does not provide any further
@@ -142,7 +137,6 @@ def exception_handler(error):
             tb.extend(line.strip('\n').split('\n'))
         response['trace'] = tb + [repr(error)]
 
-    # Why is this logger twice?
-    # logger.error(repr(error), exc_info=True)
+    logger.error(repr(error), exc_info=True)
 
     return response, 500
