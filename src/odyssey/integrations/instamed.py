@@ -165,7 +165,7 @@ class Instamed:
             raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         #update transaction in PaymentHistory with void data
-        transaction_id.voided = True
+        transaction.voided = True
         transaction.void_reason = reason
         transaction.void_id = response.json()['TransactionID']
         db.session.commit()
