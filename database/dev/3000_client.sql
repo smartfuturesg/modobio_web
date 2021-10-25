@@ -33,8 +33,10 @@ BEGIN
         _user_id,
         'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
-    INSERT INTO "ClientInfo" (user_id, membersince, zipcode)
-    VALUES (_user_id, '2021-01-01', '85255');
+    INSERT INTO "ClientInfo" (user_id, membersince, territory_id, zipcode)
+    SELECT _user_id, '2021-01-01', idx, '85255'
+    FROM "LookupTerritoriesOfOperations"
+    WHERE LOWER(sub_territory) = 'california';
 
     INSERT INTO "UserSubscriptions" (
         user_id,
