@@ -183,7 +183,7 @@ def test_refund(test_client):
     }
 
     response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}',
+        f'/payment/refunds/{test_client.client_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(data2),
         content_type='application/json')
@@ -193,7 +193,7 @@ def test_refund(test_client):
 
     #refund first payment that has already been refunded in full
     response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}',
+        f'/payment/refunds/{test_client.client_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(data1),
         content_type='application/json')
