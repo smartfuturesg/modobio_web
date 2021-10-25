@@ -163,6 +163,18 @@ class PaymentRefundApi(BaseResource):
         if not original_transaction:
             raise BadRequest(f'Transaction {payment_id} not found.')
 
+        #check if requested amount plus previous refunds of this transaction exceed the original amount
+        total_refunded = 0.00
+        for transaction in PaymentRefunds.query.filter_by(payment_id=payment_id).all():
+            total_refunded += float(transaction.refund_amount)
+    
+        if (float(request.parsed_obj.refund_amount) + total_refunded) > float(original_transaction.transaction_amount):
+            raise BadRequest(
+                f'The requested refund amount combined with refunds already given '
+                f'cannot exceed the amount of the original transaction. {total_refunded} '
+                f'has already been refunded for the transaction with id {payment_id} and '
+                f'the original transaction amount is {original_transaction.transaction_amount}.')
+
         return Instamed().refund_payment(original_transaction.transaction_id,
             request.parsed_obj.refund_amount,
             TelehealthBookings.query.filter_by(idx=original_transaction.booking_id).one_or_none(),
@@ -196,31 +208,6 @@ class PaymentTestCharge(BaseResource):
             raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
 
         return  Instamed().charge_user(booking)
-
-
-@ns_dev.route('/refund/')
-class PaymentTestRefund(BaseResource):
-    """
-    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
-    refunds in the InstaMed system.
-
-    Note
-    ---
-    **This endpoint is only available in DEV environments.**
-
-    """
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    @accepts(schema=PaymentTestRefundSchema, api=ns_dev)
-    def post(self):
-        #send InstaMed refund request
-        transaction = PaymentHistory.query.filter_by(transaction_id=request.parsed_obj['transaction_id']).one_or_none()
-        if not transaction:
-            raise BadRequest('No transaction exists with the given transaction id.')
-
-        booking = TelehealthBookings.query.filter_by(idx=transaction.booking_id).one_or_none()
-        return Instamed().refund_payment(request.parsed_obj['transaction_id'], request.parsed_obj['amount'],
-            booking, "Test refund functionality")
-
 
 @ns_dev.route('/void/')
 class PaymentVoidRefund(BaseResource):

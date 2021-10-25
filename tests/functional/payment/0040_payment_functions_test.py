@@ -78,10 +78,7 @@ def test_sale(test_client):
         content_type='application/json')
 
     #should fail, check that booking is canceled and partial payment is voided
-    res = loads(response.data)
-    assert res['TransactionStatus'] == "C"
-    assert res['PartialApprovalAmount'] == 99
-    assert res['IsPartiallyApproved'] == True
+    assert response.status_code == 400
     assert booking.status == 'Canceled'
     assert booking.charged
 
@@ -148,18 +145,19 @@ def test_refund(test_client):
 
     #refund payment for full amount
     data1 = {
-        'amount': 99.00,
-        'transaction_id': PaymentHistory.query.filter_by(booking_id=booking1.idx).one_or_none().transaction_id
+        'refund_amount': "99.00",
+        'payment_id': PaymentHistory.query.filter_by(booking_id=booking1.idx).one_or_none().idx,
+        'refund_reason': "Test refund functionality"
     }
 
     response = test_client.post(
-        '/payment/test/refund/',
+        f'/payment/refunds/{test_client.client_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(data1),
         content_type='application/json')
 
     #should succeed
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     #create new booking to charge
     booking2 = generate_test_booking(test_client)
@@ -179,12 +177,13 @@ def test_refund(test_client):
 
     #refund for more than full amount using test endpoint ($100.00)
     data2 = {
-        'amount': 100.00,
-        'transaction_id': PaymentHistory.query.filter_by(booking_id=booking2.idx).one_or_none().transaction_id
+        'refund_amount': "100.00",
+        'payment_id': PaymentHistory.query.filter_by(booking_id=booking2.idx).one_or_none().idx,
+        'refund_reason': "Test refund functionality"
     }
 
     response = test_client.post(
-        '/payment/test/refund/',
+        f'/payment/refunds/{test_client.client_id}',
         headers=test_client.staff_auth_header,
         data=dumps(data2),
         content_type='application/json')
@@ -194,7 +193,7 @@ def test_refund(test_client):
 
     #refund first payment that has already been refunded in full
     response = test_client.post(
-        '/payment/test/refund/',
+        f'/payment/refunds/{test_client.client_id}',
         headers=test_client.staff_auth_header,
         data=dumps(data1),
         content_type='application/json')
