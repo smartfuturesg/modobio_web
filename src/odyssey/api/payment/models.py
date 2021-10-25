@@ -199,6 +199,13 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     :type: int, foreignkey(PaymentHistory.idx)
     """
 
+    refund_transaction_id = db.Column(db.String)
+    """
+    InstaMed transaction id for this refund.
+
+    :type: str
+    """
+
     refund_amount = db.Column(db.Numeric(10,2), nullable=False)
     """
     Amount that was refunded in USD. Note that refunds can be partial, so they may not always be
