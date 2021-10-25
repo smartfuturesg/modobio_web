@@ -176,6 +176,27 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreignkey(TelehealthBookings.idx)
     """
 
+    voided = db.Column(db.Boolean, default=False)
+    """
+    Denotes if this transaction has been voided.
+
+    :type: bool
+    """
+
+    void_reason = db.Column(db.String, nullable=True)
+    """
+    Reason this transaction was voided if applicable.
+
+    :type: string
+    """
+
+    void_id = db.Column(db.String, nullable=True)
+    """
+    InstaMed transaction id for the void request if applicable.
+
+    :type: string
+    """
+
 class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """
     This table keeps track of refunds that have been issued as well as the staff member who 

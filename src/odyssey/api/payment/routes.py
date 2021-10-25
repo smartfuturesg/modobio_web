@@ -230,4 +230,4 @@ class PaymentVoidRefund(BaseResource):
         if not booking.charged:
             raise BadRequest('The booking with booking id {booking_id}'.format(**request.parsed_obj) + \
             'has not been charged yet,so it cannot be voided.')
-        return Instamed().void_payment(booking)
+        return Instamed().void_payment(booking, "Test void functionality")

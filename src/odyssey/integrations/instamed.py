@@ -126,7 +126,7 @@ class Instamed:
 
         return refund_data
 
-    def void_payment(self, booking):
+    def void_payment(self, booking, reason):
         """
         Void a payment before it has been processed. If the transfer of funds has already
         started, refund must be used instead.
@@ -142,13 +142,13 @@ class Instamed:
         -------
         dict of information regarding the void
         """
-        transaction_id = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none().transaction_id
-        if not transaction_id:
+        transaction = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none()
+        if not transaction.transaction_id:
             raise BadRequest(f'No transaction exists for the booking with booking id {booking.idx}.')
 
         request_data = {
             "Outlet": self.outlet,
-            "TransactionID": str(transaction_id),
+            "TransactionID": str(transaction.transaction_id),
             "Patient": {
                 "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
             }
@@ -163,6 +163,12 @@ class Instamed:
             response.raise_for_status()
         except:
             raise BadRequest(f'Instamed returned the following error: {response.text}')
+
+        #update transaction in PaymentHistory with void data
+        transaction_id.voided = True
+        transaction.void_reason = reason
+        transaction.void_id = response.json()['TransactionID']
+        db.session.commit()
 
         return response.json()
 
@@ -219,6 +225,14 @@ class Instamed:
                     }
                 }
 
+                history = PaymentHistory(**{
+                    'user_id': booking.client_user_id,
+                    'payment_method_id': booking.payment_method_id,
+                    'transaction_id': response_data['TransactionID'],
+                    'transaction_amount': booking.consult_rate,
+                    'booking_id': booking.idx
+                })
+
                 response = requests.post(self.url_base + '/payment/void',
                                 headers=self.request_header,
                                 json=request_data)
@@ -231,6 +245,13 @@ class Instamed:
                         ' voiding a partial transaction.')
 
                 cancel_telehealth_appointment(booking)
+
+                #add void data to history and commit
+                history.voided = True
+                history.void_reason = "Partial payment received"
+                history.void_id = response.json()['TransactionID']
+                db.session.add(history)
+                db.session.commit()
                 return "Partial payment received. Appointment has been canceled and partial payment has been voided", 400
             else:
                 #transaction was successful, store in PaymentHistory
