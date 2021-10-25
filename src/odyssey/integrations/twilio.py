@@ -271,7 +271,7 @@ class Twilio():
 
         return
 
-    def clomplete_telehealth_video_room(self, booking_id: int):
+    def complete_telehealth_video_room(self, booking_id: int):
         """
         Update the video room state to completed
 

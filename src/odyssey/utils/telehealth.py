@@ -281,7 +281,7 @@ def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Par
         return 'Booking Completed by Participants'
     
     elif booking.status != 'In Progress':
-        raise BadRequest('Meeting has not began')
+        raise BadRequest('Meeting has not started')
 
     # update status
     booking.status = 'Completed'
@@ -294,7 +294,7 @@ def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Par
 
     # complete twilio room if making call over, catch error or raise if not expected error
     twilio = Twilio()
-    twilio.clomplete_telehealth_video_room(booking_id)
+    twilio.complete_telehealth_video_room(booking_id)
     ##### WHEEL #####        
     # if booking.external_booking_id:
     #     wheel = Wheel()
