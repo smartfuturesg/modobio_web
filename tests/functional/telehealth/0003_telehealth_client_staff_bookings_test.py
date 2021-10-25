@@ -36,7 +36,7 @@ def test_post_1_client_staff_bookings(test_client):
     assert response.status_code == 201
     assert conversation.staff_user_id == test_client.staff_id
     assert conversation.client_user_id == test_client.client_id
-    assert conversation.booking_id == 2
+    assert conversation.booking_id == 8
 
     staff_events = (test_client.db.session.execute(
         select(StaffCalendarEvents)
