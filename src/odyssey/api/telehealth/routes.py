@@ -176,7 +176,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=booking.duration) + timedelta(minutes=10)
-        breakpoint()
+        
         if not current_app.config['TESTING']:
             cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
