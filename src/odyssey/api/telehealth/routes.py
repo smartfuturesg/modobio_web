@@ -617,7 +617,7 @@ class TelehealthBookingsApi(BaseResource):
             raise BadRequest("Invalid start time")
         start_time = time_inc[start_idx-1].start_time
         target_date = datetime.combine(request.parsed_obj.target_date, time(hour=start_time.hour, minute=start_time.minute, tzinfo=tz.gettz(client_tz)))
-        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(minute=0,second=0,microsecond=0) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(minute=0,second=0,microsecond=0) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
         if target_date < client_local_datetime_now:
             raise BadRequest("Invalid target date or time")
 
