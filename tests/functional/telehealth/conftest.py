@@ -124,6 +124,8 @@ def staff_credentials(test_client):
             user_id=test_client.staff_id,
             role='medical_doctor')
         .one_or_none())
+    
+    role.consult_rate = 100.00
 
     creds = PractitionerCredentials(
         user_id=test_client.staff_id,
@@ -141,6 +143,25 @@ def staff_credentials(test_client):
 
     test_client.db.session.delete(creds)
     test_client.db.session.commit()
+
+@pytest.fixture(scope='session')
+def staff_consult_rate(test_client):
+    """ Add staff consult rate for telehealth testing. """
+    role = (
+        StaffRoles
+        .query
+        .filter_by(
+            user_id=test_client.staff_id,
+            role='medical_doctor')
+        .one_or_none())
+    
+    role.consult_rate = 100.00
+    test_client.db.session.commit()
+
+    yield role
+
+    test_client.db.session.delete(role)
+    test_client.db.session.commit()    
 
 @pytest.fixture(scope='session')
 def staff_territory(test_client):
