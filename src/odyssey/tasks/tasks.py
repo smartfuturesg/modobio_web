@@ -22,6 +22,7 @@ from odyssey.api.user.models import User
 from odyssey.integrations.instamed import Instamed
 from odyssey.utils.file_handling import FileHandling
 from odyssey.integrations.twilio import Twilio
+from odyssey.utils.telehealth import complete_booking
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -329,6 +330,13 @@ def charge_telehealth_appointment(booking_id):
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
     Instamed().charge_user(booking)
+
+@celery.task()
+def cleanup_unended_call(booking_id: int):
+
+    completion_info = complete_booking(booking_id)
+
+    return completion_info
 
 @celery.task()
 def store_telehealth_transcript(booking_id: int):

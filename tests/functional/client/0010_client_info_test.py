@@ -67,7 +67,7 @@ def test_creating_new_client(test_client):
     user = User.query.filter_by(email=users_new_user_client_data['user_info']['email']).first()
     assert response.status_code == 201
     assert user.email == users_new_user_client_data['user_info']['email']
-    assert response.json['user_info']['modobio_id']
+    assert response.json['user_info']['modobio_id'] == None # email not verified yet, so no modobio_id
 
     # Register the client's email address (token)
     verification = UserPendingEmailVerifications.query.filter_by(user_id=user.user_id).one_or_none()
@@ -75,6 +75,10 @@ def test_creating_new_client(test_client):
 
     response = test_client.get(f'/user/email-verification/token/{token}/')
     assert response.status_code == 200
+    # Refresh user and ensure email is now verified and modobio_id generated
+    test_client.db.session.refresh(user)
+    assert user.email_verified == True
+    assert user.modobio_id  
 
     ###############
     # Use generated password to test token generation
