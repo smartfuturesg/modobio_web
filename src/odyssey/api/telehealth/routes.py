@@ -174,8 +174,9 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         db.session.commit()
 
         # schedule celery task to ensure call is completed 10 min after utc end date_time
-        booking_end_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_end_time_utc).end_time
-        cleanup_eta = datetime.combine(booking.target_date_utc, booking_end_time, tz.UTC) + timedelta(minutes=10)
+        booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
+        cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=booking.duration) + timedelta(minutes=10)
+        breakpoint()
         if not current_app.config['TESTING']:
             cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
@@ -235,6 +236,19 @@ class TelehealthClientTimeSelectApi(BaseResource):
         duration = client_in_queue.duration
 
         days_out = 0
+        # days_available = 
+        # {local_target_date(datetime.date):
+        #   {start_time_idx_1: 
+        #       {'date_start_utc': datetime.date,
+        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #       }
+        #   },
+        #   {start_time_idx_2: 
+        #       {'date_start_utc': datetime.date,
+        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #       }
+        #   }
+        #}
         days_available = {}
         times_available = 0
         while days_out <= 7 and times_available < 10:
@@ -249,9 +263,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 day_end_utc.weekday(), 
                 end_time_window_utc.idx,
                 duration)
-            
+
+            # available_times_with_practitioenrs =
+            # {start_time_idx: {'date_start_utc': datetime.date, 'practitioenrs': {user_id: [TelehealthStaffAvailability]}}}
+            # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioners': {10: [<TelehealthStaffAvailability 325>, <TelehealthStaffAvailability 326>, <TelehealthStaffAvailability 327>, <TelehealthStaffAvailability 328>]}}}
             available_times_with_practitioners = {}
             for block in time_blocks:
+                # avails = {user_id(practioner): [TelehealthSTaffAvailability objects] }
                 avails = get_practitioners_available(time_blocks[block], client_in_queue)
                 if avails:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
@@ -306,7 +324,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
         #buffer not taken into consideration here becuase that only matters to practitioner not client
         idx_delta = int(duration/5) - 1
         final_dict = []
-        
+
         for day in days_available:
             for time in days_available[day]:
                 # choose 1 practitioner at random that's available
@@ -556,7 +574,7 @@ class TelehealthBookingsApi(BaseResource):
             raise BadRequest("Invalid start time")
         start_time = time_inc[start_idx-1].start_time
         target_date = datetime.combine(request.parsed_obj.target_date, time(hour=start_time.hour, minute=start_time.minute, tzinfo=tz.gettz(client_tz)))
-        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(minute=0,second=0,microsecond=0) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(minute=0,second=0,microsecond=0) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
         if target_date < client_local_datetime_now:
             raise BadRequest("Invalid target date or time")
 
@@ -1678,7 +1696,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
         Complete the booking by:
         - send booking complete request to wheel
         - update booking status in TelehealthBookings
-        - update twilio??
+        - update twilio
         """
         booking = db.session.execute(select(TelehealthBookings).where(
             TelehealthBookings.idx == booking_id,
