@@ -1,6 +1,8 @@
 import base64
 
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
+from dateutil import tz
 
 import pytest
 
@@ -12,6 +14,7 @@ from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.user.models import User
 from odyssey.api.telehealth.models import TelehealthStaffAvailability, TelehealthBookings
 from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
+from odyssey.tasks.tasks import cleanup_unended_call
 
 from tests.utils import login
 
@@ -396,6 +399,22 @@ def test_bookings_meeting_room_access(test_client):
 
     assert response.status_code == 200
 
+
+def test_cleanup_unended_call(test_client):
+    booking = TelehealthBookings.query.filter_by(idx=1).first()
+    
+    response = test_client.get(
+        f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
+        headers=test_client.staff_auth_header)
+
+    assert response.status_code == 200
+    assert booking.status == 'In Progress'
+
+    complete = cleanup_unended_call(booking.idx)
+    
+    assert booking.status == 'Completed'
+    assert booking.status_history[-1].reporter_role == 'Unended By Participants'
+    assert complete == 'Booking Completed by System'
 
 
 def test_delete_generated_users(test_client):
