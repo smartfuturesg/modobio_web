@@ -33,7 +33,7 @@ def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
     
     # if request was for a time in the past or current time, use the present time + booking lead time window
     if localized_target_date <= time_now_client_localized:
-        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
+        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
         localized_target_date = localized_target_date.replace(minute=0, second=0, microsecond=0)
 
     localized_end = datetime.combine(localized_target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
@@ -49,8 +49,13 @@ def get_possible_ranges(target_date: datetime, weekday_start:int,\
     start_time_idx:int, weekday_end:int, end_time_idx:int, duration:int) -> dict:
     """
     time_blocks = 
-    { possible_client_start_time: ((day1, start_time1_idx, end_time1_idx), (day2,start_time2_idx,end_time2_idx))
-      possible_client_start_time: ((day1, start_time1_idx, end_time1_idx), )
+    {
+        possible_client_start_time_utc(int:index): 
+            ((day1_start_utc(datetime), weekday_num(idx), start_time1_idx(int:index), end_time1_idx(int:index)), 
+            (day2_start_utc(datetime), weekday_num(idx), start_time2_idx(int:index), end_time2_idx(int:index)))
+      
+        possible_client_start_time_utc(int:index): 
+            ((day1_start_utc(datetime), weekday_num(idx), start_time1_idx(int:index), end_time1_idx), )
     }
     """
     # Duration is taken from the client queue.
@@ -154,6 +159,8 @@ def get_practitioners_available(time_block, q_request):
             )
         )
 
+    # practitioner availablilty as per availability input
+    # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
     for user_id, avail in query.all():
         if user_id not in available:
@@ -161,10 +168,13 @@ def get_practitioners_available(time_block, q_request):
         
         if avail:
             available[user_id].append(avail)
-
+    
+    # practitioners = {user_id(practioner): [TelehealthSTaffAvailability objects] }
+    # dictionary of practitioners avaialble with list of TelehealthStaffAvailabilty objects, 
+    # after filtering through scheduled bookings and removing those availabilities occupied by a booking.
     practitioners = {}
     bookings = db.session.query(TelehealthBookings).filter_by(target_date_utc=date1.date())\
-        .filter(TelehealthBookings.status !='Cancelled')
+        .filter(TelehealthBookings.status !='Canceled')
     for pract in available:
         temp_bookings = bookings.filter_by(staff_user_id=pract)
         
