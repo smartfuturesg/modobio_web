@@ -1,3 +1,7 @@
+import logging
+logger = logging.getLogger(__name__)
+
+from typing import Any
 from flask import current_app
 import random
 from flask_restx.fields import Integer, String
@@ -19,19 +23,20 @@ from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.integrations.wheel import Wheel
 from werkzeug.exceptions import BadRequest
+from odyssey.integrations.twilio import Twilio
 
 from odyssey.utils.constants import DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS, TELEHEALTH_START_END_BUFFER
 
 def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
     localized_target_date = datetime.combine(target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
-    localized_end = datetime.combine(target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
     time_now_client_localized = datetime.now(tz.gettz(client_tz))
     
     # if request was for a time in the past or current time, use the present time + booking lead time window
     if localized_target_date <= time_now_client_localized:
-        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
+        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS + 1)
         localized_target_date = localized_target_date.replace(minute=0, second=0, microsecond=0)
 
+    localized_end = datetime.combine(localized_target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
     day_start_utc = localized_target_date.astimezone(tz.UTC)
     start_time_window_utc = LookupBookingTimeIncrements.query.filter_by(start_time=day_start_utc.time()).first()
     day_end_utc = localized_end.astimezone(tz.UTC)
@@ -44,8 +49,13 @@ def get_possible_ranges(target_date: datetime, weekday_start:int,\
     start_time_idx:int, weekday_end:int, end_time_idx:int, duration:int) -> dict:
     """
     time_blocks = 
-    { possible_client_start_time: ((day1, start_time1_idx, end_time1_idx), (day2,start_time2_idx,end_time2_idx))
-      possible_client_start_time: ((day1, start_time1_idx, end_time1_idx), )
+    {
+        possible_client_start_time_utc(int:index): 
+            ((day1_start_utc(datetime), weekday_num(idx), start_time1_idx(int:index), end_time1_idx(int:index)), 
+            (day2_start_utc(datetime), weekday_num(idx), start_time2_idx(int:index), end_time2_idx(int:index)))
+      
+        possible_client_start_time_utc(int:index): 
+            ((day1_start_utc(datetime), weekday_num(idx), start_time1_idx(int:index), end_time1_idx), )
     }
     """
     # Duration is taken from the client queue.
@@ -149,6 +159,8 @@ def get_practitioners_available(time_block, q_request):
             )
         )
 
+    # practitioner availablilty as per availability input
+    # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
     for user_id, avail in query.all():
         if user_id not in available:
@@ -156,10 +168,13 @@ def get_practitioners_available(time_block, q_request):
         
         if avail:
             available[user_id].append(avail)
-
+    
+    # practitioners = {user_id(practioner): [TelehealthSTaffAvailability objects] }
+    # dictionary of practitioners avaialble with list of TelehealthStaffAvailabilty objects, 
+    # after filtering through scheduled bookings and removing those availabilities occupied by a booking.
     practitioners = {}
     bookings = db.session.query(TelehealthBookings).filter_by(target_date_utc=date1.date())\
-        .filter(TelehealthBookings.status !='Cancelled')
+        .filter(TelehealthBookings.status !='Canceled')
     for pract in available:
         temp_bookings = bookings.filter_by(staff_user_id=pract)
         
@@ -259,6 +274,44 @@ def update_booking_status_history(new_status:String, booking_id:Integer, reporte
     # save TelehealthBookingStatus object connected to this booking.
     db.session.add(status_history)
     return 
+
+
+def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Participants'):
+    """
+    After booking gets started, make sure it gets completed
+    1. Update booking status
+    2. Send signal to twilio
+    """
+    # Query the booking in question & check status
+    booking = TelehealthBookings.query.get(booking_id)
+    if not booking:
+        raise BadRequest('Meeting does not exist')
+    
+    if booking.status == 'Completed':
+        return 'Booking Completed by Participants'
+    
+    elif booking.status != 'In Progress':
+        raise BadRequest('Meeting has not started')
+
+    # update status
+    booking.status = 'Completed'
+
+    update_booking_status_history(
+            new_status = booking.status, 
+            booking_id = booking.idx, 
+            reporter_id = reporter_id, 
+            reporter_role = reporter)
+
+    # complete twilio room if making call over, catch error or raise if not expected error
+    twilio = Twilio()
+    twilio.complete_telehealth_video_room(booking_id)
+    ##### WHEEL #####        
+    # if booking.external_booking_id:
+    #     wheel = Wheel()
+    #     wheel.complete_consult(booking.external_booking_id)
+
+    db.session.commit()
+    return 'Booking Completed by System'
 
 def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_staff_localized):
 

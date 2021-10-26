@@ -54,7 +54,7 @@ class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ('created_at', 'updated_at')
-        dump_only = ('is_staff', 'is_client', 'modobio_id', 'user_id')
+        dump_only = ('is_staff', 'is_client', 'modobio_id', 'user_id', 'email_verified')
 
     email = fields.Email(validate=validate.Length(min=0,max=50))
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
@@ -83,12 +83,13 @@ class NewClientUserSchema(Schema):
     user_info = fields.Nested(UserInfoSchema, required=True)
     token = fields.String()
     refresh_token = fields.String()
+    email_verification_code = fields.String()
 
 class NewStaffUserSchema(Schema):
     """
     General purpose user creation schema
     """
-
+    email_verification_code = fields.String()
     user_info = fields.Nested(UserInfoSchema, required=True)
     staff_info = fields.Nested(StaffInfoSchema,
                               missing={}, 
