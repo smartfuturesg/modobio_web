@@ -93,7 +93,7 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.utils.telehealth import *
 from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.base.resources import BaseResource
-from odyssey.tasks.tasks import cleanup_unended_call
+from odyssey.tasks.tasks import cleanup_unended_call, store_telehealth_transcript
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
@@ -1760,4 +1760,33 @@ class TelehealthTranscripts(Resource):
                     transcript['transcript'][message_idx]['media'][media_idx] = media
                     
         return transcript
+   
+    @token_auth.login_required(dev_only=True)
+    @responds(api=ns, status_code=200)
+    def patch(self, booking_id):
+        """
+        Store booking transcripts for the booking_id supplied.
+        This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
+        that is fired off following the completion of a booking. 
+
+        Params
+        ------
+        booking_id
+
+        Returns
+        -------
+        None
+        """
+        breakpoint()
+        current_user, _ = token_auth.current_user()
+        
+        booking = TelehealthBookings.query.get(booking_id)
+
+        if not booking:
+            raise BadRequest('Meeting does not exist yet.')
+
+        # bring up the transcript messages from mongo db
+        store_telehealth_transcript.delay((booking.idx,),)
+                    
+        return 
 
