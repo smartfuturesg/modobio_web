@@ -7,7 +7,7 @@ alter sequence "DoseSpotPractitionerID_idx_seq"
 
 
 insert into "DoseSpotPractitionerID" ("user_id", "ds_user_id", "ds_enrollment_status") values
-(12, 231937, 'pending');
+(12, 227295, 'pending');
 
 delete from "DoseSpotPatientID" 
 			where idx >= 1;
