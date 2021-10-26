@@ -36,11 +36,5 @@ BEGIN
 
     INSERT INTO "StaffRoles" (user_id, role)
     VALUES (_user_id, 'staff_admin');
-
-    INSERT INTO "DoseSpotPractitionerID" ("user_id", "ds_user_id", "ds_enrollment_status")
-    VALUES (12, 227295, 'pending');
-
-    INSERT INTO "DoseSpotPatientID" ("user_id", "ds_user_id")
-    VALUES (22, 18090700);
 END;
 $$ LANGUAGE plpgsql;

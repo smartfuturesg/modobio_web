@@ -79,6 +79,6 @@ BEGIN
 
     -- Add DoseSpot credentials.
     INSERT INTO "DoseSpotPractitionerID" (user_id, ds_user_id, ds_enrollment_status)
-    VALUES (_user_id, 231937, 'pending');
+    VALUES (_user_id, 227295, 'pending');
 END;
 $$ LANGUAGE plpgsql;
