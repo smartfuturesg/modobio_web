@@ -298,15 +298,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
         #payload = {'appointment_times': times,
         #           'total_options': len(times)}
 
-
-
         #buffer not taken into consideration here becuase that only matters to practitioner not client
-        idx_delta = int(duration/5) - 1
         final_dict = []
         
         for day in days_available:
             for time in days_available[day]:
                 # choose 1 practitioner at random that's available
+                breakpoint()
                 pract = random.choice([pract for pract in days_available[day][time]['practitioners']])
                 target_date_utc = days_available[day][time]['date_start_utc']                
                 client_window_id_start_time_utc = time
