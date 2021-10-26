@@ -326,7 +326,7 @@ def test_bookings_meeting_room_access(test_client):
 
 
 def test_cleanup_unended_call(test_client):
-    booking = TelehealthBookings.query.filter_by(idx=2).first()
+    booking = TelehealthBookings.query.filter_by(idx=8).first()
     
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
