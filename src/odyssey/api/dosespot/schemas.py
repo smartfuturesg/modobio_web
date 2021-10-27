@@ -12,6 +12,25 @@ from odyssey.utils.base.schemas import BaseSchema
     Schemas for the DoseSpot's API
 """
 
+class DoseSpotAllergyGET(Schema):
+    PatientAllergyId = fields.Integer()
+    Name = fields.String()
+    Code = fields.String()
+    RxCUI = fields.String()
+    CodeType = fields.Integer()
+    Reaction = fields.String()
+    ReactionType = fields.Integer()
+    StatusType = fields.Integer()
+    OnsetDate = fields.String(missing=None)
+    LastUpdatedUserId = fields.Integer()
+    modobio_id = fields.String(missing=None)
+    modobio_user_id = fields.Integer(missing=None)
+    modobio_name_id = fields.String(missing=None)
+
+class DoseSpotAllergyOutput(Schema):
+    items = fields.Nested(DoseSpotAllergyGET(many=True),missing=[])
+    total_items = fields.Integer()
+
 class DoseSpotEnrollmentGET(Schema):
     status = fields.String()
 

@@ -5,6 +5,7 @@ from flask import g, request, current_app
 from flask_accepts import accepts, responds
 from flask.json import dumps
 from flask_restx import Resource, Namespace
+from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
@@ -17,7 +18,8 @@ from odyssey.api.dosespot.models import (
 from odyssey.api.dosespot.schemas import (
     DoseSpotPrescribeSSO,
     DoseSpotPharmacyNestedSelect,
-    DoseSpotEnrollmentGET
+    DoseSpotEnrollmentGET,
+    DoseSpotAllergyOutput
 )
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
@@ -41,11 +43,11 @@ ns = Namespace('dosespot', description='Operations related to DoseSpot')
 @ns.route('/allergies/<int:user_id>/')
 class DoseSpotAllergies(BaseResource):
     @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',))
+    @responds(schema=DoseSpotAllergyOutput,status_code=200,api=ns)
     def get(self, user_id):
         """
         GET - DoseSpot Patient prescribed medications
         """
-
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
         if not ds_patient:
             ds_patient = onboard_patient(user_id,0)
@@ -73,10 +75,32 @@ class DoseSpotAllergies(BaseResource):
         res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/allergies',
                 headers=headers)
         res_json = res.json()
-        
+
         if not res.ok:
             raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        return res_json
+
+        # Store Modobio info in the response.        
+        query = db.session.execute(
+            select(User, DoseSpotPractitionerID
+            ).join(DoseSpotPractitionerID, DoseSpotPractitionerID.user_id == User.user_id)  
+        ).all()
+
+        # create a hashmap lookup table
+        lookup_users = {}
+        for user,practitioner in query:
+            if user not in lookup_users:
+                lookup_users[practitioner.ds_user_id] = user
+
+        for item in res_json['Items']:
+            if item['LastUpdatedUserId'] in lookup_users:
+                item['modobio_id'] = lookup_users[item['LastUpdatedUserId']].modobio_id
+                item['modobio_user_id'] = lookup_users[item['LastUpdatedUserId']].user_id
+                item['modobio_name'] = lookup_users[item['LastUpdatedUserId']].firstname + ' ' + lookup_users[item['LastUpdatedUserId']].lastname
+        breakpoint()
+        payload = {'items': res_json['Items'],
+                   'total_items': len(res_json['Items'])}
+
+        return payload
 
 @ns.route('/create-practitioner/<int:user_id>/')
 class DoseSpotPractitionerCreation(BaseResource):
