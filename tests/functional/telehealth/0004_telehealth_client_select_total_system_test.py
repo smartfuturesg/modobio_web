@@ -310,7 +310,9 @@ def test_full_system_with_settings(test_client, payment_method):
 
 #@pytest.mark.skip('Fails') 
 def test_bookings_meeting_room_access(test_client):
-    booking = TelehealthBookings.query.filter_by(idx=8).first()
+    booking = TelehealthBookings.query.all()[-1]
+    global unended_call_idx
+    unended_call_idx = booking.idx
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
         headers=test_client.staff_auth_header)
@@ -326,7 +328,8 @@ def test_bookings_meeting_room_access(test_client):
 
 
 def test_cleanup_unended_call(test_client):
-    booking = TelehealthBookings.query.filter_by(idx=8).first()
+    global unended_call_idx
+    booking = TelehealthBookings.query.filter_by(idx=unended_call_idx).first()
     
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
