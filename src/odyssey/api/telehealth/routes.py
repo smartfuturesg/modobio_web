@@ -487,8 +487,10 @@ class TelehealthBookingsApi(BaseResource):
             # transcript messages
             if booking.chat_room.transcript_object_id:
                 transcript_url = request.url_root[:-1] + url_for('api.telehealth_telehealth_transcripts', booking_id = booking.idx)
+                booking_chat_details = booking.chat_room.__dict__
+                booking_chat_details['transcript_url'] = transcript_url
             else: 
-                transcript_url = None
+                booking_chat_details = booking.chat_room.__dict__
 
             bookings_payload.append({
                 'booking_id': booking.idx,
@@ -502,7 +504,6 @@ class TelehealthBookingsApi(BaseResource):
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
-                'transcript_url': transcript_url,
                 'consult_rate': booking.consult_rate
             })
 
@@ -1765,6 +1766,8 @@ class TelehealthTranscripts(Resource):
     @responds(api=ns, status_code=200)
     def patch(self, booking_id):
         """
+        **DEV only**
+
         Store booking transcripts for the booking_id supplied.
         This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
         that is fired off following the completion of a booking. 
@@ -1777,7 +1780,6 @@ class TelehealthTranscripts(Resource):
         -------
         None
         """
-        breakpoint()
         current_user, _ = token_auth.current_user()
         
         booking = TelehealthBookings.query.get(booking_id)
@@ -1785,8 +1787,7 @@ class TelehealthTranscripts(Resource):
         if not booking:
             raise BadRequest('Meeting does not exist yet.')
 
-        # bring up the transcript messages from mongo db
-        store_telehealth_transcript.delay((booking.idx,),)
+        store_telehealth_transcript.delay(booking.idx)
                     
         return 
 
