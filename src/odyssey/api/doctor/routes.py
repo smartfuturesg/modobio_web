@@ -246,6 +246,9 @@ class MedCredentials(BaseResource):
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodPressures(BaseResource):
+    # Multiple blood pressure measurements per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(resources=('blood_pressure',))
     @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
     def get(self, user_id):
@@ -543,6 +546,9 @@ class MedicalGeneralInformation(BaseResource):
 @ns.route('/medicalinfo/medications/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalMedicationInformation(BaseResource):
+    # Multiple medications per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalMedicationsInfoInputSchema, api=ns)
     def get(self, user_id):
@@ -662,6 +668,9 @@ class MedicalMedicationInformation(BaseResource):
 @ns.route('/medicalinfo/allergies/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalAllergiesInformation(BaseResource):
+    # Multiple allergies per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(resources=('medications',))
     @responds(schema=MedicalAllergiesInfoInputSchema, api=ns)
     def get(self, user_id):

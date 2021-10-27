@@ -95,6 +95,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     start_time_utc = fields.Time()
     booking_url = fields.String()
     transcript_url = fields.String()
+    consult_rate = fields.Number(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
