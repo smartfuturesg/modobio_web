@@ -33,7 +33,7 @@ def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
     
     # if request was for a time in the past or current time, use the present time + booking lead time window
     if localized_target_date <= time_now_client_localized:
-        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS + 1)
+        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
         localized_target_date = localized_target_date.replace(minute=0, second=0, microsecond=0)
 
     localized_end = datetime.combine(localized_target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
