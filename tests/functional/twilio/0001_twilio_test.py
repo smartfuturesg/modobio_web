@@ -232,5 +232,5 @@ def test_telehealth_bookings_get(test_client, booking_twilio):
     )
 
     assert response.status_code == 200
-    assert response.json['bookings'][0]['transcript_url']
+    assert response.json['bookings'][0]['chat_room']['transcript_url']
     
