@@ -348,7 +348,8 @@ def booking_twilio(test_client, wheel = False):
         booking_window_id_end_time_utc = booking_end_idx,
         client_location_id = 1,  # TODO: make this not hardcoded
         payment_method_id = pm.idx,
-        external_booking_id = uuid.uuid4()
+        external_booking_id = uuid.uuid4(),
+        duration = 20
     )
 
     test_client.db.session.add(booking)
