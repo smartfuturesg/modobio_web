@@ -51,6 +51,7 @@ class PractitionerConsultationRates(BaseResource):
         staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
         
         payload = request.json
+        
         lookup_role = {}
         for roleObj in staff_user_roles:
             if roleObj.role not in lookup_role:

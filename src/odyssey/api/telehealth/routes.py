@@ -93,7 +93,7 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.utils.telehealth import *
 from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.base.resources import BaseResource
-from odyssey.tasks.tasks import cleanup_unended_call
+from odyssey.tasks.tasks import cleanup_unended_call, store_telehealth_transcript
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
@@ -175,7 +175,18 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
-        cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=booking.duration) + timedelta(minutes=10)
+        
+        increment_data = get_booking_increment_data()
+        #calculate booking duration
+        if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
+            #booking crosses midnight
+            highest_index = increment_data['max_idx'] + 1
+            duration = (highest_index - booking.booking_window_id_start_time + \
+                booking.booking_window_id_end_time) * increment_data['length']
+        else:
+            duration = (booking.booking_window_id_end_time - booking.booking_window_id_start_time + 1) \
+                * increment_data['length']
+        cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
         if not current_app.config['TESTING']:
             cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
@@ -322,7 +333,10 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
 
         #buffer not taken into consideration here becuase that only matters to practitioner not client
-        idx_delta = int(duration/5) - 1
+                #calculate booking duration
+        increment_length = get_booking_increment_data()['length']
+        #convert time delta to minutes
+        idx_delta = int(duration/increment_length) - 1
         final_dict = []
 
         for day in days_available:
@@ -487,8 +501,10 @@ class TelehealthBookingsApi(BaseResource):
             # transcript messages
             if booking.chat_room.transcript_object_id:
                 transcript_url = request.url_root[:-1] + url_for('api.telehealth_telehealth_transcripts', booking_id = booking.idx)
+                booking_chat_details = booking.chat_room.__dict__
+                booking_chat_details['transcript_url'] = transcript_url
             else: 
-                transcript_url = None
+                booking_chat_details = booking.chat_room.__dict__
 
             bookings_payload.append({
                 'booking_id': booking.idx,
@@ -496,13 +512,12 @@ class TelehealthBookingsApi(BaseResource):
                 'start_time_utc': start_time_utc.time(),
                 'status': booking.status,
                 'profession_type': booking.profession_type,
-                'chat_room': booking.chat_room,
+                'chat_room': booking_chat_details,
                 'client_location_id': booking.client_location_id,
                 'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
-                'transcript_url': transcript_url,
                 'consult_rate': booking.consult_rate
             })
 
@@ -611,7 +626,6 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.client_location_id = client_in_queue.location_id
         request.parsed_obj.payment_method_id = client_in_queue.payment_method_id
         request.parsed_obj.profession_type = client_in_queue.profession_type
-        request.parsed_obj.duration = client_in_queue.duration
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
 
         # check the practitioner's auto accept setting.
@@ -1760,4 +1774,33 @@ class TelehealthTranscripts(Resource):
                     transcript['transcript'][message_idx]['media'][media_idx] = media
                     
         return transcript
+   
+    @token_auth.login_required(dev_only=True)
+    @responds(api=ns, status_code=200)
+    def patch(self, booking_id):
+        """
+        **DEV only**
+
+        Store booking transcripts for the booking_id supplied.
+        This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
+        that is fired off following the completion of a booking. 
+
+        Params
+        ------
+        booking_id
+
+        Returns
+        -------
+        None
+        """
+        current_user, _ = token_auth.current_user()
+        
+        booking = TelehealthBookings.query.get(booking_id)
+
+        if not booking:
+            raise BadRequest('Meeting does not exist yet.')
+
+        store_telehealth_transcript.delay(booking.idx)
+                    
+        return 
 
