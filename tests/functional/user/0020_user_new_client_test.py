@@ -87,3 +87,16 @@ def test_self_registered_new_client(test_client):
     assert response.status_code == 401
     assert token_history[0][0].event == 'login'
     assert token_history[0][0].refresh_token == None
+
+def test_blacklisted_email_address(test_client):
+    payload = {
+        'email': 'user@10-minute-mail.com',
+        'password': 'password'}
+
+    response = test_client.post(
+        '/user/client/',
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 400
+    assert response.json['message'] == 'Email adresses from "10-minute-mail.com" are not allowed.'
