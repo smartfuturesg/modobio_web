@@ -6,7 +6,7 @@ import json
 
 from flask import request, current_app
 from flask_accepts import accepts, responds
-from flask_restx import Resource
+from flask_restx import Resource, Namespace
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
@@ -17,7 +17,16 @@ from odyssey.utils.misc import check_client_existence
 from odyssey.utils.base.resources import BaseResource
 from odyssey.api.lookup.models import LookupOrganizations
 from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
-from odyssey.api.payment.schemas import PaymentMethodsSchema, PaymentStatusSchema, PaymentStatusOutputSchema, PaymentHistorySchema, PaymentRefundsSchema
+from odyssey.api.payment.schemas import (
+PaymentMethodsSchema,
+PaymentStatusSchema,
+PaymentStatusOutputSchema,
+PaymentHistorySchema,
+PaymentRefundsSchema,
+PaymentTestChargeVoidSchema,
+PaymentTestRefundSchema)
+from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.user.models import User
 
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
 
@@ -46,7 +55,7 @@ class PaymentMethodsApi(BaseResource):
 
         im = Instamed()
 
-        response_data = im.add_payment_method(request.json['token'], request.json['expiration'])
+        response_data = im.add_payment_method(request.json['token'], request.json['expiration'], User.query.filter_by(user_id=user_id).one_or_none().modobio_id)
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method
@@ -163,14 +172,61 @@ class PaymentRefundApi(BaseResource):
             raise BadRequest(
                 f'The requested refund amount combined with refunds already given '
                 f'cannot exceed the amount of the original transaction. {total_refunded} '
-                f'has already been refunded for the transaction id {payment_id}.')
+                f'has already been refunded for the transaction with id {payment_id} and '
+                f'the original transaction amount is {original_transaction.transaction_amount}.')
 
-        im = Instamed()
-        im.refund_payment(original_transaction.transaction_id, request.parsed_obj.refund_amount)
+        return Instamed().refund_payment(original_transaction.transaction_id,
+            request.parsed_obj.refund_amount,
+            TelehealthBookings.query.filter_by(idx=original_transaction.booking_id).one_or_none(),
+            request.parsed_obj.refund_reason)
 
-        request.parsed_obj.user_id = user_id
-        request.parsed_obj.reporter_id = token_auth.current_user()[0].user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
+# Development-only Namespace, sets up endpoints for testing payments.
+ns_dev = Namespace(
+    'payment',
+    path='/payment/test',
+    description='[DEV ONLY] Endpoints for testing payments.')
 
-        return request.parsed_obj
+@ns_dev.route('/charge/')
+class PaymentTestCharge(BaseResource):
+    """
+    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
+    charging in the InstaMed system. 
+
+    Note
+    ---
+    **This endpoint is only available in DEV environments.**
+
+    """
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
+    @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
+    def post(self):
+        booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
+        if not booking:
+            raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
+        if booking.charged:
+            raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
+
+        return  Instamed().charge_user(booking)
+
+@ns_dev.route('/void/')
+class PaymentVoidRefund(BaseResource):
+    """
+    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
+    voids in the InstaMed system.
+    
+    Note
+    ---
+    **This endpoint is only available in DEV environments.**
+
+    """
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
+    @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
+    def post(self):
+        #send InstaMed void request
+        booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
+        if not booking:
+            raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
+        if not booking.charged:
+            raise BadRequest('The booking with booking id {booking_id}'.format(**request.parsed_obj) + \
+            'has not been charged yet,so it cannot be voided.')
+        return Instamed().void_payment(booking, "Test void functionality")

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import requests
 from werkzeug.exceptions import BadRequest
 
@@ -5,7 +8,8 @@ from flask import current_app
 
 from odyssey.utils.telehealth import cancel_telehealth_appointment
 from werkzeug.exceptions import BadRequest
-from odyssey.api.payment.models import PaymentHistory
+from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
+from odyssey.api.user.models import User
 
 from odyssey import db
 
@@ -26,7 +30,7 @@ class Instamed:
                 "TerminalID": '0002'
         }
 
-    def add_payment_method(self, token, expiration):
+    def add_payment_method(self, token, expiration, modobio_id):
         """
         Add a payment method for a user and save the reference token in our db.
         InstaMed URI: /payment/paymentplan
@@ -53,6 +57,9 @@ class Instamed:
                 "EntryMode": "key",
                 "CardNumber": token,
                 "Expiration": expiration
+            },
+            "Patient": {
+                "AccountNumber": modobio_id
             }
         }
 
@@ -68,7 +75,7 @@ class Instamed:
 
         return response.json()
     
-    def refund_payment(self, transaction_id, amount):
+    def refund_payment(self, transaction_id, amount, booking, reason):
         """
         Refund a payment.
         InstaMed URI: /payment/refund
@@ -89,10 +96,67 @@ class Instamed:
         request_data = {
             "Outlet": self.outlet,
             "TransactionID": str(transaction_id),
-            "Amount": str(amount)
+            "Amount": str(amount),
+            "Patient": {
+                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+            }
         }
 
         response = requests.post(self.url_base + '/payment/refund-simple',
+                        headers=self.request_header,
+                        json=request_data)
+
+        #check if instamed api raised an error
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'Instamed returned the following error: {response.text}')
+
+        refund_data = {
+            'user_id': booking.client_user_id,
+            'reporter_id': booking.staff_user_id,
+            'payment_id': PaymentHistory.query.filter_by(transaction_id=transaction_id).one_or_none().idx,
+            'refund_transaction_id': response.json()['TransactionID'],
+            'refund_amount': amount,
+            'refund_reason': reason
+        }
+
+        refund = PaymentRefunds(**refund_data)
+
+        db.session.add(refund)
+        db.session.commit()
+
+        return refund_data
+
+    def void_payment(self, booking, reason):
+        """
+        Void a payment before it has been processed. If the transfer of funds has already
+        started, refund must be used instead.
+
+        InstaMed URI: /payment/void
+
+        Params
+        ------
+        booking: (TelehealthBookings object)
+            the booking for which this payment is associated with
+        
+        Returns
+        -------
+        dict of information regarding the void
+        """
+        transaction = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none()
+        if not transaction.transaction_id:
+            raise BadRequest(f'No transaction exists for the booking with booking id {booking.idx}.')
+
+        request_data = {
+            "Outlet": self.outlet,
+            "TransactionID": str(transaction.transaction_id),
+            "Patient": {
+                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+            }
+        }
+
+        response = requests.post(self.url_base + '/payment/void',
                         headers=self.request_header,
                         json=request_data)
         
@@ -102,9 +166,15 @@ class Instamed:
         except:
             raise BadRequest(f'Instamed returned the following error: {response.text}')
 
+        #update transaction in PaymentHistory with void data
+        transaction.voided = True
+        transaction.void_reason = reason
+        transaction.void_id = response.json()['TransactionID']
+        db.session.commit()
+
         return response.json()
 
-    def charge_user(self, payment_id, amount, booking):
+    def charge_user(self, booking):
         """
         Charge a user.
         InstaMed URI: /payment/sale
@@ -112,12 +182,6 @@ class Instamed:
 
         Params
         ------
-        payment_id: (string)
-            ID of the payment method to be charged
-        
-        amount: (string)
-            amount of money to be charged
-
         booking: (TelehealthBookings object)
             the booking for which this payment is associated with
         
@@ -128,8 +192,11 @@ class Instamed:
         request_data = {
             "Outlet": self.outlet,
             "PaymentMethod": "OnFile",
-            "PaymentMethodID": str(payment_id),
-            "Amount": str(amount)
+            "PaymentMethodID": str(PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none().payment_id),
+            "Amount": str(booking.consult_rate),
+            "Patient": {
+                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+            }
         }
 
         response = requests.post(self.url_base + '/payment/sale',
@@ -151,24 +218,56 @@ class Instamed:
         #(this is not an error as checked above since 200 is returned from InstaMed)
         if response_data['TransactionStatus'] == 'C':
             if response_data['IsPartiallyApproved']:
-                #refund partial amount and log as an unsuccessful payment
-                self.refund_payment(response_data['TransactionID'], response_data['PartialApprovalAmount'])
+                #void the payment and cancel appointment
+                request_data = {
+                    "Outlet": self.outlet,
+                    "TransactionID": str(response_data['TransactionID']),
+                    "Patient": {
+                        "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+                    }
+                }
 
-                #TODO: log if refund was unsuccessful
+                history = PaymentHistory(**{
+                    'user_id': booking.client_user_id,
+                    'payment_method_id': booking.payment_method_id,
+                    'transaction_id': response_data['TransactionID'],
+                    'transaction_amount': booking.consult_rate,
+                    'booking_id': booking.idx
+                })
+
+                response = requests.post(self.url_base + '/payment/void',
+                                headers=self.request_header,
+                                json=request_data)
+                
+                #check if instamed api raised an error
+                try:
+                    response.raise_for_status()
+                except:
+                    logger.error(f'Instamed returned the following error: {response.text} when' \
+                        ' voiding a partial transaction.')
 
                 cancel_telehealth_appointment(booking)
-                return
+
+                #add void data to history and commit
+                history.voided = True
+                history.void_reason = "Partial payment received"
+                history.void_id = response.json()['TransactionID']
+                db.session.add(history)
+                db.session.commit()
+                return "Partial payment received. Appointment has been canceled and partial payment has been voided", 400
             else:
                 #transaction was successful, store in PaymentHistory
                 history = PaymentHistory(**{
                     'user_id': booking.client_user_id,
                     'payment_method_id': booking.payment_method_id,
                     'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': amount
+                    'transaction_amount': booking.consult_rate,
+                    'booking_id': booking.idx
                 })
                 db.session.add(history)
                 booking.charged = True
                 db.session.commit()
         else:
-            #transaction was declined
+            #transaction was declined, cancel appointment
             cancel_telehealth_appointment(booking)
+        return response_data

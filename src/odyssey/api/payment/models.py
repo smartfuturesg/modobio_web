@@ -164,6 +164,39 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: numeric
     """
 
+    booking = db.relationship("TelehealthBookings", backref="TelehealthBookings")
+    """
+    Relationship to the booking that this payment is associated with.
+    """
+
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx'))
+    """
+    Foreign key to the booking this payment is associated with.
+
+    :type: int, foreignkey(TelehealthBookings.idx)
+    """
+
+    voided = db.Column(db.Boolean, default=False)
+    """
+    Denotes if this transaction has been voided.
+
+    :type: bool
+    """
+
+    void_reason = db.Column(db.String, nullable=True)
+    """
+    Reason this transaction was voided if applicable.
+
+    :type: string
+    """
+
+    void_id = db.Column(db.String, nullable=True)
+    """
+    InstaMed transaction id for the void request if applicable.
+
+    :type: string
+    """
+
 class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """
     This table keeps track of refunds that have been issued as well as the staff member who 
@@ -185,6 +218,13 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     Foreign key to the payment this refund is associated with
 
     :type: int, foreignkey(PaymentHistory.idx)
+    """
+
+    refund_transaction_id = db.Column(db.String)
+    """
+    InstaMed transaction id for this refund.
+
+    :type: str
     """
 
     refund_amount = db.Column(db.Numeric(10,2), nullable=False)

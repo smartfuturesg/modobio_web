@@ -27,6 +27,9 @@ from odyssey.integrations.twilio import Twilio
 
 from odyssey.utils.constants import DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS, TELEHEALTH_START_END_BUFFER
 
+booking_time_increment_length = 0
+booking_max_increment_idx = 0
+
 def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
     localized_target_date = datetime.combine(target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
     time_now_client_localized = datetime.now(tz.gettz(client_tz))
@@ -352,3 +355,21 @@ def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='Syst
 
     db.session.commit()
     return
+    
+def get_booking_increment_data():
+    global booking_time_increment_length
+    global booking_max_increment_idx
+
+    if booking_time_increment_length == 0 or booking_max_increment_idx == 0:
+        #values have not been calculated yet
+
+
+        last_increment = LookupBookingTimeIncrements.query.all()[-1]
+        increment_length = (datetime.combine(date.min, last_increment.end_time) -  \
+            datetime.combine(date.min, last_increment.start_time))
+        #convert time delta to minutes
+        booking_time_increment_length = (increment_length.seconds % 3600) // 60
+        booking_max_increment_idx = last_increment.idx
+
+    return({'length': booking_time_increment_length,
+            'max_idx': booking_max_increment_idx})

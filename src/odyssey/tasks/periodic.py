@@ -295,12 +295,13 @@ def find_chargable_bookings():
     """
     #get all bookings that are sheduled <24 hours away and have not been charged yet
     target_time = datetime.now(timezone.utc) + timedelta(hours=24)
+
     target_time_window = LookupBookingTimeIncrements.query                    \
         .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
         LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
     bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False, TelehealthBookings.status != 'Canceled') \
         .filter(or_(
-            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.today().date()),
+            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.now(timezone.utc).date()),
             and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
         )).all()
     
