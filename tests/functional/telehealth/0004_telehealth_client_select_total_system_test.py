@@ -309,36 +309,34 @@ def test_full_system_with_settings(test_client, payment_method):
 # Everything else fails as a result, too many dependencies in one test.
 
 #@pytest.mark.skip('Fails') 
-def test_bookings_meeting_room_access(test_client):
-    booking = TelehealthBookings.query.filter_by(idx=2).first()
+def test_bookings_meeting_room_access(test_client, booking_twilio):
+    
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
+        f'/telehealth/bookings/meeting-room/access-token/{booking_twilio.idx}/',
         headers=test_client.staff_auth_header)
-
     ###
     # Complete the booking
     ###
     response = test_client.put(
-        f'/telehealth/bookings/complete/{booking.idx}/',
+        f'/telehealth/bookings/complete/{booking_twilio.idx}/',
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 200
 
 
-def test_cleanup_unended_call(test_client):
-    booking = TelehealthBookings.query.filter_by(idx=2).first()
+def test_cleanup_unended_call(test_client, booking_twilio):
     
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
+        f'/telehealth/bookings/meeting-room/access-token/{booking_twilio.idx}/',
         headers=test_client.staff_auth_header)
-
-    assert response.status_code == 200
-    assert booking.status == 'In Progress'
-
-    complete = cleanup_unended_call(booking.idx)
     
-    assert booking.status == 'Completed'
-    assert booking.status_history[-1].reporter_role == 'Unended By Participants'
+    assert response.status_code == 200
+    assert booking_twilio.status == 'In Progress'
+
+    complete = cleanup_unended_call(booking_twilio.idx)
+    
+    assert booking_twilio.status == 'Completed'
+    assert booking_twilio.status_history[-1].reporter_role == 'Unended By Participants'
     assert complete == 'Booking Completed by System'
 
 

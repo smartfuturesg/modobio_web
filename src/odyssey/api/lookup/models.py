@@ -13,6 +13,32 @@ from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 
+class LookupUSStates(BaseModelWithIdx):
+    """
+        Lookup table containing US States
+    """
+
+    state = db.Column(db.String)
+    """
+    State full name (Arizona)
+
+    :type: str
+    """
+
+    abbreviation = db.Column(db.String(2))
+    """
+    State abbreviation (AZ)
+    
+    :type: str
+    """
+
+    territory_id = db.Column(db.Integer,  db.ForeignKey('LookupTerritoriesOfOperations.idx'))
+    """
+    Territory ID foreign key
+
+    :type: int, fk: LookupTerritoriesOfOperations.idx
+    """
+
 class LookupTermsAndConditions(BaseModelWithIdx):
     """ 
         Holds the documententation for the terms and conditions
