@@ -208,7 +208,7 @@ class PaymentTestCharge(BaseResource):
 
         return  Instamed().charge_user(booking)
 
-@ns_dev.route('/test/void/')
+@ns_dev.route('/void/')
 class PaymentVoidRefund(BaseResource):
     """
     [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
