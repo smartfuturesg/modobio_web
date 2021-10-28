@@ -498,7 +498,7 @@ class TelehealthBookingsApi(BaseResource):
                 'start_time_utc': start_time_utc.time(),
                 'status': booking.status,
                 'profession_type': booking.profession_type,
-                'chat_room': booking.chat_room,
+                'chat_room': booking_chat_details,
                 'client_location_id': booking.client_location_id,
                 'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
