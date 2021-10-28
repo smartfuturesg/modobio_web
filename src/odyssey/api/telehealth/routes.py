@@ -175,7 +175,23 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
-        cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=booking.duration) + timedelta(minutes=10)
+        
+        #calculate booking duration
+        last_increment = LookupBookingTimeIncrements.query.all()[-1]
+        increment_length = (datetime.combine(date.min, last_increment.end_time) -  \
+            datetime.combine(date.min, last_increment.start_time))
+        #convert time delta to minutes
+        increment_length = (increment_length.seconds % 3600) // 60
+
+        if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
+            #booking crosses midnight
+            highest_index = last_increment.idx + 1
+            duration = (highest_index - booking.booking_window_id_start_time + \
+                booking.booking_window_id_end_time)*increment_length
+        else:
+            duration = (booking.booking_window_id_end_time - booking.booking_window_id_start_time + 1) \
+                *increment_length
+        cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
         if not current_app.config['TESTING']:
             cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
@@ -322,7 +338,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
 
         #buffer not taken into consideration here becuase that only matters to practitioner not client
-        idx_delta = int(duration/5) - 1
+                #calculate booking duration
+        last_increment = LookupBookingTimeIncrements.query.all()[-1]
+        increment_length = (datetime.combine(date.min, last_increment.end_time) -  \
+            datetime.combine(date.min, last_increment.start_time))
+        #convert time delta to minutes
+        increment_length = (increment_length.seconds % 3600) // 60
+        idx_delta = int(duration/increment_length) - 1
         final_dict = []
 
         for day in days_available:
@@ -611,7 +633,6 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.client_location_id = client_in_queue.location_id
         request.parsed_obj.payment_method_id = client_in_queue.payment_method_id
         request.parsed_obj.profession_type = client_in_queue.profession_type
-        request.parsed_obj.duration = client_in_queue.duration
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
 
         # check the practitioner's auto accept setting.
