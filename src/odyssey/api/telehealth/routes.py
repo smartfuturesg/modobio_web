@@ -176,21 +176,16 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
         
+        increment_data = get_booking_increment_data()
         #calculate booking duration
-        last_increment = LookupBookingTimeIncrements.query.all()[-1]
-        increment_length = (datetime.combine(date.min, last_increment.end_time) -  \
-            datetime.combine(date.min, last_increment.start_time))
-        #convert time delta to minutes
-        increment_length = (increment_length.seconds % 3600) // 60
-
         if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
             #booking crosses midnight
-            highest_index = last_increment.idx + 1
+            highest_index = increment_data['max_idx'] + 1
             duration = (highest_index - booking.booking_window_id_start_time + \
-                booking.booking_window_id_end_time)*increment_length
+                booking.booking_window_id_end_time) * increment_data['length']
         else:
             duration = (booking.booking_window_id_end_time - booking.booking_window_id_start_time + 1) \
-                *increment_length
+                * increment_data['length']
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
         if not current_app.config['TESTING']:
@@ -339,11 +334,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
         #buffer not taken into consideration here becuase that only matters to practitioner not client
                 #calculate booking duration
-        last_increment = LookupBookingTimeIncrements.query.all()[-1]
-        increment_length = (datetime.combine(date.min, last_increment.end_time) -  \
-            datetime.combine(date.min, last_increment.start_time))
+        increment_length = get_booking_increment_data()['length']
         #convert time delta to minutes
-        increment_length = (increment_length.seconds % 3600) // 60
         idx_delta = int(duration/increment_length) - 1
         final_dict = []
 
