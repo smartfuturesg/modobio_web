@@ -36,6 +36,7 @@ from odyssey.utils.base.schemas import BaseSchema
 class LookupUSStatesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupUSStates
+    territory_id = fields.Integer(missing=None)
 
 class LookupUSStatesOutputSchema(Schema):
     items = fields.Nested(LookupUSStatesSchema(many=True))

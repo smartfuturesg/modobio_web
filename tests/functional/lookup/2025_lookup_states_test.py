@@ -1,6 +1,6 @@
 from flask.json import dumps
 
-def test_get_currencies(test_client):
+def test_get_states(test_client):
     response = test_client.get(
         '/lookup/states/',
         headers=test_client.client_auth_header,
