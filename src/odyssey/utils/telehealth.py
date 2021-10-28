@@ -329,3 +329,26 @@ def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_
                                         )
     db.session.add(add_to_calendar)
     return
+
+def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='System'):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    and from bookings PUT to cancel a booking
+    """
+
+    # update booking status to canceled
+    booking.status = 'Canceled'
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    # add new status to status history table
+    update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
+
+    #TODO: Create notification/send email(?) to user that their appointment was canceled due
+    #to a failed payment
+
+    db.session.commit()
+    return

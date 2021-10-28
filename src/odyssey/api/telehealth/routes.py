@@ -780,26 +780,24 @@ class TelehealthBookingsApi(BaseResource):
             elif (new_status in ('Pending', 'Accepted') and
                   current_user.user_id != booking.staff_user_id):
                 raise Unauthorized('Only practitioner can update this status.')
+
+            if new_status != 'Canceled':
+                # Create TelehealthBookingStatus object if the request is updating the status
+                update_booking_status_history(new_status, booking_id, current_user.user_id,\
+                     'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
+
+                booking.update(data)
+                db.session.commit()
             
-            if new_status == 'Cancelled':
+            else:
+                cancel_telehealth_appointment(booking, current_user.user_id, 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
+                
                 ##### WHEEL #####
                 #elif current_user.user_id == booking.client_user_id:
                 #    if booking.external_booking_id:
                 #        # cancel appointment on wheel system if the staff memebr is a wheel practitioner
                 #       wheel = Wheel()
                 #       wheel.cancel_booking(booking.external_booking_id)
-
-                # If the booking gets updated for cancelation, then delete it in the Staff's calendar
-                staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
-                if staff_event:
-                    db.session.delete(staff_event)
-                
-            # Create TelehealthBookingStatus object if the request is updating the status
-            update_booking_status_history(new_status, booking_id, current_user.user_id, 
-                                    'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
-
-        booking.update(data)
-        db.session.commit()
 
         return 201
 
