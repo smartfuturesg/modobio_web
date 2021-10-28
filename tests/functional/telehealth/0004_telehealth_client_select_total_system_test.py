@@ -309,14 +309,11 @@ def test_full_system_with_settings(test_client, payment_method):
 # Everything else fails as a result, too many dependencies in one test.
 
 #@pytest.mark.skip('Fails') 
-def test_bookings_meeting_room_access(test_client):
-    booking = TelehealthBookings.query.all()[-1]
-    global unended_call_idx
-    unended_call_idx = booking.idx
+def test_bookings_meeting_room_access(test_client, booking):
+    
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
         headers=test_client.staff_auth_header)
-
     ###
     # Complete the booking
     ###
@@ -327,14 +324,12 @@ def test_bookings_meeting_room_access(test_client):
     assert response.status_code == 200
 
 
-def test_cleanup_unended_call(test_client):
-    global unended_call_idx
-    booking = TelehealthBookings.query.filter_by(idx=unended_call_idx).first()
+def test_cleanup_unended_call(test_client, booking):
     
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking.idx}/',
         headers=test_client.staff_auth_header)
-
+    
     assert response.status_code == 200
     assert booking.status == 'In Progress'
 

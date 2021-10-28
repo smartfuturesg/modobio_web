@@ -31,13 +31,10 @@ def test_bookings_payment(test_client):
 
     charge_telehealth_appointment(booking.idx)
 
-    #retrieve the latest booking between these 2 users, which is the one we inserted above
-    updated_booking = TelehealthBookings.query.filter_by(idx=booking.idx).one_or_none()
-
-    assert updated_booking.charged == True
+    assert booking.charged == True
 
     history = PaymentHistory.query. \
-        filter_by(user_id=test_client.client_id, payment_method_id=updated_booking.payment_method_id) \
+        filter_by(user_id=test_client.client_id, payment_method_id=booking.payment_method_id) \
         .order_by(PaymentHistory.created_at.desc()).all()[-1]
 
     assert history.transaction_amount == booking.consult_rate
