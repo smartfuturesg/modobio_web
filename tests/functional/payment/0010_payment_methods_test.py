@@ -1,6 +1,6 @@
 from flask.json import dumps
 
-from .data import payment_methods_data, payment_booking_data
+from .data import payment_methods_data
 
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey import db
