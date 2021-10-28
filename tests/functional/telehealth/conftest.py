@@ -248,8 +248,7 @@ def booking(test_client, payment_method):
         charged=False,
         status='Accepted',
         payment_method_id = payment_method.idx,
-        external_booking_id = uuid.uuid4(),
-        duration = 20
+        external_booking_id = uuid.uuid4()
     )
 
     test_client.db.session.add(bk)
