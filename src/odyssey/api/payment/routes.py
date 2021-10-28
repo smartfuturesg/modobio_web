@@ -186,7 +186,6 @@ ns_dev = Namespace(
     path='/payment/test',
     description='[DEV ONLY] Endpoints for testing payments.')
 
-
 @ns_dev.route('/charge/')
 class PaymentTestCharge(BaseResource):
     """
@@ -198,7 +197,7 @@ class PaymentTestCharge(BaseResource):
     **This endpoint is only available in DEV environments.**
 
     """
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
     @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
@@ -209,7 +208,7 @@ class PaymentTestCharge(BaseResource):
 
         return  Instamed().charge_user(booking)
 
-@ns_dev.route('/void/')
+@ns_dev.route('/test/void/')
 class PaymentVoidRefund(BaseResource):
     """
     [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
@@ -220,7 +219,7 @@ class PaymentVoidRefund(BaseResource):
     **This endpoint is only available in DEV environments.**
 
     """
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
     @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         #send InstaMed void request
