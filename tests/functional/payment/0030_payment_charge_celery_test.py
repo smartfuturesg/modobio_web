@@ -4,7 +4,7 @@ from odyssey import db
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentHistory
 
-from .data import payment_refund_data, generate_test_booking
+from .data import payment_refund_data, test_booking
 
 from odyssey.tasks.periodic import find_chargable_bookings
 from odyssey.tasks.tasks import charge_telehealth_appointment
@@ -19,25 +19,20 @@ Check that the payment was triggered through the payment history table
 Refund the payment
 Check that the refund was successful
 """
-def test_bookings_payment(test_client):
-    #force a booking in less than 24 hours into bookings table
-    booking = generate_test_booking(test_client)
-    db.session.add(booking)
-    db.session.commit()
-
+def test_bookings_payment(test_client, test_booking):
     #run celery tasks to find and charge bookings
     bookings = find_chargable_bookings()
     assert len(bookings) == 1
 
-    charge_telehealth_appointment(booking.idx)
+    charge_telehealth_appointment(test_booking.idx)
 
-    assert booking.charged == True
+    assert test_booking.charged == True
 
     history = PaymentHistory.query. \
-        filter_by(user_id=test_client.client_id, payment_method_id=booking.payment_method_id) \
+        filter_by(user_id=test_client.client_id, payment_method_id=test_booking.payment_method_id) \
         .order_by(PaymentHistory.created_at.desc()).all()[-1]
 
-    assert history.transaction_amount == booking.consult_rate
+    assert history.transaction_amount == test_booking.consult_rate
     assert history.transaction_id
 
     #process refunds for the payment
@@ -99,6 +94,3 @@ def test_bookings_payment(test_client):
 
     assert response.status_code == 200
     assert len(response.json) == 2
-
-    db.session.delete(booking)
-    db.session.commit()

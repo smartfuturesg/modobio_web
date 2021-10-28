@@ -1,5 +1,8 @@
+import pytest
+
 from datetime import datetime, time, timezone, timedelta
 
+from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
@@ -67,7 +70,8 @@ payment_refund_data = {
   "refund_reason": "abcdefghijklmnopqrstuvwxyz"
 }
 
-def generate_test_booking(test_client):
+@pytest.fixture(scope='function')
+def test_booking(test_client):
     """
     This function will generate a booking object for a booking that is less than 24 hours away.
     This can be used to test the payment system.
@@ -83,7 +87,7 @@ def generate_test_booking(test_client):
     if target_time_id >= 285:
         target_time_id = 284
 
-    return TelehealthBookings(**{
+    booking = TelehealthBookings(**{
         'payment_method_id': PaymentMethods.query.filter_by(user_id=test_client.client_id).first().idx,
         'client_user_id': test_client.client_id,
         'staff_user_id': test_client.staff_id,
@@ -101,3 +105,11 @@ def generate_test_booking(test_client):
         'charged': False,
         'consult_rate': 99.00
     })
+
+    db.session.add(booking)
+    db.session.flush()
+
+    yield booking
+
+    db.session.delete(booking)
+    db.session.commit()
