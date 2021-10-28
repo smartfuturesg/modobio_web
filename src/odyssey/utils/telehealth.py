@@ -130,7 +130,7 @@ def get_practitioners_available(time_block, q_request):
     location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation
     duration = q_request.duration
     
-    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, StaffRoles.consult_rate)\
+    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, StaffRoles.consult_rate, User.firstname, User.lastname, User.biological_sex_male)\
         .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
             .join(User, User.user_id == TelehealthStaffAvailability.user_id)\
                 .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
@@ -163,12 +163,16 @@ def get_practitioners_available(time_block, q_request):
     # practitioner availablilty as per availability input
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
-    consult_rates = {}
-    for user_id, avail, consult_rate in query.all():
+    practitioner_details = {} # name and consult rate for each practitioner, indexed by user_id
+    for user_id, avail, consult_rate, firstname, lastname, sex_male in query.all():
         if user_id not in available:
             available[user_id] = []
-        if user_id not in consult_rates:
-            consult_rates[user_id] = consult_rate
+        if user_id not in practitioner_details:
+            practitioner_details[user_id] = {
+                'consult_rate': consult_rate, 
+                'firstname': firstname,
+                'lastname': lastname,
+                'gender': 'm' if sex_male else 'f'}
         if avail:
             available[user_id].append(avail)
     
@@ -192,7 +196,7 @@ def get_practitioners_available(time_block, q_request):
             #practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioners[practitioner_user_id] = available[practitioner_user_id]
     
-    return practitioners, consult_rates
+    return practitioners, practitioner_details
 
 def verify_availability(client_user_id, staff_user_id, utc_start_idx, utc_end_idx, target_start_datetime_utc, target_end_datetime_utc, client_location_id):
     ###
