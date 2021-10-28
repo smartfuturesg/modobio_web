@@ -21,7 +21,6 @@ from odyssey.api.notifications.schemas import (
     ApplePushNotificationBadgeSchema,
     ApplePushNotificationVoipSchema)
 from odyssey.utils.constants import (
-    BLACKLISTED_EMAIL_DOMAINS,
     DEV_EMAIL_DOMAINS,
     PASSWORD_RESET_URL,
     REGISTRATION_PORTAL_URL)
@@ -37,8 +36,8 @@ SUBJECTS = {
     'account_deleted': 'Modo Bio Account Deleted',
     'email-verification': 'Verify Your Modo Bio Email'}
 
-_blacklist_file = pathlib.Path(current_app.static_folder) / 'email-domain-blacklist.txt'
-_blacklisted_email_domains = _blacklist_file.read_text().split('\n')
+# Cache value
+_blacklisted_email_domains = None
 
 def email_domain_blacklisted(email_address: str):
     """ Check whether the domain of an email address is blacklisted.
@@ -58,11 +57,17 @@ def email_domain_blacklisted(email_address: str):
     BadRequest
         If the email address is not valid or if it is blacklisted.
     """
+    global _blacklisted_email_domains
+
+    if not _blacklisted_email_domains:
+        blacklist_file = pathlib.Path(current_app.static_folder) / 'email-domain-blacklist.txt'
+        _blacklisted_email_domains = blacklist_file.read_text().split('\n')
+
     parts = email_address.split('@')
     if len(parts) != 2:
         raise BadRequest('Not a valid email address.')
 
-    # Domainnames (and entire email addresses) must always be lowercase.
+    # Domainnames must always be lowercase.
     # Unicode Technical Standard #46 (a.k.a. Unicode IDNA Compatibility
     # Processing) defines lower case mapping in IDNA.
     try:
@@ -71,7 +76,7 @@ def email_domain_blacklisted(email_address: str):
         raise BadRequest('Not a valid email address.')
 
     if domain in _blacklisted_email_domains:
-        raise BadRequest(f'Email adresses from "{parts[1]}" are not allowed')
+        raise BadRequest(f'Email adresses from "{parts[1]}" are not allowed.')
 
 def send_email_user_registration_portal(recipient, password, portal_id):
     """
