@@ -169,7 +169,7 @@ def get_practitioners_available(time_block, q_request):
             available[user_id] = []
         if user_id not in practitioner_details:
             practitioner_details[user_id] = {
-                'consult_rate': consult_rate, 
+                'consult_cost': round(float(consult_rate) * int(q_request.duration)/60.0, 2), 
                 'firstname': firstname,
                 'lastname': lastname,
                 'gender': 'm' if sex_male else 'f'}

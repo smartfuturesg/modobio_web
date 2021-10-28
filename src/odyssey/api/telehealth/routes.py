@@ -339,7 +339,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 final_dict.append({
                     'staff_user_id': pract,
                     'staff_available': [{'user_id': practitioner_user_id, 
-                                        'consult_rate': practitioner_details[practitioner_user_id]['consult_rate'],
+                                        'consult_cost': practitioner_details[practitioner_user_id]['consult_cost'],
                                         'firstname': practitioner_details[practitioner_user_id]['firstname'],
                                         'lastname': practitioner_details[practitioner_user_id]['lastname'],
                                         'gender': practitioner_details[practitioner_user_id]['gender']} 

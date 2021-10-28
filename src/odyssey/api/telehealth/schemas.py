@@ -39,7 +39,7 @@ class TelehealthAvailableStaffSchema(Schema):
     firstname = fields.String()
     lastname = fields.String()
     gender = fields.String()
-    consult_rate = fields.Number(missing=None)
+    consult_cost = fields.Number(missing=None)
 
 class TelehealthTimeSelectSchema(Schema):
     staff_user_id = fields.Integer()
