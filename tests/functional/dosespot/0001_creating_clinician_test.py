@@ -44,11 +44,8 @@ def test_get_patient_ds_pharmacies(test_client):
 
 @pytest.mark.skip('Dosespot API down')
 def test_get_patient_ds_prescriptions(test_client):
-    start_date='2021-01-01'
-    end_date='2021-10-27'
-    response = test_client.get(f'/dosespot/prescribe/{test_client.client_id}/?start_date={start_date}&end_date={end_date}',
+    response = test_client.get(f'/dosespot/prescribe/{test_client.client_id}/',
                                 headers=test_client.client_auth_header)
-    # breakpoint()
     assert response.status_code == 200 
 
 @pytest.mark.skip('Dosespot API down')

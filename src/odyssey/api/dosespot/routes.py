@@ -1,5 +1,5 @@
 import requests
-import datetime
+from datetime import datetime
 
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
@@ -19,7 +19,8 @@ from odyssey.api.dosespot.schemas import (
     DoseSpotPrescribeSSO,
     DoseSpotPharmacyNestedSelect,
     DoseSpotEnrollmentGET,
-    DoseSpotAllergyOutput
+    DoseSpotAllergyOutput,
+    DoseSpotPrescribedOutput
 )
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
@@ -34,6 +35,7 @@ from odyssey.utils.dosespot import (
     generate_encrypted_user_id,
     generate_sso,
     get_access_token,
+    lookup_ds_users,
     onboard_patient,
     onboard_practitioner,
     onboard_proxy_user)
@@ -79,24 +81,17 @@ class DoseSpotAllergies(BaseResource):
         if not res.ok:
             raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
 
-        # Store Modobio info in the response.        
-        query = db.session.execute(
-            select(User, DoseSpotPractitionerID
-            ).join(DoseSpotPractitionerID, DoseSpotPractitionerID.user_id == User.user_id)  
-        ).all()
-
-        # create a hashmap lookup table
-        lookup_users = {}
-        for user,practitioner in query:
-            if user not in lookup_users:
-                lookup_users[practitioner.ds_user_id] = user
+        lookup_users = lookup_ds_users()
 
         for item in res_json['Items']:
             if item['LastUpdatedUserId'] in lookup_users:
                 item['modobio_id'] = lookup_users[item['LastUpdatedUserId']].modobio_id
                 item['modobio_user_id'] = lookup_users[item['LastUpdatedUserId']].user_id
                 item['modobio_name'] = lookup_users[item['LastUpdatedUserId']].firstname + ' ' + lookup_users[item['LastUpdatedUserId']].lastname
-        breakpoint()
+
+            if item['OnsetDate']:
+                item['OnsetDate'] = datetime.strptime(item['OnsetDate'].split('T')[0], '%Y-%m-%d').date()
+
         payload = {'items': res_json['Items'],
                    'total_items': len(res_json['Items'])}
 
@@ -120,14 +115,15 @@ class DoseSpotPractitionerCreation(BaseResource):
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
     @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',))
-    @ns.doc(params={'start_date': 'prescriptions start range date',
-                'end_date':'prescriptions end range date'})
+    @responds(schema=DoseSpotPrescribedOutput,status_code=200,api=ns)
     def get(self, user_id):
         """
         GET - DoseSpot Patient prescribed medications
         """
-        start_date = request.args.get('start_date')
-        end_date = request.args.get('end_date')
+        # Some date from a long time ago to today
+        start_date = '1970-01-01'
+        now = datetime.now()
+        end_date = now.strftime("%Y-%m-%d")
 
         if not start_date or not end_date:
             raise BadRequest('Please provide both start and end dates.')
@@ -162,7 +158,31 @@ class DoseSpotPatientCreation(BaseResource):
         res_json = res.json()
         if not res.ok:
             raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        return res_json['Items']
+
+        lookup_users = lookup_ds_users()
+
+        for item in res_json['Items']:
+            if item['PrescriberId'] in lookup_users:
+                item['modobio_id'] = lookup_users[item['PrescriberId']].modobio_id
+                item['modobio_user_id'] = lookup_users[item['PrescriberId']].user_id
+                item['modobio_name'] = lookup_users[item['PrescriberId']].firstname + ' ' + lookup_users[item['PrescriberId']].lastname
+
+            if item['WrittenDate']:
+                item['WrittenDate'] = datetime.strptime(item['WrittenDate'].split('T')[0], '%Y-%m-%d').date()
+
+            if item['EffectiveDate']:
+                item['EffectiveDate'] = datetime.strptime(item['EffectiveDate'].split('T')[0], '%Y-%m-%d').date()
+
+            if item['LastFillDate']:
+                item['LastFillDate'] = datetime.strptime(item['LastFillDate'].split('T')[0], '%Y-%m-%d').date()
+
+            if item['DateInactive']:
+                item['DateInactive'] = datetime.strptime(item['DateInactive'].split('T')[0], '%Y-%m-%d').date()
+
+        payload = {'items': res_json['Items'],
+                   'total_items': len(res_json['Items'])}
+
+        return payload
 
     @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))      
     @responds(schema=DoseSpotPrescribeSSO,status_code=201,api=ns)
