@@ -31,13 +31,20 @@ booking_time_increment_length = 0
 booking_max_increment_idx = 0
 
 def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
+
+    # consider if the request is being made less than TELEHEALTH_BOOKING_LEAD_TIME_HRS before the start of the next day
+    # if it's thurs 11 pm, we should offer friday 1 am the earliest, not midnight
     localized_target_date = datetime.combine(target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
-    time_now_client_localized = datetime.now(tz.gettz(client_tz))
+    time_now_client_localized = datetime.now(tz.gettz(client_tz)) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
     
     # if request was for a time in the past or current time, use the present time + booking lead time window
     if localized_target_date <= time_now_client_localized:
-        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
-        localized_target_date = localized_target_date.replace(minute=0, second=0, microsecond=0)
+        localized_target_date = time_now_client_localized
+        # round up the minute to the nearest 15 min interval
+        if localized_target_date.minute % 15 != 0:
+            minutes = 15 - localized_target_date.minute % 15
+            localized_target_date = localized_target_date + timedelta(minutes=minutes)
+        localized_target_date = localized_target_date.replace(second=0, microsecond=0)
 
     localized_end = datetime.combine(localized_target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
     day_start_utc = localized_target_date.astimezone(tz.UTC)
@@ -355,7 +362,7 @@ def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='Syst
 
     db.session.commit()
     return
-    
+
 def get_booking_increment_data():
     global booking_time_increment_length
     global booking_max_increment_idx
