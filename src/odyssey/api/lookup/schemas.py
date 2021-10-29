@@ -28,9 +28,19 @@ from odyssey.api.lookup.models import (
     LookupLegalDocs,
     LookupMedicalSymptoms,
     LookupOrganizations,
-    LookupCurrencies
+    LookupCurrencies,
+    LookupUSStates
 )
 from odyssey.utils.base.schemas import BaseSchema
+
+class LookupUSStatesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupUSStates
+    territory_id = fields.Integer(missing=None)
+
+class LookupUSStatesOutputSchema(Schema):
+    items = fields.Nested(LookupUSStatesSchema(many=True))
+    total_items = fields.Integer()
 
 class LookupTermsAndConditionsOutputSchema(BaseSchema):
     class Meta:
