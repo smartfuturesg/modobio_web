@@ -84,12 +84,12 @@ class DoseSpotAllergies(BaseResource):
         lookup_users = lookup_ds_users()
 
         for item in res_json['Items']:
-            if item['LastUpdatedUserId'] in lookup_users:
+            if item.get('LastUpdatedUserId') in lookup_users:
                 item['modobio_id'] = lookup_users[item['LastUpdatedUserId']].modobio_id
                 item['modobio_user_id'] = lookup_users[item['LastUpdatedUserId']].user_id
                 item['modobio_name'] = lookup_users[item['LastUpdatedUserId']].firstname + ' ' + lookup_users[item['LastUpdatedUserId']].lastname
 
-            if item['OnsetDate']:
+            if item.get('OnsetDate'):
                 item['OnsetDate'] = datetime.strptime(item['OnsetDate'].split('T')[0], '%Y-%m-%d').date()
 
         payload = {'items': res_json['Items'],
@@ -162,21 +162,21 @@ class DoseSpotPatientCreation(BaseResource):
         lookup_users = lookup_ds_users()
 
         for item in res_json['Items']:
-            if item['PrescriberId'] in lookup_users:
+            if item.get('PrescriberId') in lookup_users:
                 item['modobio_id'] = lookup_users[item['PrescriberId']].modobio_id
                 item['modobio_user_id'] = lookup_users[item['PrescriberId']].user_id
                 item['modobio_name'] = lookup_users[item['PrescriberId']].firstname + ' ' + lookup_users[item['PrescriberId']].lastname
 
-            if item['WrittenDate']:
+            if item.get('WrittenDate'):
                 item['WrittenDate'] = datetime.strptime(item['WrittenDate'].split('T')[0], '%Y-%m-%d').date()
 
-            if item['EffectiveDate']:
+            if item.get('EffectiveDate'):
                 item['EffectiveDate'] = datetime.strptime(item['EffectiveDate'].split('T')[0], '%Y-%m-%d').date()
 
-            if item['LastFillDate']:
+            if item.get('LastFillDate'):
                 item['LastFillDate'] = datetime.strptime(item['LastFillDate'].split('T')[0], '%Y-%m-%d').date()
 
-            if item['DateInactive']:
+            if item.get('DateInactive'):
                 item['DateInactive'] = datetime.strptime(item['DateInactive'].split('T')[0], '%Y-%m-%d').date()
 
         payload = {'items': res_json['Items'],
