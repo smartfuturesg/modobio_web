@@ -31,8 +31,19 @@ class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()
     conversation_sid = fields.String()
 
+class TelehealthAvailableStaffSchema(Schema):
+    """
+    Details of staff members who are available for a specific timeslot
+    """
+    user_id = fields.Integer()
+    firstname = fields.String()
+    lastname = fields.String()
+    gender = fields.String()
+    consult_cost = fields.Number(missing=None)
+
 class TelehealthTimeSelectSchema(Schema):
     staff_user_id = fields.Integer()
+    staff_available = fields.Nested(TelehealthAvailableStaffSchema(many=True))
     start_time = fields.Time()
     end_time = fields.Time()
     booking_window_id_start_time = fields.Integer()
