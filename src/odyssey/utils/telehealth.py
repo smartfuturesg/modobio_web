@@ -135,7 +135,8 @@ def get_practitioners_available(time_block, q_request):
             .join(User, User.user_id == TelehealthStaffAvailability.user_id)\
                 .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
                 .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
-                PractitionerCredentials.state == location)
+                PractitionerCredentials.state == location,
+                StaffRoles.consult_rate != None)
     
     # if we need to check for gender
     if q_request.medical_gender != 'np':
