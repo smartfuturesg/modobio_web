@@ -401,7 +401,8 @@ class Client(BaseResource):
 
             client_data.update(client_info)
         if request.parsed_obj['user_info']:
-            email_domain_blacklisted(request.parsed_obj['user_info']['email'])
+            if 'email' in request.parsed_obj['user_info']:
+                email_domain_blacklisted(request.parsed_obj['user_info']['email'])
             user_data.update(request.parsed_obj['user_info'])
 
         db.session.commit()
