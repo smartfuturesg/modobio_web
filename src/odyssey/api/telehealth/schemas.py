@@ -31,8 +31,19 @@ class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()
     conversation_sid = fields.String()
 
+class TelehealthAvailableStaffSchema(Schema):
+    """
+    Details of staff members who are available for a specific timeslot
+    """
+    user_id = fields.Integer()
+    firstname = fields.String()
+    lastname = fields.String()
+    gender = fields.String()
+    consult_cost = fields.Number(missing=None)
+
 class TelehealthTimeSelectSchema(Schema):
     staff_user_id = fields.Integer()
+    staff_available = fields.Nested(TelehealthAvailableStaffSchema(many=True))
     start_time = fields.Time()
     end_time = fields.Time()
     booking_window_id_start_time = fields.Integer()
@@ -61,6 +72,8 @@ class TelehealthChatRoomsSchema(ma.SQLAlchemyAutoSchema):
         model = TelehealthChatRooms
         exclude = ('booking', 'booking_id', 'client_user_id', 'staff_user_id')
     
+    transcript_url = fields.String(missing=None)
+    
 class TelehealthUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -87,14 +100,14 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     booking_id = fields.Integer(dump_only=True)
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
     status_history = fields.Nested(TelehealthBookingStatusSchema(many=True), dump_only=True)
-    chat_room = fields.Nested(TelehealthChatRoomsSchema(only=['conversation_sid', 'room_name', 'room_status']), dump_only=True)
+    chat_room = fields.Nested(TelehealthChatRoomsSchema(only=['conversation_sid', 'room_name', 'room_status', 'transcript_url']), dump_only=True)
     client = fields.Nested(TelehealthUserSchema, dump_only=True)
     practitioner = fields.Nested(TelehealthUserSchema, dump_only=True)
     payment_method_id = fields.Integer(required=False)
     client_location_id = fields.Integer(required=False)
     start_time_utc = fields.Time()
     booking_url = fields.String()
-    transcript_url = fields.String()
+    consult_rate = fields.Number(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):

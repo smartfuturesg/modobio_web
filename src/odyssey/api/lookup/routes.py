@@ -31,7 +31,8 @@ from odyssey.api.lookup.models import (
      LookupLegalDocs,
      LookupMedicalSymptoms,
      LookupOrganizations,
-     LookupCurrencies
+     LookupCurrencies,
+     LookupUSStates
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -59,15 +60,31 @@ from odyssey.api.lookup.schemas import (
     LookupNotificationsOutputSchema,
     LookupMedicalSymptomsOutputSchema,
     LookupOrganizationsOutputSchema,
-    LookupCurrenciesOutputSchema
+    LookupCurrenciesOutputSchema,
+    LookupUSStatesOutputSchema
 )
 from odyssey.utils.auth import token_auth
+from odyssey.utils.base.models import BaseModelWithIdx
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_drink_existence
 
 logger = logging.getLogger(__name__)
 
 ns = Namespace('lookup', description='Endpoints for lookup tables.')
+
+@ns.route('/states/')
+class LookupUSStatesResource(BaseResource):
+    """
+        Returns U
+        nited States' states and their abbreviations
+    """
+    @responds(schema=LookupUSStatesOutputSchema,status_code=200,api=ns)
+    def get(self):
+        states = LookupUSStates.query.all()
+        payload = {'items': states,
+                   'total_items': len(states)}
+
+        return payload
 
 @ns.route('/terms-and-conditions/')
 class LookupTermsAndConditionResource(BaseResource):

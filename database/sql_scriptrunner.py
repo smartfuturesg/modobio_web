@@ -38,6 +38,12 @@ conf = Config()
 parser = database_parser()
 parser.description = __doc__ + '\n' + parser.description
 
+parser.add_argument(
+    'scripts',
+    nargs='*',
+    help='[Optional] Individual scripts to be run. Only the given scripts are run and nothing else. '
+         'Environment setting (development vs production) or any of the optional arguments are ignored.')
+
 prev_group = parser.add_mutually_exclusive_group()
 prev_group.add_argument(
     '--previous',
@@ -79,49 +85,51 @@ dev_group.add_argument(
 args = parser.parse_args()
 
 # Collect files.
-# if args.previous == args.no_previous (i.e. both are True or both are False)
-# then --prev or --no-prev was given. Otherwise, no option was given so go by env.
-prev = dev = conf.DEV
-if args.previous == args.no_previous:
-    prev = args.previous
+files = args.scripts
+if not files:
+    # if args.previous == args.no_previous (i.e. both are True or both are False)
+    # then --prev or --no-prev was given. Otherwise, no option was given so go by env.
+    prev = dev = conf.DEV
+    if args.previous == args.no_previous:
+        prev = args.previous
 
-if args.dev == args.no_dev:
-    dev = args.dev
+    if args.dev == args.no_dev:
+        dev = args.dev
 
-cur = True
-if args.current == args.no_current:
-    cur = args.current
+    cur = True
+    if args.current == args.no_current:
+        cur = args.current
 
-files = []
-here = pathlib.Path(__file__).parent
+    files = []
+    here = pathlib.Path(__file__).parent
 
-if prev:
-    prev_dir = here / 'releases'
-    prev_sql_files = list(prev_dir.rglob('*.sql'))
-    prev_py_files = list(prev_dir.rglob('*.py'))
+    if prev:
+        prev_dir = here / 'releases'
+        prev_sql_files = list(prev_dir.rglob('*.sql'))
+        prev_py_files = list(prev_dir.rglob('*.py'))
 
-    prev_sql_files.extend(prev_py_files)
+        prev_sql_files.extend(prev_py_files)
 
-    prev_sql_files.sort()
-    files.extend(prev_sql_files)
+        prev_sql_files.sort()
+        files.extend(prev_sql_files)
 
-if cur:
-    current_dir = here / 'current'
-    current_sql_files = list(current_dir.glob('*.sql'))
-    current_py_files = list(current_dir.glob('*.py'))
+    if cur:
+        current_dir = here / 'current'
+        current_sql_files = list(current_dir.glob('*.sql'))
+        current_py_files = list(current_dir.glob('*.py'))
 
-    current_sql_files.extend(current_py_files)
-    current_sql_files.sort()
-    files.extend(current_sql_files)
+        current_sql_files.extend(current_py_files)
+        current_sql_files.sort()
+        files.extend(current_sql_files)
 
-if dev:
-    dev_dir = here / 'dev'
-    dev_sql_files = list(dev_dir.glob('*.sql'))
-    dev_py_files = list(dev_dir.glob('*py'))
+    if dev:
+        dev_dir = here / 'dev'
+        dev_sql_files = list(dev_dir.glob('*.sql'))
+        dev_py_files = list(dev_dir.glob('*py'))
 
-    dev_sql_files.extend(dev_py_files)
-    dev_sql_files.sort()
-    files.extend(dev_sql_files)
+        dev_sql_files.extend(dev_py_files)
+        dev_sql_files.sort()
+        files.extend(dev_sql_files)
 
 # Open DB connection.
 print(f'Using the following database: {args.db_uri}')

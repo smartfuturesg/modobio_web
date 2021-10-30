@@ -17,6 +17,7 @@ from flask_migrate import Migrate
 from flask_pymongo import PyMongo 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import ProgrammingError
+from werkzeug.exceptions import HTTPException
 
 # Temporary fix
 from flask.scaffold import _endpoint_from_view_func
@@ -24,6 +25,8 @@ import flask.helpers
 flask.helpers._endpoint_from_view_func = _endpoint_from_view_func
 
 from odyssey.utils.logging import JsonFormatter
+from odyssey.utils.errors import exception_handler, http_exception_handler
+
 from odyssey.config import Config
 conf = Config()
 
@@ -124,6 +127,15 @@ def create_app():
     # Load the API.
     from odyssey.api import bp, api
 
+    # Register error handlers
+    #
+    # Basic exceptions (unexpected erros) are handled by Flask,
+    # HTTP exceptions (expected errors) are handled by Flask-RestX.
+    # Flask-RestX does not have a nice register function like Flask does,
+    # but this is essentially what the @api.errorhandler decorator does.
+    app.register_error_handler(Exception, exception_handler)
+    api.error_handlers[HTTPException] = http_exception_handler
+
     # api._doc or Api(doc=...) is not True/False,
     # it is 'path' (default '/') or False to disable.
     if not app.config['SWAGGER_DOC']:
@@ -138,10 +150,13 @@ def create_app():
         from odyssey.api.notifications.routes import ns_dev
         api.add_namespace(ns_dev)
 
+        from odyssey.api.payment.routes import ns_dev
+        api.add_namespace(ns_dev)
+
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)
-    
+
     # Elasticsearch setup.
     app.elasticsearch = None
     if app.config['ELASTICSEARCH_URL']:

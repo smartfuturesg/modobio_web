@@ -26,7 +26,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, email_required=True, resources = ()):
+    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, email_required=True, resources = (), dev_only=False):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -79,6 +79,10 @@ class BasicAuth(object):
                     
                 Any issues coming from the above should raise a 401 error with no message.
                 """
+                if dev_only:
+                    if not current_app.config['DEV']:
+                        raise BadRequest('This request is only available in dev')
+                
                 auth = self.get_auth()
 
                 # Authenticate and load user and user login details
