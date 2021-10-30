@@ -63,7 +63,7 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
-from odyssey.utils.message import send_test_email
+from odyssey.utils.message import send_test_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
     check_drink_existence
@@ -401,6 +401,7 @@ class Client(BaseResource):
 
             client_data.update(client_info)
         if request.parsed_obj['user_info']:
+            email_domain_blacklisted(request.parsed_obj['user_info']['email'])
             user_data.update(request.parsed_obj['user_info'])
 
         db.session.commit()
