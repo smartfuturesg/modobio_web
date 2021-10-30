@@ -100,3 +100,15 @@ def test_blacklisted_email_address(test_client):
 
     assert response.status_code == 400
     assert response.json['message'] == 'Email adresses from "10-minute-mail.com" are not allowed.'
+
+def test_update_blacklisted_email_address(test_client):
+    payload = {'user_info': {'email': 'user@10-minute-mail.com'}}
+
+    response = test_client.put(
+        f'/client/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 400
+    assert response.json['message'] == 'Email adresses from "10-minute-mail.com" are not allowed.'
