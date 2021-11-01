@@ -122,6 +122,21 @@ def test_creating_new_staff_same_email(test_client):
 
     assert response.status_code == 400
 
+def test_creating_new_staff_blacklisted_email(test_client):
+    payload =  {
+        'user_info': {
+            'email': 'user@10-minute-mail.com',
+            'password': 'password'}}
+
+    response = test_client.post(
+        '/user/staff/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 400
+    assert response.json['message'] == 'Email adresses from "10-minute-mail.com" are not allowed.'
+
 def test_add_roles_to_staff(test_client, new_staff):
     uid = new_staff['user_id']
     response = test_client.put(

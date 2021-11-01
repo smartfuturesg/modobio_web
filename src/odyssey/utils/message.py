@@ -1,12 +1,11 @@
-import logging
-logger = logging.getLogger(__name__)
-
 import enum
+import logging
 import pathlib
 
-import boto3
-
 from dataclasses import dataclass
+
+import boto3
+import idna
 
 from botocore.exceptions import ClientError
 from flask import current_app
@@ -21,16 +20,63 @@ from odyssey.api.notifications.schemas import (
     ApplePushNotificationBackgroundSchema,
     ApplePushNotificationBadgeSchema,
     ApplePushNotificationVoipSchema)
-from odyssey.utils.constants import DEV_EMAIL_DOMAINS, PASSWORD_RESET_URL, REGISTRATION_PORTAL_URL
+from odyssey.utils.constants import (
+    DEV_EMAIL_DOMAINS,
+    PASSWORD_RESET_URL,
+    REGISTRATION_PORTAL_URL)
 
-SUBJECTS = {"remote_registration_portal": "Modo Bio User Registration Portal", 
-            "password_reset": "Modo bio password reset request - temporary link",
-            "testing-bounce": "SES TEST EMAIL-BOUNCE",
-            "testing-complaint": "SES TEST EMAIL-COMPLAINT",
-            "testing-success": "SES TEST EMAIL",
-            "account_deleted": "Modo Bio Account Deleted",
-            "email-verification": "Verify Your Modo Bio Email"
-            }
+logger = logging.getLogger(__name__)
+
+SUBJECTS = {
+    'remote_registration_portal': 'Modo Bio User Registration Portal',
+    'password_reset': 'Modo bio password reset request - temporary link',
+    'testing-bounce': 'SES TEST EMAIL-BOUNCE',
+    'testing-complaint': 'SES TEST EMAIL-COMPLAINT',
+    'testing-success': 'SES TEST EMAIL',
+    'account_deleted': 'Modo Bio Account Deleted',
+    'email-verification': 'Verify Your Modo Bio Email'}
+
+# Cache value
+_blacklisted_email_domains = None
+
+def email_domain_blacklisted(email_address: str):
+    """ Check whether the domain of an email address is blacklisted.
+
+    Loads a list with blacklisted domainnames and checks whether or not the
+    provided email address is blacklisted or not. Email address may be
+    given in any character set, IDNA (International Domain Names in
+    Appications) is supported.
+
+    Parameters
+    ----------
+    email_address : str
+        The email address as provided by the user.
+
+    Raises
+    ------
+    BadRequest
+        If the email address is not valid or if it is blacklisted.
+    """
+    global _blacklisted_email_domains
+
+    if not _blacklisted_email_domains:
+        blacklist_file = pathlib.Path(current_app.static_folder) / 'email-domain-blacklist.txt'
+        _blacklisted_email_domains = blacklist_file.read_text().split('\n')
+
+    parts = email_address.split('@')
+    if len(parts) != 2:
+        raise BadRequest('Not a valid email address.')
+
+    # Domainnames must always be lowercase.
+    # Unicode Technical Standard #46 (a.k.a. Unicode IDNA Compatibility
+    # Processing) defines lower case mapping in IDNA.
+    try:
+        domain = idna.encode(parts[1], uts46=True).decode('utf-8')
+    except idna.IDNAError:
+        raise BadRequest('Not a valid email address.')
+
+    if domain in _blacklisted_email_domains:
+        raise BadRequest(f'Email adresses from "{parts[1]}" are not allowed.')
 
 def send_email_user_registration_portal(recipient, password, portal_id):
     """
