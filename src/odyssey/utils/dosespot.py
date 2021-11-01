@@ -20,6 +20,7 @@ from odyssey.api.dosespot.schemas import (
 )
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
+    LookupUSStates,
 )
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.staff.models import (
@@ -139,7 +140,7 @@ def onboard_practitioner(user_id):
             res_json = res.json()
             raise BadRequest('DoseSpot returned the following error: {res_json}.')
         
-        state = LookupTerritoriesOfOperations.query.filter_by(idx=staff_office.territory_id).one_or_none()
+        state = LookupUSStates.query.filter_by(idx=staff_office.state_id).one_or_none()
         
         # Phone Type
         # 2 - Cell
@@ -159,7 +160,7 @@ def onboard_practitioner(user_id):
                 'DateOfBirth': user.dob,
                 'Address1': staff_office.street,
                 'City':staff_office.city,
-                'State':state.sub_territory_abbreviation,
+                'State':state.abbreviation,
                 'ZipCode':staff_office.zipcode,
                 'PrimaryPhone': staff_office.phone,
                 'PrimaryPhoneType': phone_type,
@@ -235,7 +236,7 @@ def onboard_patient(patient_id:int,practitioner_id:int):
         gender = 2
     else:
         gender = 3
-    state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
+    state = LookupUSStates.query.filter_by(idx=user.client_info.state_id).one_or_none()
     # Phone Type
     # 2 - Cell
     phone_type = 2
@@ -245,7 +246,7 @@ def onboard_patient(patient_id:int,practitioner_id:int):
             'Gender': gender,
             'Address1': user.client_info.street,
             'City':user.client_info.city,
-            'State':state.sub_territory_abbreviation,
+            'State':state.abbreviation,
             'ZipCode':user.client_info.zipcode,
             'PrimaryPhone': user.phone_number,
             'PrimaryPhoneType': phone_type,
