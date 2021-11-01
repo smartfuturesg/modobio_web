@@ -31,6 +31,7 @@ setup(
         'Flask-PyMongo',
         'flask-restx',
         'Flask_SQLAlchemy',
+        'idna',
         'marshmallow',
         'marshmallow-sqlalchemy',
         'psycopg2',        
