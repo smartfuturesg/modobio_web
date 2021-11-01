@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.utils.file_handling import FileHandling
 logger = logging.getLogger(__name__)
 
 from typing import Any
@@ -140,7 +142,7 @@ def get_practitioners_available(time_block, q_request):
     location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation
     duration = q_request.duration
     
-    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, StaffRoles.consult_rate, User.firstname, User.lastname, User.biological_sex_male)\
+    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, User, StaffRoles.consult_rate)\
         .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
             .join(User, User.user_id == TelehealthStaffAvailability.user_id)\
                 .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
@@ -175,15 +177,21 @@ def get_practitioners_available(time_block, q_request):
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
     practitioner_details = {} # name and consult rate for each practitioner, indexed by user_id
-    for user_id, avail, consult_rate, firstname, lastname, sex_male in query.all():
+    
+    for user_id, avail, user, consult_rate in query.all():
         if user_id not in available:
             available[user_id] = []
         if user_id not in practitioner_details:
+            image_path = user.staff_profile.profile_pictures[0].image_path if user.staff_profile.profile_pictures else None
+            prefix = image_path[0:image_path.rfind('/')] if image_path else None
             practitioner_details[user_id] = {
                 'consult_cost': round(float(consult_rate) * int(q_request.duration)/60.0, 2), 
-                'firstname': firstname,
-                'lastname': lastname,
-                'gender': 'm' if sex_male else 'f'}
+                'firstname': user.firstname,
+                'lastname': user.lastname,
+                'gender': 'm' if user.biological_sex_male else 'f',
+                'bio': user.staff_profile.bio,
+                'profile_pic_prefix': prefix,
+                'hourly_consult_rate': consult_rate}
         if avail:
             available[user_id].append(avail)
     

@@ -44,7 +44,7 @@ def test_sale_deny(test_client, test_booking):
     res = loads(response.data)
     assert res['TransactionStatus'] == "D"
     assert test_booking.status == 'Canceled'
-    assert test_booking.charged
+    assert not test_booking.charged 
 
     statuses = TelehealthBookingStatus().query.filter_by(booking_id=test_booking.idx).all()
     for status in statuses:
@@ -63,7 +63,7 @@ def test_sale_partial(test_client, test_booking):
     #should fail, check that booking is canceled and partial payment is voided
     assert response.status_code == 400
     assert test_booking.status == 'Canceled'
-    assert test_booking.charged
+    assert not test_booking.charged
 
     statuses = TelehealthBookingStatus().query.filter_by(booking_id=test_booking.idx).all()
     for status in statuses:
