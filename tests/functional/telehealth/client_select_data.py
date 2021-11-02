@@ -143,18 +143,18 @@ telehealth_staff_14_general_availability_post_data = {
 # ---------------------
 telehealth_bookings_staff_4_client_1_data = {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 109 #9:00
-  #'booking_window_id_end_time': 112
+  'booking_window_id_start_time': 109, #9:00
+  'booking_window_id_end_time': 112
 }
 telehealth_bookings_staff_4_client_3_data = {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 187 #15:30
-  #'booking_window_id_end_time': 190
+  'booking_window_id_start_time': 187, #15:30
+  'booking_window_id_end_time': 190
 }
 telehealth_bookings_staff_8_client_5_data = {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 118 #9:45
-  #'booking_window_id_end_time': 121
+  'booking_window_id_start_time': 118, #9:45
+  'booking_window_id_end_time': 121
 }
 
 # ------------
@@ -212,59 +212,59 @@ telehealth_staff_full_availability = {
 telehealth_bookings_data_full_day = [
   {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 10
-  #'booking_window_id_end_time': 13
+  'booking_window_id_start_time': 10,
+  'booking_window_id_end_time': 13
 },
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 28
-  #'booking_window_id_end_time': 31
+  'booking_window_id_start_time': 28,
+  'booking_window_id_end_time': 31
 },
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 40
-  #'booking_window_id_end_time': 43
+  'booking_window_id_start_time': 40,
+  'booking_window_id_end_time': 43
 },
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 49
-  #'booking_window_id_end_time': 52
+  'booking_window_id_start_time': 49,
+  'booking_window_id_end_time': 52
 },
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 97
-  #'booking_window_id_end_time': 100
+  'booking_window_id_start_time': 97,
+  'booking_window_id_end_time': 100
 },
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 121
-  #'booking_window_id_end_time': 124
+  'booking_window_id_start_time': 121,
+  'booking_window_id_end_time': 124
 },
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 145
-  #'booking_window_id_end_time': 148
+  'booking_window_id_start_time': 145,
+  'booking_window_id_end_time': 148
 },
 # from 18:00-02:00
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 217
-  #'booking_window_id_end_time': 220
+  'booking_window_id_start_time': 217,
+  'booking_window_id_end_time': 220
 },
 {
   'target_date': '2022-04-04',
-  'booking_window_id_start_time': 250
-  #'booking_window_id_end_time': 253
+  'booking_window_id_start_time': 250,
+  'booking_window_id_end_time': 253
 },
 {
   'target_date': '2022-04-05',
-  'booking_window_id_start_time': 13
-  #'booking_window_id_end_time': 15
+  'booking_window_id_start_time': 13,
+  'booking_window_id_end_time': 15
 },
 {
   'target_date': '2022-04-05',
-  'booking_window_id_start_time': 4
-  #'booking_window_id_end_time': 8
+  'booking_window_id_start_time': 4,
+  'booking_window_id_end_time': 8
 }
 ]
 

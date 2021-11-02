@@ -547,7 +547,7 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time','target_date']), api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_end_time','booking_window_id_start_time','target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     @ns.doc(params={'client_user_id': 'Client User ID',
                 'staff_user_id' : 'Staff User ID'})
@@ -608,7 +608,9 @@ class TelehealthBookingsApi(BaseResource):
         if target_date < client_local_datetime_now:
             raise BadRequest("Invalid target date or time")
         
-        # updated parsed_obj with client localized end 
+        # update parsed_obj with client localized end 
+        # NOTE currently ignorign the incoming 'booking_window_id_end_time' input
+        # TODO coordinate with FE to stop requiring 'booking_window_id_end_time'
         target_date_end_time = (target_date + timedelta(minutes = duration))
         request.parsed_obj.booking_window_id_end_time = start_time_idx_dict[target_date_end_time.strftime('%H:%M:%S')] - 1
 
