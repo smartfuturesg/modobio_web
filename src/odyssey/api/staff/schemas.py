@@ -64,6 +64,7 @@ class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
         load_only = ('user_id',)
     role_id = fields.Integer(attribute="idx", dump_only=True)
     granter_id = fields.Integer(load_only=True)
+    consult_rate = fields.Number(missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):

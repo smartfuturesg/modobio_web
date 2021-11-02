@@ -9,6 +9,7 @@ Flask-Migrate
 Flask-PyMongo
 flask-restx
 Flask-SQLAlchemy
+idna
 marshmallow
 marshmallow-sqlalchemy
 psycopg2

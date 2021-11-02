@@ -63,7 +63,7 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
-from odyssey.utils.message import send_test_email
+from odyssey.utils.message import send_test_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
     check_drink_existence
@@ -401,6 +401,8 @@ class Client(BaseResource):
 
             client_data.update(client_info)
         if request.parsed_obj['user_info']:
+            if 'email' in request.parsed_obj['user_info']:
+                email_domain_blacklisted(request.parsed_obj['user_info']['email'])
             user_data.update(request.parsed_obj['user_info'])
 
         db.session.commit()
@@ -1784,6 +1786,9 @@ class ClientHeightApi(BaseResource):
     Endpoints related to submitting client height and viewing
     a client's height history.
     """
+    # Multiple heights per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientHeightSchema, api=ns)
     @responds(schema=ClientHeightSchema, api=ns, status_code=201)
@@ -1820,6 +1825,9 @@ class ClientWeightApi(BaseResource):
     Endpoints related to submitting client weight and viewing
     a client's weight history.
     """
+    # Multiple weights per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientWeightSchema, api=ns)
     @responds(schema=ClientWeightSchema, api=ns, status_code=201)
@@ -1856,6 +1864,9 @@ class ClientWaistSizeApi(BaseResource):
     Endpoints related to submitting client waist size and viewing
     a client's waist size history.
     """
+    # Multiple waist sizes per user allowed
+    __check_resource__ = False
+
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientWaistSizeSchema, api=ns)
     @responds(schema=ClientWaistSizeSchema, api=ns, status_code=201)
@@ -1956,7 +1967,7 @@ class ClientTransactionPutApi(BaseResource):
 
 @ns.route('/default-health-metrics/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class ClientWeightApi(BaseResource):
+class ClientDefaultHealthMetricApi(BaseResource):
     """
     Endpoint for returning the recommended health metrics for the client based on age and sex
     """

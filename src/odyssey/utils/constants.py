@@ -905,7 +905,7 @@ TELEHEALTH_START_END_BUFFER = 0
 from odyssey.config import Config
 config = Config()
 # clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
-TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 2 if any((config.TESTING, config.DEV)) else 48
+TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 48
 
 INSTAMED_OUTLET = {
                 "MerchantID": '894805',

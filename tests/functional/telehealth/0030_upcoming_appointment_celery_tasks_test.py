@@ -125,7 +125,7 @@ def test_upcoming_bookings_scan(test_client, payment_method):
         + upcoming_bookings_5))
 
     assert len(upcoming_bookings_all) == len(all_bookings_day_1 + all_bookings_day_2)
-    assert type(upcoming_bookings_today) == list # there may be some bookings leftover from other tests
+    assert type(upcoming_bookings_today) == list # there may be some bookings leftover from other tests so this is jsut a type check
 
 def test_upcoming_bookings_notification(test_client):
     ##

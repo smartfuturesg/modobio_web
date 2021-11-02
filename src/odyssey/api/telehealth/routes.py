@@ -1,4 +1,3 @@
-import secrets
 from bson import ObjectId
 from datetime import datetime, time, timedelta
 from dateutil import tz
@@ -19,8 +18,6 @@ from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy import select
-from sqlalchemy.sql.expression import and_, or_
-import twilio
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -96,6 +93,7 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.utils.telehealth import *
 from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.base.resources import BaseResource
+from odyssey.tasks.tasks import cleanup_unended_call, store_telehealth_transcript
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
@@ -147,8 +145,9 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # TODO: configure meeting room
         # meeting type (group by default), participant limit , callbacks
         
-        token = twilio_obj.create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
-        
+        token, video_room_sid = twilio_obj.create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
+        meeting_room.sid = video_room_sid
+
         if g.user_type == 'staff':
             meeting_room.staff_access_token = token
 
@@ -165,17 +164,33 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
         db.session.add(meeting_room)
 
-        # Create TelehealthBookingStatus object and update booking status to 'In Progress'
+        # Update TelehealthBookingStatus to 'In Progress'
         booking.status = 'In Progress'
-        status_history = TelehealthBookingStatus(
-            booking_id=booking_id,
-            reporter_id=current_user.user_id,
-            reporter_role='Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
-            status='In Progress'
-        )
-        db.session.add(status_history)
+        update_booking_status_history(
+            new_status = booking.status,
+            booking_id = booking.idx, 
+            reporter_id = current_user.user_id, 
+            reporter_role = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
         db.session.commit()
 
+        # schedule celery task to ensure call is completed 10 min after utc end date_time
+        booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
+        
+        increment_data = get_booking_increment_data()
+        #calculate booking duration
+        if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
+            #booking crosses midnight
+            highest_index = increment_data['max_idx'] + 1
+            duration = (highest_index - booking.booking_window_id_start_time + \
+                booking.booking_window_id_end_time) * increment_data['length']
+        else:
+            duration = (booking.booking_window_id_end_time - booking.booking_window_id_start_time + 1) \
+                * increment_data['length']
+        cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
+        
+        if not current_app.config['TESTING']:
+            cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
+        
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
         if g.user_type == 'staff':
@@ -232,12 +247,25 @@ class TelehealthClientTimeSelectApi(BaseResource):
         duration = client_in_queue.duration
 
         days_out = 0
+        # days_available = 
+        # {local_target_date(datetime.date):
+        #   {start_time_idx_1: 
+        #       {'date_start_utc': datetime.date,
+        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #       }
+        #   },
+        #   {start_time_idx_2: 
+        #       {'date_start_utc': datetime.date,
+        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #       }
+        #   }
+        #}
         days_available = {}
         times_available = 0
         while days_out <= 7 and times_available < 10:
             local_target_date2 = local_target_date + timedelta(days=days_out)
             day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc = \
-                get_utc_start_day_time(local_target_date2,client_tz)
+                get_utc_start_day_time(local_target_date2, client_tz)
             
             time_blocks = get_possible_ranges(
                 day_start_utc,
@@ -246,15 +274,21 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 day_end_utc.weekday(), 
                 end_time_window_utc.idx,
                 duration)
-            
+
+            # available_times_with_practitioenrs =
+            # {start_time_idx: {'date_start_utc': datetime.date, 'practitioenrs': {user_id: [TelehealthStaffAvailability]}}}
+            # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioners': {10: [<TelehealthStaffAvailability 325>, <TelehealthStaffAvailability 326>, <TelehealthStaffAvailability 327>, <TelehealthStaffAvailability 328>]}}}
             available_times_with_practitioners = {}
+            practitioner_details = {} # {<user_id> : {'consult_rate': Decimal, 'firstname': str, 'lastname': str}
             for block in time_blocks:
-                avails = get_practitioners_available(time_blocks[block], client_in_queue)
+                # avails = {user_id(practioner): [TelehealthSTaffAvailability objects] }
+                avails, _practitioner_details = get_practitioners_available(time_blocks[block], client_in_queue)
                 if avails:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
                     available_times_with_practitioners[block] = {
                         'date_start_utc': date1.date(),
                         'practitioners': avails}       
+                    practitioner_details.update(_practitioner_details)
 
             if available_times_with_practitioners:
                 days_available[local_target_date2.date()] = available_times_with_practitioners
@@ -298,12 +332,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
         #payload = {'appointment_times': times,
         #           'total_options': len(times)}
 
-
-
         #buffer not taken into consideration here becuase that only matters to practitioner not client
-        idx_delta = int(duration/5) - 1
+                #calculate booking duration
+        increment_length = get_booking_increment_data()['length']
+        #convert time delta to minutes
+        idx_delta = int(duration/increment_length) - 1
         final_dict = []
-        
         for day in days_available:
             for time in days_available[day]:
                 # choose 1 practitioner at random that's available
@@ -319,6 +353,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
                 final_dict.append({
                     'staff_user_id': pract,
+                    'staff_available': [{'user_id': practitioner_user_id, 
+                                        'consult_cost': practitioner_details[practitioner_user_id]['consult_cost'],
+                                        'firstname': practitioner_details[practitioner_user_id]['firstname'],
+                                        'lastname': practitioner_details[practitioner_user_id]['lastname'],
+                                        'gender': practitioner_details[practitioner_user_id]['gender']} 
+                                        for practitioner_user_id in days_available[day][time]['practitioners']],
                     'target_date': datetime_start.date(),
                     'start_time': datetime_start.time(),
                     'end_time': datetime_end.time(),
@@ -466,8 +506,10 @@ class TelehealthBookingsApi(BaseResource):
             # transcript messages
             if booking.chat_room.transcript_object_id:
                 transcript_url = request.url_root[:-1] + url_for('api.telehealth_telehealth_transcripts', booking_id = booking.idx)
+                booking_chat_details = booking.chat_room.__dict__
+                booking_chat_details['transcript_url'] = transcript_url
             else: 
-                transcript_url = None
+                booking_chat_details = booking.chat_room.__dict__
 
             bookings_payload.append({
                 'booking_id': booking.idx,
@@ -475,13 +517,13 @@ class TelehealthBookingsApi(BaseResource):
                 'start_time_utc': start_time_utc.time(),
                 'status': booking.status,
                 'profession_type': booking.profession_type,
-                'chat_room': booking.chat_room,
+                'chat_room': booking_chat_details,
                 'client_location_id': booking.client_location_id,
                 'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
-                'transcript_url': transcript_url
+                'consult_rate': booking.consult_rate
             })
 
         # Sort bookings by time then sort by date
@@ -490,7 +532,7 @@ class TelehealthBookingsApi(BaseResource):
         
         twilio = Twilio()
         # create twilio access token with chat grant 
-        token = twilio.create_twilio_access_token(current_user.modobio_id)
+        token, _ = twilio.create_twilio_access_token(current_user.modobio_id)
         
         payload = {
             'all_bookings': len(bookings_payload),
@@ -589,7 +631,6 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.client_location_id = client_in_queue.location_id
         request.parsed_obj.payment_method_id = client_in_queue.payment_method_id
         request.parsed_obj.profession_type = client_in_queue.profession_type
-        request.parsed_obj.duration = client_in_queue.duration
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
 
         # check the practitioner's auto accept setting.
@@ -624,6 +665,8 @@ class TelehealthBookingsApi(BaseResource):
         # 30 minutes -> 0.5*consult_rate
         # 60 minutes -> 1*consulte_rate
         # 90 minutes -> 1.5*consulte_rate
+        if not consult_rate:
+            raise BadRequest('Practitioner has not set a consult rate')
         rate = float(consult_rate)*(telehealth_meeting_time)/60
         
         request.parsed_obj.consult_rate = str(rate)
@@ -653,7 +696,7 @@ class TelehealthBookingsApi(BaseResource):
         conversation_sid = twilio_obj.create_telehealth_chatroom(booking_id = request.parsed_obj.idx)
 
         # create access token with chat grant for newly provisioned room
-        token = twilio_obj.create_twilio_access_token(current_user.modobio_id)
+        token, _ = twilio_obj.create_twilio_access_token(current_user.modobio_id)
 
         # Once the booking has been successful, delete the client from the queue
         if client_in_queue:
@@ -702,7 +745,8 @@ class TelehealthBookingsApi(BaseResource):
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
-                'booking_url': booking_url
+                'booking_url': booking_url,
+                'consult_rate': booking.consult_rate
                 }
             ]
         }
@@ -1660,7 +1704,7 @@ class TelehealthAllChatRoomApi(BaseResource):
         return payload
 
 @ns.route('/bookings/complete/<int:booking_id>/')
-class TelehealthBookingsRoomAccessTokenApi(BaseResource):
+class TelehealthBookingsCompletionApi(BaseResource):
     """
     API for completing bookings
     """
@@ -1671,17 +1715,18 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         Complete the booking by:
         - send booking complete request to wheel
         - update booking status in TelehealthBookings
+        - update twilio
         """
         booking = db.session.execute(select(TelehealthBookings).where(
             TelehealthBookings.idx == booking_id,
             TelehealthBookings.status == 'In Progress')).scalars().one_or_none()
         if not booking:
-            raise BadRequest('Meeting does not exist yet or has not started yet.')
+            raise BadRequest('Meeting does not exist or has not started yet.')
 
         current_user, _ = token_auth.current_user()
 
         # make sure the requester is one of the participants
-        if not current_user.user_id == booking.staff_user_id:
+        if not current_user.user_id == booking.staff_user_id or current_user.user_id == booking.client_user_id:
             raise Unauthorized('You must be a participant in this booking.')
 
         ##### WHEEL #####        
@@ -1689,16 +1734,10 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         #     wheel = Wheel()
         #     wheel.complete_consult(booking.external_booking_id)
 
-        booking.status = 'Completed'
-
-        status_history = TelehealthBookingStatus(
-            booking_id=booking_id,
-            reporter_id=current_user.user_id,
-            reporter_role='Practitioner',
-            status='Completed'
-        )
-        db.session.add(status_history)
-        db.session.commit()
+        complete_booking(
+            booking_id = booking.idx, 
+            reporter_id = current_user.user_id,
+            reporter = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
 
         return 
 
@@ -1740,4 +1779,33 @@ class TelehealthTranscripts(Resource):
                     transcript['transcript'][message_idx]['media'][media_idx] = media
                     
         return transcript
+   
+    @token_auth.login_required(dev_only=True)
+    @responds(api=ns, status_code=200)
+    def patch(self, booking_id):
+        """
+        **DEV only**
+
+        Store booking transcripts for the booking_id supplied.
+        This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
+        that is fired off following the completion of a booking. 
+
+        Params
+        ------
+        booking_id
+
+        Returns
+        -------
+        None
+        """
+        current_user, _ = token_auth.current_user()
+        
+        booking = TelehealthBookings.query.get(booking_id)
+
+        if not booking:
+            raise BadRequest('Meeting does not exist yet.')
+
+        store_telehealth_transcript.delay(booking.idx)
+                    
+        return 
 

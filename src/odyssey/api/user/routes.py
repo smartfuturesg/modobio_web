@@ -56,6 +56,7 @@ from odyssey.utils.file_handling import FileHandling
 from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import (
+    email_domain_blacklisted,
     send_email_password_reset,
     send_email_delete_account,
     send_email_verify_email)
@@ -63,6 +64,7 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
+    generate_modobio_id,
     verify_jwt)
 
 ns = Namespace('user', description='Endpoints for user accounts.')
@@ -146,13 +148,27 @@ class NewStaffUser(BaseResource):
         If registering an already existing CLIENT user as a STAFF user, 
         the password must match, or be and empty string (ie. "")
         """
-        data = request.get_json()
-        
         # Check if user exists already
-        user_info = data.get('user_info')
-        #input email made to lowercase to prevent future issues with authentication
-        email = user_info['email'] = user_info.get('email').lower()
-        staff_info = data.get('staff_info')
+        user_info = request.json['user_info']
+        email = user_info['email']
+
+        email_domain_blacklisted(email)
+
+        # Email address is lower-cased to make comparison easier.
+        # However:
+        # - The local part of the email address (before @) is case-sensitive according to specs,
+        #   even though hosts are recommended to handle addresses in a case-independent manner.
+        #   So Zan.Peeters should be delivered to zan.peeters mailbox, but not every host
+        #   implements this behaviour, in which case they are two separate mailboxes.
+        # - Internationalization allows for addresses and domains to be written in any script.
+        #   Upper/lower case is not trivial in every language (e.g. Turkish dotless-i, Greek sigma).
+        # More info:
+        # https://en.wikipedia.org/wiki/Email_address
+        # https://unicode.org/reports/tr46/
+        # Leaving this behaviour for now, until it becomes a problem.
+        email = user_info['email'] = email.lower()
+
+        staff_info = request.json.get('staff_info')
 
         user = User.query.filter(User.email.ilike(email)).first()
         if user:
@@ -307,13 +323,29 @@ class NewClientUser(BaseResource):
     def post(self): 
         """
         Create a client user. This endpoint requires a payload with just userinfo.
-        
+
         If registering an already existing staff user as a client, 
         the password provided must match the one already in use by staff account
         """
+        user_info = request.json
+        email = user_info['email']
 
-        user_info = request.get_json()     
-        email = user_info['email'] = user_info.get('email').lower()
+        email_domain_blacklisted(email)
+
+        # Email address is lower-cased to make comparison easier.
+        # However:
+        # - The local part of the email address (before @) is case-sensitive according to specs,
+        #   even though hosts are recommended to handle addresses in a case-independent manner.
+        #   So Zan.Peeters should be delivered to zan.peeters mailbox, but not every host
+        #   implements this behaviour, in which case they are two separate mailboxes.
+        # - Internationalization allows for addresses and domains to be written in any script.
+        #   Upper/lower case is not trivial in every language (e.g. Turkish dotless-i, Greek sigma).
+        # More info:
+        # https://en.wikipedia.org/wiki/Email_address
+        # https://unicode.org/reports/tr46/
+        # Leaving this behaviour for now, until it becomes a problem.
+        email = user_info['email'] = email.lower()
+
         user = db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
         if user:
             if user.is_client:
@@ -839,8 +871,12 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
 
         #token was valid, remove the pending request, update user account and return 200
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
-        user.update({'email_verified': True})
         
+        if user.email_verified == False and user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})
+        user.update({'email_verified': True})
+
         db.session.delete(verification)
         db.session.commit()
         
@@ -881,6 +917,9 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         db.session.delete(verification)
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
+        if user.email_verified == False and user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
         user.update({'email_verified': True})
 
         db.session.commit()
@@ -925,6 +964,9 @@ class UserLegalDocsApi(BaseResource):
     Endpoints related to legal documents that users have viewed and signed.
     """
     
+    # Multiple docs per user allowed.
+    __check_resource__ = False
+
     # Multiple docs per user allowed.
     __check_resource__ = False
 
