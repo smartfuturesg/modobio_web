@@ -80,7 +80,10 @@ class DoseSpotAllergies(BaseResource):
 
         if not res.ok:
             raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-
+        
+        if 'Items' not in res_json:
+            raise BadRequest(f'DoseSpot may have changed their API output, please reach out to a staff admin.')
+        
         lookup_users = lookup_ds_users()
 
         for item in res_json['Items']:
@@ -158,6 +161,9 @@ class DoseSpotPatientCreation(BaseResource):
         res_json = res.json()
         if not res.ok:
             raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+
+        if 'Items' not in res_json:
+            raise BadRequest(f'DoseSpot may have changed their API output, please reach out to a staff admin.')
 
         lookup_users = lookup_ds_users()
 
