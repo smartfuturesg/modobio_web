@@ -90,7 +90,7 @@ from odyssey.utils.misc import (
     check_staff_existence
 )
 from odyssey.integrations.twilio import Twilio
-from odyssey.utils.telehealth import *
+import odyssey.utils.telehealth as telehealth_utils
 from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.base.resources import BaseResource
 from odyssey.tasks.tasks import cleanup_unended_call, store_telehealth_transcript
@@ -166,7 +166,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
         # Update TelehealthBookingStatus to 'In Progress'
         booking.status = 'In Progress'
-        update_booking_status_history(
+        telehealth_utils.update_booking_status_history(
             new_status = booking.status,
             booking_id = booking.idx, 
             reporter_id = current_user.user_id, 
@@ -176,7 +176,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
         
-        increment_data = get_booking_increment_data()
+        increment_data = telehealth_utils.get_booking_increment_data()
         #calculate booking duration
         if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
             #booking crosses midnight
@@ -265,9 +265,9 @@ class TelehealthClientTimeSelectApi(BaseResource):
         while days_out <= 7 and times_available < 10:
             local_target_date2 = local_target_date + timedelta(days=days_out)
             day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc = \
-                get_utc_start_day_time(local_target_date2, client_tz)
+                telehealth_utils.get_utc_start_day_time(local_target_date2, client_tz)
             
-            time_blocks = get_possible_ranges(
+            time_blocks = telehealth_utils.get_possible_ranges(
                 day_start_utc,
                 day_start_utc.weekday(), 
                 start_time_window_utc.idx, 
@@ -282,7 +282,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             practitioner_details = {} # {<user_id> : {'consult_rate': Decimal, 'firstname': str, 'lastname': str}
             for block in time_blocks:
                 # avails = {user_id(practioner): [TelehealthSTaffAvailability objects] }
-                avails, _practitioner_details = get_practitioners_available(time_blocks[block], client_in_queue)
+                avails, _practitioner_details = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
                 if avails:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
                     available_times_with_practitioners[block] = {
@@ -621,7 +621,7 @@ class TelehealthBookingsApi(BaseResource):
         target_end_time_idx_utc = start_time_idx_dict[target_end_datetime_utc.strftime('%H:%M:%S')] - 1
        
         # call on verify_availability, will raise an error if practitioner doens't have availability requested
-        verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
+        telehealth_utils.verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
             target_end_time_idx_utc, target_start_datetime_utc, target_end_datetime_utc,client_in_queue.location_id)      
 
         # staff and client may proceed with scheduling the booking, 
@@ -684,7 +684,7 @@ class TelehealthBookingsApi(BaseResource):
         #    request.parsed_obj.external_booking_id = external_booking_id
         
         # build & save status history obj
-        update_booking_status_history(new_status=request.parsed_obj.status, 
+        telehealth_utils.update_booking_status_history(new_status=request.parsed_obj.status, 
                         booking_id = request.parsed_obj.idx, 
                         reporter_id = current_user.user_id,
                         reporter_role = 'Practitioner' if current_user.user_id == request.parsed_obj.staff_user_id else 'Client'
@@ -711,7 +711,7 @@ class TelehealthBookingsApi(BaseResource):
             booking_start_staff_localized = target_start_datetime_utc
             booking_end_staff_localized = target_end_datetime_utc
 
-        add_booking_to_calendar(request.parsed_obj, 
+        telehealth_utils.add_booking_to_calendar(request.parsed_obj, 
                             booking_start_staff_localized, 
                             booking_end_staff_localized)
         db.session.commit()
@@ -799,14 +799,14 @@ class TelehealthBookingsApi(BaseResource):
 
             if new_status != 'Canceled':
                 # Create TelehealthBookingStatus object if the request is updating the status
-                update_booking_status_history(new_status, booking_id, current_user.user_id,\
+                telehealth_utils.update_booking_status_history(new_status, booking_id, current_user.user_id,\
                      'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
 
                 booking.update(data)
                 db.session.commit()
             
             else:
-                cancel_telehealth_appointment(booking, current_user.user_id, 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
+                telehealth_utils.cancel_telehealth_appointment(booking, current_user.user_id, 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
                 
                 ##### WHEEL #####
                 #elif current_user.user_id == booking.client_user_id:
@@ -1730,7 +1730,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
         #     wheel = Wheel()
         #     wheel.complete_consult(booking.external_booking_id)
 
-        complete_booking(
+        telehealth_utils.complete_booking(
             booking_id = booking.idx, 
             reporter_id = current_user.user_id,
             reporter = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
