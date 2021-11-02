@@ -248,8 +248,9 @@ def test_full_system_with_settings(test_client, payment_method):
     # select the booking that is at 4:30 Phx time/ 11:30 UTC
     client_booking = {
         'target_date': '2024-11-6',
-        'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
-        'booking_window_id_end_time': response.json['appointment_times'][-1]['booking_window_id_end_time']}
+        'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time']}
+        #,
+        #'booking_window_id_end_time': response.json['appointment_times'][-1]['booking_window_id_end_time']}
 
     response = test_client.post(
         f'/telehealth/bookings/'
