@@ -69,7 +69,7 @@ class WearablesVitalsDataNested(Schema):
     """
     hr_resting_bpm = fields.Float(default = 0)
     respiratory_rate_bpm_avg = fields.Float(default = 0)
-    hrv_seconds_avg = fields.Float(default = 0)
+    hrv_ms_avg = fields.Float(default = 0)
     body_temp_celsius = fields.Float(default = 0)
 
 class WearablesActivityDataNested(Schema):

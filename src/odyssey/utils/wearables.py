@@ -32,12 +32,19 @@ def oura_data_shaper(wearable_data:List[Dict] ):
         if activity:
             item_summary['calories']['calories_active'] =  int(activity.get('cal_active',0))
             item_summary['calories']['calories_total'] =  int(activity.get('cal_total',0))
+            item_summary['calories']['calories_bmr'] =  int(activity.get('cal_total',0)) - int(activity.get('cal_active',0))
             item_summary['activity']['steps'] =  int(activity.get('steps',0))
         
         if len(sleep) > 0:
-            item_summary['vitals']['hr_resting_bpm'] =  float(sleep[-1].get('hr_average', 0)) # takes the last rest period of the day
-            item_summary['sleep']['hr_resting_bpm'] =  float(sleep[-1].get('hr_average', 0)) # takes the last rest period of the day
-            item_summary['sleep']['sleep_duration_seconds'] =  int(sleep[-1].get('total', 0)) # takes the last rest period of the day
+            # takes the last rest period of the day
+            item_summary['vitals']['hr_resting_bpm'] =  float(sleep[-1].get('hr_average', 0)) # in lieu of hr data during non-rest periods
+            item_summary['sleep']['hr_resting_bpm'] =  float(sleep[-1].get('hr_average', 0)) 
+            item_summary['sleep']['hrv_ms_avg'] =  float(sleep[-1].get('rmssd', 0)) 
+            item_summary['sleep']['sleep_duration_seconds'] =  int(sleep[-1].get('total', 0)) 
+            item_summary['sleep']['in_bed_duration_seconds'] =  int(sleep[-1].get('duration', 0)) 
+            item_summary['sleep']['respiratory_rate_bpm_avg'] =  float(sleep[-1].get('breath_average', 0)) 
+            item_summary['sleep']['bed_time_start'] =  sleep[-1].get('bedtime_start', '') 
+            item_summary['sleep']['bed_time_end'] =  sleep[-1].get('bedtime_end', '') 
 
         response.append(item_summary)
 
@@ -83,7 +90,7 @@ def applewatch_data_shaper(wearable_data:List[Dict]):
             hrv_data = vitals.get('heartRateVariabilitySec', {})
             respiratory_rate_data = vitals.get('respiratoryRateBmp', {})
             item_summary['vitals']['hr_resting_bpm'] =  rhr_data.get('average', 0) 
-            item_summary['vitals']['hrv_seconds_avg'] =  hrv_data.get('average', 0) 
+            item_summary['vitals']['hrv_ms_avg'] =  hrv_data.get('average', 0) 
             item_summary['vitals']['respiratory_rate_bpm_avg'] = respiratory_rate_data.get('average', 0) 
         if body:
             body_temp_data = body.get('bodyTemperatureCelsius',{})
