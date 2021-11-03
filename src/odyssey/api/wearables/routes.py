@@ -1,6 +1,6 @@
 import logging
 
-from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
+from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES, WEARABLES_DYNAMO_TABLE
 from odyssey.utils.wearables import applewatch_data_shaper, fitbit_data_shaper, oura_data_shaper
 logger = logging.getLogger(__name__)
 
@@ -769,7 +769,7 @@ class WearablesData(BaseResource):
 
         # connect to dynamo
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('Wearables-V1-dev')
+        table = dynamodb.Table(WEARABLES_DYNAMO_TABLE)
 
         # validate device_type request
         if device_type not in WEARABLE_DEVICE_TYPES:
