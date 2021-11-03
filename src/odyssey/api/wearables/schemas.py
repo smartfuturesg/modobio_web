@@ -53,29 +53,38 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
 
 
 
-
 class WearablesSleepDataNested(Schema):
     """
     sleep data for one day 
     """
-    hr_resting = fields.Float()
-    total_sleep_seconds = fields.Integer()
+    hr_resting_bpm = fields.Float(default = 0)
+    sleep_duration_seconds = fields.Integer(default = 0)
+    in_bed_duration_seconds = fields.Integer(default = 0)
+    bed_time_start = fields.String(default = '')
+    bed_time_end = fields.String(default = '')
 
 class WearablesVitalsDataNested(Schema):
     """
     sleep data for one day 
     """
-    hr_resting = fields.Float()
-    respiratory_rate_bpm_avg = fields.Float()
-    hrv_seconds_avg = fields.Float()
+    hr_resting_bpm = fields.Float(default = 0)
+    respiratory_rate_bpm_avg = fields.Float(default = 0)
+    hrv_seconds_avg = fields.Float(default = 0)
+    body_temp_celsius = fields.Float(default = 0)
 
 class WearablesActivityDataNested(Schema):
     """
     Activity data for one day
     """
-    calories_active = fields.Integer()
-    calories_total = fields.Integer()
-    steps = fields.Integer()
+    steps = fields.Integer(default = 0)
+
+class WearablesCalorieDataNested(Schema):
+    """
+    Activity data for one day
+    """
+    calories_active = fields.Integer(default = 0)
+    calories_total = fields.Integer(default = 0)
+    calories_bmr = fields.Integer(default = 0)
 class WearablesDataResponseNestedSchema(Schema):
     """
     Schema for each wearable data response item. Nests activity and sleep data
@@ -84,6 +93,7 @@ class WearablesDataResponseNestedSchema(Schema):
     activity = fields.Nested(WearablesActivityDataNested)
     sleep = fields.Nested(WearablesSleepDataNested)
     vitals = fields.Nested(WearablesVitalsDataNested)
+    calories = fields.Nested(WearablesCalorieDataNested)
 
 class WearablesDataResponseSchema(Schema):
     start_date = fields.String()

@@ -1,7 +1,7 @@
 import logging
 
-from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS
-from odyssey.utils.wearables import applewatch_data_shaper, oura_data_shaper
+from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
+from odyssey.utils.wearables import applewatch_data_shaper, fitbit_data_shaper, oura_data_shaper
 logger = logging.getLogger(__name__)
 
 import base64
@@ -771,6 +771,10 @@ class WearablesData(BaseResource):
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table('Wearables-V1-dev')
 
+        # validate device_type request
+        if device_type not in WEARABLE_DEVICE_TYPES:
+            raise BadRequest(f"wearable device type, {device_type}, not supported")
+
         # configure date range expression
         # Four cases: 
         #   - both start and end date provided: return data for date range
@@ -802,9 +806,11 @@ class WearablesData(BaseResource):
         # only provide the data that is required
         if device_type == 'oura':
             payload['items'] = oura_data_shaper(response['Items'])
-        if device_type == 'applewatch':
+        elif device_type == 'applewatch':
             payload['items'] = applewatch_data_shaper(response['Items'])
-       
+        elif device_type == 'fitbit':
+            payload['items'] = fitbit_data_shaper(response['Items'])
+
         return payload
 
 
