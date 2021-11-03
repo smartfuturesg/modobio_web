@@ -69,7 +69,7 @@ class DoseSpotPrescribedGET(Schema):
     Brand = fields.Boolean(missing=None)
     modobio_id = fields.String(missing=None)
     modobio_user_id = fields.Integer(missing=None)
-    modobio_name_id = fields.String(missing=None)
+    modobio_name = fields.String(missing=None)
 
 
 class DoseSpotPrescribedOutput(Schema):
@@ -89,7 +89,7 @@ class DoseSpotAllergyGET(Schema):
     LastUpdatedUserId = fields.Integer(missing=None)
     modobio_id = fields.String(missing=None)
     modobio_user_id = fields.Integer(missing=None)
-    modobio_name_id = fields.String(missing=None)
+    modobio_name = fields.String(missing=None)
 
 class DoseSpotAllergyOutput(Schema):
     items = fields.Nested(DoseSpotAllergyGET(many=True),missing=[])
