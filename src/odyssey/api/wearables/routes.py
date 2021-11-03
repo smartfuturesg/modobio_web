@@ -751,7 +751,7 @@ class WearablesFreeStyleEndpoint(BaseResource):
     'end_date': '(optional) iso formatted date. end of date range'
     })
 class WearablesData(BaseResource):
-    # @token_auth.login_required(user_type=('client','staff')) #TODO update permissions
+    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
     @responds(status_code=200, api=ns, schema = WearablesDataResponseSchema)
     def get(self, user_id, device_type):
         """
