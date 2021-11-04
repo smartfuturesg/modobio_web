@@ -801,15 +801,15 @@ class WearablesData(BaseResource):
             KeyConditionExpression= Key('user_id').eq(user_id) & date_condition,
             FilterExpression = Key('wearable').eq(device_type))
         
-        payload = {'start_date': start_date, 'end_date': end_date, 'total_items': len(response['Items']), 'items': [] }
+        payload = {'start_date': start_date, 'end_date': end_date, 'total_items': len(response.get('Items', [])), 'items': [] }
         
         # only provide the data that is required
         if device_type == 'oura':
-            payload['items'] = oura_data_shaper(response['Items'])
+            payload['items'] = oura_data_shaper(response.get('Items', []))
         elif device_type == 'applewatch':
-            payload['items'] = applewatch_data_shaper(response['Items'])
+            payload['items'] = applewatch_data_shaper(response.get('Items', []))
         elif device_type == 'fitbit':
-            payload['items'] = fitbit_data_shaper(response['Items'])
+            payload['items'] = fitbit_data_shaper(response.get('Items', []))
 
         return payload
 
