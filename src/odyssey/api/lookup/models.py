@@ -13,6 +13,24 @@ from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 
+class LookupNotificationSeverity(BaseModelWithIdx):
+    """
+        Lookup table containing notification severity
+    """
+    severity = db.Column(db.String)
+    """
+    Severity level
+
+    :type: str
+    """
+
+    color = db.Column(db.String)
+    """
+    hex color
+
+    :type: str
+    """
+
 class LookupUSStates(BaseModelWithIdx):
     """
         Lookup table containing US States
