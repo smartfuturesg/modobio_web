@@ -53,6 +53,7 @@ def test_put_client_info(test_client):
     assert response.json["client_info"]["primary_goal"] == "('Recovery',)"
     assert response.json["client_info"]["primary_macro_goal"] == "('Gain the best understanding I can of my health at any point in time.',)"
     assert response.json["client_info"]["primary_goal_description"] == "To try out something new"
+    assert response.json["client_info"]["state_id"] == 9
 
 def test_creating_new_client(test_client):
     payload = users_new_user_client_data['user_info']

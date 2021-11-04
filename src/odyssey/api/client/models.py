@@ -95,6 +95,13 @@ class ClientInfo(BaseModel):
     :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
+    state_id = db.Column(db.Integer,db.ForeignKey('LookupUSStates.idx'))
+    """
+    State ID for the client's address
+
+    :type: int
+    """
+
     preferred = db.Column(db.SmallInteger)
     """
     Client preferred contact method.
