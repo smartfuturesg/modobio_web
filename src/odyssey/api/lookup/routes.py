@@ -32,7 +32,8 @@ from odyssey.api.lookup.models import (
      LookupMedicalSymptoms,
      LookupOrganizations,
      LookupCurrencies,
-     LookupUSStates
+     LookupUSStates,
+     LookupNotificationSeverity
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -61,7 +62,8 @@ from odyssey.api.lookup.schemas import (
     LookupMedicalSymptomsOutputSchema,
     LookupOrganizationsOutputSchema,
     LookupCurrenciesOutputSchema,
-    LookupUSStatesOutputSchema
+    LookupUSStatesOutputSchema,
+    LookupNotificationSeverityOutputSchema
 )
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.models import BaseModelWithIdx
@@ -72,11 +74,23 @@ logger = logging.getLogger(__name__)
 
 ns = Namespace('lookup', description='Endpoints for lookup tables.')
 
+@ns.route('/notifications/severity/')
+class LookupNotificationSeverityResource(BaseResource):
+    """
+        Returns notification severity and their respective color
+    """
+    @responds(schema=LookupNotificationSeverityOutputSchema,status_code=200,api=ns)
+    def get(self):
+        severity = LookupNotificationSeverity.query.all()
+        payload = {'items': severity,
+                   'total_items': len(severity)}
+
+        return payload
+
 @ns.route('/states/')
 class LookupUSStatesResource(BaseResource):
     """
-        Returns U
-        nited States' states and their abbreviations
+        Returns United States' states and their abbreviations
     """
     @responds(schema=LookupUSStatesOutputSchema,status_code=200,api=ns)
     def get(self):

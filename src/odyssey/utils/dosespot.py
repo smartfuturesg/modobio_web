@@ -5,6 +5,7 @@ import requests
 
 from flask import current_app
 from werkzeug.exceptions import BadRequest
+from sqlalchemy import select
 
 from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
@@ -342,3 +343,18 @@ def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_i
                     auth=(clinic_id, encrypted_clinic_id),
                     data=payload)
     return res
+
+def lookup_ds_users():
+        # Store Modobio info in the response.        
+    query = db.session.execute(
+        select(User, DoseSpotPractitionerID
+        ).join(DoseSpotPractitionerID, DoseSpotPractitionerID.user_id == User.user_id)  
+    ).all()
+
+    # create a hashmap lookup table
+    lookup_users = {}
+    for user,practitioner in query:
+        if user not in lookup_users:
+            lookup_users[practitioner.ds_user_id] = user    
+
+    return lookup_users
