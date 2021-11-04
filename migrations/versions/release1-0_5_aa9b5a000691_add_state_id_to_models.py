@@ -1,7 +1,7 @@
 """add state_id to models
 
 Revision ID: aa9b5a000691
-Revises: d73bd62c464a
+Revises: b71131731f6e
 Create Date: 2021-10-30 08:53:09.947995
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'aa9b5a000691'
-down_revision = 'd73bd62c464a'
+down_revision = 'b71131731f6e'
 branch_labels = None
 depends_on = None
 
