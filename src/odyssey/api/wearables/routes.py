@@ -24,9 +24,7 @@ from odyssey.api.wearables.models import (
     WearablesOura,
     WearablesFitbit,
     WearablesFreeStyle)
-
 from odyssey.api.wearables.schemas import (
-    WearablesDataResponseSchema,
     WearablesSchema,
     WearablesOuraAuthSchema,
     WearablesOAuthGetSchema,
@@ -751,7 +749,7 @@ class WearablesFreeStyleEndpoint(BaseResource):
     'end_date': '(optional) iso formatted date. end of date range'
     })
 class WearablesData(BaseResource):
-    # @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
+    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
     @responds(status_code=200, api=ns)
     def get(self, user_id, device_type):
         """
