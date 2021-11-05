@@ -76,6 +76,7 @@ from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 # from odyssey.integrations.wheel import Wheel
+from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.constants import (
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TWILIO_ACCESS_KEY_TTL,
@@ -809,9 +810,9 @@ class TelehealthBookingsApi(BaseResource):
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
-                    telehealth_utils.cancel_telehealth_appointment(booking, refund=True, reporter_id=current_user.user_id, reporter_role='Practitioner')
+                    cancel_telehealth_appointment(booking, refund=True, reporter_id=current_user.user_id, reporter_role='Practitioner')
                 else:
-                    telehealth_utils.cancel_telehealth_appointment(booking, refund=False, reporter_id=current_user.user_id, reporter_role='Client')                
+                    cancel_telehealth_appointment(booking, refund=False, reporter_id=current_user.user_id, reporter_role='Client')                
                 ##### WHEEL #####
                 #elif current_user.user_id == booking.client_user_id:
                 #    if booking.external_booking_id:
