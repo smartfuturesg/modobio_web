@@ -806,8 +806,12 @@ class TelehealthBookingsApi(BaseResource):
                 db.session.commit()
             
             else:
-                telehealth_utils.cancel_telehealth_appointment(booking, current_user.user_id, 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
-                
+                #if staff initiated cancellation, refund should be true
+                #if client initiated, refund should be false
+                if current_user.user_id == booking.staff_user_id:
+                    telehealth_utils.cancel_telehealth_appointment(booking, refund=True, reporter_id=current_user.user_id, reporter_role='Practitioner')
+                else:
+                    telehealth_utils.cancel_telehealth_appointment(booking, refund=False, reporter_id=current_user.user_id, reporter_role='Client')                
                 ##### WHEEL #####
                 #elif current_user.user_id == booking.client_user_id:
                 #    if booking.external_booking_id:

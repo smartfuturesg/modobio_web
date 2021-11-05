@@ -1,6 +1,7 @@
 import logging
 
 from marshmallow.fields import Number
+from odyssey.integrations.instamed import Instamed
 
 from odyssey.utils.file_handling import FileHandling
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ from odyssey.api.telehealth.models import(
 ) 
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
+from odyssey.api.payment.models import PaymentHistory
 from odyssey.integrations.wheel import Wheel
 from werkzeug.exceptions import BadRequest
 from odyssey.integrations.twilio import Twilio
@@ -395,10 +397,18 @@ def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_
     db.session.add(add_to_calendar)
     return
 
-def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='System'):
+def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment', reporter_id=None, reporter_role='System'):
     """
     Used to cancel an appointment in the event a payment is unsuccessful
     and from bookings PUT to cancel a booking
+
+    args:
+    booking: a booking object for the telehealth appointment to be cancelled
+    refund: boolean denoting whether this booking should be refunded, should only happen when called
+    due to practitioner cancellation or practitioner no-show
+    reason: reason for the cancellation, either (Practitioner Cancellation, Practitioner No-Show, or Failed Payment)
+    reporter_id: user_id of the user that initiated the cancellation, null if system automated
+    reporter_role: role of the user that initiated the cancellation(staff or client), System if system automated
     """
 
     # update booking status to canceled
@@ -412,8 +422,17 @@ def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='Syst
     # add new status to status history table
     update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
 
-    #TODO: Create notification/send email(?) to user that their appointment was canceled due
-    #to a failed payment
+    if refund:
+        #first attempt to void, if that fails payment was likely more than 24 hours ago
+        #in which case we should refund instead of void
+        im = Instamed()
+        try:
+            im.void_payment(booking, reason)
+        except:
+            transaction_id = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none().transaction_id
+            im.refund_payment(transaction_id, booking.consult_rate, booking, reason)
+
+    #TODO: Create notification/send email(?) to user that their appointment 
 
     db.session.commit()
     return
