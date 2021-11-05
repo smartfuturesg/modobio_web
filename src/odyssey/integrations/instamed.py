@@ -75,7 +75,7 @@ class Instamed:
 
         return response.json()
     
-    def refund_payment(self, transaction_id, amount, booking, reason):
+    def refund_payment(self, transaction_id, amount, booking, reason, reporter_id=None):
         """
         Refund a payment.
         InstaMed URI: /payment/refund
@@ -89,6 +89,15 @@ class Instamed:
         amount: (string)
             amount of money to be refunded
         
+        booking: TelehealthBooking object
+            object for the booking this transaction is associated with
+
+        reason:
+            reason for this refund
+
+        reporter_id:
+            id the the staff that approved this refund, None if system automated
+            
         Returns
         -------
         dict of information regarding the refund
@@ -110,11 +119,14 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
+            logger.error(f'Instamed returned the following error: {response.text} when' \
+                f' refunding a transaction with id {transaction_id}.')
             raise BadRequest(f'Instamed returned the following error: {response.text}')
+            
 
         refund_data = {
             'user_id': booking.client_user_id,
-            'reporter_id': booking.staff_user_id,
+            'reporter_id': reporter_id,
             'payment_id': PaymentHistory.query.filter_by(transaction_id=transaction_id).one_or_none().idx,
             'refund_transaction_id': response.json()['TransactionID'],
             'refund_amount': amount,
@@ -164,6 +176,8 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
+            logger.error(f'Instamed returned the following error: {response.text} when' \
+                f' voiding a transaction with id {transaction.transaction_id}.')
             raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         #update transaction in PaymentHistory with void data
