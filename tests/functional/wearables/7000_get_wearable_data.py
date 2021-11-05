@@ -16,7 +16,6 @@ def test_get_wearable_data(test_client):
         f'/wearables/data/oura/{client_user_id}/?start_date=2021-04-05&end_date=2021-04-10',
         headers=test_client.client_auth_header,
         content_type='application/json')
-
     assert response.status_code == 200
     
     # only start date specified

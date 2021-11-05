@@ -930,5 +930,3 @@ WEARABLE_DATA_DEFAULT_RANGE_DAYS = 14
 
 # wearable device types
 WEARABLE_DEVICE_TYPES = ('fitbit', 'oura', 'applewatch')
-
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev' if any((config.TESTING, config.DEV)) else 'Wearables-V1-prod'
