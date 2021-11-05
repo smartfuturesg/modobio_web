@@ -296,7 +296,7 @@ def care_team(test_client):
 
 
 @pytest.fixture(scope='function')
-def booking_twilio(test_client, wheel = False):
+def booking_twilio(test_client):
     """ Create a new telehealth booking.
 
     This bookings fixture is used in the Twilio section of testing.

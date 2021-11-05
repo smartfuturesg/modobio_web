@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 import boto3
 from boto3.dynamodb.conditions import Key
-from flask import current_app, request
+from flask import current_app, jsonify, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
@@ -745,14 +745,14 @@ class WearablesFreeStyleEndpoint(BaseResource):
 
 @ns.route('/data/<string:device_type>/<int:user_id>/')
 @ns.doc(params={
-    'user_id': 'User ID number. url param', 
-    'device_type': 'fitbit, applewatch, oura, freestyle. url param',
+    'user_id': 'User ID number', 
+    'device_type': 'fitbit, applewatch, oura, freestyle',
     'start_date': '(optional) iso formatted date. start of date range',
     'end_date': '(optional) iso formatted date. end of date range'
     })
 class WearablesData(BaseResource):
-    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
-    @responds(status_code=200, api=ns, schema = WearablesDataResponseSchema)
+    # @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
+    @responds(status_code=200, api=ns)
     def get(self, user_id, device_type):
         """
         Bring down the wearables data from dynamodb
@@ -801,15 +801,10 @@ class WearablesData(BaseResource):
             KeyConditionExpression= Key('user_id').eq(user_id) & date_condition,
             FilterExpression = Key('wearable').eq(device_type))
         
-        payload = {'start_date': start_date, 'end_date': end_date, 'total_items': len(response.get('Items', [])), 'items': [] }
+        payload = {'start_date': start_date, 'end_date': end_date, 'total_items': len(response.get('Items', [])), 'items': []}
         
         # only provide the data that is required
-        if device_type == 'oura':
-            payload['items'] = oura_data_shaper(response.get('Items', []))
-        elif device_type == 'applewatch':
-            payload['items'] = applewatch_data_shaper(response.get('Items', []))
-        elif device_type == 'fitbit':
-            payload['items'] = fitbit_data_shaper(response.get('Items', []))
+        payload['items'] = response.get('Items', [])
 
         return payload
 

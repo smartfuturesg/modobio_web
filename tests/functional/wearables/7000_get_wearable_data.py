@@ -16,10 +16,10 @@ def test_get_oura_data(test_client):
     client_user_id = 22
     # date range specified
     response = test_client.get(
-        f'/wearables/data/oura/{client_user_id}/?start_date=2021-01-05&end_date=2021-04-10',
+        f'/wearables/data/oura/{client_user_id}/?start_date=2021-04-05&end_date=2021-04-10',
         headers=test_client.client_auth_header,
         content_type='application/json')
-        
+    breakpoint()
     assert response.status_code == 200
     
     # only start date specified
