@@ -1,7 +1,4 @@
 
-import pytest
-
-from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
 def test_get_oura_data(test_client):
     """
