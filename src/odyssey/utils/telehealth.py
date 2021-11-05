@@ -1,5 +1,7 @@
 import logging
 
+from marshmallow.fields import Number
+
 from odyssey.utils.file_handling import FileHandling
 logger = logging.getLogger(__name__)
 
@@ -26,6 +28,7 @@ from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
 from odyssey.integrations.wheel import Wheel
 from werkzeug.exceptions import BadRequest
 from odyssey.integrations.twilio import Twilio
+from odyssey.utils.file_handling import FileHandling
 
 from odyssey.utils.constants import DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS, TELEHEALTH_START_END_BUFFER
 
@@ -177,21 +180,17 @@ def get_practitioners_available(time_block, q_request):
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
     practitioner_details = {} # name and consult rate for each practitioner, indexed by user_id
-    
+    practitioner_ids = set() # set of practitioner's avaialbe user_ids
     for user_id, avail, user, consult_rate in query.all():
         if user_id not in available:
             available[user_id] = []
+            practitioner_ids.add(user_id)
         if user_id not in practitioner_details:
-            image_path = user.staff_profile.profile_pictures[0].image_path if user.staff_profile.profile_pictures else None
-            prefix = image_path[0:image_path.rfind('/')] if image_path else None
             practitioner_details[user_id] = {
                 'consult_cost': round(float(consult_rate) * int(q_request.duration)/60.0, 2), 
                 'firstname': user.firstname,
                 'lastname': user.lastname,
-                'gender': 'm' if user.biological_sex_male else 'f',
-                'bio': user.staff_profile.bio,
-                'profile_pic_prefix': prefix,
-                'hourly_consult_rate': consult_rate}
+                'gender': 'm' if user.biological_sex_male else 'f'}
         if avail:
             available[user_id].append(avail)
     
@@ -215,7 +214,47 @@ def get_practitioners_available(time_block, q_request):
             #practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioners[practitioner_user_id] = available[practitioner_user_id]
     
-    return practitioners, practitioner_details
+    return practitioners, practitioner_details, practitioner_ids
+
+def calculate_consult_rate(hourly_rate:float, duration:int) -> float:
+    
+    hour_in_min = 60.0
+    rate = round(float(hourly_rate) * int(duration) / hour_in_min, 2)
+    
+    return rate
+
+def get_practitioner_details(user_ids: set, profession_type: str, duration: int) -> dict:
+
+    practitioners = db.session.query(User, StaffRoles.consult_rate)\
+        .join(StaffRoles, StaffRoles.user_id==User.user_id)\
+            .filter(User.user_id.in_(user_ids),
+                StaffRoles.role == profession_type,
+                StaffRoles.consult_rate != None
+            ).all()
+
+    fh = FileHandling()
+
+    # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
+    practitioner_details = {}
+    for practitioner, consult_rate in practitioners:
+        # if the practitioner has a profile picture, get the prefix from the first image path found
+        image_path = practitioner.staff_profile.profile_pictures[0].image_path if practitioner.staff_profile.profile_pictures else None
+        prefix = image_path[0:image_path.rfind('/')] if image_path else None
+
+        # get presinged url to available practitioners' profile picture
+        # it's done here so we only call S3 once per practitioner available
+        practitioner_details[practitioner.user_id] = {
+            'firstname': practitioner.firstname,
+            'lastname': practitioner.lastname,
+            'gender': 'm' if practitioner.biological_sex_male else 'f',
+            'bio': practitioner.staff_profile.bio,
+            'hourly_consult_rate': consult_rate,
+            'consult_cost': calculate_consult_rate(consult_rate,duration),
+            'profile_pictures': fh.get_presigned_urls(prefix) if prefix else None
+        }
+
+
+    return practitioner_details
 
 def verify_availability(client_user_id, staff_user_id, utc_start_idx, utc_end_idx, target_start_datetime_utc, target_end_datetime_utc, client_location_id):
     ###

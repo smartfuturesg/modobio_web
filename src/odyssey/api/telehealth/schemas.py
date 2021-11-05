@@ -52,10 +52,12 @@ class TelehealthTimeSelectSchema(Schema):
     booking_window_id_start_time = fields.Integer()
     booking_window_id_end_time = fields.Integer()
     target_date = fields.Date()
+    practitioners_available_ids = fields.List(fields.Integer())
 
 class TelehealthTimeSelectOutputSchema(Schema):
     appointment_times = fields.Nested(TelehealthTimeSelectSchema(many=True),missing=[])
     total_options = fields.Integer()
+    practitioners_info = fields.Dict(keys=fields.Integer, values=fields.Nested(TelehealthAvailableStaffSchema()))
 
 class TelehealthBookingStatusSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
