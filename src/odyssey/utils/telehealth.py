@@ -1,4 +1,8 @@
 import logging
+
+from marshmallow.fields import Number
+
+from odyssey.utils.file_handling import FileHandling
 logger = logging.getLogger(__name__)
 
 from typing import Any
@@ -24,6 +28,7 @@ from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
 from odyssey.integrations.wheel import Wheel
 from werkzeug.exceptions import BadRequest
 from odyssey.integrations.twilio import Twilio
+from odyssey.utils.file_handling import FileHandling
 
 from odyssey.utils.constants import DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS, TELEHEALTH_START_END_BUFFER
 
@@ -31,13 +36,20 @@ booking_time_increment_length = 0
 booking_max_increment_idx = 0
 
 def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
+
+    # consider if the request is being made less than TELEHEALTH_BOOKING_LEAD_TIME_HRS before the start of the next day
+    # if it's thurs 11 pm, we should offer friday 1 am the earliest, not midnight
     localized_target_date = datetime.combine(target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
-    time_now_client_localized = datetime.now(tz.gettz(client_tz))
+    time_now_client_localized = datetime.now(tz.gettz(client_tz)) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
     
     # if request was for a time in the past or current time, use the present time + booking lead time window
     if localized_target_date <= time_now_client_localized:
-        localized_target_date = time_now_client_localized + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS + 1)
-        localized_target_date = localized_target_date.replace(minute=0, second=0, microsecond=0)
+        localized_target_date = time_now_client_localized
+        # round up the minute to the nearest 15 min interval
+        if localized_target_date.minute % 15 != 0:
+            minutes = 15 - localized_target_date.minute % 15
+            localized_target_date = localized_target_date + timedelta(minutes=minutes)
+        localized_target_date = localized_target_date.replace(second=0, microsecond=0)
 
     localized_end = datetime.combine(localized_target_date.date(), time(23,55,00, tzinfo=tz.gettz(client_tz)))
     day_start_utc = localized_target_date.astimezone(tz.UTC)
@@ -133,7 +145,7 @@ def get_practitioners_available(time_block, q_request):
     location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation
     duration = q_request.duration
     
-    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, StaffRoles.consult_rate, User.firstname, User.lastname, User.biological_sex_male)\
+    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, User, StaffRoles.consult_rate)\
         .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
             .join(User, User.user_id == TelehealthStaffAvailability.user_id)\
                 .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
@@ -168,15 +180,17 @@ def get_practitioners_available(time_block, q_request):
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
     practitioner_details = {} # name and consult rate for each practitioner, indexed by user_id
-    for user_id, avail, consult_rate, firstname, lastname, sex_male in query.all():
+    practitioner_ids = set() # set of practitioner's avaialbe user_ids
+    for user_id, avail, user, consult_rate in query.all():
         if user_id not in available:
             available[user_id] = []
+            practitioner_ids.add(user_id)
         if user_id not in practitioner_details:
             practitioner_details[user_id] = {
                 'consult_cost': round(float(consult_rate) * int(q_request.duration)/60.0, 2), 
-                'firstname': firstname,
-                'lastname': lastname,
-                'gender': 'm' if sex_male else 'f'}
+                'firstname': user.firstname,
+                'lastname': user.lastname,
+                'gender': 'm' if user.biological_sex_male else 'f'}
         if avail:
             available[user_id].append(avail)
     
@@ -199,8 +213,48 @@ def get_practitioners_available(time_block, q_request):
             and not current_bookings.all():
             #practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioners[practitioner_user_id] = available[practitioner_user_id]
+    # TODO remove practioneres, practitioner_details from return 
+    return practitioners, practitioner_details, practitioner_ids
+
+def calculate_consult_rate(hourly_rate:float, duration:int) -> float:
     
-    return practitioners, practitioner_details
+    hour_in_min = 60.0
+    rate = round(float(hourly_rate) * int(duration) / hour_in_min, 2)
+    
+    return rate
+
+def get_practitioner_details(user_ids: set, profession_type: str, duration: int) -> dict:
+
+    practitioners = db.session.query(User, StaffRoles.consult_rate)\
+        .join(StaffRoles, StaffRoles.user_id==User.user_id)\
+            .filter(User.user_id.in_(user_ids),
+                StaffRoles.role == profession_type,
+                StaffRoles.consult_rate != None
+            ).all()
+
+    fh = FileHandling()
+
+    # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
+    practitioner_details = {}
+    for practitioner, consult_rate in practitioners:
+        # if the practitioner has a profile picture, get the prefix from the first image path found
+        image_path = practitioner.staff_profile.profile_pictures[0].image_path if practitioner.staff_profile.profile_pictures else None
+        prefix = image_path[0:image_path.rfind('/')] if image_path else None
+
+        # get presinged url to available practitioners' profile picture
+        # it's done here so we only call S3 once per practitioner available
+        practitioner_details[practitioner.user_id] = {
+            'firstname': practitioner.firstname,
+            'lastname': practitioner.lastname,
+            'gender': 'm' if practitioner.biological_sex_male else 'f',
+            'bio': practitioner.staff_profile.bio,
+            'hourly_consult_rate': consult_rate,
+            'consult_cost': calculate_consult_rate(consult_rate,duration),
+            'profile_pictures': fh.get_presigned_urls(prefix) if prefix else None
+        }
+
+
+    return practitioner_details
 
 def verify_availability(client_user_id, staff_user_id, utc_start_idx, utc_end_idx, target_start_datetime_utc, target_end_datetime_utc, client_location_id):
     ###
@@ -339,6 +393,29 @@ def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_
                                         timezone = booking_start_staff_localized.astimezone().tzname()
                                         )
     db.session.add(add_to_calendar)
+    return
+
+def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='System'):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    and from bookings PUT to cancel a booking
+    """
+
+    # update booking status to canceled
+    booking.status = 'Canceled'
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    # add new status to status history table
+    update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
+
+    #TODO: Create notification/send email(?) to user that their appointment was canceled due
+    #to a failed payment
+
+    db.session.commit()
     return
 
 def get_booking_increment_data():

@@ -97,7 +97,7 @@ def test_booking(test_client):
         'booking_window_id_end_time': target_time_id + 4,
         'booking_window_id_start_time_utc': target_time_id,
         'booking_window_id_end_time_utc': target_time_id + 4,
-        'status': 'Confirmed',
+        'status': 'Accepted',
         'client_timezone': 'UTC',
         'staff_timezone': 'UTC',
         'target_date_utc': target_time.date(),

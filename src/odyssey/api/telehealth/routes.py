@@ -90,7 +90,7 @@ from odyssey.utils.misc import (
     check_staff_existence
 )
 from odyssey.integrations.twilio import Twilio
-from odyssey.utils.telehealth import *
+import odyssey.utils.telehealth as telehealth_utils
 from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.base.resources import BaseResource
 from odyssey.tasks.tasks import cleanup_unended_call, store_telehealth_transcript
@@ -166,7 +166,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
         # Update TelehealthBookingStatus to 'In Progress'
         booking.status = 'In Progress'
-        update_booking_status_history(
+        telehealth_utils.update_booking_status_history(
             new_status = booking.status,
             booking_id = booking.idx, 
             reporter_id = current_user.user_id, 
@@ -176,7 +176,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
         
-        increment_data = get_booking_increment_data()
+        increment_data = telehealth_utils.get_booking_increment_data()
         #calculate booking duration
         if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
             #booking crosses midnight
@@ -245,6 +245,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
         local_target_date = client_in_queue.target_date
         client_tz = client_in_queue.timezone
         duration = client_in_queue.duration
+        profession_type = client_in_queue.profession_type
 
         days_out = 0
         # days_available = 
@@ -265,9 +266,9 @@ class TelehealthClientTimeSelectApi(BaseResource):
         while days_out <= 7 and times_available < 10:
             local_target_date2 = local_target_date + timedelta(days=days_out)
             day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc = \
-                get_utc_start_day_time(local_target_date2, client_tz)
+                telehealth_utils.get_utc_start_day_time(local_target_date2, client_tz)
             
-            time_blocks = get_possible_ranges(
+            time_blocks = telehealth_utils.get_possible_ranges(
                 day_start_utc,
                 day_start_utc.weekday(), 
                 start_time_window_utc.idx, 
@@ -280,15 +281,17 @@ class TelehealthClientTimeSelectApi(BaseResource):
             # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioners': {10: [<TelehealthStaffAvailability 325>, <TelehealthStaffAvailability 326>, <TelehealthStaffAvailability 327>, <TelehealthStaffAvailability 328>]}}}
             available_times_with_practitioners = {}
             practitioner_details = {} # {<user_id> : {'consult_rate': Decimal, 'firstname': str, 'lastname': str}
+            practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
             for block in time_blocks:
                 # avails = {user_id(practioner): [TelehealthSTaffAvailability objects] }
-                avails, _practitioner_details = get_practitioners_available(time_blocks[block], client_in_queue)
+                avails, _practitioner_details, _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
                 if avails:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
                     available_times_with_practitioners[block] = {
                         'date_start_utc': date1.date(),
-                        'practitioners': avails}       
+                        'practitioner_ids': _practitioner_ids}       
                     practitioner_details.update(_practitioner_details)
+                    practitioner_ids_set.update(_practitioner_ids)
 
             if available_times_with_practitioners:
                 days_available[local_target_date2.date()] = available_times_with_practitioners
@@ -298,8 +301,11 @@ class TelehealthClientTimeSelectApi(BaseResource):
         
         if not days_available:
             raise BadRequest('No staff available for the upcoming week.')
-  
-        
+
+        # get practitioners details only once
+        # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
+        practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, profession_type, duration)
+
         ##
         #  Wheel availability request
         ##
@@ -333,15 +339,11 @@ class TelehealthClientTimeSelectApi(BaseResource):
         #           'total_options': len(times)}
 
         #buffer not taken into consideration here becuase that only matters to practitioner not client
-                #calculate booking duration
-        increment_length = get_booking_increment_data()['length']
-        #convert time delta to minutes
-        idx_delta = int(duration/increment_length) - 1
         final_dict = []
         for day in days_available:
             for time in days_available[day]:
                 # choose 1 practitioner at random that's available
-                pract = random.choice([pract for pract in days_available[day][time]['practitioners']])
+                pract = random.choice(list(practitioner_ids_set))
                 target_date_utc = days_available[day][time]['date_start_utc']                
                 client_window_id_start_time_utc = time
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
@@ -351,14 +353,16 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 datetime_end = datetime_start + timedelta(minutes=duration)
                 localized_window_start = LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()).first().idx
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
+                # TODO remove 'staff_user_id', 'staff_available' fields
                 final_dict.append({
                     'staff_user_id': pract,
+                    'practitioners_available_ids': list(practitioner_ids_set),
                     'staff_available': [{'user_id': practitioner_user_id, 
                                         'consult_cost': practitioner_details[practitioner_user_id]['consult_cost'],
                                         'firstname': practitioner_details[practitioner_user_id]['firstname'],
                                         'lastname': practitioner_details[practitioner_user_id]['lastname'],
                                         'gender': practitioner_details[practitioner_user_id]['gender']} 
-                                        for practitioner_user_id in days_available[day][time]['practitioners']],
+                                        for practitioner_user_id in days_available[day][time]['practitioner_ids']],
                     'target_date': datetime_start.date(),
                     'start_time': datetime_start.time(),
                     'end_time': datetime_end.time(),
@@ -366,7 +370,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                     'booking_window_id_end_time': localized_window_end
                 })
         payload = {'appointment_times': final_dict,
-                   'total_options': len(final_dict)}
+                   'total_options': len(final_dict),
+                   'practitioners_info': practitioners_info}
 
         return payload
 
@@ -542,7 +547,7 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_end_time', 'booking_window_id_start_time','target_date']), api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_end_time','booking_window_id_start_time','target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     @ns.doc(params={'client_user_id': 'Client User ID',
                 'staff_user_id' : 'Staff User ID'})
@@ -585,6 +590,9 @@ class TelehealthBookingsApi(BaseResource):
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=client_user_id).one_or_none()
         if not client_in_queue:
             raise BadRequest('Client not in queue.')
+        
+        # requested duration in minutes
+        duration = client_in_queue.duration
 
         # Verify target date is client's local today or in the future 
         client_tz = client_in_queue.timezone
@@ -592,25 +600,28 @@ class TelehealthBookingsApi(BaseResource):
         if (start_idx - 1) % 3 > 0:
             # verify time idx-1 is mulitple of 3. Only allowed start times are: X:00, X:15, X:30, X:45
             raise BadRequest("Invalid start time")
+
         start_time = time_inc[start_idx-1].start_time
+        # datetime start localized to client's timezone
         target_date = datetime.combine(request.parsed_obj.target_date, time(hour=start_time.hour, minute=start_time.minute, tzinfo=tz.gettz(client_tz)))
-        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(minute=0,second=0,microsecond=0) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS+1)
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(second=0,microsecond=0) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
         if target_date < client_local_datetime_now:
             raise BadRequest("Invalid target date or time")
+        
+        # update parsed_obj with client localized end 
+        # NOTE currently ignorign the incoming 'booking_window_id_end_time' input
+        # TODO coordinate with FE to stop requiring 'booking_window_id_end_time'
+        target_date_end_time = (target_date + timedelta(minutes = duration))
+        request.parsed_obj.booking_window_id_end_time = start_time_idx_dict[target_date_end_time.strftime('%H:%M:%S')] - 1
 
         # Localize the requested booking date and time to UTC
-        #duration_idx = request.parsed_obj.booking_window_id_end_time - request.parsed_obj.booking_window_id_start_time
-        duration_idx = int(client_in_queue.duration / 5)  - 1 
-        target_start_datetime_utc = datetime.combine(
-                                request.parsed_obj.target_date,
-                                time_inc[request.parsed_obj.booking_window_id_start_time-1].start_time,
-                                tzinfo=tz.gettz(client_in_queue.timezone)).astimezone(tz.UTC)
-        target_end_datetime_utc = target_start_datetime_utc + timedelta(minutes=5*(duration_idx+1))
+        target_start_datetime_utc = target_date.astimezone(tz.UTC)
+        target_end_datetime_utc = target_start_datetime_utc + timedelta(minutes=duration)
         target_start_time_idx_utc = start_time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
-        target_end_time_idx_utc = target_start_time_idx_utc + duration_idx
+        target_end_time_idx_utc = start_time_idx_dict[target_end_datetime_utc.strftime('%H:%M:%S')] - 1
        
         # call on verify_availability, will raise an error if practitioner doens't have availability requested
-        verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
+        telehealth_utils.verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
             target_end_time_idx_utc, target_start_datetime_utc, target_end_datetime_utc,client_in_queue.location_id)      
 
         # staff and client may proceed with scheduling the booking, 
@@ -646,19 +657,8 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.booking_window_id_end_time_utc = target_end_time_idx_utc
         request.parsed_obj.target_date_utc = target_start_datetime_utc.date()
 
-        # find start and end time localized to client's timezone
-        # convert start, end time and target date from utc star times found above
-        if request.parsed_obj.client_timezone != 'UTC':
-            start_time_client_localized = target_start_datetime_utc.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
-            end_time_client_localized = target_end_datetime_utc.astimezone(tz.gettz(request.parsed_obj.client_timezone)).time()
-        else:
-            start_time_client_localized = target_start_datetime_utc.time()
-            end_time_client_localized = target_end_datetime_utc.time()
-        
         # consultation rate to booking
         consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
-
-        telehealth_meeting_time = 5*(duration_idx+1)
 
         # Calculate time for display:
         # consulte_rate is in hours
@@ -667,10 +667,8 @@ class TelehealthBookingsApi(BaseResource):
         # 90 minutes -> 1.5*consulte_rate
         if not consult_rate:
             raise BadRequest('Practitioner has not set a consult rate')
-        rate = float(consult_rate)*(telehealth_meeting_time)/60
-        
+        rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
-
 
         db.session.add(request.parsed_obj)
         db.session.flush()
@@ -686,7 +684,7 @@ class TelehealthBookingsApi(BaseResource):
         #    request.parsed_obj.external_booking_id = external_booking_id
         
         # build & save status history obj
-        update_booking_status_history(new_status=request.parsed_obj.status, 
+        telehealth_utils.update_booking_status_history(new_status=request.parsed_obj.status, 
                         booking_id = request.parsed_obj.idx, 
                         reporter_id = current_user.user_id,
                         reporter_role = 'Practitioner' if current_user.user_id == request.parsed_obj.staff_user_id else 'Client'
@@ -713,7 +711,7 @@ class TelehealthBookingsApi(BaseResource):
             booking_start_staff_localized = target_start_datetime_utc
             booking_end_staff_localized = target_end_datetime_utc
 
-        add_booking_to_calendar(request.parsed_obj, 
+        telehealth_utils.add_booking_to_calendar(request.parsed_obj, 
                             booking_start_staff_localized, 
                             booking_end_staff_localized)
         db.session.commit()
@@ -722,8 +720,8 @@ class TelehealthBookingsApi(BaseResource):
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj.idx).first()
         client = {**booking.client.__dict__}
         client['timezone'] = booking.client_timezone
-        client['start_time_localized'] = start_time_client_localized
-        client['end_time_localized'] = end_time_client_localized
+        client['start_time_localized'] = target_date.time()
+        client['end_time_localized'] = (target_date + timedelta(minutes=duration)).time()
         practitioner = {**booking.practitioner.__dict__}
         practitioner['timezone'] = booking.staff_timezone
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
@@ -792,32 +790,30 @@ class TelehealthBookingsApi(BaseResource):
             # Can't update status to 'In Progress' through this endpoint
             # only practitioner can change status from pending to accepted
             # both client and practitioner can change status to canceled and completed
-            if new_status == 'In Progress':
-                raise BadRequest('This status can only be updated at the start of a call.')
+            if new_status == 'In Progress' or new_status == 'Completed':
+                raise BadRequest('This status can only be updated at the start or end of a call.')
 
             elif (new_status in ('Pending', 'Accepted') and
                   current_user.user_id != booking.staff_user_id):
                 raise Unauthorized('Only practitioner can update this status.')
+
+            if new_status != 'Canceled':
+                # Create TelehealthBookingStatus object if the request is updating the status
+                telehealth_utils.update_booking_status_history(new_status, booking_id, current_user.user_id,\
+                     'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
+
+                booking.update(data)
+                db.session.commit()
             
-            if new_status == 'Cancelled':
+            else:
+                telehealth_utils.cancel_telehealth_appointment(booking, current_user.user_id, 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
+                
                 ##### WHEEL #####
                 #elif current_user.user_id == booking.client_user_id:
                 #    if booking.external_booking_id:
                 #        # cancel appointment on wheel system if the staff memebr is a wheel practitioner
                 #       wheel = Wheel()
                 #       wheel.cancel_booking(booking.external_booking_id)
-
-                # If the booking gets updated for cancelation, then delete it in the Staff's calendar
-                staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking_id)).one_or_none()
-                if staff_event:
-                    db.session.delete(staff_event)
-                
-            # Create TelehealthBookingStatus object if the request is updating the status
-            update_booking_status_history(new_status, booking_id, current_user.user_id, 
-                                    'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
-
-        booking.update(data)
-        db.session.commit()
 
         return 201
 
@@ -1734,7 +1730,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
         #     wheel = Wheel()
         #     wheel.complete_consult(booking.external_booking_id)
 
-        complete_booking(
+        telehealth_utils.complete_booking(
             booking_id = booking.idx, 
             reporter_id = current_user.user_id,
             reporter = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
