@@ -124,9 +124,12 @@ class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
 
     territory_id = fields.Integer()
+    state_id = fields.Integer()
     country = fields.String(dump_only=True)
     territory = fields.String(dump_only=True)
     territory_abbreviation = fields.String(dump_only=True)
+    state = fields.String(dump_only=True)
+    state_abbreviation = fields.String(dump_only=True)
     phone_type = fields.String(validate=validate.OneOf(('primary', 'cell', 'work', 'home', 'fax', 'night', 'beeper')))
 
     @post_load

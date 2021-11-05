@@ -29,9 +29,18 @@ from odyssey.api.lookup.models import (
     LookupMedicalSymptoms,
     LookupOrganizations,
     LookupCurrencies,
-    LookupUSStates
+    LookupUSStates,
+    LookupNotificationSeverity
 )
 from odyssey.utils.base.schemas import BaseSchema
+
+class LookupNotificationSeveritySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupNotificationSeverity
+
+class LookupNotificationSeverityOutputSchema(Schema):
+    items = fields.Nested(LookupNotificationSeveritySchema(many=True))
+    total_items = fields.Integer()
 
 class LookupUSStatesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

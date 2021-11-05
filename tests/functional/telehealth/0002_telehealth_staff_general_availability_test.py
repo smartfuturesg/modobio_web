@@ -24,7 +24,7 @@ from .data import (
 )
 from tests.functional.doctor.data import doctor_credentials_post_1_data
 
-def test_post_1_staff_general_availability(test_client, payment_method, staff_territory, staff_credentials):
+def test_post_1_staff_general_availability(test_client, payment_method, staff_territory, staff_credentials, staff_consult_rate):
     # DEPENDENCY - add practitioner credentials
     response = test_client.post(
         f'/doctor/credentials/{test_client.staff_id}/',

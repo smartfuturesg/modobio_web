@@ -47,6 +47,7 @@ client_info_put_test_data = {
         "healthcare_contact": "United",
         "primary_goal_id": 1,
         "territory_id": 1,
+        "state_id": 9,
         "street": "123 Test St.",
         "city": "Phoenix",
         "zipcode": "85255",

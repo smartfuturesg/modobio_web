@@ -40,6 +40,9 @@ class TelehealthAvailableStaffSchema(Schema):
     lastname = fields.String()
     gender = fields.String()
     consult_cost = fields.Number(missing=None)
+    hourly_consult_rate = fields.Number(missing=None)
+    profile_pictures = fields.String()
+    bio = fields.String()
 
 class TelehealthTimeSelectSchema(Schema):
     staff_user_id = fields.Integer()
@@ -49,10 +52,12 @@ class TelehealthTimeSelectSchema(Schema):
     booking_window_id_start_time = fields.Integer()
     booking_window_id_end_time = fields.Integer()
     target_date = fields.Date()
+    practitioners_available_ids = fields.List(fields.Integer())
 
 class TelehealthTimeSelectOutputSchema(Schema):
     appointment_times = fields.Nested(TelehealthTimeSelectSchema(many=True),missing=[])
     total_options = fields.Integer()
+    practitioners_info = fields.Dict(keys=fields.Integer, values=fields.Nested(TelehealthAvailableStaffSchema()))
 
 class TelehealthBookingStatusSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

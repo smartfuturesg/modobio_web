@@ -116,7 +116,7 @@ def payment_method(test_client):
 
 @pytest.fixture(scope='session')
 def staff_credentials(test_client):
-    """ Add staff availablity for telehealth testing. """
+    """ Add staff credentials for telehealth testing. """
     role = (
         StaffRoles
         .query
@@ -124,8 +124,6 @@ def staff_credentials(test_client):
             user_id=test_client.staff_id,
             role='medical_doctor')
         .one_or_none())
-    
-    role.consult_rate = 100.00
 
     creds = PractitionerCredentials(
         user_id=test_client.staff_id,
@@ -140,9 +138,10 @@ def staff_credentials(test_client):
     test_client.db.session.commit()
 
     yield creds
-
-    test_client.db.session.delete(creds)
-    test_client.db.session.commit()
+    # TODO: find where these creds are deleted, 
+    # an error happens when trying to delete them here becuase they're already been deleted.
+    #test_client.db.session.delete(creds)
+    #test_client.db.session.commit()
 
 @pytest.fixture(scope='session')
 def staff_consult_rate(test_client):
@@ -160,7 +159,7 @@ def staff_consult_rate(test_client):
 
     yield role
 
-    test_client.db.session.delete(role)
+    role.consult_rate = None
     test_client.db.session.commit()    
 
 @pytest.fixture(scope='session')

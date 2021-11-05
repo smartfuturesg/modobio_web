@@ -19,7 +19,8 @@ from odyssey import db
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
     LookupCountriesOfOperations,
-    LookupRoles)
+    LookupRoles,
+    LookupUSStates)
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
     StaffRoles,
@@ -953,6 +954,10 @@ class StaffOfficesRoute(BaseResource):
         if not territory:
             raise BadRequest(f'Territory {request.parsed_obj.territory_id} not found.')
 
+        state = LookupUSStates.query.filter_by(idx=request.parsed_obj.state_id).one_or_none()
+        if not state:
+            raise BadRequest(f'State {request.parsed_obj.state_id} not found.')
+
         request.parsed_obj.user_id = user_id
 
         db.session.add(request.parsed_obj)
@@ -963,6 +968,8 @@ class StaffOfficesRoute(BaseResource):
         res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
         res['territory'] = territory.sub_territory
         res['territory_abbreviation'] = territory.sub_territory_abbreviation
+        res['state'] = state.state
+        res['state_abbreviation'] = state.abbreviation
 
         return res
 
@@ -979,6 +986,10 @@ class StaffOfficesRoute(BaseResource):
         if not territory:
             raise BadRequest(f'Territory {request.parsed_obj.territory_id} not found.')
 
+        state = LookupUSStates.query.filter_by(idx=request.parsed_obj.state_id).one_or_none()
+        if not state:
+            raise BadRequest(f'State {request.parsed_obj.state_id} not found.')
+
         office.update(request.json)
         db.session.commit()
 
@@ -987,6 +998,8 @@ class StaffOfficesRoute(BaseResource):
         res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
         res['territory'] = territory.sub_territory
         res['territory_abbreviation'] = territory.sub_territory_abbreviation
+        res['state'] = state.state
+        res['state_abbreviation'] = state.abbreviation
 
         return res
 
