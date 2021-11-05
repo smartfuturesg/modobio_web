@@ -213,7 +213,7 @@ def get_practitioners_available(time_block, q_request):
             and not current_bookings.all():
             #practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioners[practitioner_user_id] = available[practitioner_user_id]
-    
+    # TODO remove practioneres, practitioner_details from return 
     return practitioners, practitioner_details, practitioner_ids
 
 def calculate_consult_rate(hourly_rate:float, duration:int) -> float:

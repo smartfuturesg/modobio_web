@@ -305,7 +305,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
         # get practitioners details only once
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
         practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, profession_type, duration)
-        
+
         ##
         #  Wheel availability request
         ##
@@ -353,6 +353,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 datetime_end = datetime_start + timedelta(minutes=duration)
                 localized_window_start = LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()).first().idx
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
+                # TODO remove 'staff_user_id', 'staff_available' fields
                 final_dict.append({
                     'staff_user_id': pract,
                     'practitioners_available_ids': list(practitioner_ids_set),
@@ -666,7 +667,7 @@ class TelehealthBookingsApi(BaseResource):
         # 90 minutes -> 1.5*consulte_rate
         if not consult_rate:
             raise BadRequest('Practitioner has not set a consult rate')
-        rate = float(consult_rate)*(duration)/60
+        rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
 
         db.session.add(request.parsed_obj)
