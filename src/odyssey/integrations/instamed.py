@@ -9,6 +9,8 @@ from flask import current_app
 from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.user.models import User
+from odyssey.api.staff.models import StaffCalendarEvents
+from odyssey.utils.telehealth import update_booking_status_history
 
 from odyssey import db
 
@@ -311,14 +313,16 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
     update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
 
     if refund:
-        #first attempt to void, if that fails payment was likely more than 24 hours ago
-        #in which case we should refund instead of void
-        im = Instamed()
-        try:
-            im.void_payment(booking, reason)
-        except:
-            transaction_id = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none().transaction_id
-            im.refund_payment(transaction_id, booking.consult_rate, booking, reason)
+        #check if booking has been charged yet, if not do nothing
+        history = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none()
+        if history:
+            #first attempt to void, if that fails payment was likely more than 24 hours ago
+            #in which case we should refund instead of void
+            im = Instamed()
+            try:
+                im.void_payment(booking, reason)
+            except:
+                im.refund_payment(history.transaction_id, booking.consult_rate, booking, reason)
 
     #TODO: Create notification/send email(?) to user that their appointment 
 
