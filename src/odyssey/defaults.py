@@ -245,3 +245,6 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 
 # Google ReCaptcha api secret
 GOOGLE_RECAPTCHA_SECRET = ""
+
+WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev'
+
