@@ -530,6 +530,6 @@ def date_validator(date_string: str):
             # string does not match requirements
             raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
     except TypeError:
-        raise BadRequest("date requested is not formatted properly. Please user ISO format YYYY-MM-DD")
+        raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
 
             
