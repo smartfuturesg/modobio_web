@@ -370,10 +370,10 @@ def store_telehealth_transcript(booking_id: int):
             for media_idx, media in enumerate(message['media']):
                 # download media from twilio 
                 media_content = twilio.get_media(media['sid'])
-                
+
                 if media['content_type'] == 'application/pdf':
                     file_extension = '.pdf'
-                    media_file = FileStorage(media_content, filename=f'{media}.pdf', content_type=media['content_type'])
+                    media_file = FileStorage(media_content, filename=f'{media_id}.pdf', content_type=media['content_type'])
                 else:
                     img = BytesIO(media_content)
                     file_extension = '.' + imghdr.what('', media_content)
