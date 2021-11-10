@@ -6,10 +6,11 @@ from werkzeug.exceptions import BadRequest
 
 from flask import current_app
 
-from odyssey.utils.telehealth import cancel_telehealth_appointment
 from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.user.models import User
+from odyssey.api.staff.models import StaffCalendarEvents
+from odyssey.utils.telehealth import update_booking_status_history
 
 from odyssey import db
 
@@ -75,7 +76,7 @@ class Instamed:
 
         return response.json()
     
-    def refund_payment(self, transaction_id, amount, booking, reason):
+    def refund_payment(self, transaction_id, amount, booking, reason, reporter_id=None):
         """
         Refund a payment.
         InstaMed URI: /payment/refund
@@ -89,6 +90,15 @@ class Instamed:
         amount: (string)
             amount of money to be refunded
         
+        booking: TelehealthBooking object
+            object for the booking this transaction is associated with
+
+        reason:
+            reason for this refund
+
+        reporter_id:
+            id the the staff that approved this refund, None if system automated
+
         Returns
         -------
         dict of information regarding the refund
@@ -110,11 +120,14 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
+            logger.error(f'Instamed returned the following error: {response.text} when' \
+                f' refunding a transaction with id {transaction_id}.')
             raise BadRequest(f'Instamed returned the following error: {response.text}')
+            
 
         refund_data = {
             'user_id': booking.client_user_id,
-            'reporter_id': booking.staff_user_id,
+            'reporter_id': reporter_id,
             'payment_id': PaymentHistory.query.filter_by(transaction_id=transaction_id).one_or_none().idx,
             'refund_transaction_id': response.json()['TransactionID'],
             'refund_amount': amount,
@@ -164,6 +177,8 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
+            logger.error(f'Instamed returned the following error: {response.text} when' \
+                f' voiding a transaction with id {transaction.transaction_id}.')
             raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         #update transaction in PaymentHistory with void data
@@ -271,3 +286,45 @@ class Instamed:
             #transaction was declined, cancel appointment
             cancel_telehealth_appointment(booking)
         return response_data
+
+def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment', reporter_id=None, reporter_role='System'):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    and from bookings PUT to cancel a booking
+
+    args:
+    booking: a booking object for the telehealth appointment to be cancelled
+    refund: boolean denoting whether this booking should be refunded, should only happen when called
+    due to practitioner cancellation or practitioner no-show
+    reason: reason for the cancellation, either (Practitioner Cancellation, Practitioner No-Show, or Failed Payment)
+    reporter_id: user_id of the user that initiated the cancellation, null if system automated
+    reporter_role: role of the user that initiated the cancellation(staff or client), System if system automated
+    """
+
+    # update booking status to canceled
+    booking.status = 'Canceled'
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    # add new status to status history table
+    update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
+
+    if refund:
+        #check if booking has been charged yet, if not do nothing
+        history = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none()
+        if history:
+            #first attempt to void, if that fails payment was likely more than 24 hours ago
+            #in which case we should refund instead of void
+            im = Instamed()
+            try:
+                im.void_payment(booking, reason)
+            except:
+                im.refund_payment(history.transaction_id, booking.consult_rate, booking, reason)
+
+    #TODO: Create notification/send email(?) to user that their appointment 
+
+    db.session.commit()
+    return
