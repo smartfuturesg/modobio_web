@@ -386,7 +386,7 @@ def store_telehealth_transcript(booking_id: int):
                 save_file_path_s3 = f'{transcript_media_prefix}/{media_id}{file_extension}'
                 fh.save_file_to_s3(media_file, save_file_path_s3)
 
-                media['s3_path'] = save_file_path_s3 #+ f'{img_id}{img_extension}'
+                media['s3_path'] = save_file_path_s3 
                 transcript[idx]['media'][media_idx] = media
             
                 media_id+=1
@@ -402,10 +402,10 @@ def store_telehealth_transcript(booking_id: int):
     else:
         _id = None  
 
-    # # delete the conversation from twilio
+    # delete the conversation from twilio
     twilio.delete_conversation(booking.chat_room.conversation_sid)
 
-    # # delete the conversation sid entry, add transcript_object_id from mongodb
+    # delete the conversation sid entry, add transcript_object_id from mongodb
     booking.chat_room.conversation_sid = None
     booking.chat_room.transcript_object_id = str(_id)
 
