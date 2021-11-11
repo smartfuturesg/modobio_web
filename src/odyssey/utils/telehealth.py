@@ -233,6 +233,7 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
                 StaffRoles.consult_rate != None
             ).all()
 
+
     fh = FileHandling()
 
     # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
@@ -251,7 +252,8 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
             'bio': practitioner.staff_profile.bio,
             'hourly_consult_rate': consult_rate,
             'consult_cost': calculate_consult_rate(consult_rate,duration),
-            'profile_pictures': fh.get_presigned_urls(prefix) if prefix else None
+            'profile_pictures': fh.get_presigned_urls(prefix) if prefix else None,
+            'roles' : [role.role for role in practitioner.roles]
         }
 
 
