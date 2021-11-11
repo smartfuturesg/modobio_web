@@ -26,6 +26,7 @@ from odyssey.api.telehealth.models import(
 from odyssey.api.telehealth.schemas import TelehealthBookingStatusSchema
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
+from odyssey.api.payment.models import PaymentHistory
 from odyssey.integrations.wheel import Wheel
 from werkzeug.exceptions import BadRequest
 from odyssey.integrations.twilio import Twilio
@@ -388,26 +389,6 @@ def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_
                                         timezone = booking_start_staff_localized.astimezone().tzname()
                                         )
     db.session.add(add_to_calendar)
-    return
-
-def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='System'):
-    """
-    Used to cancel an appointment in the event a payment is unsuccessful
-    and from bookings PUT to cancel a booking
-    """
-
-    # update booking status to canceled
-    booking.status = 'Canceled'
-
-    # delete booking from Practitioner's calendar
-    staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
-    if staff_event:
-        db.session.delete(staff_event)
-
-    #TODO: Create notification/send email(?) to user that their appointment was canceled due
-    #to a failed payment
-
-    db.session.commit()
     return
 
 def get_booking_increment_data():

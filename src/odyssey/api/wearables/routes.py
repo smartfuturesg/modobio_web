@@ -1,26 +1,28 @@
 import logging
+
+from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
 logger = logging.getLogger(__name__)
 
 import base64
 import secrets
 from datetime import datetime, timedelta
 
-from flask import current_app, request
+import boto3
+from boto3.dynamodb.conditions import Key
+from flask import current_app, jsonify, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
 from werkzeug.exceptions import BadRequest
 
-from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.auth import token_auth
 
+from odyssey import db
 from odyssey.api.wearables.models import (
     Wearables,
     WearablesOura,
     WearablesFitbit,
     WearablesFreeStyle)
-
 from odyssey.api.wearables.schemas import (
     WearablesSchema,
     WearablesOuraAuthSchema,
@@ -28,9 +30,9 @@ from odyssey.api.wearables.schemas import (
     WearablesOAuthPostSchema,
     WearablesFreeStyleSchema,
     WearablesFreeStyleActivateSchema)
-
-from odyssey.utils.misc import check_client_existence
-from odyssey import db
+from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.misc import check_client_existence, date_validator
 
 ns = Namespace('wearables', description='Endpoints for registering wearable devices.')
 
@@ -736,3 +738,72 @@ class WearablesFreeStyleEndpoint(BaseResource):
             cid=user_id)
         db.session.execute(stmt)
         db.session.commit()
+
+
+@ns.route('/data/<string:device_type>/<int:user_id>/')
+@ns.doc(params={
+    'user_id': 'User ID number', 
+    'device_type': 'fitbit, applewatch, oura, freestyle',
+    'start_date': '(optional) iso formatted date. start of date range',
+    'end_date': '(optional) iso formatted date. end of date range'
+    })
+class WearablesData(BaseResource):
+    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
+    @responds(status_code=200, api=ns)
+    def get(self, user_id, device_type):
+        """
+        Bring down the wearables data from dynamodb
+
+        Tables queried depend on environment:
+        ['Wearables-V1-dev', 'Wearables-V1-prod']
+
+        Params
+        ------
+        user_id
+
+        device_type: only the data from one device per request.
+        """
+
+        # connect to dynamo
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table(current_app.config['WEARABLES_DYNAMO_TABLE'])
+
+        # validate device_type request
+        if device_type not in WEARABLE_DEVICE_TYPES:
+            raise BadRequest(f"wearable device type, {device_type}, not supported")
+
+        # configure date range expression
+        # Four cases: 
+        #   - both start and end date provided: return data for date range
+        #   - only start date specified: return start_date + WEARABLE_DATA_DEFAULT_RANGE_DAYS 
+        #   - only end date specified: return end_date - WEARABLE_DATA_DEFAULT_RANGE_DAYS 
+        #   - no dates specified: return last WEARABLE_DATA_DEFAULT_RANGE_DAYS days of data
+        start_date = date_validator(request.values.get('start_date')) if request.values.get('start_date') else None
+        end_date =  date_validator(request.values.get('end_date')) if request.values.get('end_date') else None
+        if start_date and end_date:
+            date_condition = Key('date').between(start_date, end_date)
+        elif start_date:
+            end_date = (datetime.fromisoformat(start_date) + timedelta(days=WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
+            date_condition = Key('date').between(start_date, end_date)
+        elif end_date:
+            start_date = (datetime.fromisoformat(end_date) - timedelta(days=WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
+            date_condition = Key('date').between(start_date, end_date)
+        else:
+            start_date = (datetime.now() - timedelta(days=WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
+            end_date = datetime.now().date().isoformat() 
+            date_condition =  Key('date').gte(start_date)
+        
+        # make reqeust for data
+        response = table.query(
+            KeyConditionExpression= Key('user_id').eq(user_id) & date_condition,
+            FilterExpression = Key('wearable').eq(device_type))
+        
+        payload = {'start_date': start_date, 'end_date': end_date, 'total_items': len(response.get('Items', [])), 'items': []}
+        
+        # only provide the data that is required
+        payload['items'] = response.get('Items', [])
+
+        return jsonify(payload)
+
+
+

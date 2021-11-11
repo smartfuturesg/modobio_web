@@ -213,8 +213,8 @@ def update_booking_status_history(mapper, connection, target):
     if current_user_id:
         reporter_role = 'Practitioner' if current_user_id == booking.staff_user_id else 'Client'
     else:
-        # if the status is updated through the task cleanup_unended_call
-        reporter_role = 'Unended by Participants'
+        # if the status is updated through the task cleanup_unended_call or after a failed payment
+        reporter_role = 'System'
 
     connection.execute(
         insert(TelehealthBookingStatus),
