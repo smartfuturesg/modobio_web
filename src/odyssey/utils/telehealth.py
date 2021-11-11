@@ -22,7 +22,8 @@ from odyssey.api.telehealth.models import(
     TelehealthBookings, 
     TelehealthStaffAvailability, 
     TelehealthBookingStatus
-) 
+)
+from odyssey.api.telehealth.schemas import TelehealthBookingStatusSchema
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
 from odyssey.integrations.wheel import Wheel
@@ -341,7 +342,7 @@ def update_booking_status_history(new_status:String, booking_id:Integer, reporte
     return 
 
 
-def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Participants'):
+def complete_booking(booking_id: int):
     """
     After booking gets started, make sure it gets completed
     1. Update booking status
@@ -360,12 +361,6 @@ def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Par
 
     # update status
     booking.status = 'Completed'
-
-    update_booking_status_history(
-            new_status = booking.status, 
-            booking_id = booking.idx, 
-            reporter_id = reporter_id, 
-            reporter_role = reporter)
 
     # complete twilio room if making call over, catch error or raise if not expected error
     twilio = Twilio()
@@ -408,9 +403,6 @@ def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='Syst
     staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
     if staff_event:
         db.session.delete(staff_event)
-
-    # add new status to status history table
-    update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
 
     #TODO: Create notification/send email(?) to user that their appointment was canceled due
     #to a failed payment

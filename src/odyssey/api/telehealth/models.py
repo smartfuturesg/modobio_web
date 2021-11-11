@@ -2,11 +2,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 from flask_restx.fields import String
-from sqlalchemy import text
+from sqlalchemy import text, insert
 from sqlalchemy.sql.expression import true
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
+from odyssey.utils.auth import token_auth
 
 """
 Database models for all things telehealth. These tables will be used to keep track of bookings,
@@ -174,6 +175,56 @@ class TelehealthBookings(BaseModelWithIdx):
 
     :type: Numeric
     """
+
+@db.event.listens_for(TelehealthBookings, "after_insert")
+def add_booking_status_history(mapper, connection, target):
+    """
+    Listens for any new status change
+    Updates the booking status history
+    """
+    current_user, _ = token_auth.current_user()
+    booking = target
+    
+    connection.execute(
+        insert(TelehealthBookingStatus),
+        [
+            {"status":booking.status,
+            "booking_id":booking.idx,
+            "reporter_id":current_user.user_id,
+            "reporter_role":'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client'}])
+
+@db.event.listens_for(TelehealthBookings, "after_update", "status")
+def update_booking_status_history(mapper, connection, target):
+    """
+    Listens for any new status change
+    Updates the booking status history
+    """
+    try:
+        current_user, _ = token_auth.current_user()
+        current_user_id = current_user.user_id
+    except:
+        current_user_id = None
+
+    try:
+        booking = target.obj()
+    except:
+        booking = target
+    
+    if current_user_id:
+        reporter_role = 'Practitioner' if current_user_id == booking.staff_user_id else 'Client'
+    else:
+        # if the status is updated through the task cleanup_unended_call
+        reporter_role = 'Unended by Participants'
+
+    connection.execute(
+        insert(TelehealthBookingStatus),
+        [
+            {"status":booking.status,
+            "booking_id":booking.idx,
+            "reporter_id":current_user_id,
+            "reporter_role":reporter_role
+            }])
+    
 
 class TelehealthBookingStatus(db.Model):
     """
