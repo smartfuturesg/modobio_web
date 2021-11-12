@@ -253,12 +253,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
         # {local_target_date(datetime.date):
         #   {start_time_idx_1: 
         #       {'date_start_utc': datetime.date,
-        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #         'practitioner_ids': {user_id, user_id (set)}
         #       }
         #   },
         #   {start_time_idx_2: 
         #       {'date_start_utc': datetime.date,
-        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #         'practitioner_ids':  {user_id, user_id (set)}
         #       }
         #   }
         #}
@@ -284,12 +284,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
             practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
             for block in time_blocks:
                 # avails = {user_id(practioner): [TelehealthSTaffAvailability objects] }
-                avails, _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
-                if avails:
+                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                if _practitioner_ids:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
                     available_times_with_practitioners[block] = {
                         'date_start_utc': date1.date(),
-                        'practitioner_ids': _practitioner_ids}       
+                        'practitioner_ids': _practitioner_ids}
                     practitioner_ids_set.update(_practitioner_ids)
 
             if available_times_with_practitioners:
@@ -341,8 +341,6 @@ class TelehealthClientTimeSelectApi(BaseResource):
         final_dict = []
         for day in days_available:
             for time in days_available[day]:
-                # choose 1 practitioner at random that's available
-                pract = random.choice(list(practitioner_ids_set))
                 target_date_utc = days_available[day][time]['date_start_utc']                
                 client_window_id_start_time_utc = time
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
@@ -352,9 +350,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 datetime_end = datetime_start + timedelta(minutes=duration)
                 localized_window_start = LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()).first().idx
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
-                # TODO remove 'staff_user_id', 'staff_available' fields
+                
                 final_dict.append({
-                    'staff_user_id': pract,
                     'practitioners_available_ids': list(practitioner_ids_set),
                     'target_date': datetime_start.date(),
                     'start_time': datetime_start.time(),

@@ -179,18 +179,15 @@ def get_practitioners_available(time_block, q_request):
     # practitioner availablilty as per availability input
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
-    practitioner_ids = set() # set of practitioner's avaialbe user_ids
     for user_id, avail in query.all():
         if user_id not in available:
             available[user_id] = []
-            practitioner_ids.add(user_id)
         if avail:
             available[user_id].append(avail)
     
-    # practitioners = {user_id(practioner): [TelehealthSTaffAvailability objects] }
-    # dictionary of practitioners avaialble with list of TelehealthStaffAvailabilty objects, 
-    # after filtering through scheduled bookings and removing those availabilities occupied by a booking.
-    practitioners = {}
+
+    # filtering through scheduled bookings and removing those availabilities occupied by a booking.
+    practitioner_ids = set() # set of practitioner's avaialbe user_ids
     bookings_base_query = db.session.query(TelehealthBookings).filter_by(target_date_utc=date1.date())\
         .filter(TelehealthBookings.status !='Canceled')
     for practitioner_user_id in available:
@@ -205,9 +202,9 @@ def get_practitioners_available(time_block, q_request):
         if len(available[practitioner_user_id]) == int(duration/5) + (TELEHEALTH_START_END_BUFFER * 2)\
             and not current_bookings.all():
             #practitioner doesn't have a booking with the date1 and any of the times in the range
-            practitioners[practitioner_user_id] = available[practitioner_user_id]
-    # TODO remove practioneres, practitioner_details from return 
-    return practitioners, practitioner_ids
+            practitioner_ids.add(practitioner_user_id)
+    
+    return practitioner_ids
 
 def calculate_consult_rate(hourly_rate:float, duration:int) -> float:
     
