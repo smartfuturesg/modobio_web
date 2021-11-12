@@ -277,13 +277,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 end_time_window_utc.idx,
                 duration)
 
-            # available_times_with_practitioenrs =
-            # {start_time_idx: {'date_start_utc': datetime.date, 'practitioenrs': {user_id: [TelehealthStaffAvailability]}}}
-            # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioners': {10: [<TelehealthStaffAvailability 325>, <TelehealthStaffAvailability 326>, <TelehealthStaffAvailability 327>, <TelehealthStaffAvailability 328>]}}}
+            # available_times_with_practitioners =
+            # {start_time_idx: {'date_start_utc': datetime.date, 'practitioner_ids': {set of available user_ids}}
+            # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioner_ids': {10}}
             available_times_with_practitioners = {}
             practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
             for block in time_blocks:
-                # avails = {user_id(practioner): [TelehealthSTaffAvailability objects] }
                 _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
                 if _practitioner_ids:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]

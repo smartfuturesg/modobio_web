@@ -46,7 +46,6 @@ class TelehealthAvailableStaffSchema(Schema):
     roles = fields.List(fields.String())
 
 class TelehealthTimeSelectSchema(Schema):
-    staff_user_id = fields.Integer()
     start_time = fields.Time()
     end_time = fields.Time()
     booking_window_id_start_time = fields.Integer()
