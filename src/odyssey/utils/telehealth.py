@@ -146,9 +146,8 @@ def get_practitioners_available(time_block, q_request):
     location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation
     duration = q_request.duration
     
-    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, User, StaffRoles.consult_rate)\
+    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
         .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-            .join(User, User.user_id == TelehealthStaffAvailability.user_id)\
                 .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
                 .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
                 PractitionerCredentials.state == location,
@@ -180,18 +179,11 @@ def get_practitioners_available(time_block, q_request):
     # practitioner availablilty as per availability input
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
-    practitioner_details = {} # name and consult rate for each practitioner, indexed by user_id
     practitioner_ids = set() # set of practitioner's avaialbe user_ids
-    for user_id, avail, user, consult_rate in query.all():
+    for user_id, avail in query.all():
         if user_id not in available:
             available[user_id] = []
             practitioner_ids.add(user_id)
-        if user_id not in practitioner_details:
-            practitioner_details[user_id] = {
-                'consult_cost': round(float(consult_rate) * int(q_request.duration)/60.0, 2), 
-                'firstname': user.firstname,
-                'lastname': user.lastname,
-                'gender': 'm' if user.biological_sex_male else 'f'}
         if avail:
             available[user_id].append(avail)
     
@@ -215,7 +207,7 @@ def get_practitioners_available(time_block, q_request):
             #practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioners[practitioner_user_id] = available[practitioner_user_id]
     # TODO remove practioneres, practitioner_details from return 
-    return practitioners, practitioner_details, practitioner_ids
+    return practitioners, practitioner_ids
 
 def calculate_consult_rate(hourly_rate:float, duration:int) -> float:
     
