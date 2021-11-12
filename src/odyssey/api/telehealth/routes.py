@@ -1799,8 +1799,6 @@ class TelehealthTranscripts(Resource):
         -------
         None
         """
-        current_user, _ = token_auth.current_user()
-        
         booking = TelehealthBookings.query.get(booking_id)
 
         if not booking:

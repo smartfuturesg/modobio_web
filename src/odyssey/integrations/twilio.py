@@ -41,7 +41,6 @@ class Twilio():
                 'api_key_secret': twilio_api_key_secret}
 
 
-
     def get_conversation_messages(self, conversation_sid: str):
         """
         Brings up the full conversation using the conversation_sid and twilio's API
@@ -70,7 +69,6 @@ class Twilio():
                  .conversations(conversation_sid) \
                  .messages \
                  .list()
-
         # construct response with just the necessary details of each message
         for message in messages:
             transcript.append({
@@ -338,7 +336,7 @@ class Twilio():
         return response.content
     
     
-    def upload_media(self, media_path: str):
+    def upload_media(self, media_path: str, content_type: str = 'image/jpeg'):
         """
         Upload a media file to twilio. Twilio responds with details on the media object they store on their end. We can use the sid in the response to 
         add the media file to a conversation. 
@@ -358,7 +356,7 @@ class Twilio():
     
         response = requests.post(f"https://mcs.us1.twilio.com/v1/Services/{self.conversation_service_sid}/Media", 
                             auth = (self.twilio_credentials['api_key'], self.twilio_credentials['api_key_secret']),
-                            headers={'Content-Type': 'image/jpeg'},
+                            headers={'Content-Type': content_type},
                             data=data)
         try:
             response.raise_for_status()
