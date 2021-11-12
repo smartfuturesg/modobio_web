@@ -18,7 +18,6 @@ Refund more than full amount (should fail)
 Refund after full amount has been refunded (should fail)
 """
 def test_sale_success(test_client, test_booking):
-    breakpoint()
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
         '/payment/test/charge/',
