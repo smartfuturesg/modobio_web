@@ -351,7 +351,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
                 
                 final_dict.append({
-                    'practitioners_available_ids': list(practitioner_ids_set),
+                    'practitioners_available_ids': list(days_available[day][time]['practitioner_ids']),
                     'target_date': datetime_start.date(),
                     'start_time': datetime_start.time(),
                     'end_time': datetime_end.time(),
