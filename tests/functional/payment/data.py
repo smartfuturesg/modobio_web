@@ -107,7 +107,7 @@ def test_booking(test_client):
     })
 
     test_client.db.session.add(booking)
-    test_client.db.session.commit()
+    test_client.db.session.flush()
 
     yield booking
 

@@ -795,9 +795,9 @@ class TelehealthBookingsApi(BaseResource):
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
-                    cancel_telehealth_appointment(booking, refund=True, reporter_id=current_user.user_id, reporter_role='Practitioner')
+                    cancel_telehealth_appointment(booking, refund=True)
                 else:
-                    cancel_telehealth_appointment(booking, refund=False, reporter_id=current_user.user_id, reporter_role='Client')                
+                    cancel_telehealth_appointment(booking, refund=False)                
                 ##### WHEEL #####
                 #elif current_user.user_id == booking.client_user_id:
                 #    if booking.external_booking_id:
@@ -1720,10 +1720,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
         #     wheel = Wheel()
         #     wheel.complete_consult(booking.external_booking_id)
 
-        telehealth_utils.complete_booking(
-            booking_id = booking.idx, 
-            reporter_id = current_user.user_id,
-            reporter = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
+        telehealth_utils.complete_booking(booking_id = booking.idx)
 
         return 
 
