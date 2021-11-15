@@ -1789,6 +1789,7 @@ class ClientHeightEndpoint(BaseResource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientHeightSchema, api=ns)
+    @responds(api=ns, status_code=201)
     def post(self, user_id):
         """ New height measurement.
 
@@ -1833,6 +1834,7 @@ class ClientWeightEndpoint(BaseResource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientWeightSchema, api=ns)
+    @responds(api=ns, status_code=201)
     def post(self, user_id):
         """ New weight measurement.
 
@@ -1877,6 +1879,7 @@ class ClientWaistSizeEndpoint(BaseResource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientWaistSizeSchema, api=ns)
+    @responds(api=ns, status_code=201)
     def post(self, user_id):
         """ New waist size measurement.
 
