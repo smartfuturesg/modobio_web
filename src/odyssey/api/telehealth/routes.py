@@ -253,12 +253,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
         # {local_target_date(datetime.date):
         #   {start_time_idx_1: 
         #       {'date_start_utc': datetime.date,
-        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #         'practitioner_ids': {user_id, user_id (set)}
         #       }
         #   },
         #   {start_time_idx_2: 
         #       {'date_start_utc': datetime.date,
-        #         'practitioners': {user_id(practioner): [TelehealthSTaffAvailability objects], ...}
+        #         'practitioner_ids':  {user_id, user_id (set)}
         #       }
         #   }
         #}
@@ -277,21 +277,18 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 end_time_window_utc.idx,
                 duration)
 
-            # available_times_with_practitioenrs =
-            # {start_time_idx: {'date_start_utc': datetime.date, 'practitioenrs': {user_id: [TelehealthStaffAvailability]}}}
-            # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioners': {10: [<TelehealthStaffAvailability 325>, <TelehealthStaffAvailability 326>, <TelehealthStaffAvailability 327>, <TelehealthStaffAvailability 328>]}}}
+            # available_times_with_practitioners =
+            # {start_time_idx: {'date_start_utc': datetime.date, 'practitioner_ids': {set of available user_ids}}
+            # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioner_ids': {10}}
             available_times_with_practitioners = {}
-            practitioner_details = {} # {<user_id> : {'consult_rate': Decimal, 'firstname': str, 'lastname': str}
             practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
             for block in time_blocks:
-                # avails = {user_id(practioner): [TelehealthSTaffAvailability objects] }
-                avails, _practitioner_details, _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
-                if avails:
+                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                if _practitioner_ids:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
                     available_times_with_practitioners[block] = {
                         'date_start_utc': date1.date(),
-                        'practitioner_ids': _practitioner_ids}       
-                    practitioner_details.update(_practitioner_details)
+                        'practitioner_ids': _practitioner_ids}
                     practitioner_ids_set.update(_practitioner_ids)
 
             if available_times_with_practitioners:
@@ -343,8 +340,6 @@ class TelehealthClientTimeSelectApi(BaseResource):
         final_dict = []
         for day in days_available:
             for time in days_available[day]:
-                # choose 1 practitioner at random that's available
-                pract = random.choice(list(practitioner_ids_set))
                 target_date_utc = days_available[day][time]['date_start_utc']                
                 client_window_id_start_time_utc = time
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
@@ -354,16 +349,9 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 datetime_end = datetime_start + timedelta(minutes=duration)
                 localized_window_start = LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()).first().idx
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
-                # TODO remove 'staff_user_id', 'staff_available' fields
+                
                 final_dict.append({
-                    'staff_user_id': pract,
-                    'practitioners_available_ids': list(practitioner_ids_set),
-                    'staff_available': [{'user_id': practitioner_user_id, 
-                                        'consult_cost': practitioner_details[practitioner_user_id]['consult_cost'],
-                                        'firstname': practitioner_details[practitioner_user_id]['firstname'],
-                                        'lastname': practitioner_details[practitioner_user_id]['lastname'],
-                                        'gender': practitioner_details[practitioner_user_id]['gender']} 
-                                        for practitioner_user_id in days_available[day][time]['practitioner_ids']],
+                    'practitioners_available_ids': list(days_available[day][time]['practitioner_ids']),
                     'target_date': datetime_start.date(),
                     'start_time': datetime_start.time(),
                     'end_time': datetime_end.time(),
@@ -1799,8 +1787,6 @@ class TelehealthTranscripts(Resource):
         -------
         None
         """
-        current_user, _ = token_auth.current_user()
-        
         booking = TelehealthBookings.query.get(booking_id)
 
         if not booking:

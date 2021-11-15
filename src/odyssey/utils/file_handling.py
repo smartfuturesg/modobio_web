@@ -93,8 +93,10 @@ class FileHandling:
     
     def save_file_to_s3(self, file: FileStorage, filename: str):
         # Just saves, nothing returned
-        file.seek(0)
+        if file.content_type != 'application/pdf':
+            file.seek(0)
         self.s3_bucket.put_object(Key=self.s3_prefix + filename, Body=file.stream)
+
 
     def get_presigned_urls(self, prefix: str) -> dict:
         # returns all files found with defined prefix
@@ -120,3 +122,4 @@ class FileHandling:
 
     def delete_from_s3(self, prefix):
         self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
+
