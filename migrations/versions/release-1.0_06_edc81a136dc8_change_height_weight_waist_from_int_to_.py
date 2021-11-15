@@ -27,11 +27,11 @@ def upgrade():
     op.rename_table('ClientWeightHistory', 'ClientWeight')
     op.rename_table('ClientWaistSizeHistory', 'ClientWaistSize')
 
-    op.alter_column('ClientHeight', 'height', type_=sa.Numeric(precision=10, scale=6))
-    op.alter_column('ClientWaistSize', 'waist_size', type_=sa.Numeric(precision=10, scale=6))
+    op.alter_column('ClientHeight', 'height', type_=sa.Numeric(precision=10, scale=6, asdecimal=False))
+    op.alter_column('ClientWaistSize', 'waist_size', type_=sa.Numeric(precision=10, scale=6, asdecimal=False))
 
     # Temporarily give this more precision than needed, to deal with g -> kg conversion.
-    op.alter_column('ClientWeight', 'weight', type_=sa.Numeric(precision=20, scale=11))
+    op.alter_column('ClientWeight', 'weight', type_=sa.Numeric(precision=20, scale=11, asdecimal=False))
 
     # Convert weight in g to kg.
     # Weight in g is always > 1000 g (> 1 kg, even a premature baby weighs more),
@@ -40,18 +40,18 @@ def upgrade():
     op.execute('UPDATE "ClientWeight" SET weight = weight / 1000 WHERE weight > 1000;')
 
     # Reduce precision to what is defined in model.
-    op.alter_column('ClientWeight', 'weight', type_=sa.Numeric(precision=15, scale=11))
+    op.alter_column('ClientWeight', 'weight', type_=sa.Numeric(precision=15, scale=11, asdecimal=False))
 
 def downgrade():
     # Temporarily give this more precision than needed, to deal with kg -> g conversion.
-    op.alter_column('ClientWeight', 'weight', type_=sa.Numeric(precision=20, scale=11))
+    op.alter_column('ClientWeight', 'weight', type_=sa.Numeric(precision=20, scale=11, asdecimal=False))
 
     op.execute('UPDATE "ClientWeight" SET weight = weight * 1000 WHERE weight < 1000;')
 
     # Conversion back to integer rounds.
     op.alter_column('ClientHeight', 'height', type_=sa.Integer)
     op.alter_column('ClientWeight', 'weight', type_=sa.Integer)
-    op.alter_column('ClientWaistSize', 'waist_size', type_=Integer)
+    op.alter_column('ClientWaistSize', 'waist_size', type_=sa.Integer)
 
     op.rename_table('ClientHeight', 'ClientHeightHistory')
     op.rename_table('ClientWeight', 'ClientWeightHistory')
