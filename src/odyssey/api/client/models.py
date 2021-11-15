@@ -910,6 +910,24 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     :type: boolean
     """
 
+    display_metric_height = db.Column(db.Boolean(), nullable=True)
+    """ Display height in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
+    display_metric_weight = db.Column(db.Boolean(), nullable=True)
+    """ Display weight in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
+    display_metric_waist_size = db.Column(db.Boolean(), nullable=True)
+    """ Display waist size in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
     enable_push_notifications = db.Column(db.Boolean())
     """
     Denotes if user has enabled push notifications
