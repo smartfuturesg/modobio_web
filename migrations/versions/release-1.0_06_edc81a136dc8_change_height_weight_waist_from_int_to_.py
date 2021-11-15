@@ -1,6 +1,7 @@
 """Change height, weight, waist from int to numeric.
 Change tablenames to drop -History postfix.
 Change data in weight column from g to kg.
+Add metric display settings to ClientMobileSettings.
 
 Revision ID: edc81a136dc8
 Revises: aa9b5a000691
@@ -18,6 +19,10 @@ depends_on = None
 
 
 def upgrade():
+    op.add_column('ClientMobileSettings', sa.Column('display_metric_height', sa.Boolean, nullable=True))
+    op.add_column('ClientMobileSettings', sa.Column('display_metric_weight', sa.Boolean, nullable=True))
+    op.add_column('ClientMobileSettings', sa.Column('display_metric_waist_size', sa.Boolean, nullable=True))
+
     op.rename_table('ClientHeightHistory', 'ClientHeight')
     op.rename_table('ClientWeightHistory', 'ClientWeight')
     op.rename_table('ClientWaistSizeHistory', 'ClientWaistSize')
@@ -51,3 +56,7 @@ def downgrade():
     op.rename_table('ClientHeight', 'ClientHeightHistory')
     op.rename_table('ClientWeight', 'ClientWeightHistory')
     op.rename_table('ClientWaistSize', 'ClientWaistSizeHistory')
+
+    op.drop_column('ClientMobileSettings', 'display_metric_height')
+    op.drop_column('ClientMobileSettings', 'display_metric_weight')
+    op.drop_column('ClientMobileSettings', 'display_metric_waist_size')
