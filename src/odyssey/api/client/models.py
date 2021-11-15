@@ -955,7 +955,8 @@ class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
 
     # precision = total number of digits.
     # scale = number of digits behind decimal point.
-    height = db.Column(db.Numeric(precision=10, scale=6))
+    # asdecimal=True returns decimal.Decimal object, no JSON parser for it.
+    height = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
     """
     Value for this height measurement in cm.
 
@@ -965,7 +966,7 @@ class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
 class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
     """ Stores weight measurements of clients. """
 
-    weight = db.Column(db.Numeric(precision=15, scale=11))
+    weight = db.Column(db.Numeric(precision=15, scale=11, asdecimal=False))
     """
     Value for this weight measurement in kg.
 
@@ -975,7 +976,7 @@ class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
 class ClientWaistSize(BaseModelWithIdx, UserIdFkeyMixin):
     """ Stores waist size measurements of clients. """
 
-    waist_size = db.Column(db.Numeric(precision=10, scale=6))
+    waist_size = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
     """
     Value for this waist size measurement in cm.
 
