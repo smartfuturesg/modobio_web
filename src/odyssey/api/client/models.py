@@ -932,40 +932,36 @@ class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key('LookupDrinks.drink_id)
     """
 
-class ClientHeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical height measurements of clients.
-    """
+class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores height measurements of clients. """
 
-    height = db.Column(db.Integer)
+    # precision = total number of digits.
+    # scale = number of digits behind decimal point.
+    height = db.Column(db.Numeric(precision=10, scale=6))
     """
     Value for this height measurement in cm.
 
-    :type: int
+    :type: decimal.Decimal
     """
 
-class ClientWeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
+class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores weight measurements of clients. """
+
+    weight = db.Column(db.Numeric(precision=15, scale=11))
     """
-    Stores historical weight measurements of clients.
+    Value for this weight measurement in kg.
+
+    :type: decimal.Decimal
     """
 
-    weight = db.Column(db.Integer)
-    """
-    Value for this weight measurement in g.
+class ClientWaistSize(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores waist size measurements of clients. """
 
-    :type: int
-    """
-
-class ClientWaistSizeHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical waist size measurements of clients.
-    """
-
-    waist_size = db.Column(db.Integer)
+    waist_size = db.Column(db.Numeric(precision=10, scale=6))
     """
     Value for this waist size measurement in cm.
 
-    :type: int
+    :type: decimal.Decimal
     """
     
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
