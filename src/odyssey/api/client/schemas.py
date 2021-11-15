@@ -450,6 +450,7 @@ class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
         model = ClientHeight
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
 
 class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
@@ -457,6 +458,7 @@ class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
         model = ClientWeight
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
 
 class ClientWaistSizeSchema(ma.SQLAlchemyAutoSchema):
@@ -464,6 +466,7 @@ class ClientWaistSizeSchema(ma.SQLAlchemyAutoSchema):
         model = ClientWaistSize
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
 
 class ClientTokenRequestSchema(Schema):
