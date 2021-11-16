@@ -25,12 +25,12 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract,
     ClientFacilities,
     ClientMobileSettings,
+    ClientNotificationSettings,
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
     ClientWaistSizeHistory,
     ClientTransactionHistory,
-    ClientPushNotifications,
     ClientRaceAndEthnicity
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
@@ -419,18 +419,25 @@ class ClientGeneralMobileSettingsSchema(BaseSchema):
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
 
-class ClientMobilePushNotificationsSchema(Schema):
+
+# TODO: deprecated
+class ClientNotificationSettingsSchema(Schema):
     notification_type_id = fields.Integer()
     user_id = fields.Integer(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
-        return ClientPushNotifications(**data)
+        return ClientNotificationSettings(**data)
+
 
 class ClientMobileSettingsSchema(Schema):
     general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
-    push_notification_type_ids = fields.Nested(ClientMobilePushNotificationsSchema(many=True), missing=[])
-        
+    notification_type_ids = fields.List(fields.Integer, missing=[])
+
+    # TODO: deprecated
+    push_notification_type_ids = fields.Nested(ClientNotificationSettingsSchema(many=True), missing=[])
+
+
 class ClientAssignedDrinksSchema(BaseSchema):
     class Meta:
         model = ClientAssignedDrinks
