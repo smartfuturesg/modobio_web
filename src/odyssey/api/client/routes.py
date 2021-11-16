@@ -1723,8 +1723,8 @@ class ClientMobileSettingsApi(BaseResource):
             .all())
         wrong = ntypes - lu_ntypes
         if wrong:
-            wrongstr = ', '.join((str(w) for w in sorted(wrong)))
             db.session.rollback()
+            wrongstr = ', '.join((str(w) for w in sorted(wrong)))
             raise BadRequest(f'Invalid notification type(s): {wrongstr}.')
 
         for ntype in ntypes:
@@ -1788,6 +1788,7 @@ class ClientMobileSettingsApi(BaseResource):
             .all())
         wrong = ntypes - lu_ntypes
         if wrong:
+            db.session.rollback()
             wrongstr = ', '.join((str(w) for w in sorted(wrong)))
             raise BadRequest(f'Invalid notification type(s): {wrongstr}.')
 
