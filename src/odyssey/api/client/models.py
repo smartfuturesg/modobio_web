@@ -1049,9 +1049,9 @@ class ClientTransactionHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: string
     """
 
-class ClientPushNotifications(BaseModelWithIdx, UserIdFkeyMixin):
+class ClientNotificationSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """
-    This table holds the categories of push notifications that a user has enabled.
+    This table holds the categories of notifications that a user has enabled.
     If a notification type appears in this table for a user id, it means that user has this
     type of notification enabled.
     """
@@ -1060,7 +1060,7 @@ class ClientPushNotifications(BaseModelWithIdx, UserIdFkeyMixin):
     """
     Denotes what type of notification this is as defined in the LookupNotifications table.
 
-    :type: int, foreign key('LookupNotifications.notification_id')
+    :type: int, foreign key to LookupNotifications.notification_type_id
     """
 
 class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
