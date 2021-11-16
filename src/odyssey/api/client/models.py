@@ -955,32 +955,52 @@ class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
 
     # precision = total number of digits.
     # scale = number of digits behind decimal point.
-    # asdecimal=True returns decimal.Decimal object, no JSON parser for it.
+    # asdecimal=True returns decimal.Decimal object, but there is no JSON
+    # parser for it, so return simple float instead.
+    #
+    # TODO: if calculations with these numbers need to be done, keep as
+    # Decimal and create a JSON parser for it. Calculations with Decimal
+    # objects is exact to any arbitrary precision.
     height = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
-    """
-    Value for this height measurement in cm.
+    """ Client height in cm.
 
-    :type: decimal.Decimal
+    Conversion to/from inches requires 2 decimal places (1 in = 2.54 cm exactly).
+    Human beings range from ~50 cm as a baby to over 2 m (200 cm) as a tall adult.
+    An order of 10^4 can hold any realistic measurement, while 6 (2 + 4 extra)
+    decimal digits is enough to deal with rounding to/from imperial.
+
+    :type: float
     """
 
 class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
     """ Stores weight measurements of clients. """
 
+    # See comments at ClientHeight
     weight = db.Column(db.Numeric(precision=15, scale=11, asdecimal=False))
-    """
-    Value for this weight measurement in kg.
+    """ Client weight in kg.
 
-    :type: decimal.Decimal
+    Conversion to/from pounds requires 8 decimal places (1 lb = 0.45359237 kg
+    exactly for the avoirdupois pound). Human beings range from ~1 kg as a baby
+    to ~650 kg for the heaviest human being on record. An order of 10^4 can hold
+    any realistic measurement, while 11 decimal digits (8 + 3 extra) is enough
+    to deal with rounding to/from imperial.
+
+    :type: float
     """
 
 class ClientWaistSize(BaseModelWithIdx, UserIdFkeyMixin):
     """ Stores waist size measurements of clients. """
 
+    # See comments at ClientHeight
     waist_size = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
-    """
-    Value for this waist size measurement in cm.
+    """ Client waist size in cm.
 
-    :type: decimal.Decimal
+    Conversion to/from inches requires 2 decimal places (1 in = 2.54 cm exactly).
+    Human beings range from a few to a few 100 cm in waist size. An order of 10^4
+    can hold any realistic measurement, while 6 (2 + 4 extra) decimal digits is
+    enough to deal with rounding to/from imperial.
+
+    :type: float
     """
     
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
