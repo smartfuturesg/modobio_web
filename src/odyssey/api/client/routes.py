@@ -27,12 +27,12 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract,
     ClientFacilities,
     ClientMobileSettings,
+    ClientNotificationSettings,
     ClientAssignedDrinks,
     ClientHeightHistory,
     ClientWeightHistory,
     ClientWaistSizeHistory,
     ClientTransactionHistory,
-    ClientPushNotifications,
     ClientRaceAndEthnicity
 )
 from odyssey.api.doctor.models import (
@@ -82,7 +82,6 @@ from odyssey.api.client.schemas import(
     ClientClinicalCareTeamSchema,
     ClinicalCareTeamTemporaryMembersSchema,
     ClientMobileSettingsSchema,
-    ClientMobilePushNotificationsSchema,
     ClientPoliciesContractSchema, 
     ClientRegistrationStatusSchema,
     ClientReleaseSchema,
@@ -1693,91 +1692,130 @@ class ClientDrinksApi(BaseResource):
 @ns.route('/mobile-settings/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ClientMobileSettingsApi(BaseResource):
-    """
-    For the client to change their own mobile settings
-    """
+    """ For the client to change their own mobile settings. """
+
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
-    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=201)
+    @responds(api=ns, status_code=201)
     def post(self, user_id):
-        """
-        Set a client's mobile settings for the first time
-        """
-
+        """ Set a client's mobile settings for the first time. """
         self.check_user(user_id, user_type='client')
+
+        settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+        if settings:
+            raise BadRequest('Settings already exist. Use PUT to edit.')
 
         gen_settings = request.parsed_obj['general_settings']
         gen_settings.user_id = user_id
         db.session.add(gen_settings)
 
-        for notification in request.parsed_obj['push_notification_type_ids']:
-            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
-            if not exists:
-                raise BadRequest(f'Invalid notification type {notification.notification_type_id}.')
+        if request.parsed_obj['notification_type_ids']:
+            ntypes = set(request.parsed_obj['notification_type_ids'])
+        else:
+            # TODO: else-branch deprecated
+            ntype_ids = request.parsed_obj['push_notification_type_ids']
+            ntypes = set((n.notification_type_id for n in ntype_ids))
 
-            push_notfication = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification.notification_type_id})
-            push_notfication.user_id = user_id
-            db.session.add(push_notfication)
+        lu_ntypes = set(
+            db.session.execute(
+                select(LookupNotifications.notification_type_id))
+            .scalars()
+            .all())
+        wrong = ntypes - lu_ntypes
+        if wrong:
+            wrongstr = ', '.join((str(w) for w in sorted(wrong)))
+            db.session.rollback()
+            raise BadRequest(f'Invalid notification type(s): {wrongstr}.')
+
+        for ntype in ntypes:
+            notification_type = ClientNotificationSettings(user_id=user_id, notification_type_id=ntype)
+            db.session.add(notification_type)
 
         db.session.commit()
 
-        return request.json
 
     @token_auth.login_required(user_type=('client',))
     @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
     def get(self, user_id):
-        """
-        Returns the mobile settings that a client has set.
-        """
+        """ Returns the mobile settings that a client has set. """
 
         self.check_user(user_id, user_type='client')
 
         gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
-        notification_types = ClientPushNotifications.query.filter_by(user_id=user_id).all()
+        # TODO: push_notification_types deprecated
+        push_notification_types = ClientNotificationSettings.query.filter_by(user_id=user_id).all()
 
-        return {'general_settings': gen_settings, 'push_notification_type_ids': notification_types}
+        notification_types = (
+            db.session.execute(
+                select(
+                    ClientNotificationSettings.notification_type_id)
+                .filter_by(user_id=user_id))
+            .scalars()
+            .all())
+
+        return {
+            'general_settings': gen_settings,
+            'push_notification_type_ids': push_notification_types,
+            'notification_type_ids': sorted(notification_types)}
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
-    @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
+    @responds(api=ns, status_code=201)
     def put(self, user_id):
-        """
-        Update a client's mobile settings
-        """
+        """ Update a client's mobile settings. """
         self.check_user(user_id, user_type='client')
 
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
-        gen_settings = request.parsed_obj['general_settings'].__dict__
-        del gen_settings['_sa_instance_state']
-        settings.update(gen_settings)
+        if not settings:
+            raise BadRequest('Settings not found. Use POST first.')
 
-        client_push_notifications = ClientPushNotifications.query.filter_by(user_id=user_id).all()
-        client_new_notifications = []
-        for notification in request.parsed_obj['push_notification_type_ids']:
-            exists = LookupNotifications.query.filter_by(notification_type_id=notification.notification_type_id).one_or_none()
-            if not exists:
-                raise BadRequest(f'Notification type {notification.notification_type_id} not found.')
+        for k, v in request.json['general_settings'].items():
+            setattr(settings, k, v)
 
-            client_new_notifications.append(notification.notification_type_id)
-            
-        for notification in client_push_notifications:
-            if notification.notification_type_id not in client_new_notifications:
-                #if an id type is not in the arguments, the user has disabled this type of notification
-                db.session.delete(notification)
-            else:
-                #if a notification type with this id is already in the db, remove from the list
-                #of new types to be added for the user
-                client_new_notifications.remove(notification.notification_type_id)
+        if request.parsed_obj['notification_type_ids']:
+            ntypes = set(request.parsed_obj['notification_type_ids'])
+        else:
+            # TODO: else-branch deprecated
+            ntype_ids = request.parsed_obj['push_notification_type_ids']
+            ntypes = set((n.notification_type_id for n in ntype_ids))
 
-        for notification_type_id in client_new_notifications:
-            push_notification = ClientMobilePushNotificationsSchema().load({'notification_type_id': notification_type_id})
-            push_notification.user_id = user_id
-            db.session.add(push_notification)
+        lu_ntypes = set(
+            db.session.execute(
+                select(LookupNotifications.notification_type_id))
+            .scalars()
+            .all())
+        wrong = ntypes - lu_ntypes
+        if wrong:
+            wrongstr = ', '.join((str(w) for w in sorted(wrong)))
+            raise BadRequest(f'Invalid notification type(s): {wrongstr}.')
+
+        prev_ntypes = set(
+            db.session.execute(
+                select(ClientNotificationSettings.notification_type_id)
+                .filter_by(user_id=user_id))
+            .scalars()
+            .all())
+
+        remove = prev_ntypes - ntypes
+        add = ntypes - prev_ntypes
+
+        for ntype in remove:
+            notification_type = (
+                ClientNotificationSettings
+                .query
+                .filter_by(user_id=user_id, notification_type_id=ntype)
+                .one_or_none())
+            if notification_type:
+                db.session.delete(notification_type)
+
+        for ntype in add:
+            notification_type = ClientNotificationSettings(user_id=user_id, notification_type_id=ntype)
+            db.session.add(notification_type)
 
         db.session.commit()
-        return request.json
+
 
 @ns.route('/height/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
