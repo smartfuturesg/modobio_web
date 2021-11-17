@@ -26,9 +26,9 @@ from odyssey.api.client.models import (
     ClientFacilities,
     ClientMobileSettings,
     ClientAssignedDrinks,
-    ClientHeightHistory,
-    ClientWeightHistory,
-    ClientWaistSizeHistory,
+    ClientHeight,
+    ClientWeight,
+    ClientWaistSize,
     ClientTransactionHistory,
     ClientPushNotifications,
     ClientRaceAndEthnicity
@@ -447,39 +447,27 @@ class ClientAssignedDrinksDeleteSchema(Schema):
 
 class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = ClientHeightHistory
+        model = ClientHeight
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
-    user_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientHeightHistory(**data)
 
 class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = ClientWeightHistory
+        model = ClientWeight
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
-    user_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientWeightHistory(**data)
 
 class ClientWaistSizeSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = ClientWaistSizeHistory
+        model = ClientWaistSize
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
-    user_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientWaistSizeHistory(**data)
 
 class ClientTokenRequestSchema(Schema):
     user_id = fields.Integer()
