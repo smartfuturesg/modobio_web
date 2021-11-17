@@ -4,7 +4,7 @@ from datetime import datetime, time, timezone, timedelta
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
 
 payment_methods_data = {
@@ -111,5 +111,8 @@ def test_booking(test_client):
 
     yield booking
 
+    statuses = TelehealthBookingStatus.query.filter_by(booking_id=booking.idx).all()
+    for status in statuses:
+        db.session.delete(status)
     db.session.delete(booking)
     db.session.commit()
