@@ -12,11 +12,10 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.integrations.instamed import Instamed
+from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.telehealth import cancel_telehealth_appointment
 from odyssey.api.lookup.models import LookupOrganizations
 from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
 from odyssey.api.payment.schemas import (
