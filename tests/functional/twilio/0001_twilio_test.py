@@ -94,7 +94,6 @@ def test_conversation_cache(test_client, booking_twilio):
         conversation_sid = conversation_sid,
         message_body = "testingtesting")
 
-    
     # add media file to conversation transcript
     twilio.send_message(
         user_id = booking.client_user_id, 
@@ -187,7 +186,7 @@ def test_telehealth_transcript_get(test_client, booking_twilio):
         f'/telehealth/bookings/transcript/{booking.idx}/',
         headers=test_client.client_auth_header
     )
-
+    
     assert response.status_code == 200
     assert len(response.json['transcript'][1]['media']) == 1
     assert response.json['transcript'][1]['media'][0]['content_type'] == 'image/jpeg'
