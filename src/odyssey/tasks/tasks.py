@@ -360,31 +360,36 @@ def store_telehealth_transcript(booking_id: int):
     transcript = twilio.get_booking_transcript(booking.idx)
 
     # s3 bucket path for the media associated with this booking transcript
-    transcript_images_prefix = f'id{booking.client_user_id:05d}/telehealth/{booking_id}/transcript/images'
+    transcript_media_prefix = f'id{booking.client_user_id:05d}/telehealth/{booking_id}/transcript/media'
 
     # if there is media present in the transcript, store it in an s3 bucket
     fh = FileHandling()
     for idx, message in enumerate(transcript):
-        img_id = 0
+        media_id = 0
         if message['media']:
             for media_idx, media in enumerate(message['media']):
                 # download media from twilio 
                 media_content = twilio.get_media(media['sid'])
 
-                img = BytesIO(media_content)
-                img_extension = '.' + imghdr.what('', media_content)
+                if media['content_type'] == 'application/pdf':
+                    file_extension = '.pdf'
+                    media_file = FileStorage(media_content, filename=f'{media_id}.pdf', content_type=media['content_type'])
+                else:
+                    img = BytesIO(media_content)
+                    file_extension = '.' + imghdr.what('', media_content)
+                    tmp = Image.open(img)
+                    tfile = BytesIO()
+                    tmp.save(tfile, format='jpeg')
+                    media_file = FileStorage(tfile, filename=f'{media_id}{file_extension}', content_type=media['content_type'])
 
-                tmp = Image.open(img)
-                tfile = BytesIO()
-                tmp.save(tfile, format='jpeg')
-                save_file_path_s3 = f'{transcript_images_prefix}/{img_id}{img_extension}'
-                img_file = FileStorage(tfile, filename=f'{img_id}{img_extension}', content_type=media['content_type'])
+                # save media to s3, update transcript with file save path
+                save_file_path_s3 = f'{transcript_media_prefix}/{media_id}{file_extension}'
+                fh.save_file_to_s3(media_file, save_file_path_s3)
 
-                fh.save_file_to_s3(img_file, save_file_path_s3)
-
-                media['s3_path'] = save_file_path_s3 #+ f'{img_id}{img_extension}'
+                media['s3_path'] = save_file_path_s3 
                 transcript[idx]['media'][media_idx] = media
-                img_id+=1
+            
+                media_id+=1
 
     payload = {
         'booking_id': booking.idx,
@@ -395,13 +400,15 @@ def store_telehealth_transcript(booking_id: int):
     if current_app.config['MONGO_URI']:
         _id = mongo.db.telehealth_transcripts.insert(payload)
     else:
+        logger.warning('mongo db has not been setup. Twilio conversation will not be deleted.')
         _id = None  
 
-    # delete the conversation from twilio
-    twilio.delete_conversation(booking.chat_room.conversation_sid)
-
+    # delete the conversation from twilio if the transcript was successfully stored on mongo
+    if _id:
+        twilio.delete_conversation(booking.chat_room.conversation_sid)
+        booking.chat_room.conversation_sid = None
+        
     # delete the conversation sid entry, add transcript_object_id from mongodb
-    booking.chat_room.conversation_sid = None
     booking.chat_room.transcript_object_id = str(_id)
 
     db.session.commit()

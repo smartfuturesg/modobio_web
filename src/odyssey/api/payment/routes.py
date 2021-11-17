@@ -229,7 +229,8 @@ class PaymentRefundApi(BaseResource):
         return Instamed().refund_payment(original_transaction.transaction_id,
             request.parsed_obj.refund_amount,
             TelehealthBookings.query.filter_by(idx=original_transaction.booking_id).one_or_none(),
-            request.parsed_obj.refund_reason)
+            request.parsed_obj.refund_reason,
+            reporter_id=token_auth.current_user()[0].user_id)
 
 # Development-only Namespace, sets up endpoints for testing payments.
 ns_dev = Namespace(

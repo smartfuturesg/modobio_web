@@ -25,6 +25,7 @@ from odyssey.api.telehealth.models import(
 ) 
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
+from odyssey.api.payment.models import PaymentHistory
 from odyssey.integrations.wheel import Wheel
 from werkzeug.exceptions import BadRequest
 from odyssey.integrations.twilio import Twilio
@@ -145,9 +146,8 @@ def get_practitioners_available(time_block, q_request):
     location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation
     duration = q_request.duration
     
-    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability, User, StaffRoles.consult_rate)\
+    query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
         .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-            .join(User, User.user_id == TelehealthStaffAvailability.user_id)\
                 .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
                 .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
                 PractitionerCredentials.state == location,
@@ -179,25 +179,15 @@ def get_practitioners_available(time_block, q_request):
     # practitioner availablilty as per availability input
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
-    practitioner_details = {} # name and consult rate for each practitioner, indexed by user_id
-    practitioner_ids = set() # set of practitioner's avaialbe user_ids
-    for user_id, avail, user, consult_rate in query.all():
+    for user_id, avail in query.all():
         if user_id not in available:
             available[user_id] = []
-            practitioner_ids.add(user_id)
-        if user_id not in practitioner_details:
-            practitioner_details[user_id] = {
-                'consult_cost': round(float(consult_rate) * int(q_request.duration)/60.0, 2), 
-                'firstname': user.firstname,
-                'lastname': user.lastname,
-                'gender': 'm' if user.biological_sex_male else 'f'}
         if avail:
             available[user_id].append(avail)
     
-    # practitioners = {user_id(practioner): [TelehealthSTaffAvailability objects] }
-    # dictionary of practitioners avaialble with list of TelehealthStaffAvailabilty objects, 
-    # after filtering through scheduled bookings and removing those availabilities occupied by a booking.
-    practitioners = {}
+
+    # filtering through scheduled bookings and removing those availabilities occupied by a booking.
+    practitioner_ids = set() # set of practitioner's avaialbe user_ids
     bookings_base_query = db.session.query(TelehealthBookings).filter_by(target_date_utc=date1.date())\
         .filter(TelehealthBookings.status !='Canceled')
     for practitioner_user_id in available:
@@ -212,9 +202,9 @@ def get_practitioners_available(time_block, q_request):
         if len(available[practitioner_user_id]) == int(duration/5) + (TELEHEALTH_START_END_BUFFER * 2)\
             and not current_bookings.all():
             #practitioner doesn't have a booking with the date1 and any of the times in the range
-            practitioners[practitioner_user_id] = available[practitioner_user_id]
-    # TODO remove practioneres, practitioner_details from return 
-    return practitioners, practitioner_details, practitioner_ids
+            practitioner_ids.add(practitioner_user_id)
+    
+    return practitioner_ids
 
 def calculate_consult_rate(hourly_rate:float, duration:int) -> float:
     
@@ -231,6 +221,7 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
                 StaffRoles.role == profession_type,
                 StaffRoles.consult_rate != None
             ).all()
+
 
     fh = FileHandling()
 
@@ -250,7 +241,8 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
             'bio': practitioner.staff_profile.bio,
             'hourly_consult_rate': consult_rate,
             'consult_cost': calculate_consult_rate(consult_rate,duration),
-            'profile_pictures': fh.get_presigned_urls(prefix) if prefix else None
+            'profile_pictures': fh.get_presigned_urls(prefix) if prefix else None,
+            'roles' : [role.role for role in practitioner.roles]
         }
 
 
@@ -393,29 +385,6 @@ def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_
                                         timezone = booking_start_staff_localized.astimezone().tzname()
                                         )
     db.session.add(add_to_calendar)
-    return
-
-def cancel_telehealth_appointment(booking, reporter_id=None, reporter_role='System'):
-    """
-    Used to cancel an appointment in the event a payment is unsuccessful
-    and from bookings PUT to cancel a booking
-    """
-
-    # update booking status to canceled
-    booking.status = 'Canceled'
-
-    # delete booking from Practitioner's calendar
-    staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
-    if staff_event:
-        db.session.delete(staff_event)
-
-    # add new status to status history table
-    update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
-
-    #TODO: Create notification/send email(?) to user that their appointment was canceled due
-    #to a failed payment
-
-    db.session.commit()
     return
 
 def get_booking_increment_data():

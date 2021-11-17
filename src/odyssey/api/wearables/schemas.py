@@ -44,7 +44,6 @@ class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ('idx', 'user_id', 'created_at', 'updated_at')
 
-
 class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle

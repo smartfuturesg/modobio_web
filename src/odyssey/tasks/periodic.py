@@ -314,11 +314,6 @@ def find_chargable_bookings():
 
 
 celery.conf.beat_schedule = {
-    # refresh the client data storage table every day at midnight
-    'add-update-client-data-storage-table': {
-        'task': 'odyssey.tasks.periodic.refresh_client_data_storage',
-        'schedule': crontab(hour=0, minute=0)
-    },
     # look for upcoming apppointment within moving windows:
     # (00:00 - 08:00)
     'check-for-upcoming-bookings-00-00': {
