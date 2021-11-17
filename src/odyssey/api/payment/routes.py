@@ -1,4 +1,5 @@
 import logging
+from sqlalchemy import and_
 logger = logging.getLogger(__name__)
 
 import requests
@@ -39,10 +40,13 @@ class PaymentMethodsApi(BaseResource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=PaymentMethodsSchema(many=True), api=ns)
     def get(self, user_id):
-        """get user payment methods"""
+        """get active user payment methods"""
         self.check_user(user_id, user_type='client')
 
-        return PaymentMethods.query.filter_by(user_id=user_id).all()
+        return PaymentMethods.query.filter(
+            and_(
+            PaymentMethods.user_id == user_id,
+            PaymentMethods.payment_id != None)).all()
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=PaymentMethodsSchema, api=ns)
@@ -111,7 +115,7 @@ class PaymentMethodsApi(BaseResource):
                         raise BadRequest(f"The payment method with id {replacement_id} does not belong " \
                             "to the current user. Please use a valid payment method id that belongs to the " \
                             "current user.")
-                    elif method.token == None:
+                    elif method.payment_id == None:
                         #this method has been removed, it only exists to be displayed in history
                         raise BadRequest(f"The payment method with id {replacement_id} has been removed, " \
                             "it can no longer be charged.")
