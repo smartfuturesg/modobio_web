@@ -517,7 +517,8 @@ class TelehealthBookingsApi(BaseResource):
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
-                'consult_rate': booking.consult_rate
+                'consult_rate': booking.consult_rate,
+                'charged': booking.charged
             })
 
         # Sort bookings by time then sort by date
@@ -798,7 +799,7 @@ class TelehealthBookingsApi(BaseResource):
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
-                    cancel_telehealth_appointment(booking, refund=True, reporter_id=current_user.user_id, reporter_role='Practitioner')
+                    cancel_telehealth_appointment(booking, reason="Practitioner Cancellation", refund=True, reporter_id=current_user.user_id, reporter_role='Practitioner')
                 else:
                     cancel_telehealth_appointment(booking, refund=False, reporter_id=current_user.user_id, reporter_role='Client')                
                 ##### WHEEL #####
