@@ -270,6 +270,7 @@ telehealth_bookings_data_full_day = [
 
 payment_method_data = {
   'token': '4111111111111111',
+  'cardholder_name': 'Test Tester',
   'expiration': '04/25',
   'is_default':True
 }
