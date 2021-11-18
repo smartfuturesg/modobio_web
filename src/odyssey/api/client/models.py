@@ -144,25 +144,31 @@ class ClientInfo(BaseModel):
     :type: str, max length 1
     """
 
-    height = db.Column(db.Integer)
+    height = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
     """
     Most recently reported height in cm.
 
-    :type: int
+    See :class:`ClientHeight` for more details.
+
+    :type: float
     """
 
-    weight = db.Column(db.Integer)
+    weight = db.Column(db.Numeric(precision=15, scale=11, asdecimal=False))
     """
-    Most recently reported weight in g.
+    Most recently reported weight in kg.
 
-    :type: int
+    See :class:`ClientWeight` for more details.
+
+    :type: float
     """
 
-    waist_size = db.Column(db.Integer)
+    waist_size = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
     """
     Most recently reported waist size in cm.
 
-    :type: int
+    See :class:`ClientWaistSize` for more details.
+
+    :type: float
     """
 
     profession = db.Column(db.String(100))
