@@ -93,7 +93,7 @@ class ClientRaceAndEthnicityEditSchema(Schema):
 class ClientInfoSchema(BaseSchema):
     class Meta:
         model = ClientInfo
-        dump_only = ('modobio_id', 'membersince', 'height', 'weight')
+        dump_only = ('modobio_id', 'membersince', 'height', 'weight', 'waist_size')
         include_fk = True
 
     dob = fields.Date()
@@ -117,7 +117,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         include_fk = True
         exclude = ('created_at', 'updated_at', 'user_id')
-        dump_only = ( 'membersince', 'membersince', 'height', 'weight')
+        dump_only = ( 'membersince', 'membersince', 'height', 'weight', 'waist_size')
     
     dob = fields.Date()
     primary_goal = fields.String()
