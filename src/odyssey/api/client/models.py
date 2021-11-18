@@ -910,6 +910,24 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     :type: boolean
     """
 
+    display_metric_height = db.Column(db.Boolean(), nullable=True)
+    """ Display height in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
+    display_metric_weight = db.Column(db.Boolean(), nullable=True)
+    """ Display weight in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
+    display_metric_waist_size = db.Column(db.Boolean(), nullable=True)
+    """ Display waist size in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
     enable_push_notifications = db.Column(db.Boolean())
     """
     Denotes if user has enabled push notifications
@@ -932,40 +950,57 @@ class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key('LookupDrinks.drink_id)
     """
 
-class ClientHeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical height measurements of clients.
+class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores height measurements of clients. """
+
+    # precision = total number of digits.
+    # scale = number of digits behind decimal point.
+    # asdecimal=True returns decimal.Decimal object, but there is no JSON
+    # parser for it, so return simple float instead.
+    #
+    # TODO: if calculations with these numbers need to be done, keep as
+    # Decimal and create a JSON parser for it. Calculations with Decimal
+    # objects is exact to any arbitrary precision.
+    height = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
+    """ Client height in cm.
+
+    Conversion to/from inches requires 2 decimal places (1 in = 2.54 cm exactly).
+    Human beings range from ~50 cm as a baby to over 2 m (200 cm) as a tall adult.
+    An order of 10^4 can hold any realistic measurement, while 6 (2 + 4 extra)
+    decimal digits is enough to deal with rounding to/from imperial.
+
+    :type: float
     """
 
-    height = db.Column(db.Integer)
-    """
-    Value for this height measurement in cm.
+class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores weight measurements of clients. """
 
-    :type: int
-    """
+    # See comments at ClientHeight
+    weight = db.Column(db.Numeric(precision=15, scale=11, asdecimal=False))
+    """ Client weight in kg.
 
-class ClientWeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical weight measurements of clients.
-    """
+    Conversion to/from pounds requires 8 decimal places (1 lb = 0.45359237 kg
+    exactly for the avoirdupois pound). Human beings range from ~1 kg as a baby
+    to ~650 kg for the heaviest human being on record. An order of 10^4 can hold
+    any realistic measurement, while 11 decimal digits (8 + 3 extra) is enough
+    to deal with rounding to/from imperial.
 
-    weight = db.Column(db.Integer)
-    """
-    Value for this weight measurement in g.
-
-    :type: int
+    :type: float
     """
 
-class ClientWaistSizeHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical waist size measurements of clients.
-    """
+class ClientWaistSize(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores waist size measurements of clients. """
 
-    waist_size = db.Column(db.Integer)
-    """
-    Value for this waist size measurement in cm.
+    # See comments at ClientHeight
+    waist_size = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
+    """ Client waist size in cm.
 
-    :type: int
+    Conversion to/from inches requires 2 decimal places (1 in = 2.54 cm exactly).
+    Human beings range from a few to a few 100 cm in waist size. An order of 10^4
+    can hold any realistic measurement, while 6 (2 + 4 extra) decimal digits is
+    enough to deal with rounding to/from imperial.
+
+    :type: float
     """
     
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
