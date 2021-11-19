@@ -34,8 +34,8 @@ class SystemTelehealthSettingsApi(BaseResource):
         for cost, lookup in costs:
             cost.country = lookup.country
             cost.currency_symbol_and_code = lookup.symbol_and_code
-            cost.session_min_cost = practitioner_rates.min_rate,
-            cost.session_max_cost = practitioner_rates.max_rate,
+            cost.session_min_cost = practitioner_rates.min_rate
+            cost.session_max_cost = practitioner_rates.max_rate
             cost.session_cost = 100.00 # TODO, this is useless now, but will be kept for a few more stories 10/11/2021
             formatted_costs.append(cost)
 

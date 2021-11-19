@@ -1,8 +1,3 @@
-ALTER TABLE "LookupCurrencies"
-ADD COLUMN IF NOT EXISTS "min_rate" Float,
-ADD COLUMN IF NOT EXISTS "max_rate" Float,
-ADD COLUMN IF NOT EXISTS "increment" Integer;
-
 UPDATE "LookupCurrencies"
 SET min_rate = 30.00
 WHERE idx = 1;
