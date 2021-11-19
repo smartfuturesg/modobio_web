@@ -1090,18 +1090,41 @@ class ClientTransactionHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: string
     """
 
-class ClientPushNotifications(BaseModelWithIdx, UserIdFkeyMixin):
+class ClientNotificationSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """
-    This table holds the categories of push notifications that a user has enabled.
+    This table holds the categories of notifications that a user has enabled.
     If a notification type appears in this table for a user id, it means that user has this
     type of notification enabled.
     """
+
+    # TODO: currently this system allows only for settings to be enabled. We want to have
+    # an on-by-default system. We could add all notif_type_ids from the lookup table to all
+    # clients by default. However:
+    #  - That means a lot of maintenance whenever new types are added (add it for every user).
+    #  - A huge number of entries in this table as the "default".
+    #
+    # A better idea is to have all notifications be on by default and make this list the
+    # disabled list. Keep the code, change the meaning. Invalid type_ids can be deleted or
+    # ignored. New types are on by default by the fact that they are not in the list. Same
+    # goes for new users.
+    #
+    # A further optimization is to delete this table and add a simple list to ClientMobileSettings:
+    #
+    # notifications_disabled = Column(ARRAY)
+    #
+    # None or [] means all enabled (default). Disabling means adding a number to the list,
+    # re-enabling is popping that number off the list. This makes code in endpoint a lot
+    # easier, because it doesn't require any lookups. Simply assign the list from the request
+    # body to the model and be done. Marshmallow will convert lists.
+    #
+    # Final note: this system is not integrated with notifications at all. Settings are ignored
+    # on both front and backend (as of 2021-11-19). At some point, actually start using them.
 
     notification_type_id = db.Column(db.Integer, db.ForeignKey('LookupNotifications.notification_type_id', ondelete="CASCADE"), nullable=False)
     """
     Denotes what type of notification this is as defined in the LookupNotifications table.
 
-    :type: int, foreign key('LookupNotifications.notification_id')
+    :type: int, foreign key to LookupNotifications.notification_type_id
     """
 
 class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
