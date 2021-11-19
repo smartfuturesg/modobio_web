@@ -70,6 +70,7 @@ class PaymentMethodsApi(BaseResource):
         #then store the payment plan info from response in db
         payment_data = {
             'user_id': user_id,
+            'cardholder_name': request.json['cardholder_name'],
             'payment_id': response_data['PaymentPlanID'],
             'number': response_data['CardResult']['LastFour'],
             'expiration': request.json['expiration'],
