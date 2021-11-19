@@ -1,7 +1,7 @@
 """Add Cardholder name to PaymentMethods
 
 Revision ID: 5ad075e390c4
-Revises: 9742ee54316f
+Revises: cc0d0aaeb7d3
 Create Date: 2021-11-18 12:30:59.873999
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '5ad075e390c4'
-down_revision = '9742ee54316f'
+down_revision = 'cc0d0aaeb7d3'
 branch_labels = None
 depends_on = None
 
