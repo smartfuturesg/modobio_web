@@ -43,6 +43,13 @@ class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: string
     """
+    
+    cardholder_name = db.Column(db.String)
+    """
+    Cardholder name for this payment method.
+    
+    :type: string
+    """
 
     is_default = db.Column(db.Boolean)
     """

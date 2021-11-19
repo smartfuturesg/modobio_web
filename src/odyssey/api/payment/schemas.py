@@ -14,6 +14,7 @@ class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
 
     token = fields.String(load_only=True, required=True)
     expiration = fields.String(required=True)
+    cardholder_name = fields.String(required=True)
 
 class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

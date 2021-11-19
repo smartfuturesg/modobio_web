@@ -103,6 +103,7 @@ def payment_method(test_client):
         data=dumps({
             'token': '4111111111111111',
             'expiration': '04/25',
+            'cardholder_name': "Test Tester",
             'is_default': True}),
         content_type='application/json')
     pm = PaymentMethods.query.filter_by(user_id=test_client.client_id).first()
