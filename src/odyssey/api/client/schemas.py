@@ -25,12 +25,12 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract,
     ClientFacilities,
     ClientMobileSettings,
+    ClientNotificationSettings,
     ClientAssignedDrinks,
-    ClientHeightHistory,
-    ClientWeightHistory,
-    ClientWaistSizeHistory,
+    ClientHeight,
+    ClientWeight,
+    ClientWaistSize,
     ClientTransactionHistory,
-    ClientPushNotifications,
     ClientRaceAndEthnicity
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
@@ -93,7 +93,7 @@ class ClientRaceAndEthnicityEditSchema(Schema):
 class ClientInfoSchema(BaseSchema):
     class Meta:
         model = ClientInfo
-        dump_only = ('modobio_id', 'membersince', 'height', 'weight')
+        dump_only = ('modobio_id', 'membersince', 'height', 'weight', 'waist_size')
         include_fk = True
 
     dob = fields.Date()
@@ -117,7 +117,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         model = ClientInfo
         include_fk = True
         exclude = ('created_at', 'updated_at', 'user_id')
-        dump_only = ( 'membersince', 'membersince', 'height', 'weight')
+        dump_only = ( 'membersince', 'membersince', 'height', 'weight', 'waist_size')
     
     dob = fields.Date()
     primary_goal = fields.String()
@@ -419,18 +419,25 @@ class ClientGeneralMobileSettingsSchema(BaseSchema):
     def make_object(self, data, **kwargs):
         return ClientMobileSettings(**data)
 
-class ClientMobilePushNotificationsSchema(Schema):
+
+# TODO: deprecated
+class ClientNotificationSettingsSchema(Schema):
     notification_type_id = fields.Integer()
     user_id = fields.Integer(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
-        return ClientPushNotifications(**data)
+        return ClientNotificationSettings(**data)
+
 
 class ClientMobileSettingsSchema(Schema):
     general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
-    push_notification_type_ids = fields.Nested(ClientMobilePushNotificationsSchema(many=True), missing=[])
-        
+    notification_type_ids = fields.List(fields.Integer, missing=[])
+
+    # TODO: deprecated
+    push_notification_type_ids = fields.Nested(ClientNotificationSettingsSchema(many=True), missing=[])
+
+
 class ClientAssignedDrinksSchema(BaseSchema):
     class Meta:
         model = ClientAssignedDrinks
@@ -447,39 +454,27 @@ class ClientAssignedDrinksDeleteSchema(Schema):
 
 class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = ClientHeightHistory
+        model = ClientHeight
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
-    user_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientHeightHistory(**data)
 
 class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = ClientWeightHistory
+        model = ClientWeight
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
-    user_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientWeightHistory(**data)
 
 class ClientWaistSizeSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = ClientWaistSizeHistory
+        model = ClientWaistSize
         exclude = ('created_at', 'idx')
         dump_only = ('updated_at', 'user_id')
+        load_instance = True
 
-    user_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientWaistSizeHistory(**data)
 
 class ClientTokenRequestSchema(Schema):
     user_id = fields.Integer()

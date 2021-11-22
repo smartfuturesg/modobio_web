@@ -1,4 +1,5 @@
 import logging
+from sqlalchemy import and_
 logger = logging.getLogger(__name__)
 
 import requests
@@ -11,7 +12,7 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.integrations.instamed import Instamed
+from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_client_existence
 from odyssey.utils.base.resources import BaseResource
@@ -38,10 +39,13 @@ class PaymentMethodsApi(BaseResource):
     @token_auth.login_required(user_type=('client',))
     @responds(schema=PaymentMethodsSchema(many=True), api=ns)
     def get(self, user_id):
-        """get user payment methods"""
+        """get active user payment methods"""
         self.check_user(user_id, user_type='client')
 
-        return PaymentMethods.query.filter_by(user_id=user_id).all()
+        return PaymentMethods.query.filter(
+            and_(
+            PaymentMethods.user_id == user_id,
+            PaymentMethods.payment_id != None)).all()
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=PaymentMethodsSchema, api=ns)
@@ -66,6 +70,7 @@ class PaymentMethodsApi(BaseResource):
         #then store the payment plan info from response in db
         payment_data = {
             'user_id': user_id,
+            'cardholder_name': request.json['cardholder_name'],
             'payment_id': response_data['PaymentPlanID'],
             'number': response_data['CardResult']['LastFour'],
             'expiration': request.json['expiration'],
@@ -81,7 +86,8 @@ class PaymentMethodsApi(BaseResource):
         return payment
 
     @token_auth.login_required(user_type=('client',))
-    @ns.doc(params={'idx': 'int',})
+    @ns.doc(params={'idx': 'int id of the payment method to remove',
+                    'replacement_id': 'int id of the payment method to replace the removed method with for future appointments. If the appointments should be canceled, use id 0.'})
     @responds(schema=PaymentMethodsSchema, api=ns, status_code=204)
     def delete(self, user_id):
         """remove an existing payment method"""
@@ -89,7 +95,52 @@ class PaymentMethodsApi(BaseResource):
 
         payment = PaymentMethods.query.filter_by(idx=idx, user_id=user_id).one_or_none()
         if payment:
-            db.session.delete(payment)
+            #check if payment is involved with future bookings
+            bookings = TelehealthBookings.query.filter_by(payment_method_id=payment.idx, charged=False).all()
+            if len(bookings) > 0:
+                replacement_id = request.args.get('replacement_id', type=int)
+                if replacement_id == 0:
+                    #cancel appointments that are attached to the payment method being removed
+                    for booking in bookings:
+                        cancel_telehealth_appointment(booking)
+                elif replacement_id:
+                    #replace payment method on affected appointments with the new method
+                    
+                    #ensure replacement_id references an active payment method that belong to this user
+                    method = PaymentMethods.query.filter_by(idx=replacement_id).one_or_none()
+                    if not method:
+                        raise BadRequest(f"No payment method exists the the id {replacement_id}.")
+                    
+                    if method.user_id != token_auth.current_user()[0].user_id:
+                        raise BadRequest(f"The payment method with id {replacement_id} does not belong " \
+                            "to the current user. Please use a valid payment method id that belongs to the " \
+                            "current user.")
+                    elif method.payment_id == None:
+                        #this method has been removed, it only exists to be displayed in history
+                        raise BadRequest(f"The payment method with id {replacement_id} has been removed, " \
+                            "it can no longer be charged.")
+                    else:
+                        #replace payment_method_id in the affected bookings
+                        for booking in bookings:
+                            booking.payment_method_id = replacement_id
+                        db.session.flush()
+                else:
+                    #no replacement id was provided, raise error
+                    booking_ids = []
+                    for booking in bookings:
+                        booking_ids += str(booking.idx)
+                    booking_ids = ",".join(booking_ids)
+                    raise BadRequest(f"The payment method with id {idx} is involed with the following booking " \
+                        "ids: {booking_ids}. Please send another request with the replacement_id argument set to " \
+                        "a valid payment id for the userif you would like to replace the payment methods on these " \
+                        "booking with a new method. Alternatively, send another request with replacement_id argument "\
+                        "set to 0 to cancel the affected appointments.")
+            
+            #remove token so card can't be charged anymore
+            payment.payment_id = None
+            #ensure card is not default and remove expiration date info
+            payment.expiration = None
+            payment.is_default = False
             db.session.commit()
 
 @ns.route('/status/')

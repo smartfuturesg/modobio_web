@@ -4,33 +4,38 @@ from datetime import datetime, time, timezone, timedelta
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.payment.models import PaymentMethods
 
 payment_methods_data = {
     'normal_data': {
         'token': '4111111111111111',
         'expiration': '04/25',
+        'cardholder_name': "Test Tester",
         'is_default': True
     },
     'normal_data_2': {
         'token': '5500000000000004',
         'expiration': '04/25',
+        'cardholder_name': "Test Tester",
         'is_default': True
     },
     'normal_data_3': {
         'token': '6011000000000004',
         'expiration': '04/25',
+        'cardholder_name': "Test Tester",
         'is_default': False
     },
     'invalid_card': {
         'token': '9999999999999999',
         'expiration': '04/25',
+        'cardholder_name': "Test Tester",
         'is_default': True
     },
     'expired': {
         'token': '4111111111111111',
         'expiration': '01/20',
+        'cardholder_name': "Test Tester",
         'is_default': False
     }
 }
@@ -111,8 +116,8 @@ def test_booking(test_client):
 
     yield booking
 
-    for status in booking.status_history:
-        test_client.db.session.delete(status)
-
-    test_client.db.session.delete(booking)
-    test_client.db.session.commit()
+    statuses = TelehealthBookingStatus.query.filter_by(booking_id=booking.idx).all()
+    for status in statuses:
+        db.session.delete(status)
+    db.session.delete(booking)
+    db.session.commit()

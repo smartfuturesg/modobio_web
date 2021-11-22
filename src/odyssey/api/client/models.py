@@ -144,25 +144,31 @@ class ClientInfo(BaseModel):
     :type: str, max length 1
     """
 
-    height = db.Column(db.Integer)
+    height = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
     """
     Most recently reported height in cm.
 
-    :type: int
+    See :class:`ClientHeight` for more details.
+
+    :type: float
     """
 
-    weight = db.Column(db.Integer)
+    weight = db.Column(db.Numeric(precision=15, scale=11, asdecimal=False))
     """
-    Most recently reported weight in g.
+    Most recently reported weight in kg.
 
-    :type: int
+    See :class:`ClientWeight` for more details.
+
+    :type: float
     """
 
-    waist_size = db.Column(db.Integer)
+    waist_size = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
     """
     Most recently reported waist size in cm.
 
-    :type: int
+    See :class:`ClientWaistSize` for more details.
+
+    :type: float
     """
 
     profession = db.Column(db.String(100))
@@ -910,6 +916,24 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     :type: boolean
     """
 
+    display_metric_height = db.Column(db.Boolean(), nullable=True)
+    """ Display height in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
+    display_metric_weight = db.Column(db.Boolean(), nullable=True)
+    """ Display weight in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
+    display_metric_waist_size = db.Column(db.Boolean(), nullable=True)
+    """ Display waist size in metric units (True), imperial (False), or global default (None).
+
+    :type: bool, nullable
+    """
+
     enable_push_notifications = db.Column(db.Boolean())
     """
     Denotes if user has enabled push notifications
@@ -932,40 +956,57 @@ class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key('LookupDrinks.drink_id)
     """
 
-class ClientHeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical height measurements of clients.
+class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores height measurements of clients. """
+
+    # precision = total number of digits.
+    # scale = number of digits behind decimal point.
+    # asdecimal=True returns decimal.Decimal object, but there is no JSON
+    # parser for it, so return simple float instead.
+    #
+    # TODO: if calculations with these numbers need to be done, keep as
+    # Decimal and create a JSON parser for it. Calculations with Decimal
+    # objects is exact to any arbitrary precision.
+    height = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
+    """ Client height in cm.
+
+    Conversion to/from inches requires 2 decimal places (1 in = 2.54 cm exactly).
+    Human beings range from ~50 cm as a baby to over 2 m (200 cm) as a tall adult.
+    An order of 10^4 can hold any realistic measurement, while 6 (2 + 4 extra)
+    decimal digits is enough to deal with rounding to/from imperial.
+
+    :type: float
     """
 
-    height = db.Column(db.Integer)
-    """
-    Value for this height measurement in cm.
+class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores weight measurements of clients. """
 
-    :type: int
-    """
+    # See comments at ClientHeight
+    weight = db.Column(db.Numeric(precision=15, scale=11, asdecimal=False))
+    """ Client weight in kg.
 
-class ClientWeightHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical weight measurements of clients.
-    """
+    Conversion to/from pounds requires 8 decimal places (1 lb = 0.45359237 kg
+    exactly for the avoirdupois pound). Human beings range from ~1 kg as a baby
+    to ~650 kg for the heaviest human being on record. An order of 10^4 can hold
+    any realistic measurement, while 11 decimal digits (8 + 3 extra) is enough
+    to deal with rounding to/from imperial.
 
-    weight = db.Column(db.Integer)
-    """
-    Value for this weight measurement in g.
-
-    :type: int
+    :type: float
     """
 
-class ClientWaistSizeHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores historical waist size measurements of clients.
-    """
+class ClientWaistSize(BaseModelWithIdx, UserIdFkeyMixin):
+    """ Stores waist size measurements of clients. """
 
-    waist_size = db.Column(db.Integer)
-    """
-    Value for this waist size measurement in cm.
+    # See comments at ClientHeight
+    waist_size = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
+    """ Client waist size in cm.
 
-    :type: int
+    Conversion to/from inches requires 2 decimal places (1 in = 2.54 cm exactly).
+    Human beings range from a few to a few 100 cm in waist size. An order of 10^4
+    can hold any realistic measurement, while 6 (2 + 4 extra) decimal digits is
+    enough to deal with rounding to/from imperial.
+
+    :type: float
     """
     
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
@@ -1049,18 +1090,41 @@ class ClientTransactionHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: string
     """
 
-class ClientPushNotifications(BaseModelWithIdx, UserIdFkeyMixin):
+class ClientNotificationSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """
-    This table holds the categories of push notifications that a user has enabled.
+    This table holds the categories of notifications that a user has enabled.
     If a notification type appears in this table for a user id, it means that user has this
     type of notification enabled.
     """
+
+    # TODO: currently this system allows only for settings to be enabled. We want to have
+    # an on-by-default system. We could add all notif_type_ids from the lookup table to all
+    # clients by default. However:
+    #  - That means a lot of maintenance whenever new types are added (add it for every user).
+    #  - A huge number of entries in this table as the "default".
+    #
+    # A better idea is to have all notifications be on by default and make this list the
+    # disabled list. Keep the code, change the meaning. Invalid type_ids can be deleted or
+    # ignored. New types are on by default by the fact that they are not in the list. Same
+    # goes for new users.
+    #
+    # A further optimization is to delete this table and add a simple list to ClientMobileSettings:
+    #
+    # notifications_disabled = Column(ARRAY)
+    #
+    # None or [] means all enabled (default). Disabling means adding a number to the list,
+    # re-enabling is popping that number off the list. This makes code in endpoint a lot
+    # easier, because it doesn't require any lookups. Simply assign the list from the request
+    # body to the model and be done. Marshmallow will convert lists.
+    #
+    # Final note: this system is not integrated with notifications at all. Settings are ignored
+    # on both front and backend (as of 2021-11-19). At some point, actually start using them.
 
     notification_type_id = db.Column(db.Integer, db.ForeignKey('LookupNotifications.notification_type_id', ondelete="CASCADE"), nullable=False)
     """
     Denotes what type of notification this is as defined in the LookupNotifications table.
 
-    :type: int, foreign key('LookupNotifications.notification_id')
+    :type: int, foreign key to LookupNotifications.notification_type_id
     """
 
 class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):

@@ -43,10 +43,9 @@ class TelehealthAvailableStaffSchema(Schema):
     hourly_consult_rate = fields.Number(missing=None)
     profile_pictures = fields.String()
     bio = fields.String()
+    roles = fields.List(fields.String())
 
 class TelehealthTimeSelectSchema(Schema):
-    staff_user_id = fields.Integer()
-    staff_available = fields.Nested(TelehealthAvailableStaffSchema(many=True))
     start_time = fields.Time()
     end_time = fields.Time()
     booking_window_id_start_time = fields.Integer()
