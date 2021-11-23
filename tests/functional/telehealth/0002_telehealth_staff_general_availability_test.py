@@ -53,21 +53,15 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
     # NOTE: At this point we have one staff member with availability 11 am - 12 pm on Mondays
     # this allows 3 avaiablities ==> 11 am, 11:15 am and 11:30 am
     # 11:45 and 12:00 are not valid start times bcs the practitioner's availablity ends at 12 pm
-    # and the requested duration is 20 min.
+    # and the requested duration is 30 min.
     # NOTE: Availabilities are returned with this rule
-    # At least 10 availabilities unless we have checked a full week 7 days off.
-    # Thus, we will receive 6 availabilities, 3 on Monday 2022-04-04 & 3 on Monday 2022-04-11
+    # At least 10 available time slots unless we have checked a full 2 weeks (14 days) off.
+    # Thus, we will receive 9 availabilities, 3 on closest_future_Monday & 3 on closest_future_Monday + week & 3 on closest_future_Monday + 2 weeks
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header)
-        
-    assert response.json['appointment_times'][0]['target_date'] == '2022-04-04'
-    assert response.json['appointment_times'][1]['target_date'] == '2022-04-04'
-    assert response.json['appointment_times'][2]['target_date'] == '2022-04-04'
-    assert response.json['appointment_times'][3]['target_date'] == '2022-04-11'
-    assert response.json['appointment_times'][4]['target_date'] == '2022-04-11'
-    assert response.json['appointment_times'][5]['target_date'] == '2022-04-11'
-    assert response.json['total_options'] == 6
+    
+    assert response.json['total_options'] == 9
 
     # 3_midnight_bug_staff_general_availability
     response = test_client.post(
