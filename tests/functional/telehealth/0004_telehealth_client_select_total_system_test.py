@@ -15,6 +15,7 @@ from odyssey.api.user.models import User
 from odyssey.api.telehealth.models import TelehealthStaffAvailability, TelehealthBookings
 from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
 from odyssey.tasks.tasks import cleanup_unended_call
+from flask import g
 
 from tests.utils import login
 
@@ -333,10 +334,11 @@ def test_cleanup_unended_call(test_client, booking_twilio):
     assert response.status_code == 200
     assert booking_twilio.status == 'In Progress'
 
+    g.flask_httpauth_user = None
     complete = cleanup_unended_call(booking_twilio.idx)
     
     assert booking_twilio.status == 'Completed'
-    assert booking_twilio.status_history[-1].reporter_role == 'Unended By Participants'
+    assert booking_twilio.status_history[-1].reporter_role == 'System'
     assert complete == 'Booking Completed by System'
 
 

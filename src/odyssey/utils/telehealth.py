@@ -22,7 +22,8 @@ from odyssey.api.telehealth.models import(
     TelehealthBookings, 
     TelehealthStaffAvailability, 
     TelehealthBookingStatus
-) 
+)
+from odyssey.api.telehealth.schemas import TelehealthBookingStatusSchema
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
 from odyssey.api.payment.models import PaymentHistory
@@ -333,7 +334,7 @@ def update_booking_status_history(new_status:String, booking_id:Integer, reporte
     return 
 
 
-def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Participants'):
+def complete_booking(booking_id: int):
     """
     After booking gets started, make sure it gets completed
     1. Update booking status
@@ -352,12 +353,6 @@ def complete_booking(booking_id: int, reporter_id=None, reporter='Unended By Par
 
     # update status
     booking.status = 'Completed'
-
-    update_booking_status_history(
-            new_status = booking.status, 
-            booking_id = booking.idx, 
-            reporter_id = reporter_id, 
-            reporter_role = reporter)
 
     # complete twilio room if making call over, catch error or raise if not expected error
     twilio = Twilio()

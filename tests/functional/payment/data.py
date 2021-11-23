@@ -111,8 +111,8 @@ def test_booking(test_client):
         'consult_rate': 99.00
     })
 
-    db.session.add(booking)
-    db.session.flush()
+    test_client.db.session.add(booking)
+    test_client.db.session.flush()
 
     yield booking
 

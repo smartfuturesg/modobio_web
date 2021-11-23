@@ -283,7 +283,7 @@ class Twilio():
             ).where(TelehealthMeetingRooms.booking_id==booking_id)
         ).scalars().one_or_none()
 
-        if room.sid:
+        if room and room.sid:
             room_sid = room.sid
             t_room = self.client.video.rooms(room_sid).fetch()
 

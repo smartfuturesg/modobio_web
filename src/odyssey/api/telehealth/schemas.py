@@ -85,6 +85,7 @@ class TelehealthUserSchema(ma.SQLAlchemyAutoSchema):
             'modobio_id','is_staff','phone_number','deleted','email','is_internal')
 
     profile_picture = fields.String()
+    start_date_localized = fields.Date()
     start_time_localized = fields.Time()
     end_time_localized = fields.Time()
     timezone = fields.String()

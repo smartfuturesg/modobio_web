@@ -287,7 +287,7 @@ class Instamed:
             cancel_telehealth_appointment(booking)
         return response_data
 
-def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment', reporter_id=None, reporter_role='System'):
+def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'):
     """
     Used to cancel an appointment in the event a payment is unsuccessful
     and from bookings PUT to cancel a booking
@@ -310,7 +310,7 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
         db.session.delete(staff_event)
 
     # add new status to status history table
-    update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
+    #update_booking_status_history('Canceled', booking.idx, reporter_id, reporter_role)
 
     if refund:
         #check if booking has been charged yet, if not do nothing

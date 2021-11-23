@@ -167,11 +167,6 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
         # Update TelehealthBookingStatus to 'In Progress'
         booking.status = 'In Progress'
-        telehealth_utils.update_booking_status_history(
-            new_status = booking.status,
-            booking_id = booking.idx, 
-            reporter_id = current_user.user_id, 
-            reporter_role = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
         db.session.commit()
 
         # schedule celery task to ensure call is completed 10 min after utc end date_time
@@ -485,10 +480,12 @@ class TelehealthBookingsApi(BaseResource):
                 time_inc[booking.booking_window_id_end_time_utc-1].end_time,
                 tzinfo=tz.UTC)
 
+            practitioner['start_date_localized'] = start_time_utc.astimezone(tz.gettz(booking.staff_timezone)).date()
             practitioner['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.staff_timezone)).time()
             practitioner['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.staff_timezone)).time()
 
             client['timezone'] = booking.client_timezone
+            client['start_date_localized'] = start_time_utc.astimezone(tz.gettz(booking.client_timezone)).date()
             client['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             client['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
@@ -673,12 +670,6 @@ class TelehealthBookingsApi(BaseResource):
         #    external_booking_id, booking_url = wheel.make_booking_request(staff_user_id, client_user_id, client_in_queue.location_id, request.parsed_obj.idx, target_start_datetime_utc)
         #    request.parsed_obj.external_booking_id = external_booking_id
         
-        # build & save status history obj
-        telehealth_utils.update_booking_status_history(new_status=request.parsed_obj.status, 
-                        booking_id = request.parsed_obj.idx, 
-                        reporter_id = current_user.user_id,
-                        reporter_role = 'Practitioner' if current_user.user_id == request.parsed_obj.staff_user_id else 'Client'
-                        )
         twilio_obj = Twilio()
         # create Twilio conversation and store details in TelehealthChatrooms table
         conversation_sid = twilio_obj.create_telehealth_chatroom(booking_id = request.parsed_obj.idx)
@@ -710,10 +701,12 @@ class TelehealthBookingsApi(BaseResource):
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj.idx).first()
         client = {**booking.client.__dict__}
         client['timezone'] = booking.client_timezone
+        client['start_date_localized'] = target_date.date()
         client['start_time_localized'] = target_date.time()
         client['end_time_localized'] = (target_date + timedelta(minutes=duration)).time()
         practitioner = {**booking.practitioner.__dict__}
         practitioner['timezone'] = booking.staff_timezone
+        practitioner['start_date_localized'] = booking_start_staff_localized.date()
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
@@ -780,7 +773,7 @@ class TelehealthBookingsApi(BaseResource):
             # Can't update status to 'In Progress' through this endpoint
             # only practitioner can change status from pending to accepted
             # both client and practitioner can change status to canceled and completed
-            if new_status == 'In Progress' or new_status == 'Completed':
+            if new_status in ('In Progress', 'Completed'):
                 raise BadRequest('This status can only be updated at the start or end of a call.')
 
             elif (new_status in ('Pending', 'Accepted') and
@@ -788,10 +781,6 @@ class TelehealthBookingsApi(BaseResource):
                 raise Unauthorized('Only practitioner can update this status.')
 
             if new_status != 'Canceled':
-                # Create TelehealthBookingStatus object if the request is updating the status
-                telehealth_utils.update_booking_status_history(new_status, booking_id, current_user.user_id,\
-                     'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
-
                 booking.update(data)
                 db.session.commit()
             
@@ -799,9 +788,9 @@ class TelehealthBookingsApi(BaseResource):
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
-                    cancel_telehealth_appointment(booking, reason="Practitioner Cancellation", refund=True, reporter_id=current_user.user_id, reporter_role='Practitioner')
+                    cancel_telehealth_appointment(booking, reason="Practitioner Cancellation", refund=True)
                 else:
-                    cancel_telehealth_appointment(booking, refund=False, reporter_id=current_user.user_id, reporter_role='Client')                
+                    cancel_telehealth_appointment(booking, refund=False)                
                 ##### WHEEL #####
                 #elif current_user.user_id == booking.client_user_id:
                 #    if booking.external_booking_id:
@@ -1698,7 +1687,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
     """
     API for completing bookings
     """
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff','client'))
     @responds(api=ns, status_code=200)
     def put(self, booking_id):
         """
@@ -1716,7 +1705,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
         current_user, _ = token_auth.current_user()
 
         # make sure the requester is one of the participants
-        if not current_user.user_id == booking.staff_user_id or current_user.user_id == booking.client_user_id:
+        if current_user.user_id not in [booking.staff_user_id, booking.client_user_id]:
             raise Unauthorized('You must be a participant in this booking.')
 
         ##### WHEEL #####        
@@ -1724,10 +1713,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
         #     wheel = Wheel()
         #     wheel.complete_consult(booking.external_booking_id)
 
-        telehealth_utils.complete_booking(
-            booking_id = booking.idx, 
-            reporter_id = current_user.user_id,
-            reporter = 'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client')
+        telehealth_utils.complete_booking(booking_id = booking.idx)
 
         return 
 
