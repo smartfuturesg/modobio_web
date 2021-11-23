@@ -480,10 +480,12 @@ class TelehealthBookingsApi(BaseResource):
                 time_inc[booking.booking_window_id_end_time_utc-1].end_time,
                 tzinfo=tz.UTC)
 
+            practitioner['start_date_localized'] = start_time_utc.astimezone(tz.gettz(booking.staff_timezone)).date()
             practitioner['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.staff_timezone)).time()
             practitioner['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.staff_timezone)).time()
 
             client['timezone'] = booking.client_timezone
+            client['start_date_localized'] = start_time_utc.astimezone(tz.gettz(booking.client_timezone)).date()
             client['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             client['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
@@ -699,10 +701,12 @@ class TelehealthBookingsApi(BaseResource):
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj.idx).first()
         client = {**booking.client.__dict__}
         client['timezone'] = booking.client_timezone
+        client['start_date_localized'] = target_date.date()
         client['start_time_localized'] = target_date.time()
         client['end_time_localized'] = (target_date + timedelta(minutes=duration)).time()
         practitioner = {**booking.practitioner.__dict__}
         practitioner['timezone'] = booking.staff_timezone
+        practitioner['start_date_localized'] = booking_start_staff_localized.date()
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
