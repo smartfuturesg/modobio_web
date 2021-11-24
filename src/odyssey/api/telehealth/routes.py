@@ -259,7 +259,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
         #}
         days_available = {}
         times_available = 0
-        while days_out <= 7 and times_available < 10:
+        while days_out <= 14 and times_available < 10:
             local_target_date2 = local_target_date + timedelta(days=days_out)
             day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc = \
                 telehealth_utils.get_utc_start_day_time(local_target_date2, client_tz)

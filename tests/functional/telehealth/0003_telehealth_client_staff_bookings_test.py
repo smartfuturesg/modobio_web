@@ -45,7 +45,7 @@ def test_post_1_client_staff_bookings(test_client):
         
     assert staff_events.start_date == datetime.strptime(telehealth_client_staff_bookings_post_1_data['target_date'],'%Y-%m-%d').date()
     assert staff_events.start_time == time(8, 15)
-    assert staff_events.end_time == time(8, 35)
+    assert staff_events.end_time == time(8, 45)
 
 def test_post_2_client_staff_bookings(test_client, payment_method):
     # add client to queue first

@@ -1,5 +1,12 @@
 import pathlib
 # TODO update dates to current year + 1 to ensure the tests always use a future date
+from datetime import timedelta, datetime
+
+from odyssey.utils.constants import DAY_OF_WEEK
+
+today = datetime.utcnow().weekday()
+days_til_monday = timedelta(weeks= 1, days= -today + DAY_OF_WEEK.index('Monday'))
+target_date_next_monday = datetime.utcnow() + days_til_monday
 
 # For readability
 # 1/5/2025
@@ -76,12 +83,12 @@ telehealth_queue_client_pool_7_post_data = {
 
 telehealth_queue_client_pool_8_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2022-04-04T01:00:00.000',
+  'target_date': str(target_date_next_monday),
   'priority': False,
   'medical_gender': 'np',
   'payment_method_id': None,
   'location_id': 1,
-  'duration':20,
+  'duration':30,
   'timezone': 'UTC'
 }
 
@@ -212,7 +219,7 @@ telehealth_staff_general_availability_bad_7_post_data = {
 # It works out that: booking_window_id_end_time.end_time - booking_window_id_start_time.start_time = 20 minutes
 # NOTE: This works when there is no buffer
 telehealth_client_staff_bookings_post_1_data = {
-  'target_date': '2025-03-03',
+  'target_date': str(target_date_next_monday.date()),
   'booking_window_id_start_time': 100,
   'booking_window_id_end_time': 103
 }
