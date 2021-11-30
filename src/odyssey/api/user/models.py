@@ -72,7 +72,7 @@ class User(db.Model):
     :type: str, max length 50, non-null, unique
     """
 
-    phone_number = db.Column(db.String(50), unique=True)
+    phone_number = db.Column(db.String(50), unique=False)
     """
     User phone number
 
