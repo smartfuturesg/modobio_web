@@ -160,6 +160,9 @@ class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
 class TelehealthStaffAvailabilityOutputSchema(Schema):
     availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])
     settings = fields.Nested(TelehealthStaffSettingsSchema, required=True)
+    
+class TelehealthStaffAvailabilityConflictSchema(Schema):
+    conflicts = fields.Nested(TelehealthBookingsSchema(many=True), dump_only=True)
 
 class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """

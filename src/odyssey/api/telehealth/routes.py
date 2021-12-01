@@ -59,6 +59,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilitySchema,
     TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
+    TelehealthStaffAvailabilityConflictSchema,
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema,
     TelehealthStaffSettingsSchema,
@@ -1071,7 +1072,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
     @token_auth.login_required
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
-    @responds(api=ns, status_code=201)
+    @responds(schema=TelehealthStaffAvailabilityConflictSchema, api=ns, status_code=201)
     def post(self,user_id):
         """
         Posts the staff availability
@@ -1202,9 +1203,28 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                         data['day_of_week'] = block['weekday']
                         data_in = TelehealthStaffAvailabilitySchema().load(data)
                         db.session.add(data_in)
+                        
+                #detect if practitoner has scheduled appointments outside of their new availability
+                bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()
+                conflicts = []
+                for booking in bookings:
+                    staff_availability = db.session.execute(
+                        select(TelehealthStaffAvailability).
+                        filter(
+                            TelehealthStaffAvailability.booking_window_id.in_([idx for idx in range (booking.booking_window_id_start_time_utc,booking.booking_window_id_end_time_utc + 1)]),
+                            TelehealthStaffAvailability.day_of_week == DAY_OF_WEEK[booking.target_date_utc.weekday()],
+                            TelehealthStaffAvailability.user_id == user_id
+                            )
+                    ).scalars().all()
+                    # Make sure the full range of requested indices are found in staff_availability
+                    available_indices = {line.booking_window_id for line in staff_availability}
+                    requested_indices = {req_idx for req_idx in range(booking.booking_window_id_start_time_utc, booking.booking_window_id_end_time_utc + 1)}
+                    if not requested_indices.issubset(available_indices):
+                        #booking is outside of the bounds of the new availability
+                        conflicts.append(booking)
         
         db.session.commit()
-        return 201
+        return conflicts
 
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(BaseResource):
