@@ -130,9 +130,9 @@ class PaymentMethodsApi(BaseResource):
                     for booking in bookings:
                         booking_ids += str(booking.idx)
                     booking_ids = ",".join(booking_ids)
-                    raise BadRequest(f"The payment method with id {idx} is involed with the following booking " \
-                        "ids: {booking_ids}. Please send another request with the replacement_id argument set to " \
-                        "a valid payment id for the userif you would like to replace the payment methods on these " \
+                    raise BadRequest(f"The payment method with id {idx} is involved with the following booking " \
+                        f"ids: {booking_ids}. Please send another request with the replacement_id argument set to " \
+                        "a valid payment id for the user if you would like to replace the payment methods on these " \
                         "booking with a new method. Alternatively, send another request with replacement_id argument "\
                         "set to 0 to cancel the affected appointments.")
             
