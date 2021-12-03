@@ -135,6 +135,7 @@ class PaymentMethodsApi(BaseResource):
                         'booking_ids': booking_ids,
                         'replacement_id': replacement_id
                     }
+                    raise e
             
             #remove token so card can't be charged anymore
             payment.payment_id = None
