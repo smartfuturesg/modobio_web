@@ -172,7 +172,7 @@ def test_client_time_select(test_client):
         headers=test_client.client_auth_header)
 
     assert response.status_code == 200
-    assert response.json['total_options'] == 30
+    assert response.json['total_options'] == 27
 
 def test_full_system_with_settings(test_client, payment_method):
     """
