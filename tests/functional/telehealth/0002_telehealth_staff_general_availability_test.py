@@ -1,3 +1,4 @@
+import copy
 from flask.json import dumps
 
 from .data import (
@@ -361,7 +362,7 @@ def test_update_availability_conflicts(test_client, booking):
     booking.booking_window_id_end_time = 109
     
     #change availability to exclude booking
-    data = telehealth_staff_general_availability_2_post_data
+    data = copy.deepcopy(telehealth_staff_general_availability_2_post_data)
     data['availability'] = data['availability'][1:]
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
@@ -370,4 +371,14 @@ def test_update_availability_conflicts(test_client, booking):
         content_type='application/json')
     
     #assert booking in conflicts
+    assert response.status_code == 201
     assert len(response.json['conflicts']) == 1
+    
+    #return availability to normal for future tests
+    response = test_client.post(
+        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(telehealth_staff_general_availability_2_post_data),
+        content_type='application/json')
+    
+    assert response.status_code == 201
