@@ -311,6 +311,15 @@ def find_chargable_bookings():
 
     for booking in bookings:
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
+        
+@celery.task()
+def detect_practitioner_no_show():
+    """
+    This task will scan the TelehealthBookings table for bookings where the practitioner does not
+    join the call on time. If a practitioner does not start a telehealth call within 10 minutes of
+    the scheduled time, the client will be refunded for the booking.
+    """
+    return
 
 
 celery.conf.beat_schedule = {
