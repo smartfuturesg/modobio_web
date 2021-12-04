@@ -130,11 +130,12 @@ class PaymentMethodsApi(BaseResource):
                     for booking in bookings:
                         booking_ids += str(booking.idx)
                     booking_ids = ",".join(booking_ids)
-                    raise BadRequest(f"The payment method with id {idx} is involed with the following booking " \
-                        "ids: {booking_ids}. Please send another request with the replacement_id argument set to " \
-                        "a valid payment id for the userif you would like to replace the payment methods on these " \
-                        "booking with a new method. Alternatively, send another request with replacement_id argument "\
-                        "set to 0 to cancel the affected appointments.")
+                    e = BadRequest("This payment method cannot be deleted because it is involved with unpcoming unpaid bookings.")
+                    e.data = {
+                        'booking_ids': booking_ids,
+                        'replacement_id': replacement_id
+                    }
+                    raise e
             
             #remove token so card can't be charged anymore
             payment.payment_id = None
