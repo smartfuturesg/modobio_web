@@ -58,7 +58,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
     target date is the date of the appointment in client's timezone
 
-    :type: datetime
+    :type: date
     """
 
     booking_window_id_start_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
@@ -106,7 +106,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
     target date converted to utc
 
-    :type: datetime
+    :type: date
     """
 
     booking_window_id_start_time_utc = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
@@ -548,6 +548,16 @@ class TelehealthChatRooms(BaseModel):
     Object id for telehealth transcript entry on mongo db
 
     :type: str
+    """
+
+    write_access_timeout = db.Column(db.DateTime)
+    """
+    Time write accesss to the conversation threaf will expire. After this time, the conversation will be cached on the modobio end
+    and will be removed from twilio. 
+
+    timezone is always in UTC
+    
+    :type: datetime
     """
     
 class TelehealthStaffSettings(BaseModel):

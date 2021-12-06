@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import random
 
 from flask import current_app
@@ -9,9 +10,10 @@ from twilio.rest import Client
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
+from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms, TelehealthMeetingRooms
 from odyssey.api.user.models import User
-from odyssey.utils.constants import ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
+from odyssey.utils.constants import ALPHANUMERIC, TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, TWILIO_ACCESS_KEY_TTL
 
 
 class Twilio():
@@ -208,6 +210,8 @@ class Twilio():
 
         # create chatroom entry into DB
         new_chat_room.conversation_sid = conversation_sid
+        booking_end_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_end_time_utc).end_time
+        new_chat_room.write_access_timeout = datetime.combine(booking.target_date_utc, booking_end_time) + timedelta(hours=TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS)
         db.session.add(new_chat_room)
 
         return conversation_sid
