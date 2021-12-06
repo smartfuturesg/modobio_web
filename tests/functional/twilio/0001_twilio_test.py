@@ -68,6 +68,7 @@ def test_twilio_wrapper(test_client, booking_twilio):
 
     assert True
 
+
 def test_conversation_cache(test_client, booking_twilio):
     """
     Test the conversation cache task which takes a booking_id and stores the conversation on mongo_db. All media is stored in an s3 bucket.
@@ -106,6 +107,7 @@ def test_conversation_cache(test_client, booking_twilio):
 
     assert len(stored_transcript['transcript']) == 2
     assert stored_transcript['transcript'][1]['media'][0]['s3_path'] == fname
+
 
 def test_conversation_cache_scheduler(test_client, booking_twilio):
     """
@@ -180,6 +182,12 @@ def test_telehealth_transcript_get(test_client, booking_twilio):
         conversation_sid = conversation_sid,
         media_sid = pdf_media_sid)
 
+    for i in range(10):
+        twilio.send_message(
+        user_id = booking.staff_user_id if i % 2 == 0 else booking.client_user_id, 
+        conversation_sid = conversation_sid,
+        message_body = f"testingtesting  message {i}")
+
     stored_transcript = store_telehealth_transcript(booking.idx)
 
     response = test_client.get(
@@ -191,6 +199,19 @@ def test_telehealth_transcript_get(test_client, booking_twilio):
     assert len(response.json['transcript'][1]['media']) == 1
     assert response.json['transcript'][1]['media'][0]['content_type'] == 'image/jpeg'
     assert response.json['transcript'][2]['media'][0]['content_type'] == 'application/pdf'
+    
+    # test pagination   
+    msg_count = 0
+    for i in range(6):
+        response = test_client.get(
+        f'/telehealth/bookings/transcript/{booking.idx}/?page={i+1}&per_page=3',
+        headers=test_client.client_auth_header
+        )
+
+        msg_count += len(response.json['transcript'])
+    
+    assert msg_count == 13
+
 
 def test_telehealth_bookings_get(test_client, booking_twilio):
     """

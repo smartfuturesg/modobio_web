@@ -132,7 +132,7 @@ def staff_credentials(test_client):
         state='FL',
         credential_type='NPI',
         credentials='good doc',
-        status='verified',
+        status='Verified',
         role_id=role.idx)
 
     test_client.db.session.add(creds)

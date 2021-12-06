@@ -294,7 +294,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             days_out += 1
         
         if not days_available:
-            raise BadRequest('No staff available for the upcoming week.')
+            raise BadRequest('No staff available for the upcoming two weeks.')
 
         # get practitioners details only once
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
@@ -370,7 +370,9 @@ class TelehealthBookingsApi(BaseResource):
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=200)
     @ns.doc(params={'client_user_id': 'Client User ID',
                 'staff_user_id' : 'Staff User ID',
-                'booking_id': 'booking_id'})
+                'booking_id': 'booking_id',
+                'page': 'pagination index',
+                'per_page': 'results per page'})
     def get(self):
         """
         Returns the list of bookings for clients and/or staff
@@ -378,10 +380,10 @@ class TelehealthBookingsApi(BaseResource):
         current_user, _ = token_auth.current_user()
 
         client_user_id = request.args.get('client_user_id', type=int)
-
         staff_user_id = request.args.get('staff_user_id', type=int)
-
         booking_id = request.args.get('booking_id', type=int)
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
 
         fh = FileHandling()
 
@@ -404,52 +406,44 @@ class TelehealthBookingsApi(BaseResource):
             # 2. No parameter provided, raise error
             raise BadRequest('Must include at least "client_user_id", "staff_user_id", '
                              'or "booking_id".')
-
-        if booking_id:
+        elif booking_id:
             # 1. booking_id provided, any other parameter is ignored, only returns booking to participants or cs
-            booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-            if not booking:
-                return
-            if not (current_user.user_id == booking.client_user_id or
-                    current_user.user_id == booking.staff_user_id or
-                    'client_services' in [role.role for role in current_user.roles]):
-                raise Unauthorized('You must be a participant in this booking.')
-
-            # return booking & both profile pictures
-            bookings = [booking]
+            query_filter = {'idx': booking_id}
 
         elif staff_user_id and not client_user_id:
-            # 3. only staff_user_id provided, return all bookings for such user_id if loggedin user is same user or cs
+            # 3. only staff_user_id provided, return all bookings for such user_id if logged-in user is same user or client services
             if not (current_user.user_id == staff_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-
-            # return all bookings with given staff_user_id
-            bookings = TelehealthBookings.query.filter_by(staff_user_id = staff_user_id).\
-                order_by(TelehealthBookings.target_date.asc()).all()
-
+            query_filter = {'staff_user_id': staff_user_id}
+        
         elif client_user_id and not staff_user_id:
-            # 4. only client_user_id provided, return all bookings for such user_id if loggedin user is same user or cs
+            #4. only client_user_id provided, return all bookings for such user_id if loggedin user is same user or cs
             if not (current_user.user_id == client_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-
-            # return all bookings with given client_user_ide'
-            bookings = TelehealthBookings.query.filter_by(client_user_id = client_user_id).\
-                order_by(TelehealthBookings.target_date.asc()).all()
-
+            query_filter = {'client_user_id': client_user_id}
+       
         else:
-            # 5. both client and user id's are provided, return bookings where both exist if loggedin is either or cs
+            #5. both client and user id's are provided, return bookings where both exist if loggedin is either or cs
             if not (current_user.user_id == client_user_id or
                     current_user.user_id == staff_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
+            query_filter = {'staff_user_id': staff_user_id, 'client_user_id': client_user_id}
+            
+        # grab the bookings using the filter generated above
+        bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
+            order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc()).paginate(page,per_page,error_out=False)
+        bookings = bookings_query.items
 
-            # return all bookings with given client and staff user_id combination
-            # grab the whole queue
-            bookings = TelehealthBookings.query.filter_by(client_user_id = client_user_id, staff_user_id = staff_user_id).\
-                order_by(TelehealthBookings.target_date.asc()).all()
-
+        # ensure requested booking_id is allowed
+        if booking_id and len(bookings) == 1:
+            if not (current_user.user_id == bookings[0].client_user_id or
+                    current_user.user_id == bookings[0].staff_user_id or
+                    'client_services' in [role.role for role in current_user.roles]):
+                raise Unauthorized('You must be a participant in this booking.')
+        
         time_inc = LookupBookingTimeIncrements.query.all()
         bookings_payload = []
 
@@ -462,7 +456,6 @@ class TelehealthBookingsApi(BaseResource):
             client = {**booking.client.__dict__}
             practitioner = {**booking.practitioner.__dict__}
 
-
             # bookings stored in staff timezone
             practitioner['timezone'] = booking.staff_timezone
             #return the practioner profile_picture width=128 if the logged in user is the client involved or client services
@@ -470,16 +463,23 @@ class TelehealthBookingsApi(BaseResource):
                 image_paths = {pic.width: pic.image_path for pic in booking.practitioner.staff_profile.profile_pictures}
                 practitioner['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
 
-
             start_time_utc = datetime.combine(
                     booking.target_date_utc,
                     time_inc[booking.booking_window_id_start_time_utc-1].start_time,
                     tzinfo=tz.UTC)
+            
+            #calculate booking duration in minutes
+            increment_data = telehealth_utils.get_booking_increment_data()
+            if booking.booking_window_id_end_time_utc < booking.booking_window_id_start_time_utc:
+                #booking crosses midnight
+                highest_index = increment_data['max_idx'] + 1
+                duration = (highest_index - booking.booking_window_id_start_time + \
+                    booking.booking_window_id_end_time) * increment_data['length']
+            else:
+                duration = (booking.booking_window_id_end_time - booking.booking_window_id_start_time + 1) \
+                    * increment_data['length']
 
-            end_time_utc = datetime.combine(
-                booking.target_date_utc,
-                time_inc[booking.booking_window_id_end_time_utc-1].end_time,
-                tzinfo=tz.UTC)
+            end_time_utc = start_time_utc + timedelta(minutes=duration)
 
             practitioner['start_date_localized'] = start_time_utc.astimezone(tz.gettz(booking.staff_timezone)).date()
             practitioner['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.staff_timezone)).time()
@@ -530,7 +530,11 @@ class TelehealthBookingsApi(BaseResource):
         payload = {
             'all_bookings': len(bookings_payload),
             'bookings': bookings_payload,
-            'twilio_token': token
+            'twilio_token': token,
+            '_links': {
+                '_prev': url_for('api.telehealth_telehealth_bookings_api', page=bookings_query.prev_num, per_page = per_page) if bookings_query.has_prev else None,
+                '_next': url_for('api.telehealth_telehealth_bookings_api', page=bookings_query.next_num, per_page = per_page) if bookings_query.has_next else None,
+            }
         }
         return payload
 
@@ -1745,11 +1749,15 @@ class TelehealthTranscripts(Resource):
     """
     @token_auth.login_required()
     @responds(api=ns, schema = TelehealthTranscriptsSchema, status_code=200)
+    @ns.doc(params={'page': 'pagination index',
+                'per_page': 'results per page'})
     def get(self, booking_id):
         """
         Retrieve messages from booking transscripts that have been stored on modobio's end
         """
         current_user, _ = token_auth.current_user()
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
         
         booking = TelehealthBookings.query.get(booking_id)
 
@@ -1766,16 +1774,31 @@ class TelehealthTranscripts(Resource):
 
         # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
         fh = FileHandling()
+
+        payload = {'booking_id': booking_id, 'transcript': []}
+        has_next = False
         for message_idx, message in enumerate(transcript.get('transcript',[])):
+            # pagination logic: loop through all messages until we find the ones that are in the specified page, add those to the payload
+            if message_idx <  (page-1) * per_page:
+                continue
+            elif message_idx >= (page * per_page):
+                has_next = True
+                break
+
             if message['media']:
                 for media_idx, media in enumerate(message['media']):
                     _prefix = media['s3_path']
                     s3_link = fh.get_presigned_urls(prefix=_prefix)
-
                     media['media_link'] = [val for val in s3_link.values()][0]
                     transcript['transcript'][message_idx]['media'][media_idx] = media
-                    
-        return transcript
+            
+            payload['transcript'].append(transcript['transcript'][message_idx])
+
+        payload['_links'] =  {
+                '_prev': url_for('api.telehealth_telehealth_transcripts', booking_id = booking_id, page = page - 1, per_page = per_page) if page > 1 else None,
+                '_next': url_for('api.telehealth_telehealth_transcripts', booking_id = booking_id, page = page + 1, per_page = per_page) if has_next else None,
+            }
+        return payload
    
     @token_auth.login_required(dev_only=True)
     @responds(api=ns, status_code=200)
