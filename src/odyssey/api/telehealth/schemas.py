@@ -105,7 +105,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     booking_id = fields.Integer(dump_only=True)
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
     status_history = fields.Nested(TelehealthBookingStatusSchema(many=True), dump_only=True)
-    chat_room = fields.Nested(TelehealthChatRoomsSchema(only=['conversation_sid', 'room_name', 'room_status', 'transcript_url']), dump_only=True)
+    chat_room = fields.Nested(TelehealthChatRoomsSchema(only=['conversation_sid', 'room_name', 'room_status', 'transcript_url', 'write_access_timeout']), dump_only=True)
     client = fields.Nested(TelehealthUserSchema, dump_only=True)
     practitioner = fields.Nested(TelehealthUserSchema, dump_only=True)
     payment_method_id = fields.Integer(required=False)
@@ -118,10 +118,16 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     def make_object(self, data, **kwargs):
         return TelehealthBookings(**data)
 
+class PaginationLinks(Schema):
+    _next = fields.String()
+    _prev = fields.String()
+
 class TelehealthBookingsOutputSchema(Schema):
     bookings = fields.Nested(TelehealthBookingsSchema(many=True),missing=[])
     all_bookings = fields.Integer()  
     twilio_token = fields.String()
+    _links = fields.Nested(PaginationLinks) 
+
 
 class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -257,3 +263,4 @@ class TelehealthTranscriptsSchema(Schema):
     """
     booking_id = fields.Integer()
     transcript = fields.Nested(TelehealthTranscriptsMessage(many=True))
+    _links = fields.Nested(PaginationLinks)
