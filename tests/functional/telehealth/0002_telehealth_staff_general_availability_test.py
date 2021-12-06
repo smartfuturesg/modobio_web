@@ -1,15 +1,5 @@
-import time
-
+import copy
 from flask.json import dumps
-from odyssey.api.staff.models import StaffRoles
-from odyssey.api.payment.models import PaymentMethods
-
-from odyssey.api.telehealth.models import (
-    TelehealthStaffAvailability,
-    TelehealthBookings,
-    TelehealthQueueClientPool,
-)
-from odyssey.api.practitioner.models import PractitionerCredentials
 
 from .data import (
     telehealth_staff_general_availability_1_post_data,
@@ -60,7 +50,7 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header)
-    
+
     assert response.json['total_options'] == 9
 
     # 3_midnight_bug_staff_general_availability
@@ -361,3 +351,34 @@ def test_get_7_staff_availability(test_client):
         response.json['availability'][6]['day_of_week'],
         response.json['availability'][6]['start_time'],
         response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
+
+def test_update_availability_conflicts(test_client, booking):
+    #tests that conflicting appointments show up when a practitioner updates their availability
+    
+    #set booking within availability (Monday 8:30AM)
+    booking.booking_window_id_start_time_utc = 103
+    booking.booking_window_id_start_time = 103
+    booking.booking_window_id_end_time_utc = 109
+    booking.booking_window_id_end_time = 109
+    
+    #change availability to exclude booking
+    data = copy.deepcopy(telehealth_staff_general_availability_2_post_data)
+    data['availability'] = data['availability'][1:]
+    response = test_client.post(
+        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(data),
+        content_type='application/json')
+    
+    #assert booking in conflicts
+    assert response.status_code == 201
+    assert len(response.json['conflicts']) == 1
+    
+    #return availability to normal for future tests
+    response = test_client.post(
+        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        data=dumps(telehealth_staff_general_availability_2_post_data),
+        content_type='application/json')
+    
+    assert response.status_code == 201

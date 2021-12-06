@@ -4,15 +4,11 @@ from sqlalchemy import select
 
 from odyssey.api.telehealth.models import TelehealthChatRooms
 from odyssey.api.staff.models import StaffCalendarEvents
-from odyssey.api.payment.models import PaymentMethods
 
 from .data import (
     telehealth_client_staff_bookings_post_1_data,
     telehealth_client_staff_bookings_post_2_data,
     telehealth_client_staff_bookings_post_3_data,
-    telehealth_client_staff_bookings_post_4_data,
-    telehealth_client_staff_bookings_post_5_data,
-    telehealth_client_staff_bookings_post_6_data,
     telehealth_client_staff_bookings_put_1_data
 )
 
@@ -26,12 +22,7 @@ def test_post_1_client_staff_bookings(test_client):
         content_type='application/json')
 
     # Bring up conversation to ensure it was created for this booking
-    conversation = (test_client.db.session.execute(
-        select(TelehealthChatRooms)
-        .where(
-            TelehealthChatRooms.staff_user_id == test_client.staff_id,
-            TelehealthChatRooms.client_user_id == test_client.client_id))
-        .one_or_none()[0])
+    conversation = TelehealthChatRooms.query.filter_by(booking_id=response.json['bookings'][0]['booking_id']).one_or_none()
 
     assert response.status_code == 201
     assert conversation.staff_user_id == test_client.staff_id
