@@ -113,10 +113,11 @@ def test_booking(test_client):
 
     test_client.db.session.add(booking)
     test_client.db.session.flush()
+    booking_id = booking.idx
 
     yield booking
 
-    statuses = TelehealthBookingStatus.query.filter_by(booking_id=booking.idx).all()
+    statuses = TelehealthBookingStatus.query.filter_by(booking_id=booking_id).all()
     for status in statuses:
         db.session.delete(status)
     db.session.delete(booking)
