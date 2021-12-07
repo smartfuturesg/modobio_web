@@ -17,7 +17,7 @@ from dateutil import tz
 from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -1209,7 +1209,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                         db.session.add(data_in)
                         
             #detect if practitoner has scheduled appointments outside of their new availability
-            bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()
+            bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(or_(
+                TelehealthBookings.status == 'Accepted',
+                TelehealthBookings.status == 'Pending'
+                )).all()
             conflicts = []
             for booking in bookings:
                 staff_availability = db.session.execute(

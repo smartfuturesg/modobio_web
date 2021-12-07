@@ -30,6 +30,7 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
+from odyssey.integrations.instamed import cancel_telehealth_appointment
 
 from odyssey.config import Config
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS
@@ -337,7 +338,8 @@ def detect_practitioner_no_show():
     for booking in bookings:
         #change booking status to canceled and refund client
         if config.TESTING:
-            cancel_noshow_appointment(booking.idx)
+            #cancel_noshow_appointment(booking.idx)
+            cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
         else:
             cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
         
