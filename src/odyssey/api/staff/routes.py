@@ -265,7 +265,7 @@ class RecentClients(BaseResource):
     @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
     def get(self):
         """get the 10 most recent clients a staff member has loaded"""
-        return StaffRecentClients.query.filter_by(user_id=token_auth.current_user()[0].user_id).all()
+        return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user()[0].user_id).all()
 
 """ Staff Token Endpoint """
 
@@ -437,7 +437,7 @@ class StaffProfilePage(BaseResource):
                 # Save original to db
                 user_profile_pic = UserProfilePictures()
                 user_profile_pic.original = True
-                user_profile_pic.staff_id = user_id
+                user_profile_pic.staff_user_id = user_id
                 user_profile_pic.image_path = original_s3key
                 user_profile_pic.width = img_w
                 user_profile_pic.height = img_h
@@ -458,7 +458,7 @@ class StaffProfilePage(BaseResource):
                     # save to database
                     w, h = dimension
                     user_profile_pic = UserProfilePictures()
-                    user_profile_pic.staff_id = user_id
+                    user_profile_pic.staff_user_id = user_id
                     user_profile_pic.image_path = _img_s3key
                     user_profile_pic.width = w
                     user_profile_pic.height = h

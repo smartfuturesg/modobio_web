@@ -68,7 +68,7 @@ class StaffRecentClients(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
     """
     User_id of the staff member that loaded the client
 

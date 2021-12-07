@@ -94,10 +94,6 @@ class ApiUser(BaseResource):
         db.session.add(removal_request)
         db.session.flush()
         
-        #Get a list of all tables in database
-        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-                WHERE column_name='user_id';").fetchall()
-        
         #Send notification email to user being deleted and user requesting deletion
         #when FLASK_ENV=production
         if user.email != requester.email:
@@ -120,6 +116,21 @@ class ApiUser(BaseResource):
         fh = FileHandling()
         fh.delete_from_s3(prefix=f'id{user_id:05d}/')
         
+        #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+                WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+        
+        #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+        for table in tableList:
+            tblname = table.table_name
+            #added data_per_client table due to issues with the testing database
+            if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
+                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
+
+        #Get a list of all tables in database that have field: user_id
+        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+                WHERE column_name='user_id';").fetchall()
+
         #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
         for table in tableList:
             tblname = table.table_name
@@ -208,6 +219,7 @@ class NewStaffUser(BaseResource):
                 user.is_staff = True
                 staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
                 db.session.add(staff_profile)
+                user.update(user_info)
 
                 # add new staff subscription information
                 staff_sub = UserSubscriptionsSchema().load({
@@ -384,7 +396,7 @@ class NewClientUser(BaseResource):
                 password= user_info.get('password')
                 del user_info['password']
                 user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
-                
+                user.update(user_info)
                 #Create client account for existing staff member
                 user.is_client = True
                 client_info = ClientInfoSchema().load({'user_id': user.user_id})

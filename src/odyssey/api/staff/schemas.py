@@ -22,7 +22,7 @@ from odyssey.utils.constants import ACCESS_ROLES, STAFF_ROLES, EVENT_AVAILABILIT
 
 class StaffRecentClientsSchema(Schema):
     idx = fields.Integer()
-    user_id = fields.Integer()
+    staff_user_id = fields.Integer()
     client_user_id = fields.Integer(required=True)
     timestamp = fields.DateTime()
 
