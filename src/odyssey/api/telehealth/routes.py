@@ -1372,7 +1372,7 @@ class TelehealthBookingDetailsApi(BaseResource):
         #retrieve all files associated with this booking id
         fh = FileHandling()
 
-        prefix = f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/'
+        prefix = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/'
         res['voice'] = fh.get_presigned_urls(prefix=prefix + 'voice')
         res['images'] = fh.get_presigned_urls(prefix=prefix + 'image')
 
@@ -1430,11 +1430,11 @@ class TelehealthBookingDetailsApi(BaseResource):
 
             #if images key is present, delete existing images
             if 'images' in files:
-                fh.delete_from_s3(prefix=f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/image')
+                fh.delete_from_s3(prefix=f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/image')
 
             #if voice key is present, delete existing recording
             if 'voice' in files:
-                fh.delete_from_s3(prefix=f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/voice')
+                fh.delete_from_s3(prefix=f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/voice')
 
             hex_token = secrets.token_hex(4)
 
@@ -1445,7 +1445,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 # validate file type
                 img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-                s3key = f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
                 fh.save_file_to_s3(img, s3key)
 
                 #exit loop if this is the 4th picture, as that is the max allowed
@@ -1460,7 +1460,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 # validate file type
                 recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
 
-                s3key = f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
                 fh.save_file_to_s3(recording, s3key)
 
                 #exit loop if this is the 1st recording, as that is the max allowed
@@ -1520,7 +1520,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 # validate file type
                 img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
 
-                s3key = f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
+                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
                 fh.save_file_to_s3(img, s3key)
 
                 #exit loop if this is the 4th picture, as that is the max allowed
@@ -1535,7 +1535,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 # validate file type
                 recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
 
-                s3key = f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
+                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
                 fh.save_file_to_s3(recording, s3key)
 
                 #exit loop if this is the 1st recording, as that is the max allowed
@@ -1570,7 +1570,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         #delete s3 resources for this booking id
         fh = FileHandling()
-        fh.delete_from_s3(prefix=f'{booking.client_user_id:05d}/meeting_files/id{booking_id:05d}/')
+        fh.delete_from_s3(prefix=f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/')
 
 @ns.route('/chat-room/access-token')
 @ns.deprecated

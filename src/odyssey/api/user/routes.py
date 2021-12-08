@@ -125,7 +125,11 @@ class ApiUser(BaseResource):
         #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
         for table in tableList:
             tblname = table.table_name
-            db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
+            #Only delete telehealth bookings when the client is being deleted, keep if it's the practitioner
+            if tblname == 'TelehealthBookings':
+                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE client_user_id={user_id};")
+            else:
+                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
 
         #Get a list of all tables in database that have field: user_id
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
