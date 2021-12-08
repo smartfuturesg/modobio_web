@@ -117,6 +117,8 @@ class ApiUser(BaseResource):
         fh.delete_from_s3(prefix=f'id{user_id:05d}/')
         
         #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+        # NOTE - Order matters, must delete these tables before those with user_id 
+        # to avoid problems while deleting payment methods
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
                 WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
         
