@@ -112,14 +112,14 @@ def test_account_delete_request(test_client):
         """)).fetchall()
 
     for table in tables:
-        exists = test_client.db.session.execute(text(
-        """ SELECT EXISTS(
-                SELECT * FROM "{}" WHERE user_id={}
-            );
-        """.format(table.table_name, staff_client_id)))
-
-        result = exists.fetchall().pop()
-        assert result[0] == False
+        if table.table_name == 'StaffRecentClients':
+            exists = test_client.db.session.execute(text(""" SELECT EXISTS( SELECT * FROM "{}" WHERE staff_user_id={});""".format(table.table_name, staff_client_id)))
+            result = exists.fetchall().pop()
+            assert result[0] == False
+        else:
+            exists = test_client.db.session.execute(text(""" SELECT EXISTS( SELECT * FROM "{}" WHERE user_id={});""".format(table.table_name, staff_client_id)))
+            result = exists.fetchall().pop()
+            assert result[0] == False
 
     assert tables
 

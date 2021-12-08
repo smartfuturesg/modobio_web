@@ -123,9 +123,7 @@ class ApiUser(BaseResource):
         #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
         for table in tableList:
             tblname = table.table_name
-            #added data_per_client table due to issues with the testing database
-            if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
-                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
+            db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
 
         #Get a list of all tables in database that have field: user_id
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\

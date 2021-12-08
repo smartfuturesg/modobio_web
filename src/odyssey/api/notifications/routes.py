@@ -337,7 +337,7 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
             staff_id = content['data']['staff_id']
             _prefix = f'id{staff_id:05d}/staff_profile_picture'
             # Verify the staff member has a profile picture
-            profile_pictures_exist = UserProfilePictures.query.filter_by(staff_id=staff_id).all()
+            profile_pictures_exist = UserProfilePictures.query.filter_by(staff_user_id=staff_id).all()
             if profile_pictures_exist:
                 fh = FileHandling()
                 urls = fh.get_presigned_urls(prefix=_prefix)
