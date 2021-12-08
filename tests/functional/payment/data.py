@@ -84,9 +84,13 @@ def test_booking(test_client):
 
     #find UTC time window that is closest to current time plus 1 hour
     target_time = datetime.now(timezone.utc) + timedelta(hours=1)
-    target_time_id = LookupBookingTimeIncrements.query                \
-        .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
-        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
+    if target_time.minute % 5 != 0:
+        minutes = target_time.minute + 5 - target_time.minute % 5
+        target_time = target_time.replace(minute=minutes, second=0, microsecond=0)
+    
+    # updated finding the time window index to avoid getting more than one option.
+    target_time_id = LookupBookingTimeIncrements.query\
+        .filter(LookupBookingTimeIncrements.start_time == target_time.time()).one_or_none().idx
 
     #prevent a time slot that would loop to the next day
     if target_time_id >= 285:
