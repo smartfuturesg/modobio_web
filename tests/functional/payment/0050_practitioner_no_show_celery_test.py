@@ -17,12 +17,10 @@ def test_no_show_scan(test_client, test_booking):
     target_time = datetime.now(timezone.utc)
     if target_time.minute % 5 != 0:
         minutes = target_time.minute + 5 - target_time.minute % 5
-        if minutes > 60:
-            minutes = 0
         target_time = target_time.replace(minute=minutes, second=0, microsecond=0)
-        
-    target_time_window = LookupBookingTimeIncrements.query \
-        .filter(LookupBookingTimeIncrements.start_time == target_time.time()).first().idx
+    target_time_window = LookupBookingTimeIncrements.query.filter(LookupBookingTimeIncrements.start_time == target_time.time()).first().idx
+        .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
+        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
     
     if target_time_window <= 1:
         #if it is 12:00 or 12:05, we have to adjust to target the previous date at 11:50 and 11:55 respectively
