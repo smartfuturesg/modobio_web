@@ -103,7 +103,6 @@ class ClientInfoSchema(BaseSchema):
     race_information = fields.Nested(ClientRaceAndEthnicitySchema(many=True))
     profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
     territory_id = fields.Integer()
-    state_id = fields.Integer()
     country = fields.String(dump_only=True)
     territory = fields.String(dump_only=True)
     territory_abbreviation = fields.String(dump_only=True)
@@ -118,7 +117,7 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
         exclude = ('created_at', 'updated_at', 'user_id')
         dump_only = ( 'membersince', 'membersince', 'height', 'weight', 'waist_size')
-    
+    state_id = fields.Integer() #TODO remove when FE sends territory_id instead
     dob = fields.Date()
     primary_goal = fields.String()
     race_information = fields.Nested(ClientRaceAndEthnicityEditSchema)

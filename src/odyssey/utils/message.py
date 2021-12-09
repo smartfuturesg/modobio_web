@@ -167,10 +167,6 @@ def send_email_password_reset(recipient, reset_token, url_scheme):
 
     reset_password_url = PASSWORD_RESET_URL.format(url_scheme,reset_token)
 
-    # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([recipient.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        recipient = "success@simulator.amazonses.com"
-
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = (f'Hello {recipient.firstname},\r\n' +
                 f'We received a request to reset the account password associated with {recipient.email}.\n'
@@ -191,7 +187,11 @@ def send_email_password_reset(recipient, reset_token, url_scheme):
         BODY_HTML = BODY_HTML.replace('[user-email]', recipient.email)
         BODY_HTML = BODY_HTML.replace('[password-reset-link]', reset_password_url) 
 
-    send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+    # route emails to AWS mailbox simulator when in dev environment
+    if current_app.config['DEV'] and not any([recipient.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
+        send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+    else:
+        send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
 
 def send_email_delete_account(recipient, deleted_account):
     """

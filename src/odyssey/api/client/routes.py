@@ -397,6 +397,13 @@ class Client(BaseResource):
                 dob = client_info['dob']
                 del client_info['dob']
                 user_data.update({'dob':dob})
+                
+            # handle state_id field: 
+            #  ClientInfo.state_id removed and replaced with territory_id as of 12.8.21 
+            #  however the FE still expects to send it in this request
+            if 'state_id' in client_info:
+                client_info['territory_id'] = client_info['state_id']
+                del client_info['state_id']
 
             client_data.update(client_info)
         if request.parsed_obj['user_info']:
