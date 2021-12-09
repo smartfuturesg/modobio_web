@@ -323,6 +323,12 @@ def detect_practitioner_no_show():
     """
 
     target_time = datetime.now(timezone.utc)
+
+    if target_time.minute % 5 != 0:
+        minutes = target_time.minute + 5 - target_time.minute % 5
+        target_time = target_time.replace(minute=minutes, second=0, microsecond=0)
+    target_time_window = LookupBookingTimeIncrements.query.filter(LookupBookingTimeIncrements.start_time == target_time.time()).one_or_none().idx
+
     target_time_window = LookupBookingTimeIncrements.query                    \
         .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
         LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
