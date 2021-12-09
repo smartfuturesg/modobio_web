@@ -15,10 +15,7 @@ def test_no_show_scan(test_client, test_booking):
     #set booking to 10 mins ago
     booking_id = test_booking.idx
     target_time = datetime.now(timezone.utc)
-    if target_time.minute % 5 != 0:
-        minutes = target_time.minute + 5 - target_time.minute % 5
-        target_time = target_time.replace(minute=minutes, second=0, microsecond=0)
-    target_time_window = LookupBookingTimeIncrements.query.filter(LookupBookingTimeIncrements.start_time == target_time.time()).first().idx
+    target_time_window = LookupBookingTimeIncrements.query                    \
         .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
         LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
     
