@@ -293,7 +293,7 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
     and from bookings PUT to cancel a booking
 
     args:
-    booking: a booking object for the telehealth appointment to be cancelled
+    booking: a booking object for the telehealth appointment to be canceled
     refund: boolean denoting whether this booking should be refunded, should only happen when called
     due to practitioner cancellation or practitioner no-show
     reason: reason for the cancellation, either (Practitioner Cancellation, Practitioner No-Show, or Failed Payment)

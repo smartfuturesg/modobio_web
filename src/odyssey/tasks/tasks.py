@@ -19,7 +19,7 @@ from odyssey.api.notifications.models import Notifications
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
 from odyssey.api.user.models import User
-from odyssey.integrations.instamed import Instamed
+from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.utils.file_handling import FileHandling
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils.telehealth import complete_booking
@@ -330,6 +330,16 @@ def charge_telehealth_appointment(booking_id):
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
     Instamed().charge_user(booking)
+    
+@celery.task()
+def cancel_noshow_appointment(booking_id):
+    """
+    This task will cancel a booking in which the practitioner did not show up within 10 minutes of
+    the start time. It will then refund the user.
+    """
+    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+    
+    cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):

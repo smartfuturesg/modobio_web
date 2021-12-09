@@ -21,7 +21,8 @@ from odyssey.tasks.tasks import (
     upcoming_appointment_care_team_permissions, 
     upcoming_appointment_notification_2hr, 
     charge_telehealth_appointment, 
-    store_telehealth_transcript
+    store_telehealth_transcript,
+    cancel_noshow_appointment
 )
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
@@ -29,6 +30,7 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User
+from odyssey.integrations.instamed import cancel_telehealth_appointment
 
 from odyssey.config import Config
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS
@@ -311,6 +313,36 @@ def find_chargable_bookings():
 
     for booking in bookings:
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
+        
+@celery.task()
+def detect_practitioner_no_show():
+    """
+    This task will scan the TelehealthBookings table for bookings where the practitioner does not
+    join the call on time. If a practitioner does not start a telehealth call within 10 minutes of
+    the scheduled time, the client will be refunded for the booking.
+    """
+
+    target_time = datetime.now(timezone.utc)
+    target_time_window = LookupBookingTimeIncrements.query                    \
+        .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
+        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
+    if target_time_window <= 1:
+        #if it is 12:00 or 12:05, we have to adjust to target the previous date at 11:50 and 11:55 respectively
+        target_time = target_time - timedelta(hours=24)
+        target_time_window = 289 + target_time_window
+
+    bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
+                                               TelehealthBookings.charged == True,
+                                               TelehealthBookings.target_date_utc == target_time.date(),
+                                               TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2)
+    for booking in bookings:
+        #change booking status to canceled and refund client
+        if config.TESTING:
+            #cancel_noshow_appointment(booking.idx)
+            cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+        else:
+            cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
+        
 
 
 celery.conf.beat_schedule = {
@@ -353,5 +385,10 @@ celery.conf.beat_schedule = {
     'appointment_transcript_store_scheduler': {
         'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
         'schedule': crontab(hour=0, minute=10)
+    },
+    #practitioner no show
+    'detect_practitioner_no_show': {
+        'task': 'odyssey.tasks.periodic.detect_practitioner_no_show',
+        'schedule': crontab(hour=0, minute=5)
     }
 }

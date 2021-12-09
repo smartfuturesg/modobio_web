@@ -17,7 +17,7 @@ from dateutil import tz
 from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -1209,8 +1209,12 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                         db.session.add(data_in)
                         
             #detect if practitoner has scheduled appointments outside of their new availability
-            bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()
+            bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(or_(
+                TelehealthBookings.status == 'Accepted',
+                TelehealthBookings.status == 'Pending'
+                )).all()
             conflicts = []
+            time_inc = LookupBookingTimeIncrements.query.all()
             for booking in bookings:
                 staff_availability = db.session.execute(
                     select(TelehealthStaffAvailability).
@@ -1226,8 +1230,28 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                 requested_indices = {req_idx for req_idx in range(booking.booking_window_id_start_time_utc, booking.booking_window_id_end_time_utc + 1)}
                 if not requested_indices.issubset(available_indices):
                     #booking is outside of the bounds of the new availability
-                    conflicts.append(booking)
-        
+                    start_time_utc = datetime.combine(
+                        booking.target_date_utc,
+                        time_inc[booking.booking_window_id_start_time_utc-1].start_time,
+                        tzinfo=tz.UTC)
+
+                    client = {**booking.client.__dict__}
+                    practitioner = {**booking.practitioner.__dict__}
+                    
+                    conflicts.append({
+                        'booking_id': booking.idx,
+                        'target_date_utc': booking.target_date_utc,
+                        'start_time_utc': start_time_utc.time(),
+                        'status': booking.status,
+                        'profession_type': booking.profession_type,
+                        'client_location_id': booking.client_location_id,
+                        'payment_method_id': booking.payment_method_id,
+                        'status_history': booking.status_history,
+                        'client': client,
+                        'consult_rate': booking.consult_rate,
+                        'charged': booking.charged
+                    })
+                            
         db.session.commit()
         return {'conflicts': conflicts}
 

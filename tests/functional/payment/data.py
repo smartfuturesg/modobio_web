@@ -118,6 +118,6 @@ def test_booking(test_client):
 
     statuses = TelehealthBookingStatus.query.filter_by(booking_id=booking.idx).all()
     for status in statuses:
-        db.session.delete(status)
-    db.session.delete(booking)
-    db.session.commit()
+        test_client.db.session.delete(status)
+    test_client.db.session.delete(booking)
+    test_client.db.session.commit()
