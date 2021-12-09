@@ -330,7 +330,7 @@ def detect_practitioner_no_show():
     if target_time_window <= 2:
         #if it is 12:00 or 12:05, we have to adjust to target the previous date at 11:50 and 11:55 respectively
         target_time = target_time - timedelta(hours=24)
-        target_time_window = 286 + target_time_window
+        target_time_window = 288 + target_time_window
     logger.info(f'no show task time window: {target_time_window}')
 
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 

@@ -533,7 +533,7 @@ def date_validator(date_string: str):
     except TypeError:
         raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
 
-def get_time_index(target_time):
+def get_time_index(target_time:datetime()):
     """
     This function will return the index of the time window corresponding to the provided target_time 
     as defined in the LookupBookingTimeIncrements table.
