@@ -51,7 +51,7 @@ def test_post_staff_office(test_client):
     assert response.json['country'] == 'USA'
     assert response.json['city'] == 'Miami'
     assert response.json['phone'] == '4804389574'
-    assert response.json['state_id'] == 9
+    assert response.json['state_id'] == 1
 
     # # There is a Database listener waiting for both medical credentials and staff office.
     # # Once those are done, the system will automatically try to onboard the practitioner.
@@ -121,7 +121,7 @@ def test_put_staff_profile(test_client):
     assert response.json['country'] == 'USA'
     assert response.json['city'] == 'Tampa'
     assert response.json['phone'] == '4804389575'
-    assert response.json['state_id'] == 9
+    assert response.json['state_id'] == 1
 
 def test_post_2_ds_practitioner_create(test_client):
     payload = {}

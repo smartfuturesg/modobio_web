@@ -1,15 +1,13 @@
 import calendar
 import copy
-import json
 import logging
 
-from datetime import date, time, datetime, timedelta, timezone
+from datetime import time, datetime, timedelta
 
 from dateutil import tz
 from dateutil.relativedelta import relativedelta
-from dateutil.rrule import YEARLY, MONTHLY, WEEKLY, DAILY, rrule
-from flask import request, current_app, Response
-from flask.json import dumps
+from dateutil.rrule import MONTHLY, WEEKLY, DAILY, rrule
+from flask import request,  Response
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from PIL import Image
@@ -19,8 +17,7 @@ from odyssey import db
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
     LookupCountriesOfOperations,
-    LookupRoles,
-    LookupUSStates)
+    LookupRoles)
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
     StaffRoles,
@@ -45,7 +42,7 @@ from odyssey.api.user.models import (
     UserLogin,
     UserTokenHistory,
     UserProfilePictures)
-from odyssey.api.user.schemas import UserSchema, StaffInfoSchema
+from odyssey.api.user.schemas import UserSchema
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
@@ -950,26 +947,22 @@ class StaffOfficesRoute(BaseResource):
         """
         Submit office data for a professional.
         """
-        territory = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
-        if not territory:
-            raise BadRequest(f'Territory {request.parsed_obj.territory_id} not found.')
-
-        state = LookupUSStates.query.filter_by(idx=request.parsed_obj.state_id).one_or_none()
-        if not state:
-            raise BadRequest(f'State {request.parsed_obj.state_id} not found.')
-
+        state = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
+       
+        if not state:    
+            raise BadRequest(f'State not found.')
+        
         request.parsed_obj.user_id = user_id
-
         db.session.add(request.parsed_obj)
         db.session.commit()
 
         #fill in country name for the response
         res = request.get_json()
-        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
-        res['territory'] = territory.sub_territory
-        res['territory_abbreviation'] = territory.sub_territory_abbreviation
-        res['state'] = state.state
-        res['state_abbreviation'] = state.abbreviation
+        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=state.country_id).one_or_none().country
+        res['territory'] = state.sub_territory
+        res['territory_abbreviation'] = state.sub_territory_abbreviation
+        res['state'] =  res['territory']
+        res['state_abbreviation'] = res['territory_abbreviation']
 
         return res
 
@@ -982,24 +975,21 @@ class StaffOfficesRoute(BaseResource):
         """
         office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
 
-        territory = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
-        if not territory:
-            raise BadRequest(f'Territory {request.parsed_obj.territory_id} not found.')
-
-        state = LookupUSStates.query.filter_by(idx=request.parsed_obj.state_id).one_or_none()
-        if not state:
-            raise BadRequest(f'State {request.parsed_obj.state_id} not found.')
+        state = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id).one_or_none()
+       
+        if not state:    
+            raise BadRequest(f'State not found.')
 
         office.update(request.json)
         db.session.commit()
 
         #fill in country name for the response
         res = request.json
-        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=territory.country_id).one_or_none().country
-        res['territory'] = territory.sub_territory
-        res['territory_abbreviation'] = territory.sub_territory_abbreviation
-        res['state'] = state.state
-        res['state_abbreviation'] = state.abbreviation
+        res['country'] = LookupCountriesOfOperations.query.filter_by(idx=state.country_id).one_or_none().country
+        res['territory'] = state.sub_territory
+        res['territory_abbreviation'] = state.sub_territory_abbreviation
+        res['state'] =  res['territory']
+        res['state_abbreviation'] = res['territory_abbreviation']
 
         return res
 

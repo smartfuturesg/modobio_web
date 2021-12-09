@@ -11,7 +11,6 @@ from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
 from odyssey.api.dosespot.models import (
     DoseSpotPractitionerID,
-    DoseSpotPatientID,
     DoseSpotProxyID
 )
 from odyssey.api.dosespot.schemas import (
@@ -19,16 +18,10 @@ from odyssey.api.dosespot.schemas import (
     DoseSpotCreatePatientSchema,
     DoseSpotCreateProxyUserSchema
 )
-from odyssey.api.lookup.models import (
-    LookupTerritoriesOfOperations,
-    LookupUSStates,
-)
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.staff.models import (
-    StaffOffices
-)
+from odyssey.api.staff.models import StaffOffices
 from odyssey.api.user.models import User
-from odyssey.utils.auth import token_auth
 
 def generate_encrypted_clinic_id(clinic_key,char_len=32):
     """
@@ -100,7 +93,7 @@ def onboard_practitioner(user_id):
     """
 
     user = User.query.filter_by(user_id=user_id).one_or_none()
-
+    # reqs: being a staff. office location, verified npi #
     if not user.is_staff:
         raise BadRequest('User must be a practitioner')
 
@@ -141,7 +134,7 @@ def onboard_practitioner(user_id):
             res_json = res.json()
             raise BadRequest('DoseSpot returned the following error: {res_json}.')
         
-        state = LookupUSStates.query.filter_by(idx=staff_office.state_id).one_or_none()
+        state = LookupTerritoriesOfOperations.query.filter_by(idx=staff_office.territory_id).one_or_none()
         
         # Phone Type
         # 2 - Cell
@@ -161,7 +154,7 @@ def onboard_practitioner(user_id):
                 'DateOfBirth': user.dob,
                 'Address1': staff_office.street,
                 'City':staff_office.city,
-                'State':state.abbreviation,
+                'State':state.sub_territory_abbreviation,
                 'ZipCode':staff_office.zipcode,
                 'PrimaryPhone': staff_office.phone,
                 'PrimaryPhoneType': phone_type,
@@ -237,7 +230,7 @@ def onboard_patient(patient_id:int,practitioner_id:int):
         gender = 2
     else:
         gender = 3
-    state = LookupUSStates.query.filter_by(idx=user.client_info.state_id).one_or_none()
+    state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
     # Phone Type
     # 2 - Cell
     phone_type = 2
@@ -247,7 +240,7 @@ def onboard_patient(patient_id:int,practitioner_id:int):
             'Gender': gender,
             'Address1': user.client_info.street,
             'City':user.client_info.city,
-            'State':state.abbreviation,
+            'State':state.sub_territory_abbreviation,
             'ZipCode':user.client_info.zipcode,
             'PrimaryPhone': user.phone_number,
             'PrimaryPhoneType': phone_type,

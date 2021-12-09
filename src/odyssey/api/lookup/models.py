@@ -31,32 +31,6 @@ class LookupNotificationSeverity(BaseModelWithIdx):
     :type: str
     """
 
-class LookupUSStates(BaseModelWithIdx):
-    """
-        Lookup table containing US States
-    """
-
-    state = db.Column(db.String)
-    """
-    State full name (Arizona)
-
-    :type: str
-    """
-
-    abbreviation = db.Column(db.String(2))
-    """
-    State abbreviation (AZ)
-    
-    :type: str
-    """
-
-    territory_id = db.Column(db.Integer,  db.ForeignKey('LookupTerritoriesOfOperations.idx'))
-    """
-    Territory ID foreign key
-
-    :type: int, fk: LookupTerritoriesOfOperations.idx
-    """
-
 class LookupTermsAndConditions(BaseModelWithIdx):
     """ 
         Holds the documententation for the terms and conditions
@@ -170,6 +144,13 @@ class LookupTerritoriesOfOperations(BaseModelWithIdx):
     Abbreviation of sub_territory. Two characters for US states.
     
     :type: str
+    """
+
+    active = db.Column(db.Boolean)
+    """
+    True if the territory is operational on the modobio platform
+
+    :type: bool
     """
 
 class LookupClientBookingWindow(BaseModelWithIdx):

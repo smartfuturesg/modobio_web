@@ -29,7 +29,6 @@ from odyssey.api.lookup.models import (
     LookupMedicalSymptoms,
     LookupOrganizations,
     LookupCurrencies,
-    LookupUSStates,
     LookupNotificationSeverity
 )
 from odyssey.utils.base.schemas import BaseSchema
@@ -43,10 +42,12 @@ class LookupNotificationSeverityOutputSchema(Schema):
     total_items = fields.Integer()
 
 class LookupUSStatesSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = LookupUSStates
+    
     territory_id = fields.Integer(missing=None)
-
+    idx = fields.Integer(missing=None)
+    state = fields.String()
+    abbreviation = fields.String()
+    active = fields.Bool()
 class LookupUSStatesOutputSchema(Schema):
     items = fields.Nested(LookupUSStatesSchema(many=True))
     total_items = fields.Integer()

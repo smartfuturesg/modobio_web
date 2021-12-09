@@ -6,7 +6,6 @@ from flask import current_app
 from flask_accepts import responds
 from flask_restx import Namespace
 
-from odyssey import db
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
      LookupBookingTimeIncrements,
@@ -32,7 +31,6 @@ from odyssey.api.lookup.models import (
      LookupMedicalSymptoms,
      LookupOrganizations,
      LookupCurrencies,
-     LookupUSStates,
      LookupNotificationSeverity
      )
 from odyssey.api.lookup.schemas import (
@@ -66,7 +64,6 @@ from odyssey.api.lookup.schemas import (
     LookupNotificationSeverityOutputSchema
 )
 from odyssey.utils.auth import token_auth
-from odyssey.utils.base.models import BaseModelWithIdx
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_drink_existence
 
@@ -90,12 +87,17 @@ class LookupNotificationSeverityResource(BaseResource):
 @ns.route('/states/')
 class LookupUSStatesResource(BaseResource):
     """
-        Returns United States' states and their abbreviations
+    Returns United States' states and their abbreviations
     """
     @responds(schema=LookupUSStatesOutputSchema,status_code=200,api=ns)
     def get(self):
-        states = LookupUSStates.query.all()
-        payload = {'items': states,
+        states = LookupTerritoriesOfOperations.query.all()
+        payload = {'items': [ 
+                        {'abbreviation': state.sub_territory_abbreviation,
+                        'state': state.sub_territory,
+                        'territory_id': state.idx,
+                        'idx': state.idx ,
+                        'active': state.active} for state in states ],
                    'total_items': len(states)}
 
         return payload
