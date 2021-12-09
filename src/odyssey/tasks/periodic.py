@@ -297,8 +297,10 @@ def find_chargable_bookings():
     payment method saved to the booking.
     """
     #get all bookings that are sheduled <24 hours away and have not been charged yet
+    logger.info('deploying charge booking task')
     target_time = datetime.now(timezone.utc) + timedelta(hours=24)
     target_time_window = get_time_index(target_time)
+    logger.info(f'charge bookings task time window: {target_time_window}')
     
     bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False, TelehealthBookings.status == 'Accepted') \
         .filter(or_(
@@ -311,7 +313,9 @@ def find_chargable_bookings():
         return bookings
 
     for booking in bookings:
+        logger.info(f'chargable booking detected with id {booking.idx}')
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
+    logger.info('charge booking task completed')
         
 @celery.task()
 def detect_practitioner_no_show():
@@ -320,24 +324,29 @@ def detect_practitioner_no_show():
     join the call on time. If a practitioner does not start a telehealth call within 10 minutes of
     the scheduled time, the client will be refunded for the booking.
     """
+    logger.info("deploying practitioner no show task")
     target_time = datetime.now(timezone.utc)
     target_time_window = get_time_index(target_time)
     if target_time_window <= 2:
         #if it is 12:00 or 12:05, we have to adjust to target the previous date at 11:50 and 11:55 respectively
         target_time = target_time - timedelta(hours=24)
         target_time_window = 286 + target_time_window
+    logger.info(f'no show task time window: {target_time_window}')
 
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
                                                TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
                                                TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2)
+
     for booking in bookings:
+        logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client
         if config.TESTING:
             #cancel_noshow_appointment(booking.idx)
             cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
         else:
             cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
+    logger.info('no show task completed')
         
 
 
