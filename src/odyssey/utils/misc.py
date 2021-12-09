@@ -13,7 +13,7 @@ import statistics
 import textwrap
 import typing as t
 import uuid
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timezone
 from flask import current_app, request
 import flask.json
 from werkzeug.exceptions import (
@@ -28,6 +28,7 @@ from odyssey.api.doctor.models import (
     MedicalConditions,
     MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
 from odyssey.api.lookup.models import LookupDrinks
 from odyssey.utils.constants import ALPHANUMERIC
@@ -532,4 +533,15 @@ def date_validator(date_string: str):
     except TypeError:
         raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
 
-            
+def get_time_index(target_time: datetime):
+    """
+    This function will return the index of the time window corresponding to the provided target_time 
+    as defined in the LookupBookingTimeIncrements table.
+    
+    In order to do this, we query to find the index where the current time falls in the range of
+    start time <= current time < end time
+    """
+    return LookupBookingTimeIncrements.query.filter(
+        LookupBookingTimeIncrements.start_time <= target_time.time(),
+        LookupBookingTimeIncrements.end_time > target_time.time()
+    ).one_or_none().idx
