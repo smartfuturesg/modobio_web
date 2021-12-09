@@ -690,30 +690,30 @@ class UserProfilePictures(BaseModelWithIdx):
     Stores S3 keys to profile pictures saved in aws s3
 
     """
-    __table_args__ = (CheckConstraint('(client_id IS NULL) != (staff_id IS NULL)'),)
+    __table_args__ = (CheckConstraint('(client__user_id IS NULL) != (staff_user_id IS NULL)'),)
 
-    client_id= db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"))
+    client_user_id= db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"))
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
 
-    client_info = db.relationship('ClientInfo', back_populates='profile_pictures', foreign_keys=[client_id])
+    client_info = db.relationship('ClientInfo', back_populates='profile_pictures', foreign_keys=[client_user_id])
     """
     Many to one relationship with ClientInfo
 
     :type: :class:`ClientInfo` instance
     """
 
-    staff_id= db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete="CASCADE"))
+    staff_user_id= db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete="CASCADE"))
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
 
-    staff_profile = db.relationship('StaffProfile', back_populates='profile_pictures', foreign_keys=[staff_id])
+    staff_profile = db.relationship('StaffProfile', back_populates='profile_pictures', foreign_keys=[staff_user_id])
     """
     Many to one relationship with StaffProfile
 

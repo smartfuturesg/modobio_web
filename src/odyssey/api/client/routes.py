@@ -218,7 +218,7 @@ class ClientProfilePicture(BaseResource):
         # Save original to db
         user_profile_pic = UserProfilePictures()
         user_profile_pic.original = True
-        user_profile_pic.client_id = user_id
+        user_profile_pic.client_user_id = user_id
         user_profile_pic.image_path = original_s3key
         user_profile_pic.width = img_w
         user_profile_pic.height = img_h
@@ -237,7 +237,7 @@ class ClientProfilePicture(BaseResource):
             # save to database
             w, h = dimension
             user_profile_pic = UserProfilePictures()
-            user_profile_pic.client_id = user_id
+            user_profile_pic.client_user_id = user_id
             user_profile_pic.image_path = _img_s3key
             user_profile_pic.width = w
             user_profile_pic.height = h
@@ -291,7 +291,7 @@ class Client(BaseResource):
         #if this request was made by a staff member, update their recent clients list
         if staff_user_id != user_id:
             #check if supplied client is already in staff recent clients
-            client_exists = StaffRecentClients.query.filter_by(user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
+            client_exists = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).filter_by(client_user_id=user_id).one_or_none()
             if client_exists:
                 #update timestamp
                 client_exists.timestamp = datetime.now()
@@ -299,12 +299,12 @@ class Client(BaseResource):
                 db.session.commit()
             else:
                 #enter new recent client information
-                recent_client_schema = StaffRecentClientsSchema().load({'user_id': staff_user_id, 'client_user_id': user_id})
+                recent_client_schema = StaffRecentClientsSchema().load({'staff_user_id': staff_user_id, 'client_user_id': user_id})
                 db.session.add(recent_client_schema)
                 db.session.flush()
 
                 #check if staff member has more than 10 recent clients
-                staff_recent_searches = StaffRecentClients.query.filter_by(user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
+                staff_recent_searches = StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).order_by(StaffRecentClients.timestamp.asc()).all()
                 if len(staff_recent_searches) > 10:
                     #remove the oldest client in the list
                     db.session.delete(staff_recent_searches[0])
@@ -1432,7 +1432,7 @@ class UserClinicalCareTeamApi(BaseResource):
             profile_pic_path = db.session.execute(
                 select(
                     UserProfilePictures.image_path
-                ).where(UserProfilePictures.client_id == client_user.user_id, UserProfilePictures.width == 64)
+                ).where(UserProfilePictures.client_user_id == client_user.user_id, UserProfilePictures.width == 64)
                 ).scalars().one_or_none()                
             profile_pic = (fh.get_presigned_url(file_path=profile_pic_path) if profile_pic_path else None)
             res.append({'client_user_id': client_user.user_id, 

@@ -499,7 +499,7 @@ class Wheel:
                 # Save original to db
                 user_profile_pic = UserProfilePictures()
                 user_profile_pic.original = True
-                user_profile_pic.staff_id = user.user_id
+                user_profile_pic.staff_user_id = user.user_id
                 user_profile_pic.image_path = original_s3key
                 user_profile_pic.width = img_w
                 user_profile_pic.height = img_h
@@ -520,7 +520,7 @@ class Wheel:
                     # save to database
                     w, h = dimension
                     user_profile_pic = UserProfilePictures()
-                    user_profile_pic.staff_id = user.user_id
+                    user_profile_pic.staff_user_id = user.user_id
                     user_profile_pic.image_path = _img_s3key
                     user_profile_pic.width = w
                     user_profile_pic.height = h
