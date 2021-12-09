@@ -34,6 +34,7 @@ from odyssey.integrations.instamed import cancel_telehealth_appointment
 
 from odyssey.config import Config
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS
+from odyssey.utils.misc import get_time_index
 
 logger = get_task_logger(__name__)
 
@@ -297,14 +298,8 @@ def find_chargable_bookings():
     """
     #get all bookings that are sheduled <24 hours away and have not been charged yet
     target_time = datetime.now(timezone.utc) + timedelta(hours=24)
-    # round up the minute to the nearest 5 min interval
-    if target_time.minute % 5 != 0:
-        minutes = target_time.minute + 5 - target_time.minute % 5
-        target_time = target_time.replace(minute=minutes, second=0, microsecond=0)
+    target_time_window = get_time_index(target_time)
     
-    # updated finding the time window index to avoid getting more than one option.
-    target_time_window = LookupBookingTimeIncrements.query\
-        .filter(LookupBookingTimeIncrements.start_time == target_time.time()).one_or_none().idx
     bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False, TelehealthBookings.status == 'Accepted') \
         .filter(or_(
             and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.now(timezone.utc).date()),
@@ -325,15 +320,12 @@ def detect_practitioner_no_show():
     join the call on time. If a practitioner does not start a telehealth call within 10 minutes of
     the scheduled time, the client will be refunded for the booking.
     """
-
     target_time = datetime.now(timezone.utc)
-    target_time_window = LookupBookingTimeIncrements.query                    \
-        .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
-        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
-    if target_time_window <= 1:
+    target_time_window = get_time_index(target_time)
+    if target_time_window <= 2:
         #if it is 12:00 or 12:05, we have to adjust to target the previous date at 11:50 and 11:55 respectively
         target_time = target_time - timedelta(hours=24)
-        target_time_window = 289 + target_time_window
+        target_time_window = 286 + target_time_window
 
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
                                                TelehealthBookings.charged == True,

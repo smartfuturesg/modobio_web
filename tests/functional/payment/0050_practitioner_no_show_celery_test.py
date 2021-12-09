@@ -7,6 +7,7 @@ from odyssey.api.payment.models import PaymentHistory
 from odyssey.api.telehealth.models import TelehealthBookings
 
 from odyssey.tasks.periodic import detect_practitioner_no_show
+from odyssey.utils.misc import get_time_index
 
 from .data import test_booking
 from odyssey import db
@@ -15,14 +16,11 @@ def test_no_show_scan(test_client, test_booking):
     #set booking to 10 mins ago
     booking_id = test_booking.idx
     target_time = datetime.now(timezone.utc)
-    target_time_window = LookupBookingTimeIncrements.query                    \
-        .filter(LookupBookingTimeIncrements.start_time <= target_time.time(), \
-        LookupBookingTimeIncrements.end_time >= target_time.time()).one_or_none().idx
-    
-    if target_time_window <= 1:
+    target_time_window = get_time_index(target_time)
+    if target_time_window <= 2:
         #if it is 12:00 or 12:05, we have to adjust to target the previous date at 11:50 and 11:55 respectively
         target_time = target_time - timedelta(hours=24)
-        target_time_window = 289 + target_time_window
+        target_time_window = 286 + target_time_window
     
     target_time_window -= 2
     test_booking.booking_window_id_start_time_utc = target_time_window
