@@ -379,12 +379,12 @@ celery.conf.beat_schedule = {
     #temporary member cleanup
     'cleanup_temporary_care_team': {
         'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
-        'schedule': crontab(hour=1, minute=0)
+        'schedule': crontab(minute='0', hour='*/1')
     },
     #telehealth appointment charging
     'find_chargable_bookings': {
         'task': 'odyssey.tasks.periodic.find_chargable_bookings',
-        'schedule': crontab(hour=0, minute=5)
+        'schedule': crontab(minute='*/5')
     },
     # search for telehealth transcripts that need to be stored, deploy those storage tasks
     'appointment_transcript_store_scheduler': {
@@ -394,6 +394,6 @@ celery.conf.beat_schedule = {
     #practitioner no show
     'detect_practitioner_no_show': {
         'task': 'odyssey.tasks.periodic.detect_practitioner_no_show',
-        'schedule': crontab(hour=0, minute=5)
+        'schedule': crontab(minute='*/5')
     }
 }
