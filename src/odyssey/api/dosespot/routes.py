@@ -37,8 +37,8 @@ from odyssey.utils.dosespot import (
     get_access_token,
     lookup_ds_users,
     onboard_patient,
-    onboard_practitioner,
-    onboard_proxy_user)
+    onboard_practitioner
+)
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
 
@@ -61,12 +61,10 @@ class DoseSpotAllergies(BaseResource):
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
 
         # PROXY_USER
-        proxy_user = DoseSpotProxyID.query.one_or_none()
-        if not proxy_user:
-            proxy_user = onboard_proxy_user()        
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
+        proxy_ds_user_id = str(current_app.config['DOSESPOT_PROXY_USER_ID'])  
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22], clinic_api_key, proxy_ds_user_id)
 
-        res = get_access_token(modobio_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),encrypted_user_id)
+        res = get_access_token(modobio_id,encrypted_clinic_id, proxy_ds_user_id, encrypted_user_id)
         res_json = res.json()
         if res.ok:
             access_token = res_json['access_token']
@@ -142,13 +140,10 @@ class DoseSpotPatientCreation(BaseResource):
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
 
         # PROXY_USER
-        # proxy_user = str(232322)
-        proxy_user = DoseSpotProxyID.query.one_or_none()
-        if not proxy_user:
-            proxy_user = onboard_proxy_user()        
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
+        proxy_ds_user_id = str(current_app.config['DOSESPOT_PROXY_USER_ID'])         
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key, proxy_ds_user_id)
 
-        res = get_access_token(modobio_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),encrypted_user_id)
+        res = get_access_token(modobio_id,encrypted_clinic_id, proxy_ds_user_id,encrypted_user_id)
         res_json = res.json()
         if res.ok:
             access_token = res_json['access_token']
@@ -382,13 +377,11 @@ class DoseSpotPatientPharmacies(BaseResource):
         # generating keys for ADMIN
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
 
-        proxy_user = DoseSpotProxyID.query.one_or_none()
-        if not proxy_user:
-            proxy_user = onboard_proxy_user()
-        
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
+        proxy_ds_user_id = str(current_app.config['DOSESPOT_PROXY_USER_ID'])         
+        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key, proxy_ds_user_id)
 
-        res = get_access_token(modobio_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),encrypted_user_id)
+        res = get_access_token(modobio_id,encrypted_clinic_id, proxy_ds_user_id,encrypted_user_id)
+
         res_json = res.json()
         if res.ok:
             access_token = res_json['access_token']
@@ -435,7 +428,8 @@ class DoseSpotPatientPharmacies(BaseResource):
 
         encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
         encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
-        res = get_access_token(modobio_clinic_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+        
+        res = get_access_token(modobio_clinic_id, encrypted_clinic_id, admin_id, encrypted_user_id)
         res_json = res.json()
         if res.ok:
             access_token = res_json['access_token']
@@ -443,13 +437,12 @@ class DoseSpotPatientPharmacies(BaseResource):
         else:
             raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
         
-        proxy_user = DoseSpotProxyID.query.one_or_none()
-        if not proxy_user:
-            proxy_user = onboard_proxy_user()        
+                      
+        proxy_ds_user_id = str(current_app.config['DOSESPOT_PROXY_USER_ID'])  
         
         clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-        proxy_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(proxy_user.ds_proxy_id))
-        proxy_res = get_access_token(modobio_clinic_id,encrypted_clinic_id,str(proxy_user.ds_proxy_id),proxy_encrypted_user_id)
+        proxy_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22], clinic_api_key, proxy_ds_user_id)
+        proxy_res = get_access_token(modobio_clinic_id, encrypted_clinic_id, proxy_ds_user_id, proxy_encrypted_user_id)
         proxy_res_json = proxy_res.json()
         if proxy_res.ok:
             proxy_access_token = proxy_res_json['access_token']

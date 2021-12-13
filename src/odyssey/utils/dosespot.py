@@ -9,14 +9,10 @@ from sqlalchemy import select
 
 from odyssey import db
 from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
-from odyssey.api.dosespot.models import (
-    DoseSpotPractitionerID,
-    DoseSpotProxyID
-)
+from odyssey.api.dosespot.models import DoseSpotPractitionerID
 from odyssey.api.dosespot.schemas import (
     DoseSpotCreatePractitionerSchema,
     DoseSpotCreatePatientSchema,
-    DoseSpotCreateProxyUserSchema
 )
 from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 from odyssey.api.practitioner.models import PractitionerCredentials
@@ -195,19 +191,15 @@ def onboard_patient(patient_id:int,practitioner_id:int):
     # PROXY_USER - CAN Create patient on DS platform
     # Practitioner_id = 0 means use a Proxy User
     if practitioner_id == 0:
-        proxy_user = DoseSpotProxyID.query.one_or_none()
-        if not proxy_user:
-            proxy_user = onboard_proxy_user()
-        auth_id = str(proxy_user.ds_proxy_id)
+        auth_id = current_app.config['DOSESPOT_PROXY_USER_ID']
     else:
         ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=practitioner_id).one_or_none()
         auth_id = str(ds_clinician.user_id)
     modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
     clinic_api_key = current_app.config['DOSESPOT_API_KEY']
     encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-      
     
-    encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,auth_id)    
+    encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22], clinic_api_key, auth_id)    
     res = get_access_token(modobio_clinic_id,encrypted_clinic_id,auth_id,encrypted_user_id)
 
     res_json = res.json()
@@ -266,69 +258,69 @@ def onboard_patient(patient_id:int,practitioner_id:int):
         raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     return ds_patient
 
-def onboard_proxy_user():
-    """
-    POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
-            we have stored a DoseSpot Admin credentials so the ModoBio system will be able
-            to create the practitioner on the DoseSpot platform
-    """
-    admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
-    modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+# def onboard_proxy_user():
+#     """
+#     POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
+#             we have stored a DoseSpot Admin credentials so the ModoBio system will be able
+#             to create the practitioner on the DoseSpot platform
+#     """
+#     admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
+#     modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
 
-    encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-    encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+#     encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+#     encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
 
-    # Get access token for the Admin
-    res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+#     # Get access token for the Admin
+#     res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
 
-    res_json = res.json()
-    if res.ok:
-        access_token = res_json['access_token']
-        headers = {'Authorization': f'Bearer {access_token}'}
-    else:
-        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+#     res_json = res.json()
+#     if res.ok:
+#         access_token = res_json['access_token']
+#         headers = {'Authorization': f'Bearer {access_token}'}
+#     else:
+#         raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     
-    # Phone Type
-    # 2 - Cell
-    phone_type = 2
-    # clin_role_type
-    # 1 - Prescribing Practitioner
-    # 6 - Proxy user
-    clin_role_type = 6
-    min_payload = {'FirstName': MODOBIO_ADDRESS['firstname'],
-            'LastName': MODOBIO_ADDRESS['lastname'],
-            'DateOfBirth': MODOBIO_ADDRESS['dob'],
-            'Address1': MODOBIO_ADDRESS['street'],
-            'Address2': MODOBIO_ADDRESS['street2'],
-            'City':MODOBIO_ADDRESS['city'],
-            'State':MODOBIO_ADDRESS['state'],
-            'ZipCode':MODOBIO_ADDRESS['zipcode'],
-            'PrimaryPhone': MODOBIO_ADDRESS['phone'],
-            'PrimaryPhoneType': phone_type,
-            'PrimaryFax': MODOBIO_ADDRESS['phone'],
-            'ClinicianRoleType': clin_role_type,
-            'Active': True
-            }
+#     # Phone Type
+#     # 2 - Cell
+#     phone_type = 2
+#     # clin_role_type
+#     # 1 - Prescribing Practitioner
+#     # 6 - Proxy user
+#     clin_role_type = 6
+#     min_payload = {'FirstName': MODOBIO_ADDRESS['firstname'],
+#             'LastName': MODOBIO_ADDRESS['lastname'],
+#             'DateOfBirth': MODOBIO_ADDRESS['dob'],
+#             'Address1': MODOBIO_ADDRESS['street'],
+#             'Address2': MODOBIO_ADDRESS['street2'],
+#             'City':MODOBIO_ADDRESS['city'],
+#             'State':MODOBIO_ADDRESS['state'],
+#             'ZipCode':MODOBIO_ADDRESS['zipcode'],
+#             'PrimaryPhone': MODOBIO_ADDRESS['phone'],
+#             'PrimaryPhoneType': phone_type,
+#             'PrimaryFax': MODOBIO_ADDRESS['phone'],
+#             'ClinicianRoleType': clin_role_type,
+#             'Active': True
+#             }
 
-    res = requests.post(
-        'https://my.staging.dosespot.com/webapi/api/clinicians',
-        headers=headers,
-        data=min_payload)
+#     res = requests.post(
+#         'https://my.staging.dosespot.com/webapi/api/clinicians',
+#         headers=headers,
+#         data=min_payload)
 
-    # If res is okay, store credentials
-    res_json = res.json()
-    if res.ok:
-        if 'Result' in res_json:
-            if 'ResultCode' in res_json['Result']:
-                if res_json['Result']['ResultCode'] != 'OK':
-                    raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        ds_proxy_user = DoseSpotCreateProxyUserSchema().load(
-                                        {'ds_proxy_id': res_json['Id']})
-        db.session.add(ds_proxy_user)
-        db.session.commit()
-    else:
-        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-    return ds_proxy_user
+#     # If res is okay, store credentials
+#     res_json = res.json()
+#     if res.ok:
+#         if 'Result' in res_json:
+#             if 'ResultCode' in res_json['Result']:
+#                 if res_json['Result']['ResultCode'] != 'OK':
+#                     raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+#         ds_proxy_user = DoseSpotCreateProxyUserSchema().load(
+#                                         {'ds_proxy_id': res_json['Id']})
+#         db.session.add(ds_proxy_user)
+#         db.session.commit()
+#     else:
+#         raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+#     return ds_proxy_user
 
 def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_id):
     payload = {'grant_type': 'password','Username':clinician_id,'Password':encrypted_user_id}
