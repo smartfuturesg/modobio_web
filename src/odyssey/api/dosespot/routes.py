@@ -29,6 +29,7 @@ from odyssey.api.lookup.models import (
 from odyssey.api.notifications.models import Notifications
 
 from odyssey.api.user.models import User
+from odyssey.integrations.dosespot import DoseSpot
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.dosespot import (
@@ -203,16 +204,14 @@ class DoseSpotPatientCreation(BaseResource):
         # DoseSpotPatientID
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
 
-        modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(ds_clinician.ds_user_id))
-
         # If the patient does not exist in DoseSpot System yet
         if not ds_patient:
             ds_patient = onboard_patient(user_id,0)
 
-        return {'url': generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id,patient_id=ds_patient.ds_user_id)}
+        ds = DoseSpot(practitioner_user_id = curr_user.user_id)
+
+        _url = ds.prescribe(client_user_id = user_id)
+        return {'url': _url}
 
 @ns.route('/notifications/<int:user_id>/')
 class DoseSpotNotificationSSO(BaseResource):
