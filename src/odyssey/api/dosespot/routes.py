@@ -194,24 +194,12 @@ class DoseSpotPatientCreation(BaseResource):
                we have stored a ModoBio Practitioners credentials so the ModoBio system will be able
                to create the practitioner on the DoseSpot platform
         """
-
         # Clinician ID 
         curr_user,_ = token_auth.current_user()
-        ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=curr_user.user_id).one_or_none()
-        if not ds_clinician:
-            raise BadRequest('This practitioner does not have a DoseSpot account.')
-
-        # DoseSpotPatientID
-        ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
-
-        # If the patient does not exist in DoseSpot System yet
-        if not ds_patient:
-            ds_patient = onboard_patient(user_id,0)
 
         ds = DoseSpot(practitioner_user_id = curr_user.user_id)
-
-        _url = ds.prescribe(client_user_id = user_id)
-        return {'url': _url}
+        
+        return {'url': ds.prescribe(client_user_id = user_id)}
 
 @ns.route('/notifications/<int:user_id>/')
 class DoseSpotNotificationSSO(BaseResource):
@@ -219,58 +207,21 @@ class DoseSpotNotificationSSO(BaseResource):
     @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
     def get(self, user_id):
         """
-        GET - Only a ModoBio Practitioners will be able to use this endpoint. This endpoint is used
-              to return the SSO Link 
+        Bring up DoseSpot notifications for the practitioner. Stores notification count as a notification 
+        entry on the modobio platform. Responds with SSO to access notification content on DoseSpot. 
+
+        Params
+        ------
+        user_id: int
+            Must be a practitioner registered with DoseSpot
+        
+        Returns
+        ------
+        url: str
+            SSO which sends user directly to their notifications
         """
-        
-        curr_user,_ = token_auth.current_user()
-        ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
-        if not ds_clinician:
-            raise BadRequest('This practitioner does not have a DoseSpot account.')
-
-        modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-
-        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,str(ds_clinician.ds_user_id))
-
-        res = get_access_token(modobio_clinic_id,encrypted_clinic_id,str(ds_clinician.ds_user_id),encrypted_user_id)
-        res_json = res.json()
-        if res.ok:
-            access_token = res_json['access_token']
-            headers = {'Authorization': f'Bearer {access_token}'}
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        
-        res = requests.get('https://my.staging.dosespot.com/webapi/api/notifications/counts',headers=headers)
-        
-        notification_count = 0
-        res_json = res.json()
-        if res.ok:
-            for key in res_json:
-                if key != 'Result':
-                    notification_count+=res_json[key]
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-
-        url = generate_sso(modobio_clinic_id, str(ds_clinician.ds_user_id), encrypted_clinic_id, encrypted_user_id)
-        
-        ds_notification_type = 17 # DoseSpot Notification ID
-        ds_notification = Notifications.query.filter_by(user_id=user_id,notification_type_id=ds_notification_type).one_or_none()
-        if not ds_notification:
-            ds_notification = Notifications(
-                notification_type_id=ds_notification_type, # DoseSpot Notification
-                user_id=user_id,
-                title=f"You have {notification_count} DoseSpot Notifications.",
-                content="Click this notification to be brought to the DoseSpot platform to view notifications.",
-                action=url,
-                time_to_live = 0 
-            )
-            db.session.add(ds_notification)
-        else:
-            ds_notification.update({'title': f"You have {notification_count} DoseSpot Notifications."})
-
-        db.session.commit()
+        ds = DoseSpot(practitioner_user_id = user_id)
+        url = ds.notifications()
 
         return {'url': url}
 

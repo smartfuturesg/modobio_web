@@ -8,6 +8,7 @@ from werkzeug.exceptions import BadRequest
 from sqlalchemy import select
 
 from odyssey import db
+from odyssey.api.notifications.models import Notifications
 from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
 from odyssey.api.dosespot.models import DoseSpotPatientID, DoseSpotPractitionerID
 from odyssey.api.dosespot.schemas import (
@@ -26,7 +27,7 @@ class DoseSpot:
 
     
     def __init__(self, practitioner_user_id = None, char_len = 32):
-        self.proxy_user_id = current_app.config['DOSESPOT_PROXY_USER_ID']
+        self.proxy_user_ds_id = current_app.config['DOSESPOT_PROXY_USER_ID']
         self.modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
         self.clinic_api_key = current_app.config['DOSESPOT_API_KEY']
         self.encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
@@ -36,6 +37,8 @@ class DoseSpot:
         if practitioner_user_id:
             self.practitioner_ds_id = db.session.execute(select(DoseSpotPractitionerID.ds_user_id).where(DoseSpotPractitionerID.user_id == practitioner_user_id)
                                     ).scalars().one_or_none()
+            if not self.practitioner_ds_id:
+                raise BadRequest("Practitioner not yet registered with DoseSpot")
         else:
             self.practitioner_ds_id = None
 
@@ -85,7 +88,7 @@ class DoseSpot:
 
         return self.rand_phrase + encrypted_str
 
-    def _generate_encrypted_user_id(self, user_id):
+    def _generate_encrypted_user_id(self, user_ds_id):
         """
         This function generates an encrypted user_id for DoseSpot
         
@@ -93,8 +96,13 @@ class DoseSpot:
         
         DoseSpot RESTful API Guide 
         Section 2.3.1 
+
+        Params
+        ------
+        user_ds_id: str
+            DoseSpot user id
         """    
-        temp_str = str(user_id) + self.encrypted_clinic_id[:22] + self.clinic_api_key
+        temp_str = str(user_ds_id) + self.encrypted_clinic_id[:22] + self.clinic_api_key
         encoded_str = temp_str.encode('utf-8')
 
         hash512 = hashlib.sha512(encoded_str).digest()
@@ -136,6 +144,25 @@ class DoseSpot:
             URL = URL+'&RefillsErrors=1'
         return URL
 
+    def _get_access_token(self, user_ds_id):
+        """
+        Query the DoseSpot API to generate an API access token using the DS user_id and the generated 
+        encrypted user_id
+        """
+        encrypted_user_id = self._generate_encrypted_user_id(user_ds_id)
+        payload = {'grant_type': 'password', 'Username':user_ds_id, 'Password':encrypted_user_id}
+        
+        response = requests.post('https://my.staging.dosespot.com/webapi/token',
+                        auth=(self.modobio_clinic_id, self.encrypted_clinic_id),
+                        data=payload)
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+
+        return response.json()['access_token']
+
+
     def prescribe(self, client_user_id):
         """
         Generates an SSO link for the DoseSpot prescribing portal
@@ -150,12 +177,127 @@ class DoseSpot:
         """
         client_ds_id = db.session.execute(select(DoseSpotPatientID.ds_user_id).where(DoseSpotPatientID.user_id == client_user_id)
                 ).scalars().one_or_none()
-        
+
+        # If the patient does not exist in DoseSpot System yet
+        #TODO remove soon. 12.14.21
+        if not client_ds_id:
+            ds_patient = self.onboard_client(client_user_id)
+            client_ds_id = ds_patient.ds_user_id
+
         return self._generate_sso(client_ds_id)
 
     def notifications(self):
+        """
+        Bring up notifications the practitioner has on DoseSpot
+        Store these inthe modobio notification system
+        """
+        # log user in 
+        access_token = self._get_access_token(self.practitioner_ds_id)
+        headers = {'Authorization': f'Bearer {access_token}'}
 
-        return self._generate_sso()
+        # bring up notifications from dosespot api
+        response = requests.get('https://my.staging.dosespot.com/webapi/api/notifications/counts',
+                    headers=headers)
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+
+        notification_count = 0
+        res_json = response.json()
+        for key in res_json:
+            if key != 'Result':
+                notification_count += res_json[key]
+
+        ds_notification_type = 17 # DoseSpot Notification ID
+        url = self._generate_sso()
+        # create new or update dosespot notification entry
+        # this is done so we do not repeat the same dosespot notification over again, 
+        # instead we update the sso url and the notification count
+        if notification_count > 0:
+            ds_notification = Notifications.query.filter_by(user_id=self.practitioner_ds_id, notification_type_id=ds_notification_type).one_or_none()
+            if not ds_notification:
+                ds_notification = Notifications(
+                    notification_type_id = ds_notification_type, # DoseSpot Notification
+                    user_id=self.practitioner_ds_id,
+                    title=f"You have {notification_count} DoseSpot Notifications.",
+                    content="Click this notification to be brought to the DoseSpot platform to view notifications.",
+                    action=url,
+                    time_to_live = 0 
+                )
+                db.session.add(ds_notification)
+            else:
+                ds_notification.update({'title': f"You have {notification_count} DoseSpot Notifications."})
+
+            db.session.commit()
+
+        return url
+
+    def onboard_client(self, client_user_id : int):
+        """
+        Create the patient in the DoseSpot System
+        """ 
+        # PROXY_USER - CAN Create patient on DS platform
+    
+        access_token = self._get_access_token(self.proxy_user_ds_id)
+
+        headers = {'Authorization': f'Bearer {access_token}'}
+
+        # This user is the patient
+        user = User.query.filter_by(user_id = client_user_id).one_or_none()
+        
+        # Create patient in DoseSpot here
+        # Gender
+        # 1 - Male
+        # 2 - Female
+        # 3 - Other
+        if user.client_info.gender == 'm':
+            gender = 1
+        elif user.client_info.gender == 'f':
+            gender = 2
+        else:
+            gender = 3
+
+        state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
+        # Phone Type
+        # 2 - Cell
+        phone_type = 2
+        
+        payload = {'FirstName': user.firstname,
+                'LastName': user.lastname,
+                'DateOfBirth': user.dob.strftime('%Y-%m-%d'),
+                'Gender': gender,
+                'Address1': user.client_info.street,
+                'City':user.client_info.city,
+                'State':state.sub_territory_abbreviation,
+                'ZipCode':user.client_info.zipcode,
+                'PrimaryPhone': user.phone_number,
+                'PrimaryPhoneType': phone_type,
+                'Active': True
+                }
+        
+        response = requests.post('https://my.staging.dosespot.com/webapi/api/patients',
+            headers=headers,
+            data=payload)
+        
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+
+        res_json = response.json()
+        if 'Result' in res_json:
+            if 'ResultCode' in res_json['Result']:
+                if res_json['Result']['ResultCode'] != 'OK':
+                    raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+
+        ds_patient = DoseSpotCreatePatientSchema().load({'ds_user_id': res_json['Id']})
+        ds_patient.user_id = client_user_id
+        db.session.add(ds_patient)
+        db.session.commit()
+
+        return ds_patient
+
 
 def onboard_practitioner(user_id):
     """
@@ -260,88 +402,9 @@ def onboard_practitioner(user_id):
             raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
     return 201
 
-def onboard_patient(patient_id:int,practitioner_id:int):
-    """
-    Create the patient in the DoseSpot System
-    """ 
-    # PROXY_USER - CAN Create patient on DS platform
-    # Practitioner_id = 0 means use a Proxy User
-    if practitioner_id == 0:
-        auth_id = current_app.config['DOSESPOT_PROXY_USER_ID']
-    else:
-        ds_clinician = DoseSpotPractitionerID.query.filter_by(user_id=practitioner_id).one_or_none()
-        auth_id = str(ds_clinician.user_id)
-    modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-    clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-    encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-    
-    encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22], clinic_api_key, auth_id)    
-    res = get_access_token(modobio_clinic_id,encrypted_clinic_id,auth_id,encrypted_user_id)
-
-    res_json = res.json()
-    if res.ok:
-        access_token = res_json['access_token']
-        headers = {'Authorization': f'Bearer {access_token}'}
-    else:
-        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-    # This user is the patient
-    user = User.query.filter_by(user_id=patient_id).one_or_none()
-    
-    # Create patient in DoseSpot here
-    # Gender
-    # 1 - Male
-    # 2 - Female
-    # 3 - Other
-    if user.client_info.gender == 'm':
-        gender = 1
-    elif user.client_info.gender == 'f':
-        gender = 2
-    else:
-        gender = 3
-    state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
-    # Phone Type
-    # 2 - Cell
-    phone_type = 2
-    min_payload = {'FirstName': user.firstname,
-            'LastName': user.lastname,
-            'DateOfBirth': user.dob.strftime('%Y-%m-%d'),
-            'Gender': gender,
-            'Address1': user.client_info.street,
-            'City':user.client_info.city,
-            'State':state.sub_territory_abbreviation,
-            'ZipCode':user.client_info.zipcode,
-            'PrimaryPhone': user.phone_number,
-            'PrimaryPhoneType': phone_type,
-            'Active': True
-            }
-    
-    res = requests.post('https://my.staging.dosespot.com/webapi/api/patients',
-        headers=headers,
-        data=min_payload)
-
-    res_json = res.json()
-    if res.ok:
-        if 'Result' in res_json:
-            if 'ResultCode' in res_json['Result']:
-                if res_json['Result']['ResultCode'] != 'OK':
-                    raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        ds_patient = DoseSpotCreatePatientSchema().load({'ds_user_id': res_json['Id']})
-        ds_patient.user_id = patient_id
-        db.session.add(ds_patient)
-        db.session.commit()
-    else:
-        # There was an error creating the patient in DoseSpot system
-        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-    return ds_patient
 
 
 
-def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_id):
-    payload = {'grant_type': 'password','Username':clinician_id,'Password':encrypted_user_id}
-    res = requests.post('https://my.staging.dosespot.com/webapi/token',
-                    auth=(clinic_id, encrypted_clinic_id),
-                    data=payload)
-    return res
 
 
 
