@@ -1,3 +1,4 @@
+from datetime import datetime
 import random
 import hashlib
 import base64
@@ -41,6 +42,7 @@ class DoseSpot:
         else:
             self.practitioner_ds_id = None
 
+    @staticmethod
     def registered_practitioners():
         """
         Bring up all practitioners registered with DoseSpot 
@@ -316,8 +318,6 @@ class DoseSpot:
         staff_user_id: int
             Modobio user_id for a staff member. 
         """
- 
-
         user = User.query.filter_by(user_id=staff_user_id).one_or_none()
         if not user.is_staff:
             raise BadRequest('User must be a practitioner')
@@ -386,6 +386,38 @@ class DoseSpot:
         db.session.add(ds_practitioner)
         
         return ds_practitioner
+
+    def allergies(self, client_user_id):
+        """
+        Bring up the allergies to medications using DS API
+        """
+        # sign in as proxy user
+        access_token = self._get_access_token(self.proxy_user_ds_id)
+        headers = {'Authorization': f'Bearer {access_token}'}
+
+        ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
+        
+        response = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/allergies',
+                headers=headers)
+
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+        
+        res_json = response.json()
+        lookup_users = self.registered_practitioners()
+
+        for item in res_json['Items']:
+            if item.get('LastUpdatedUserId') in lookup_users:
+                item['modobio_id'] = lookup_users[item['LastUpdatedUserId']].modobio_id
+                item['modobio_user_id'] = lookup_users[item['LastUpdatedUserId']].user_id
+                item['modobio_name'] = lookup_users[item['LastUpdatedUserId']].firstname + ' ' + lookup_users[item['LastUpdatedUserId']].lastname
+
+            if item.get('OnsetDate'):
+                item['OnsetDate'] = datetime.strptime(item['OnsetDate'].split('T')[0], '%Y-%m-%d').date()
+
+        return res_json
 
 
 

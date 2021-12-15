@@ -330,7 +330,7 @@ def get_access_token(clinic_id,encrypted_clinic_id,clinician_id,encrypted_user_i
     return res
 
 def lookup_ds_users():
-        # Store Modobio info in the response.        
+    # Store Modobio info in the response.        
     query = db.session.execute(
         select(User, DoseSpotPractitionerID
         ).join(DoseSpotPractitionerID, DoseSpotPractitionerID.user_id == User.user_id)  

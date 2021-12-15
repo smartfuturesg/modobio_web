@@ -47,53 +47,17 @@ class DoseSpotAllergies(BaseResource):
     @responds(schema=DoseSpotAllergyOutput,status_code=200,api=ns)
     def get(self, user_id):
         """
-        GET - DoseSpot Patient prescribed medications
+        Bring up the client's allergies to medications stored on DoseSpot
         """
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
+        ds = DoseSpot()
         if not ds_patient:
-            ds_patient = onboard_patient(user_id,0)
+            ds_patient = ds.onboard_client(user_id)
 
-        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-
-        # generating keys for ADMIN
-        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-
-        # PROXY_USER
-        proxy_ds_user_id = str(current_app.config['DOSESPOT_PROXY_USER_ID'])  
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22], clinic_api_key, proxy_ds_user_id)
-
-        res = get_access_token(modobio_id,encrypted_clinic_id, proxy_ds_user_id, encrypted_user_id)
-        res_json = res.json()
-        if res.ok:
-            access_token = res_json['access_token']
-            headers = {'Authorization': f'Bearer {access_token}'}
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-
-        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/allergies',
-                headers=headers)
-        res_json = res.json()
-
-        if not res.ok:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
+        ds_allergies = ds.allergies(user_id)
         
-        if 'Items' not in res_json:
-            raise BadRequest(f'DoseSpot may have changed their API output, please reach out to a staff admin.')
-        
-        lookup_users = lookup_ds_users()
-
-        for item in res_json['Items']:
-            if item.get('LastUpdatedUserId') in lookup_users:
-                item['modobio_id'] = lookup_users[item['LastUpdatedUserId']].modobio_id
-                item['modobio_user_id'] = lookup_users[item['LastUpdatedUserId']].user_id
-                item['modobio_name'] = lookup_users[item['LastUpdatedUserId']].firstname + ' ' + lookup_users[item['LastUpdatedUserId']].lastname
-
-            if item.get('OnsetDate'):
-                item['OnsetDate'] = datetime.strptime(item['OnsetDate'].split('T')[0], '%Y-%m-%d').date()
-
-        payload = {'items': res_json['Items'],
-                   'total_items': len(res_json['Items'])}
+        payload = {'items': ds_allergies['Items'],
+                   'total_items': len(ds_allergies['Items'])}
 
         return payload
 
