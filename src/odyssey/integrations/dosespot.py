@@ -23,10 +23,9 @@ from odyssey.api.user.models import User
 
 class DoseSpot:
     """Object to handle dose spot routines"""
-
-
     
     def __init__(self, practitioner_user_id = None, char_len = 32):
+        self.admin_user_ds_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
         self.proxy_user_ds_id = current_app.config['DOSESPOT_PROXY_USER_ID']
         self.modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
         self.clinic_api_key = current_app.config['DOSESPOT_API_KEY']
@@ -236,16 +235,22 @@ class DoseSpot:
     def onboard_client(self, client_user_id : int):
         """
         Create the patient in the DoseSpot System
+
+        Params
+        ------
+        client_user_id: int
+            Modobio user_id for a client
         """ 
+        # This user is the patient
+        user = User.query.filter_by(user_id = client_user_id).one_or_none()
+        if not user.is_client:
+            raise BadRequest("This user is not registered as a client.")
+        
         # PROXY_USER - CAN Create patient on DS platform
-    
         access_token = self._get_access_token(self.proxy_user_ds_id)
 
         headers = {'Authorization': f'Bearer {access_token}'}
 
-        # This user is the patient
-        user = User.query.filter_by(user_id = client_user_id).one_or_none()
-        
         # Create patient in DoseSpot here
         # Gender
         # 1 - Male
@@ -299,70 +304,51 @@ class DoseSpot:
         return ds_patient
 
 
-def onboard_practitioner(user_id):
-    """
-    POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
-            we have stored a DoseSpot Admin credentials so the ModoBio system will be able
-            to create the practitioner on the DoseSpot platform
-    """
+    def onboard_practitioner(self, staff_user_id):
+        """
+        Register practitioner with DoseSpot. Pracatitioner must meet the following requirements:
+        - valid NPI
+        - Staff office 
+        - medical_doctor role
 
-    user = User.query.filter_by(user_id=user_id).one_or_none()
-    # reqs: being a staff. office location, verified npi #
-    if not user.is_staff:
-        raise BadRequest('User must be a practitioner')
+        Params
+        ------
+        staff_user_id: int
+            Modobio user_id for a staff member. 
+        """
+ 
 
-    staff_office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
+        user = User.query.filter_by(user_id=staff_user_id).one_or_none()
+        if not user.is_staff:
+            raise BadRequest('User must be a practitioner')
 
-    if not staff_office:
-        raise BadRequest('Staff office not found.')
+        staff_office = StaffOffices.query.filter_by(user_id=staff_user_id).one_or_none()
+        if not staff_office:
+            raise BadRequest('Staff office not found.')
 
-    credentials = PractitionerCredentials.query.filter_by(user_id=user_id,credential_type='npi').one_or_none()
-
-    if not credentials:
-        raise BadRequest('NPI number not found.')
-    else:
-        if credentials.status == 'Verified':
-            npi_number = credentials.credentials
-        else:
-            raise BadRequest('NPI number has not been verified yet.')
-
-    ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
-    admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
-    clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-    modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-
-    # generating keys for ADMIN
-    encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-    encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
-
-    if ds_practitioner:
-        raise BadRequest('Practitioner is already in the DoseSpot System.')
-    else:
-        # Get access token for the Admin
-        res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
-
-        if res.ok:
-            access_token = res.json()['access_token']
-            headers = {'Authorization': f'Bearer {access_token}'}
-        else:
-            res_json = res.json()
-            raise BadRequest('DoseSpot returned the following error: {res_json}.')
+        creds = PractitionerCredentials.query.filter_by(user_id=staff_user_id,credential_type='npi', status='Verified').one_or_none()
+        if not creds:
+            raise BadRequest('Verified NPI number not found for this user.')
+        npi_number = creds.credentials
         
+        ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=staff_user_id).one_or_none()
+        if ds_practitioner:
+            raise BadRequest('Practitioner is already in the DoseSpot System.')
+        
+        # Get access token for the Admin account
+        access_token = self._get_access_token(self.admin_user_ds_id)
+
+        headers = {'Authorization': f'Bearer {access_token}'}
+            
         state = LookupTerritoriesOfOperations.query.filter_by(idx=staff_office.territory_id).one_or_none()
-        
-        # Phone Type
-        # 2 - Cell
 
         # NOTE:
         # If dea and med_lic are empty [], the request works
         # Having trouble sending dea and med_lic to the endpoint
         # HOWEVER, DoseSpot does not require that info, and ModoBio
         # will not be working with controlled substances, so DEA is also unnecessary.
-        
-        # clin_role_type - 1 = Prescribing Clinician
-        # phone_type - 2 = cell
-        clin_role_type = 1
-        phone_type = 2
+        clin_role_type = 1 # prescribing clinician code
+        phone_type = 2 # cell phone by default
         min_payload = {'FirstName': user.firstname,
                 'LastName': user.lastname,
                 'DateOfBirth': user.dob,
@@ -380,27 +366,26 @@ def onboard_practitioner(user_id):
                 'Active': True
                 }
 
-        res = requests.post(
+        response = requests.post(
             'https://my.staging.dosespot.com/webapi/api/clinicians',
             headers=headers,
             data=min_payload)
 
-        # If res is okay, store credentials
-        res_json = res.json()
-        if res.ok:
-            if 'Result' in res_json:
-                if 'ResultCode' in res_json['Result']:
-                    if res_json['Result']['ResultCode'] != 'OK':
-                        raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-            ds_practitioner_id = DoseSpotCreatePractitionerSchema().load(
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+
+        # If response is okay, store credentials
+        res_json = response.json()
+        ds_practitioner = DoseSpotCreatePractitionerSchema().load(
                                             {'ds_user_id': res_json['Id'],
-                                             'ds_enrollment_status': 'pending'
+                                            'ds_enrollment_status': 'pending'
                                             })
-            ds_practitioner_id.user_id = user_id
-            db.session.add(ds_practitioner_id)
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-    return 201
+        ds_practitioner.user_id = staff_user_id
+        db.session.add(ds_practitioner)
+        
+        return ds_practitioner
 
 
 

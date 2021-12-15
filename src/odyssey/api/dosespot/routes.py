@@ -34,11 +34,9 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.dosespot import (
     generate_encrypted_user_id,
-    generate_sso,
     get_access_token,
     lookup_ds_users,
-    onboard_patient,
-    onboard_practitioner
+    onboard_patient
 )
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
@@ -109,10 +107,10 @@ class DoseSpotPractitionerCreation(BaseResource):
                we have stored a DoseSpot Admin credentials so the ModoBio system will be able
                to create the practitioner on the DoseSpot platform
         """
-        res = onboard_practitioner(user_id)
-        if res == 201:
-            db.session.commit()
-        return res
+        ds = DoseSpot()
+        ds.onboard_practitioner(user_id)
+        db.session.commit()
+        return 
 
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
