@@ -8,9 +8,7 @@
 - remove PaymentFailedTransactions
 - practitioner rates, telehealth bookings consult rate
 - Update payment tables
-- lookup US States
 - lookup notification severity
-- add state_id to models
 - Change height, weight, waist from int to numeric.
 - Change tablenames to drop -History postfix.
 - Change data in weight column from g to kg.
@@ -21,7 +19,7 @@
 - drop phone number unique constraint
 - Add write access timeout to TelehealthChatRooms
 - normalizing UserProfilePictures & StaffRecentClients user_id fields
-- operational territories flag, remove state_id fields from StaffOffices and ClientInfo
+- operational territories flag
 
 Revision ID: fb14f8b40f12
 Revises: 0bebaad7e4a1
@@ -144,10 +142,32 @@ def upgrade():
     op.add_column('TelehealthChatRooms', sa.Column('transcript_object_id', sa.String(), nullable=True))
     op.add_column('TelehealthChatRooms', sa.Column('write_access_timeout', sa.DateTime(), nullable=True))
     op.add_column('TelehealthMeetingRooms', sa.Column('sid', sa.String(), nullable=True))
+    
     op.add_column('User', sa.Column('membersince', sa.DateTime(), nullable=True))
     op.alter_column('User', 'deleted',
                existing_type=sa.BOOLEAN(),
                nullable=False)
+    
+    op.alter_column('User', 'is_staff',
+                existing_type=sa.BOOLEAN,
+                server_default='false')
+    op.alter_column('User', 'is_client',
+                existing_type=sa.BOOLEAN,
+                server_default='false')
+    op.alter_column('User', 'deleted',
+                existing_type=sa.BOOLEAN,
+                server_default='false',
+                nullable=False)
+    op.alter_column('User', 'is_internal',
+                existing_type=sa.BOOLEAN,
+                server_default='false')
+    op.alter_column('User', 'email_verified',
+                existing_type=sa.BOOLEAN,
+                server_default='false')
+    op.alter_column('User', 'biological_sex_male',
+                existing_type=sa.BOOLEAN,
+                server_default='false')
+    
     op.drop_constraint('User_phone_number_key', 'User', type_='unique')
     op.add_column('UserProfilePictures', sa.Column('client_user_id', sa.Integer(), nullable=True))
     op.add_column('UserProfilePictures', sa.Column('staff_user_id', sa.Integer(), nullable=True))
