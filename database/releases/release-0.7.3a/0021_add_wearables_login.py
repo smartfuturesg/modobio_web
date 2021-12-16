@@ -30,9 +30,7 @@ BEGIN
         lastname,
         is_staff,
         is_client,
-        email_verified,
-        deleted,
-        is_internal)
+        email_verified)
     VALUES (
         'wearables_scraper@modobio.com',
         'WRBLSCRPR000',
@@ -40,9 +38,7 @@ BEGIN
         'Scraper',
         true,
         false,
-        true,
-        false,
-        false)
+        true)
     RETURNING user_id INTO wearables_user_id;
 
     INSERT INTO "UserLogin" (
