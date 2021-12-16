@@ -170,40 +170,42 @@ class DoseSpotEnrollmentStatus(BaseResource):
         return {'status':ds.enrollment_status(user_id, user_type = utype)}
 
 @ns.route('/select/pharmacies/<int:user_id>/')
-@ns.param({'zipcode': '(optional) overrides user\'s zipcode', 
+@ns.doc(params = {'zipcode': '(optional) overrides user\'s zipcode', 
             'state_id': '(optional) overrides user\'s state'})
 class DoseSpotSelectPharmacies(BaseResource):
     @token_auth.login_required(user_type=('client',))
     def get(self,user_id):
         """
-        GET - This is to display to the Modobio client the pharmacies available to them
-              given their state and zipcode
+        Queries DoseSpot for a list of available pharmacies. By default this endpoint uses the client's address
+        to locate pharmacies. Optionally a user may submit a zipcode and state_id 
 
-            DoseSpot Admin credentials will be used for this endpoint
+        Params
+        ------
+        user_id: int
+        zipcode: str
+            Optional zipcode for pharmacy search
+        state_id: int
+            Optional state_id from LookupTerritoriesOfOperations
+
+        Returns
+        ------
+        pharmacies: [dict]
+            big list of pharmacies
         """
-        admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
-        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+        zipcode = request.args.get('zipcode', None)
+        state_id = request.args.get('state_id', None)
 
-        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key,admin_id)    
+        # if no zopcode not state specified, use client's address detail by default
+        if not zipcode and not state_id:
+            user = User.query.filter_by(user_id = user_id).one_or_none()
+            zipcode = user.client_info.zipcode
+            state_id = user.client_info.territory_id
+        
+        ds = DoseSpot()
 
-        res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
-        res_json = res.json()
-        if res.ok:
-            access_token = res_json['access_token']
-            headers = {'Authorization': f'Bearer {access_token}'}
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-        state = LookupTerritoriesOfOperations.query.filter_by(idx=user.client_info.territory_id).one_or_none()
-
-        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/pharmacies/search?zip={user.client_info.zipcode}&state={state.sub_territory_abbreviation}',headers=headers)
-        res_json = res.json()
-        if not res.ok:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        return res_json['Items']
+        pharmacies = ds.pharmacies(state_id = state_id, zipcode = zipcode)
+        
+        return pharmacies['Items']
 
 @ns.route('/pharmacies/<int:user_id>/')
 class DoseSpotPatientPharmacies(BaseResource):

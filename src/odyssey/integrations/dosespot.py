@@ -7,6 +7,7 @@ import requests
 from flask import current_app
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import select
+from werkzeug.wrappers import response
 
 from odyssey import db
 from odyssey.api.notifications.models import Notifications
@@ -513,18 +514,46 @@ class DoseSpot:
 
         return status
 
-    def pharmacies(self, user_id, zip_code = None, state_id = None):
+    def pharmacies(self, zipcode = None, state_id = None):
         """
         Returns the pharmacies near the provied address details
 
         Params
         ------
-        user_id
+        zipcode: str
+        state_id: int
 
         Returns
         ------
-        parmacies_list: [str]
+        parmacies_list: [dict]
             list of pharmacies 
         """
-    # Bring up client's ds details. if not registered, make an account
+        # Bring up client's ds details. if not registered, make an account
+         # Get access token for the Admin account
+        access_token = self._get_access_token(self.admin_user_ds_id)
+
+        headers = {'Authorization': f'Bearer {access_token}'}
+            
+        state = LookupTerritoriesOfOperations.query.filter_by(idx=state_id).one_or_none()
+
+        request_url = f'https://my.staging.dosespot.com/webapi/api/pharmacies/search?'
+
+        if zipcode and state:
+            request_url += f'zip={zipcode}&state={state.sub_territory_abbreviation}'
+        elif zipcode:
+            request_url += f'zip={zipcode}'
+        elif state:
+            request_url += f'state={state.sub_territory_abbreviation}'
+        else:
+            raise BadRequest('Please select state and/or zipcode for pharmacy search')
+       
+        response = requests.get(request_url,headers=headers)
+
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'DoseSpot returned the following error: {response.text}')
         
+        res_json = response.json()
+        
+        return res_json
