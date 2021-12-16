@@ -2,6 +2,7 @@ from datetime import datetime
 import random
 import hashlib
 import base64
+from marshmallow.fields import Dict
 import requests
 
 from flask import current_app
@@ -582,3 +583,45 @@ class DoseSpot:
         res_json = response.json()
         
         return res_json
+
+    def pharmacy_select(self, client_user_id: int, pharmacies: Dict):
+        """
+        Bring up the client's pharmacies saved on the DS platform. Use the proxy user for this request
+        """
+        # Bring up client's ds details. if not registered, make an account
+        ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
+
+        if not ds_patient:
+            ds_patient = self.onboard_client(client_user_id)
+
+        # sign in as proxy user
+        access_token = self._get_access_token(self.proxy_user_ds_id)
+        headers = {'Authorization': f'Bearer {access_token}'}
+
+        #Bring up a list of current pharmacies, remove them from DS
+        current_pharmacies = self.client_pharmacies(client_user_id)
+
+        for item in current_pharmacies['Items']:
+            pharm_id = item['PharmacyId']
+            response = requests.delete(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers)
+            try:
+                response.raise_for_status()
+            except:
+                raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+        
+        # log in as admin and submit the new pharmacies
+        access_token = self._get_access_token(self.admin_user_ds_id)
+        headers = {'Authorization': f'Bearer {access_token}'}
+        for item in pharmacies:
+            pharm_id = item['pharmacy_id']
+            primary_flag = {'SetAsPrimary': item['primary_pharm']}
+            response = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers,data=primary_flag)
+            try:
+                response.raise_for_status()
+            except:
+                raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+
+        return
+
+
+    

@@ -250,47 +250,9 @@ class DoseSpotPatientPharmacies(BaseResource):
         if primary_pharm_count == 0:
             raise BadRequest('Must select 1 pharmacy to be set as primary.')
 
-        # # DoseSpotPatientID
-        ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
-        if not ds_patient:
-            ds_patient = onboard_patient(user_id,0)
 
-        # ADMIN - WORKS
-        admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
-        modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+        ds = DoseSpot()
 
-        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-        encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
-        
-        res = get_access_token(modobio_clinic_id, encrypted_clinic_id, admin_id, encrypted_user_id)
-        res_json = res.json()
-        if res.ok:
-            access_token = res_json['access_token']
-            headers = {'Authorization': f'Bearer {access_token}'}
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        
-                      
-        proxy_ds_user_id = str(current_app.config['DOSESPOT_PROXY_USER_ID'])  
-        
-        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-        proxy_encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22], clinic_api_key, proxy_ds_user_id)
-        proxy_res = get_access_token(modobio_clinic_id, encrypted_clinic_id, proxy_ds_user_id, proxy_encrypted_user_id)
-        proxy_res_json = proxy_res.json()
-        if proxy_res.ok:
-            proxy_access_token = proxy_res_json['access_token']
-            proxy_headers = {'Authorization': f'Bearer {proxy_access_token}'}
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {proxy_res_json}.')
+        ds.pharmacy_select(user_id, payload['items'])
 
-        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=proxy_headers)
-        res_json = res.json()
-        for item in res_json['Items']:
-            pharm_id = item['PharmacyId']
-            res = requests.delete(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=proxy_headers)
- 
-        for item in payload['items']:
-            pharm_id = item['pharmacy_id']
-            primary_flag = {'SetAsPrimary': item['primary_pharm']}
-            res = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers,data=primary_flag)
         return
