@@ -179,7 +179,7 @@ class DoseSpot:
         client_ds_id = db.session.execute(select(DoseSpotPatientID.ds_user_id).where(DoseSpotPatientID.user_id == client_user_id)
                 ).scalars().one_or_none()
 
-        # If the patient does not exist in DoseSpot System yet
+        # If the patient does not exist in DoseSpot System yet, make an account
         #TODO remove soon. 12.14.21
         if not client_ds_id:
             ds_patient = self.onboard_client(client_user_id)
@@ -387,16 +387,19 @@ class DoseSpot:
         
         return ds_practitioner
 
-    def allergies(self, client_user_id):
+    def allergies(self, client_user_id: int):
         """
         Bring up the allergies to medications using DS API
         """
+        ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
+
+        if not ds_patient:
+            ds_patient = self.onboard_client(client_user_id)
+        
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
         headers = {'Authorization': f'Bearer {access_token}'}
 
-        ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
-        
         response = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/allergies',
                 headers=headers)
 
@@ -419,76 +422,109 @@ class DoseSpot:
 
         return res_json
 
+    def prescriptions(self, client_user_id: int):
+        """
+        Query the DoseSpot API for the client's prescriptions
+        """
+        # Bring up client's ds details. if not registered, make an account
+        ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
+        if not ds_patient:
+            ds_patient = self.onboard_client(client_user_id)
 
+        # sign in as proxy user
+        access_token = self._get_access_token(self.proxy_user_ds_id)
+        headers = {'Authorization': f'Bearer {access_token}'}
 
+        # Some date from a long time ago to today
+        start_date = '1970-01-01'
+        now = datetime.now()
+        end_date = now.strftime("%Y-%m-%d")
 
+        response = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/prescriptions?startDate={start_date}&endDate={end_date}',
+                headers=headers)
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+        
+        res_json = response.json()
 
+        lookup_users = self.registered_practitioners()
 
+        for item in res_json['Items']:
+            if item.get('PrescriberId') in lookup_users:
+                item['modobio_id'] = lookup_users[item['PrescriberId']].modobio_id
+                item['modobio_user_id'] = lookup_users[item['PrescriberId']].user_id
+                item['modobio_name'] = lookup_users[item['PrescriberId']].firstname + ' ' + lookup_users[item['PrescriberId']].lastname
 
+            if item.get('WrittenDate'):
+                item['WrittenDate'] = datetime.strptime(item['WrittenDate'].split('T')[0], '%Y-%m-%d').date()
 
+            if item.get('EffectiveDate'):
+                item['EffectiveDate'] = datetime.strptime(item['EffectiveDate'].split('T')[0], '%Y-%m-%d').date()
 
+            if item.get('LastFillDate'):
+                item['LastFillDate'] = datetime.strptime(item['LastFillDate'].split('T')[0], '%Y-%m-%d').date()
 
-# def onboard_proxy_user():
-#     """
-#     POST - Only a DoseSpot Admin will be able to use this endpoint. As a workaround
-#             we have stored a DoseSpot Admin credentials so the ModoBio system will be able
-#             to create the practitioner on the DoseSpot platform
-#     """
-#     admin_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
-#     modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
+            if item.get('DateInactive'):
+                item['DateInactive'] = datetime.strptime(item['DateInactive'].split('T')[0], '%Y-%m-%d').date()
 
-#     encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-#     encrypted_user_id = current_app.config['DOSESPOT_ENCRYPTED_ADMIN_ID']
+        return res_json
 
-#     # Get access token for the Admin
-#     res = get_access_token(modobio_id,encrypted_clinic_id,admin_id,encrypted_user_id)
+    def enrollment_status(self, user_id, user_type = 'staff'):
+        """
+        Returns the DoseSpot enrollment status of the user. 
+        """
+        # Bring up client's ds details. if not registered, make an account
+        if user_type == 'client':
+            ds_patient = DoseSpotPatientID.query.filter_by(user_id = user_id).one_or_none()
+            if ds_patient:
+                status = 'enrolled' if ds_patient else 'not enrolled'
+        else:
+            # check if the practitioner has a dosespot account
+            # if they do, check their account status
+            #   if the account status is not 'enrolled', query dosespot to see if there are any updates
+            ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=user_id).one_or_none()
+            if not ds_practitioner:
+                raise BadRequest('This practitioner does not have a DoseSpot account.')
+            
+            if ds_practitioner.ds_enrollment_status == 'enrolled':
+                status = ds_practitioner.ds_enrollment_status
+            else:
+                # sign in as admin user
+                access_token = self._get_access_token(self.admin_user_ds_id)
+                headers = {'Authorization': f'Bearer {access_token}'}
+                response = requests.get(f'https://my.staging.dosespot.com/webapi/api/clinicians/{ds_practitioner.ds_user_id}',headers=headers)
+                try:
+                    response.raise_for_status()
+                except:
+                    raise BadRequest(f'DoseSpot returned the following error: {response.text}')
+                res_json = response.json()
+                if res_json['Item']!=0:
+                    if res_json['Item']['Confirmed'] == True:
+                        ds_practitioner.update({'ds_enrollment_status':'enrolled'})
+                        db.session.commit()
+                        status = 'enrolled'
+                    else:
+                        status = 'pending'
+                else:
+                    status = ds_practitioner.ds_enrollment_status
 
-#     res_json = res.json()
-#     if res.ok:
-#         access_token = res_json['access_token']
-#         headers = {'Authorization': f'Bearer {access_token}'}
-#     else:
-#         raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-    
-#     # Phone Type
-#     # 2 - Cell
-#     phone_type = 2
-#     # clin_role_type
-#     # 1 - Prescribing Practitioner
-#     # 6 - Proxy user
-#     clin_role_type = 6
-#     min_payload = {'FirstName': MODOBIO_ADDRESS['firstname'],
-#             'LastName': MODOBIO_ADDRESS['lastname'],
-#             'DateOfBirth': MODOBIO_ADDRESS['dob'],
-#             'Address1': MODOBIO_ADDRESS['street'],
-#             'Address2': MODOBIO_ADDRESS['street2'],
-#             'City':MODOBIO_ADDRESS['city'],
-#             'State':MODOBIO_ADDRESS['state'],
-#             'ZipCode':MODOBIO_ADDRESS['zipcode'],
-#             'PrimaryPhone': MODOBIO_ADDRESS['phone'],
-#             'PrimaryPhoneType': phone_type,
-#             'PrimaryFax': MODOBIO_ADDRESS['phone'],
-#             'ClinicianRoleType': clin_role_type,
-#             'Active': True
-#             }
+        return status
 
-#     res = requests.post(
-#         'https://my.staging.dosespot.com/webapi/api/clinicians',
-#         headers=headers,
-#         data=min_payload)
+    def pharmacies(self, user_id, zip_code = None, state_id = None):
+        """
+        Returns the pharmacies near the provied address details
 
-#     # If res is okay, store credentials
-#     res_json = res.json()
-#     if res.ok:
-#         if 'Result' in res_json:
-#             if 'ResultCode' in res_json['Result']:
-#                 if res_json['Result']['ResultCode'] != 'OK':
-#                     raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-#         ds_proxy_user = DoseSpotCreateProxyUserSchema().load(
-#                                         {'ds_proxy_id': res_json['Id']})
-#         db.session.add(ds_proxy_user)
-#         db.session.commit()
-#     else:
-#         raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-#     return ds_proxy_user
+        Params
+        ------
+        user_id
+
+        Returns
+        ------
+        parmacies_list: [str]
+            list of pharmacies 
+        """
+    # Bring up client's ds details. if not registered, make an account
+        
