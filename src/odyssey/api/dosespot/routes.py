@@ -203,7 +203,7 @@ class DoseSpotSelectPharmacies(BaseResource):
         
         ds = DoseSpot()
 
-        pharmacies = ds.pharmacies(state_id = state_id, zipcode = zipcode)
+        pharmacies = ds.pharmacy_search(state_id = state_id, zipcode = zipcode)
         
         return pharmacies['Items']
 
@@ -212,42 +212,21 @@ class DoseSpotPatientPharmacies(BaseResource):
     @token_auth.login_required(user_type=('client',))
     def get(self, user_id):
         """
-        GET - The pharmacies the Modobio client has selected (at most 3.)
+        Retrieve from DoseSpot the pharmacies the Modobio client has selected (at most 3.)
+        Params
+        ------
+        user_id: int
 
-            DoseSpot Proxy credentials will be used to access DoseSpot credentials
+        Returns
+        ------
+        pharamacies: [dict]
+            list of up to 3 pharmacies
         """
         
-        # ADMIN - Cannot GET, look in to PROXY user
-        # PROXY user WORKS
-        ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
-
-        if not ds_patient:
-            # This works
-            ds_patient = onboard_patient(user_id,0)
-
-        clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-        modobio_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
-
-        # generating keys for ADMIN
-        encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
-
-        proxy_ds_user_id = str(current_app.config['DOSESPOT_PROXY_USER_ID'])         
-        encrypted_user_id = generate_encrypted_user_id(encrypted_clinic_id[:22],clinic_api_key, proxy_ds_user_id)
-
-        res = get_access_token(modobio_id,encrypted_clinic_id, proxy_ds_user_id,encrypted_user_id)
-
-        res_json = res.json()
-        if res.ok:
-            access_token = res_json['access_token']
-            headers = {'Authorization': f'Bearer {access_token}'}
-        else:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-
-        res = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
-        res_json = res.json()
-        if not res.ok:
-            raise BadRequest(f'DoseSpot returned the following error: {res_json}.')
-        return res_json['Items']
+        ds = DoseSpot()
+        pharmacies = ds.client_pharmacies(user_id)
+        
+        return pharmacies['Items']
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=DoseSpotPharmacyNestedSelect,api=ns)
