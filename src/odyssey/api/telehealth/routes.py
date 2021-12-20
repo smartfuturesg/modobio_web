@@ -6,9 +6,6 @@ from operator import itemgetter
 import logging
 logger = logging.getLogger(__name__)
 
-import json
-import random
-import requests
 import secrets
 
 from datetime import datetime, time, timedelta
@@ -26,19 +23,10 @@ from odyssey import db, mongo
 from odyssey.api.lookup.models import (
     LookupBookingTimeIncrements
 )
-from odyssey.api.staff.models import  StaffCalendarEvents
 from odyssey.api.lookup.models import LookupTerritoriesOfOperations
-from odyssey.api.payment.models import (
-    PaymentMethods,
-    PaymentHistory)
-from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.staff.models import (
-    StaffOperationalTerritories,
-    StaffCalendarEvents,
-    StaffRoles)
-from odyssey.api.system.models import SystemTelehealthSessionCosts
+from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import (
-    TelehealthBookingStatus,
     TelehealthBookings,
     TelehealthChatRooms,
     TelehealthMeetingRooms,
@@ -62,21 +50,16 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilityConflictSchema,
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema,
-    TelehealthStaffSettingsSchema,
     TelehealthBookingsPUTSchema,
     TelehealthTranscriptsSchema,
-    TelehealthUserSchema
 )
 from odyssey.api.user.models import User
-from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
 )
-from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.payment.models import PaymentMethods, PaymentHistory
+from odyssey.api.payment.models import PaymentMethods
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-# from odyssey.integrations.wheel import Wheel
 from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.constants import (
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
@@ -503,6 +486,11 @@ class TelehealthBookingsApi(BaseResource):
             else: 
                 booking_chat_details = booking.chat_room.__dict__
 
+            # check if a booking description has been added to the meeting
+            booking_details = None
+            if booking.booking_details:
+                booking_details = booking.booking_details.details
+
             bookings_payload.append({
                 'booking_id': booking.idx,
                 'target_date_utc': booking.target_date_utc,
@@ -516,7 +504,8 @@ class TelehealthBookingsApi(BaseResource):
                 'client': client,
                 'practitioner': practitioner,
                 'consult_rate': booking.consult_rate,
-                'charged': booking.charged
+                'charged': booking.charged,
+                'description': booking_details 
             })
 
         # Sort bookings by time then sort by date
@@ -1531,7 +1520,6 @@ class TelehealthBookingDetailsApi(BaseResource):
         details = form.get('details', '')
 
         data = TelehealthBookingDetails(booking_id=booking_id, details=details)
-
         #Saving media files into s3
         if files:
             fh = FileHandling()

@@ -159,6 +159,13 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: :class: `TelehealthChatRooms` instance
     """
 
+    booking_details = db.relationship('TelehealthBookingDetails', uselist=False, back_populates='booking')
+    """
+    One-to_One relationship with TelehealthBookingDetails
+
+    :type: :class: `TelehealthBookingDetails` instance
+    """
+
     medical_gender_preference  = db.Column(db.String)
     """
     preferred gender of the medical professional
@@ -474,6 +481,13 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     client details about a booked teleheath call
     
     :type: str
+    """
+
+    booking = db.relationship('TelehealthBookings', uselist=False, back_populates='booking_details')
+    """
+    One-to-One relationship with TelehealthBookings
+
+    :type: :class: `TelehalthBookings` instance
     """
     
 
