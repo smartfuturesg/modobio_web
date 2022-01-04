@@ -32,12 +32,7 @@ from odyssey.api.user.models import User
 from odyssey.integrations.dosespot import DoseSpot
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.dosespot import (
-    generate_encrypted_user_id,
-    get_access_token,
-    lookup_ds_users,
-    onboard_patient
-)
+
 
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
 
