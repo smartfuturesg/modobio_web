@@ -355,8 +355,8 @@ class FitnessQuestionnaireEndpoint(BaseResource):
             FitnessQuestionnaire
             .query
             .filter_by(
-                user_id=user_id))
-            .first()
+                user_id=user_id)
+            .first())
 
         request.parsed_obj.idx = quest.idx
         request.parsed_obj.user_id = user_id
