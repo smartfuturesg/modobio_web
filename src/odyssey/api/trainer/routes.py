@@ -312,32 +312,53 @@ class MoxyRipAssessment(BaseResource):
 
 @ns.route('/questionnaire/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class InitialQuestionnaire(BaseResource):    
-    """GET and POST initial fitness questionnaire"""
+class FitnessQuestionnaireEndpoint(BaseResource):
+    """ Fitness questionnaire endpoint.
+
+    One questionnaire per client.
+    """
 
     @token_auth.login_required
     @responds(schema=FitnessQuestionnaireSchema, api=ns)
     def get(self, user_id):
-        """returns client's fitness questionnaire"""
+        """ Returns a fitness questionnaire for user_id. """
         check_client_existence(user_id)
 
-        client_fq = FitnessQuestionnaire.query.filter_by(user_id=user_id).order_by(FitnessQuestionnaire.idx.desc()).first()
-        
-        return client_fq
+        quest = (
+            FitnessQuestionnaire
+            .query
+            .filter_by(
+                user_id=user_id)
+            .one_or_none())
+
+        return quest
 
     @token_auth.login_required
     @accepts(schema=FitnessQuestionnaireSchema, api=ns)
-    @responds(schema=FitnessQuestionnaireSchema, status_code=201, api=ns)
+    @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """create a fitness questionnaire entry for user_id"""
+        """ Create a fitness questionnaire entry for user_id. """
         check_client_existence(user_id)
 
-        data=request.get_json()
-        data['user_id'] = user_id
-        
-        client_fq = FitnessQuestionnaireSchema().load(data)
-        
-        db.session.add(client_fq)
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
         db.session.commit()
         
-        return client_fq
+    @token_auth.login_required
+    @accepts(schema=FitnessQuestionnaireSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def put(self, user_id):
+        """ Update a fitness questionnaire entry for user_id. """
+        check_client_existence(user_id)
+
+        quest = (
+            FitnessQuestionnaire
+            .query
+            .filter_by(
+                user_id=user_id))
+            .first()
+
+        request.parsed_obj.idx = quest.idx
+        request.parsed_obj.user_id = user_id
+        db.session.merge(request.parsed_obj)
+        db.session.commit()
