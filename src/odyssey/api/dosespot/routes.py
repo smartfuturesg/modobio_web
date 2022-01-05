@@ -33,7 +33,6 @@ from odyssey.integrations.dosespot import DoseSpot
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 
-
 ns = Namespace('dosespot', description='Operations related to DoseSpot')
 
 @ns.route('/allergies/<int:user_id>/')
@@ -137,7 +136,7 @@ class DoseSpotNotificationSSO(BaseResource):
             SSO which sends user directly to their notifications
         """
         ds = DoseSpot(practitioner_user_id = user_id)
-        url = ds.notifications()
+        url = ds.notifications(user_id)
 
         return {'url': url}
 

@@ -172,7 +172,7 @@ class DoseSpot:
 
         Params
         ------
-        patient_id, str: user_id for the client user. Used to bring up the client's dose spot id 
+        client_user_id, str: user_id for the client user. Used to bring up the client's dose spot id 
 
         Returns
         ------
@@ -189,10 +189,15 @@ class DoseSpot:
 
         return self._generate_sso(client_ds_id)
 
-    def notifications(self):
+    def notifications(self, user_id):
         """
         Bring up notifications the practitioner has on DoseSpot
         Store these inthe modobio notification system
+
+        Params
+        ------
+        user_id: int
+            modobio user_id
         """
         # log user in 
         access_token = self._get_access_token(self.practitioner_ds_id)
@@ -205,7 +210,7 @@ class DoseSpot:
             response.raise_for_status()
         except:
             raise BadRequest(f'DoseSpot returned the following error: {response.text}')
-
+        
         notification_count = 0
         res_json = response.json()
         for key in res_json:
@@ -218,11 +223,11 @@ class DoseSpot:
         # this is done so we do not repeat the same dosespot notification over again, 
         # instead we update the sso url and the notification count
         if notification_count > 0:
-            ds_notification = Notifications.query.filter_by(user_id=self.practitioner_ds_id, notification_type_id=ds_notification_type).one_or_none()
+            ds_notification = Notifications.query.filter_by(user_id=user_id, notification_type_id=ds_notification_type).one_or_none()
             if not ds_notification:
                 ds_notification = Notifications(
                     notification_type_id = ds_notification_type, # DoseSpot Notification
-                    user_id=self.practitioner_ds_id,
+                    user_id=user_id,
                     title=f"You have {notification_count} DoseSpot Notifications.",
                     content="Click this notification to be brought to the DoseSpot platform to view notifications.",
                     action=url,
