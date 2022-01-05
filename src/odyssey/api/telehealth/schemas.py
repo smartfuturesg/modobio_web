@@ -90,6 +90,11 @@ class TelehealthUserSchema(ma.SQLAlchemyAutoSchema):
     end_time_localized = fields.Time()
     timezone = fields.String()
 
+class TelehealthBookingDetailsGetSchema(Schema):
+    details = fields.String(default=None)
+    images = fields.String(default=None)
+    voice = fields.String(default=None)
+    
 class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
@@ -113,6 +118,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     start_time_utc = fields.Time()
     booking_url = fields.String()
     consult_rate = fields.Number(missing=None)
+    description = fields.String()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -209,11 +215,7 @@ class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at')
         include_fk = True
 
-class TelehealthBookingDetailsGetSchema(Schema):
-    details = fields.String()
-    images = fields.String()
-    voice = fields.String()
-    
+
 class TelehealthChatRoomAccessSchema(Schema):
     """
     Validates response for telehealth chat room access request
