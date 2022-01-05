@@ -1,9 +1,8 @@
-import pytest
-from copy import deepcopy
+
 from flask.json import dumps
-from odyssey import db
-from odyssey.api.staff.models import StaffOffices
-from tests.functional.staff.data import staff_office_data
+from odyssey.api.notifications.models import Notifications
+
+from odyssey.tasks.periodic import get_dosespot_notifications
 
 def test_get_select_ds_pharmacies(test_client):
     response = test_client.get(f'/dosespot/select/pharmacies/{test_client.client_id}/',
@@ -44,5 +43,16 @@ def test_get_patient_ds_prescriptions(test_client):
                                 headers=test_client.client_auth_header)
 
     assert response.status_code == 200 
+
+
+def test_ds_notifications_task(test_client):
+    """
+    Tests the periodically run celery task that populates the Notifications table with dosespot notifications    
+    """
+    ds_practitioners = get_dosespot_notifications()
+
+    notifications = Notifications.query.filter_by(user_id = test_client.staff_id, notification_type_id = 17).one_or_none()
+
+    assert notifications
 
 
