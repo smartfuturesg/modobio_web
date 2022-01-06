@@ -506,4 +506,4 @@ class ClientFertilitySchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('updated_at', 'user_id')
         load_instance = True
         
-    status = validate=validate.OneOf(FERTILITY_STATUSES['pregnant'].append(FERTILITY_STATUSES['not pregnant']))
+    status = validate=validate.OneOf(FERTILITY_STATUSES['pregnant'] + FERTILITY_STATUSES['not_pregnant'])
