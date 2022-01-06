@@ -1,5 +1,7 @@
 from flask.json import dumps
 
+from odyssey.api.notifications.models import Notifications
+
 from .data import notification, notification_type, notification_update
 
 def test_notifications_post(test_client):
@@ -30,8 +32,9 @@ def test_notifications_get(test_client):
         assert notif.get('notification_type') == notification_type
 
 def test_notifications_put(test_client):
+        _notification = Notifications.query.filter_by(user_id = test_client.client_id).first()
         response = test_client.put(
-            f'/notifications/{test_client.client_id}/1/',
+            f'/notifications/{test_client.client_id}/{_notification.notification_id}/',
             headers=test_client.client_auth_header,
             data=dumps(notification_update),
             content_type='application/json')

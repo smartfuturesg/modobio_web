@@ -111,14 +111,6 @@ class DoseSpotPharmacySelect(Schema):
 class DoseSpotPharmacyNestedSelect(Schema):
     items = fields.Nested(DoseSpotPharmacySelect(many=True))
 
-class DoseSpotCreateProxyUserSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = DoseSpotProxyID
-        exclude = ('created_at',)
-        dump_only = ('idx',)
-    @post_load
-    def make_object(self,data,**kwargs):
-        return DoseSpotProxyID(**data)
 class DoseSpotCreatePractitionerSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = DoseSpotPractitionerID
