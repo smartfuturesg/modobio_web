@@ -479,8 +479,8 @@ class NewClientUser(BaseResource):
         db.session.add(client_mother_race_info)
         db.session.add(client_father_race_info)
         
-        # is client biological_sex_male = False, add default fertility status
-        if not user_info.biological_sex_male:
+        # if client biological_sex_male = False, add default fertility status
+        if not user_info['biological_sex_male']:
             fertility = ClientFertility(**{'pregnant': False, 'status': 'unknown'})
             db.session.add(fertility)
 
