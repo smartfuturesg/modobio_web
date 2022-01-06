@@ -4,15 +4,15 @@ import hashlib
 import base64
 from marshmallow.fields import Dict
 import requests
+import urllib
 
 from flask import current_app
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import select
-from werkzeug.wrappers import response
 
 from odyssey import db
 from odyssey.api.notifications.models import Notifications
-from odyssey.utils.constants import ALPHANUMERIC, MODOBIO_ADDRESS
+from odyssey.utils.constants import ALPHANUMERIC
 from odyssey.api.dosespot.models import DoseSpotPatientID, DoseSpotPractitionerID
 from odyssey.api.dosespot.schemas import (
     DoseSpotCreatePractitionerSchema,
@@ -33,6 +33,7 @@ class DoseSpot:
         self.modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
         self.clinic_api_key = current_app.config['DOSESPOT_API_KEY']
         self.encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
+        self.base_url = current_app.config['DOSESPOT_BASE_URL']
         
         self.rand_phrase = "".join([random.choice(ALPHANUMERIC) for i in range(char_len)])
         
@@ -62,7 +63,7 @@ class DoseSpot:
 
         return lookup_users
 
-    def _generate_encrypted_clinic_id(self):
+    def _generate_encrypted_clinic_id(self, url=False):
         """
         This function generates an encrypted clinic key for DoseSpot:
         
@@ -84,14 +85,14 @@ class DoseSpot:
 
         hash512 = hashlib.sha512(encoded_str).digest()
 
-        encrypted_str = base64.b64encode(hash512).decode()
-
-        while encrypted_str[-1] == '=':
-            encrypted_str = encrypted_str[:-1]
+        if url:
+            encrypted_str = base64.urlsafe_b64encode(hash512).decode().rstrip('=')
+        else:
+            encrypted_str = base64.b64encode(hash512).decode().rstrip('=')
 
         return self.rand_phrase + encrypted_str
 
-    def _generate_encrypted_user_id(self, user_ds_id):
+    def _generate_encrypted_user_id(self, user_ds_id, url=False):
         """
         This function generates an encrypted user_id for DoseSpot
         
@@ -110,10 +111,10 @@ class DoseSpot:
 
         hash512 = hashlib.sha512(encoded_str).digest()
 
-        encrypted_str = base64.b64encode(hash512).decode()
-
-        while encrypted_str[-1] == '=':
-            encrypted_str = encrypted_str[:-1]
+        if url:
+            encrypted_str = base64.urlsafe_b64encode(hash512).decode().rstrip('=')
+        else:
+            encrypted_str = base64.b64encode(hash512).decode().rstrip('=')
 
         return encrypted_str
 
@@ -135,17 +136,22 @@ class DoseSpot:
         encrypted_clinic_id_url = self.encrypted_clinic_id.replace('/','%2F')
         encrypted_clinic_id_url = encrypted_clinic_id_url.replace('+','%2B')   
 
-        encrypted_user_id = self._generate_encrypted_user_id(self.practitioner_ds_id)
-        encrypted_user_id_url = encrypted_user_id.replace('/','%2F')
-        encrypted_user_id_url = encrypted_user_id_url.replace('+','%2B')    
+        encrypted_user_id_url = self._generate_encrypted_user_id(self.practitioner_ds_id, url=True)
         
-        URL = f'http://my.staging.dosespot.com/LoginSingleSignOn.aspx?SingleSignOnClinicId={self.modobio_clinic_id}&SingleSignOnUserId={self.practitioner_ds_id}&SingleSignOnPhraseLength=32&SingleSignOnCode={encrypted_clinic_id_url}&SingleSignOnUserIdVerify={encrypted_user_id_url}'
-        
+        params = {
+        'SingleSignOnClinicId': self.modobio_clinic_id,
+        'SingleSignOnUserId': self.practitioner_ds_id,
+        'SingleSignOnPhraseLength': 32,
+        'SingleSignOnCode': encrypted_clinic_id_url,
+        'SingleSignOnUserIdVerify': encrypted_user_id_url
+        }
+
         if(patient_id):
-            URL = URL+f'&PatientId={patient_id}'
+            params['PatientId'] = patient_id
         else:
-            URL = URL+'&RefillsErrors=1'
-        return URL
+            params['RefillsErrors'] = 1
+
+        return self.base_url + 'LoginSingleSignOn.aspx?' + urllib.parse.urlencode(params)
 
     def _get_access_token(self, user_ds_id):
         """
@@ -154,8 +160,8 @@ class DoseSpot:
         """
         encrypted_user_id = self._generate_encrypted_user_id(user_ds_id)
         payload = {'grant_type': 'password', 'Username':user_ds_id, 'Password':encrypted_user_id}
-        
-        response = requests.post('https://my.staging.dosespot.com/webapi/token',
+
+        response = requests.post(self.base_url + '/webapi/token',
                         auth=(self.modobio_clinic_id, self.encrypted_clinic_id),
                         data=payload)
         try:
@@ -204,7 +210,7 @@ class DoseSpot:
         headers = {'Authorization': f'Bearer {access_token}'}
 
         # bring up notifications from dosespot api
-        response = requests.get('https://my.staging.dosespot.com/webapi/api/notifications/counts',
+        response = requests.get(self.base_url + '/webapi/api/notifications/counts',
                     headers=headers)
         try:
             response.raise_for_status()
@@ -290,7 +296,7 @@ class DoseSpot:
                 'Active': True
                 }
         
-        response = requests.post('https://my.staging.dosespot.com/webapi/api/patients',
+        response = requests.post(self.base_url + '/webapi/api/patients',
             headers=headers,
             data=payload)
         
@@ -374,7 +380,7 @@ class DoseSpot:
                 }
 
         response = requests.post(
-            'https://my.staging.dosespot.com/webapi/api/clinicians',
+            self.base_url + '/webapi/api/clinicians',
             headers=headers,
             data=min_payload)
 
@@ -407,7 +413,7 @@ class DoseSpot:
         access_token = self._get_access_token(self.proxy_user_ds_id)
         headers = {'Authorization': f'Bearer {access_token}'}
 
-        response = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/allergies',
+        response = requests.get(self.base_url + f'/webapi/api/patients/{ds_patient.ds_user_id}/allergies',
                 headers=headers)
 
         try:
@@ -448,7 +454,9 @@ class DoseSpot:
         now = datetime.now()
         end_date = now.strftime("%Y-%m-%d")
 
-        response = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/prescriptions?startDate={start_date}&endDate={end_date}',
+        params = {'startDate': start_date, 'endDate': end_date}
+
+        response = requests.get(self.base_url + f'/webapi/api/patients/{ds_patient.ds_user_id}/prescriptions?' + urllib.parse.urlencode(params),
                 headers=headers)
         try:
             response.raise_for_status()
@@ -502,7 +510,7 @@ class DoseSpot:
                 # sign in as admin user
                 access_token = self._get_access_token(self.admin_user_ds_id)
                 headers = {'Authorization': f'Bearer {access_token}'}
-                response = requests.get(f'https://my.staging.dosespot.com/webapi/api/clinicians/{ds_practitioner.ds_user_id}',headers=headers)
+                response = requests.get(self.base_url + f'/webapi/api/clinicians/{ds_practitioner.ds_user_id}',headers=headers)
                 try:
                     response.raise_for_status()
                 except:
@@ -542,18 +550,16 @@ class DoseSpot:
             
         state = LookupTerritoriesOfOperations.query.filter_by(idx=state_id).one_or_none()
 
-        request_url = f'https://my.staging.dosespot.com/webapi/api/pharmacies/search?'
-
         if zipcode and state:
-            request_url += f'zip={zipcode}&state={state.sub_territory_abbreviation}'
+            params = {'zip': zipcode ,'state' : state.sub_territory_abbreviation}
         elif zipcode:
-            request_url += f'zip={zipcode}'
+            params = {'zip': zipcode}
         elif state:
-            request_url += f'state={state.sub_territory_abbreviation}'
+            params = {'state' : state.sub_territory_abbreviation}
         else:
             raise BadRequest('Please select state and/or zipcode for pharmacy search')
        
-        response = requests.get(request_url,headers=headers)
+        response = requests.get(self.base_url + '/webapi/api/pharmacies/search?' + urllib.parse.urlencode(params),headers=headers)
 
         try:
             response.raise_for_status()
@@ -578,7 +584,7 @@ class DoseSpot:
         access_token = self._get_access_token(self.proxy_user_ds_id)
         headers = {'Authorization': f'Bearer {access_token}'}
 
-        response = requests.get(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
+        response = requests.get(self.base_url +f'/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies',headers=headers)
        
         try:
             response.raise_for_status()
@@ -608,7 +614,7 @@ class DoseSpot:
 
         for item in current_pharmacies['Items']:
             pharm_id = item['PharmacyId']
-            response = requests.delete(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers)
+            response = requests.delete(self.base_url + f'/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}', headers=headers)
             try:
                 response.raise_for_status()
             except:
@@ -620,7 +626,7 @@ class DoseSpot:
         for item in pharmacies:
             pharm_id = item['pharmacy_id']
             primary_flag = {'SetAsPrimary': item['primary_pharm']}
-            response = requests.post(f'https://my.staging.dosespot.com/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}',headers=headers,data=primary_flag)
+            response = requests.post(self.base_url + f'/webapi/api/patients/{ds_patient.ds_user_id}/pharmacies/{pharm_id}', headers=headers, data=primary_flag)
             try:
                 response.raise_for_status()
             except:
