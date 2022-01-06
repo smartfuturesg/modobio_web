@@ -73,6 +73,9 @@ ns = Namespace('user', description='Endpoints for user accounts.')
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ApiUser(BaseResource):
+    """
+    Retrieve, Update, and Delete a User's basic information.
+    """
     
     @token_auth.login_required
     @responds(schema=UserSchema, api=ns)
@@ -80,6 +83,16 @@ class ApiUser(BaseResource):
         check_user_existence(user_id)
 
         return User.query.filter_by(user_id=user_id).one_or_none()
+
+    @token_auth.login_required(user_type=('staff', 'client', 'staff_self'), staff_role=('client_services',))
+    def patch(self, user_id):
+        """
+        Update attributes from user's basic info
+        
+        Client services role will have access to this endpoint. All other staff roles are locked out.
+        """
+        self.check_user(user_id)
+
 
     @token_auth.login_required
     def delete(self, user_id):
