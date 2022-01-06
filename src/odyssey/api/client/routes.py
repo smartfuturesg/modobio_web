@@ -1971,7 +1971,7 @@ class ClientWeightEndpoint(BaseResource):
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClientFertilitySchema, api=ns)
-    @responds(api=ns, status_code=201)
+    @responds(schema=ClientFertilitySchema, api=ns, status_code=201)
     def post(self, user_id):
         """ New fertility status.
 
@@ -2008,6 +2008,7 @@ class ClientWeightEndpoint(BaseResource):
         db.session.add(request.parsed_obj)
 
         db.session.commit()
+        return request.parsed_obj
 
     @token_auth.login_required(user_type=('client', 'staff'))
     @responds(schema=ClientFertilitySchema(many=True), api=ns, status_code=200)
