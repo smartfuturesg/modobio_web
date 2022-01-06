@@ -893,6 +893,7 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
 
         #token was valid, remove the pending request, update user account and return 200
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+        # if this email is being verified on a new account: create modobio_id and update membersince dates
         
         if user.email_verified == False and user.modobio_id == None:
             md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)

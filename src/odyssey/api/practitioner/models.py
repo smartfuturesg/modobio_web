@@ -116,7 +116,7 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     If any updates occur, we will try to automatically onboard that MD to to the DS platform
     """
-    from odyssey.utils.dosespot import onboard_practitioner
+    from odyssey.integrations.dosespot import DoseSpot
     from odyssey.api.staff.models import StaffOffices
     from odyssey.api.dosespot.models import DoseSpotPractitionerID
 
@@ -126,6 +126,8 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     if (staff_office and verified_npi) and not ds_practitioner:
         try:
-            onboard_practitioner(target.user_id)    
+            ds = DoseSpot()
+            ds.onboard_practitioner(target.user_id)
+            db.session.commit() 
         except:
             return

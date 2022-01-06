@@ -3,6 +3,7 @@ Database tables staff member information for the Modo Bio Staff application.
 All tables in this module are prefixed with ``Staff``.
 """
 import logging
+from sqlalchemy.sql.expression import except_all
 logger = logging.getLogger(__name__)
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -346,7 +347,7 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     If any updates occur, we will try to automatically onboard that MD to to the DS platform
     """
-    from odyssey.utils.dosespot import onboard_practitioner
+    from odyssey.integrations.dosespot import DoseSpot
     from odyssey.api.practitioner.models import PractitionerCredentials
     from odyssey.api.dosespot.models import DoseSpotPractitionerID
 
@@ -354,10 +355,8 @@ def ds_onboard_practitioner(mapper, connection, target):
     ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=target.user_id).one_or_none()
 
     if verified_npi and not ds_practitioner:
-        try:
-            onboard_practitioner(target.user_id)    
-        except:
-            return
+        ds = DoseSpot()
+        ds.onboard_practitioner(target.user_id)    
 
 @db.event.listens_for(StaffOffices, "after_update")
 def ds_onboard_practitioner(mapper, connection, target):
@@ -366,7 +365,7 @@ def ds_onboard_practitioner(mapper, connection, target):
 
     If any updates occur, we will try to automatically onboard that MD to to the DS platform
     """
-    from odyssey.utils.dosespot import onboard_practitioner
+    from odyssey.integrations.dosespot import DoseSpot
     from odyssey.api.practitioner.models import PractitionerCredentials
     from odyssey.api.dosespot.models import DoseSpotPractitionerID
 
@@ -374,7 +373,5 @@ def ds_onboard_practitioner(mapper, connection, target):
     ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=target.user_id).one_or_none()
 
     if verified_npi and not ds_practitioner:
-        try:
-            onboard_practitioner(target.user_id)    
-        except:
-            return            
+        ds = DoseSpot()
+        ds.onboard_practitioner(target.user_id)   

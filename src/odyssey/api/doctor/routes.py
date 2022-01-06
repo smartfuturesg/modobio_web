@@ -177,7 +177,7 @@ class MedCredentials(BaseResource):
                     cred.user_id = user_id
                     db.session.add(cred)
             else:
-                cred.status = 'Pending Verification'
+                cred.status = 'Pending Verification' if not any([current_app.config['DEV'],current_app.config['TESTING']]) else 'Verified'
                 cred.role_id = curr_role.idx
                 cred.user_id = user_id
                 db.session.add(cred)

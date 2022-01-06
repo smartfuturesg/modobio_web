@@ -227,6 +227,11 @@ DOSESPOT_ADMIN_ID = ''
 """ DoseSpot Admin ID"""
 
 DOSESPOT_ENCRYPTED_ADMIN_ID = ''
+
+DOSESPOT_PROXY_USER_ID = '238851'
+
+DOSESPOT_BASE_URL = 'https://my.staging.dosespot.com'
+
 # Wheel settings
 WHEEL_API_TOKEN = ''
 WHEEL_MD_CONSULT_RATE = '7161c1e9-69a6-4430-a7ef-04593300f48a'
