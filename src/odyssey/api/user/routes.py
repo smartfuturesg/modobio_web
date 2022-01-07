@@ -480,10 +480,11 @@ class NewClientUser(BaseResource):
         db.session.add(client_father_race_info)
         
         # if client biological_sex_male = False, add default fertility status
-        if not user_info['biological_sex_male']:
-            fertility = ClientFertility(**{'pregnant': False, 'status': 'unknown'})
-            fertility.user_id = user.user_id
-            db.session.add(fertility)
+        if 'biological_sex_male' in user_info:
+            if not user_info['biological_sex_male']:
+                fertility = ClientFertility(**{'pregnant': False, 'status': 'unknown'})
+                fertility.user_id = user.user_id
+                db.session.add(fertility)
 
         #Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
