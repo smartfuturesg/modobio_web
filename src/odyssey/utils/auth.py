@@ -240,16 +240,12 @@ class BasicAuth(object):
        
         # staff accessing their own resources
         # request args will either contain user_id or staff_user_id which must match the logged-in user
+        # if logged-in staff is not the user being requested and no role nor resource requirements are provided, raise unauthorized
         if 'staff_self' in user_type \
             and request.view_args.get('user_id', request.view_args.get('staff_user_id')) != user.user_id \
-            and staff_roles is not None:
+            and staff_roles is not None \
+            and len(resources) == 0:
                 raise Unauthorized
-continue herererwe;lkrnas;dlfjasd
-       
-       ####################################################################################################################################
-       
-       
-       
         # check if resource access check is necessary
         elif len(resources) > 0:
             # 1. Check if staff member has resource access

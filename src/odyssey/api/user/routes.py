@@ -2,12 +2,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
-import boto3
 import jwt
 import requests
 import json
 
-from flask import current_app, request, jsonify, redirect
+from flask import current_app, request, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy.sql.expression import select
@@ -16,7 +15,6 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.client.schemas import (
     ClientInfoSchema,
     ClientGeneralMobileSettingsSchema,
@@ -92,6 +90,13 @@ class ApiUser(BaseResource):
         Client services role will have access to this endpoint. All other staff roles are locked out.
         """
         self.check_user(user_id)
+
+        user_info = request.json
+        email = user_info['email']
+
+        email_domain_blacklisted(email)
+
+        #if email is part of payload, use email update routine
 
 
     @token_auth.login_required
@@ -831,16 +836,6 @@ class UserLogoutApi(BaseResource):
         db.session.commit()
 
         return 200
-
-        res = []
-        for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
-            user = User.query.filter_by(user_id=client.user_id).one_or_none()
-            res.append({'client_user_id': user.user_id, 
-                        'client_name': ''.join(filter(None, (user.firstname, user.middlename ,user.lastname))),
-                        'client_email': user.email})
-        
-        return res
-
 
 # TODO: remove these redirects once fixed on frontend
 
