@@ -930,3 +930,22 @@ WEARABLE_DATA_DEFAULT_RANGE_DAYS = 14
 
 # wearable device types
 WEARABLE_DEVICE_TYPES = ('fitbit', 'oura', 'applewatch')
+
+FERTILITY_STATUSES = {
+    'pregnant': [
+        'unknown',
+        'first trimester',
+        'second trimester',
+        'third trimester'
+    ],
+    'not_pregnant': [
+        'unknown',
+        'menstruation phase',
+        'follicular phase',
+        'ovulation phase',
+        'luteal phase',
+        'perimenopausal',
+        'menopausal',
+        'postmenopausal'
+    ]
+}

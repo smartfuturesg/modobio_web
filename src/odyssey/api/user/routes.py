@@ -16,7 +16,7 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.client.models import ClientClinicalCareTeam
+from odyssey.api.client.models import ClientClinicalCareTeam, ClientFertility
 from odyssey.api.client.schemas import (
     ClientInfoSchema,
     ClientGeneralMobileSettingsSchema,
@@ -477,7 +477,14 @@ class NewClientUser(BaseResource):
         client_father_race_info = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
         client_father_race_info.user_id = user.user_id
         db.session.add(client_mother_race_info)
-        db.session.add(client_father_race_info)     
+        db.session.add(client_father_race_info)
+        
+        # if client biological_sex_male = False, add default fertility status
+        if 'biological_sex_male' in user_info:
+            if not user_info['biological_sex_male']:
+                fertility = ClientFertility(**{'pregnant': False, 'status': 'unknown'})
+                fertility.user_id = user.user_id
+                db.session.add(fertility)
 
         #Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')

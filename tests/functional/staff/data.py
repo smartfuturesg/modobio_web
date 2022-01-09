@@ -8,7 +8,8 @@ users_staff_new_user_data = {
     "email": "test_this_user_staff@modobio.com",
     "phone_number": "1111111112",
     "password": "password",
-    "dob": '1995-6-13'
+    "dob": '1995-6-13',
+    "biological_sex_male": True
   },
   "staff_info": {
     "access_roles" : [
