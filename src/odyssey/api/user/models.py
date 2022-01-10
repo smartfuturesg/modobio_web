@@ -482,7 +482,7 @@ class UserPendingEmailVerifications(db.Model):
     :type: int, primary key
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False, unique = True)
     """
     Id of the user that this pending verification belongs to.
 
@@ -501,6 +501,15 @@ class UserPendingEmailVerifications(db.Model):
     4 digit code that can be used in place of the token in case of problems with the token.
 
     :type: string
+    """
+
+    email = db.Column(db.String(75), unique=True)
+    """
+    Email address.
+
+    The email address is also the login username.
+
+    :type: str, max length 75, non-null, unique
     """
 
     @staticmethod

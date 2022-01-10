@@ -2,6 +2,8 @@
 import logging
 
 from odyssey.api.telehealth.models import TelehealthBookingStatus
+from odyssey.utils.auth import BasicAuth
+from odyssey.utils.message import send_email_verify_email
 logger = logging.getLogger(__name__)
 
 import ast
@@ -31,8 +33,8 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
 from odyssey.api.lookup.models import LookupDrinks
-from odyssey.utils.constants import ALPHANUMERIC
-from odyssey.api.user.models import User, UserTokenHistory
+from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME
+from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -545,3 +547,137 @@ def get_time_index(target_time: datetime):
         LookupBookingTimeIncrements.start_time <= target_time.time(),
         LookupBookingTimeIncrements.end_time > target_time.time()
     ).one_or_none().idx
+
+
+
+
+class EmailVerification():
+    """
+    Class for handling email verification routines
+    """
+
+    def __init__(self) -> None:
+        self.secret = current_app.config['SECRET_KEY']
+
+    def pending_email_verification(self, user: User, email: str = None):
+        """
+        Email verification process creates an entry into the UserPendingEmailVerification table which stores
+        the code and token used to verify new emails. If a user is updating their email address, the new email 
+        is temporarily stored in this table until the email is verified.
+
+        """
+        # check if there is already a Pending email verification entry
+        pending_verification = UserPendingEmailVerifications.query.filter_by(user_id = user.user_id).one_or_none()
+
+        # if there is a pending verification, remove it and create a new one
+        if pending_verification:
+            db.session.delete(pending_verification)
+
+        # generate token and code for email verification
+        token = UserPendingEmailVerifications.generate_token(user.user_id)
+        code = UserPendingEmailVerifications.generate_code()
+
+        # create pending email verification in db
+        email_verification_data = {
+            'user_id': user.user_id,
+            'token': token,
+            'code': code,
+            'email': email
+        }
+        
+        verification = UserPendingEmailVerifications(**email_verification_data)
+        db.session.add(verification)
+
+        # send email to the user
+        send_email_verify_email(user, token, code)
+
+        db.session.commit()
+
+        return email_verification_data
+
+    def check_token(self, token):
+        """
+        checks email verification token (JWT) 
+        """
+        try:
+            jwt.decode(token, self.secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise Unauthorized('Email verification token expired.')
+
+        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
+
+        if not verification:
+            raise Unauthorized('Email verification token not found.')
+
+        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+        
+        return user, verification
+
+    def check_code(self, user_id: int, code: str):
+        """
+        checks provided email verification code and then validates token stored in UserPendingEmailVerifications
+        """
+
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+
+        if not verification or verification.code != request.args.get('code'):
+            raise Unauthorized('Email verification failed.')
+
+        # Decode and validate token. Code should expire the same time the token does.
+        secret = current_app.config['SECRET_KEY']
+
+        try:
+            jwt.decode(verification.token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise Unauthorized('Email verification token expired.')
+
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+
+        return user, verification
+
+
+    def complete_pending_email_verification(self, token : str = None, code : str = None, user_id : int = None):
+        """
+        Check the provided token or code to validate new emails. If the account is new, a modobio_id is generated and 
+        User.email_verified is set to True. 
+
+        Verification occurs through one of two methods
+        1. Token is provided. This token is emailed to the user as part of the email verification url. Using just the token validates the
+        email, the user's identity, and checks that the user has completed this step within the time allotted. 
+        2.Verification using the provided code. Users will also revieve a code in their email to verify their emails. We use this code
+        and the user's user_id to verify they are the owner of the email. We then check the token (stored in UserPendingEmailVerifications)
+        to ensure the process is completed within the token's TTL
+
+        Params
+        ------
+        token:
+            JWT encoding the TTL of the email verification routine and the identity of the user.  
+        code:
+            Short code provided to the user's email. This code, the user's id, and the TTL on the token provide the verification
+        user_id:
+            required only if verifying email using the provided code
+        """
+
+        if token:
+            user, verification = self.check_token(token)
+        elif code and user_id:
+            user, verification = self.check_code(user_id = user_id, code = code)
+        else:
+            raise BadRequest('Code or token not provided')
+        
+        # If account is new, update modobio_id, membersince, and set User.email_verified=True
+        if user.email_verified == False: 
+            user.update({'email_verified': True})
+        elif verification.email:
+            user.update({'email': verification.email})
+        
+        if user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
+
+
+        #code/token were valid, remove the pending request
+        db.session.delete(verification)
+
+        db.session.commit()
+        return
