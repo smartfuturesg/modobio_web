@@ -1374,7 +1374,7 @@ class AllMedBloodTestResults(BaseResource):
         payload['user_id'] = user_id
         return payload
 
-
+@ns.deprecated
 @ns.route('/bloodtest/result-types/')
 class MedBloodTestResultTypes(BaseResource):
     """
