@@ -34,6 +34,7 @@ from odyssey.api.user.models import (
     UserResetPasswordRequestHistory
 )
 from odyssey.api.user.schemas import (
+    UserInfoPutSchema,
     UserSchema, 
     UserLoginSchema,
     UserPasswordRecoveryContactSchema,
@@ -84,25 +85,31 @@ class ApiUser(BaseResource):
         return User.query.filter_by(user_id=user_id).one_or_none()
 
     @token_auth.login_required(user_type=('staff', 'client', 'staff_self'), staff_role=('client_services',))
+    @accepts(schema=UserInfoPutSchema)
     @responds(schema=NewClientUserSchema, status_code=200)
     def patch(self, user_id):
         """
-        Update attributes from user's basic info
+        Update attributes from user's basic info. See api.user.schemas.UserInfoPutSchema for attributes that can be updated. 
         
-        Client services role will have access to this endpoint. All other staff roles are locked out.
+        Client services role will have access to this endpoint. All other staff roles are locked out unless editing their own resource. 
         """
         user = self.check_user(user_id)
 
         user_info = request.json
         email = user_info.get('email')
 
-
         payload = {}
         #if email is part of payload, use email update routine
         if email:
             email_domain_blacklisted(email)
             email_verification_data = EmailVerification().begin_email_verification(user, email = email)
+            del user_info['email']
+        
+        user.update(user_info)
+        db.session.commit()
 
+        # respond with verification code in dev
+        if current_app.config['DEV'] :
             payload['email_verification_code'] = email_verification_data.get('code')
 
         return payload
@@ -864,7 +871,8 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
 @ns.route('/email-verification/code/<int:user_id>/')
 @ns.doc(params={'code': 'Email verification code'})
 class UserPendingEmailVerificationsCodeApi(BaseResource):
-
+    __check_resource__ = False
+    
     @responds(status_code=200)
     def post(self, user_id):
         """
@@ -891,6 +899,7 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
     they can use this endpoint to create another token/code and send another email. This 
     can also be used if the user never received an email.
     """
+    __check_resource__ = False
 
     @responds(status_code=200)
     def post(self, user_id):
@@ -923,9 +932,6 @@ class UserLegalDocsApi(BaseResource):
     Endpoints related to legal documents that users have viewed and signed.
     """
     
-    # Multiple docs per user allowed.
-    __check_resource__ = False
-
     # Multiple docs per user allowed.
     __check_resource__ = False
 
