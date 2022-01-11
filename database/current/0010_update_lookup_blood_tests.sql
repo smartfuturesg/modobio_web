@@ -1,4 +1,7 @@
-INSERT INTO "LookupBloodTests" ('display_test_name','modo_test_code','quest_test_code','cpt_code','panel_display_name','tags')
+DELETE FROM "LookupBloodTests";
+DELETE FROM "LookupBloodTestRanges";
+
+INSERT INTO "LookupBloodTests" ("display_name","modobio_test_code","quest_test_code","cpt_test_code","panel_display_name","tags")
 VALUES
 ('Platelet Count','CBC001','723','85049','Complete Blood Count with Differential/Platelets (CBC)','Platelets'),
 ('Absolute Nucleated RBC','CBC002','6399','85025','Complete Blood Count with Differential/Platelets (CBC)','Red Blood Cells'),
@@ -24,8 +27,7 @@ VALUES
 ('Glucose, Serum (Fasting)','CMP001','483','82947','Comprehensive Metabolic Panel (CMP)','Diabetes, Insulin Resistance, Metabolic Health'),
 ('Urea Nitrogen (BUN)','CMP002','294','84520','Comprehensive Metabolic Panel (CMP)','Kidney, Metabolic Health'),
 ('Creatinine, Serum','CMP003','375','82565','Comprehensive Metabolic Panel (CMP)','Kidney, Metabolic Health'),
-('eGFR If NonAfrican American','CMP004','375','82565','Comprehensive Metabolic Panel (CMP)','Kidney, Metabolic Health'),
-('eGFR If African American','CMP004','375','82565','Comprehensive Metabolic Panel (CMP)','Kidney, Metabolic Health'),
+('eGFR','CMP004','375','82565','Comprehensive Metabolic Panel (CMP)','Kidney, Metabolic Health'),
 ('BUN/Creatinine Ratio','CMP005',NULL,NULL,'Comprehensive Metabolic Panel (CMP)','Kidney, Metabolic Health'),
 ('Sodium, Serum','CMP006','836','84295','Comprehensive Metabolic Panel (CMP)','Electrolytes, Metabolic Health'),
 ('Potassium, Serum','CMP007','733','84132','Comprehensive Metabolic Panel (CMP)','Electrolytes, Metabolic Health'),
@@ -83,32 +85,32 @@ VALUES
 ('Vitamin D3, 1, 25 (OH)2','VIT007','16558','82652','Vitamin D, 1,25-Dihydroxy Panel','Vitamins/Bone'),
 ('Vitamin D2, 1, 25 (OH) 2','VIT008','16558','82652','Vitamin D, 1,25-Dihydroxy Panel','Vitamins/Bone');
 
-INSERT INTO "LookupBloodTestRanges" ('modo_test_code','sex','menstrual_cycle','age_min','age_max','race','units','ratio','critical_min','ref_min','ref_max','crititcal_max')
+INSERT INTO "LookupBloodTestRanges" ("modobio_test_code","biological_sex_male","menstrual_cycle","age_min","age_max","race_id","units","ratio","critical_min","ref_min","ref_max","critical_max")
 VALUES
 ('CMP001',NULL,NULL,NULL,NULL,NULL,'mg/dL',NULL,40.00,65.00,99.00,300.00),
 ('CMP002',NULL,NULL,20,NULL,NULL,'mg/dL',NULL,NULL,7.00,25.00,75.00),
 ('CMP002',NULL,NULL,4,19,NULL,'mg/dL',NULL,NULL,7.00,20.00,75.00),
 ('CMP002',True,NULL,1,3,NULL,'mg/dL',NULL,NULL,3.00,12.00,50.00),
 ('CMP002',False,NULL,1,3,NULL,'mg/dL',NULL,NULL,3.00,14.00,50.00),
-('CMP003',True,NULL,79,NULL,black/african american,'mg/dL',NULL,NULL,0.70,1.25,3.00),
+('CMP003',True,NULL,79,NULL,4,'mg/dL',NULL,NULL,0.70,1.25,3.00),
 ('CMP003',True,NULL,80,NULL,NULL,'mg/dL',NULL,NULL,0.70,1.11,3.00),
-('CMP003',True,NULL,70,79,black/african american,'mg/dL',NULL,NULL,0.70,1.33,3.00),
+('CMP003',True,NULL,70,79,4,'mg/dL',NULL,NULL,0.70,1.33,3.00),
 ('CMP003',True,NULL,70,79,NULL,'mg/dL',NULL,NULL,0.70,1.18,3.00),
-('CMP003',True,NULL,60,69,black/african american,'mg/dL',NULL,NULL,0.70,1.41,3.00),
+('CMP003',True,NULL,60,69,4,'mg/dL',NULL,NULL,0.70,1.41,3.00),
 ('CMP003',True,NULL,60,69,NULL,'mg/dL',NULL,NULL,0.70,1.25,3.00),
-('CMP003',True,NULL,50,59,black/african american,'mg/dL',NULL,NULL,0.70,1.50,3.00),
+('CMP003',True,NULL,50,59,4,'mg/dL',NULL,NULL,0.70,1.50,3.00),
 ('CMP003',True,NULL,50,59,NULL,'mg/dL',NULL,NULL,0.70,1.33,3.00),
 ('CMP003',True,NULL,20,49,NULL,'mg/dL',NULL,NULL,0.60,1.35,3.00),
 ('CMP003',True,NULL,18,19,NULL,'mg/dL',NULL,NULL,0.60,1.26,3.00),
 ('CMP003',True,NULL,16,17,NULL,'mg/dL',NULL,NULL,0.60,1.20,2.50),
 ('CMP003',True,NULL,13,15,NULL,'mg/dL',NULL,NULL,0.40,1.05,2.50),
-('CMP003',False,NULL,80,NULL,black/african american,'mg/dL',NULL,NULL,0.60,0.99,3.00),
+('CMP003',False,NULL,80,NULL,4,'mg/dL',NULL,NULL,0.60,0.99,3.00),
 ('CMP003',False,NULL,80,NULL,NULL,'mg/dL',NULL,NULL,0.60,0.88,3.00),
-('CMP003',False,NULL,70,79,black/african american,'mg/dL',NULL,NULL,0.60,1.05,3.00),
+('CMP003',False,NULL,70,79,4,'mg/dL',NULL,NULL,0.60,1.05,3.00),
 ('CMP003',False,NULL,70,79,NULL,'mg/dL',NULL,NULL,0.60,0.93,3.00),
-('CMP003',False,NULL,60,69,black/african american,'mg/dL',NULL,NULL,0.50,1.12,3.00),
+('CMP003',False,NULL,60,69,4,'mg/dL',NULL,NULL,0.50,1.12,3.00),
 ('CMP003',False,NULL,60,69,NULL,'mg/dL',NULL,NULL,0.50,0.99,3.00),
-('CMP003',False,NULL,50,59,black/african american,'mg/dL',NULL,NULL,0.50,1.19,3.00),
+('CMP003',False,NULL,50,59,4,'mg/dL',NULL,NULL,0.50,1.19,3.00),
 ('CMP003',False,NULL,50,59,NULL,'mg/dL',NULL,NULL,0.50,1.05,3.00),
 ('CMP003',False,NULL,20,49,NULL,'mg/dL',NULL,NULL,0.50,1.10,3.00),
 ('CMP003',False,NULL,16,19,NULL,'mg/dL',NULL,NULL,0.50,1.00,2.50),
@@ -116,7 +118,7 @@ VALUES
 ('CMP003',NULL,NULL,10,12,NULL,'mg/dL',NULL,NULL,0.30,0.78,2.50),
 ('CMP003',NULL,NULL,1,9,NULL,'mg/dL',NULL,NULL,0.20,0.73,2.50),
 ('CMP004',NULL,NULL,NULL,NULL,NULL,'mL/min/1.73m2',NULL,15.00,60.00,NULL,NULL),
-('CMP004',NULL,NULL,NULL,NULL,black/african american,'mL/min/1.73m2',NULL,15.00,60.00,NULL,NULL),
+('CMP004',NULL,NULL,NULL,NULL,4,'mL/min/1.73m2',NULL,15.00,60.00,NULL,NULL),
 ('CMP005',NULL,NULL,NULL,NULL,NULL,'ratio','CMP002/CMP003',NULL,6.00,22.00,NULL),
 ('CMP006',NULL,NULL,NULL,NULL,NULL,'mmol/L',NULL,125.00,135.00,146.00,155.00),
 ('CMP007',NULL,NULL,20,NULL,NULL,'mmol/L',NULL,3.00,3.50,5.30,6.00),
