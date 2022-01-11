@@ -338,3 +338,12 @@ class LookupBloodTestsSchema(ma.SQLAlchemyAutoSchema):
 class LookupBloodTestsOutputSchema(Schema):
     items = fields.Nested(LookupBloodTestsSchema(many=True), missing=[])
     total_items = fields.Integer()
+    
+class LookupBloodTestRangesSchema(ma.SQLAlchemyAutoSchema):
+    class metal:
+        model = LookupBloodTestRanges
+        exclude = ('created_at', 'updated_at')
+        
+class LookupBloodTestRangesOutputSchema(Schema):
+    items = fields.Nested(LookupBloodTestRangesSchema(many=True), missing=[])
+    total_items = fields.Integer()

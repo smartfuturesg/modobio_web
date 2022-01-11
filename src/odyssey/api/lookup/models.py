@@ -1193,8 +1193,8 @@ class LookupCurrencies(BaseModelWithIdx):
 
     :type: int
     """    
-    
-def LookupBloodTests(BaseModel):
+
+class LookupBloodTests(BaseModel):
     """
     Lookup table for blood tests
     """
@@ -1206,7 +1206,7 @@ def LookupBloodTests(BaseModel):
     :type: string, primary key
     """
     
-    display_name = db.Columng(db.String)
+    display_name = db.Column(db.String)
     """
     Test display name
     
@@ -1241,7 +1241,7 @@ def LookupBloodTests(BaseModel):
     :type: string
     """
     
-def LookupBloodTestRanges(BaseModelWithIdx):
+class LookupBloodTestRanges(BaseModelWithIdx):
     """
     Lookup table for blood test result optimal/critical ranges. One result may have multiple
     entries if it can be affected by age/race/fertility status/bioloical sex
