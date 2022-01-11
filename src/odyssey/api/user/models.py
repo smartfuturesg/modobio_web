@@ -512,28 +512,6 @@ class UserPendingEmailVerifications(db.Model):
     :type: str, max length 75, non-null, unique
     """
 
-    @staticmethod
-    def generate_token(user_id):
-        """
-        Generate a JWT with the appropriate user type and user_id
-        """
-        
-        secret = current_app.config['SECRET_KEY']
-        
-        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=EMAIL_TOKEN_LIFETIME),
-                            'uid': user_id,
-                            'ttype': 'email_verification'
-                            }, 
-                            secret, 
-                            algorithm='HS256')
-
-    @staticmethod
-    def generate_code():
-        """
-        Generate a 4 digit code
-        """
-
-        return str(random.randrange(1000, 9999))
 
 class UserTokenHistory(db.Model):
     """ 

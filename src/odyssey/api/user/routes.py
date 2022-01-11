@@ -101,7 +101,7 @@ class ApiUser(BaseResource):
         #if email is part of payload, use email update routine
         if email:
             email_domain_blacklisted(email)
-            email_verification_data = EmailVerification().pending_email_verification(user, email = email)
+            email_verification_data = EmailVerification().begin_email_verification(user, email = email)
 
             payload['email_verification_code'] = email_verification_data.get('code')
 
@@ -296,7 +296,7 @@ class NewStaffUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            email_verification_data = EmailVerification().pending_email_verification(user)
+            email_verification_data = EmailVerification().begin_email_verification(user)
         
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
@@ -439,7 +439,7 @@ class NewClientUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            email_verification_data = EmailVerification().pending_email_verification(user)
+            email_verification_data = EmailVerification().begin_email_verification(user)
 
             # #Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
@@ -857,7 +857,7 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
         Checks if token has not expired and exists in db.
         If true, removes pending verification object and returns 200.
         """
-        EmailVerification().complete_pending_email_verification(token = token)
+        EmailVerification().complete_email_verification(token = token)
 
         return
 
@@ -879,7 +879,7 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         token stored on the modobio side. The token has a short lifetime so the email varification process must happen within
         that time. 
         """
-        EmailVerification().complete_pending_email_verification(user_id = user_id, code = request.args.get('code'))
+        EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
 
         return
 
