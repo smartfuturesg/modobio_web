@@ -1282,11 +1282,11 @@ class LookupBloodTestRanges(BaseModelWithIdx):
     :type: int
     """
     
-    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.idx'))
+    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
     """
     Race_id this range applies to. If Null, the range applies to all races.
     
-    :type: int, foreign key(LookupRaces.idx)
+    :type: int, foreign key(LookupRaces.race_id)
     """
     
     units = db.Column(db.String)
