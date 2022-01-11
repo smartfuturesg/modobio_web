@@ -39,6 +39,7 @@ client_info_put_test_data = {
         "firstname": "Tester",
         "middlename": "Name",
         "lastname": "Tested",
+        "biological_sex_male": True
     },
     "client_info": {
         "dob": "1991-10-14",
@@ -221,5 +222,24 @@ clients_race_and_ethnicities = {
     {
         'mother': [9,10],
         'father': ['White, Caucasian']
+    }
+}
+
+client_fertility = {
+    'invalid_pair_1': {
+        'pregnant': True,
+        'status': 'menstruation phase'
+    },
+    'invalid_pair_2': {
+        'pregnant': False,
+        'status': 'first trimester'
+    },
+    'valid_pair_1': {
+        'pregnant': True,
+        'status': 'second trimester'
+    },
+    'valid_pair_2': {
+        'pregnant': False,
+        'status': 'follicular phase'
     }
 }
