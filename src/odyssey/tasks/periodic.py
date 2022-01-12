@@ -1,4 +1,7 @@
 import logging
+
+from odyssey.api.dosespot.models import DoseSpotPractitionerID
+from odyssey.integrations.dosespot import DoseSpot
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, date, timedelta
@@ -347,8 +350,21 @@ def detect_practitioner_no_show():
         else:
             cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('no show task completed')
-        
 
+@celery.task()
+def get_dosespot_notifications():
+    """
+    Populate dosespot notifications for all practitioners registered on the DS platform
+    """
+    # bring up all ds practitioners
+
+    ds_practitioners = DoseSpotPractitionerID.query.all()
+    
+    for practitioner in ds_practitioners:
+        ds = DoseSpot()
+        ds.practitioner_ds_id = practitioner.ds_user_id
+        ds.notifications(practitioner.user_id) 
+    
 
 celery.conf.beat_schedule = {
     # look for upcoming apppointment within moving windows:
@@ -395,5 +411,10 @@ celery.conf.beat_schedule = {
     'detect_practitioner_no_show': {
         'task': 'odyssey.tasks.periodic.detect_practitioner_no_show',
         'schedule': crontab(minute='*/5')
+    },
+    #dosespot notifications
+    'get_dosespot_notifications': {
+        'task': 'odyssey.tasks.periodic.get_dosespot_notifications',
+        'schedule': crontab(hour=1, minute=0)
     }
 }
