@@ -31,7 +31,9 @@ from odyssey.api.lookup.models import (
      LookupMedicalSymptoms,
      LookupOrganizations,
      LookupCurrencies,
-     LookupNotificationSeverity
+     LookupNotificationSeverity,
+     LookupBloodTests,
+     LookupBloodTestRanges
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -61,7 +63,9 @@ from odyssey.api.lookup.schemas import (
     LookupOrganizationsOutputSchema,
     LookupCurrenciesOutputSchema,
     LookupUSStatesOutputSchema,
-    LookupNotificationSeverityOutputSchema
+    LookupNotificationSeverityOutputSchema,
+    LookupBloodTestsOutputSchema,
+    LookupBloodTestRangesOutputSchema
 )
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -488,4 +492,29 @@ class LookupCurrenciesApi(BaseResource):
     def get(self):
         """get contents of medical symptoms lookup table"""
         res = LookupCurrencies.query.all()
+        return {'total_items': len(res), 'items': res}
+    
+@ns.route('/bloodtests/')
+class LookupBloodTestsApi(BaseResource):
+    """
+    Endpoint that returns the list of blood test types.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodTestsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of blood tests lookup table"""
+        res = LookupBloodTests.query.all()
+        return {'total_items': len(res), 'items': res}
+    
+@ns.route('/bloodtests/ranges/<string:modobio_test_code>/')
+@ns.doc(params={'modobio_test_code': 'Modobio Test Code for desired test'})
+class LookupBloodTestRangesApi(BaseResource):
+    """
+    Endpoint that return blood test range information for the requested test.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodTestRangesOutputSchema, status_code=200, api=ns)
+    def get(self, modobio_test_code):
+        """get all ranges for the requested blood test"""
+        res = LookupBloodTestRanges.query.filter_by(modobio_test_code=modobio_test_code).all()
         return {'total_items': len(res), 'items': res}
