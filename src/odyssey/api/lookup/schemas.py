@@ -340,7 +340,7 @@ class LookupBloodTestsOutputSchema(Schema):
     total_items = fields.Integer()
     
 class LookupBloodTestRangesSchema(ma.SQLAlchemyAutoSchema):
-    class metal:
+    class Meta:
         model = LookupBloodTestRanges
         exclude = ('created_at', 'updated_at')
         
