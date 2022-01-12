@@ -849,11 +849,20 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     :type: :class:`datetime.date`
     """
 
-    panel_type = db.Column(db.String, default="Nonroutine")
+    panel_type = db.Column(db.String)
     """
     Which panel does test belong to. ``None`` if not one of the standard tests.
 
+    This field is no longer in used. modobio_test_code will be used instead
+
     :type: str
+    """
+    
+    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
+    """
+    Modobio Test Code that identifies the result type.
+    
+    :type: str, foreign key (LookupBloodTests.modobio_test_code)
     """
 
     notes = db.Column(db.String)
