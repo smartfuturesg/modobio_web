@@ -956,7 +956,6 @@ class MeetingRoomStatusAPI(BaseResource):
         For status callback directly from twilio
 
         TODO:
-
         - authorize access to this API from twilio automated callback
         - check callback reason (we just want the status updated)
         - update meeting status

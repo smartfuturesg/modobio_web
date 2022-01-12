@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.api.telehealth.models import TelehealthBookings
 logger = logging.getLogger(__name__)
 
 import requests
@@ -229,6 +231,12 @@ class Instamed:
         #convert response data to json (python dict)
         response_data = response.json()
 
+        ################### Transaction descriptor ##############
+        # create the descriptor for the transaction type
+        # TODO: extend this to include all future transaction types, currently there's only on
+        # transaction_descriptor = 
+
+
         #check if card was declined or partially approved
         #(this is not an error as checked above since 200 is returned from InstaMed)
         if response_data['TransactionStatus'] == 'C':
@@ -286,6 +294,147 @@ class Instamed:
             #transaction was declined, cancel appointment
             cancel_telehealth_appointment(booking)
         return response_data
+
+
+    def _charge_user(self, user_id: int, amount: str, payment_method_id: int = None):
+        """
+        Charge a user.
+        InstaMed URI: /payment/sale
+
+
+        Params
+        ------
+        user_id : int
+            the booking for which this payment is associated with
+        payment_method_id : int
+            Refers to PaymentMethods.idx. Payment method selected by user for this transaction. Defaults to their default payment method.
+
+        Returns
+        -------
+        dict of information regarding the sale
+        """
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        payment_method =  PaymentMethods.query.filter_by(idx=payment_method_id).one_or_none() if payment_method_id \
+                                        else PaymentMethods.query.filter_by(user_id=user_id, is_default=True).one_or_none()
+        if not payment_method:
+            raise BadRequest('user missing payment method')
+
+        request_data = {
+            "Outlet": self.outlet,
+            "PaymentMethod": "OnFile",
+            "PaymentMethodID": str(payment_method.payment_id),
+            "Amount": amount,
+            "Patient": {
+                "AccountNumber": user.modobio_id
+            }
+        }
+
+        response = requests.post(self.url_base + '/payment/sale',
+                        headers=self.request_header,
+                        json=request_data)
+
+        #check if instamed api raised an error
+        try:
+            response.raise_for_status()
+        except:
+            
+            return {'is_successful': False}
+
+        #convert response data to json (python dict)
+        response_data = response.json()
+
+        ################### Transaction descriptor ##############
+        # create the descriptor for the transaction type
+        # TODO: extend this to include all future transaction types, currently there's only on
+        # transaction_descriptor = 
+
+
+        #check if card was declined or partially approved
+        #(this is not an error as checked above since 200 is returned from InstaMed)
+        if response_data['TransactionStatus'] == 'C':
+            if response_data['IsPartiallyApproved']:
+                #void the payment and cancel appointment
+                request_data = {
+                    "Outlet": self.outlet,
+                    "TransactionID": str(response_data['TransactionID']),
+                    "Patient": {
+                        "AccountNumber": user.modobio_id
+                    }
+                }
+
+                history = PaymentHistory(**{
+                    'user_id': user_id,
+                    'payment_method_id': payment_method.idx,
+                    'transaction_id': response_data['TransactionID'],
+                    'transaction_amount': amount
+                })
+
+                response = requests.post(self.url_base + '/payment/void',
+                                headers=self.request_header,
+                                json=request_data)
+                
+                #check if instamed api raised an error
+                try:
+                    response.raise_for_status()
+                except:
+                    logger.error(f'Instamed returned the following error: {response.text} when' \
+                        ' voiding a partial transaction.')
+
+                #add void data to history and commit
+                history.voided = True
+                history.void_reason = "Partial payment received"
+                history.void_id = response.json()['TransactionID']
+                db.session.add(history)
+                db.session.flush()
+
+                response_data['payment_history_id'] = history.idx
+                response_data['is_successful'] = False
+                response_data['message'] = "Partial payment received. Appointment has been canceled and partial payment has been voided"
+            else:
+                #transaction was successful, store in PaymentHistory
+                history = PaymentHistory(**{
+                    'user_id': user_id,
+                    'payment_method_id': payment_method.idx,
+                    'transaction_id': response_data['TransactionID'],
+                    'transaction_amount': amount
+                })
+                db.session.add(history)
+                
+                response_data['payment_history_id'] = history.idx
+                response_data['is_successful'] = True
+        else:
+            #transaction was declined
+            response_data['is_successful'] = False
+
+        return response_data
+
+
+    def charge_telehealth_booking(self, booking: TelehealthBookings):
+            """
+            Charge a user for their telehealth appointment
+
+            Params
+            ------
+            booking : TelehealthBookings
+
+            Returns
+            ------
+            dict : instamed response
+            """
+            amount = "{:.2f}".format(booking.scheduled_duration_mins / 60 * booking.consult_rate)
+
+            # transaction_descriptor = 'Telehealth'
+
+            payment_data = self.charge_user(user_id = booking.client_user_id, payment_method_id = booking.payment_method_id, amount = amount)
+
+            if not payment_data['is_successful']:
+                cancel_telehealth_appointment(booking)
+                raise BadRequest(payment_data.get('message', ''))
+
+            booking.charged = True
+
+            db.session.commit()
+
 
 def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'):
     """

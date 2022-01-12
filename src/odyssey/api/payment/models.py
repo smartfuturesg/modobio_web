@@ -171,17 +171,17 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: numeric
     """
 
-    booking = db.relationship("TelehealthBookings", backref="TelehealthBookings")
-    """
-    Relationship to the booking that this payment is associated with.
-    """
+    # booking = db.relationship("TelehealthBookings", backref="TelehealthBookings")
+    # """
+    # Relationship to the booking that this payment is associated with.
+    # """
 
-    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx'))
-    """
-    Foreign key to the booking this payment is associated with.
+    # booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx'))
+    # """
+    # Foreign key to the booking this payment is associated with.
 
-    :type: int, foreignkey(TelehealthBookings.idx)
-    """
+    # :type: int, foreignkey(TelehealthBookings.idx)
+    # """
 
     voided = db.Column(db.Boolean, default=False)
     """
