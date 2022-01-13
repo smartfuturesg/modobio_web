@@ -171,18 +171,6 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: numeric
     """
 
-    # booking = db.relationship("TelehealthBookings", backref="TelehealthBookings")
-    # """
-    # Relationship to the booking that this payment is associated with.
-    # """
-
-    # booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx'))
-    # """
-    # Foreign key to the booking this payment is associated with.
-
-    # :type: int, foreignkey(TelehealthBookings.idx)
-    # """
-
     voided = db.Column(db.Boolean, default=False)
     """
     Denotes if this transaction has been voided.
@@ -200,6 +188,13 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     void_id = db.Column(db.String, nullable=True)
     """
     InstaMed transaction id for the void request if applicable.
+
+    :type: string
+    """
+
+    transaction_descriptor = db.Column(db.String, nullable = True)
+    """
+    Description of the transaction
 
     :type: string
     """

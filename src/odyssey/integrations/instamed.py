@@ -1,4 +1,5 @@
 import logging
+from odyssey.api.lookup.models import LookupRoles
 
 from odyssey.api.telehealth.models import TelehealthBookings
 logger = logging.getLogger(__name__)
@@ -234,7 +235,7 @@ class Instamed:
         ################### Transaction descriptor ##############
         # create the descriptor for the transaction type
         # TODO: extend this to include all future transaction types, currently there's only on
-        # transaction_descriptor = 
+        #transaction_descriptor = 
 
 
         #check if card was declined or partially approved
@@ -296,7 +297,7 @@ class Instamed:
         return response_data
 
 
-    def _charge_user(self, user_id: int, amount: str, payment_method_id: int = None):
+    def charge_user(self, user_id: int, amount: str, transaction_descriptor: str, payment_method_id: int = None):
         """
         Charge a user.
         InstaMed URI: /payment/sale
@@ -308,6 +309,13 @@ class Instamed:
             the booking for which this payment is associated with
         payment_method_id : int
             Refers to PaymentMethods.idx. Payment method selected by user for this transaction. Defaults to their default payment method.
+        amount : str
+            tansaction ammount formatted for currency
+        transaction_descriptor : str
+            Standard format transaction descriptio e.g. “Telehealth-MedicalDoctor-30mins”
+        payment_method_id : int
+            Refers to PaymentMethods.idx. Payment method to be used for the transaction. 
+                If none specified, the default payment method for the user will be used
 
         Returns
         -------
@@ -343,12 +351,6 @@ class Instamed:
         #convert response data to json (python dict)
         response_data = response.json()
 
-        ################### Transaction descriptor ##############
-        # create the descriptor for the transaction type
-        # TODO: extend this to include all future transaction types, currently there's only on
-        # transaction_descriptor = 
-
-
         #check if card was declined or partially approved
         #(this is not an error as checked above since 200 is returned from InstaMed)
         if response_data['TransactionStatus'] == 'C':
@@ -366,7 +368,8 @@ class Instamed:
                     'user_id': user_id,
                     'payment_method_id': payment_method.idx,
                     'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': amount
+                    'transaction_amount': amount,
+                    'transaction_descriptor': transaction_descriptor
                 })
 
                 response = requests.post(self.url_base + '/payment/void',
@@ -423,17 +426,26 @@ class Instamed:
             """
             amount = "{:.2f}".format(booking.scheduled_duration_mins / 60 * booking.consult_rate)
 
-            # transaction_descriptor = 'Telehealth'
+            professional_role = LookupRoles.query.filter_by(role_name = booking.profession_type).one_or_none().display_name
+            professional_role = professional_role.replace(" ", "")
+            transaction_descriptor = f"Telehealth-{professional_role}-{booking.scheduled_duration_mins}mins"
 
-            payment_data = self.charge_user(user_id = booking.client_user_id, payment_method_id = booking.payment_method_id, amount = amount)
+            payment_data = self.charge_user(
+                user_id = booking.client_user_id, 
+                payment_method_id = booking.payment_method_id, 
+                amount = amount, 
+                transaction_descriptor = transaction_descriptor)
 
             if not payment_data['is_successful']:
                 cancel_telehealth_appointment(booking)
                 raise BadRequest(payment_data.get('message', ''))
 
             booking.charged = True
+            booking.payment_history_id = payment_data['payment_history_id']
 
             db.session.commit()
+
+            return payment_data
 
 
 def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'):
