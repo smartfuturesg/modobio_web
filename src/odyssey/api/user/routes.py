@@ -109,7 +109,7 @@ class ApiUser(BaseResource):
         db.session.commit()
 
         # respond with verification code in dev
-        if current_app.config['DEV'] :
+        if any((current_app.config['DEV'], current_app.config['TESTING'])) :
             payload['email_verification_code'] = email_verification_data.get('code')
 
         return payload
