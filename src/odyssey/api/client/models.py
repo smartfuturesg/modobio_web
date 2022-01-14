@@ -1140,3 +1140,28 @@ class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
     :type: float
     """
 
+class ClientFertility(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    Details on the fertility status of a client. Should only exist if the client's 
+    sex_at_birth is female.
+
+    """
+    
+    pregnant = db.Column(db.Boolean)
+    """
+    Denotes if the client is pregnant.
+    
+    :type: boolean
+    """
+    
+    status = db.Column(db.String)
+    """
+    Fertility status. Can be one of:
+    
+    if pregnant: unknown, first trimester, second trimester, third trimester
+    
+    if not pregnant: unknown, menstruation phase, follicular phase, ovulation phase, luteal phase,
+                     perimenopausal, menopausal, postmenopausal
+                     
+    :type: string
+    """

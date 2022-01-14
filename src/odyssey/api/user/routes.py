@@ -2,12 +2,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
-import boto3
 import jwt
 import requests
 import json
 
-from flask import current_app, request, jsonify, redirect
+from flask import current_app, request, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
 from sqlalchemy.sql.expression import select
@@ -16,7 +15,7 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.api.client.models import ClientClinicalCareTeam
+from odyssey.api.client.models import ClientClinicalCareTeam, ClientFertility
 from odyssey.api.client.schemas import (
     ClientInfoSchema,
     ClientGeneralMobileSettingsSchema,
@@ -36,6 +35,7 @@ from odyssey.api.user.models import (
     UserResetPasswordRequestHistory
 )
 from odyssey.api.user.schemas import (
+    UserInfoPutSchema,
     UserSchema, 
     UserLoginSchema,
     UserPasswordRecoveryContactSchema,
@@ -61,6 +61,7 @@ from odyssey.utils.message import (
     send_email_delete_account,
     send_email_verify_email)
 from odyssey.utils.misc import (
+    EmailVerification,
     check_user_existence,
     check_client_existence,
     check_staff_existence,
@@ -73,6 +74,9 @@ ns = Namespace('user', description='Endpoints for user accounts.')
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ApiUser(BaseResource):
+    """
+    Retrieve, Update, and Delete a User's basic information.
+    """
     
     @token_auth.login_required
     @responds(schema=UserSchema, api=ns)
@@ -80,6 +84,37 @@ class ApiUser(BaseResource):
         check_user_existence(user_id)
 
         return User.query.filter_by(user_id=user_id).one_or_none()
+
+    @token_auth.login_required(user_type=('staff', 'client', 'staff_self'), staff_role=('client_services',))
+    @accepts(schema=UserInfoPutSchema)
+    @responds(schema=NewClientUserSchema, status_code=200)
+    def patch(self, user_id):
+        """
+        Update attributes from user's basic info. See api.user.schemas.UserInfoPutSchema for attributes that can be updated. 
+        
+        Client services role will have access to this endpoint. All other staff roles are locked out unless editing their own resource. 
+        """
+        user = self.check_user(user_id)
+
+        user_info = request.json
+        email = user_info.get('email')
+
+        payload = {}
+        #if email is part of payload, use email update routine
+        if email:
+            email_domain_blacklisted(email)
+            email_verification_data = EmailVerification().begin_email_verification(user, email = email)
+            del user_info['email']
+        
+        user.update(user_info)
+        db.session.commit()
+
+        # respond with verification code in dev
+        if any((current_app.config['DEV'], current_app.config['TESTING'])) :
+            payload['email_verification_code'] = email_verification_data.get('code')
+
+        return payload
+
 
     @token_auth.login_required
     def delete(self, user_id):
@@ -269,22 +304,7 @@ class NewStaffUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            # generate token and code for email verifciation
-            token = UserPendingEmailVerifications.generate_token(user.user_id)
-            code = UserPendingEmailVerifications.generate_code()
-
-            # create pending email verification in db
-            email_verification_data = {
-                'user_id': user.user_id,
-                'token': token,
-                'code': code
-            }
-
-            verification = UserPendingEmailVerifications(**email_verification_data)
-            db.session.add(verification)
-
-            # send email to the user
-            send_email_verify_email(user, token, code)
+            email_verification_data = EmailVerification().begin_email_verification(user)
         
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
@@ -408,7 +428,6 @@ class NewClientUser(BaseResource):
                 db.session.add(client_info)
                 verify_email = False
         else:
-
             # user account does not yet exist for this email
             password=user_info.get('password', None)
             if not password:
@@ -428,24 +447,9 @@ class NewClientUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            # generate token and code for email verification
-            token = UserPendingEmailVerifications.generate_token(user.user_id)
-            code = UserPendingEmailVerifications.generate_code()
+            email_verification_data = EmailVerification().begin_email_verification(user)
 
-            # create pending email verification in db
-            email_verification_data = {
-                'user_id': user.user_id,
-                'token': token,
-                'code': code
-            }
-
-            verification = UserPendingEmailVerifications(**email_verification_data)
-            db.session.add(verification)
-
-            # send email to the user
-            send_email_verify_email(user, token, code)
-
-            #Authenticate newly created client accnt for immediate login
+            # #Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
         # add new client subscription information
@@ -477,7 +481,14 @@ class NewClientUser(BaseResource):
         client_father_race_info = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
         client_father_race_info.user_id = user.user_id
         db.session.add(client_mother_race_info)
-        db.session.add(client_father_race_info)     
+        db.session.add(client_father_race_info)
+        
+        # if client biological_sex_male = False, add default fertility status
+        if 'biological_sex_male' in user_info:
+            if not user_info['biological_sex_male']:
+                fertility = ClientFertility(**{'pregnant': False, 'status': 'unknown'})
+                fertility.user_id = user.user_id
+                db.session.add(fertility)
 
         #Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
@@ -496,7 +507,6 @@ class NewClientUser(BaseResource):
         # respond with verification code in dev
         if current_app.config['DEV'] and verify_email:
             payload['email_verification_code'] = email_verification_data.get('code')
-
 
         return payload
 
@@ -819,16 +829,6 @@ class UserLogoutApi(BaseResource):
 
         return 200
 
-        res = []
-        for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
-            user = User.query.filter_by(user_id=client.user_id).one_or_none()
-            res.append({'client_user_id': user.user_id, 
-                        'client_name': ''.join(filter(None, (user.firstname, user.middlename ,user.lastname))),
-                        'client_email': user.email})
-        
-        return res
-
-
 # TODO: remove these redirects once fixed on frontend
 
 from odyssey.api.notifications.schemas import NotificationSchema
@@ -872,35 +872,15 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
         Checks if token has not expired and exists in db.
         If true, removes pending verification object and returns 200.
         """
-        # decode and validate token 
-        secret = current_app.config['SECRET_KEY']
+        EmailVerification().complete_email_verification(token = token)
 
-        try:
-            decoded_token = jwt.decode(token, secret, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
-            raise Unauthorized('Email verification token expired.')
-
-        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
-
-        if not verification:
-            raise Unauthorized('Email verification token not found.')
-
-        #token was valid, remove the pending request, update user account and return 200
-        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
-        
-        if user.email_verified == False and user.modobio_id == None:
-            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})
-        user.update({'email_verified': True})
-
-        db.session.delete(verification)
-        db.session.commit()
-        
+        return
 
 @ns.route('/email-verification/code/<int:user_id>/')
 @ns.doc(params={'code': 'Email verification code'})
 class UserPendingEmailVerificationsCodeApi(BaseResource):
-
+    __check_resource__ = False
+    
     @responds(status_code=200)
     def post(self, user_id):
         """
@@ -915,30 +895,9 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         token stored on the modobio side. The token has a short lifetime so the email varification process must happen within
         that time. 
         """
+        EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
 
-        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
-
-        if not verification or verification.code != request.args.get('code'):
-            raise Unauthorized('Email verification failed.')
-
-        # Decode and validate token. Code should expire the same time the token does.
-        secret = current_app.config['SECRET_KEY']
-
-        try:
-            decoded_token = jwt.decode(verification.token, secret, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
-            raise Unauthorized('Email verification token expired.')
-
-        #code was valid, remove the pending request, update user account and return 200
-        db.session.delete(verification)
-
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-        if user.email_verified == False and user.modobio_id == None:
-            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
-        user.update({'email_verified': True})
-
-        db.session.commit()
+        return
 
 @ns.route('/email-verification/resend/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -948,6 +907,7 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
     they can use this endpoint to create another token/code and send another email. This 
     can also be used if the user never received an email.
     """
+    __check_resource__ = False
 
     @responds(status_code=200)
     def post(self, user_id):
@@ -980,9 +940,6 @@ class UserLegalDocsApi(BaseResource):
     Endpoints related to legal documents that users have viewed and signed.
     """
     
-    # Multiple docs per user allowed.
-    __check_resource__ = False
-
     # Multiple docs per user allowed.
     __check_resource__ = False
 

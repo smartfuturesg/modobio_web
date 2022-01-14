@@ -83,7 +83,7 @@ def clear_db():
             FROM information_schema.tables 
             WHERE table_schema = 'public';"""))
         .all())
-
+    
     for table, table_type in tables:
         if table_type == 'BASE TABLE':
             table_type = 'TABLE'
@@ -157,7 +157,7 @@ def test_client():
             tc.staff_auth_header = login(tc, staff, password='123')
 
             yield tc
-
+            
             # Cleanup functions also need a live app.
             db.session.rollback()
             clear_twilio()
