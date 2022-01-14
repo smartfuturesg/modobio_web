@@ -651,6 +651,8 @@ class TelehealthBookingsApi(BaseResource):
         rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
 
+        request.parsed_obj.scheduled_duration_mins = client_in_queue.duration
+        
         db.session.add(request.parsed_obj)
         db.session.flush()
 

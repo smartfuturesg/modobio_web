@@ -20,7 +20,7 @@ Refund after full amount has been refunded (should fail)
 def test_sale_success(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -35,7 +35,7 @@ def test_sale_deny(test_client, test_booking):
     #charge booking using test endpoint ($99.05)
     test_booking.consult_rate = 99.05
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -55,7 +55,7 @@ def test_sale_partial(test_client, test_booking):
     #charge booking using test endpoint ($99.10)
     test_booking.consult_rate = 99.10
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -73,7 +73,7 @@ def test_sale_partial(test_client, test_booking):
 def test_void(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -102,7 +102,7 @@ def test_void(test_client, test_booking):
 def test_refund(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -116,7 +116,7 @@ def test_refund(test_client, test_booking):
     #refund payment for full amount
     data1 = {
         'refund_amount': "99.00",
-        'payment_id': PaymentHistory.query.filter_by(booking_id=test_booking.idx).one_or_none().idx,
+        'payment_id': PaymentHistory.query.filter_by(idx=test_booking.payment_history_id).one_or_none().idx,
         'refund_reason': "Test refund functionality"
     }
 
@@ -147,7 +147,7 @@ def test_refund(test_client, test_booking):
 def test_refund_too_much(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -158,7 +158,7 @@ def test_refund_too_much(test_client, test_booking):
     #refund for more than full amount using test endpoint ($100.00)
     data2 = {
         'refund_amount': "100.00",
-        'payment_id': PaymentHistory.query.filter_by(booking_id=test_booking.idx).one_or_none().idx,
+        'payment_id': PaymentHistory.query.filter_by(idx=test_booking.payment_history_id).one_or_none().idx,
         'refund_reason': "Test refund functionality"
     }
 

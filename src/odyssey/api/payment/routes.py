@@ -227,9 +227,8 @@ class PaymentRefundApi(BaseResource):
                 f'has already been refunded for the transaction with id {payment_id} and '
                 f'the original transaction amount is {original_transaction.transaction_amount}.')
 
-        return Instamed().refund_payment(original_transaction.transaction_id,
+        return Instamed().refund_payment(original_transaction,
             request.parsed_obj.refund_amount,
-            TelehealthBookings.query.filter_by(idx=original_transaction.booking_id).one_or_none(),
             request.parsed_obj.refund_reason,
             reporter_id=token_auth.current_user()[0].user_id)
 
@@ -239,7 +238,7 @@ ns_dev = Namespace(
     path='/payment/test',
     description='[DEV ONLY] Endpoints for testing payments.')
 
-@ns_dev.route('/charge/')
+@ns_dev.route('/telehealth-charge/')
 class PaymentTestCharge(BaseResource):
     """
     [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
@@ -259,13 +258,15 @@ class PaymentTestCharge(BaseResource):
         if booking.charged:
             raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
 
-        return  Instamed().charge_telehealth_booking(booking)
+        return Instamed().charge_telehealth_booking(booking)
 
 @ns_dev.route('/void/')
 class PaymentVoidRefund(BaseResource):
     """
     [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
     voids in the InstaMed system.
+
+    TODO: extend to include other transaction types. 
     
     Note
     ---
@@ -276,10 +277,11 @@ class PaymentVoidRefund(BaseResource):
     @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         #send InstaMed void request
+        # use it as an argument
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
         if not booking:
             raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
         if not booking.charged:
             raise BadRequest('The booking with booking id {booking_id}'.format(**request.parsed_obj) + \
             'has not been charged yet,so it cannot be voided.')
-        return Instamed().void_payment(booking, "Test void functionality")
+        return Instamed().void_payment(booking.payment_history_id, "Test void functionality")

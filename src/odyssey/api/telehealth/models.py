@@ -177,7 +177,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     consult_rate = db.Column(db.Numeric(10,2))
     """
-    HOURLY practitioner consultation rate
+    Amount to be charged to the client. Based on the practitioner's hourly consult rate and the scheduled duration of the call.
 
     :type: Numeric
     """
