@@ -15,6 +15,10 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
+<<<<<<< HEAD
+=======
+from odyssey.api.client.models import ClientClinicalCareTeam, ClientFertility
+>>>>>>> 17a48573eea253c912aa4e15054c65c99d8533d0
 from odyssey.api.client.schemas import (
     ClientInfoSchema,
     ClientGeneralMobileSettingsSchema,
@@ -480,7 +484,14 @@ class NewClientUser(BaseResource):
         client_father_race_info = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
         client_father_race_info.user_id = user.user_id
         db.session.add(client_mother_race_info)
-        db.session.add(client_father_race_info)     
+        db.session.add(client_father_race_info)
+        
+        # if client biological_sex_male = False, add default fertility status
+        if 'biological_sex_male' in user_info:
+            if not user_info['biological_sex_male']:
+                fertility = ClientFertility(**{'pregnant': False, 'status': 'unknown'})
+                fertility.user_id = user.user_id
+                db.session.add(fertility)
 
         #Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
@@ -866,7 +877,32 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
         """
         EmailVerification().complete_email_verification(token = token)
 
+<<<<<<< HEAD
         return
+=======
+        try:
+            decoded_token = jwt.decode(token, secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise Unauthorized('Email verification token expired.')
+
+        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
+
+        if not verification:
+            raise Unauthorized('Email verification token not found.')
+
+        #token was valid, remove the pending request, update user account and return 200
+        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+        # if this email is being verified on a new account: create modobio_id and update membersince dates
+        
+        if user.email_verified == False and user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})
+        user.update({'email_verified': True})
+
+        db.session.delete(verification)
+        db.session.commit()
+        
+>>>>>>> 17a48573eea253c912aa4e15054c65c99d8533d0
 
 @ns.route('/email-verification/code/<int:user_id>/')
 @ns.doc(params={'code': 'Email verification code'})

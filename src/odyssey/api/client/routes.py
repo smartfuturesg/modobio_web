@@ -21,6 +21,7 @@ from odyssey.api.client.models import (
     ClientConsultContract,
     ClientClinicalCareTeam,
     ClientClinicalCareTeamAuthorizations,
+    ClientFertility,
     ClientIndividualContract,
     ClientPolicies,
     ClientRelease,
@@ -62,7 +63,7 @@ from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.constants import TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
+from odyssey.utils.constants import FERTILITY_STATUSES, TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.utils.message import send_test_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
@@ -78,6 +79,7 @@ from odyssey.api.client.schemas import(
     ClientClinicalCareTeamDeleteSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
+    ClientFertilitySchema,
     ClientIndividualContractSchema,
     ClientClinicalCareTeamSchema,
     ClinicalCareTeamTemporaryMembersSchema,
@@ -1958,6 +1960,69 @@ class ClientWaistSizeEndpoint(BaseResource):
         self.check_user(user_id, user_type='client')
 
         return ClientWaistSize.query.filter_by(user_id=user_id).all()
+    
+@ns.route('/fertility/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID number'})
+class ClientWeightEndpoint(BaseResource):
+    """ Endpoint for weight measurements. """
+
+    # Multiple fertility statuses per user allowed
+    __check_resource__ = False
+
+    @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientFertilitySchema, api=ns)
+    @responds(schema=ClientFertilitySchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """ New fertility status.
+
+        Params
+        ------
+        pregnant : boolean
+            Denotes if this fertility status is pregnant.
+        status : string
+            Phase of this fertility status.
+        """
+        self.check_user(user_id, user_type='client')
+        if User.query.filter_by(user_id=user_id).one_or_none().biological_sex_male:
+            raise BadRequest("Fertility updates can only be submitted for user's whose assigned sex"
+                             "at birth is female.")
+            
+        if request.parsed_obj.pregnant:
+            if request.parsed_obj.status not in FERTILITY_STATUSES['pregnant']:
+                e = BadRequest("Invalid status when pregnant.")
+                e.data = {
+                    'pregnant': request.parsed_obj.pregnant,
+                    'status': request.parsed_obj.status
+                }
+                raise e
+        else:
+            if request.parsed_obj.status not in FERTILITY_STATUSES['not_pregnant']:
+                e = BadRequest("Invalid status when not pregnant.")
+                e.data = {
+                    'pregnant': request.parsed_obj.pregnant,
+                    'status': request.parsed_obj.status
+                }
+                raise e
+
+        request.parsed_obj.user_id = user_id
+        db.session.add(request.parsed_obj)
+
+        db.session.commit()
+        return request.parsed_obj
+
+    @token_auth.login_required(user_type=('client', 'staff'))
+    @responds(schema=ClientFertilitySchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """ All fertility status updates.
+
+        Returns
+        -------
+        dict
+            Dict of date-fertility status pairs.
+        """
+        self.check_user(user_id, user_type='client')
+
+        return ClientFertility.query.filter_by(user_id=user_id).all()
 
 
 @ns.route('/transaction/history/<int:user_id>/')

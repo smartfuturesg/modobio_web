@@ -15,7 +15,8 @@ users_new_user_client_data = {
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
     "phone_number": "1111111121",
-    "password": "password"
+    "password": "password",
+    "biological_sex_male": True
   },
   "client_info": {
     "guardianname": "guardian 1",
@@ -79,7 +80,8 @@ users_to_delete_data = {
       "lastname": "Granger",
       "email": "hgranger@mail.com",
       "password": "password3",
-      "phone_number": "1111113333"
+      "phone_number": "1111113333",
+      "biological_sex_male": True
     },
     "staff_info":{
       "access_roles" : [
