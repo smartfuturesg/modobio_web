@@ -105,13 +105,12 @@ class ApiUser(BaseResource):
             email_domain_blacklisted(email)
             email_verification_data = EmailVerification().begin_email_verification(user, email = email)
             del user_info['email']
+            # respond with verification code in dev/testing
+            if any((current_app.config['DEV'], current_app.config['TESTING'])) :
+                payload['email_verification_code'] = email_verification_data.get('code')
         
         user.update(user_info)
         db.session.commit()
-
-        # respond with verification code in dev
-        if any((current_app.config['DEV'], current_app.config['TESTING'])) :
-            payload['email_verification_code'] = email_verification_data.get('code')
 
         return payload
 
