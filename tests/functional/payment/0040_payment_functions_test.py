@@ -178,13 +178,16 @@ def test_refund_too_much(test_client, test_booking):
 
 
 def test_payment_history(test_client):
-
+    """
+    Test the response to payment/transaction-history (GET)
+    
+    Relies on the transactions previously made with test_client.client_id
+    """
 
     response = test_client.get(
         f'/payment/transaction-history/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
 
-    breakpoint()
-
-    assert 1==1
+    assert response.status_code == 200
+    assert response.json['items'][0]['transaction_descriptor'] == 'Telehealth-MedicalDoctor-20mins'
