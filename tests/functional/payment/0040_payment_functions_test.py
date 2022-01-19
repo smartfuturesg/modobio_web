@@ -175,3 +175,16 @@ def test_refund_too_much(test_client, test_booking):
     for status in statuses:
         db.session.delete(status)
     db.session.commit()
+
+
+def test_payment_history(test_client):
+
+
+    response = test_client.get(
+        f'/payment/transaction-history/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    breakpoint()
+
+    assert 1==1

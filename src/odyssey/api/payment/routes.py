@@ -8,6 +8,7 @@ import json
 from flask import request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
+from sqlalchemy import select
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
@@ -25,7 +26,8 @@ PaymentStatusOutputSchema,
 PaymentHistorySchema,
 PaymentRefundsSchema,
 PaymentTestChargeVoidSchema,
-PaymentTestRefundSchema)
+PaymentTestRefundSchema,
+TransactionHistorySchema)
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User
 
@@ -172,15 +174,39 @@ class PaymentStatusGetApi(BaseResource):
 
 @ns.route('/history/<int:user_id>/')
 class PaymentHistoryApi(BaseResource):
-    @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
+
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services',))
     @responds(schema=PaymentHistorySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns a list of transactions for the given user_id.
         """
+        # bring up payment history entries and associated payment methods
         self.check_user(user_id, user_type='client')
 
         return  PaymentHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/transaction-history/<int:user_id>/')
+class PaymentHistoryApi(BaseResource):
+
+    @token_auth.login_required(user_type=('client', 'staff', 'staff-self'), staff_role=('client_services',))
+    @responds(schema=TransactionHistorySchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns a list of transactions for the given user_id.
+        """
+        # transactions = db.session.execute(select(PaymentHistory, PaymentMethods
+        # ).join(PaymentMethods, PaymentMethods.idx == PaymentHistory.))
+        # bring up payment history entries and associated payment methods
+        self.check_user(user_id, user_type='client')
+
+        payload = {'items': []}
+
+        for transaction in PaymentHistory.query.filter_by(user_id=user_id).all():
+            transaction.__dict__.update({'transaction_date': transaction.created_at, 'currency' : 'USD', 'transaction_updated': transaction.updated_at, 'payment_method': transaction.payment_method})
+            payload['items'].append(transaction.__dict__)
+
+        return payload
 
 @ns.route('/refunds/<int:user_id>/')
 class PaymentRefundApi(BaseResource):
@@ -249,7 +275,7 @@ class PaymentTestCharge(BaseResource):
     **This endpoint is only available in DEV environments.**
 
     """
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
+    @token_auth.login_required(user_type=('staff','client'), staff_role=('system_admin',), dev_only=True)
     @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
