@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.api.lookup.models import LookupBloodTestRanges, LookupRaces
 logger = logging.getLogger(__name__)
 
 import os, boto3, secrets, pathlib
@@ -74,6 +76,7 @@ from odyssey.api.doctor.schemas import (
     MedicalSocialHistoryOutputSchema,
     MedicalSurgeriesSchema
 )
+from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.utils.base.resources import BaseResource
@@ -1171,28 +1174,104 @@ class MedBloodTest(BaseResource):
         multiple results (e.g. in a panel)
         """
         self.check_user(user_id, user_type='client')
-
-        data = request.get_json()
         
         # remove results from data, commit test info without results to db
-        results = data['results']
-        del data['results']
-        data['user_id'] = user_id
-        data['reporter_id'] = token_auth.current_user()[0].user_id
-        client_bt = MedicalBloodTestSchema().load(data)
+        results = request.parsed_obj.results
+        request.parsed_obj.results = []
+        
+        #insert non results data into MedicalBloodTests in order to generate the test_id
+        client_bt = MedicalBloodTests(**{
+            'user_id': user_id,
+            'reporter_id': token_auth.current_user()[0].user_id,
+            'date': request.parsed_obj.date,
+            'notes': request.parsed_obj.notes
+        })
         
         db.session.add(client_bt)
-        db.session.flush()
-
-        # insert results into the result table
-        for result in results:
-            check_blood_test_result_type_existence(result['result_name'])
-            result_id = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().result_id
-            result_data = {'test_id': client_bt.test_id, 
-                           'result_id': result_id, 
-                           'result_value': result['result_value']}
-            db.session.add(MedicalBloodTestResultsSchema().load(result_data))
+        db.session.commit()
         
+        #for each provided result, evaluate the results based on the range that most applies to the client
+        for result in results:
+            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_id=result['result_name']).all()
+            client = User.query.filter_by(user_id=user_id).one_or_none()
+            for race in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
+                client_races = race.race_id
+            if len(ranges) > 1:
+                #first filter to client biological sex if relevant
+                if ranges[0].biological_sex_male != None:
+                    ranges = LookupBloodTestRanges.query.filter_by(modobio_test_id=result['result_name'], biological_sex_male=client.biological_sex_male)
+                    result.biological_sex_male = client.biological_sex_male
+                    if not ranges[0].biological_sex_male:
+                        #prune by menstrual cycle if relevant
+                        client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
+                        if client_cycle == 'unknown':
+                            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_id=result['result_name'], menstrual_cycle=None).all()
+                        else:
+                            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_id=result['result_name'], menstrual_cycle=client_cycle).all()
+                        result.menstrual_cycle = client_cycle
+                #prune remaining ranges by races relevant to the client
+                temp = []
+                for range in ranges:
+                    if range.race_id in client_races or range.race_id == None:
+                        temp.append(range)
+                    ranges = temp
+                #prune remaining ranges by age if relevant
+                for range in ranges:
+                    age_min = range.age_min
+                    if age_min == None:
+                        age_min = 0
+                    age_max = range.age_max
+                    if age_max == None:
+                        age_max = 999
+                    if not (age_min <= client.age <= age_max):
+                        #if client's age does not apply to this range's age range, remove it from the remaining ranges
+                        ranges.remove(range)
+                result.age = client.age
+                if len(ranges) > 1:
+                    """
+                    If more than 1 range remains at this point, it is because the client has multiple
+                    races that can impact the evaluation. In this case, we want the 'most conservative'
+                    range. Meaning of all the remaining ranges, we want to take the highest min values
+                    and lowest max values.
+                    """
+                    critical_min, ref_min = 0
+                    critical_max, ref_max = float("inf")
+                    races = []
+                    for range in ranges:
+                        if range.critical_min > critical_min: critical_min = range.critical_min
+                        if range.ref_min > ref_min: ref_min = range.ref_min
+                        if range.critical_max > critical_max: critical_max = range.critical_max
+                        if range.ref_max > ref_max: ref_max = range.ref_max
+                        races.append(LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name)
+                    result.race = ','.join(races)
+                    eval_values = {
+                        'critical_min': critical_min,
+                        'ref_min': ref_min,
+                        'ref_max': ref_max,
+                        'critical_max': critical_max
+                    }
+            else:
+                eval_values = {
+                    'critical_min': range.critical_min,
+                    'ref_min': range.ref_min,
+                    'ref_max': range.ref_max,
+                    'critical_max': range.critical_max
+                }
+            
+            #make the evaluation based on the eval values found above
+            if result.result_value < eval_values['critical_min']:
+                result.evaluation = 'critical'
+            elif result.result_value < eval_values['ref_min']:
+                result.evaluation = 'abnormal'
+            elif result.result_value < eval_values['ref_max']:
+                result.evaluation = 'normal'
+            elif result.result_value < eval_values['critical_max']:
+                result.evaluation = 'abnormal'
+            else:
+                result.evaluation = 'critical'
+            db.session.add(result)
+            request.parsed_obj.results.append(result)
+            
         db.session.commit()
         return client_bt
 

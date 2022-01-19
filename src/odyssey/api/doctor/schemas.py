@@ -244,6 +244,7 @@ class MedicalBloodTestSchema(Schema):
     user_id = fields.Integer()
     date = fields.Date(required=True)
     panel_type = fields.String(required=False)
+    modobio_test_code = fields.String(required=True)
     notes = fields.String(required=False)
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
@@ -263,16 +264,20 @@ class AllMedicalBloodTestSchema(Schema):
     total = fields.Integer()
     clientid = fields.Integer()
 
-class MedicalBloodTestResultsSchema(Schema):
-    result_name = fields.String()
-    result_value = fields.Float()
-    evaluation = fields.String(dump_only=True)
+class MedicalBloodTestResultsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalBloodTestResults
+        dump_only = ('age', 'race', 'menstrual_cycle', 'biological_sex_male', 'evaluation')
+        exclude = ('created_at','updated_at','result_id')
+    modobio_test_code = fields.String()
+    race_id = fields.Integer()
 
-class MedicalBloodTestsInputSchema(Schema):
+class MedicalBloodTestsInputSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MedicalBloodTests
+        dump_only = ('reporter_id', 'test_id')
+        exclude = ('created_at', 'updated_at')
     user_id = fields.Integer()
-    date = fields.Date()
-    panel_type = fields.String()
-    notes = fields.String()
     results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
 
 class BloodTestsByTestID(Schema):
