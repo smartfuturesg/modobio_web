@@ -8,14 +8,13 @@ import json
 
 from flask import current_app, request, redirect
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
-from odyssey.api import api
-from odyssey.api.client.models import ClientClinicalCareTeam, ClientFertility
+from odyssey.api.client.models import ClientFertility
 from odyssey.api.client.schemas import (
     ClientInfoSchema,
     ClientGeneralMobileSettingsSchema,
@@ -65,7 +64,6 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
-    generate_modobio_id,
     verify_jwt)
 
 ns = Namespace('user', description='Endpoints for user accounts.')

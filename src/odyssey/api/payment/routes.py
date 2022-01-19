@@ -2,20 +2,16 @@ import logging
 from sqlalchemy import and_
 logger = logging.getLogger(__name__)
 
-import requests
-import json
 
-from flask import request, current_app
+from flask import request
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
-from sqlalchemy import select
+from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
 from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
-from odyssey.utils.misc import check_client_existence
 from odyssey.utils.base.resources import BaseResource
 from odyssey.api.lookup.models import LookupOrganizations
 from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
@@ -26,7 +22,6 @@ PaymentStatusOutputSchema,
 PaymentHistorySchema,
 PaymentRefundsSchema,
 PaymentTestChargeVoidSchema,
-PaymentTestRefundSchema,
 TransactionHistorySchema)
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User
@@ -177,11 +172,11 @@ class PaymentHistoryApi(BaseResource):
 
     @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services',))
     @responds(schema=PaymentHistorySchema(many=True), api=ns, status_code=200)
+    @ns.deprecated
     def get(self, user_id):
         """
         Returns a list of transactions for the given user_id.
         """
-        # bring up payment history entries and associated payment methods
         self.check_user(user_id, user_type='client')
 
         return  PaymentHistory.query.filter_by(user_id=user_id).all()
@@ -195,9 +190,6 @@ class PaymentHistoryApi(BaseResource):
         """
         Returns a list of transactions for the given user_id.
         """
-        # transactions = db.session.execute(select(PaymentHistory, PaymentMethods
-        # ).join(PaymentMethods, PaymentMethods.idx == PaymentHistory.))
-        # bring up payment history entries and associated payment methods
         self.check_user(user_id, user_type='client')
 
         payload = {'items': []}
@@ -275,7 +267,7 @@ class PaymentTestCharge(BaseResource):
     **This endpoint is only available in DEV environments.**
 
     """
-    @token_auth.login_required(user_type=('staff','client'), staff_role=('system_admin',), dev_only=True)
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
     @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
@@ -292,8 +284,6 @@ class PaymentVoidRefund(BaseResource):
     [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
     voids in the InstaMed system.
 
-    TODO: extend to include other transaction types. 
-    
     Note
     ---
     **This endpoint is only available in DEV environments.**
@@ -303,7 +293,6 @@ class PaymentVoidRefund(BaseResource):
     @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
     def post(self):
         #send InstaMed void request
-        # use it as an argument
         booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
         if not booking:
             raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
