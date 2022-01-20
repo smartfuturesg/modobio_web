@@ -1241,7 +1241,7 @@ class LookupBloodTests(BaseModel):
     :type: string
     """
     
-    ranges = db.Relationship('LookupBloodTestRanges')
+    ranges = db.relationship('LookupBloodTestRanges')
     """
     Relation holding information on ranges that apply to this test type.
     
@@ -1261,7 +1261,7 @@ class LookupBloodTestRanges(BaseModelWithIdx):
     :type: string, foreign key(LookupBloodTests.modobio_test_code)
     """
     
-    test_info = db.Relationship("LookupBloodTests", back_populates="ranges")
+    test_info = db.relationship("LookupBloodTests", back_populates="ranges")
     """
     Many to one relationship holding the non-range test information.
     

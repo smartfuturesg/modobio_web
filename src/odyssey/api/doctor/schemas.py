@@ -243,7 +243,6 @@ class MedicalBloodTestSchema(Schema):
     test_id = fields.Integer()
     user_id = fields.Integer()
     date = fields.Date(required=True)
-    panel_type = fields.String(required=False)
     modobio_test_code = fields.String(required=True)
     notes = fields.String(required=False)
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
@@ -258,7 +257,7 @@ class AllMedicalBloodTestSchema(Schema):
     """
     For returning several blood test instance details 
     No actual results are returned, just details on
-    the test entry (notes, date, panel_type)
+    the test entry (notes, date)
     """
     items = fields.Nested(MedicalBloodTestSchema(many=True))
     total = fields.Integer()
@@ -268,16 +267,15 @@ class MedicalBloodTestResultsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodTestResults
         dump_only = ('age', 'race', 'menstrual_cycle', 'biological_sex_male', 'evaluation')
-        exclude = ('created_at','updated_at','result_id')
+        exclude = ('created_at','updated_at', 'idx')
     modobio_test_code = fields.String()
-    race_id = fields.Integer()
 
 class MedicalBloodTestsInputSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodTests
-        dump_only = ('reporter_id', 'test_id')
+        dump_only = ('reporter_id', 'test_id', 'panel_type')
         exclude = ('created_at', 'updated_at')
-    user_id = fields.Integer()
+    user_id = fields.Integer(dump_only=True)
     results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
 
 class BloodTestsByTestID(Schema):
@@ -286,10 +284,9 @@ class BloodTestsByTestID(Schema):
     General information about the test entry like testid, date, notes, panel
     are in the outer most part of this schema.
     """
-    testid = fields.Integer()
+    test_id = fields.Integer()
     results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
     notes = fields.String()
-    panel_type = fields.String()
     date = fields.Date(format="iso")
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
