@@ -1232,7 +1232,7 @@ class MedBloodTest(BaseResource):
                                 elif client_cycle != range.menstrual_cycle:
                                     ranges.remove(range)
                                 else:
-                                    result.menstrual_cycle = client_cycle
+                                    result['menstrual_cycle'] = client_cycle
 
 
                 client_races = []
@@ -1444,9 +1444,9 @@ class AllMedBloodTestResults(BaseResource):
 
         # pull up all tests, test results, and the test type names for this client
         results =  db.session.query(
-                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
+                        MedicalBloodTests, MedicalBloodTestResults, LookupBloodTests, User
                         ).join(
-                            MedicalBloodTestResultTypes
+                            LookupBloodTests
                         ).join(MedicalBloodTests
                         ).filter(
                             MedicalBloodTests.test_id == MedicalBloodTestResults.test_id
@@ -1465,15 +1465,20 @@ class AllMedBloodTestResults(BaseResource):
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
                 if test_result.test_id == test['test_id']:
-                    res = {'result_name': result_type.result_name, 
-                           'result_value': test_result.result_value,
-                           'evaluation': test_result.evaluation}
+                    res = {
+                        'modobio_test_code': result_type.modobio_test_code, 
+                        'result_value': test_result.result_value,
+                        'evaluation': test_result.evaluation,
+                        'age': test_result.age,
+                        'biological_sex_male': test_result.biological_sex_male,
+                        'race': test_result.race,
+                        'menstrual_cycle': test_result.menstrual_cycle
+                    }
                     test['results'].append(res)
                     # add test details if not present
                     if not test.get('date', False):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
-                        test['panel_type'] = test_info.panel_type
         payload = {}
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)
