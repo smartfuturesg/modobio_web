@@ -1040,6 +1040,8 @@ class MedicalFamilyHist(BaseResource):
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedImaging(BaseResource):
+    __check_resource__ = False
+    
     @token_auth.login_required(resources=('diagnostic_imaging',))
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, user_id):
