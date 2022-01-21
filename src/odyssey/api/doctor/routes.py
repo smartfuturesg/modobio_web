@@ -1,9 +1,11 @@
 import logging
+
+from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
 logger = logging.getLogger(__name__)
 
 import os, boto3, secrets, pathlib
 
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from flask import g, request, current_app
@@ -74,6 +76,7 @@ from odyssey.api.doctor.schemas import (
     MedicalSocialHistoryOutputSchema,
     MedicalSurgeriesSchema
 )
+from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.utils.base.resources import BaseResource
@@ -1037,6 +1040,8 @@ class MedicalFamilyHist(BaseResource):
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedImaging(BaseResource):
+    __check_resource__ = False
+    
     @token_auth.login_required(resources=('diagnostic_imaging',))
     @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, user_id):
@@ -1159,6 +1164,10 @@ class MedImaging(BaseResource):
 @ns.route('/bloodtest/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodTest(BaseResource):
+    
+    # Multiple tests per user allowed
+    __check_resource__ = False
+    
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
     @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
     @responds(schema=MedicalBloodTestSchema, status_code=201, api=ns)
@@ -1170,30 +1179,126 @@ class MedBloodTest(BaseResource):
         to the results related to this submisison. Each submission may have 
         multiple results (e.g. in a panel)
         """
+        
         self.check_user(user_id, user_type='client')
-
-        data = request.get_json()
         
         # remove results from data, commit test info without results to db
-        results = data['results']
-        del data['results']
-        data['user_id'] = user_id
-        data['reporter_id'] = token_auth.current_user()[0].user_id
-        client_bt = MedicalBloodTestSchema().load(data)
+        results = request.parsed_obj['results']
+        
+        #insert non results data into MedicalBloodTests in order to generate the test_id
+        client_bt = MedicalBloodTests(**{
+            'user_id': user_id,
+            'reporter_id': token_auth.current_user()[0].user_id,
+            'date': request.parsed_obj['date'],
+            'notes': request.parsed_obj['notes']
+        })
         
         db.session.add(client_bt)
-        db.session.flush()
-
-        # insert results into the result table
-        for result in results:
-            check_blood_test_result_type_existence(result['result_name'])
-            result_id = MedicalBloodTestResultTypes.query.filter_by(result_name=result['result_name']).first().result_id
-            result_data = {'test_id': client_bt.test_id, 
-                           'result_id': result_id, 
-                           'result_value': result['result_value']}
-            db.session.add(MedicalBloodTestResultsSchema().load(result_data))
-        
         db.session.commit()
+        
+        #for each provided result, evaluate the results based on the range that most applies to the client
+        for result in results:
+            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_code=result['modobio_test_code']).all()
+            client = User.query.filter_by(user_id=user_id).one_or_none()
+                
+            if len(ranges) > 1:
+                
+                #calculate client age
+                today = date.today()
+                client_age = today.year - client.dob.year
+                if today.month < client.dob.month or (today.month == client.dob.month and today.day < client.dob.day):
+                    client_age -= 1
+                
+                for range in ranges:
+                    #prune ranges by age if relevant
+                    age_min = range.age_min
+                    if age_min == None:
+                        age_min = 0
+                    age_max = range.age_max
+                    if age_max == None:
+                        age_max = 999
+                    if not (age_min <= client_age <= age_max):
+                        #if client's age does not apply to this range's age range, remove it from the remaining ranges
+                        ranges.remove(range)
+                result['age'] = client_age
+                
+                #first prune by client biological sex if relevant
+                for range in ranges:
+                    if range.biological_sex_male != None:
+                        if range.biological_sex_male == client.biological_sex_male:
+                            if not client.biological_sex_male:
+                                #prune by menstrual cycle if relevant
+                                client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
+                                if client_cycle == 'unknown' and range.menstrual_cycle != None:
+                                    ranges.remove(range)
+                                elif client_cycle != range.menstrual_cycle:
+                                    ranges.remove(range)
+                                else:
+                                    result['menstrual_cycle'] = client_cycle
+
+
+                client_races = []
+                for race in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
+                    client_races.append(race.race_id)
+        
+                #prune remaining ranges by races relevant to the client
+                for range in ranges:
+                    if range.race_id != None and range.race_id not in client_races:
+                        ranges.remove(range)
+                
+                if len(ranges) > 1:
+                    """
+                    If more than 1 range remains at this point, it is because the client has multiple
+                    races that can impact the evaluation. In this case, we want the 'most conservative'
+                    range. Meaning of all the remaining ranges, we want to take the highest min values
+                    and lowest max values.
+                    """
+                    critical_min = ref_min = 0
+                    critical_max = ref_max = float("inf")
+                    races = []
+                    for range in ranges:
+                        if range.critical_min != None and range.critical_min > critical_min:
+                            critical_min = range.critical_min
+                        if range.ref_min != None and range.ref_min > ref_min:
+                            ref_min = range.ref_min
+                        if range.ref_max != None and range.ref_max < ref_max:
+                            ref_max = range.ref_max
+                        if range.critical_max != None and range.critical_max < critical_max:
+                            critical_max = range.critical_max
+                        if range.race_id != None:
+                            races.append(LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name)
+                    if len(races) > 0:
+                        result['race'] = ','.join(races)
+                    eval_values = {
+                        'critical_min': critical_min,
+                        'ref_min': ref_min,
+                        'ref_max': ref_max,
+                        'critical_max': critical_max
+                    }
+            else:
+                eval_values = {
+                    'critical_min': ranges[0].critical_min,
+                    'ref_min': ranges[0].ref_min,
+                    'ref_max': ranges[0].ref_max,
+                    'critical_max': ranges[0].critical_max
+                }
+
+            #make the evaluation based on the eval values found above
+            if result['result_value'] < eval_values['critical_min']:
+                result['evaluation'] = 'critical'
+            elif result['result_value'] < eval_values['ref_min']:
+                result['evaluation'] = 'abnormal'
+            elif result['result_value'] < eval_values['ref_max']:
+                result['evaluation'] = 'normal'
+            elif result['result_value'] < eval_values['critical_max']:
+                result['evaluation'] = 'abnormal'
+            else:
+                result['evaluation'] = 'critical'
+            result['test_id'] = client_bt.test_id
+            db.session.add(MedicalBloodTestResults(**result))
+            
+        db.session.commit()
+        
         return client_bt
 
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
@@ -1230,7 +1335,6 @@ class MedBloodTestAll(BaseResource):
         - date
         - test_id
         - notes
-        - panel_type
         - reporter (a staff member who reported the test results)
         
         To see the actual test results for a given test, use the test_id
@@ -1281,9 +1385,9 @@ class MedBloodTestResults(BaseResource):
         #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes table
 
         results =  db.session.query(
-                MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
+                MedicalBloodTests, MedicalBloodTestResults, LookupBloodTests, User
                 ).join(
-                    MedicalBloodTestResultTypes
+                    LookupBloodTests
                 ).join(MedicalBloodTests
                 ).filter(
                     MedicalBloodTests.test_id == MedicalBloodTestResults.test_id
@@ -1300,7 +1404,6 @@ class MedBloodTestResults(BaseResource):
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
-                          'panel_type' : results[0][0].panel_type,
                           'reporter_id': results[0][0].reporter_id,
                           'reporter_firstname': results[0][3].firstname,
                           'reporter_lastname': results[0][3].lastname,
@@ -1309,9 +1412,15 @@ class MedBloodTestResults(BaseResource):
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
         for _, test_result, result_type, _ in results:
-                res = {'result_name': result_type.result_name, 
-                        'result_value': test_result.result_value,
-                        'evaluation': test_result.evaluation}
+                res = {
+                    'modobio_test_code': result_type.modobio_test_code, 
+                    'result_value': test_result.result_value,
+                    'evaluation': test_result.evaluation,
+                    'age': test_result.age,
+                    'biological_sex_male': test_result.biological_sex_male,
+                    'race': test_result.race,
+                    'menstrual_cycle': test_result.menstrual_cycle
+                }
                 nested_results['results'].append(res)
 
         payload = {}
@@ -1337,9 +1446,9 @@ class AllMedBloodTestResults(BaseResource):
 
         # pull up all tests, test results, and the test type names for this client
         results =  db.session.query(
-                        MedicalBloodTests, MedicalBloodTestResults, MedicalBloodTestResultTypes, User
+                        MedicalBloodTests, MedicalBloodTestResults, LookupBloodTests, User
                         ).join(
-                            MedicalBloodTestResultTypes
+                            LookupBloodTests
                         ).join(MedicalBloodTests
                         ).filter(
                             MedicalBloodTests.test_id == MedicalBloodTestResults.test_id
@@ -1358,15 +1467,20 @@ class AllMedBloodTestResults(BaseResource):
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
                 if test_result.test_id == test['test_id']:
-                    res = {'result_name': result_type.result_name, 
-                           'result_value': test_result.result_value,
-                           'evaluation': test_result.evaluation}
+                    res = {
+                        'modobio_test_code': result_type.modobio_test_code, 
+                        'result_value': test_result.result_value,
+                        'evaluation': test_result.evaluation,
+                        'age': test_result.age,
+                        'biological_sex_male': test_result.biological_sex_male,
+                        'race': test_result.race,
+                        'menstrual_cycle': test_result.menstrual_cycle
+                    }
                     test['results'].append(res)
                     # add test details if not present
                     if not test.get('date', False):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
-                        test['panel_type'] = test_info.panel_type
         payload = {}
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)

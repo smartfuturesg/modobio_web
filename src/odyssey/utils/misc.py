@@ -545,10 +545,13 @@ def get_time_index(target_time: datetime):
     In order to do this, we query to find the index where the current time falls in the range of
     start time <= current time < end time
     """
-    return LookupBookingTimeIncrements.query.filter(
-        LookupBookingTimeIncrements.start_time <= target_time.time(),
-        LookupBookingTimeIncrements.end_time > target_time.time()
-    ).one_or_none().idx
+    if target_time.hour == 23 and target_time.minute >= 55:
+        return LookupBookingTimeIncrements.query.all()[-1].idx
+    else:
+        return LookupBookingTimeIncrements.query.filter(
+            LookupBookingTimeIncrements.start_time <= target_time.time(),
+            LookupBookingTimeIncrements.end_time > target_time.time()
+        ).one_or_none().idx
 
 
 
@@ -728,4 +731,5 @@ class EmailVerification():
         db.session.delete(verification)
         db.session.commit()
         return
+
 
