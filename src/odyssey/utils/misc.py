@@ -599,6 +599,10 @@ class EmailVerification():
         ------
         dict: email verification code, token, email, and user_id
         """
+        # Check if email is already in use
+        if User.query.filter_by(email = email).one_or_none():
+            raise BadRequest("Email in use")
+            
         # check if there is already a Pending email verification entry
         pending_verification = UserPendingEmailVerifications.query.filter_by(user_id = user.user_id).one_or_none()
 

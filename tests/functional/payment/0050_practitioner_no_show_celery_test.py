@@ -27,7 +27,7 @@ def test_no_show_scan(test_client, test_booking):
         
     #charge the booking
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': booking_id}),
         content_type='application/json')
@@ -46,6 +46,6 @@ def test_no_show_scan(test_client, test_booking):
     assert booking.status == 'Canceled'
     
     #check that client was refunded
-    payment = PaymentHistory.query.filter_by(booking_id=booking_id).one_or_none()
+    payment = PaymentHistory.query.filter_by(idx=booking.payment_history_id).one_or_none()
     assert payment.voided == True
     assert payment.void_reason == 'Practitioner No Show'
