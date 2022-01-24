@@ -517,4 +517,9 @@ class LookupBloodTestRangesApi(BaseResource):
     def get(self, modobio_test_code):
         """get all ranges for the requested blood test"""
         res = LookupBloodTestRanges.query.filter_by(modobio_test_code=modobio_test_code).all()
+        for range in res:
+            if range.race_id:
+                range.race = LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+            else:
+                range.race = None
         return {'total_items': len(res), 'items': res}
