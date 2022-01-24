@@ -260,7 +260,8 @@ class Instamed:
                     'payment_method_id': payment_method.idx,
                     'transaction_id': response_data['TransactionID'],
                     'transaction_amount': amount,
-                    'transaction_descriptor': transaction_descriptor
+                    'transaction_descriptor': transaction_descriptor,
+                    'authorization_number': response_data.get('AuthorizationNumber')
                 })
 
                 response = requests.post(self.url_base + '/payment/void',
@@ -291,7 +292,8 @@ class Instamed:
                     'payment_method_id': payment_method.idx,
                     'transaction_id': response_data['TransactionID'],
                     'transaction_amount': amount,
-                    'transaction_descriptor': transaction_descriptor
+                    'transaction_descriptor': transaction_descriptor,
+                    'authorization_number': response_data.get('AuthorizationNumber')
                 })
                 db.session.add(history)
                 db.session.flush()

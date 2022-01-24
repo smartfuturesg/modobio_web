@@ -41,7 +41,7 @@ def test_no_show_scan(test_client, test_booking):
     #deploy task and make sure task booking is canceled
     assert test_booking.status == 'Accepted'
     detect_practitioner_no_show()
-    
+    breakpoint()
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
     assert booking.status == 'Canceled'
     
