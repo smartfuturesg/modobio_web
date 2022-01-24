@@ -199,6 +199,13 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: string
     """
 
+    authorization_number = db.Column(db.String)
+    """
+    Card authorization number from Instamed. 
+
+    :type: string
+    """
+
 class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """
     This table keeps track of refunds that have been issued as well as the staff member who 
