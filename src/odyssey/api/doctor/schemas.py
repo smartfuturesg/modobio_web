@@ -274,7 +274,7 @@ class MedicalBloodTestResultsSchema(ma.SQLAlchemyAutoSchema):
 class MedicalBloodTestsInputSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodTests
-        dump_only = ('reporter_id', 'test_id', 'panel_type')
+        dump_only = ('reporter_id', 'test_id', 'panel_type', 'image_path')
         exclude = ('created_at', 'updated_at')
     user_id = fields.Integer(dump_only=True)
     results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
@@ -289,6 +289,7 @@ class BloodTestsByTestID(Schema):
     results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
     notes = fields.String()
     date = fields.Date(format="iso")
+    image = fields.String()
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, dump_only=True)

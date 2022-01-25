@@ -1324,10 +1324,10 @@ class MedBloodTest(BaseResource):
         
 @ns.route('/bloodtest/image/<int:test_id>/')
 @ns.doc(params={'test_id': 'User ID number'})
-class MedBloodTest(BaseResource):
+class MedBloodTestImage(BaseResource):
     
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
-    @responds(schema=MedicalBloodTestSchema, api=ns, response_code=200)
+    @responds(schema=MedicalBloodTestSchema, api=ns, status_code=200)
     def patch(self, test_id):
         """
         This resource can be used to add an image to submitted blood test results.
@@ -1351,10 +1351,9 @@ class MedBloodTest(BaseResource):
         img_extension = fh.validate_file_type(img, ('.pdf',))
         
         #get hex token
-        hex_token = secrets.hex_token(4)
+        hex_token = secrets.token_hex(4)
         
-        
-        test = MedBloodTest.query.filter_by(test_id=test_id).one_or_none()
+        test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
         _prefix = f'id{test.user_id:05d}/bloodtest/id{test.test_id:05d}'
 
         # if any, delete files with prefix
@@ -1363,13 +1362,10 @@ class MedBloodTest(BaseResource):
         # Save to S3
         s3key = f'{_prefix}/{hex_token}{img_extension}'
         fh.save_file_to_s3(img, s3key)
-        
+
         #store file path in db
-        test.file_path = s3key
+        test.image_path = s3key
         db.session.commit()
-        
-        #get presigned url to return to FE
-        test.image = fh.get_presigned_url(s3key)
         
         return test
 
@@ -1412,7 +1408,7 @@ class MedBloodTestAll(BaseResource):
             data.update(
                 {'reporter_firstname': test[1],
                  'reporter_lastname': test[2],
-                 'image': fh.get_presigned_url(test.image_path)})
+                 'image': fh.get_presigned_url(test[0].image_path)})
             response.append(data)
         payload = {}
         payload['items'] = response
@@ -1455,11 +1451,15 @@ class MedBloodTestResults(BaseResource):
         if not results:
             return
         fh = FileHandling()
+        if results[0][0].image_path:
+            image_path = fh.get_presigned_url(results[0][0].image_path)
+        else:
+            image_path = None
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
-                          'image': fh.get_presigned_url(results[0][0].image_path),
+                          'image': image_path,
                           'reporter_id': results[0][0].reporter_id,
                           'reporter_firstname': results[0][3].firstname,
                           'reporter_lastname': results[0][3].lastname,
