@@ -549,6 +549,13 @@ class LookupSubscriptions(BaseModel):
     :type: string
     """
 
+    ios_product_id = db.Column(db.String)
+    """
+    Product ID assigned by the iOS app store
+
+    :type: string
+    """
+
 class LookupNotifications(BaseModel):
     """ Static list of notifications types that a user can receive. """
 

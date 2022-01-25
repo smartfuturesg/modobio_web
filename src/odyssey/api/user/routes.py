@@ -261,7 +261,6 @@ class NewStaffUser(BaseResource):
 
                 # add new staff subscription information
                 staff_sub = UserSubscriptionsSchema().load({
-                    'subscription_type_id': 1,
                     'subscription_status': 'subscribed',
                     'is_staff': True
                 })
@@ -293,7 +292,6 @@ class NewStaffUser(BaseResource):
 
             # add new user subscription information
             staff_sub = UserSubscriptionsSchema().load({
-                'subscription_type_id': 1,
                 'subscription_status': 'subscribed',
                 'is_staff': True
             })
@@ -454,7 +452,6 @@ class NewClientUser(BaseResource):
         # add new client subscription information
         client_sub = UserSubscriptionsSchema().load({
             'subscription_status': 'unsubscribed',
-            'subscription_type_id': 1,
             'is_staff': False
         })
         client_sub.user_id = user.user_id

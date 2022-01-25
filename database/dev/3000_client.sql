@@ -40,16 +40,13 @@ BEGIN
         user_id,
         is_staff,
         start_date,
-        subscription_status,
-        subscription_type_id)
-    SELECT
+        subscription_status
+        )
+    VALUES (
         _user_id,
         false,
         '2021-01-01',
-        'unsubscribed',
-        sub_id
-    FROM "LookupSubscriptions"
-    WHERE LOWER(name) = 'annual';
+        'unsubscribed');
 
     -- Create a care team with two staff members.
 
