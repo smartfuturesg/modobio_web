@@ -1404,11 +1404,15 @@ class MedBloodTestAll(BaseResource):
         response = []
         fh = FileHandling()
         for test in blood_tests:
+            if test[0].image_path:
+                image_path = fh.get_presigned_url(test[0].image_path)
+            else:
+                image_path = None
             data = test[0].__dict__
             data.update(
                 {'reporter_firstname': test[1],
                  'reporter_lastname': test[2],
-                 'image': fh.get_presigned_url(test[0].image_path)})
+                 'image': image_path})
             response.append(data)
         payload = {}
         payload['items'] = response
