@@ -45,7 +45,7 @@ from odyssey.utils.misc import (
     check_medical_condition_existence,
 )
 from odyssey.utils.file_handling import FileHandling
-from odyssey.utils.constants import IMAGE_MAX_SIZE, MED_ALLOWED_IMAGE_TYPES
+from odyssey.utils.constants import IMAGE_MAX_SIZE, MED_ALLOWED_IMAGE_TYPES, BLOOD_TEST_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
@@ -1320,7 +1320,58 @@ class MedBloodTest(BaseResource):
             db.session.delete(result)
             db.session.commit()
         else:
-            raise BadRequest("test_id must be an integer.")     
+            raise BadRequest("test_id must be an integer.")
+        
+@ns.route('/bloodtest/image/<int:test_id>/')
+@ns.doc(params={'test_id': 'User ID number'})
+class MedBloodTest(BaseResource):
+    
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
+    @responds(schema=MedicalBloodTestSchema, api=ns, response_code=200)
+    def patch(self, test_id):
+        """
+        This resource can be used to add an image to submitted blood test results.
+
+        Args:
+            image ([file]): image file to be added to test results (only .pdf files are supported, max size 20MB)
+        """
+
+        if not ('image' in request.files and request.files['image']):  
+            raise BadRequest('No file selected.')
+
+        # add all files to S3
+        # format: id{user_id:05d}/bloodtest/id{test_id:05d}/hex_token.img_extension
+        fh = FileHandling()
+        img = request.files['image']
+        
+        # validate file size - safe threashold (MAX = 10 mb)
+        fh.validate_file_size(img, BLOOD_TEST_IMAGE_MAX_SIZE)
+        
+        # validate file type
+        img_extension = fh.validate_file_type(img, ('.pdf',))
+        
+        #get hex token
+        hex_token = secrets.hex_token(4)
+        
+        
+        test = MedBloodTest.query.filter_by(test_id=test_id).one_or_none()
+        _prefix = f'id{test.user_id:05d}/bloodtest/id{test.test_id:05d}'
+
+        # if any, delete files with prefix
+        fh.delete_from_s3(prefix=_prefix)
+
+        # Save to S3
+        s3key = f'{_prefix}/{hex_token}{img_extension}'
+        fh.save_file_to_s3(img, s3key)
+        
+        #store file path in db
+        test.file_path = s3key
+        db.session.commit()
+        
+        #get presigned url to return to FE
+        test.image = fh.get_presigned_url(s3key)
+        
+        return test
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
@@ -1355,9 +1406,13 @@ class MedBloodTestAll(BaseResource):
 
         # prepare response items with reporter name from User table
         response = []
+        fh = FileHandling()
         for test in blood_tests:
             data = test[0].__dict__
-            data.update({'reporter_firstname': test[1], 'reporter_lastname': test[2]})
+            data.update(
+                {'reporter_firstname': test[1],
+                 'reporter_lastname': test[2],
+                 'image': fh.get_presigned_url(test.image_path)})
             response.append(data)
         payload = {}
         payload['items'] = response
@@ -1399,11 +1454,12 @@ class MedBloodTestResults(BaseResource):
 
         if not results:
             return
-
+        fh = FileHandling()
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
+                          'image': fh.get_presigned_url(results[0][0].image_path),
                           'reporter_id': results[0][0].reporter_id,
                           'reporter_firstname': results[0][3].firstname,
                           'reporter_lastname': results[0][3].lastname,

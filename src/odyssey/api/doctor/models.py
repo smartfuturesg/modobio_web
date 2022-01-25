@@ -865,6 +865,13 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
     :type: str
     """
+    
+    image_path = db.Column(db.String)
+    """
+    Optional image uploaded alongside blood test results.
+    
+    :type: str
+    """
 
 
 class MedicalBloodTestResultTypes(BaseModel):

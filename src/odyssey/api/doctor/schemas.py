@@ -248,6 +248,7 @@ class MedicalBloodTestSchema(Schema):
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'})
+    image = fields.String(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
