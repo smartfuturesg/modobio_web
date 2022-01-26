@@ -54,7 +54,9 @@ class PaymentMethodsApi(BaseResource):
         """add a new payment method"""
         self.check_user(user_id, user_type='client')
 
-        if len(PaymentMethods.query.filter_by(user_id=user_id).all()) >= 5:
+        if len(PaymentMethods.query.filter(PaymentMethods.user_id == user_id,
+                                           PaymentMethods.payment_id.isnot(None),
+                                           PaymentMethods.expiration.isnot(None)).all()) >= 5:
             raise BadRequest('Maximum number of payment methods reached.')
 
         im = Instamed()
