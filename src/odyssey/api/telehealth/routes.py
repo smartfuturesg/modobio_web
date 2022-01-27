@@ -1240,7 +1240,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                         'consult_rate': booking.consult_rate,
                         'charged': booking.charged
                     })
-                            
+            
+        else:
+            #all availability is being removed, so all bookings are conflicts
+            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()                
         db.session.commit()
         return {'conflicts': conflicts}
 
