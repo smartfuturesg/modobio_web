@@ -549,6 +549,13 @@ class LookupSubscriptions(BaseModel):
     :type: string
     """
 
+    ios_product_id = db.Column(db.String)
+    """
+    Product ID assigned by the iOS app store
+
+    :type: string
+    """
+
 class LookupNotifications(BaseModel):
     """ Static list of notifications types that a user can receive. """
 
@@ -1241,17 +1248,31 @@ class LookupBloodTests(BaseModel):
     :type: string
     """
     
+    ranges = db.relationship('LookupBloodTestRanges')
+    """
+    Relation holding information on ranges that apply to this test type.
+    
+    :type: :class: LookupBloodTestRanges
+    """
+    
 class LookupBloodTestRanges(BaseModelWithIdx):
     """
     Lookup table for blood test result optimal/critical ranges. One result may have multiple
     entries if it can be affected by age/race/fertility status/bioloical sex
     """
     
-    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'), nullable=False)
+    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
     """
     Modobio Test Code for this result.
     
     :type: string, foreign key(LookupBloodTests.modobio_test_code)
+    """
+    
+    test_info = db.relationship("LookupBloodTests", back_populates="ranges")
+    """
+    Many to one relationship holding the non-range test information.
+    
+    :type: :class: LookupBloodTests
     """
     
     biological_sex_male = db.Column(db.Boolean)

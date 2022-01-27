@@ -26,7 +26,7 @@ def test_get_user_subscription(test_client):
         f'/user/subscription/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
-
+        
     # some simple checks for validity
     assert response.status_code == 200
 

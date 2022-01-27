@@ -876,8 +876,11 @@ MED_ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', 'DCOM','.bmp', '.gif', '.web
 #image resize thumbnail demensions (w, h) two-tuple
 IMAGE_DIMENSIONS = ((512,512),(256,256),(128,128),(64,64))
 
-#image max size 10MB = 10485760 binary bytes
+#general image max size 10MB = 10485760 binary bytes
 IMAGE_MAX_SIZE = 10485760
+
+#blood test image max size 20MB = 20971520
+BLOOD_TEST_IMAGE_MAX_SIZE = 20971520
 
 #audio types allowed for upload
 ALLOWED_AUDIO_TYPES = ('.m4a', '.caf')

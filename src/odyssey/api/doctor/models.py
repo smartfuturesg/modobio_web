@@ -849,8 +849,11 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     :type: :class:`datetime.date`
     """
 
-    panel_type = db.Column(db.String, default="Nonroutine")
+    panel_type = db.Column(db.String)
     """
+    Deprecated field - it's job is now covered by the information in LookupBloodTests when paired with
+    the modobio_test_code field in MedicalBloodTestResults
+    
     Which panel does test belong to. ``None`` if not one of the standard tests.
 
     :type: str
@@ -860,6 +863,13 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """
     Notes regarding blood test.
 
+    :type: str
+    """
+    
+    image_path = db.Column(db.String)
+    """
+    Optional image uploaded alongside blood test results.
+    
     :type: str
     """
 
@@ -934,8 +944,8 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     """ Blood test result data.
 
     This table holds the value of a single blood test and the
-    evaluation of that value given the normal and optimal ranges
-    stored in :class:`MedicalBloodTestResultTypes`.
+    evaluation of that value given the normal and critical ranges
+    stored in :class:`LookupBloodTestRanges`.
     """
 
     test_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.test_id', ondelete="CASCADE"), nullable=False)
@@ -944,9 +954,49 @@ class MedicalBloodTestResults(BaseModelWithIdx):
 
     :type: int, foreign key to :attr:`MedicalBloodTests.testid`
     """
-
-    result_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.result_id', ondelete="CASCADE"), nullable=False)
+    
+    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
     """
+    Modobio Test Code for this result type.
+    
+    :type: str, foreign key to :attr:'LookupBloodTests.modobio_test_id
+    """
+    
+    age = db.Column(db.Integer)
+    """
+    Client age at the time the blood test was administered.
+    
+    :type: int
+    """
+    
+    race = db.Column(db.String)
+    """
+    Client's race for the purpose of blood chemistry analysis. In the case a client has multiple races
+    that may affect blood chemistry ranges, multiple races may be present in this field as the range 
+    used is derived from the most 'conservative' range when considering all the client's races.
+        
+    :type: string
+    """
+    
+    menstrual_cycle = db.Column(db.String)
+    """
+    Stage of the menstrual cycle the client was in at the time of the blood test. Null if the client's
+    biological_sex_male is True.
+    
+    :type: string
+    """
+    
+    biological_sex_male = db.Column(db.Boolean)
+    """
+    Biological sex of the client for the purpose of blood chemistry analysis.
+    
+    :type: bool
+    """
+
+    result_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.result_id', ondelete="SET NULL"), nullable=True)
+    """
+    Deprecated field that was used to track result types before modobio_test_id was developed
+    
     Unique result ID number.
 
     :type: int, foreign key to :attr:`MedicalBloodTestResultTypes.resultid`
@@ -964,36 +1014,13 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     Evaluation of blood test result based on recommended ranges for normal
     and optimal results. Possible values are:
 
-    - optimal
     - normal
     - abnormal
+    - critical
+    - unknown
 
     :type: str
     """
-
-
-@db.event.listens_for(MedicalBloodTestResults, "after_insert")
-def add_rest_result_eval(mapper, connection, target):
-    """
-    Event listener for the :class:`MedicalBloodTestResults` table.
-
-    Listens for inserts into the :class:`MedicalBloodTestResults` table. When
-    called, it runs the value evaluation on the DB side
-    (:const:`odyssey.constants.BLOODTEST_EVAL`) and stores the result.
-    Evaluation is based of normal and optimal ranges of each blood test type.
-
-    Parameters
-    ----------
-    mapper : ???
-        What does this do? Not used.
-
-    connection : :class:`sqlalchemy.engine.Connection`
-        Connection to the database engine.
-
-    target : :class:`sqlalchemy.schema.Table`
-        Target SQLAlchemy table, fixed to :class:`MedicalBloodTestResults` by decorator.
-    """
-    connection.execute(text(BLOODTEST_EVAL.format(target.idx, target.result_id, target.result_value)))
 
 class MedicalSurgeries(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ 
