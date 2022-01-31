@@ -65,8 +65,10 @@ from odyssey.api.lookup.schemas import (
     LookupUSStatesOutputSchema,
     LookupNotificationSeverityOutputSchema,
     LookupBloodTestsOutputSchema,
-    LookupBloodTestRangesOutputSchema
+    LookupBloodTestRangesOutputSchema,
+    LookupBloodTestRangesAllOutputSchema
 )
+from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_drink_existence
@@ -522,4 +524,26 @@ class LookupBloodTestRangesApi(BaseResource):
                 range.race = LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
             else:
                 range.race = None
+        return {'total_items': len(res), 'items': res}
+    
+@ns.route('/bloodtests/ranges/all/')
+class LookupBloodTestRangesAllApi(BaseResource):
+    """
+    Endpoint that return blood test range information for the all tests.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodTestRangesAllOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get all ranges for the all blood tests"""
+        tests = db.session.query(LookupBloodTests, LookupBloodTestRanges
+                ).filter(LookupBloodTestRanges.modobio_test_code == LookupBloodTests.modobio_test_code
+                ).all()
+        
+        res = []
+        for test, range in tests:
+            if range.race_id:
+                range.race = LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+            else:
+                range.race = None
+            res.append({'test': test, 'range': range})
         return {'total_items': len(res), 'items': res}
