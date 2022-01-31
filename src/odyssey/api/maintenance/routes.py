@@ -1,112 +1,116 @@
+import boto3
+from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.auth import token_auth
+from odyssey.api import api
+from flask import Response, request, current_app
+from datetime import *
+from dateutil.relativedelta import *
+from datetime import timedelta
+import json
 import logging
-from sqlalchemy import and_
-
-from odyssey.api.maintenance.models import MaintenanceBlocks
 logger = logging.getLogger(__name__)
 
-import requests
-import json
 
-from pymongo import MongoClient
+ns = api.namespace(
+    'maintenance', description='Endpoints for functions related to maintenance.')
 
-from flask import Response, request, current_app
-from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
-from werkzeug.exceptions import BadRequest, Unauthorized
-from odyssey import db, mongo
-from odyssey.api import api
-from odyssey.utils.auth import token_auth
-from odyssey.utils.misc import check_client_existence
-from odyssey.utils.base.resources import BaseResource
-# Models
-from odyssey.api.lookup.models import LookupOrganizations
-from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
-from odyssey.api.telehealth.models import TelehealthBookings
-from odyssey.api.user.models import User
 
-ns = api.namespace('maintenance', description='Endpoints for functions related to maintenance.')
-
-@ns.route('/methods/<int:staff_id>/')
+# @ns.route('/methods/<int:staff_id>/')
+@ns.route('/methods/')
 class MaintenanceApi(BaseResource):
-    # Multiple payment methods per user allowed
-    __check_resource__ = False
 
     def __init__(self, data):
-        self.client = MongoClient("mongodb://127.0.0.1:5000/")
-
-        database = data['database']
-        collection = data['collection']
-        cursor = self.client[database]
-        self.collection = cursor[collection]
+        # Get the service resource.
+        self.dynamodb = boto3.resource('dynamodb')
+        self.table = self.dynamodb.Table(
+            current_app.config['MAINTENANCE_DYNAMO_TABLE'])
         self.data = data
 
-    #@token_auth.login_required(user_type=('staff',))
+    # TODO: Change to system admin
+    # @token_auth.login_required(user_type=('staff',))
     def get(self):
-        documents = self.collection.find()
-        output = [{item: data[item] for item in data if item != '_id'} for data in documents]
-        return output
-    
-    #@token_auth.login_required(user_type=('staff',))
-    def put(self, data):
-        new_document = data['Document']
-        response = self.collection.insert_one(new_document)
-        output = {'Status': 'Successfully Inserted', 'Document_ID': str(response.inserted_id)}
-        return output
+        response = self.table.scan()
+        items = response['Items']
+        return items
 
-    #@token_auth.login_required(user_type=('staff',))
+    # @token_auth.login_required(user_type=('staff',))
+    @ns.doc(params={'data': 'JSON data'})
+    def post(self, data):
+        maint = data['Document']
+        response = self.table.put_item(
+            Item={
+                'start_time': maint["start_time"],
+                'end_time': maint["end_time"]
+            }
+        )
+        return response
+
+    # @token_auth.login_required(user_type=('staff',))
     def update(self):
+        # TODO: Finish this function
         filt = self.data['Filter']
-        updated_data = {"$set": self.data['DataToBeUpdated']}
-        response = self.collection.update_one(filt, updated_data)
-        output = {'Status': 'Successfully Updated' if response.modified_count > 0 else "Nothing was updated."}
-        return output
 
-    #@token_auth.login_required(user_type=('staff',))
+        response = self.update_item(
+            Key={
+                'start_time': filt['start_time']
+            },
+            AttributeUpdates={
+                'start_time': {
+                    'Value': self.data['start_time'],
+                    # available options -> DELETE(delete), PUT(set), ADD(increment)
+                    'Action': 'PUT'
+                },
+                'end_time': {
+                    'Value': self.data['end_time'],
+                    'Action': 'PUT'
+                }
+            },
+            ReturnValues="UPDATED_NEW"  # returns the new updated values
+        )
+        return response
+
+    # @token_auth.login_required(user_type=('staff',))
     def delete(self, data):
-        filt = data['Document']
-        response = self.collection.delete_one(filt)
-        output = {'Status': 'Successfully Deleted' if response.deleted_count > 0 else "Document not found."}
-        return output
+        filt = data['Filter']
+
+        response = self.table.delete_item(
+            Key={
+                'start_time': filt['start_time']
+            }
+        )
+        return response
 
 
 @ns.route('/')
 class Base(BaseResource):
     def get(self):
-        """
-        Base route
-
-        :return: 
-        """
         return Response(response=json.dumps({"Status": "UP"}),
-                                status=200,
-                                mimetype='application/json')
+                        status=200,
+                        mimetype='application/json')
 
 
 @ns.route('/list-blocks')
-class MongoRead(BaseResource):
+class DynamoRead(BaseResource):
     def get(self):
         """
-        Read from the MongoDB table using data from the request.
+        Read from the DynamoDB table using data from the request.
 
         :return: HTTP status code
         """
-        data = request.json
-        if data is None or data == {}:
-            return Response(response=json.dumps({"Error": "Please provide connection information"}),
-                            status=400,
-                            mimetype='application/json')
-        obj1 = MaintenanceApi(data)
-        response = obj1.get()
+        response = MaintenanceApi.get(MaintenanceApi)
         return Response(response=json.dumps(response),
                         status=200,
                         mimetype='application/json')
 
 
 @ns.route('/schedule-block')
-class MongoWrite(BaseResource):
-    def put(self):
+class DynamoWrite(BaseResource):
+    def post(self):
         """
-        Write to the MongoDB table using data from the request.
+        Write to the DynamoDB table using data from the request.
+
+        {"end_time": string, epoch time, 
+        "start_time": string, epoch time}
 
         :return: HTTP status code
         """
@@ -114,46 +118,95 @@ class MongoWrite(BaseResource):
         data = request.json
         # If the request is empty, return an error
         if data is None or data == {} or 'Document' not in data:
-            return Response(response=json.dumps({"Error": "Please provide connection information"}),
+            return Response(response=json.dumps({"Error": "Please provide request information"}),
                             status=400,
                             mimetype='application/json')
 
+        obj1 = MaintenanceApi(data)
+        response = obj1.post(data)
+
+        return Response(response=json.dumps(response),
+                        status=200,
+                        mimetype='application/json')
+
 
 @ns.route('/update-block')
-class MongoUpdate(BaseResource):
-    def put(self):
+class DynamoUpdate(BaseResource):
+    def update(self):
         """
-        Update an existing item in the MongoDB table.
+        Update an existing item in the DynamoDB table.
 
         :return: HTTP status code
         """
         data = request.json
+
         if data is None or data == {} or 'Filter' not in data:
-            return Response(response=json.dumps({"Error": "Please provide connection information"}),
+            return Response(response=json.dumps({"Error": "Please provide request information"}),
                             status=400,
                             mimetype='application/json')
+
         obj1 = MaintenanceApi(data)
         response = obj1.put()
+
         return Response(response=json.dumps(response),
                         status=200,
                         mimetype='application/json')
 
 
 @ns.route('/delete-block')
-class MongoDelete(BaseResource):
+class DynamoDelete(BaseResource):
     def delete(self):
         """
-        Delete an item from the MongoDB table.
+        Delete an item from the DynamoDB table.
 
         :return: HTTP status code
         """
         data = request.json
+
         if data is None or data == {} or 'Filter' not in data:
-            return Response(response=json.dumps({"Error": "Please provide connection information"}),
+            return Response(response=json.dumps({"Error": "Please provide request information"}),
                             status=400,
                             mimetype='application/json')
+
         obj1 = MaintenanceApi(data)
         response = obj1.delete(data)
+
         return Response(response=json.dumps(response),
                         status=200,
                         mimetype='application/json')
+
+
+def is_maint_time_allowed(now_obj, start_obj, end_obj):
+    """
+    :param now: the current time
+    :param start: the start time
+    :param end: the end time
+
+    :return: Boolean
+    """
+
+    # 1.    0600 < Y < 2300    = 15 days
+    # 2.    2300 < Y ; Y > 0600   = 3 days
+    # Time windows in UTC
+    # 1.    1300 < Y ; Y < 0600     = 15 days
+    # 2.    0600 < Y < 1300     = 3 days
+    six_am_mst = "06:00:00"
+    eleven_pm_mst = "23:00:00"
+
+    # Time Deltas
+    short_notice = timedelta(days=2)
+    std_notice = timedelta(days=14)
+
+    #maint_time = maint_date.strftime("%H:%M:%S")
+    now = now_obj.strftime("%H:%M:%S")
+
+    start = start_obj.strftime("%H:%M:%S")
+    end = end_obj.strftime("%H:%M:%S")
+    now = now_obj.strftime("%H:%M:%S")
+
+    # If maintenance is scheduled for business hours
+    if six_am_mst <= start <= eleven_pm_mst and end <= eleven_pm_mst:
+        return True if start_obj > now_obj + std_notice else False
+    # If maintenance is scheduled for non-business hours
+    elif eleven_pm_mst <= start or start <= six_am_mst:
+        return True if start_obj > now_obj + short_notice else False
