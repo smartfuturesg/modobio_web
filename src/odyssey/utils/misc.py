@@ -1,5 +1,6 @@
 """ Utility functions for the odyssey package. """
 import logging
+from time import mktime
 
 from odyssey.api.telehealth.models import TelehealthBookingStatus
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ import statistics
 import textwrap
 import typing as t
 import uuid
-from datetime import datetime, date, time, timezone
+from datetime import datetime, date, time, timedelta, timezone
 from flask import current_app, request
 import flask.json
 from werkzeug.exceptions import (
@@ -548,3 +549,29 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.start_time <= target_time.time(),
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
+
+
+def generate_apple_appstore_jwt():
+    """
+    Create JWT for authenticating Apple appstore requests.
+    ref:  https://developer.apple.com/documentation/appstoreserverapi/generating_tokens_for_api_requests?changes=latest_major
+    
+    """
+
+    # format private key
+    secret = "-----BEGIN PRIVATE KEY-----\n"+ current_app.config.get('APPLE_APPSTORE_API_KEY')+"\n-----END PRIVATE KEY-----"
+
+    return jwt.encode( {
+                'iss': current_app.config.get('APPLE_APPSTORE_ISSUER_ID'),
+                'iat': mktime(datetime.utcnow().timetuple()) , 
+                'exp': mktime((datetime.utcnow()+timedelta(minutes=60)).timetuple()) , 
+                'aud': 'appstoreconnect-v1',
+                'nonce': str(uuid.uuid4()),
+                'bid': current_app.config.get('APPLE_APPSTORE_BUNDLE_ID')},
+                secret, 
+                headers ={
+                        'alg': 'ES256',
+                        'kid': current_app.config.get('APPLE_APPSTORE_API_KEY_ID'),
+                        'typ': 'JWT'
+                    }, 
+                algorithm='ES256')
