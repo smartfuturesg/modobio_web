@@ -39,19 +39,18 @@ SUBJECTS = {
 # Cache value
 _blacklisted_email_domains = None
 
-def send_generic_email(recipient: str, contents: str, subject: str):
+def send_generic_email(RECIPIENT, TEXT, HTML, SUBJECT, SENDER="Modo Bio no-reply <no-reply@modobio.com>"):
     """
     Send an email using the base email template. The value of contents will be used to replace
     [insert-email-base-content-here] within the modo-bio-automated-email-template-body.html file.
     """
-    SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
     
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        recipient = "success@simulator.amazonses.com"
+    if current_app.config['DEV'] and not any([RECIPIENT.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
+        RECIPIENT = "success@simulator.amazonses.com"
         
     BODY_TEXT = ("Please do not reply to this email\r\n" +
-                contents + "\r\n"
+                TEXT + "\r\n"
                 "This email was automatically generated and sent to the address associated with your Modo Bio account.\r\n"
                 "If you have any questions or concerns please visit modobio.com.")
         
@@ -60,13 +59,13 @@ def send_generic_email(recipient: str, contents: str, subject: str):
     HTML_FILE = pathlib.Path(current_app.static_folder) / 'modo-bio-automated-email-template-body.html'
     with open(HTML_FILE) as fh:
         BODY_HTML = fh.read()
-        BODY_HTML = BODY_HTML.replace('[insert-email-base-content-here]', contents)
+        BODY_HTML = BODY_HTML.replace('[insert-email-base-content-here]', HTML)
         
     # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([recipient.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        send_email(subject=subject, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+    if current_app.config['DEV'] and not any([RECIPIENT.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
+        send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
     else:
-        send_email(subject=subject, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+        send_email(subject=SUBJECT, recipient=RECIPIENT.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
 
 def email_domain_blacklisted(email_address: str):
     """ Check whether the domain of an email address is blacklisted.
@@ -153,15 +152,17 @@ def send_email_user_registration_portal(recipient, password, portal_id):
 
     send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
 
-def send_email_verify_email(recipient, token, code):
+def send_email_verify_email(RECIPIENT, token, code):
     """
     Email sent to verifiy a user's email address.
     """
 
     SUBJECT = SUBJECTS["email-verification"]
+    
+    SENDER = "Modo Bio Verify <verify@modobio.com>"
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = (f'Hello {recipient.firstname},\r\n'
+    BODY_TEXT = (f'Hello {RECIPIENT.firstname},\r\n'
                 'We are delighted to welcome you to Modo Bio.\n'
                 'Email Verification\n'
                 'For security purposes, we need to confirm your email address for your Modo Bio account. Please click the following link to verify your address:\n'
@@ -175,17 +176,13 @@ def send_email_verify_email(recipient, token, code):
     HTML_FILE = pathlib.Path(current_app.static_folder) / 'email-verify.html'
     with open(HTML_FILE) as fh:
         BODY_HTML = fh.read()
-        BODY_HTML = BODY_HTML.replace('[user-first-name]', recipient.firstname)
+        BODY_HTML = BODY_HTML.replace('[user-first-name]', RECIPIENT.firstname)
         BODY_HTML = BODY_HTML.replace('[verification-link]', f'{api.base_url}/user/email-verification/token/{token}/')
         BODY_HTML = BODY_HTML.replace('XXXX', str(code))
 
-    # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([recipient.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
-    else:
-        send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="verify@modobio.com")
+    send_generic_email(RECIPIENT, BODY_TEXT, BODY_HTML, SUBJECT, SENDER)
 
-def send_email_password_reset(recipient, reset_token, url_scheme):
+def send_email_password_reset(RECIPIENT, reset_token, url_scheme):
     """
     Email for sending users password reset portal
     """
@@ -197,8 +194,8 @@ def send_email_password_reset(recipient, reset_token, url_scheme):
     reset_password_url = PASSWORD_RESET_URL.format(url_scheme,reset_token)
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = (f'Hello {recipient.firstname},\r\n' +
-                f'We received a request to reset the account password associated with {recipient.email}.\n'
+    BODY_TEXT = (f'Hello {RECIPIENT.firstname},\r\n' +
+                f'We received a request to reset the account password associated with {RECIPIENT.email}.\n'
                 'Password Reset Instruction\n\n'
                 'If you have not requested this please consider any or all of the following:\n\n'
                 'Manually navigate to your Modo Bio application, log in to your account and change your password.\n'
@@ -212,16 +209,12 @@ def send_email_password_reset(recipient, reset_token, url_scheme):
     HTML_FILE = pathlib.Path(current_app.static_folder) / 'password-reset.html'
     with open(HTML_FILE) as fh:
         BODY_HTML = fh.read()
-        BODY_HTML = BODY_HTML.replace('[user-first-name]', recipient.firstname)
-        BODY_HTML = BODY_HTML.replace('[user-email]', recipient.email)
+        BODY_HTML = BODY_HTML.replace('[user-first-name]', RECIPIENT.firstname)
+        BODY_HTML = BODY_HTML.replace('[user-email]', RECIPIENT.email)
         BODY_HTML = BODY_HTML.replace('[password-reset-link]', reset_password_url) 
 
-    # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([recipient.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        send_email(subject=SUBJECT, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
-    else:
-        send_email(subject=SUBJECT, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
-
+    send_generic_email(RECIPIENT, BODY_TEXT, BODY_HTML, SUBJECT, SENDER)
+   
 def send_email_delete_account(recipient, deleted_account):
     """
     Email for notifying users of account deletion
