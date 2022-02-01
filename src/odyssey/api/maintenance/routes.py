@@ -15,7 +15,6 @@ ns = api.namespace(
     'maintenance', description='Endpoints for functions related to maintenance.')
 
 
-# @ns.route('/methods/<int:staff_id>/')
 @ns.route('/methods/')
 class MaintenanceApi(BaseResource):
 
@@ -26,14 +25,13 @@ class MaintenanceApi(BaseResource):
             current_app.config['MAINTENANCE_DYNAMO_TABLE'])
         self.data = data
 
-    # TODO: Change to system admin
-    # @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('system_admin',))
     def get(self):
         response = self.table.scan()
         items = response['Items']
         return items
 
-    # @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('system_admin',))
     @ns.doc(params={'data': 'JSON data'})
     def post(self, data):
         maint = data['Document']
@@ -45,7 +43,7 @@ class MaintenanceApi(BaseResource):
         )
         return response
 
-    # @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('system_admin',))
     def update(self):
         # TODO: Finish this function
         filt = self.data['Filter']
@@ -69,7 +67,7 @@ class MaintenanceApi(BaseResource):
         )
         return response
 
-    # @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('system_admin',))
     def delete(self, data):
         filt = data['Filter']
 
@@ -81,6 +79,7 @@ class MaintenanceApi(BaseResource):
         return response
 
 
+@token_auth.login_required(user_type=('system_admin',))
 @ns.route('/')
 class Base(BaseResource):
     def get(self):
@@ -89,6 +88,7 @@ class Base(BaseResource):
                         mimetype='application/json')
 
 
+@token_auth.login_required(user_type=('system_admin',))
 @ns.route('/list-blocks')
 class DynamoRead(BaseResource):
     def get(self):
@@ -103,6 +103,7 @@ class DynamoRead(BaseResource):
                         mimetype='application/json')
 
 
+@token_auth.login_required(user_type=('system_admin',))
 @ns.route('/schedule-block')
 class DynamoWrite(BaseResource):
     def post(self):
@@ -130,6 +131,7 @@ class DynamoWrite(BaseResource):
                         mimetype='application/json')
 
 
+@token_auth.login_required(user_type=('system_admin',))
 @ns.route('/update-block')
 class DynamoUpdate(BaseResource):
     def update(self):
@@ -153,6 +155,7 @@ class DynamoUpdate(BaseResource):
                         mimetype='application/json')
 
 
+@token_auth.login_required(user_type=('system_admin',))
 @ns.route('/delete-block')
 class DynamoDelete(BaseResource):
     def delete(self):
@@ -178,9 +181,9 @@ class DynamoDelete(BaseResource):
 
 def is_maint_time_allowed(now_obj, start_obj, end_obj):
     """
-    :param now: the current time
-    :param start: the start time
-    :param end: the end time
+    :param now_obj: datetime object
+    :param start_obj: datetime object
+    :param end_obj: datetime object
 
     :return: Boolean
     """
@@ -197,13 +200,13 @@ def is_maint_time_allowed(now_obj, start_obj, end_obj):
     short_notice = timedelta(days=2)
     std_notice = timedelta(days=14)
 
-    #maint_time = maint_date.strftime("%H:%M:%S")
-    now = now_obj.strftime("%H:%M:%S")
-
+    # Yes, this is a string of numbers in a weird format
     start = start_obj.strftime("%H:%M:%S")
     end = end_obj.strftime("%H:%M:%S")
     now = now_obj.strftime("%H:%M:%S")
 
+    # And yes, python is somehow able to compare them perfectly
+    # Don't question it
     # If maintenance is scheduled for business hours
     if six_am_mst <= start <= eleven_pm_mst and end <= eleven_pm_mst:
         return True if start_obj > now_obj + std_notice else False
