@@ -44,10 +44,6 @@ def send_generic_email(RECIPIENT, TEXT, HTML, SUBJECT, SENDER="Modo Bio no-reply
     Send an email using the base email template. The value of contents will be used to replace
     [insert-email-base-content-here] within the modo-bio-automated-email-template-body.html file.
     """
-    
-    # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([RECIPIENT.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        RECIPIENT = "success@simulator.amazonses.com"
         
     BODY_TEXT = ("Please do not reply to this email\r\n" +
                 TEXT + "\r\n"
@@ -159,7 +155,7 @@ def send_email_verify_email(RECIPIENT, token, code):
 
     SUBJECT = SUBJECTS["email-verification"]
     
-    SENDER = "Modo Bio Verify <verify@modobio.com>"
+    SENDER = "Modo Bio Verify"
 
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = (f'Hello {RECIPIENT.firstname},\r\n'
