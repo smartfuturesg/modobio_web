@@ -39,6 +39,35 @@ SUBJECTS = {
 # Cache value
 _blacklisted_email_domains = None
 
+def send_generic_email(recipient: str, contents: str, subject: str):
+    """
+    Send an email using the base email template. The value of contents will be used to replace
+    [insert-email-base-content-here] within the modo-bio-automated-email-template-body.html file.
+    """
+    SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
+    
+    # route emails to AWS mailbox simulator when in dev environment
+    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
+        recipient = "success@simulator.amazonses.com"
+        
+    BODY_TEXT = ("Please do not reply to this email\r\n" +
+                contents + "\r\n"
+                "This email was automatically generated and sent to the address associated with your Modo Bio account.\r\n"
+                "If you have any questions or concerns please visit modobio.com.")
+        
+    # The HTML body of the email.
+    # Get HTML from file and insert recipient information
+    HTML_FILE = pathlib.Path(current_app.static_folder) / 'modo-bio-automated-email-template-body.html'
+    with open(HTML_FILE) as fh:
+        BODY_HTML = fh.read()
+        BODY_HTML = BODY_HTML.replace('[insert-email-base-content-here]', contents)
+        
+    # route emails to AWS mailbox simulator when in dev environment
+    if current_app.config['DEV'] and not any([recipient.email.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
+        send_email(subject=subject, recipient="success@simulator.amazonses.com", body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+    else:
+        send_email(subject=subject, recipient=recipient.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+
 def email_domain_blacklisted(email_address: str):
     """ Check whether the domain of an email address is blacklisted.
 
