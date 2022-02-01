@@ -1,4 +1,7 @@
+from datetime import datetime
 import logging
+
+from odyssey.api.lookup.models import LookupBookingTimeIncrements
 logger = logging.getLogger(__name__)
 
 import requests
@@ -301,6 +304,18 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
     reporter_role: role of the user that initiated the cancellation(staff or client), System if system automated
     """
 
+    # ensure that cancellation request does not occur during or after the scheduled meeting time
+    booking_start_time = datetime.combine(
+            date=booking.target_date_utc,
+            time = LookupBookingTimeIncrements.query.filter_by(idx = booking.booking_window_id_start_time_utc).one_or_none().start_time)
+
+    current_time_utc = datetime.utcnow()
+    
+    # prevent bookings that have already started from being cancelled. 
+    # exception: practitioner no show triggered by background process
+    if current_time_utc > booking_start_time and reason != 'Practitioner No Show':
+        raise BadRequest('Unable to cancel booking. Schedueld meeting has already begun')
+    
     # update booking status to canceled
     booking.status = 'Canceled'
 

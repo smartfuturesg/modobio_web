@@ -65,7 +65,6 @@ def test_post_booking_details(test_client, booking):
         f'/telehealth/bookings/details/{booking.idx}',
         headers=test_client.client_auth_header,
         data=payload)
-
     assert response.status_code == 400
 
 def test_put_booking_details(test_client, booking):

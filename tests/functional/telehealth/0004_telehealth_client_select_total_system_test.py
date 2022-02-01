@@ -1,19 +1,11 @@
-import base64
 
 from datetime import datetime, timedelta
-import time
-from dateutil import tz
-
-import pytest
 
 from flask.json import dumps
-from sqlalchemy.sql.expression import delete, select
+from sqlalchemy.sql.expression import delete
 
-# from tests.conftest import generate_users
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.user.models import User
-from odyssey.api.telehealth.models import TelehealthStaffAvailability, TelehealthBookings
-from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
+from odyssey.api.telehealth.models import TelehealthStaffAvailability
 from odyssey.tasks.tasks import cleanup_unended_call
 from flask import g
 
@@ -30,8 +22,7 @@ from .client_select_data import (
     telehealth_bookings_staff_4_client_3_data,
     telehealth_bookings_staff_8_client_5_data,
     telehealth_queue_client_3_data,
-    payment_method_data,
-    payment_refund_data
+    payment_method_data
 )
 
 def test_generate_staff_availability(test_client, telehealth_staff):
@@ -302,43 +293,63 @@ def test_full_system_with_settings(test_client, payment_method):
     assert current_booking['client']['end_time_localized'] == '04:50:00'
     assert current_booking['client']['timezone'] == 'America/Phoenix'
 
-# TODO: first request fails with missing chat room.
-#   return {'twilio_token': token,
-#           'conversation_sid': booking.chat_room.conversation_sid}
-#   AttributeError: 'NoneType' object has no attribute 'conversation_sid'
-#
-# Everything else fails as a result, too many dependencies in one test.
 
-#@pytest.mark.skip('Fails') 
-def test_bookings_meeting_room_access(test_client, booking_twilio):
+def test_booking_start_and_complete(test_client, booking_function_scope):
     
+    # start teelehealth call as a staff member
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_twilio.idx}/',
+        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
         headers=test_client.staff_auth_header)
+
+    assert response.status_code == 200
+
     ###
     # Complete the booking
     ###
     response = test_client.put(
-        f'/telehealth/bookings/complete/{booking_twilio.idx}/',
+        f'/telehealth/bookings/complete/{booking_function_scope.idx}/',
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 200
 
 
-def test_cleanup_unended_call(test_client, booking_twilio):
+def test_booking_start_fail(test_client, booking_function_scope):
+    
+    # bookings cannot be started by a client, ensure this is the case by making the request below
+    response = test_client.get(
+        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 400
+
+    # change the timing of the call so that it has already ended
+    # meetings cannot begin after the scheduled duration has passed
+    booking_function_scope.target_date_utc = booking_function_scope.target_date_utc - timedelta(days=1)
+
+    test_client.db.session.add(booking_function_scope)
+    test_client.db.session.commit()
+
+    response = test_client.get(
+        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
+        headers=test_client.staff_auth_header)
+
+    assert response.status_code == 400
+
+
+def test_cleanup_unended_call(test_client, booking_function_scope):
     
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_twilio.idx}/',
+        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
         headers=test_client.staff_auth_header)
     
     assert response.status_code == 200
-    assert booking_twilio.status == 'In Progress'
+    assert booking_function_scope.status == 'In Progress'
 
     g.flask_httpauth_user = None
-    complete = cleanup_unended_call(booking_twilio.idx)
+    complete = cleanup_unended_call(booking_function_scope.idx)
     
-    assert booking_twilio.status == 'Completed'
-    assert booking_twilio.status_history[-1].reporter_role == 'System'
+    assert booking_function_scope.status == 'Completed'
+    assert booking_function_scope.status_history[-1].reporter_role == 'System'
     assert complete == 'Booking Completed by System'
 
 
