@@ -558,13 +558,11 @@ def generate_apple_appstore_jwt():
     
     """
 
-    # format private key
-    secret = "-----BEGIN PRIVATE KEY-----\n"+ current_app.config.get('APPLE_APPSTORE_API_KEY')+"\n-----END PRIVATE KEY-----"
-
-    return jwt.encode( {
+    secret =  open(current_app.config.get('APPLE_APPSTORE_API_KEY_FILE'), 'r').read()
+    token= jwt.encode( {
                 'iss': current_app.config.get('APPLE_APPSTORE_ISSUER_ID'),
-                'iat': mktime(datetime.utcnow().timetuple()) , 
-                'exp': mktime((datetime.utcnow()+timedelta(minutes=60)).timetuple()) , 
+                'iat': int(mktime((datetime.now()).timetuple() )) , 
+                'exp': int(mktime((datetime.now()+timedelta(minutes=20)).timetuple())), 
                 'aud': 'appstoreconnect-v1',
                 'nonce': str(uuid.uuid4()),
                 'bid': current_app.config.get('APPLE_APPSTORE_BUNDLE_ID')},
@@ -575,3 +573,4 @@ def generate_apple_appstore_jwt():
                         'typ': 'JWT'
                     }, 
                 algorithm='ES256')
+    return token

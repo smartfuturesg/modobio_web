@@ -254,7 +254,7 @@ GOOGLE_RECAPTCHA_SECRET = ""
 WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev'
 
 # Apple app store 
-APPLE_APPSTORE_API_KEY = '' 
+APPLE_APPSTORE_API_KEY_FILE = '' 
 
 APPLE_APPSTORE_API_KEY_ID = ''
 """Identifier for the API key"""
