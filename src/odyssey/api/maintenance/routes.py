@@ -53,24 +53,19 @@ class MaintenanceApi(BaseResource):
         return response
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    def update(self):
-        # TODO: Finish this function
-        filt = self.data['Filter']
+    def put(self, data):
+        filt = data['Filter']
+        data = data['Document']
 
-        response = self.update_item(
+        response = self.table.update_item(
             Key={
-                'start_time': filt['start_time']
+                'start_time': filt['start_time'],
+                #'end_time': filt['end_time']
             },
-            AttributeUpdates={
-                'start_time': {
-                    'Value': self.data['start_time'],
-                    # available options -> DELETE(delete), PUT(set), ADD(increment)
-                    'Action': 'PUT'
-                },
-                'end_time': {
-                    'Value': self.data['end_time'],
-                    'Action': 'PUT'
-                }
+            UpdateExpression="set end_time = :e",
+            ExpressionAttributeValues={
+                #':s': data['start_time'],
+                ':e': data['end_time']
             },
             ReturnValues="UPDATED_NEW"  # returns the new updated values
         )
@@ -98,7 +93,7 @@ class Base(BaseResource):
 
 
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/list-blocks')
+@ns.route('/list-blocks', methods=['GET'])
 class DynamoRead(BaseResource):
     def get(self):
         """
@@ -113,7 +108,7 @@ class DynamoRead(BaseResource):
 
 
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/schedule-block')
+@ns.route('/schedule-block', methods=['POST'])
 class DynamoWrite(BaseResource):
     def post(self):
         """
@@ -143,9 +138,9 @@ class DynamoWrite(BaseResource):
 
 
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/update-block')
+@ns.route('/update-block', methods=['PUT'])
 class DynamoUpdate(BaseResource):
-    def update(self):
+    def put(self):
         """
         Update an existing item in the DynamoDB table.
 
@@ -159,7 +154,7 @@ class DynamoUpdate(BaseResource):
                             mimetype='application/json')
 
         obj1 = MaintenanceApi(data)
-        response = obj1.put()
+        response = obj1.put(data)
 
         return Response(response=json.dumps(response),
                         status=200,
@@ -167,7 +162,7 @@ class DynamoUpdate(BaseResource):
 
 
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/delete-block')
+@ns.route('/delete-block', methods=['DELETE'])
 class DynamoDelete(BaseResource):
     def delete(self):
         """
