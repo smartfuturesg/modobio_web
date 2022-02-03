@@ -250,6 +250,36 @@ class UserLogin(db.Model):
     :type: boolean
     """
 
+    staff_account_blocked = db.Column(db.Boolean, server_default='f')
+    """
+    Indicates when the staff portion of the account is blocked.
+    See :attr:`staff_account_blocked_reason` for the reason why it was blocked.
+
+    :type: bool
+    """
+
+    staff_account_blocked_reason = db.Column(db.String(500))
+    """
+    Reason why the staff portion of the account was blocked.
+
+    :type: str, max length 500
+    """
+
+    client_account_blocked = db.Column(db.Boolean, server_default='f')
+    """
+    Indicates when the client portion of the account is blocked.
+    See :attr:`client_account_blocked_reason` for the reason why it was blocked.
+
+    :type: bool
+    """
+
+    client_account_blocked_reason = db.Column(db.String(500))
+    """
+    Reason why the client portion of the account was blocked.
+
+    :type: str, max length 500
+    """
+
     last_login = db.Column(db.DateTime)
     """
     **Deprecated 4.12.21 use UserTokensHistory to find last login**
