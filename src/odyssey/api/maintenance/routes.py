@@ -1,12 +1,11 @@
-import boto3
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.auth import token_auth
 from odyssey.api import api
 from flask import Response, request, current_app
-from datetime import *
-from dateutil.relativedelta import *
+from datetime import datetime
 from datetime import timedelta
 import json
+import boto3
 import logging
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class MaintenanceApi(BaseResource):
         self.data = data
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    def get(self):
+    def get(self) -> Response:
         """
         FIXME: This wasnt working when I tried using self.table, so in the current state 
         every single function needs its own instance of the Dynamo table which is 
@@ -41,38 +40,24 @@ class MaintenanceApi(BaseResource):
         return items
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    @ns.doc(params={'data': 'JSON data'})
-    def post(self, data):
-        maint = data['Document']
+    def post(self, data) -> Response:
+        user, user2 = token_auth.current_user()
+        # String casting, otherwise boto3 will convert it to a decimal
+        user_id = str(user.user_id)
+
+        # TODO: Also store version
+        # TODO: Applicable to X version
         response = self.table.put_item(
             Item={
-                'start_time': maint["start_time"],
-                'end_time': maint["end_time"],
+                'start_time': data["start_time"],
+                'end_time': data["end_time"],
+                'user_id': user_id
             }
         )
         return response
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    def put(self, data):
-        filt = data['Filter']
-        data = data['Document']
-
-        response = self.table.update_item(
-            Key={
-                'start_time': filt['start_time'],
-                #'end_time': filt['end_time']
-            },
-            UpdateExpression="set end_time = :e",
-            ExpressionAttributeValues={
-                #':s': data['start_time'],
-                ':e': data['end_time']
-            },
-            ReturnValues="UPDATED_NEW"  # returns the new updated values
-        )
-        return response
-
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    def delete(self, data):
+    def delete(self, data) -> Response:
         filt = data['Filter']
 
         response = self.table.delete_item(
@@ -86,7 +71,7 @@ class MaintenanceApi(BaseResource):
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
 @ns.route('/')
 class Base(BaseResource):
-    def get(self):
+    def get(self) -> Response:
         return Response(response=json.dumps({"Status": "UP"}),
                         status=200,
                         mimetype='application/json')
@@ -95,7 +80,7 @@ class Base(BaseResource):
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
 @ns.route('/list-blocks', methods=['GET'])
 class DynamoRead(BaseResource):
-    def get(self):
+    def get(self) -> Response:
         """
         Read from the DynamoDB table using data from the request.
 
@@ -110,7 +95,7 @@ class DynamoRead(BaseResource):
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
 @ns.route('/schedule-block', methods=['POST'])
 class DynamoWrite(BaseResource):
-    def post(self):
+    def post(self) -> Response:
         """
         Write to the DynamoDB table using data from the request.
 
@@ -121,54 +106,35 @@ class DynamoWrite(BaseResource):
         """
         # Make the request JSON into a dictionary
         # Try just sending the request
-        data = request.json
-
+        data = request.json['Document']
+        
         # If the request is empty, return an error
-        if data is None or data == {} or 'Document' not in data:
+        if data is None or data == {} or 'start_time' not in data:
             return Response(response=json.dumps({"Error": "Please provide request information"}),
                             status=400,
                             mimetype='application/json')
 
-        obj1 = MaintenanceApi(data)
-        response = obj1.post(data)
+        dts = datetime.fromtimestamp
 
-        return Response(response=json.dumps(response),
-                        status=200,
-                        mimetype='application/json')
-
-
-@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/update-block', methods=['PUT'])
-class DynamoUpdate(BaseResource):
-    def put(self):
-        """
-        Update an existing item in the DynamoDB table.
-
-        :return: HTTP status code
-        """
-        data = request.json
-
-        if data is None or data == {} or 'Filter' not in data:
-            return Response(response=json.dumps({"Error": "Please provide request information"}),
-                            status=400,
+        if is_maint_time_allowed(datetime.now(), dts(int(data['start_time'])), dts(int(data['end_time']))):
+            obj1 = MaintenanceApi(data)
+            response = obj1.post(data)
+            return Response(response=json.dumps(response),
+                            status=200,
                             mimetype='application/json')
 
-        obj1 = MaintenanceApi(data)
-        response = obj1.put(data)
-
-        return Response(response=json.dumps(response),
-                        status=200,
-                        mimetype='application/json')
+        else:
+            return Response(response=json.dumps({"Error": "Maintenance time is not allowed"}),
+                            status=400,
+                            mimetype='application/json')
 
 
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
 @ns.route('/delete-block', methods=['DELETE'])
 class DynamoDelete(BaseResource):
-    def delete(self):
+    def delete(self) -> Response:
         """
         Delete an item from the DynamoDB table.
-
-        :return: HTTP status code
         """
         data = request.json
 
@@ -185,30 +151,16 @@ class DynamoDelete(BaseResource):
                         mimetype='application/json')
 
 
-def is_maint_time_allowed(now, start, end):
-    """
-    :param now: datetime object
-    :param start: datetime object
-    :param end: datetime object
-
-    :return: Boolean
-    """
-
-    # 1.    0600 < Y < 2300    = 15 days
-    # 2.    2300 < Y ; Y > 0600   = 3 days
-    # Time windows in UTC
-    # 1.    1300 < Y ; Y < 0600     = 15 days
-    # 2.    0600 < Y < 1300     = 3 days
-
+def is_maint_time_allowed(now: datetime, start: datetime, end: datetime) -> bool:
     # Time Deltas
     short_notice = timedelta(days=2)
     std_notice = timedelta(days=14)
 
     # Business hours
-    if start.hour in range(6,22) or end.hour in range(6,22):   
+    if start.hour in range(6, 22) or end.hour in range(6, 22):
         return True if start > now + std_notice else False
     # Overnight
-    elif (start.hour in range(23,24) or start.hour in range(0,5)) and (end.hour in range(23,24) or end.hour in range(0,5)):
+    elif (start.hour in range(23, 24) or start.hour in range(0, 5)) and (end.hour in range(23, 24) or end.hour in range(0, 5)):
         return True if start > now + short_notice else False
     else:
         return False
