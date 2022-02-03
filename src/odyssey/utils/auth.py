@@ -297,11 +297,14 @@ class BasicAuth(object):
             that is defined in auth.py """
             
         user_details = db.session.execute(
-            select(User, UserLogin).
-            join(UserLogin, User.user_id==UserLogin.user_id).
-            where(User.email==username.lower())
+            select(User, UserLogin)
+            .join(
+                UserLogin,
+                User.user_id == UserLogin.user_id)
+            .where(
+                User.email == username.lower())
         ).one_or_none()
-            
+
         # make sure login details exist, check password
         if not user_details:
             db.session.add(UserTokenHistory(event='login', ua_string=request.headers.get('User-Agent')))
@@ -309,6 +312,13 @@ class BasicAuth(object):
             raise Unauthorized
 
         user, user_login = user_details
+
+        if user.is_staff and user_login.staff_account_blocked:
+            raise Unauthorized(f'Your account has been blocked for the following reason: '
+                               f'{user_login.staff_account_blocked_reason}')
+        elif user.is_client and user_login.client_account_blocked:
+            raise Unauthorized(f'Your account has been blocked for the following reason: '
+                               f'{user_login.client_account_blocked_reason}')
 
         if check_password_hash(user_login.password, password):
             user_login.last_login = DB_SERVER_TIME
@@ -379,14 +389,24 @@ class TokenAuth(BasicAuth):
         if decoded_token['ttype'] != 'access':
             raise Unauthorized
 
-        query = db.session.execute(
-            select(User, UserLogin
-                    ).join(
-                        UserLogin, User.user_id == UserLogin.user_id
-                    ).where(User.user_id == decoded_token['uid'])).one_or_none()    
-                    
+        user, user_login = db.session.execute(
+            select(User, UserLogin)
+            .join(
+                UserLogin,
+                User.user_id == UserLogin.user_id)
+            .where(
+                User.user_id == decoded_token['uid'])
+        ).one_or_none()
+
+        if user.is_staff and user_login.staff_account_blocked:
+            raise Unauthorized(f'Your account has been blocked for the following reason: '
+                               f'{user_login.staff_account_blocked_reason}')
+        elif user.is_client and user_login.client_account_blocked:
+            raise Unauthorized(f'Your account has been blocked for the following reason: '
+                               f'{user_login.client_account_blocked_reason}')
+
         g.user_type = decoded_token.get('utype')
-        return query[0], query[1], decoded_token.get('utype')
+        return user, user_login, decoded_token.get('utype')
 
     def get_auth(self):
         ''' This method is to authorize tokens '''
