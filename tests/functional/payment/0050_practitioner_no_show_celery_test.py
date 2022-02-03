@@ -24,7 +24,7 @@ def test_no_show_scan(test_client, test_booking):
     
     target_time_window -= 2
     test_booking.booking_window_id_start_time_utc = target_time_window
-        
+
     #charge the booking
     response = test_client.post(
         '/payment/test/charge/',
@@ -40,6 +40,7 @@ def test_no_show_scan(test_client, test_booking):
     
     #deploy task and make sure task booking is canceled
     assert test_booking.status == 'Accepted'
+    
     detect_practitioner_no_show()
     
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
