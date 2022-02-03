@@ -45,9 +45,9 @@ def send_generic_email(RECIPIENT, TEXT, HTML, SUBJECT, SENDER="Modo Bio no-reply
     [insert-email-base-content-here] within the modo-bio-automated-email-template-body.html file.
     """
         
-    BODY_TEXT = ("Please do not reply to this email\r\n" +
-                TEXT + "\r\n"
-                "This email was automatically generated and sent to the address associated with your Modo Bio account.\r\n"
+    BODY_TEXT = ("Please do not reply to this email\n" +
+                TEXT + "\n"
+                "This email was automatically generated and sent to the address associated with your Modo Bio account.\n"
                 "If you have any questions or concerns please visit modobio.com.")
         
     # The HTML body of the email.
@@ -119,7 +119,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
         recipient = "success@simulator.amazonses.com"
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = ("Welcome to Modo Bio!\r\n"
+    BODY_TEXT = ("Welcome to Modo Bio!\n"
                 "Please visit your unique portal to complete your user registration:\n"
                 f"1) Copy and paste this portal link into your browser {remote_registration_url}\n"
                 "2) Enter your email and password to login:"
@@ -158,7 +158,7 @@ def send_email_verify_email(RECIPIENT, token, code):
     SENDER = "Modo Bio Verify"
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = (f'Hello {RECIPIENT.firstname},\r\n'
+    BODY_TEXT = (f'Hello {RECIPIENT.firstname},\n'
                 'We are delighted to welcome you to Modo Bio.\n'
                 'Email Verification\n'
                 'For security purposes, we need to confirm your email address for your Modo Bio account. Please click the following link to verify your address:\n'
@@ -190,7 +190,7 @@ def send_email_password_reset(RECIPIENT, reset_token, url_scheme):
     reset_password_url = PASSWORD_RESET_URL.format(url_scheme,reset_token)
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = (f'Hello {RECIPIENT.firstname},\r\n' +
+    BODY_TEXT = (f'Hello {RECIPIENT.firstname},\n' +
                 f'We received a request to reset the account password associated with {RECIPIENT.email}.\n'
                 'Password Reset Instruction\n\n'
                 'If you have not requested this please consider any or all of the following:\n\n'
@@ -265,7 +265,7 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
     SUBJECT = SUBJECTS.get(subject, None)
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = ("Amazon SES Test (Python)\r\n"
+    BODY_TEXT = ("Amazon SES Test (Python)\n"
                 "This email was sent with Amazon SES using the "
                 "AWS SDK for Python (Boto)."
                 )
