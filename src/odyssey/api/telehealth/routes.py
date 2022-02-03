@@ -1258,7 +1258,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
             
         else:
             #all availability is being removed, so all bookings are conflicts
-            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()                
+            time_inc = LookupBookingTimeIncrements.query.all()
+            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()
+            for conflict in conflicts:
+                    conflict.start_time_utc = time_inc[conflict.booking_window_id_start_time_utc-1].start_time
         db.session.commit()
         return {'conflicts': conflicts}
 
