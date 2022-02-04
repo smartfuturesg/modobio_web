@@ -26,7 +26,7 @@
 				<tr>
 				  <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">
 					<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-					  Hello <b>{% data.name %}</b>,
+					  Hello <b>{{ data.name }}</b>,
 					</p>                        
 					<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
 						We are delighted to welcome you to Modo Bio.
@@ -45,7 +45,7 @@
 						For security purposes, we need to confirm your email address for your Modo Bio account. Please click the following link to verify your address:
 					</p>
 					<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-						<a href=[{% data.verifciation_link %}]>Verify Email</a>
+						<a href=[{{ data.verifciation_link }}]>Verify Email</a>
 					</p>
 					<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
 						Or alternatively, enter the following 4 digit code on your mobile application:
@@ -53,7 +53,7 @@
 
 					</p style="font-family: sans-serif; font-size: 18px; margin: 0; margin-bottom: 15px;">
 					<p style="font-family: sans-serif; font-size: 18px; margin: 0; margin-bottom: 15px; text-align: center;">
-						<h2 style="text-align: center;">{% data.code %}</h2>
+						<h2 style="text-align: center;">{{ data.code }}</h2>
 					</p>
 					<hr class="solid">
 					<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">

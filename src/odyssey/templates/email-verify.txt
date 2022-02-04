@@ -1,6 +1,6 @@
 {% extends modo-bio-automated-email-template-body.html %}
 {% block body %}
-Hello {% data.name %},
+Hello {{ data.name }},
 
 We are delighted to welcome you to Modo Bio.
 
@@ -8,11 +8,11 @@ Email Verification
 
 For security purposes, we need to confirm your email address for your Modo Bio account. Please click the following link to verify your address:
 
-{% data.verifciation_link %}
+{{ data.verifciation_link }}
 
 Or alternatively, enter the following 4 digit code on your mobile application:
 
-{% data.code %}
+{{ data.code }}
 
 Please check that this email was sent from verify@modobio.com.  
 
