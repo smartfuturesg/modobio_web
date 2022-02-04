@@ -1,4 +1,4 @@
-{% extends modo-bio-automated-email-template-body.html %}
+{% extends "modo-bio-automated-email-template-body.html" %}
 {% block body %}
 Hello {{ data.name }},
 
