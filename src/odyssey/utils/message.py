@@ -126,8 +126,9 @@ def send_email_user_registration_portal(recipient, password, portal_id):
 
 def send_email_verify_email(RECIPIENT, token, code):
     """
-    Jinja test.
+    Email sent to verifiy a user's email address.
     """
+
     data = {
         "name": RECIPIENT.firstname,
         "verification_link": f'{api.base_url}/user/email-verification/token/{token}/',
@@ -141,8 +142,9 @@ def send_email_verify_email(RECIPIENT, token, code):
 
 def send_email_password_reset(RECIPIENT, reset_token, url_scheme):
     """
-    Jinja test.
+    Email for sending users password reset portal
     """
+
     data = {
         "name": RECIPIENT.firstname,
         "email": RECIPIENT.email,
