@@ -1,0 +1,6 @@
+{% block body %}{% endblock %}
+
+This email was automatically generated and sent to the address associated with your Modo Bio account.
+
+If you have any questions or concerns please visit modobio.com.
+Terms of Service: https://www.modobio.com/terms 
