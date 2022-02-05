@@ -250,6 +250,17 @@ class UserLogin(db.Model):
     :type: boolean
     """
 
+    # Explicitly setting nullable and default to indicate that None has meaning.
+    staff_account_closed = db.Column(db.DateTime, nullable=True, default=None)
+    """
+    User closed staff portion of the account on this date. A closed account will
+    be deleted some time after the close date (initially, 30 days after). If the
+    user logs in after closing, but before the account is deleted, this timestamp
+    is set to None.
+
+    :type: datetime or None
+    """
+
     staff_account_blocked = db.Column(db.Boolean, server_default='f')
     """
     Indicates when the staff portion of the account is blocked.
@@ -263,6 +274,17 @@ class UserLogin(db.Model):
     Reason why the staff portion of the account was blocked.
 
     :type: str, max length 500
+    """
+
+    # Explicitly setting nullable and default to indicate that None has meaning.
+    client_account_closed = db.Column(db.DateTime, nullable=True, default=None)
+    """
+    User closed client portion of the account on this date. A closed account will
+    be deleted some time after the close date (initially, 30 days after). If the
+    user logs in after closing, but before the account is deleted, this timestamp
+    is set to None.
+
+    :type: datetime or None
     """
 
     client_account_blocked = db.Column(db.Boolean, server_default='f')
