@@ -983,9 +983,10 @@ class ClientToken(BaseResource):
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, user_login = basic_auth.current_user()
+
         if not user:
             raise Unauthorized
-        
+
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
 
@@ -993,6 +994,12 @@ class ClientToken(BaseResource):
                                         refresh_token=refresh_token,
                                         event='login',
                                         ua_string = request.headers.get('User-Agent')))
+
+        # If a user logs in after closing the account, but within the account
+        # deletion limit, the account will be reopened and not deleted.
+        if user_login.client_account_closed:
+            user_login.client_account_closed = None
+
         db.session.commit()
 
         return {'email': user.email, 
@@ -1012,6 +1019,29 @@ class ClientToken(BaseResource):
         invalidate urrent token. Used to effectively logout a user
         """
         return '', 200
+
+
+# user_id in path is not necessary here, except that
+# staff_access_check() relies on it to check staff_self.
+@ns.route('/account/<int:user_id>/close/')
+class ClientCloseAccountEndpoint(BaseResource):
+    """ Close client account. """
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(api=ns, status_code=201)
+    def post(self, user_id):
+        """ Close client portion of an account.
+
+        Closing an account means that the account will be deleted after a number
+        of days (initially 30 days). If the client logs in after closing,
+        but before deletion, the account is open again and will not be deleted.
+
+        The client is logged out immediately after closing the account.
+        """
+        user, user_login = token_auth.current_user()
+        user_login.client_account_closed = datetime.now()
+        db.session.commit()
+        UserLogoutApi().post()
 
 
 @ns.route('/clinical-care-team/members/<int:user_id>/')

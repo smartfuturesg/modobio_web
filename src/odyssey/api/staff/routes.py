@@ -42,6 +42,7 @@ from odyssey.api.user.models import (
     UserLogin,
     UserTokenHistory,
     UserProfilePictures)
+from odyssey.api.user.routes import UserLogoutApi
 from odyssey.api.user.schemas import UserSchema
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
@@ -264,7 +265,6 @@ class RecentClients(BaseResource):
         """get the 10 most recent clients a staff member has loaded"""
         return StaffRecentClients.query.filter_by(staff_user_id=token_auth.current_user()[0].user_id).all()
 
-""" Staff Token Endpoint """
 
 @ns.route('/token/')
 class StaffToken(BaseResource):
@@ -275,8 +275,10 @@ class StaffToken(BaseResource):
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, user_login = basic_auth.current_user()
+
         if not user:
-            return 401
+            raise Unauthorized
+
         # bring up list of staff roles
         access_roles = db.session.query(
                                 StaffRoles.role
@@ -291,6 +293,12 @@ class StaffToken(BaseResource):
                                         refresh_token=refresh_token,
                                         event='login',
                                         ua_string = request.headers.get('User-Agent')))
+
+        # If a user logs in after closing the account, but within the account
+        # deletion limit, the account will be reopened and not deleted.
+        if user_login.staff_account_closed:
+            user_login.staff_account_closed = None
+
         db.session.commit()
 
         return {'email': user.email, 
@@ -311,6 +319,29 @@ class StaffToken(BaseResource):
         Deprecated 11.23.20..does nothing now
         """
         return '', 200
+
+
+# user_id in path is not necessary here, except that
+# staff_access_check() relies on it to check staff_self.
+@ns.route('/account/<int:user_id>/close/')
+class StaffCloseAccountEndpoint(BaseResource):
+    """ Close staff member account. """
+
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(api=ns, status_code=201)
+    def post(self, user_id):
+        """ Close staff portion of an account.
+
+        Closing an account means that the account will be deleted after a number
+        of days (initially 30 days). If the staff member logs in after closing,
+        but before deletion, the account is open again and will not be deleted.
+
+        The staff member is logged out immediately after closing the account.
+        """
+        user, user_login = token_auth.current_user()
+        user_login.staff_account_closed = datetime.now()
+        db.session.commit()
+        UserLogoutApi().post()
 
 
 @ns.route('/profile/<int:user_id>/')
