@@ -24,6 +24,7 @@ def test_no_show_scan(test_client, test_booking):
     
     target_time_window -= 2
     test_booking.booking_window_id_start_time_utc = target_time_window
+    test_booking.target_date_utc = target_time.date()
 
     #charge the booking
     response = test_client.post(
