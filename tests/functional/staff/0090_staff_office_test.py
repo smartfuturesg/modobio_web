@@ -154,9 +154,9 @@ def test_post_2_ds_patient_prescribe(test_client):
         headers=test_client.staff_auth_header,
         data=dumps(payload),
         content_type='application/json')
-    
     assert response.status_code == 201
-    assert response.json['url'] == patient_sso
+    # encrypted clinic_id is randomply generated. URLs will be different for each run
+    assert response.json['url'] != patient_sso
 
 def test_get_1_ds_practitioner_notification_sso(test_client):
     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
