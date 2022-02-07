@@ -33,9 +33,9 @@ class DoseSpot:
         self.proxy_user_ds_id = current_app.config['DOSESPOT_PROXY_USER_ID']
         self.modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
         self.clinic_api_key = current_app.config['DOSESPOT_API_KEY']
+        self.base_url = current_app.config['DOSESPOT_BASE_URL']
         self.encrypted_clinic_id = self._generate_encrypted_clinic_id(url=False)
         self.encrypted_clinic_id_url = urllib.parse.quote(self.encrypted_clinic_id, safe='')
-        self.base_url = current_app.config['DOSESPOT_BASE_URL']
 
         if practitioner_user_id:
             self.practitioner_ds_id = db.session.execute(select(DoseSpotPractitionerID.ds_user_id).where(DoseSpotPractitionerID.user_id == practitioner_user_id)
@@ -135,7 +135,6 @@ class DoseSpot:
         ------
         sso url
         """
-
         encrypted_user_id_url = self._generate_encrypted_user_id(self.practitioner_ds_id, url=True)
         
         params = {

@@ -1,7 +1,5 @@
-from flask import current_app
 from .data import staff_office_data
 from flask.json import dumps
-from odyssey.api.dosespot.models import DoseSpotPractitionerID
 
 def test_post_staff_office(test_client):
     #test with invalid territory id, should return 400
@@ -155,7 +153,7 @@ def test_post_2_ds_patient_prescribe(test_client):
         data=dumps(payload),
         content_type='application/json')
     assert response.status_code == 201
-    # encrypted clinic_id is randomply generated. URLs will be different for each run
+    # encrypted clinic_id is randomly generated. URLs will be different for each run
     assert response.json['url'] != patient_sso
 
 def test_get_1_ds_practitioner_notification_sso(test_client):
