@@ -1,4 +1,4 @@
-{% extends "modo-bio-automated-email-template-body.html" %}
+{% extends "modo-bio-automated-email-template-body.txt" %}
 {% block body %}
 Hello {{ data.name }},
 
@@ -12,7 +12,7 @@ For security purposes, we need to confirm your email address for your Modo Bio a
 
 Or alternatively, enter the following 4 digit code on your mobile application:
 
-{{ data.code }}
+{{ data.verification_code }}
 
 Please check that this email was sent from verify@modobio.com.  
 

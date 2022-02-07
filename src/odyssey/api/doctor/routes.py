@@ -1275,6 +1275,13 @@ class MedBloodTest(BaseResource):
                         'ref_max': ref_max,
                         'critical_max': critical_max
                     }
+                else:
+                    eval_values = {
+                    'critical_min': ranges[0].critical_min,
+                    'ref_min': ranges[0].ref_min,
+                    'ref_max': ranges[0].ref_max,
+                    'critical_max': ranges[0].critical_max
+                }
             else:
                 eval_values = {
                     'critical_min': ranges[0].critical_min,

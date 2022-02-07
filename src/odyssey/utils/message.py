@@ -265,7 +265,7 @@ def send_email(subject=None, recipient="success@simulator.amazonses.com", body_t
                     'Data': subject,
                 },
             },
-            Source="no-reply@modobio.com"
+            Source=sender
         )
        
     # Display an error if something goes wrong.	
