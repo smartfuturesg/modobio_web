@@ -7,12 +7,12 @@ import subprocess
 import sys
 import uuid
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import boto3
 import twilio
 
-from flask.json import dumps
+from flask import g
 from flask_migrate import upgrade
 from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
@@ -20,13 +20,12 @@ from twilio.base.exceptions import TwilioRestException
 from werkzeug.exceptions import BadRequest
 
 from odyssey import create_app, db, mongo
-from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
+from odyssey.api.client.models import ClientClinicalCareTeam
+from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
-from odyssey.utils.constants import TELEHEALTH_BOOKING_LEAD_TIME_HRS
 from odyssey.utils import search
 
 # import fixtures from telehealth
@@ -296,7 +295,7 @@ def care_team(test_client):
 
 
 @pytest.fixture(scope='function')
-def booking_twilio(test_client):
+def booking_function_scope(test_client):
     """ Create a new telehealth booking.
 
     This bookings fixture is used in the Twilio section of testing.
@@ -319,11 +318,17 @@ def booking_twilio(test_client):
     test_client.db.session.add(pm)
     test_client.db.session.flush()
 
+    # simulates logged-in user accepting a booking. Necessary to satisfy background process: telehealth.models.add_booking_status_history
+    g.flask_httpauth_user = (test_client.staff, UserLogin.query.filter_by(user_id = test_client.staff_id).one_or_none())
 
     # make a telehealth booking by direct db call
-    # booking is made with minimum lead time
-    target_datetime = datetime.now() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
-    target_datetime = target_datetime.replace(minute = 45, second=0)
+    # booking is made less than 10 minutes out from the current time
+    target_datetime = datetime.utcnow() #+ timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    start_minute = target_datetime.minute + (10 - target_datetime.minute % 10) 
+    target_datetime = target_datetime.replace(
+        hour = target_datetime.hour + 1 if start_minute == 60 else target_datetime.hour,
+        minute = 0 if start_minute == 60 else start_minute, 
+        second=0)
     time_inc = LookupBookingTimeIncrements.query.all()
         
     start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}

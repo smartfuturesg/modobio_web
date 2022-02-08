@@ -79,7 +79,7 @@
     }
     </style>
   </head>
-  <body style="background: linear-gradient(0deg, #2B3FB2 0%, #e9e9ff 100%); font-family: sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
+  <body style="background: linear-gradient(0deg, #FFFFFF 0%, #FFFFFF 100%); font-family: sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
     <span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">
       This is preheader text. Some clients will show this text as a preview.
     </span>
@@ -93,54 +93,23 @@
               <img style="max-height: 200px;" src="https://modobio-public.s3.us-east-2.amazonaws.com/images/Modo+Bio+Full+Logo.svg" alt="Modo Bio">
             </div>
             <p style="color: #5659E2; font-weight: bold; font-size: 16px; text-align: center;">
-              Please do not reply to this email.
+              Please do not reply to this email
             </p>
             <!-- START CENTERED WHITE CONTAINER -->
-            <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #ffffff; border-radius: 10px;">
+            <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #ffffff; border-radius: 10px; box-shadow: 1px 4px 10px 1px #848484;">
 
               <!-- START MAIN CONTENT AREA -->
+              
               <tr>
                 <td class="wrapper" style="font-family: sans-serif; font-size: 14px; vertical-align: top; box-sizing: border-box; padding: 20px;">
                   <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                     <tr>
                       <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                          Hello <b>[user-first-name]</b>,
-                        </p>                        
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                            We received a request to reset the account password associated with [user-email].
-                        </p>
-                        <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
-                            <tbody>
-                              <tr>
-                                <p style="font-family: sans-serif; font-size: 14px; font-weight: bold; margin: 0; margin-bottom: 15px;">
-                                  Password Reset Instructions
-                                </p>
-                                <p style="font-family: sans-serif; font-size: 14px; font-weight: bold; margin: 0; margin-bottom: 15px;">
-                              </tr>
-                            </tbody>
-                          </table>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                            If you have not requested this please consider any or all of the following:
-                            <ul>
-                                <li>Manually navigate to your Modo Bio application, log in to your account and change your password.</li>
-                                <li>Contact <a href="mailto:support@modobio.com">support@modobio.com</a> and inform them of the issue.</li>
-                            </ul>
-                        </p>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                            If you have requested a password reset, please click the following link to reset your account password. Be aware that this will change your password for both your mobile application and your access to your practitioner account if you have one set up.
-                        </p>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                            <b></b>
-                        </p>
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px; text-align: center;">
-                            <a href=[password-reset-link]>Reset Password</a>
-                        </p>
-                        <hr class="solid">
-                        <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px; text-align: center">
-                          <br>
-                          Please check that this email was sent from <br><a href="mailto:no-reply@modobio.com">no-reply@modobio.com</a>.  
-                      </p>
+                        
+                        <!-- INSERT CONTENT START -->
+                        {% block body %}{% endblock %}
+                        <!-- INSERT CONTENT END -->
+                      
                       </td>
                     </tr>
                   </table>
@@ -154,18 +123,18 @@
             <div class="footer" style="clear: both; margin-top: 10px; text-align: center; width: 100%;">
               <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                 <tr>
-                  <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">
-                    <p style="color: #FFFFFF; font-size: 12px; text-align: center;">
+                  <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 14px; color: #999999; text-align: center;">
+                    <p style="color: #5659E2; font-size: 14px; text-align: center;">
                       This email was automatically generated and sent to the address associated with your Modo Bio account.
                     </p>
-                    <p style="color: #FFFFFF; font-size: 12px; text-align: center;">
+                    <p style="color: #5659E2; font-size: 14px; text-align: center;">
                       If you have any questions or concerns please 
-                      <a href="https://www.modobio.com/" style="color: #FFFFFF; text-decoration: underline !important;">
+                      <a href="https://www.modobio.com/" style="color: #5659E2; text-decoration: underline !important;">
                         visit modobio.com.
                       </a>
                     </p>
-                    <p style="color: #FFFFFF; font-size: 12px; text-align: center;">
-                      <a href="https://www.modobio.com/terms" style="color: #FFFFFF; text-decoration: underline !important; padding-right: 5px !important;">Terms of Service</a>|<a href="https://www.modobio.com/privacy" style="color: #FFFFFF; text-decoration: underline !important; padding-left: 5px !important;">Privacy Policy</a>
+                    <p style="color: #5659E2; font-size: 14px; text-align: center;">
+                      <a href="https://www.modobio.com/terms" style="color: #5659E2; text-decoration: underline !important; padding-right: 5px !important;">Terms of Service</a>|<a href="https://www.modobio.com/privacy" style="color: #5659E2; text-decoration: underline !important; padding-left: 5px !important;">Privacy Policy</a>
                     </p>
                   </td>
                 </tr>

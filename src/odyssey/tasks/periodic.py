@@ -340,7 +340,6 @@ def detect_practitioner_no_show():
                                                TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
                                                TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2)
-
     for booking in bookings:
         logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client

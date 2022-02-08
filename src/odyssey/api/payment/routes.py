@@ -263,7 +263,7 @@ class PaymentTestCharge(BaseResource):
         if booking.charged:
             raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
 
-        return  Instamed().charge_user(booking)
+        return Instamed().charge_user(booking)
 
 @ns_dev.route('/void/')
 class PaymentVoidRefund(BaseResource):
