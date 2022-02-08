@@ -17,7 +17,7 @@ test:
     - sudo docker run --name postgres_$CI_BUILD_ID --network modobio -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=modobio_test -d postgres
     - sudo docker run --name elasticsearch_$CI_BUILD_ID --network modobio -e discovery.type=single-node --rm -d docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     - echo "Creating redis instance..."
-    - sudo docker run --name redis_$CI_BUILD_ID --network modobio -d -p 6379:6379 redis
+    - sudo docker run --name redis_$CI_BUILD_ID --network modobio -d redis
     - echo "Running tests..."
     - wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
     - sudo docker build -f Dockerfile -t odyssey_test_$CI_BUILD_ID .
