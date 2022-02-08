@@ -33,23 +33,20 @@ BEGIN
         _user_id,
         'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
-    INSERT INTO "ClientInfo" (user_id, membersince, zipcode)
-    VALUES (_user_id, '2021-01-01', '85255');
+    INSERT INTO "ClientInfo" (user_id, membersince, zipcode, territory_id)
+    VALUES (_user_id, '2021-01-01', '85255', 1);
 
     INSERT INTO "UserSubscriptions" (
         user_id,
         is_staff,
         start_date,
-        subscription_status,
-        subscription_type_id)
-    SELECT
+        subscription_status
+        )
+    VALUES (
         _user_id,
         false,
         '2021-01-01',
-        'unsubscribed',
-        sub_id
-    FROM "LookupSubscriptions"
-    WHERE LOWER(name) = 'annual';
+        'unsubscribed');
 
     -- Create a care team with two staff members.
 

@@ -312,4 +312,4 @@ def test_clinical_care_team_access(test_client, care_team):
         content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
+    assert response.json['notes'] == doctor_blood_tests_data['notes']

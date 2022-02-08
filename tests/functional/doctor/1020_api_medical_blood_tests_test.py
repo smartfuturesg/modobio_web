@@ -4,7 +4,7 @@ from flask.json import dumps
 from sqlalchemy import delete, select
 
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResults
-from .data import doctor_blood_tests_data
+from .data import doctor_blood_tests_data, doctor_blood_tests_image_data
 from tests.functional.user.data import users_staff_member_data
 
 def test_post_medical_blood_test(test_client, care_team):
@@ -30,7 +30,7 @@ def test_post_medical_blood_test(test_client, care_team):
         content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
+    assert response.json['notes'] == 'test2'
     test_id_client_submit = response.json['test_id']
 
     ##
@@ -43,7 +43,7 @@ def test_post_medical_blood_test(test_client, care_team):
         content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['panel_type'] == doctor_blood_tests_data['panel_type']
+    assert response.json['notes'] == 'test2'
     test_id_staff_submit = response.json['test_id']
 
 def test_get_client_blood_tests(test_client):
@@ -65,8 +65,12 @@ def test_get_blood_test_results_all(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['test_results'] == 4
-    assert response.json['items'][0]['panel_type'] == 'Lipids'
+    assert response.json['test_results'] == 10
+    assert response.json['items'][0]['results'][0]['modobio_test_code'] == 'TST003'
+    assert response.json['items'][0]['results'][1]['modobio_test_code'] == 'HOR003'
+    assert response.json['items'][0]['results'][2]['modobio_test_code'] == 'CMP010'
+    assert response.json['items'][0]['results'][3]['modobio_test_code'] == 'CMP002'
+    assert response.json['items'][0]['results'][4]['modobio_test_code'] == 'CMP001'
 
 def test_get_blood_test_results(test_client):
     response = test_client.get(
@@ -75,8 +79,11 @@ def test_get_blood_test_results(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['items'][0]['results'][0]['evaluation'] == 'optimal'
-    assert response.json['items'][0]['results'][1]['evaluation'] == 'normal'
+    assert response.json['items'][0]['results'][0]['evaluation'] == 'critical'
+    assert response.json['items'][0]['results'][1]['evaluation'] == 'abnormal'
+    assert response.json['items'][0]['results'][2]['evaluation'] == 'normal'
+    assert response.json['items'][0]['results'][3]['evaluation'] == 'abnormal'
+    assert response.json['items'][0]['results'][4]['evaluation'] == 'critical'
     assert response.json['items'][0]['reporter_id'] == test_client.client_id
 
     response = test_client.get(
@@ -85,19 +92,30 @@ def test_get_blood_test_results(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['items'][0]['results'][0]['evaluation'] == 'optimal'
-    assert response.json['items'][0]['results'][1]['evaluation'] == 'normal'
+    assert response.json['items'][0]['results'][0]['evaluation'] == 'critical'
+    assert response.json['items'][0]['results'][1]['evaluation'] == 'abnormal'
+    assert response.json['items'][0]['results'][2]['evaluation'] == 'normal'
+    assert response.json['items'][0]['results'][3]['evaluation'] == 'abnormal'
+    assert response.json['items'][0]['results'][4]['evaluation'] == 'critical'
     assert response.json['items'][0]['reporter_id'] == test_client.staff_id
-
-def test_get_blood_test_result_types(test_client):
+    
+def teset_patch_blood_test_image(test_client):
+    response = test_client.patch(
+        f'/doctor/bloodtest/image/{test_id_client_submit}/',
+        headers=test_client.client_auth_header,
+        data=dumps(doctor_blood_tests_image_data),
+        content_type='application/json'
+    )
+    
+    assert response.status_code == 200
+    
     response = test_client.get(
-        'doctor/bloodtest/result-types/',
+        f'/doctor/bloodtest/results/{test_id_client_submit}/',
         headers=test_client.client_auth_header,
         content_type='application/json')
-
+    
     assert response.status_code == 200
-    assert response.json['items'][0]['result_name'] == 'dihydroxyvitaminD'
-    assert response.json['items'][0]['normal_max'] == 60
+    assert response.json['image'] != None
 
 def test_delete_blood_test(test_client):
     # send delete request where the user attempting to delete is not the reporter, should raise 401

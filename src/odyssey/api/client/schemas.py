@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.utils.constants import FERTILITY_STATUSES
 logger = logging.getLogger(__name__)
 
 from marshmallow import (
@@ -17,6 +19,7 @@ from odyssey.api.client.models import (
     ClientConsent,
     ClientConsultContract,
     ClientDataStorage,
+    ClientFertility,
     ClientInfo,
     ClientIndividualContract, 
     ClientPolicies,
@@ -495,3 +498,12 @@ class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientTransactionHistory(**data)
+
+class ClientFertilitySchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ClientFertility
+        exclude = ('created_at', 'idx')
+        dump_only = ('updated_at', 'user_id')
+        load_instance = True
+        
+    status = validate=validate.OneOf(FERTILITY_STATUSES['pregnant'] + FERTILITY_STATUSES['not_pregnant'])

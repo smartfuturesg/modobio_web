@@ -15,7 +15,7 @@ def test_put_client_profile_picture(test_client):
         f'/client/profile-picture/{test_client.client_id}/',
         headers=test_client.staff_auth_header,
         data=client_profile_picture_data)
-
+        
     assert response.status_code == 401
 
     # Test client adding profile picture

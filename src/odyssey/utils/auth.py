@@ -235,12 +235,15 @@ class BasicAuth(object):
         staff_user_roles = [x[0] for x in staff_user_roles]
 
         requested_user_id =  request.view_args.get('user_id', request.view_args.get('client_user_id'))
+       
         # staff accessing their own resources
         # request args will either contain user_id or staff_user_id which must match the logged-in user
-        if 'staff_self' in user_type:
-            if request.view_args.get('user_id', request.view_args.get('staff_user_id')) != user.user_id:
+        # if logged-in staff is not the user being requested and no role nor resource requirements are provided, raise unauthorized
+        if 'staff_self' in user_type \
+            and request.view_args.get('user_id', request.view_args.get('staff_user_id')) != user.user_id \
+            and staff_roles is None \
+            and len(resources) == 0:
                 raise Unauthorized
-
         # check if resource access check is necessary
         elif len(resources) > 0:
             # 1. Check if staff member has resource access

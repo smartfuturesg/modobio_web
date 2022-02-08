@@ -549,6 +549,13 @@ class LookupSubscriptions(BaseModel):
     :type: string
     """
 
+    ios_product_id = db.Column(db.String)
+    """
+    Product ID assigned by the iOS app store
+
+    :type: string
+    """
+
 class LookupNotifications(BaseModel):
     """ Static list of notifications types that a user can receive. """
 
@@ -1193,3 +1200,154 @@ class LookupCurrencies(BaseModelWithIdx):
 
     :type: int
     """    
+
+class LookupBloodTests(BaseModel):
+    """
+    Lookup table for blood tests
+    """
+    
+    modobio_test_code = db.Column(db.String, primary_key=True, nullable=False)
+    """
+    Internal test code
+    
+    :type: string, primary key
+    """
+    
+    display_name = db.Column(db.String)
+    """
+    Test display name
+    
+    :type: string
+    """
+    
+    quest_test_code = db.Column(db.String)
+    """
+    Quest Diagnostics test code
+    
+    :type: string
+    """
+    
+    cpt_test_code = db.Column(db.String)
+    """
+    Current Procedural Terminology (medical billing) code
+    
+    :type: string
+    """
+    
+    panel_display_name = db.Column(db.String)
+    """
+    Name of the blood panel where the test results come from
+    
+    :type: string
+    """
+    
+    tags = db.Column(db.String)
+    """
+    Tags relating the this test
+    
+    :type: string
+    """
+    
+    ranges = db.relationship('LookupBloodTestRanges')
+    """
+    Relation holding information on ranges that apply to this test type.
+    
+    :type: :class: LookupBloodTestRanges
+    """
+    
+class LookupBloodTestRanges(BaseModelWithIdx):
+    """
+    Lookup table for blood test result optimal/critical ranges. One result may have multiple
+    entries if it can be affected by age/race/fertility status/bioloical sex
+    """
+    
+    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
+    """
+    Modobio Test Code for this result.
+    
+    :type: string, foreign key(LookupBloodTests.modobio_test_code)
+    """
+    
+    test_info = db.relationship("LookupBloodTests", back_populates="ranges")
+    """
+    Many to one relationship holding the non-range test information.
+    
+    :type: :class: LookupBloodTests
+    """
+    
+    biological_sex_male = db.Column(db.Boolean)
+    """
+    Biological sex this range applies to. If Null, the range applies to either biological sex.
+    
+    :type: bool
+    """
+    
+    menstrual_cycle = db.Column(db.String)
+    """
+    Stage of the menstrual cycle this range applies to. If Null, the range applies to any stage.
+    
+    :type: string
+    """
+    
+    age_min = db.Column(db.Integer)
+    """
+    Minimum age this range applies to.
+    
+    :type: int
+    """
+    
+    age_max = db.Column(db.Integer)
+    """
+    Maximum age this range applies to.
+    
+    :type: int
+    """
+    
+    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
+    """
+    Race_id this range applies to. If Null, the range applies to all races.
+    
+    :type: int, foreign key(LookupRaces.race_id)
+    """
+    
+    units = db.Column(db.String)
+    """
+    Units used to measure this result.
+    
+    :type: string
+    """
+    
+    ratio = db.Column(db.String)
+    """
+    Ratio used to calculate this result if applicable
+    
+    :type: string
+    """
+    
+    critical_min = db.Column(db.Float)
+    """
+    Critical range minimum.
+    
+    :type: float    
+    """
+    
+    ref_min = db.Column(db.Float)
+    """
+    Reference (normal) range minimum
+    
+    :type: float
+    """ 
+    
+    ref_max = db.Column(db.Float)
+    """
+    Reference (normal) range maximum
+    
+    :type: float
+    """
+    
+    critical_max = db.Column(db.Float)
+    """
+    Critical range maximum.
+    
+    :type: float
+    """

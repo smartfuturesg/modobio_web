@@ -31,7 +31,9 @@ from odyssey.api.lookup.models import (
      LookupMedicalSymptoms,
      LookupOrganizations,
      LookupCurrencies,
-     LookupNotificationSeverity
+     LookupNotificationSeverity,
+     LookupBloodTests,
+     LookupBloodTestRanges
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -61,8 +63,12 @@ from odyssey.api.lookup.schemas import (
     LookupOrganizationsOutputSchema,
     LookupCurrenciesOutputSchema,
     LookupUSStatesOutputSchema,
-    LookupNotificationSeverityOutputSchema
+    LookupNotificationSeverityOutputSchema,
+    LookupBloodTestsOutputSchema,
+    LookupBloodTestRangesOutputSchema,
+    LookupBloodTestRangesAllOutputSchema
 )
+from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_drink_existence
@@ -488,4 +494,56 @@ class LookupCurrenciesApi(BaseResource):
     def get(self):
         """get contents of medical symptoms lookup table"""
         res = LookupCurrencies.query.all()
+        return {'total_items': len(res), 'items': res}
+    
+@ns.route('/bloodtests/')
+class LookupBloodTestsApi(BaseResource):
+    """
+    Endpoint that returns the list of blood test types.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodTestsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of blood tests lookup table"""
+        res = LookupBloodTests.query.all()
+        return {'total_items': len(res), 'items': res}
+    
+@ns.route('/bloodtests/ranges/<string:modobio_test_code>/')
+@ns.doc(params={'modobio_test_code': 'Modobio Test Code for desired test'})
+class LookupBloodTestRangesApi(BaseResource):
+    """
+    Endpoint that return blood test range information for the requested test.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodTestRangesOutputSchema, status_code=200, api=ns)
+    def get(self, modobio_test_code):
+        """get all ranges for the requested blood test"""
+        res = LookupBloodTestRanges.query.filter_by(modobio_test_code=modobio_test_code).all()
+        for range in res:
+            if range.race_id:
+                range.race = LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+            else:
+                range.race = None
+        return {'total_items': len(res), 'items': res}
+    
+@ns.route('/bloodtests/ranges/all/')
+class LookupBloodTestRangesAllApi(BaseResource):
+    """
+    Endpoint that return blood test range information for the all tests.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodTestRangesAllOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get all ranges for the all blood tests"""
+        tests = db.session.query(LookupBloodTests, LookupBloodTestRanges
+                ).filter(LookupBloodTestRanges.modobio_test_code == LookupBloodTests.modobio_test_code
+                ).all()
+        
+        res = []
+        for test, range in tests:
+            if range.race_id:
+                range.race = LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+            else:
+                range.race = None
+            res.append({'test': test, 'range': range})
         return {'total_items': len(res), 'items': res}

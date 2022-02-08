@@ -107,7 +107,8 @@ def test_booking(test_client):
         'target_date_utc': target_time.date(),
         'client_location_id': 1,
         'charged': False,
-        'consult_rate': 99.00
+        'consult_rate': 99.00,
+        'scheduled_duration_mins': 20
     })
 
     test_client.db.session.add(booking)

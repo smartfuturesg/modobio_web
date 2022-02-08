@@ -467,13 +467,21 @@ doctor_medical_history_data = {
 }
 
 doctor_blood_tests_data = {
-    'date': '2020-09-10',
+    'date': '2021-09-10',
     'results': [
-        {'result_name': 'cholesterolSerumTotal','result_value': 150.0},
-        {'result_name': 'cholesterolSerumLDL', 'result_value': 20.0}
+        {'modobio_test_code': 'CMP001','result_value': 301.0},
+        {'modobio_test_code': 'CMP002', 'result_value': 40.0},
+        {'modobio_test_code': 'CMP010','result_value': 10.0},
+        {'modobio_test_code': 'HOR003','result_value': 1.0},
+        {'modobio_test_code': 'TST003','result_value': 0.2}
     ],
-    'panel_type': 'Lipids',
     'notes': 'test2'
+}
+
+img_file = pathlib.Path(__file__).parent / 'test_pdf_image.pdf'
+
+doctor_blood_tests_image_data = {
+  'image': (img_file.open(mode='rb'), img_file.as_posix())
 }
 
 img_file = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
