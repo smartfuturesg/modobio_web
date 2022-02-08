@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 SUBJECTS = {
     'remote_registration_portal': 'Modo Bio User Registration Portal',
-    'password_reset': 'Modo bio password reset request - temporary link',
+    'password_reset': 'Reset Your Modo Bio Password',
     'testing-bounce': 'SES TEST EMAIL-BOUNCE',
     'testing-complaint': 'SES TEST EMAIL-COMPLAINT',
     'testing-success': 'SES TEST EMAIL',
@@ -230,7 +230,7 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
     send_email(subject=SUBJECT,recipient=RECIPIENT, body_text=BODY_TEXT, body_html=BODY_HTML)
 
 
-def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None, sender="no-reply@modobio.com"):
+def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None, sender="Modo Bio No Reply <no-reply@modobio.com>"):
 
     # The character encoding for the email.
     CHARSET = "UTF-8"
