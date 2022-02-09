@@ -214,6 +214,9 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
+INSTAMED_MERCHANT_ID = ''
+""" InstaMed API Merchant ID."""
+
 # Dosespot Settings
 DOSESPOT_API_KEY = ''
 """ DoseSpot API access key ID number. """
