@@ -46,7 +46,7 @@ class DoseSpotAllergies(BaseResource):
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=user_id).one_or_none()
         ds = DoseSpot()
         if not ds_patient:
-            ds_patient = ds.onboard_client(user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         ds_allergies = ds.allergies(user_id)
         
