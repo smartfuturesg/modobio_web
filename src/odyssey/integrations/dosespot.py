@@ -260,6 +260,9 @@ class DoseSpot:
         if not user.is_client:
             raise BadRequest("This user is not registered as a client.")
         
+        if not all((user.client_info.street, user.client_info.zipcode, user.client_info.city, user.client_info.territory_id)):
+            raise BadRequest("User missing required address details")
+            
         # PROXY_USER - CAN Create patient on DS platform
         access_token = self._get_access_token(self.proxy_user_ds_id)
 
@@ -313,7 +316,6 @@ class DoseSpot:
         ds_patient = DoseSpotCreatePatientSchema().load({'ds_user_id': res_json['Id']})
         ds_patient.user_id = client_user_id
         db.session.add(ds_patient)
-        db.session.commit()
 
         return ds_patient
 
