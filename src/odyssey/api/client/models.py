@@ -299,9 +299,9 @@ def ds_onboard_client(mapper, connection, target):
     from odyssey.integrations.dosespot import DoseSpot
     from odyssey.api.dosespot.models import DoseSpotPatientID
 
-    ds_practitioner = DoseSpotPatientID.query.filter_by(user_id=target.user_id).one_or_none()
+    ds_client = DoseSpotPatientID.query.filter_by(user_id=target.user_id).one_or_none()
 
-    if not ds_practitioner and all((target.street, target.zipcode, target.city, target.territory_id)):
+    if not ds_client and all((target.street, target.zipcode, target.city, target.territory_id)):
         try:
             ds = DoseSpot()
             ds.onboard_client(target.user_id)   

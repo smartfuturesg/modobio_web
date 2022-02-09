@@ -189,8 +189,7 @@ class DoseSpot:
         # If the patient does not exist in DoseSpot System yet, make an account
         #TODO remove soon. 12.14.21
         if not client_ds_id:
-            ds_patient = self.onboard_client(client_user_id)
-            client_ds_id = ds_patient.ds_user_id
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         return self._generate_sso(client_ds_id)
 
@@ -262,7 +261,7 @@ class DoseSpot:
         
         if not all((user.client_info.street, user.client_info.zipcode, user.client_info.city, user.client_info.territory_id)):
             raise BadRequest("User missing required address details")
-            
+
         # PROXY_USER - CAN Create patient on DS platform
         access_token = self._get_access_token(self.proxy_user_ds_id)
 
@@ -408,7 +407,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
         
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
@@ -444,7 +443,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
@@ -579,7 +578,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
@@ -604,7 +603,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
