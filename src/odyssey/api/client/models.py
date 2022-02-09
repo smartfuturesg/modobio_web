@@ -5,18 +5,11 @@ All tables in this module are prefixed with ``Client``.
 import logging
 logger = logging.getLogger(__name__)
 
-import base64
-import os
 import pytz
-import random
-import secrets
 
-from datetime import datetime, timedelta
-from hashlib import md5
-from sqlalchemy import text, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm.query import Query
-from odyssey.utils.constants import DB_SERVER_TIME, ALPHANUMERIC
+from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin, BaseModel
 from odyssey import db
 
@@ -292,9 +285,9 @@ class ClientInfo(BaseModel):
 @db.event.listens_for(ClientInfo, "after_update")
 def ds_onboard_client(mapper, connection, target):
     """ 
-    Listens for any updates to StaffOffice table
+    Listens for any updates to ClientInfo table
 
-    If any updates occur, we will try to automatically onboard that MD to to the DS platform
+    If any updates occur, we will try to automatically onboard client to the DS platform
     """
     from odyssey.integrations.dosespot import DoseSpot
     from odyssey.api.dosespot.models import DoseSpotPatientID
