@@ -37,8 +37,12 @@ def test_put_user_subscription(test_client):
         data=dumps(users_subscription_data),
         content_type='application/json')
 
-    assert response.status_code == 201
-    assert response.json['subscription_status'] == 'subscribed'
+    # The transaction_id being used will be moving from valid to invalid as we test this feature
+    # 201 means the requested transaction_id is active on the applestore. 
+    # 400 indicates the transaction_is is tied to an inactive subscription and
+    #   cannot be used to start a new subcription on the modobio end. 
+    assert response.status_code in (201, 400)
+    assert response.json['subscription_status'] in ('subscribed', 'unsubscribed')
 
     #test method with invalid subscription_type
     users_subscription_data['subscription_type_id'] = 9999
