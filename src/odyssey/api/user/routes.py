@@ -1,6 +1,5 @@
 import logging
 
-from odyssey.integrations.apple import AppStore
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -11,7 +10,6 @@ import json
 from flask import current_app, request, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
-from itsdangerous.encoding import base64_decode
 from pytz import utc
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
@@ -68,7 +66,6 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
-    generate_apple_appstore_jwt,
     generate_modobio_id,
     verify_jwt)
 
