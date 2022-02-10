@@ -2,17 +2,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
-import boto3
 import jwt
 import requests
 import json
 
-from flask import current_app, request, jsonify, redirect
+from flask import current_app, request, redirect
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
+from itsdangerous.encoding import base64_decode
+from pytz import utc
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequest, Unauthorized
+
 
 from odyssey import db
 from odyssey.api import api
@@ -64,6 +66,7 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
+    generate_apple_appstore_jwt,
     generate_modobio_id,
     verify_jwt)
 
@@ -723,8 +726,8 @@ class VerifyPortalId(BaseResource):
 @ns.doc(params={'user_id': 'User ID number'})
 class UserSubscriptionApi(BaseResource):
 
-    @token_auth.login_required
-    @responds(schema=UserSubscriptionsSchema(many=True), api=ns, status_code=200)
+    @token_auth.login_required(user_type=('staff', 'client'), staff_role=('client_services',))
+    @responds(schema=UserSubscriptionsSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns active subscription information for the given user_id. 
@@ -732,7 +735,58 @@ class UserSubscriptionApi(BaseResource):
         """
         check_user_existence(user_id)
 
-        return UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None).all()
+        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None).one_or_none()
+
+        transaction_id =  '1000000930498925' #'1000000962062255'
+                    
+        # query Apple Storekit for subscription status and details, update if necessary
+        access_token = generate_apple_appstore_jwt()
+        headers = {'Authorization': f'Bearer {access_token}'}
+        response = requests.get(current_app.config['APPLE_APPSTORE_BASE_URL'] + '/inApps/v1/subscriptions/' + transaction_id,
+                headers=headers )
+
+        payload = response.json()
+
+        # extract signed transaction info and status from response. Should always be present given a valid originalTransactionID from apple
+        transaction_jws = payload.get('data')[0].get('lastTransactions')[0].get('signedTransactionInfo')
+        status = payload.get('data')[0].get('lastTransactions')[0].get('status')
+        # transaction_info = b64decode
+        
+        # decode JWS payload, check the subscription product
+        transaction_info = base64_decode(transaction_jws.split('.')[1])
+        transaction_info = json.loads(transaction_info)
+
+        # check subscription status cases
+        # -subscription remains the same -> continue, add last checked date
+        # -subscription changed but is still active -> update the current subscription, create entry for new one
+        # -subscription no longer active (anything but 1) -> update current subscription, make new entry for unsubscribed status
+
+        if status != 1:
+            # end the subscription
+            end_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
+            current_subscription.end_date = end_date
+            
+        elif status == 1:
+            # check if subscription type has changed
+            if transaction_info.get('productId') != current_subscription.subscription_type_information.ios_product_id:
+                end_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc)
+                current_subscription.end_date = end_date
+                new_subscription_data = {
+                    'subscription_status': 'subscribed',
+                    'subscription_type_id': LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id,
+                    'is_staff': current_subscription.is_staff,
+                    'last_checked_date': datetime.utcnow().isoformat(),
+                    'apple_original_transaction_id': current_subscription.apple_original_transaction_id
+                }
+                new_subscription = UserSubscriptionsSchema().load(new_subscription_data)
+                new_subscription.user_id = user_id
+                db.session.add(new_subscription)
+            else:
+                current_subscription.last_checked_date = datetime.utcnow().isoformat()
+            pass
+
+        db.session.commit()
+        return new_subscription
 
     @token_auth.login_required
     @accepts(schema=UserSubscriptionsSchema, api=ns)
@@ -747,10 +801,10 @@ class UserSubscriptionApi(BaseResource):
         else:
             check_client_existence(user_id)
         
-        new_sub_info =  LookupSubscriptions.query.filter_by(sub_id=request.parsed_obj.subscription_type_id).one_or_none()
+        # new_sub_info =  LookupSubscriptions.query.filter_by(sub_id=request.parsed_obj.subscription_type_id).one_or_none()
             
-        if not new_sub_info:
-            raise BadRequest('Invalid subscription type.')
+        # if not new_sub_info:
+        #     raise BadRequest('Invalid subscription type.')
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -758,10 +812,16 @@ class UserSubscriptionApi(BaseResource):
         prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
         prev_sub.update({'end_date': DB_SERVER_TIME})
 
+        ####
+        # TODO: verify subscription with apple
+        ####
+
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
             'subscription_type_id': request.parsed_obj.subscription_type_id,
             'is_staff': request.parsed_obj.is_staff,
+            'apple_original_transaction_id': request.parsed_obj.apple_original_transaction_id,
+            'last_checked_date': datetime.utcnow().isoformat()
         }
 
         new_sub = UserSubscriptionsSchema().load(new_data)
@@ -770,7 +830,8 @@ class UserSubscriptionApi(BaseResource):
         db.session.add(new_sub)
         db.session.commit()
 
-        new_sub.subscription_type_information = new_sub_info
+        # new_sub.subscription_type_information = new_sub_info
+
         return new_sub
 
     

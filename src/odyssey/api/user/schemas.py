@@ -129,11 +129,11 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscriptions
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('start_date', 'end_date', 'user_id')
+        dump_only = ('start_date', 'end_date', 'user_id', )
 
     subscription_type_id = fields.Integer(required=False)
     subscription_status = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free trial', 'sponsored']))
-
+    
     subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
     
     @post_load
