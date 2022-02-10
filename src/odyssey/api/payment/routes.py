@@ -1,22 +1,17 @@
-from datetime import timedelta
 import logging
-import jwt
+from flask import request
 from sqlalchemy import and_
 logger = logging.getLogger(__name__)
 
-import requests
-import json
 
-from flask import request, current_app
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
+from flask_restx import  Namespace
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
 from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
-from odyssey.utils.misc import check_client_existence, generate_apple_appstore_jwt
 from odyssey.utils.base.resources import BaseResource
 from odyssey.api.lookup.models import LookupOrganizations
 from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
@@ -26,8 +21,7 @@ PaymentStatusSchema,
 PaymentStatusOutputSchema,
 PaymentHistorySchema,
 PaymentRefundsSchema,
-PaymentTestChargeVoidSchema,
-PaymentTestRefundSchema)
+PaymentTestChargeVoidSchema)
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User
 
@@ -288,23 +282,3 @@ class PaymentVoidRefund(BaseResource):
             'has not been charged yet,so it cannot be voided.')
         return Instamed().void_payment(booking, "Test void functionality")
 
-
-@ns_dev.route('/apple/appstore-status/')
-class PaymentVoidRefund(BaseResource):
-    """
-    Check the status of a user's subscription on the app store
-
-    Generate jwt for apple app store requests: https://developer.apple.com/documentation/appstoreserverapi/generating_tokens_for_api_requests?changes=latest_major
-    
-    Note
-    ---
-    **This endpoint is only available in DEV environments.**
-
-    """
-    # @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
-    # @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
-    def get(self):
-
-
-        return {'test': 'test', 'token': generate_apple_appstore_jwt()}
-       
