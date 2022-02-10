@@ -793,13 +793,14 @@ class UserSubscriptionApi(BaseResource):
         prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
         prev_sub.update({'end_date': DB_SERVER_TIME})
 
-        ####
-        # TODO: verify subscription with apple
-        ####
+        # Verify subscription through apple
         appstore  = AppStore()
         transaction_info, _, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
 
-        if status != 1 or transaction_info.get('productId') != 
+        if status != 1 or \
+            transaction_info.get('productId') != \
+            LookupSubscriptions.query.filter_by(sub_id = request.parsed_obj.subscription_type_id).one_or_none().ios_product_id:
+                raise BadRequest('Appstore subscription status/product id does not match request')
 
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
@@ -814,8 +815,6 @@ class UserSubscriptionApi(BaseResource):
         
         db.session.add(new_sub)
         db.session.commit()
-
-        # new_sub.subscription_type_information = new_sub_info
 
         return new_sub
 
