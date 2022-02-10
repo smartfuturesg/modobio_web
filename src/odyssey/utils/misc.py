@@ -550,27 +550,3 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
 
-
-def generate_apple_appstore_jwt():
-    """
-    Create JWT for authenticating Apple appstore requests.
-    ref:  https://developer.apple.com/documentation/appstoreserverapi/generating_tokens_for_api_requests?changes=latest_major
-    
-    """
-
-    secret =  open(current_app.config.get('APPLE_APPSTORE_API_KEY_FILE'), 'r').read()
-    token= jwt.encode( {
-                'iss': current_app.config.get('APPLE_APPSTORE_ISSUER_ID'),
-                'iat': int(mktime((datetime.now()).timetuple() )) , 
-                'exp': int(mktime((datetime.now()+timedelta(minutes=20)).timetuple())), 
-                'aud': 'appstoreconnect-v1',
-                'nonce': str(uuid.uuid4()),
-                'bid': current_app.config.get('APPLE_APPSTORE_BUNDLE_ID')},
-                secret, 
-                headers ={
-                        'alg': 'ES256',
-                        'kid': current_app.config.get('APPLE_APPSTORE_API_KEY_ID'),
-                        'typ': 'JWT'
-                    }, 
-                algorithm='ES256')
-    return token

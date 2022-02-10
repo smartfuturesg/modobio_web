@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.integrations.apple import AppStore
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -736,25 +738,9 @@ class UserSubscriptionApi(BaseResource):
         check_user_existence(user_id)
 
         current_subscription = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None).one_or_none()
-
-        transaction_id =  '1000000930498925' #'1000000962062255'
-                    
-        # query Apple Storekit for subscription status and details, update if necessary
-        access_token = generate_apple_appstore_jwt()
-        headers = {'Authorization': f'Bearer {access_token}'}
-        response = requests.get(current_app.config['APPLE_APPSTORE_BASE_URL'] + '/inApps/v1/subscriptions/' + transaction_id,
-                headers=headers )
-
-        payload = response.json()
-
-        # extract signed transaction info and status from response. Should always be present given a valid originalTransactionID from apple
-        transaction_jws = payload.get('data')[0].get('lastTransactions')[0].get('signedTransactionInfo')
-        status = payload.get('data')[0].get('lastTransactions')[0].get('status')
-        # transaction_info = b64decode
         
-        # decode JWS payload, check the subscription product
-        transaction_info = base64_decode(transaction_jws.split('.')[1])
-        transaction_info = json.loads(transaction_info)
+        appstore  = AppStore()
+        transaction_info, _, status = appstore.latest_transaction(current_subscription.apple_original_transaction_id)
 
         # check subscription status cases
         # -subscription remains the same -> continue, add last checked date
@@ -783,7 +769,6 @@ class UserSubscriptionApi(BaseResource):
                 db.session.add(new_subscription)
             else:
                 current_subscription.last_checked_date = datetime.utcnow().isoformat()
-            pass
 
         db.session.commit()
         return new_subscription
@@ -801,10 +786,6 @@ class UserSubscriptionApi(BaseResource):
         else:
             check_client_existence(user_id)
         
-        # new_sub_info =  LookupSubscriptions.query.filter_by(sub_id=request.parsed_obj.subscription_type_id).one_or_none()
-            
-        # if not new_sub_info:
-        #     raise BadRequest('Invalid subscription type.')
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -815,6 +796,10 @@ class UserSubscriptionApi(BaseResource):
         ####
         # TODO: verify subscription with apple
         ####
+        appstore  = AppStore()
+        transaction_info, _, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
+
+        if status != 1 or transaction_info.get('productId') != 
 
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
