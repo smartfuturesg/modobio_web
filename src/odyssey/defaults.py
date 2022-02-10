@@ -208,6 +208,9 @@ Celery's new config system.
 """
 
 # InstaMed Settings
+INSTAMED_MERCHANT_ID = ''
+"""InstaMed Merchant ID."""
+
 INSTAMED_API_KEY = ''
 """ InstaMed API access key ID number. """
 

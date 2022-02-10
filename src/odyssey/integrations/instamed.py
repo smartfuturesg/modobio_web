@@ -26,7 +26,7 @@ class Instamed:
                                         'Content-Type': 'application/json'}
         self.url_base = "https://connect.instamed.com/rest"
         self.outlet = {
-                "MerchantID": '894805',
+                "MerchantID": current_app.config.get('INSTAMED_MERCHANT_ID'),
                 "StoreID": '0001',
                 "TerminalID": '0002'
         }
