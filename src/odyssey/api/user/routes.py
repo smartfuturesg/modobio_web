@@ -1,4 +1,3 @@
-from ast import Subscript
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,8 +17,7 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 
 from odyssey import db
-from odyssey.api import api
-from odyssey.api.client.models import ClientClinicalCareTeam, ClientFertility
+from odyssey.api.client.models import ClientFertility
 from odyssey.api.client.schemas import (
     ClientInfoSchema,
     ClientGeneralMobileSettingsSchema,
@@ -786,8 +784,7 @@ class UserSubscriptionApi(BaseResource):
         #NOTE: users always have a subscription, even a brand new account will have an entry
         #      in this table as an 'unsubscribed' subscription
         prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
-        prev_sub.update({'end_date': DB_SERVER_TIME})
-
+        
         if request.parsed_obj.apple_original_transaction_id and request.parsed_obj.subscription_status == 'subscribed':
             # Verify subscription through apple
             appstore  = AppStore()
@@ -797,6 +794,7 @@ class UserSubscriptionApi(BaseResource):
                 LookupSubscriptions.query.filter_by(sub_id = request.parsed_obj.subscription_type_id).one_or_none().ios_product_id:
                     raise BadRequest('Appstore subscription status/product id does not match request')
 
+        prev_sub.update({'end_date': DB_SERVER_TIME})
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
             'subscription_type_id': request.parsed_obj.subscription_type_id,

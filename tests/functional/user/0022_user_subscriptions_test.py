@@ -42,7 +42,6 @@ def test_put_user_subscription(test_client):
     # 400 indicates the transaction_is is tied to an inactive subscription and
     #   cannot be used to start a new subcription on the modobio end. 
     assert response.status_code in (201, 400)
-    assert response.json['subscription_status'] in ('subscribed', 'unsubscribed')
 
     #test method with invalid subscription_type
     users_subscription_data['subscription_type_id'] = 9999
