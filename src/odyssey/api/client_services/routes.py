@@ -39,7 +39,6 @@ class CSAccountEndpoint(BaseResource):
     """ User account info endpoint. """
 
     @token_auth.login_required(user_type=('staff',), staff_role=('client_services',))
-    @responds(api=ns, status_code=200)
     def get(self, user_id):
         """ Get user account info.
 
