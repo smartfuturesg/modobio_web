@@ -99,7 +99,13 @@ class BasicAuth(object):
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
-                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context, resources=resources)
+                    self.user_role_check(
+                        user,
+                        user_login,
+                        user_type,
+                        user_context,
+                        staff_role=staff_role,
+                        resources=resources)
                 
                 # If necessary, restrict access to internal users
                 if internal_required:
@@ -114,7 +120,7 @@ class BasicAuth(object):
             return login_required_internal(f)
         return login_required_internal
    
-    def user_role_check(self, user, user_type, user_context, staff_roles=None, resources=()):
+    def user_role_check(self, user, user_login, user_type, user_context, staff_roles=None, resources=()):
         ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
         # Check if logged-in user is authorized by type (staff,client)
@@ -125,19 +131,27 @@ class BasicAuth(object):
             return
         # if the user is logged in as staff member, follow staff authorization routine
         elif user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
-            if user.is_staff:
+            if user.is_staff and not user_login.staff_account_blocked:
                 if staff_roles or 'staff_self' in user_type or len(resources) > 0: # role-based authorization 
                     self.staff_access_check(user, user_type, resources, staff_roles=staff_roles)
                 else:
                     return
             else:
-                raise Unauthorized
+                msg = None
+                if user_login.staff_account_blocked:
+                    msg = 'Your account has been blocked. Contact Modo Bio to resolve the issue.'
+                raise Unauthorized(msg)
+
         # if the user is logged in as a client, follow the client authorization routine
         elif user_context == 'client' and 'client' in user_type:
-            if user.is_client:
+            if user.is_client and not user_login.client_account_blocked:
                 self.client_access_check(user, resources)
             else:
-                raise Unauthorized
+                msg = None
+                if user_login.client_account_blocked:
+                    msg = 'Your account has been blocked. Contact Modo Bio to resolve the issue.'
+                raise Unauthorized(msg)
+
         elif user_context == 'basic_auth':
             if 'staff' in user_type and user.is_staff:
                 return
@@ -313,13 +327,6 @@ class BasicAuth(object):
 
         user, user_login = user_details
 
-        if user.is_staff and user_login.staff_account_blocked:
-            raise Unauthorized(f'Your account has been blocked for the following reason: '
-                               f'{user_login.staff_account_blocked_reason}')
-        elif user.is_client and user_login.client_account_blocked:
-            raise Unauthorized(f'Your account has been blocked for the following reason: '
-                               f'{user_login.client_account_blocked_reason}')
-
         if check_password_hash(user_login.password, password):
             user_login.last_login = DB_SERVER_TIME
             db.session.commit()
@@ -397,13 +404,6 @@ class TokenAuth(BasicAuth):
             .where(
                 User.user_id == decoded_token['uid'])
         ).one_or_none()
-
-        if user.is_staff and user_login.staff_account_blocked:
-            raise Unauthorized(f'Your account has been blocked for the following reason: '
-                               f'{user_login.staff_account_blocked_reason}')
-        elif user.is_client and user_login.client_account_blocked:
-            raise Unauthorized(f'Your account has been blocked for the following reason: '
-                               f'{user_login.client_account_blocked_reason}')
 
         g.user_type = decoded_token.get('utype')
         return user, user_login, decoded_token.get('utype')
