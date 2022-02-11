@@ -282,6 +282,26 @@ class ClientInfo(BaseModel):
             }
         return data, resources
 
+@db.event.listens_for(ClientInfo, "after_update")
+def ds_onboard_client(mapper, connection, target):
+    """ 
+    Listens for any updates to ClientInfo table
+
+    If any updates occur, we will try to automatically onboard client to the DS platform
+    """
+    from odyssey.integrations.dosespot import DoseSpot
+    from odyssey.api.dosespot.models import DoseSpotPatientID
+
+    ds_client = DoseSpotPatientID.query.filter_by(user_id=target.user_id).one_or_none()
+
+    if not ds_client and all((target.street, target.zipcode, target.city, target.territory_id)):
+        try:
+            ds = DoseSpot()
+            ds.onboard_client(target.user_id)   
+        except:
+            return
+
+
 
 class ClientRaceAndEthnicity(BaseModelWithIdx, UserIdFkeyMixin):
     """ Holds information about the race and ethnicity of a client's parents """
