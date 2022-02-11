@@ -104,7 +104,7 @@ class BasicAuth(object):
                         user_login,
                         user_type,
                         user_context,
-                        staff_role=staff_role,
+                        staff_roles=staff_role,
                         resources=resources)
                 
                 # If necessary, restrict access to internal users
