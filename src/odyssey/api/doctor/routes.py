@@ -1275,6 +1275,13 @@ class MedBloodTest(BaseResource):
                         'ref_max': ref_max,
                         'critical_max': critical_max
                     }
+                else:
+                    eval_values = {
+                    'critical_min': ranges[0].critical_min,
+                    'ref_min': ranges[0].ref_min,
+                    'ref_max': ranges[0].ref_max,
+                    'critical_max': ranges[0].critical_max
+                }
             else:
                 eval_values = {
                     'critical_min': ranges[0].critical_min,
@@ -1282,6 +1289,16 @@ class MedBloodTest(BaseResource):
                     'ref_max': ranges[0].ref_max,
                     'critical_max': ranges[0].critical_max
                 }
+
+            #fix ranges if any are null
+            if eval_values['critical_min'] == None:
+                eval_values['critical_min'] = 0
+            if eval_values['ref_min'] == None:
+                eval_values['ref_min'] = 0
+            if eval_values['ref_max'] == None:
+                eval_values['ref_max'] = float('inf')
+            if eval_values['critical_max'] == None:
+                eval_values['critical_max'] = float('inf')
 
             #make the evaluation based on the eval values found above
             if result['result_value'] < eval_values['critical_min']:

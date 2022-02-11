@@ -28,15 +28,15 @@ class DoseSpot:
     """Object to handle dose spot routines"""
     
     def __init__(self, practitioner_user_id = None, char_len = 32):
+        self.rand_phrase = "".join([random.choice(ALPHANUMERIC) for i in range(char_len)])
         self.admin_user_ds_id = str(current_app.config['DOSESPOT_ADMIN_ID'])
         self.proxy_user_ds_id = current_app.config['DOSESPOT_PROXY_USER_ID']
         self.modobio_clinic_id = str(current_app.config['DOSESPOT_MODOBIO_ID'])
         self.clinic_api_key = current_app.config['DOSESPOT_API_KEY']
-        self.encrypted_clinic_id = current_app.config['DOSESPOT_ENCRYPTED_MODOBIO_ID']
         self.base_url = current_app.config['DOSESPOT_BASE_URL']
-        
-        self.rand_phrase = "".join([random.choice(ALPHANUMERIC) for i in range(char_len)])
-        
+        self.encrypted_clinic_id = self._generate_encrypted_clinic_id(url=False)
+        self.encrypted_clinic_id_url = urllib.parse.quote(self.encrypted_clinic_id, safe='')
+
         if practitioner_user_id:
             self.practitioner_ds_id = db.session.execute(select(DoseSpotPractitionerID.ds_user_id).where(DoseSpotPractitionerID.user_id == practitioner_user_id)
                                     ).scalars().one_or_none()
@@ -86,7 +86,8 @@ class DoseSpot:
         hash512 = hashlib.sha512(encoded_str).digest()
 
         if url:
-            encrypted_str = base64.urlsafe_b64encode(hash512).decode().rstrip('=')
+            encrypted_str = base64.b64encode(hash512).decode().rstrip('=')
+            encrypted_str = urllib.parse.quote(encrypted_str, safe='')
         else:
             encrypted_str = base64.b64encode(hash512).decode().rstrip('=')
 
@@ -112,7 +113,8 @@ class DoseSpot:
         hash512 = hashlib.sha512(encoded_str).digest()
 
         if url:
-            encrypted_str = base64.urlsafe_b64encode(hash512).decode().rstrip('=')
+            encrypted_str = base64.b64encode(hash512).decode().rstrip('=')
+            encrypted_str = urllib.parse.quote(encrypted_str, safe='')
         else:
             encrypted_str = base64.b64encode(hash512).decode().rstrip('=')
 
@@ -133,16 +135,13 @@ class DoseSpot:
         ------
         sso url
         """
-        encrypted_clinic_id_url = self.encrypted_clinic_id.replace('/','%2F')
-        encrypted_clinic_id_url = encrypted_clinic_id_url.replace('+','%2B')   
-
         encrypted_user_id_url = self._generate_encrypted_user_id(self.practitioner_ds_id, url=True)
         
         params = {
         'SingleSignOnClinicId': self.modobio_clinic_id,
         'SingleSignOnUserId': self.practitioner_ds_id,
         'SingleSignOnPhraseLength': 32,
-        'SingleSignOnCode': encrypted_clinic_id_url,
+        'SingleSignOnCode': self.encrypted_clinic_id_url,
         'SingleSignOnUserIdVerify': encrypted_user_id_url
         }
 
@@ -151,7 +150,7 @@ class DoseSpot:
         else:
             params['RefillsErrors'] = 1
 
-        return self.base_url + 'LoginSingleSignOn.aspx?' + urllib.parse.urlencode(params)
+        return self.base_url + '/LoginSingleSignOn.aspx?' + urllib.parse.urlencode(params)
 
     def _get_access_token(self, user_ds_id):
         """
@@ -190,8 +189,7 @@ class DoseSpot:
         # If the patient does not exist in DoseSpot System yet, make an account
         #TODO remove soon. 12.14.21
         if not client_ds_id:
-            ds_patient = self.onboard_client(client_user_id)
-            client_ds_id = ds_patient.ds_user_id
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         return self._generate_sso(client_ds_id)
 
@@ -261,6 +259,9 @@ class DoseSpot:
         if not user.is_client:
             raise BadRequest("This user is not registered as a client.")
         
+        if not all((user.client_info.street, user.client_info.zipcode, user.client_info.city, user.client_info.territory_id)):
+            raise BadRequest("User missing required address details")
+
         # PROXY_USER - CAN Create patient on DS platform
         access_token = self._get_access_token(self.proxy_user_ds_id)
 
@@ -314,7 +315,6 @@ class DoseSpot:
         ds_patient = DoseSpotCreatePatientSchema().load({'ds_user_id': res_json['Id']})
         ds_patient.user_id = client_user_id
         db.session.add(ds_patient)
-        db.session.commit()
 
         return ds_patient
 
@@ -407,7 +407,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
         
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
@@ -443,7 +443,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
@@ -578,7 +578,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
@@ -603,7 +603,7 @@ class DoseSpot:
         ds_patient = DoseSpotPatientID.query.filter_by(user_id=client_user_id).one_or_none()
 
         if not ds_patient:
-            ds_patient = self.onboard_client(client_user_id)
+            raise BadRequest("User not registered with DoseSpot. User missing required address details")
 
         # sign in as proxy user
         access_token = self._get_access_token(self.proxy_user_ds_id)
