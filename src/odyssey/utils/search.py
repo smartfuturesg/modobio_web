@@ -1,11 +1,15 @@
+import json
 import logging
-logger = logging.getLogger(__name__)
+
+import elasticsearch
 
 from flask import current_app
-from odyssey.api.user.models import User
-from odyssey.api.client.models import ClientInfo
+
 from odyssey import db
-import json
+from odyssey.api.client.models import ClientInfo
+from odyssey.api.user.models import User
+
+logger = logging.getLogger(__name__)
 
 def build_ES_indices():
     es = current_app.elasticsearch
@@ -32,7 +36,12 @@ def build_ES_indices():
 
     for queryName, query in queries:
         if len(query) != 0:
-            es.bulk(operations=build_index(indexName=queryName, query=query), refresh=True)
+            # Elasticsearch 8.0 requires all arguments to be named parameters.
+            if elasticsearch.__version__[0] >= 8:
+                es.bulk(operations=build_index(indexName=queryName, query=query), refresh=True)
+            else:
+                # But it's not backwards compatible.
+                es.bulk(build_index(indexName=queryName, query=query), refresh=True)
 
 #def update_user_dob(user_id:int, dob:str):
 #    """
