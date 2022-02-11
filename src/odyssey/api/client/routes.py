@@ -1021,15 +1021,13 @@ class ClientToken(BaseResource):
         return '', 200
 
 
-# user_id in path is not necessary here, except that
-# staff_access_check() relies on it to check staff_self.
-@ns.route('/account/<int:user_id>/close/')
+@ns.route('/account/close/')
 class ClientCloseAccountEndpoint(BaseResource):
     """ Close client account. """
 
-    @token_auth.login_required(user_type=('staff_self',))
+    @token_auth.login_required(user_type=('client',))
     @responds(api=ns, status_code=201)
-    def post(self, user_id):
+    def post(self):
         """ Close client portion of an account.
 
         Closing an account means that the account will be deleted after a number
