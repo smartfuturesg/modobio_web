@@ -62,6 +62,7 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
+from odyssey.api.user.routes import UserLogoutApi
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import FERTILITY_STATUSES, TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.utils.message import send_test_email, email_domain_blacklisted
