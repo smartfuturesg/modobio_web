@@ -9,13 +9,13 @@ from flask.json import dumps
 # INFO = 20, CRITICAL = 30
 audit_level = 25
 
-def audit(msg, *args, **kwargs):
+def audit(self, msg, *args, **kwargs):
+    """ Log a message with severity AUDIT.
+
+    Use this logger to send messages to a special log
+    which is filtered out and preserved for auditing.
     """
-    Log a message with severity 'AUDIT' on the root logger. If the logger has
-    no handlers, call basicConfig() to add a console handler with a pre-defined
-    format.
-    """
-    logging.log(audit_level, msg, *args, **kwargs)
+    logging.Logger.log(self, audit_level, msg, *args, **kwargs)
 
 logging.Logger.audit = audit
 logging.addLevelName(audit_level, 'AUDIT')

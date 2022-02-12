@@ -250,6 +250,58 @@ class UserLogin(db.Model):
     :type: boolean
     """
 
+    # Explicitly setting nullable and default to indicate that None has meaning.
+    staff_account_closed = db.Column(db.DateTime, nullable=True, default=None)
+    """
+    User closed staff portion of the account on this date. A closed account will
+    be deleted some time after the close date (initially, 30 days after). If the
+    user logs in after closing, but before the account is deleted, this timestamp
+    is set to None.
+
+    :type: datetime or None
+    """
+
+    staff_account_blocked = db.Column(db.Boolean, server_default='f')
+    """
+    Indicates when the staff portion of the account is blocked.
+    See :attr:`staff_account_blocked_reason` for the reason why it was blocked.
+
+    :type: bool
+    """
+
+    staff_account_blocked_reason = db.Column(db.String(500))
+    """
+    Reason why the staff portion of the account was blocked.
+
+    :type: str, max length 500
+    """
+
+    # Explicitly setting nullable and default to indicate that None has meaning.
+    client_account_closed = db.Column(db.DateTime, nullable=True, default=None)
+    """
+    User closed client portion of the account on this date. A closed account will
+    be deleted some time after the close date (initially, 30 days after). If the
+    user logs in after closing, but before the account is deleted, this timestamp
+    is set to None.
+
+    :type: datetime or None
+    """
+
+    client_account_blocked = db.Column(db.Boolean, server_default='f')
+    """
+    Indicates when the client portion of the account is blocked.
+    See :attr:`client_account_blocked_reason` for the reason why it was blocked.
+
+    :type: bool
+    """
+
+    client_account_blocked_reason = db.Column(db.String(500))
+    """
+    Reason why the client portion of the account was blocked.
+
+    :type: str, max length 500
+    """
+
     last_login = db.Column(db.DateTime)
     """
     **Deprecated 4.12.21 use UserTokensHistory to find last login**

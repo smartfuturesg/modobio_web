@@ -99,7 +99,13 @@ class BasicAuth(object):
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
-                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context, resources=resources)
+                    self.user_role_check(
+                        user,
+                        user_login,
+                        user_type,
+                        user_context,
+                        staff_roles=staff_role,
+                        resources=resources)
                 
                 # If necessary, restrict access to internal users
                 if internal_required:
@@ -114,7 +120,7 @@ class BasicAuth(object):
             return login_required_internal(f)
         return login_required_internal
    
-    def user_role_check(self, user, user_type, user_context, staff_roles=None, resources=()):
+    def user_role_check(self, user, user_login, user_type, user_context, staff_roles=None, resources=()):
         ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
         # Check if logged-in user is authorized by type (staff,client)
@@ -125,19 +131,27 @@ class BasicAuth(object):
             return
         # if the user is logged in as staff member, follow staff authorization routine
         elif user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
-            if user.is_staff:
+            if user.is_staff and not user_login.staff_account_blocked:
                 if staff_roles or 'staff_self' in user_type or len(resources) > 0: # role-based authorization 
                     self.staff_access_check(user, user_type, resources, staff_roles=staff_roles)
                 else:
                     return
             else:
-                raise Unauthorized
+                msg = None
+                if user_login.staff_account_blocked:
+                    msg = 'Your account has been blocked. Contact Modo Bio to resolve the issue.'
+                raise Unauthorized(msg)
+
         # if the user is logged in as a client, follow the client authorization routine
         elif user_context == 'client' and 'client' in user_type:
-            if user.is_client:
+            if user.is_client and not user_login.client_account_blocked:
                 self.client_access_check(user, resources)
             else:
-                raise Unauthorized
+                msg = None
+                if user_login.client_account_blocked:
+                    msg = 'Your account has been blocked. Contact Modo Bio to resolve the issue.'
+                raise Unauthorized(msg)
+
         elif user_context == 'basic_auth':
             if 'staff' in user_type and user.is_staff:
                 return
@@ -297,11 +311,14 @@ class BasicAuth(object):
             that is defined in auth.py """
             
         user_details = db.session.execute(
-            select(User, UserLogin).
-            join(UserLogin, User.user_id==UserLogin.user_id).
-            where(User.email==username.lower())
+            select(User, UserLogin)
+            .join(
+                UserLogin,
+                User.user_id == UserLogin.user_id)
+            .where(
+                User.email == username.lower())
         ).one_or_none()
-            
+
         # make sure login details exist, check password
         if not user_details:
             db.session.add(UserTokenHistory(event='login', ua_string=request.headers.get('User-Agent')))
@@ -379,14 +396,17 @@ class TokenAuth(BasicAuth):
         if decoded_token['ttype'] != 'access':
             raise Unauthorized
 
-        query = db.session.execute(
-            select(User, UserLogin
-                    ).join(
-                        UserLogin, User.user_id == UserLogin.user_id
-                    ).where(User.user_id == decoded_token['uid'])).one_or_none()    
-                    
+        user, user_login = db.session.execute(
+            select(User, UserLogin)
+            .join(
+                UserLogin,
+                User.user_id == UserLogin.user_id)
+            .where(
+                User.user_id == decoded_token['uid'])
+        ).one_or_none()
+
         g.user_type = decoded_token.get('utype')
-        return query[0], query[1], decoded_token.get('utype')
+        return user, user_login, decoded_token.get('utype')
 
     def get_auth(self):
         ''' This method is to authorize tokens '''

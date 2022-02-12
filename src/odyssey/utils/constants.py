@@ -907,12 +907,6 @@ config = Config()
 # clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
 TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 48
 
-INSTAMED_OUTLET = {
-                "MerchantID": '894805',
-                "StoreID": '0001',
-                "TerminalID": '0002'
-            }
-
 MODOBIO_ADDRESS = {
     "firstname": "Modo",
     "lastname": "Bio",

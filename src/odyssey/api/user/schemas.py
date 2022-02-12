@@ -1,3 +1,5 @@
+""" Schemas for user accounts. """
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -9,9 +11,7 @@ from odyssey.api.staff.schemas import StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserPendingEmailVerifications, UserLegalDocs
 from odyssey.utils.constants import ACCESS_ROLES
 
-"""
-   Schemas for user accounts
-"""
+
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -23,9 +23,15 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         new_user = User(**data)
         return new_user
 
+
 class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserLogin
+        exclude = (
+            'staff_account_blocked',
+            'staff_account_blocked_reason',
+            'client_account_blocked',
+            'client_account_blocked_reason')
 
     user_id = fields.Integer()
 
@@ -35,7 +41,7 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
-    
+
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
