@@ -324,11 +324,13 @@ def booking_function_scope(test_client):
     # make a telehealth booking by direct db call
     # booking is made less than 10 minutes out from the current time
     target_datetime = datetime.utcnow() #+ timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
-    start_minute = target_datetime.minute + (10 - target_datetime.minute % 10) 
-    target_datetime = target_datetime.replace(
-        hour = target_datetime.hour + 1 if start_minute == 60 else target_datetime.hour,
-        minute = 0 if start_minute == 60 else start_minute, 
-        second=0)
+
+    # Round target_datetime up to the next 10-minute time.
+    target_datetime = target_datetime - timedelta(
+        minutes=target_datetime.minute % 10 - 10,
+        seconds=target_datetime.second,
+        microseconds=target_datetime.microsecond)
+
     time_inc = LookupBookingTimeIncrements.query.all()
         
     start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
