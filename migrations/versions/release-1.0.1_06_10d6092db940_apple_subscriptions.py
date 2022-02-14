@@ -1,7 +1,7 @@
 """App store integration. UserSubscriptions fields
 
 Revision ID: 10d6092db940
-Revises: 28f6800e6909
+Revises: 1079f0374c0d
 Create Date: 2022-02-10 10:30:09.520354
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '10d6092db940'
-down_revision = '28f6800e6909'
+down_revision = '1079f0374c0d'
 branch_labels = None
 depends_on = None
 
