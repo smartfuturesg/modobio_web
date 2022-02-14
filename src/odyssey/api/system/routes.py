@@ -14,7 +14,7 @@ from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 
-ns = Namespace('system', description='Endpoints for system functions.')
+ns = Namespace('system', description='Endpoints for system admin functions.')
 
 @ns.route('/telehealth-settings/')
 class SystemTelehealthSettingsApi(BaseResource):
@@ -89,3 +89,24 @@ class SystemTelehealthSettingsApi(BaseResource):
 
         db.session.commit()
         return res
+
+
+@ns.route('/delete-user/')
+class SystemDeleteUserApi(BaseResource):
+    """
+    Endpoint for the system admin to delete a user
+    """
+    
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @ns.doc(params={'delete_type': "Denotes what portion of the user should be deleted. Can be 'client','staff', or 'both "})
+    @responds(status_code=204, api=ns)
+    def delete(self, user_id):
+        """
+        This endpoint can be used to instantly delete a user by the system admin. Note that unlike the
+        self-deletion process that a user can initiate, this does not have the step of the user being
+        makred as 'closed' for 30 days before being deleted by the automated system.
+        
+        The system admin should specify which portion of the user's account should be deleted by supplying 
+        either 'client', 'staff', or 'both' in the delete_type arg
+        """
+        return
