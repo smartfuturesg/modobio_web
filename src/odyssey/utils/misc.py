@@ -30,9 +30,15 @@ from odyssey.api.doctor.models import (
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
+from odyssey.api.user.models import UserRemovalRequests
 from odyssey.api.lookup.models import LookupDrinks
 from odyssey.utils.constants import ALPHANUMERIC
 from odyssey.api.user.models import User, UserTokenHistory
+
+from odyssey.utils.auth import token_auth
+from odyssey.utils.message import send_email_delete_account
+from odyssey.utils.file_handling import FileHandling
+from odyssey.utils import search
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -548,3 +554,77 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.start_time <= target_time.time(),
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
+        
+def delete_user(user_id, requestor_id):
+    """
+    This function is used to delete a user and any relevant user date. It is leveraged by the system
+    admin delete user endpoint and (in the future) the task that automatically deletes accounts that have
+    been marked as 'closed' for at least 30 days.
+    
+    Args:
+        user_id (int): int id of the user to be deleted
+        requestor_id (int): id of the user requesting to delete this user
+    """
+    check_user_existence(user_id, requestor_id)
+    
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+    requester = token_auth.current_user()[0]
+    removal_request = UserRemovalRequests(
+        requester_user_id=requester.user_id, 
+        user_id=user.user_id)
+
+    db.session.add(removal_request)
+    db.session.flush()
+    
+    #Send notification email to user being deleted and user requesting deletion
+    #when FLASK_ENV=production
+    if user.email != requester.email:
+        send_email_delete_account(requester.email, user.email)
+    send_email_delete_account(user.email, user.email)
+
+    #when user is staff
+    #keep name, email, modobio id, user id in User table
+    #keep lines in tables where user_id is the reporter_id
+    if user.is_client and not user.is_staff:
+        #keep only modobio id, user id in User table
+        user.email = None
+        user.firstname = None
+        user.middlename = None
+        user.lastname = None
+    user.phone_number = None
+    user.deleted = True
+    
+    #delete files or images saved in S3 bucket for user_id
+    fh = FileHandling()
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/')
+    
+    #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+    # NOTE - Order matters, must delete these tables before those with user_id 
+    # to avoid problems while deleting payment methods
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+    
+    #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+    for table in tableList:
+        tblname = table.table_name
+        #Only delete telehealth bookings when the client is being deleted, keep if it's the practitioner
+        if tblname == 'TelehealthBookings':
+            db.session.execute(f"DELETE FROM \"{tblname}\" WHERE client_user_id={user_id};")
+        else:
+            db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
+
+    #Get a list of all tables in database that have field: user_id
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='user_id';").fetchall()
+
+    #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+    for table in tableList:
+        tblname = table.table_name
+        #added data_per_client table due to issues with the testing database
+        if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
+            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(tblname, user_id))
+
+    db.session.commit()
+
+    #remove user from elastic search indices (must be done after commit)
+    search.delete_from_index(user.user_id)
