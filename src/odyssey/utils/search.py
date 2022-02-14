@@ -1,11 +1,15 @@
+import json
 import logging
-logger = logging.getLogger(__name__)
+
+import elasticsearch
 
 from flask import current_app
-from odyssey.api.user.models import User
-from odyssey.api.client.models import ClientInfo
+
 from odyssey import db
-import json
+from odyssey.api.client.models import ClientInfo
+from odyssey.api.user.models import User
+
+logger = logging.getLogger(__name__)
 
 def build_ES_indices():
     es = current_app.elasticsearch
@@ -32,7 +36,12 @@ def build_ES_indices():
 
     for queryName, query in queries:
         if len(query) != 0:
-            es.bulk(build_index(indexName=queryName, query=query), refresh=True)
+            # Elasticsearch 8.0 requires all arguments to be named parameters.
+            if elasticsearch.__version__[0] >= 8:
+                es.bulk(operations=build_index(indexName=queryName, query=query), refresh=True)
+            else:
+                # But it's not backwards compatible.
+                es.bulk(build_index(indexName=queryName, query=query), refresh=True)
 
 #def update_user_dob(user_id:int, dob:str):
 #    """
@@ -102,23 +111,23 @@ def update_index(user:dict, new_entry:bool):
         if client:
             payload = update_body['script']['params']
             body = '{\"index\":{\"_index\":\"clients\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
-            es.bulk(body= body, refresh=True)
+            es.bulk(body=body, refresh=True)
         
         if staff:
             payload = update_body['script']['params']
             body = '{\"index\":{\"_index\":\"staff\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
-            es.bulk(body= body, refresh=True)
+            es.bulk(body=body, refresh=True)
 
     else:
         if client:
-            if not es.exists('clients', _id):
+            if not es.exists(index='clients', id=_id):
                 payload = update_body['script']['params']
                 body = '{\"index\":{\"_index\":\"clients\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
-                es.bulk(body= body, refresh=True)
+                es.bulk(body=body, refresh=True)
             es.update(index="clients", id=_id, body=update_body, refresh=True)
         
         if staff:
-            if not es.exists('staff', _id):
+            if not es.exists(index='staff', id=_id):
                 payload = update_body['script']['params']
                 body = '{\"index\":{\"_index\":\"staff\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
                 es.bulk(body= body, refresh=True)
@@ -134,8 +143,8 @@ def delete_from_index(user_id:int):
     es = current_app.elasticsearch
     if not es: return
     
-    if es.exists('clients', user_id):
-        es.delete('clients', user_id, refresh=True)
+    if es.exists(index='clients', id=user_id):
+        es.delete(index='clients', id=user_id, refresh=True)
     
-    if es.exists('staff', user_id):
-        es.delete('staff', user_id, refresh=True)
+    if es.exists(index='staff', id=user_id):
+        es.delete(index='staff', id=user_id, refresh=True)
