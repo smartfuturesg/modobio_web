@@ -394,6 +394,13 @@ class UserRemovalRequests(db.Model):
 
     :type: :class:`datetime.datetime`, primary key
     """
+    
+    removal_type = db.Column(db.String)
+    """
+    Type of removal requested. Can be 'client', 'staff', 'or both.
+
+    :type: str
+    """
 
 class UserSubscriptions(db.Model):
     """ 
