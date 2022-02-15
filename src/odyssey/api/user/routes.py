@@ -738,7 +738,7 @@ class UserSubscriptionApi(BaseResource):
         
         new_subscription = None
         renewal_info = None
-        if current_subscription.apple_original_transaction_id and current_subscription.subscription_status == 'subscribed':
+        if current_subscription.apple_original_transaction_id:
             appstore  = AppStore()
             transaction_info, renewal_info, status = appstore.latest_transaction(current_subscription.apple_original_transaction_id)
             # check subscription status cases
@@ -793,6 +793,8 @@ class UserSubscriptionApi(BaseResource):
                 transaction_info.get('productId') != \
                 LookupSubscriptions.query.filter_by(sub_id = request.parsed_obj.subscription_type_id).one_or_none().ios_product_id:
                     raise BadRequest('Appstore subscription status/product id does not match request')
+        elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
+            raise BadRequest('Missing original transaction id')
 
         prev_sub.update({'end_date': DB_SERVER_TIME})
         new_data = {
@@ -851,7 +853,6 @@ class UserSubscriptionHistoryApi(BaseResource):
                     current_subscription.last_checked_date = datetime.utcnow().isoformat()
 
             db.session.commit()
-
 
         client_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
         staff_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
