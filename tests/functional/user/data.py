@@ -109,7 +109,8 @@ users_staff_passwords_data = {
 users_subscription_data = {
   "is_staff": False,
   "subscription_type_id": 1,
-  "subscription_status": "subscribed"
+  "subscription_status": "subscribed",
+  "apple_original_transaction_id": "1000000930498925"
 }
 
 users_legal_docs_data = {

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 import pytz
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import  UniqueConstraint
 from sqlalchemy.orm.query import Query
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin, BaseModel
