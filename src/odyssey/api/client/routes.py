@@ -285,7 +285,7 @@ class Client(BaseResource):
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
-        if not client_data and not user_data:
+        if not client_data or not user_data:
             raise BadRequest(f'Client {user_id} not found.')
 
         #update staff recent clients information
@@ -318,7 +318,7 @@ class Client(BaseResource):
             db.session.refresh(client_data)
         if user_data:
             db.session.refresh(user_data)
-       
+
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
         client_info_payload["primary_macro_goal"] = db.session.query(LookupMacroGoals.goal).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
