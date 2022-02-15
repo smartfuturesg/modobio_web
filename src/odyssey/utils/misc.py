@@ -555,48 +555,63 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
         
-def delete_user(user_id, requestor_id):
+def delete_staff_data(user_id):
     """
-    This function is used to delete a user and any relevant user date. It is leveraged by the system
-    admin delete user endpoint and (in the future) the task that automatically deletes accounts that have
-    been marked as 'closed' for at least 30 days.
+    This function is used by the delete_user function to delete staff specific data. This includes:
     
-    Args:
-        user_id (int): int id of the user to be deleted
-        requestor_id (int): id of the user requesting to delete this user
+    *staff specific s3 files(profile picture)
+    *rows in staff specific tables
     """
-    check_user_existence(user_id, requestor_id)
     
-    user = User.query.filter_by(user_id=user_id).one_or_none()
-    requester = token_auth.current_user()[0]
-    removal_request = UserRemovalRequests(
-        requester_user_id=requester.user_id, 
-        user_id=user.user_id)
-
-    db.session.add(removal_request)
-    db.session.flush()
-    
-    #Send notification email to user being deleted and user requesting deletion
-    #when FLASK_ENV=production
-    if user.email != requester.email:
-        send_email_delete_account(requester.email, user.email)
-    send_email_delete_account(user.email, user.email)
-
-    #when user is staff
-    #keep name, email, modobio id, user id in User table
-    #keep lines in tables where user_id is the reporter_id
-    if user.is_client and not user.is_staff:
-        #keep only modobio id, user id in User table
-        user.email = None
-        user.firstname = None
-        user.middlename = None
-        user.lastname = None
-    user.phone_number = None
-    user.deleted = True
-    
-    #delete files or images saved in S3 bucket for user_id
+    #delete client specific files or images saved in S3 bucket for user_id
     fh = FileHandling()
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/')
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/staff_profile_picture')
+    
+    #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+    # NOTE - Order matters, must delete these tables before those with user_id 
+    # to avoid problems while deleting payment methods
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+    
+    for table in tableList:
+        #Do not delete from TelehealthBookings when deleting staff data
+        if table.table_name == 'TelehealthBookings':
+            continue
+        else:
+            db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE staff_user_id={user_id};")
+
+    #Get a list of all tables in database that have field: user_id
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='user_id';").fetchall()
+
+    #delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
+    for table in tableList:
+        #added data_per_client table due to issues with the testing database
+        if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
+            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+
+    #only delete staff subscription
+    db.session.execute(f"DELETE FROM UserSubscriptions WHERE user_id={user_id} AND is_staff=True")
+
+    db.session.commit()
+    
+def delete_client_data(user_id):
+    """
+    This function is used by the below delete_user function to delete client specific data. This includes:
+    
+    *any s3 files stored under the given user_id
+    *telehealth booking details, status history
+    *rows in client specific tables
+    """
+    
+    #delete client specific files or images saved in S3 bucket for user_id
+    fh = FileHandling()
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/medical_images')
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/bloodtest')
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/meeting_files')
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/signed_documents')
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/telehealth')
+    fh.delete_from_s3(prefix=f'id{user_id:05d}/client_profile_picture')
     
     #Get a list of all tables in database that have fields: client_user_id & staff_user_id
     # NOTE - Order matters, must delete these tables before those with user_id 
@@ -606,25 +621,95 @@ def delete_user(user_id, requestor_id):
     
     #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
     for table in tableList:
-        tblname = table.table_name
-        #Only delete telehealth bookings when the client is being deleted, keep if it's the practitioner
-        if tblname == 'TelehealthBookings':
-            db.session.execute(f"DELETE FROM \"{tblname}\" WHERE client_user_id={user_id};")
-        else:
-            db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
+        db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE client_user_id={user_id};")
 
     #Get a list of all tables in database that have field: user_id
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
             WHERE column_name='user_id';").fetchall()
+    
 
-    #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+    #delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
     for table in tableList:
-        tblname = table.table_name
         #added data_per_client table due to issues with the testing database
-        if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
-            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(tblname, user_id))
+        if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
+            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+            
+    #only delete client subscription
+    db.session.execute(f"DELETE FROM UserSubscriptions WHERE user_id={user_id} AND is_staff=False")
 
     db.session.commit()
+        
+def delete_user(user_id, requestor_id, delete_type):
+    """
+    This function is used to delete a user and any relevant user date. It is leveraged by the system
+    admin delete user endpoint and (in the future) the task that automatically deletes accounts that have
+    been marked as 'closed' for at least 30 days.
+    
+    Args:
+        user_id (int): int id of the user to be deleted
+        requestor_id (int): id of the user requesting to delete this user
+        staff_delete (str): denotes what type of delete to do. Can be 'client', 'staff', or 'both'.
+    """
+    check_user_existence(user_id, requestor_id)
+    
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+    requester = token_auth.current_user()[0]
+    removal_request = UserRemovalRequests(
+        requester_user_id=requester.user_id, 
+        user_id=user.user_id,
+        removal_type=delete_type)
 
-    #remove user from elastic search indices (must be done after commit)
-    search.delete_from_index(user.user_id)
+    db.session.add(removal_request)
+    db.session.flush()
+
+    if user.is_staff:
+        #cases where the user is either only staff or client and staff
+        
+        #staff users must always retain name, email, modobio_id, and user_id
+        user.phone_number = None
+        if delete_type == 'both':
+            user.deleted = True    
+            delete_client_data()
+            delete_staff_data()
+            
+            #since entire user is being deleted, we can delete the login info
+            db.session.execute(f"DELETE FROM UserLogin WHERE user_id={user_id};")
+            
+            #remove user from elastic search indices (must be done after commit)
+            search.delete_from_index(user_id)
+        elif delete_type == 'client':
+            delete_client_data()
+            user.is_client = False
+        elif delete_type == 'staff':
+            delete_staff_data()
+            if not user.is_client:
+                #user was only staff, so we can delete the login info
+                user.is_staff = False
+                db.session.execute(f"DELETE FROM UserLogin WHERE user_id={user_id};")
+                
+                #remove user from elastic search indices (must be done after commit)
+                search.delete_from_index(user_id)
+        else:
+            raise BadRequest('Invalid delete type.')
+    else:
+        #cases where the user is only a client user
+        if delete_type in ('client', 'both'):
+            user.email = None
+            user.firstname = None
+            user.middlename = None
+            user.lastname = None
+            user.phone_number = None
+            user.deleted = True
+            user.is_client = False
+            delete_client_data()
+            
+            db.session.execute(f"DELETE FROM UserLogin WHERE user_id={user_id};")
+            
+            #remove user from elastic search indices (must be done after commit)
+            search.delete_from_index(user_id)
+        
+    #Send notification email to user being deleted and user requesting deletion
+    #when FLASK_ENV=production
+    if user.email != requester.email:
+        send_email_delete_account(requester.email, user.email)
+    send_email_delete_account(user.email, user.email)
