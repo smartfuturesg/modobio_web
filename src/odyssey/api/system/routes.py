@@ -13,6 +13,7 @@ from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariab
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.misc import delete_user
 
 ns = Namespace('system', description='Endpoints for system admin functions.')
 
@@ -109,4 +110,9 @@ class SystemDeleteUserApi(BaseResource):
         The system admin should specify which portion of the user's account should be deleted by supplying 
         either 'client', 'staff', or 'both' in the delete_type arg
         """
-        return
+        delete_type = request.args.get('delete_type', type=str)
+        if delete_type not in ('client', 'staff', 'both'):
+            raise BadRequest('Invalid delete type specified.')
+        delete_user(user_id, token_auth.current_user()[0].user_id, delete_type)
+        
+        return {'message': f'User with id {user_id} has been removed with a delete_type of {delete_type}.'}           
