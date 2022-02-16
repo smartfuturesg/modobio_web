@@ -473,6 +473,27 @@ class UserSubscriptions(db.Model):
     :type: int, foreign key('LookupSubscriptions.sub_id')
     """
 
+    last_checked_date = db.Column(db.DateTime)
+    """
+    Date the subscription status was last checked with the Apple Store. 
+    
+    :type: datetime
+    """
+
+    apple_original_transaction_id = db.Column(db.String)
+    """
+    Original transaction id used to track all in-app purchases. This id remains the same for each client purchase.
+
+    https://developer.apple.com/documentation/appstoreserverapi/originaltransactionid
+
+    :type: String
+    """
+
+    subscription_type_information = db.relationship("LookupSubscriptions")
+    """
+    Relationship lookup subscriptions
+    """
+
     
 class UserTokensBlacklist(db.Model):
     """ 

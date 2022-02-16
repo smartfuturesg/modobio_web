@@ -1,5 +1,6 @@
 """ Utility functions for the odyssey package. """
 import logging
+from time import mktime
 
 from odyssey.api.telehealth.models import TelehealthBookingStatus
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ import statistics
 import textwrap
 import typing as t
 import uuid
-from datetime import datetime, date, time, timezone
+from datetime import datetime, date, time, timedelta, timezone
 from flask import current_app, request
 import flask.json
 from werkzeug.exceptions import (
