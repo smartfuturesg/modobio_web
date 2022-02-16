@@ -92,7 +92,7 @@ class SystemTelehealthSettingsApi(BaseResource):
         return res
 
 
-@ns.route('/delete-user/')
+@ns.route('/delete-user/<int:user_id>/')
 class SystemDeleteUserApi(BaseResource):
     """
     Endpoint for the system admin to delete a user
