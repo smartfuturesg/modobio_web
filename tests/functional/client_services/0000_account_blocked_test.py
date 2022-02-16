@@ -60,7 +60,7 @@ def test_block_client_account(test_client, client_services):
         headers=test_client.client_auth_header)
 
     assert response.status_code == 401
-    assert response.json['message'].startswith('Your account has been blocked.')
+    assert response.json['message'].startswith('Your client account has been blocked.')
 
 def test_unblock_client_account(test_client, client_services):
     data = {'staff': False}
@@ -121,7 +121,7 @@ def test_block_staff_account(test_client, client_services, not_client_services):
         headers=not_client_services.auth_header)
 
     assert response.status_code == 401
-    assert response.json['message'].startswith('Your account has been blocked.')
+    assert response.json['message'].startswith('Your staff account has been blocked.')
 
 def test_unblock_staff_account(test_client, client_services, not_client_services):
     data = {'staff': True}
