@@ -592,7 +592,7 @@ def delete_staff_data(user_id):
             db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
 
     #only delete staff subscription
-    db.session.execute(f"DELETE FROM UserSubscriptions WHERE user_id={user_id} AND is_staff=True")
+    db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=True")
 
     db.session.commit()
     
@@ -636,7 +636,7 @@ def delete_client_data(user_id):
             db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
             
     #only delete client subscription
-    db.session.execute(f"DELETE FROM UserSubscriptions WHERE user_id={user_id} AND is_staff=False")
+    db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=False")
 
     db.session.commit()
         
@@ -674,7 +674,7 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
             
             #since entire user is being deleted, we can delete the login info
-            db.session.execute(f"DELETE FROM UserLogin WHERE user_id={user_id};")
+            db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
             
             #remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
@@ -686,7 +686,7 @@ def delete_user(user_id, requestor_id, delete_type):
             if not user.is_client:
                 #user was only staff, so we can delete the login info
                 user.is_staff = False
-                db.session.execute(f"DELETE FROM UserLogin WHERE user_id={user_id};")
+                db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
                 
                 #remove user from elastic search indices (must be done after commit)
                 search.delete_from_index(user_id)
@@ -704,7 +704,7 @@ def delete_user(user_id, requestor_id, delete_type):
             user.is_client = False
             delete_client_data(user_id)
             
-            db.session.execute(f"DELETE FROM UserLogin WHERE user_id={user_id};")
+            db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
             
             #remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
