@@ -8,10 +8,11 @@ from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserPe
 from odyssey.api.doctor.models import MedicalImaging
 from tests.functional.user.data import users_to_delete_data
 from tests.functional.doctor.data import doctor_medical_imaging_data
+from tests.functional.client.data import client_profile_picture_data
 from tests.utils import login
 
-def test_account_delete_request(test_client):
-    #Just need two users added to db, one client and one staff/client
+def test_account_delete_client_and_staff(test_client):
+    #Create a new staff user and a new client user
     #1. Create self created client user
     payload = users_to_delete_data['client_user']
     client_user = test_client.post(
@@ -166,3 +167,6 @@ def test_account_delete_request(test_client):
 
     #requester is the staff member created in conftest
     assert removal_request[1].requester_user_id == test_client.staff_id
+
+def test_account_delete_both(test_client):
+    return
