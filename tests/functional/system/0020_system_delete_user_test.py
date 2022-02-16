@@ -99,8 +99,8 @@ def test_account_delete_client_and_staff(test_client):
 
     # 5. Delete staff/client
     deleting_staff_client = test_client.delete(
-        f'/user/{staff_client_id}/',
-        headers=staff_auth_header)
+        f'/system/delete-user/{staff_client_id}/?delete_type=both',
+        headers=test_client.staff_auth_header)
 
     assert deleting_staff_client.status_code == 200
     assert deleting_staff_client.json['message'] == f'User with id {staff_client_id} has been removed'
@@ -143,7 +143,7 @@ def test_account_delete_client_and_staff(test_client):
 
     # 5. Delete client
     deleting_client = test_client.delete(
-        f'/user/{client_id}/',
+        f'/system/delete-user/{client_id}/?delete_type=client',
         headers=test_client.staff_auth_header)
 
     assert deleting_client.status_code == 200
