@@ -306,8 +306,8 @@ class BasicAuth(object):
                 raise Unauthorized
 
         # Staff is accessing client resources without role or resource authorization
-        # TODO: leaving this here for debugging and (enventually) logging
         else:
+            logger.debug(f'Staff user granted access to endpoint without checks: {request.path}')
             return
 
         # authorization checks all end here

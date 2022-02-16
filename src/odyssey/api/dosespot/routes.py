@@ -72,7 +72,7 @@ class DoseSpotPractitionerCreation(BaseResource):
 
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
-    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',))
+    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',), resources=('medications',))
     @responds(schema=DoseSpotPrescribedOutput,status_code=200,api=ns)
     def get(self, user_id):
         """
@@ -92,7 +92,7 @@ class DoseSpotPatientCreation(BaseResource):
 
         return payload
 
-    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))      
+    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',), resources=('medications',))      
     @responds(schema=DoseSpotPrescribeSSO,status_code=201,api=ns)
     def post(self, user_id):
         """
@@ -118,7 +118,7 @@ class DoseSpotPatientCreation(BaseResource):
 
 @ns.route('/notifications/<int:user_id>/')
 class DoseSpotNotificationSSO(BaseResource):
-    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
+    @token_auth.login_required(user_type=('staff_self',),staff_role=('medical_doctor',))
     @responds(schema=DoseSpotPrescribeSSO,status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -203,7 +203,7 @@ class DoseSpotSelectPharmacies(BaseResource):
 
 @ns.route('/pharmacies/<int:user_id>/')
 class DoseSpotPatientPharmacies(BaseResource):
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client','staff'), staff_role=('medical_doctor',))
     def get(self, user_id):
         """
         Retrieve from DoseSpot the pharmacies the Modobio client has selected (at most 3.)
