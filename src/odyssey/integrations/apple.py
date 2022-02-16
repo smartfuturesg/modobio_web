@@ -25,6 +25,7 @@ class AppStore:
 
     def __init__(self):
         self.bundle_id = current_app.config.get('APPLE_APPSTORE_BUNDLE_ID')
+        self.private_api_key = current_app.config.get('APPLE_APPSTORE_API_KEY').replace('\\\n', '\n') # additional '\' added when reading in from env var (\\ in DEV)
         self.private_api_key = current_app.config.get('APPLE_APPSTORE_API_KEY').replace('\\n', '\n') # additional '\' added when reading in from env var
         self.api_key_id = current_app.config.get('APPLE_APPSTORE_API_KEY_ID')
 
