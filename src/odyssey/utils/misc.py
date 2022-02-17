@@ -670,7 +670,8 @@ def delete_user(user_id, requestor_id, delete_type):
         #staff users must always retain name, email, modobio_id, and user_id
         user.phone_number = None
         if delete_type == 'both':
-            user.deleted = True    
+            user.phone_number = None
+            user.deleted = True
             delete_client_data(user_id)
             delete_staff_data(user_id)
             
@@ -686,6 +687,7 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
             if not user.is_client:
                 #user was only staff, so we can delete the login info
+                user.phone_number = None
                 user.is_staff = False
                 db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
                 
