@@ -230,6 +230,7 @@ def care_team(test_client):
         phone_number = '9871237766',
         modobio_id = 'ABC123X7Y8Z9',
         is_staff = False,
+        was_staff = False,
         is_client = True,
         email_verified = True)
 
@@ -246,6 +247,7 @@ def care_team(test_client):
     tm_non_user = User(
         email=NON_USER_TM,
         is_staff=False,
+        was_staff=False,
         is_client=False)
 
     test_client.db.session.add(tm_non_user)

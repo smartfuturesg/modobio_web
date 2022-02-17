@@ -85,74 +85,6 @@ class ApiUser(BaseResource):
 
         return User.query.filter_by(user_id=user_id).one_or_none()
 
-    @token_auth.login_required
-    def delete(self, user_id):
-        #Search for user by user_id in User table
-        check_user_existence(user_id)
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-        requester = token_auth.current_user()[0]
-        removal_request = UserRemovalRequests(
-            requester_user_id=requester.user_id, 
-            user_id=user.user_id)
-
-        db.session.add(removal_request)
-        db.session.flush()
-        
-        #Send notification email to user being deleted and user requesting deletion
-        #when FLASK_ENV=production
-        if user.email != requester.email:
-            send_email_delete_account(requester.email, user.email)
-        send_email_delete_account(user.email, user.email)
-
-        #when user is staff
-        #keep name, email, modobio id, user id in User table
-        #keep lines in tables where user_id is the reporter_id
-        if user.is_client and not user.is_staff:
-            #keep only modobio id, user id in User table
-            user.email = None
-            user.firstname = None
-            user.middlename = None
-            user.lastname = None
-        user.phone_number = None
-        user.deleted = True
-        
-        #delete files or images saved in S3 bucket for user_id
-        fh = FileHandling()
-        fh.delete_from_s3(prefix=f'id{user_id:05d}/')
-        
-        #Get a list of all tables in database that have fields: client_user_id & staff_user_id
-        # NOTE - Order matters, must delete these tables before those with user_id 
-        # to avoid problems while deleting payment methods
-        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-                WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
-        
-        #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
-        for table in tableList:
-            tblname = table.table_name
-            #Only delete telehealth bookings when the client is being deleted, keep if it's the practitioner
-            if tblname == 'TelehealthBookings':
-                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE client_user_id={user_id};")
-            else:
-                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
-
-        #Get a list of all tables in database that have field: user_id
-        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-                WHERE column_name='user_id';").fetchall()
-
-        #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
-        for table in tableList:
-            tblname = table.table_name
-            #added data_per_client table due to issues with the testing database
-            if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
-                db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(tblname, user_id))
-
-        db.session.commit()
-
-        #remove user from elastic search indices (must be done after commit)
-        search.delete_from_index(user.user_id)
-
-        return {'message': f'User with id {user_id} has been removed'}
-
 @ns.route('/staff/')
 class NewStaffUser(BaseResource):
     @token_auth.login_required
@@ -209,6 +141,7 @@ class NewStaffUser(BaseResource):
                 del user_info['password']
                 user_info['is_client'] = False
                 user_info['is_staff'] = True
+                user_info['was_staff'] = True
                 user.update(user_info)
                 
                 user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
@@ -225,6 +158,7 @@ class NewStaffUser(BaseResource):
             else:
                 #user account exists but only the client portion of the account is defined
                 user.is_staff = True
+                user.was_staff = True
                 staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
                 db.session.add(staff_profile)
                 user.update(user_info)
@@ -249,6 +183,7 @@ class NewStaffUser(BaseResource):
             
             user_info["is_client"] = False
             user_info["is_staff"] = True
+            user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables
             user = UserSchema().load(user_info)
@@ -383,6 +318,7 @@ class NewClientUser(BaseResource):
                 del user_info['password']
                 user_info['is_client'] = True
                 user_info['is_staff'] = False
+                user_info['was_staff'] = False
                 user.update(user_info)
                 
                 user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
@@ -419,6 +355,7 @@ class NewClientUser(BaseResource):
             del user_info['password']
             user_info['is_client'] = True
             user_info['is_staff'] = False
+            user_info['was_staff'] = False
             user = UserSchema().load(user_info)
             db.session.add(user)
             db.session.flush()
@@ -716,6 +653,7 @@ class VerifyPortalId(BaseResource):
             db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
+            user.was_staff = True
 
         # mark user email as verified        
         user.email_verified = True

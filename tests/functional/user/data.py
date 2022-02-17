@@ -5,6 +5,7 @@ users_client_new_creation_data = {
     "email": "test_remote_registration@gmail.com",
     "phone_number": "1111111111",
     "is_staff": False,
+    "was_staff": False,
     "is_client": True
 }
 
@@ -97,6 +98,7 @@ users_staff_member_data = {
     "email": "staff_member@modobio.com",
     "phone_number": "1111111113",
     "is_staff": True,
+    "was_staff": True,
     "is_client": False
 }
 
