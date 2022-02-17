@@ -33,7 +33,7 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
 from odyssey.api.user.models import UserRemovalRequests
 from odyssey.api.lookup.models import LookupDrinks
-from odyssey.utils.constants import ALPHANUMERIC
+from odyssey.utils.constants import ALPHANUMERIC, CLIENT_S3_TABLES, STAFF_S3_TABLES
 from odyssey.api.user.models import User, UserTokenHistory
 
 from odyssey.utils.auth import token_auth
@@ -566,7 +566,8 @@ def delete_staff_data(user_id):
     
     #delete client specific files or images saved in S3 bucket for user_id
     fh = FileHandling()
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/staff_profile_picture')
+    for table in STAFF_S3_TABLES:
+        fh.delete_from_s3(prefix=f'id{user_id:05d}/' + table)
     
     #Get a list of all tables in database that have fields: client_user_id & staff_user_id
     # NOTE - Order matters, must delete these tables before those with user_id 
@@ -607,12 +608,8 @@ def delete_client_data(user_id):
     
     #delete client specific files or images saved in S3 bucket for user_id
     fh = FileHandling()
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/medical_images')
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/bloodtest')
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/meeting_files')
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/signed_documents')
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/telehealth')
-    fh.delete_from_s3(prefix=f'id{user_id:05d}/client_profile_picture')
+    for table in CLIENT_S3_TABLES:
+        fh.delete_from_s3(prefix=f'id{user_id:05d}/' + table)
     
     #Get a list of all tables in database that have fields: client_user_id & staff_user_id
     # NOTE - Order matters, must delete these tables before those with user_id 
