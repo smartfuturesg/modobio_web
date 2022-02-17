@@ -176,7 +176,7 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     Relationship to the booking that this payment is associated with.
     """
 
-    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx'))
+    booking_id = db.Column(db.Integer, db.ForeignKey('TelehealthBookings.idx', ondelete='SET NULL'))
     """
     Foreign key to the booking this payment is associated with.
 
