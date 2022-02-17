@@ -943,3 +943,9 @@ FERTILITY_STATUSES = {
         'postmenopausal'
     ]
 }
+
+#List of s3 tables containing client data for use when deleting a client
+CLIENT_S3_TABLES = ['medical_images', 'bloodtest', 'meeting_files', 'signed_documents', 'telehealth', 'client_profile_picture']
+
+#List of s3 tables containing staff data for use when deleting a client
+STAFF_S3_TABLES = ['staff_profile_picture']
