@@ -102,8 +102,7 @@ def test_account_delete_client_and_staff(test_client):
         f'/system/delete-user/{staff_client_id}/?delete_type=both',
         headers=test_client.staff_auth_header)
 
-    assert deleting_staff_client.status_code == 200
-    assert deleting_staff_client.json['message'] == f'User with id {staff_client_id} has been removed'
+    assert deleting_staff_client.status_code == 204
 
     # Check no info for user_id is in staff tables
     tables = test_client.db.session.execute(text(
@@ -146,7 +145,7 @@ def test_account_delete_client_and_staff(test_client):
         f'/system/delete-user/{client_id}/?delete_type=client',
         headers=test_client.staff_auth_header)
 
-    assert deleting_client.status_code == 200
+    assert deleting_client.status_code == 204
 
     # Check only modobioid and userid are in User table
     client_user = User.query.filter_by(user_id=client_id).first()
@@ -162,11 +161,6 @@ def test_account_delete_client_and_staff(test_client):
     removal_request = UserRemovalRequests.query.all()
 
     assert removal_request[0].user_id == staff_client_id
-    assert removal_request[0].requester_user_id == staff_client_id
+    assert removal_request[0].requester_user_id == test_client.staff_id
     assert removal_request[1].user_id == client_id
-
-    #requester is the staff member created in conftest
     assert removal_request[1].requester_user_id == test_client.staff_id
-
-def test_account_delete_both(test_client):
-    return

@@ -654,6 +654,10 @@ def delete_user(user_id, requestor_id, delete_type):
     check_user_existence(user_id, requestor_id)
     
     user = User.query.filter_by(user_id=user_id).one_or_none()
+    
+    #save user email before it is nulled so we can send email after everything is done
+    user_email = user.email
+    
     requester = token_auth.current_user()[0]
     removal_request = UserRemovalRequests(
         requester_user_id=requester.user_id, 
@@ -711,6 +715,6 @@ def delete_user(user_id, requestor_id, delete_type):
         
     #Send notification email to user being deleted and user requesting deletion
     #when FLASK_ENV=production
-    if user.email != requester.email:
-        send_email_delete_account(requester.email, user.email)
-    send_email_delete_account(user.email, user.email)
+    if user_email != requester.email:
+        send_email_delete_account(requester.email, user_email)
+    send_email_delete_account(user_email, user_email)
