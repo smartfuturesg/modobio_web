@@ -114,6 +114,15 @@ class User(db.Model):
     :type: boolean
     """
 
+    was_staff = db.Column(db.Boolean, nullable=False, server_default='false')
+    """
+    Denotes if this user was ever a staff member. This is important to retain necessary staff info 
+    even if a user has deleted their staff account and then later deletes their client account.
+
+    :type: boolean
+    """
+
+
     staff_profile = db.relationship('StaffProfile', uselist=False, back_populates='user_info')
     """
     One-to-One relationship with StaffProfile
@@ -393,6 +402,13 @@ class UserRemovalRequests(db.Model):
     Timestamp of the removal request.
 
     :type: :class:`datetime.datetime`, primary key
+    """
+    
+    removal_type = db.Column(db.String)
+    """
+    Type of removal requested. Can be 'client', 'staff', 'or both.
+
+    :type: str
     """
 
 class UserSubscriptions(db.Model):
