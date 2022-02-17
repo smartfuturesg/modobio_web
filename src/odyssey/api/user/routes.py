@@ -1,5 +1,7 @@
 import logging
 
+from sqlalchemy import text
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -734,8 +736,11 @@ class UserSubscriptionApi(BaseResource):
         """
         check_user_existence(user_id)
         
-        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None, is_staff = True if g.user_type == 'staff' else False).one_or_none()
-        
+        # bring up most recent subscription
+        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id
+                ).filter_by(is_staff = True if g.user_type == 'staff' else False
+                ).order_by(text('idx desc')).first()
+
         new_subscription = None
         renewal_info = None
         if current_subscription.apple_original_transaction_id:
@@ -796,7 +801,9 @@ class UserSubscriptionApi(BaseResource):
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
 
-        prev_sub.update({'end_date': DB_SERVER_TIME})
+        if prev_sub:
+            prev_sub.update({'end_date': DB_SERVER_TIME})
+        
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
             'subscription_type_id': request.parsed_obj.subscription_type_id,
@@ -831,7 +838,10 @@ class UserSubscriptionHistoryApi(BaseResource):
         """
         check_user_existence(user_id)
 
-        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None, is_staff = True if g.user_type == 'staff' else False).one_or_none()
+        # bring up most recent subscription
+        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id
+                ).filter_by(is_staff = True if g.user_type == 'staff' else False
+                ).order_by(text('idx desc')).first()
         
         if current_subscription.apple_original_transaction_id:
             # check subscription with apple, update if necessary
@@ -955,6 +965,7 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
 @ns.route('/email-verification/code/<int:user_id>/')
 @ns.doc(params={'code': 'Email verification code'})
 class UserPendingEmailVerificationsCodeApi(BaseResource):
+    __check_resource__ = False
 
     @responds(status_code=200)
     def post(self, user_id):
