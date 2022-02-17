@@ -32,6 +32,7 @@ def telehealth_clients(test_client):
             email=f'client{i}@example.com',
             phone_number=f'91111111{i}',
             is_staff=False,
+            was_staff=False,
             is_client=True,
             email_verified=True,
             modobio_id = f'KW99TSVWP88{i}')
@@ -61,6 +62,7 @@ def telehealth_staff(test_client):
             email=f'staff{i}@example.com',
             phone_number=f'922222222{i}',
             is_staff=True,
+            was_staff=True,
             is_client=False,
             email_verified=True,
             modobio_id=f'ZW99TSVWP88{i}')
