@@ -156,6 +156,7 @@ class NewStaffUser(BaseResource):
             else:
                 #user account exists but only the client portion of the account is defined
                 user.is_staff = True
+                user.was_staff = True
                 staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
                 db.session.add(staff_profile)
                 user.update(user_info)
@@ -315,6 +316,7 @@ class NewClientUser(BaseResource):
                 del user_info['password']
                 user_info['is_client'] = True
                 user_info['is_staff'] = False
+                user_info['was_staff'] = False
                 user.update(user_info)
                 
                 user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
@@ -351,6 +353,7 @@ class NewClientUser(BaseResource):
             del user_info['password']
             user_info['is_client'] = True
             user_info['is_staff'] = False
+            user_info['was_staff'] = False
             user = UserSchema().load(user_info)
             db.session.add(user)
             db.session.flush()
@@ -648,6 +651,7 @@ class VerifyPortalId(BaseResource):
             db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
+            user.was_staff = True
 
         # mark user email as verified        
         user.email_verified = True
