@@ -111,8 +111,6 @@ class AppStore:
         ------
         UserSubscriptions
         """
-
-
         # end current subscription
         end_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc)
         current_subscription.end_date = end_date

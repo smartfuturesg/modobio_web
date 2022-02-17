@@ -748,19 +748,20 @@ class UserSubscriptionApi(BaseResource):
             transaction_info, renewal_info, status = appstore.latest_transaction(current_subscription.apple_original_transaction_id)
             # check subscription status cases
             # -subscription remains the same -> continue, add last checked date
-            # -subscription changed but is still active -> update the current subscription, create entry for new one
-            # -subscription no longer active (anything but 1) -> update current subscription, make new entry for unsubscribed status
+            # -subscription changed but is still active -> end the current subscription, create entry for new one
+            # -subscription no longer active (anything but 1) -> end current subscription
+            current_subscription.last_checked_date = datetime.utcnow().isoformat()
             if status != 1:
-                # end the subscription
-                end_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
-                current_subscription.end_date = end_date
-                current_subscription.subscription_status = 'unsubscribed'
+                if not current_subscription.end_date:
+                    # end the subscription
+                    end_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
+                    current_subscription.end_date = end_date
+                    current_subscription.subscription_status = 'unsubscribed'
             elif status == 1:
-                # check if subscription type has changed
-                if transaction_info.get('productId') != current_subscription.subscription_type_information.ios_product_id:
+                # if previous subscription had ended or new subscription type is made, make new subscription entry and end current subscription
+                if current_subscription.end_date or transaction_info.get('productId') != current_subscription.subscription_type_information.ios_product_id:
                     new_subscription = appstore.update_user_subscription(current_subscription, transaction_info)
-                else:
-                    current_subscription.last_checked_date = datetime.utcnow().isoformat()
+   
             renewal_info = {'auto_renew_status': True if renewal_info.get('autoRenewStatus') == 1 else False, 'expire_date': datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)}
             db.session.commit()
 
@@ -803,7 +804,7 @@ class UserSubscriptionApi(BaseResource):
             raise BadRequest('Missing original transaction id')
 
         if prev_sub:
-            prev_sub.update({'end_date': DB_SERVER_TIME, 'subscription_status': 'unsubscribed'})
+            prev_sub.update({'end_date': DB_SERVER_TIME, 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
         
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
@@ -850,19 +851,19 @@ class UserSubscriptionHistoryApi(BaseResource):
             transaction_info, _, status = appstore.latest_transaction(current_subscription.apple_original_transaction_id)
             # check subscription status cases
             # -subscription remains the same -> continue, add last checked date
-            # -subscription changed but is still active -> update the current subscription, create entry for new one
-            # -subscription no longer active (anything but 1) -> update current subscription, make new entry for unsubscribed status
+            # -subscription changed but is still active -> end the current subscription, create entry for new one
+            # -subscription no longer active (anything but 1) -> end current subscription
+            current_subscription.last_checked_date = datetime.utcnow().isoformat()
             if status != 1:
-                # end the subscription
-                end_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
-                current_subscription.end_date = end_date
-                current_subscription.subscription_status = 'unsubscribed'
+                if not current_subscription.end_date:
+                    # end the subscription
+                    end_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
+                    current_subscription.end_date = end_date
+                    current_subscription.subscription_status = 'unsubscribed'
             elif status == 1:
                 # check if subscription type has changed
-                if transaction_info.get('productId') != current_subscription.subscription_type_information.ios_product_id:
+                if current_subscription.end_date or transaction_info.get('productId') != current_subscription.subscription_type_information.ios_product_id:
                     appstore.update_user_subscription(current_subscription, transaction_info)
-                else:
-                    current_subscription.last_checked_date = datetime.utcnow().isoformat()
 
             db.session.commit()
 
