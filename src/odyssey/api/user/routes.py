@@ -754,6 +754,7 @@ class UserSubscriptionApi(BaseResource):
                 # end the subscription
                 end_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
                 current_subscription.end_date = end_date
+                current_subscription.subscription_status = 'unsubscribed'
             elif status == 1:
                 # check if subscription type has changed
                 if transaction_info.get('productId') != current_subscription.subscription_type_information.ios_product_id:
@@ -802,7 +803,7 @@ class UserSubscriptionApi(BaseResource):
             raise BadRequest('Missing original transaction id')
 
         if prev_sub:
-            prev_sub.update({'end_date': DB_SERVER_TIME})
+            prev_sub.update({'end_date': DB_SERVER_TIME, 'subscription_status': 'unsubscribed'})
         
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
@@ -855,6 +856,7 @@ class UserSubscriptionHistoryApi(BaseResource):
                 # end the subscription
                 end_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
                 current_subscription.end_date = end_date
+                current_subscription.subscription_status = 'unsubscribed'
             elif status == 1:
                 # check if subscription type has changed
                 if transaction_info.get('productId') != current_subscription.subscription_type_information.ios_product_id:
