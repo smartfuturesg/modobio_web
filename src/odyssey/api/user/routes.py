@@ -139,6 +139,7 @@ class NewStaffUser(BaseResource):
                 del user_info['password']
                 user_info['is_client'] = False
                 user_info['is_staff'] = True
+                user_info['was_staff'] = True
                 user.update(user_info)
                 
                 user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
@@ -179,6 +180,7 @@ class NewStaffUser(BaseResource):
             
             user_info["is_client"] = False
             user_info["is_staff"] = True
+            user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables
             user = UserSchema().load(user_info)

@@ -667,7 +667,7 @@ def delete_user(user_id, requestor_id, delete_type):
     db.session.add(removal_request)
     db.session.flush()
 
-    if user.is_staff:
+    if user.was_staff:
         #cases where the user is either only staff or client and staff
         
         #staff users must always retain name, email, modobio_id, and user_id
@@ -712,7 +712,7 @@ def delete_user(user_id, requestor_id, delete_type):
             
             #remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
-        
+    db.session.commit()
     #Send notification email to user being deleted and user requesting deletion
     #when FLASK_ENV=production
     if user_email != requester.email:
