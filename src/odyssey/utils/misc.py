@@ -667,10 +667,11 @@ def delete_user(user_id, requestor_id, delete_type):
     if user.was_staff:
         #cases where the user is either only staff or client and staff
         
-        #staff users must always retain name, email, modobio_id, and user_id
+        #staff users must always retain name, modobio_id, and user_id
         user.phone_number = None
         if delete_type == 'both':
             user.phone_number = None
+            user.email = None
             user.deleted = True
             user.is_staff = False
             user.is_client = False
@@ -691,6 +692,7 @@ def delete_user(user_id, requestor_id, delete_type):
                 #user was only staff, so we can delete the login info
                 db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
                 user.phone_number = None
+                user.email = None
                 user.deleted = True
                 
                 #remove user from elastic search indices (must be done after commit)
