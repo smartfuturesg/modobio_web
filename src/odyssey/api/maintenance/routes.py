@@ -1,15 +1,23 @@
-import time
-from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.auth import token_auth
-from odyssey.api import api
-from flask import Response, request, current_app
-from datetime import datetime
-from datetime import timedelta
 import json
+import logging
+from sre_constants import SUCCESS
+import time
+import pytz
+import uuid
 import boto3
 from boto3.dynamodb.conditions import Key
-import uuid
-import logging
+from datetime import datetime, timedelta
+from flask import Response, current_app, request
+from flask_accepts import accepts, responds
+from pytest import param
+from odyssey.api import api
+from odyssey.api.maintenance.schemas import MaintenanceBlocksDeleteSchema
+from odyssey.api.maintenance.schemas import MaintenanceBlocksCreateSchema
+from odyssey.utils.auth import token_auth
+from odyssey.utils.base.resources import BaseResource
+from decimal import Decimal
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,29 +25,28 @@ ns = api.namespace(
     'maintenance', description='Endpoints for functions related to maintenance.')
 
 
-@ns.route('/methods/')
-class MaintenanceApi(BaseResource):
-
+class MaintenanceDB():
+    """
+    Functions encompassing DynamoDB functionality.
+    """
     def __init__(self):
         self.dynamodb = boto3.resource('dynamodb')
         self.table = self.dynamodb.Table(
             current_app.config['MAINTENANCE_DYNAMO_TABLE'])
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    def get(self) -> Response:
+    def get(self) -> json:
         response = self.table.scan()
-        items = response['Items']
-        return items
+        return response['Items']
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    def post(self, data) -> Response:
+    def post(self):
         """
         Create a new maintenance block using a given start and end time. Append 
         the current user's ID to the block 
         """
         # Get the current users token auth info
         user, _ = token_auth.current_user()
-        # String casting, boto3 defaults the numbers to Decimals
         user_id = str(user.user_id)
 
         # TODO: Also store version
@@ -49,19 +56,21 @@ class MaintenanceApi(BaseResource):
         response = self.table.put_item(
             Item={
                 'block_id': str(uuid.uuid4()),
-                'start_time': data["start_time"],
-                'end_time': data["end_time"],
+                'start_time': request.json["start_time"],
+                'end_time': request.json["end_time"],
                 'created_by': user_id,
-                'created_at': str(int(time.time())),
+                'created_at': datetime.now().isoformat(),
                 'deleted': "False",
                 'updated_by': None,
-                'updated_at': None
+                'updated_at': None,
+                'comments': request.json['comments']
             }
         )
-        return response
+
+        return response["ResponseMetadata"]["HTTPStatusCode"]
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-    def delete(self, data) -> Response:
+    def delete(self) -> Response:
         """ 
         Set 'Deleted' flag to true for a maintenance block with the given 'start_time'
         """
@@ -69,145 +78,119 @@ class MaintenanceApi(BaseResource):
         user, _ = token_auth.current_user()
         user_id = str(user.user_id)
 
-        filt = data['Filter']
-
-        # Query the table using the global secondary index 'start_timestart_time-end_time-index'
-        block = self.table.query(
-            IndexName="start_time-end_time-index",
-            KeyConditionExpression=Key('start_time').eq(filt['start_time'])
-        )
-
-        # If the query didn't return what we're expecting, return an error
-        # NOTE: Is 404 right here?
-        if block is None or block.get('Items') is None:
-            return Response(response=json.dumps({"Status": "No maintenance block found"}),
-                            status=400,
-                            mimetype='application/json')
-
-        # Get down to the dict of block info
-        # e.g. {'Items': [{'block_id': '1234',...}]} -> {'block_id': '1234',...}
-        block = block['Items'][0]
-
         # Deletion process
         # Query using the primary index 'block_id'
         # Add a 'Deleted' flag to the block along with update info
-        response = self.table.put_item(
-            Item={
-                # Unchanged values from Dynamo
-                'block_id': block['block_id'],
-                'start_time': block['start_time'],
-                'end_time': block['end_time'],
-                'created_by': block['created_by'],
-                'created_at': block['created_at'],
-                # New values
-                'deleted': "True",
-                'updated_by': user_id,
-                'updated_at': str(int(time.time()))
-            }
+        response = self.table.update_item(
+            Key={
+                'block_id': request.json['block_id']
+            },
+            UpdateExpression="set #deleted = :deleted, #updated_by = :updated_by, #updated_at = :updated_at",
+            ExpressionAttributeNames={
+                '#deleted': 'deleted',
+                '#updated_by': 'updated_by',
+                '#updated_at': 'updated_at'
+            },
+            ExpressionAttributeValues={
+                ':deleted': "True",
+                ':updated_by': user_id,
+                ':updated_at': datetime.now().isoformat()
+            },
+            ReturnValues="UPDATED_NEW"
         )
-        return response
 
+        # Return the deleted block attributes
+        return response['Attributes']
 
-@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/')
-class Base(BaseResource):
-    def get(self) -> Response:
-        return Response(response=json.dumps({"Status": "UP"}),
-                        status=200,
-                        mimetype='application/json')
-
-
-@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/list-blocks', methods=['GET'])
-class DynamoRead(BaseResource):
-    def get(self) -> Response:
+    def is_maint_time_allowed() -> bool:
         """
-        Read from the DynamoDB table using data from the request.
-        """
-        # Instantiate the MaintenanceApi class
-        obj1 = MaintenanceApi()
-        # Store the results of the get func in 'response'
-        response = obj1.get()
-        return Response(response=json.dumps(response),
-                        status=200,
-                        mimetype='application/json')
-
-
-@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/schedule-block', methods=['POST'])
-class DynamoWrite(BaseResource):
-    def post(self) -> Response:
-        """
-        Write to the DynamoDB table using data from the request.
-        """
-        data = request.json['Document']
-
-        # If the request doesn't have the relevant info, return an error
-        if data is None or data == {} or 'start_time' not in data:
-            return Response(response=json.dumps({"Error": "Please provide request information"}),
-                            status=400,
-                            mimetype='application/json')
-
-        # Made this a var to shorten the if statement
-        dts = datetime.fromtimestamp
-
-        # Check if the start and end times are allowed
-        if is_maint_time_allowed(dts(int(data['start_time'])), dts(int(data['end_time']))):
-            obj1 = MaintenanceApi(data)
-            response = obj1.post(data)
-            return Response(response=json.dumps(response),
-                            status=200,
-                            mimetype='application/json')
-        # If the times are not allowed, return an error
-        else:
-            return Response(response=json.dumps({"Error": "Maintenance time is not allowed"}),
-                            status=400,
-                            mimetype='application/json')
-
-
-@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
-@ns.route('/delete-block', methods=['DELETE'])
-class DynamoDelete(BaseResource):
-    def delete(self) -> Response:
-        """
-        Add the 'Deleted' flag to a maintenance block with a given 'start_time'
-        """
-        data = request.json
-
-        if data is None or data == {} or 'Filter' not in data:
-            return Response(response=json.dumps({"Error": "Please provide request information"}),
-                            status=400,
-                            mimetype='application/json')
-
-        obj1 = MaintenanceApi(data)
-        response = obj1.delete(data)
-
-        return Response(response=json.dumps(response),
-                        status=200,
-                        mimetype='application/json')
-
-
-def is_maint_time_allowed(start: datetime, end: datetime) -> bool:
-    """
-    Check if the given maintenance time is allowed given Modobio's policies:
+        Check if the given maintenance time is allowed given Modobio's policies:
         - For maintenance between the hours of 6am and 11pm, their must be more 
         than 14 days of notice
         - For maintenance between the hours of 11pm and 6am, their must be more 
         than 2 days of notice 
-    """
-    # Time Deltas
-    short_notice = timedelta(days=2)
-    std_notice = timedelta(days=14)
+        """
+        # Set timezone
+        zone = pytz.timezone(current_app.config['TIMEZONE'])
+        # Get and set relevant times, force timezone info
 
-    # If the start time is later than the end time (e.g. start = 4am, end = 3am)
-    if start > end:
-        return False
+        start = request.json['start_time'].replace(tz=zone)
+        end = request.json['end_time'].replace(tz=zone)
+        now = datetime.now(tz=zone)
 
-    # Business hours
-    if start.hour in range(6, 22) or end.hour in range(6, 22):
-        return True if start > datetime.now() + std_notice else False
-    # Overnight
-    elif (start.hour in range(23, 24) or start.hour in range(0, 5)) and (end.hour in range(23, 24) or end.hour in range(0, 5)):
-        return True if start > datetime.now() + short_notice else False
-    else:
-        return False
+        # Current date but with the time set to the start times of business / overnight
+        business_start = datetime.combine(now, time(hour=6, minute=0, second=0))
+        overnight_start = datetime.combine(now, time(hour=23, minute=0, second=0))
+
+        # Time windows
+        # 6AM-11PM
+        business_hours = range(business_start.hour, business_start+timedelta(hours=17))
+        # 11PM-6AM
+        overnight_hours = range(0, 6) # And 23
+
+        # Time Deltas
+        short_notice = timedelta(days=2)
+        std_notice = timedelta(days=14)
+
+        # If the start time is later than the end time (e.g. start = 4am, end = 3am)
+        if start > end:
+            return False
+
+        # Business hours
+        if start.hour in business_hours or end.hour in business_hours:
+            return True if start > now + std_notice else False
+        # Overnight
+        elif ((start.hour in overnight_hours or start.hour == 23) and (end.hour in overnight_hours or end.hour == 23)): 
+            return True if start > datetime.now() + short_notice else False
+        else:
+            return False
+
+
+@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+@ns.route('/', methods=['GET'])
+class Base(BaseResource):
+    def get(self) -> any:
+        return Response(status=200)
+
+
+@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+@ns.route('/list/', methods=['GET'])
+class DynamoRead(BaseResource):
+    def get(self) -> json:
+        """
+        Read from the DynamoDB table using data from the request.
+        """
+        # Instantiate the MaintenanceDB class
+        obj1 = MaintenanceDB()
+        # Store the results of the get func in 'response'
+        response = obj1.get()
+        return response
+
+
+@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+@ns.route('/schedule/', methods=['POST'])
+@ns.doc(params={'start_time': 'The start time of the block', 'end_time': 'The end time of the block'})
+class DynamoWrite(BaseResource):
+    @accepts(schema=MaintenanceBlocksCreateSchema, api=ns)
+    def post(self) -> Response:
+        """
+        Write to the DynamoDB table using data from the request.
+        """
+        obj1 = MaintenanceDB()
+        response = obj1.post()
+        return response
+
+
+@token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+@ns.route('/delete/', methods=['DELETE'])
+@ns.doc(params={'block_id': 'The block_id of the block to delete'})
+class DynamoDelete(BaseResource):
+    @accepts(schema=MaintenanceBlocksDeleteSchema, api=ns)
+    def delete(self) -> Response:
+        """
+        Add the 'Deleted' flag to a maintenance block with a given 'start_time'
+        """
+        obj1 = MaintenanceDB()
+        response = obj1.delete()
+
+        return response

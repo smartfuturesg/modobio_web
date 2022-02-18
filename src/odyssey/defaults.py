@@ -253,3 +253,6 @@ GOOGLE_RECAPTCHA_SECRET = ""
 
 WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev'
 
+MAINTENANCE_DYNAMO_TABLE='dev_maintenance_v02'
+
+TIMEZONE='America/Phoenix'
