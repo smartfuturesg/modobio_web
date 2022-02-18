@@ -138,7 +138,6 @@ def test_account_delete_client_and_staff(test_client):
     assert staff_user.user_id
     assert staff_user.firstname
     assert staff_user.lastname
-    assert staff_user.email
 
     # 5. Delete client
     deleting_client = test_client.delete(

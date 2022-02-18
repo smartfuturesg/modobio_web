@@ -582,11 +582,11 @@ def delete_staff_data(user_id):
         else:
             db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE staff_user_id={user_id};")
 
-    #Get a list of all tables in database that have field: user_id
+    #Get a list of all staff-specific tables in database that have field: user_id
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-            WHERE column_name='user_id';").fetchall()
+            WHERE column_name='user_id' and (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
 
-    #delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
+    #delete from staff specific tables where user_id is the user to be deleted
     for table in tableList:
         #added data_per_client table due to issues with the testing database
         if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
@@ -621,9 +621,9 @@ def delete_client_data(user_id):
     for table in tableList:
         db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE client_user_id={user_id};")
 
-    #Get a list of all tables in database that have field: user_id
+    #Get a list of all client-specific tables in database that have field: user_id
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-            WHERE column_name='user_id';").fetchall()
+            WHERE column_name='user_id' and NOT (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
     
 
     #delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
@@ -667,11 +667,14 @@ def delete_user(user_id, requestor_id, delete_type):
     if user.was_staff:
         #cases where the user is either only staff or client and staff
         
-        #staff users must always retain name, email, modobio_id, and user_id
+        #staff users must always retain name, modobio_id, and user_id
         user.phone_number = None
         if delete_type == 'both':
             user.phone_number = None
+            user.email = None
             user.deleted = True
+            user.is_staff = False
+            user.is_client = False
             delete_client_data(user_id)
             delete_staff_data(user_id)
             
@@ -687,12 +690,15 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
             if not user.is_client:
                 #user was only staff, so we can delete the login info
-                user.phone_number = None
-                user.is_staff = False
                 db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+                user.phone_number = None
+                user.email = None
+                user.deleted = True
                 
                 #remove user from elastic search indices (must be done after commit)
                 search.delete_from_index(user_id)
+                
+            user.is_staff = False
         else:
             raise BadRequest('Invalid delete type.')
     else:
