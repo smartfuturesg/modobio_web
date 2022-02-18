@@ -672,6 +672,8 @@ def delete_user(user_id, requestor_id, delete_type):
         if delete_type == 'both':
             user.phone_number = None
             user.deleted = True
+            user.is_staff = False
+            user.is_client = False
             delete_client_data(user_id)
             delete_staff_data(user_id)
             
@@ -687,12 +689,14 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
             if not user.is_client:
                 #user was only staff, so we can delete the login info
-                user.phone_number = None
-                user.is_staff = False
                 db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+                user.deleted = True
                 
                 #remove user from elastic search indices (must be done after commit)
                 search.delete_from_index(user_id)
+                
+            user.phone_number = None
+            user.is_staff = False
         else:
             raise BadRequest('Invalid delete type.')
     else:
