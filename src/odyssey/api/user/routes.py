@@ -150,7 +150,7 @@ class NewStaffUser(BaseResource):
                 else:
                     user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
                     db.session.add(user_login)
-                
+                db.session.flush()
                 verify_email = True
             else:
                 #user account exists but only the client portion of the account is defined
