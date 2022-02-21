@@ -721,10 +721,12 @@ class UserSubscriptionApi(BaseResource):
             # Verify subscription through apple
             appstore  = AppStore()
             transaction_info, renewal_info, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
-            if status != 1 or \
-                transaction_info.get('productId') != \
-                LookupSubscriptions.query.filter_by(sub_id = request.parsed_obj.subscription_type_id).one_or_none().ios_product_id:
-                    raise BadRequest('Appstore subscription status/product id does not match request')
+            if status != 1:
+                raise BadRequest('Appstore subscription status does not match request')
+
+            # NOTE: We check the app store and user the subscription type from apple. This potentially overrides request from FE. 
+            request.parsed_obj.subscription_type_id = LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id
+
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
 
