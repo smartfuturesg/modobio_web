@@ -650,6 +650,7 @@ class VerifyPortalId(BaseResource):
 @ns.route('/subscription/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserSubscriptionApi(BaseResource):
+    __check_resource__ = False
 
     @token_auth.login_required(user_type=('staff', 'client'), staff_role=('client_services',))
     @responds(schema=UserSubscriptionsSchema, api=ns, status_code=200)
