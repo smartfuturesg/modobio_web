@@ -317,9 +317,7 @@ class NewClientUser(BaseResource):
                 else:
                     user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
                     db.session.add(user_login)
-                client_info = ClientInfoSchema().load({"user_id": user.user_id})
-                db.session.add(client_info)
-                db.session.flush()
+                
                 verify_email = True
 
             else:
@@ -331,9 +329,6 @@ class NewClientUser(BaseResource):
                 user.update(user_info)
                 #Create client account for existing staff member
                 user.is_client = True
-                client_info = ClientInfoSchema().load({'user_id': user.user_id})
-                
-                db.session.add(client_info)
                 verify_email = False
         else:
 
@@ -350,8 +345,6 @@ class NewClientUser(BaseResource):
             db.session.add(user)
             db.session.flush()
             user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
-            client_info = ClientInfoSchema().load({"user_id": user.user_id})
-            db.session.add(client_info)
             db.session.add(user_login)
 
             verify_email = True
@@ -377,6 +370,9 @@ class NewClientUser(BaseResource):
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
+        client_info = ClientInfoSchema().load({"user_id": user.user_id})
+        db.session.add(client_info)
+        
         # add new client subscription information
         client_sub = UserSubscriptionsSchema().load({
             'subscription_status': 'unsubscribed',
