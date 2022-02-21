@@ -710,7 +710,6 @@ class UserSubscriptionApi(BaseResource):
             check_staff_existence(user_id)
         else:
             check_client_existence(user_id)
-        
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -724,7 +723,7 @@ class UserSubscriptionApi(BaseResource):
             if status != 1:
                 raise BadRequest('Appstore subscription status does not match request')
 
-            # NOTE: We check the app store and user the subscription type from apple. This potentially overrides request from FE. 
+            # NOTE: We check the app store and use the subscription type from apple. This potentially overrides request from FE. 
             request.parsed_obj.subscription_type_id = LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id
 
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:

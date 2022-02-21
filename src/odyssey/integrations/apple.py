@@ -114,6 +114,7 @@ class AppStore:
         # end current subscription
         end_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc)
         current_subscription.end_date = end_date
+        current_subscription.subscription_status = 'unsubscribed'
 
         new_subscription_data = {
             'subscription_status': 'subscribed',
