@@ -150,26 +150,13 @@ class NewStaffUser(BaseResource):
                 else:
                     user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
                     db.session.add(user_login)
-                
-                client_info = ClientInfoSchema().load({"user_id": user.user_id})
-                db.session.add(client_info)
                 db.session.flush()
                 verify_email = True
             else:
                 #user account exists but only the client portion of the account is defined
                 user.is_staff = True
                 user.was_staff = True
-                staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
-                db.session.add(staff_profile)
                 user.update(user_info)
-
-                # add new staff subscription information
-                staff_sub = UserSubscriptionsSchema().load({
-                    'subscription_status': 'subscribed',
-                    'is_staff': True
-                })
-                staff_sub.user_id = user.user_id
-                db.session.add(staff_sub)
 
                 verify_email = False
         else:
@@ -191,17 +178,7 @@ class NewStaffUser(BaseResource):
             db.session.flush()
 
             user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
-            staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
             db.session.add(user_login)
-            db.session.add(staff_profile)
-
-            # add new user subscription information
-            staff_sub = UserSubscriptionsSchema().load({
-                'subscription_status': 'subscribed',
-                'is_staff': True
-            })
-            staff_sub.user_id = user.user_id
-            db.session.add(staff_sub)
 
             verify_email = True
 
@@ -223,6 +200,19 @@ class NewStaffUser(BaseResource):
             # send email to the user
             send_email_verify_email(user, token, code)
         
+        # create subscription entry for new staff user
+        staff_sub = UserSubscriptionsSchema().load({
+                'subscription_status': 'subscribed',
+                'is_staff': True
+            })
+        staff_sub.user_id = user.user_id
+        db.session.add(staff_sub)
+
+        # add staff_profile for user
+        staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
+        db.session.add(staff_profile)
+
+
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
             db.session.add(StaffRolesSchema().load(
@@ -327,8 +317,6 @@ class NewClientUser(BaseResource):
                 else:
                     user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
                     db.session.add(user_login)
-                client_info = ClientInfoSchema().load({"user_id": user.user_id})
-                db.session.add(client_info)
                 db.session.flush()
                 verify_email = True
 
@@ -341,9 +329,6 @@ class NewClientUser(BaseResource):
                 user.update(user_info)
                 #Create client account for existing staff member
                 user.is_client = True
-                client_info = ClientInfoSchema().load({'user_id': user.user_id})
-                
-                db.session.add(client_info)
                 verify_email = False
         else:
 
@@ -360,8 +345,6 @@ class NewClientUser(BaseResource):
             db.session.add(user)
             db.session.flush()
             user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
-            client_info = ClientInfoSchema().load({"user_id": user.user_id})
-            db.session.add(client_info)
             db.session.add(user_login)
 
             verify_email = True
@@ -387,6 +370,9 @@ class NewClientUser(BaseResource):
             #Authenticate newly created client accnt for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
+        client_info = ClientInfoSchema().load({"user_id": user.user_id})
+        db.session.add(client_info)
+        
         # add new client subscription information
         client_sub = UserSubscriptionsSchema().load({
             'subscription_status': 'unsubscribed',
