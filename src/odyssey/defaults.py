@@ -255,4 +255,5 @@ WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev'
 
 MAINTENANCE_DYNAMO_TABLE='dev_maintenance_v02'
 
+# Maintenance timezone, 
 TIMEZONE='America/Phoenix'
