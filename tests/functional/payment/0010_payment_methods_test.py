@@ -5,7 +5,7 @@ from odyssey.api.payment.models import PaymentMethods
 from .data import payment_methods_data, test_booking
 
 def test_payment_methods_post(test_client):
-
+    
     #test with invalid card #, should raise 400
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
@@ -30,7 +30,7 @@ def test_payment_methods_post(test_client):
         headers=test_client.client_auth_header,
         data=dumps(payment_methods_data['normal_data']),
         content_type='application/json')
-
+    
     assert response.status_code == 201
     assert response.json['payment_type'] == 'VISA'
     assert response.json['is_default'] == True

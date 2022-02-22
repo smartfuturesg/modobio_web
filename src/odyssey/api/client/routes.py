@@ -62,6 +62,7 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
+from odyssey.api.user.routes import UserLogoutApi
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.constants import FERTILITY_STATUSES, TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
 from odyssey.utils.message import send_test_email, email_domain_blacklisted
@@ -284,7 +285,7 @@ class Client(BaseResource):
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
-        if not client_data and not user_data:
+        if not client_data or not user_data:
             raise BadRequest(f'Client {user_id} not found.')
 
         #update staff recent clients information
@@ -317,7 +318,7 @@ class Client(BaseResource):
             db.session.refresh(client_data)
         if user_data:
             db.session.refresh(user_data)
-       
+
         client_info_payload = client_data.__dict__
         client_info_payload["primary_goal"] = db.session.query(LookupGoals.goal_name).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
         client_info_payload["primary_macro_goal"] = db.session.query(LookupMacroGoals.goal).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
@@ -983,9 +984,10 @@ class ClientToken(BaseResource):
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
         user, user_login = basic_auth.current_user()
+
         if not user:
             raise Unauthorized
-        
+
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
 
@@ -993,6 +995,12 @@ class ClientToken(BaseResource):
                                         refresh_token=refresh_token,
                                         event='login',
                                         ua_string = request.headers.get('User-Agent')))
+
+        # If a user logs in after closing the account, but within the account
+        # deletion limit, the account will be reopened and not deleted.
+        if user_login.client_account_closed:
+            user_login.client_account_closed = None
+
         db.session.commit()
 
         return {'email': user.email, 
@@ -1012,6 +1020,27 @@ class ClientToken(BaseResource):
         invalidate urrent token. Used to effectively logout a user
         """
         return '', 200
+
+
+@ns.route('/account/close/')
+class ClientCloseAccountEndpoint(BaseResource):
+    """ Close client account. """
+
+    @token_auth.login_required(user_type=('client',))
+    @responds(api=ns, status_code=201)
+    def post(self):
+        """ Close client portion of an account.
+
+        Closing an account means that the account will be deleted after a number
+        of days (initially 30 days). If the client logs in after closing,
+        but before deletion, the account is open again and will not be deleted.
+
+        The client is logged out immediately after closing the account.
+        """
+        user, user_login = token_auth.current_user()
+        user_login.client_account_closed = datetime.now()
+        db.session.commit()
+        UserLogoutApi().post()
 
 
 @ns.route('/clinical-care-team/members/<int:user_id>/')

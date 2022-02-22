@@ -95,19 +95,44 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
     @token_auth.login_required
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema, api=ns, status_code=200)
     def get(self, booking_id):
-        # Get the current user
         current_user, _ = token_auth.current_user()
 
         booking = TelehealthBookings.query.get(booking_id)
 
+        # below are some checks to ensure the call may begin:
+        # - requester must be one of the participants
+        # - the call must be started by the practitioner
+        # - calls cannot begin more than 10 minuted before scheduled time 
+        # - calls may not begin AFTER the scheduled appointment time
         if not booking:
-            return
+            raise BadRequest('no booking found')
 
         # make sure the requester is one of the participants
         if not (current_user.user_id == booking.client_user_id or
                 current_user.user_id == booking.staff_user_id):
             raise Unauthorized('You must be a participant in this booking.')
 
+        # check call timing
+        booking_start_time = datetime.combine(
+            date=booking.target_date_utc,
+            time = LookupBookingTimeIncrements.query.filter_by(idx = booking.booking_window_id_start_time_utc).one_or_none().start_time)
+        current_time_utc = datetime.utcnow()
+        call_start_offset = (booking_start_time - current_time_utc).total_seconds()
+
+        #calculate booking duration
+        increment_data = telehealth_utils.get_booking_increment_data()
+        if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
+            #booking crosses midnight
+            highest_index = increment_data['max_idx'] + 1
+            duration = (highest_index - booking.booking_window_id_start_time + \
+                booking.booking_window_id_end_time) * increment_data['length']
+        else:
+            duration = (booking.booking_window_id_end_time - booking.booking_window_id_start_time + 1) \
+                * increment_data['length']
+        
+        if call_start_offset > 600 or call_start_offset < -60*duration:
+            raise BadRequest('Request to start call occured too soon or after the scheduled call has ended')
+        
         # Create telehealth meeting room entry
         # each telehealth session is given a unique meeting room
         twilio_obj = Twilio()
@@ -117,12 +142,17 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 TelehealthMeetingRooms.booking_id == booking_id,
                 )).scalar()
 
+        # if there is no meeting room, the call has not yet begun. 
+        # only practitioners may initiate a call
         if not meeting_room:
-            meeting_room = TelehealthMeetingRooms(
-                booking_id=booking_id,
-                staff_user_id=booking.staff_user_id,
-                client_user_id=booking.client_user_id)
-            meeting_room.room_name = twilio_obj.generate_meeting_room_name()
+            if current_user.user_id == booking.staff_user_id:
+                meeting_room = TelehealthMeetingRooms(
+                    booking_id=booking_id,
+                    staff_user_id=booking.staff_user_id,
+                    client_user_id=booking.client_user_id)
+                meeting_room.room_name = twilio_obj.generate_meeting_room_name()
+            else:
+                raise BadRequest('Telehealth call may only be initiated by practitioner')
 
         # Create access token for users to access the Twilio API
         # Add grant for video room access using meeting room name just created
@@ -156,16 +186,6 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # schedule celery task to ensure call is completed 10 min after utc end date_time
         booking_start_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_start_time_utc).start_time
         
-        increment_data = telehealth_utils.get_booking_increment_data()
-        #calculate booking duration
-        if booking.booking_window_id_end_time < booking.booking_window_id_start_time:
-            #booking crosses midnight
-            highest_index = increment_data['max_idx'] + 1
-            duration = (highest_index - booking.booking_window_id_start_time + \
-                booking.booking_window_id_end_time) * increment_data['length']
-        else:
-            duration = (booking.booking_window_id_end_time - booking.booking_window_id_start_time + 1) \
-                * increment_data['length']
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
         if not current_app.config['TESTING']:
@@ -787,12 +807,7 @@ class TelehealthBookingsApi(BaseResource):
                     cancel_telehealth_appointment(booking, reason="Practitioner Cancellation", refund=True)
                 else:
                     cancel_telehealth_appointment(booking, refund=False)                
-                ##### WHEEL #####
-                #elif current_user.user_id == booking.client_user_id:
-                #    if booking.external_booking_id:
-                #        # cancel appointment on wheel system if the staff memebr is a wheel practitioner
-                #       wheel = Wheel()
-                #       wheel.cancel_booking(booking.external_booking_id)
+
 
         return 201
 
@@ -1241,7 +1256,13 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                         'consult_rate': booking.consult_rate,
                         'charged': booking.charged
                     })
-                            
+            
+        else:
+            #all availability is being removed, so all bookings are conflicts
+            time_inc = LookupBookingTimeIncrements.query.all()
+            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()
+            for conflict in conflicts:
+                    conflict.start_time_utc = time_inc[conflict.booking_window_id_start_time_utc-1].start_time
         db.session.commit()
         return {'conflicts': conflicts}
 

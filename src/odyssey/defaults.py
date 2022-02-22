@@ -208,11 +208,17 @@ Celery's new config system.
 """
 
 # InstaMed Settings
+INSTAMED_MERCHANT_ID = ''
+"""InstaMed Merchant ID."""
+
 INSTAMED_API_KEY = ''
 """ InstaMed API access key ID number. """
 
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
+
+INSTAMED_MERCHANT_ID = ''
+""" InstaMed API Merchant ID."""
 
 # Dosespot Settings
 DOSESPOT_API_KEY = ''
@@ -253,3 +259,15 @@ GOOGLE_RECAPTCHA_SECRET = ""
 
 WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev'
 
+# Apple app store 
+APPLE_APPSTORE_API_KEY = ''
+
+APPLE_APPSTORE_API_KEY_ID = 'C9PC58MRPT'
+"""Identifier for the API key"""
+
+APPLE_APPSTORE_ISSUER_ID = 'a81919e2-a4c0-4611-b8d0-7b260a6fdd62'
+"""ID from appstore conenct account"""
+
+APPLE_APPSTORE_BUNDLE_ID = 'com.modobio.ModoBioClient'
+
+APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'

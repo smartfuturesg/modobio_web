@@ -270,11 +270,11 @@ def verify_availability(client_user_id, staff_user_id, utc_start_idx, utc_end_id
     client_bookings = TelehealthBookings.query.filter(
             TelehealthBookings.client_user_id==client_user_id,
             TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
-            TelehealthBookings.status!='Cancelled').all()
+            TelehealthBookings.status!='Canceled').all()
     staff_bookings = TelehealthBookings.query.filter(
         TelehealthBookings.staff_user_id==staff_user_id,
         TelehealthBookings.target_date_utc==target_start_datetime_utc.date(),
-        TelehealthBookings.status!='Cancelled').all()
+        TelehealthBookings.status!='Canceled').all()
 
     # This checks if the input slots have already been taken.
     # using utc times to remain consistent 

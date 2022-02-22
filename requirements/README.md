@@ -26,6 +26,7 @@ Keep a list of dependencies here with date and reason why we need it. This will 
  -------------------------------|------------|------------------------------------------------
 | boto3                         | 2020-05-19 | Amazon AWS SDK                                 |
 | celery                        | 2021-04-30 | Concurrent task server                         |
+| cryptography                  | 2022-02-02 | Signing JWTs with ECDSA for Apple Store API    |
 | elasticsearch                 | 2021-02-25 | Full text search                               |
 | Flask                         | 2020-03-16 | Main WSGI server                               |
 | flask-accepts                 | 2020-07-27 | Simplifies use of flask-restx decorators       |

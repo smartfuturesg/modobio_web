@@ -163,7 +163,9 @@ def create_app():
         app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
         if not app.config['TESTING']:
             with app.app_context():
-                app.elasticsearch.indices.delete('_all')
+                # action.destructive_requires_namesetting defaults to true in v8,
+                # which disallows use of wildcards or _all.
+                app.elasticsearch.indices.delete(index='clients,staff', ignore_unavailable=True)
                 from odyssey.utils import search
                 try:
                     search.build_ES_indices()

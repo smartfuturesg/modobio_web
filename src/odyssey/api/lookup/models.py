@@ -556,6 +556,12 @@ class LookupSubscriptions(BaseModel):
     :type: string
     """
 
+    
+    user_subscriptions = db.relationship("UserSubscriptions", back_populates = 'subscription_type_information', uselist = False )
+    """
+    Relationship UserSubscriptions
+    """
+
 class LookupNotifications(BaseModel):
     """ Static list of notifications types that a user can receive. """
 
