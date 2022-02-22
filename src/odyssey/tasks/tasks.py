@@ -427,3 +427,7 @@ def store_telehealth_transcript(booking_id: int):
         return payload
     
     return
+
+@celery.task()
+def test_task():
+    logger.info("Celery test task succeeded")
