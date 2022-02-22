@@ -1,4 +1,3 @@
-from bdb import Breakpoint
 import logging
 logger = logging.getLogger(__name__)
 
@@ -9,7 +8,7 @@ from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
-from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencies
+from odyssey.api.lookup.models import LookupCurrencies
 from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
 from odyssey.utils.auth import token_auth
