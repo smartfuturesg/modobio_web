@@ -8,7 +8,7 @@ from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
-from odyssey.api.lookup.models import LookupCountriesOfOperations, LookupCurrencies
+from odyssey.api.lookup.models import LookupCurrencies
 from odyssey.api.system.models import SystemTelehealthSessionCosts, SystemVariables
 from odyssey.api.system.schemas import SystemTelehealthSettingsSchema
 from odyssey.utils.auth import token_auth
@@ -116,3 +116,16 @@ class SystemDeleteUserApi(BaseResource):
         delete_user(user_id, token_auth.current_user()[0].user_id, delete_type)
         
         return {'message': f'User with id {user_id} has been removed with a delete_type of {delete_type}.'}           
+
+
+@ns.route('/celery/test/')
+class SystemDeleteUserApi(BaseResource):
+    """Send a test task """
+    @token_auth.login_required
+    def get(self):
+        from odyssey.tasks.tasks import test_task
+        test_task.delay()
+
+        test_task.apply_async(countdown=5)
+
+        return 200
