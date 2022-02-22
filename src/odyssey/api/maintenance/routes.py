@@ -111,7 +111,7 @@ class MaintenanceDB():
         than 2 days of notice 
         """
         # Set timezone
-        zone = pytz.timezone(current_app.config['TIMEZONE'])
+        zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
         # Get and set relevant times, force timezone info
 
         start = request.json['start_time'].replace(tz=zone)

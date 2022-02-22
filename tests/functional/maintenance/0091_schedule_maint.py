@@ -19,7 +19,7 @@ def test_schedule(test_client):
     """
     Schedule a test maintenan=ce block (1 month out)
     """
-    zone = pytz.timezone(current_app.config['TIMEZONE'])
+    zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
     start = (datetime.now(tz=zone) + timedelta(days=30)).isoformat()
     end = (datetime.now(tz=zone) + timedelta(days=30, hours=1)).isoformat()
 

@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 class MaintenanceBlocksCreateSchema(Schema):
     # Must be DateTime objects in the future
     start_time = fields.DateTime(format="iso", required=True, validate=lambda x: x > datetime.now(
-        tz=pytz.timezone(current_app.config['TIMEZONE'])))
+        tz=pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])))
     end_time = fields.DateTime(format="iso", required=True, validate=lambda x: x > datetime.now(
-        tz=pytz.timezone(current_app.config['TIMEZONE'])))
+        tz=pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])))
     comments = fields.String()
 
 
