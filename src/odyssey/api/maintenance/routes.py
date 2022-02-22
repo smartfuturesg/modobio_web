@@ -120,19 +120,22 @@ class MaintenanceDB():
 
         # Current date but with the time set to the start times of business / overnight
         business_start = datetime.combine(now, time(hour=6, minute=0, second=0))
+        # If you use the same logic as business hours, it checks for a range(23, 6) which is not what we want
+        # Probably simpler
         overnight_start = datetime.combine(now, time(hour=23, minute=0, second=0))
 
         # Time windows
-        # 6AM-11PM
+        # 6AM-10:59PM
         business_hours = range(business_start.hour, business_start+timedelta(hours=17))
-        # 11PM-6AM
-        overnight_hours = range(0, 6) # And 23
+        # 11PM-5:59AM
+        overnight_hours = range(6)
+        overnight_hours.append(23)
 
         # Time Deltas
         short_notice = timedelta(days=2)
         std_notice = timedelta(days=14)
 
-        # If the start time is later than the end time (e.g. start = 4am, end = 3am)
+        # If the start datetime is later than the end datetime (e.g. start = 4am, end = 3am)
         if start > end:
             return False
 
@@ -140,7 +143,7 @@ class MaintenanceDB():
         if start.hour in business_hours or end.hour in business_hours:
             return True if start > now + std_notice else False
         # Overnight
-        elif ((start.hour in overnight_hours or start.hour == 23) and (end.hour in overnight_hours or end.hour == 23)): 
+        elif start.hour in overnight_hours and end.hour in overnight_hours: 
             return True if start > datetime.now() + short_notice else False
         else:
             return False
