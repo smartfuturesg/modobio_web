@@ -283,6 +283,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
             practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
             for block in time_blocks:
                 _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                
+                #if the user has a staff + client account, it may be possible for their staff account
+                #to appear as an option when attempting to book a meeting as a client
+                #to prevent this, we check if the logged in user's id is in the list of practitioners and remove it
+                if token_auth.current_user()[0].user_id in _practitioner_ids:
+                    _practitioner_ids.remove(token_auth.current_user()[0].user_id)
+                    
                 if _practitioner_ids:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
                     available_times_with_practitioners[block] = {
@@ -578,7 +585,10 @@ class TelehealthBookingsApi(BaseResource):
         if not staff_user_id:
             raise BadRequest('Missing practitioner ID.')    
         # Check staff existence
-        self.check_user(staff_user_id, user_type='staff')    
+        self.check_user(staff_user_id, user_type='staff')
+        
+        if client_user_id == staff_user_id:
+            raise BadRequest('Staff user id cannot be the same as client user id.')
         
         # make sure the requester is one of the participants
         if not (current_user.user_id == client_user_id or
