@@ -286,8 +286,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 
                 #if the user has a staff + client account, it may be possible for their staff account
                 #to appear as an option when attempting to book a meeting as a client
-                #to prevent this, we check if the logged in user's id is in the list of practitioners and remove it
-                if token_auth.current_user()[0].user_id in _practitioner_ids:
+                #to prevent this, we check if the given user id is in the list of practitioners and remove it
+                if user_id in _practitioner_ids:
                     _practitioner_ids.remove(token_auth.current_user()[0].user_id)
                     
                 if _practitioner_ids:
