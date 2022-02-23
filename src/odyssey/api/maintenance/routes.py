@@ -1,6 +1,5 @@
 import json
 import logging
-from sre_constants import SUCCESS
 import time
 import pytz
 import uuid
@@ -8,14 +7,12 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from datetime import datetime, timedelta
 from flask import Response, current_app, request
-from flask_accepts import accepts, responds
-from pytest import param
+from flask_accepts import accepts
 from odyssey.api import api
 from odyssey.api.maintenance.schemas import MaintenanceBlocksDeleteSchema
 from odyssey.api.maintenance.schemas import MaintenanceBlocksCreateSchema
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from decimal import Decimal
 
 
 logger = logging.getLogger(__name__)
@@ -172,7 +169,7 @@ class DynamoRead(BaseResource):
 
 @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
 @ns.route('/schedule/', methods=['POST'])
-@ns.doc(params={'start_time': 'The start time of the block', 'end_time': 'The end time of the block'})
+@ns.doc(params={'start_time': 'The start time of the block', 'end_time': 'The end time of the block', 'comments': 'Details about the maintenance (e.g. version it applies to, new features, etc.)'})
 class DynamoWrite(BaseResource):
     @accepts(schema=MaintenanceBlocksCreateSchema, api=ns)
     def post(self) -> Response:
@@ -191,7 +188,7 @@ class DynamoDelete(BaseResource):
     @accepts(schema=MaintenanceBlocksDeleteSchema, api=ns)
     def delete(self) -> Response:
         """
-        Add the 'Deleted' flag to a maintenance block with a given 'start_time'
+        Add the 'deleted' flag to a maintenance block with a given 'block_id'
         """
         obj1 = MaintenanceDB()
         response = obj1.delete()
