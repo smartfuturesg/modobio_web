@@ -226,6 +226,8 @@ class Instamed:
             response.raise_for_status()
         except:
             #transaction was not successful, cancel booking
+            logger.error(f'Instamed returned the following error: {response.text} when' \
+                f' attempting to charge booking with id {booking.idx}.')
             cancel_telehealth_appointment(booking)
             return
 

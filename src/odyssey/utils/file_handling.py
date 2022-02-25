@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import os
 import boto3
 import mimetypes
@@ -26,6 +29,8 @@ class FileHandling:
             self.s3_prefix += '/'
         self.s3_bucket = self.s3_resource.Bucket(self.s3_bucket_name)
         mimetypes.add_type('audio/mp4', '.m4a')
+        logger.info(f'S3 bucket name: {self.s3_bucket_name}')
+        logger.info(f'S3 bucket prefix: {self.s3_prefix}')
 
     def validate_file_type(self, file: FileStorage, allowed_file_types: tuple) -> str:
         # validate the file is allowed
@@ -95,7 +100,10 @@ class FileHandling:
         # Just saves, nothing returned
         if file.content_type != 'application/pdf':
             file.seek(0)
-        self.s3_bucket.put_object(Key=self.s3_prefix + filename, Body=file.stream)
+        try:
+            self.s3_bucket.put_object(Key=self.s3_prefix + filename, Body=file.stream)
+        except Exception as e:
+            logger.error(f'S3 error when saving file: {e}')
 
 
     def get_presigned_urls(self, prefix: str) -> dict:
@@ -121,5 +129,7 @@ class FileHandling:
         return url
 
     def delete_from_s3(self, prefix):
-        self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
-
+        try:
+            self.s3_bucket.objects.filter(Prefix=self.s3_prefix + prefix).delete()
+        except Exception as e:
+            logger.error(f'S3 error when deleting file: {e}')
