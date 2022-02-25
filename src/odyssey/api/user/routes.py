@@ -714,9 +714,9 @@ class UserSubscriptionApi(BaseResource):
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
         #      in this table as an 'unsubscribed' subscription
-        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
-        
-        if request.parsed_obj.apple_original_transaction_id and request.parsed_obj.subscription_status == 'subscribed':
+        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=request.parsed_obj.is_staff).order_by(UserSubscriptions.idx.desc()).first()
+
+        if request.parsed_obj.apple_original_transaction_id:
             # Verify subscription through apple
             appstore  = AppStore()
             transaction_info, renewal_info, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
@@ -725,13 +725,25 @@ class UserSubscriptionApi(BaseResource):
 
             # NOTE: We check the app store and use the subscription type from apple. This potentially overrides request from FE. 
             request.parsed_obj.subscription_type_id = LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id
-
+        
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
 
-        if prev_sub:
-            prev_sub.update({'end_date': DB_SERVER_TIME, 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
-        
+        # Update the previous subscription if necessary
+        if prev_sub.subscription_status == 'subscribed':
+            if prev_sub.expire_date:
+                if prev_sub.expire_date < datetime.utcnow():
+                    prev_sub.update({'end_date': DB_SERVER_TIME, 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
+                else:
+                    # new subscription entry not required return the current subscription
+                    prev_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
+                    prev_sub.update({'last_checked_date': datetime.utcnow().isoformat()})
+                    db.session.commit()
+                    return prev_sub
+        else:
+            prev_sub.update({'end_date': DB_SERVER_TIME, 'last_checked_date': datetime.utcnow().isoformat()})
+    
+        # make a new subscription entry
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
             'subscription_type_id': request.parsed_obj.subscription_type_id,
@@ -742,13 +754,14 @@ class UserSubscriptionApi(BaseResource):
 
         new_sub = UserSubscriptionsSchema().load(new_data)
         new_sub.user_id = user_id
-        
-        db.session.add(new_sub)
-        db.session.commit()
 
         if request.parsed_obj.apple_original_transaction_id:
             new_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
-            new_sub.expire_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc)
+            new_sub.expire_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None)
+            new_sub.start_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None)
+        
+        db.session.add(new_sub)
+        db.session.commit()
 
         return new_sub
 
