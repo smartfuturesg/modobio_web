@@ -125,7 +125,7 @@ class MaintenanceApi(BaseResource):
 
         # If it was successful, return the newly created block
         # Returning data since it allows the user to see the block_id that was created without having to perform a subsequent scan request on the database
-        return data
+        return {"block_id": data["block_id"]}
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @accepts(schema=MaintenanceBlocksDeleteSchema, api=ns)
