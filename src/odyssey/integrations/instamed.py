@@ -231,7 +231,7 @@ class Instamed:
             cancel_telehealth_appointment(booking)
             #create notification for failed payment
             start_time = LookupBookingTimeIncrements.query \
-                .filter_by(idx=booking.booking_window_is_start_time).one_or_none().start_time
+                .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
             payment_last_four = PaymentMethods.query \
                 .filter_by(idx=booking.payment_method_id).one_or_none().number
             create_notification(booking.client_user_id,
@@ -284,7 +284,7 @@ class Instamed:
 
                 #create notification for failed payment
                 start_time = LookupBookingTimeIncrements.query \
-                    .filter_by(idx=booking.booking_window_is_start_time).one_or_none().start_time
+                    .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
                 payment_last_four = PaymentMethods.query \
                     .filter_by(idx=booking.payment_method_id).one_or_none().number
                 create_notification(booking.client_user_id,
@@ -322,7 +322,7 @@ class Instamed:
             
             #create notification for failed payment
             start_time = LookupBookingTimeIncrements.query \
-                .filter_by(idx=booking.booking_window_is_start_time).one_or_none().start_time
+                .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
             payment_last_four = PaymentMethods.query \
                 .filter_by(idx=booking.payment_method_id).one_or_none().number
             create_notification(booking.client_user_id,
