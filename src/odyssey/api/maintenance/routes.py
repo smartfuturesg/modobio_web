@@ -5,12 +5,13 @@ import uuid
 import boto3
 from datetime import datetime, timedelta, time
 from flask import current_app, request
-from flask_accepts import accepts
+from flask_accepts import accepts, responds
 from odyssey.api import api
 from odyssey.api.maintenance.schemas import MaintenanceBlocksDeleteSchema
 from odyssey.api.maintenance.schemas import MaintenanceBlocksCreateSchema
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
+from werkzeug.exceptions import BadRequest
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,6 @@ class MaintenanceApi(BaseResource):
         # Set timezone
         zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
         # Get and set relevant times, force timezone info
-
         start = datetime.fromisoformat(request.json['start_time']).replace(tzinfo=zone)
         end = datetime.fromisoformat(request.json['end_time']).replace(tzinfo=zone)
         now = datetime.now(tz=zone)
@@ -80,6 +80,9 @@ class MaintenanceApi(BaseResource):
         table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
 
         response = table.scan()
+        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
+
         return response['Items']
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
@@ -91,7 +94,7 @@ class MaintenanceApi(BaseResource):
         'start_time' and 'end_time' must be iso formatted, naive datetimes. e.g. 2022-04-23T13:30:00.000000
         """
         if not self.is_maint_time_allowed():
-            raise Exception('Maintenance time is not allowed')
+            raise BadRequest('Maintenance time is not allowed')
 
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
@@ -118,12 +121,15 @@ class MaintenanceApi(BaseResource):
         response = table.put_item(Item=data)
         # If the request to DynamoDB wasn't successful, print out the entire response to help diagnose
         if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            return response["ResponseMetadata"]
+            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
+
         # If it was successful, return the newly created block
-        else: return data
+        # Returning data since it allows the user to see the block_id that was created without having to perform a subsequent scan request on the database
+        return data
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @accepts(schema=MaintenanceBlocksDeleteSchema, api=ns)
+    @responds(status_code=200, api=ns)
     def delete(self):
         """
         Set 'deleted' flag to 'True' for a maintenance block with the given 'block_id'.
@@ -159,5 +165,6 @@ class MaintenanceApi(BaseResource):
             ReturnValues="UPDATED_NEW"
         )
 
-        # Return the deleted block attributes
-        return response['Attributes']
+        # If the request to DynamoDB wasn't successful, print out the entire response to help diagnose
+        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
