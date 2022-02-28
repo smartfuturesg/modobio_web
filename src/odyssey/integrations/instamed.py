@@ -13,7 +13,7 @@ from werkzeug.exceptions import BadRequest
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents
-from odyssey.utils.telehealth import update_booking_status_history
+from odyssey.utils.misc import create_notification
 
 from odyssey import db
 
@@ -229,6 +229,20 @@ class Instamed:
             logger.error(f'Instamed returned the following error: {response.text} when' \
                 f' attempting to charge booking with id {booking.idx}.')
             cancel_telehealth_appointment(booking)
+            #create notification for failed payment
+            start_time = LookupBookingTimeIncrements.query \
+                .filter_by(idx=booking.booking_window_is_start_time).one_or_none().start_time
+            payment_last_four = PaymentMethods.query \
+                .filter_by(idx=booking.payment_method_id).one_or_none().number
+            create_notification(booking.client_user_id,
+                                3, 
+                                5, 
+                                "Your Card Could Not Be Charged", 
+                                f"Your telehealth appointment with {booking.practitioner.firstname} \
+                                {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
+                                unfortunately, had to be canceled as your payment method ending in \
+                                {payment_last_four} could not be charged. Please revise your payment \
+                                method or perhaps speak with your bank to resolve the issue")
             return
 
         #convert response data to json (python dict)
@@ -268,6 +282,21 @@ class Instamed:
 
                 cancel_telehealth_appointment(booking)
 
+                #create notification for failed payment
+                start_time = LookupBookingTimeIncrements.query \
+                    .filter_by(idx=booking.booking_window_is_start_time).one_or_none().start_time
+                payment_last_four = PaymentMethods.query \
+                    .filter_by(idx=booking.payment_method_id).one_or_none().number
+                create_notification(booking.client_user_id,
+                                    3, 
+                                    5, 
+                                    "Your Card Could Not Be Charged", 
+                                    f"Your telehealth appointment with {booking.practitioner.firstname} \
+                                    {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
+                                    unfortunately, had to be canceled as your payment method ending in \
+                                    {payment_last_four} could not be charged. Please revise your payment \
+                                    method or perhaps speak with your bank to resolve the issue")
+            
                 #add void data to history and commit
                 history.voided = True
                 history.void_reason = "Partial payment received"
@@ -290,6 +319,22 @@ class Instamed:
         else:
             #transaction was declined, cancel appointment
             cancel_telehealth_appointment(booking)
+            
+            #create notification for failed payment
+            start_time = LookupBookingTimeIncrements.query \
+                .filter_by(idx=booking.booking_window_is_start_time).one_or_none().start_time
+            payment_last_four = PaymentMethods.query \
+                .filter_by(idx=booking.payment_method_id).one_or_none().number
+            create_notification(booking.client_user_id,
+                                3, 
+                                5, 
+                                "Your Card Could Not Be Charged", 
+                                f"Your telehealth appointment with {booking.practitioner.firstname} \
+                                {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
+                                unfortunately, had to be canceled as your payment method ending in \
+                                {payment_last_four} could not be charged. Please revise your payment \
+                                method or perhaps speak with your bank to resolve the issue")
+
         return response_data
 
 def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'):

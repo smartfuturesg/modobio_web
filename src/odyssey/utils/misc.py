@@ -33,6 +33,7 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
 from odyssey.api.user.models import UserRemovalRequests
 from odyssey.api.lookup.models import LookupDrinks
+from odyssey.api.notifications.models import Notifications
 from odyssey.utils.constants import ALPHANUMERIC, CLIENT_S3_TABLES, STAFF_S3_TABLES
 from odyssey.api.user.models import User, UserTokenHistory
 
@@ -723,3 +724,18 @@ def delete_user(user_id, requestor_id, delete_type):
     if user_email != requester.email:
         send_email_delete_account(requester.email, user_email)
     send_email_delete_account(user_email, user_email)
+
+
+def create_notification(user_id, severity_id, notification_type_id, title, content):
+    #used to create a notification
+    
+    notification = Notifications(*{
+        'user_id': user_id,
+        'title': title,
+        'content': content,
+        'severity': severity_id,
+        'notification_type_id': notification_type_id
+    })
+    
+    db.session.add(notification)
+    db.session.commit()
