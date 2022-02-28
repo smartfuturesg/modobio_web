@@ -708,8 +708,8 @@ class UserSubscriptionApi(BaseResource):
         # Update the previous subscription if necessary
         if prev_sub.subscription_status == 'subscribed':
             if prev_sub.expire_date:
-                if prev_sub.expire_date < datetime.utcnow():
-                    prev_sub.update({'end_date': DB_SERVER_TIME, 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
+                if prev_sub.expire_date < datetime.utcnow() or transaction_info.get('productId') != prev_sub.subscription_type_information.ios_product_id:
+                    prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
                 else:
                     # new subscription entry not required return the current subscription
                     prev_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
@@ -717,7 +717,7 @@ class UserSubscriptionApi(BaseResource):
                     db.session.commit()
                     return prev_sub
         else:
-            prev_sub.update({'last_checked_date': datetime.utcnow().isoformat()})
+            prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
     
         # make a new subscription entry
         new_data = {
