@@ -1,7 +1,7 @@
 """Add expire date to UserSubscriptions
 
 Revision ID: deaa74c44845
-Revises: 25d16cc47dfb
+Revises: 83eabfbaecf4
 Create Date: 2022-02-25 04:24:48.414232
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'deaa74c44845'
-down_revision = '25d16cc47dfb'
+down_revision = '83eabfbaecf4'
 branch_labels = None
 depends_on = None
 
