@@ -94,7 +94,7 @@ class PaymentMethodsApi(BaseResource):
         payment = PaymentMethods.query.filter_by(idx=idx, user_id=user_id).one_or_none()
         if payment:
             #check if payment is involved with future bookings
-            bookings = TelehealthBookings.query.filter(payment_method_id=payment.idx, charged=False).all()
+            bookings = TelehealthBookings.query.filter_by(payment_method_id=payment.idx, charged=False).all()
             
             #check if booking has been cancelled or completed. If so, remove it from the list.
             for booking in bookings:
