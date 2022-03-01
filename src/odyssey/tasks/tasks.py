@@ -1,10 +1,14 @@
 import logging
+from odyssey.api.user.schemas import UserSubscriptionsSchema
+
+from odyssey.integrations.apple import AppStore
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Any, Dict
 from PIL import Image
+from pytz import utc
 
 from bson import ObjectId
 from flask_migrate import current_app
@@ -14,14 +18,14 @@ from werkzeug.datastructures import FileStorage
 
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupSubscriptions
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
-from odyssey.utils.file_handling import FileHandling
 from odyssey.integrations.twilio import Twilio
+from odyssey.tasks.base import BaseTaskWithRetry
+from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.telehealth import complete_booking
 
 @celery.task()
@@ -427,6 +431,63 @@ def store_telehealth_transcript(booking_id: int):
         return payload
     
     return
+
+@celery.task(base=BaseTaskWithRetry)
+def update_apple_subscription(user_id:int):
+    """
+    Updates the user's subscription by checking the subscription status with apple. 
+    This task is intended to be scheduled right after the current subscription expires.
+
+    Params
+    ------
+    user_id: int
+        used to grab the latest subscription
+    
+    """
+    
+    prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
+
+    # only update the most recent subscription
+    if prev_sub.apple_original_transaction_id:
+        # if the subscription does not need to be updated, skip update
+        if datetime.utcnow() < prev_sub.expire_date:
+            return 
+        # grab the latest subscription details from Apple
+        appstore  = AppStore()
+        transaction_info, renewal_info, status = appstore.latest_transaction(prev_sub.apple_original_transaction_id)
+
+        prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 
+                        'subscription_status': 'unsubscribed', 
+                        'last_checked_date': datetime.utcnow().isoformat()})
+        if status != 1:
+            # create entry for unsubscribed status
+            new_sub_data = {
+                'subscription_status': 'unsubscribed',
+                'is_staff': False,
+                'start_date':  datetime.utcnow().isoformat()
+            }
+        else:
+            new_sub_data = {
+                'subscription_status': 'subscribed',
+                'subscription_type_id': LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id,
+                'is_staff': False,
+                'apple_original_transaction_id': prev_sub.apple_original_transaction_id,
+                'last_checked_date': datetime.utcnow().isoformat(),
+                'expire_date': datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None).isoformat(),
+                'start_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None).isoformat()
+            }
+        
+        new_sub = UserSubscriptionsSchema().load(new_sub_data)
+        new_sub.user_id = user_id
+
+        db.session.add(new_sub)
+
+        db.session.commit()
+
+        logger.info(f"Apple subscription updated for user_id: {user_id}")
+
+    return
+
 
 @celery.task()
 def test_task():

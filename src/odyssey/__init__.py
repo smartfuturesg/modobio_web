@@ -197,7 +197,7 @@ def init_celery(app=None):
     """
 
     app = app or create_app()
-
+    app.app_context().push()
     celery.conf.update(app.config)
 
     class ContextTask(celery.Task):

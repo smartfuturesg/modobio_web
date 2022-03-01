@@ -30,7 +30,6 @@ from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
     UserLogin,
-    UserRemovalRequests,
     UserSubscriptions,
     UserTokenHistory,
     UserTokensBlacklist,
