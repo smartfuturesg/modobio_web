@@ -729,11 +729,11 @@ def delete_user(user_id, requestor_id, delete_type):
 def create_notification(user_id, severity_id, notification_type_id, title, content):
     #used to create a notification
     
-    notification = Notifications(*{
+    notification = Notifications(**{
         'user_id': user_id,
         'title': title,
         'content': content,
-        'severity': severity_id,
+        'severity_id': severity_id,
         'notification_type_id': notification_type_id
     })
     
