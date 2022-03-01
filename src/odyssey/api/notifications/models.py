@@ -71,11 +71,18 @@ class Notifications(db.Model):
     :type: str
     """
 
-    action = db.Column(db.String(512))
+    severity = db.relationship('LookupNotificationSeverity')
     """
-    The result of clicking this notification - either hyperlink or code function
+    Severity of this notification. Relationship with LookupNotificationSeverity holding text and color data.
 
-    :type: str
+    :type: :class:`LookupNotificationSeverity <odyssey.api.lookup.models.LookupNotificationSeverity>` instance
+    """
+    
+    severity_id = db.Column(db.Integer, db.ForeignKey('LookupNotificationSeverity.idx', ondelete='SET NULL'))
+    """
+    Id of the severity type of this notification.
+    
+    :type: int, foreign key(LookupNotificationSeverity.idx)
     """
 
     time_to_live = db.Column(db.Integer)
