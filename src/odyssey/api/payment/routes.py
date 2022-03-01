@@ -99,7 +99,7 @@ class PaymentMethodsApi(BaseResource):
             #check if booking has been cancelled or completed. If so, remove it from the list.
             for booking in bookings:
                 for status in booking.status_history:
-                    if status in ('Cancelled', 'Canceled', 'Completed'):
+                    if status.status in ('Cancelled', 'Canceled', 'Completed'):
                         bookings.remove(booking)
                         continue
                         
