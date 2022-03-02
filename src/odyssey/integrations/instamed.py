@@ -66,6 +66,10 @@ class Instamed:
                 "AccountNumber": modobio_id
             }
         }
+        
+        logger.info("Sending Instamed payment plan request")
+        logger.info(f"Headers: {self.request_header}")
+        logger.info(f"Body: {request_data}")
 
         response = requests.post(self.url_base + '/payment/paymentplan',
                                 headers=self.request_header,
@@ -75,6 +79,8 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
+            logger.error(f'Instamed returned the following error: {response.text} when' \
+                f' adding a payment method.')
             raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         return response.json()
@@ -114,6 +120,10 @@ class Instamed:
                 "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
             }
         }
+        
+        logger.info("Sending Instamed refund request")
+        logger.info(f"Headers: {self.request_header}")
+        logger.info(f"Body: {request_data}")
 
         response = requests.post(self.url_base + '/payment/refund-simple',
                         headers=self.request_header,
@@ -172,6 +182,10 @@ class Instamed:
             }
         }
 
+        logger.info("Sending Instamed void request")
+        logger.info(f"Headers: {self.request_header}")
+        logger.info(f"Body: {request_data}")
+
         response = requests.post(self.url_base + '/payment/void',
                         headers=self.request_header,
                         json=request_data)
@@ -216,6 +230,10 @@ class Instamed:
                 "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
             }
         }
+        
+        logger.info("Sending Instamed sale request")
+        logger.info(f"Headers: {self.request_header}")
+        logger.info(f"Body: {request_data}")
 
         response = requests.post(self.url_base + '/payment/sale',
                         headers=self.request_header,
@@ -268,6 +286,10 @@ class Instamed:
                     'transaction_amount': booking.consult_rate,
                     'booking_id': booking.idx
                 })
+                
+                logger.info("Sending Instamed void request")
+                logger.info(f"Headers: {self.request_header}")
+                logger.info(f"Body: {request_data}")
 
                 response = requests.post(self.url_base + '/payment/void',
                                 headers=self.request_header,
