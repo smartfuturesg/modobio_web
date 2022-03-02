@@ -406,20 +406,22 @@ def store_telehealth_transcript(booking_id: int):
                 media_id+=1
 
     payload = {
+        'created_at': datetime.utcnow().isoformat(),
         'booking_id': booking.idx,
         'transcript': transcript
     }
-
     # insert transcript into mongo db under the telehealth_transcripts collection
     if current_app.config['MONGO_URI']:
         _id = mongo.db.telehealth_transcripts.insert(payload)
+        logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
     else:
-        logger.warning('mongo db has not been setup. Twilio conversation will not be deleted.')
+        logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')
         _id = None  
 
     # delete the conversation from twilio if the transcript was successfully stored on mongo
     if _id:
         twilio.delete_conversation(booking.chat_room.conversation_sid)
+        logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
         booking.chat_room.conversation_sid = None
         
     # delete the conversation sid entry, add transcript_object_id from mongodb
@@ -459,6 +461,9 @@ def update_apple_subscription(user_id:int):
         prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 
                         'subscription_status': 'unsubscribed', 
                         'last_checked_date': datetime.utcnow().isoformat()})
+        logger.info(f"****\n Status: {status} **** user_id: {user_id}  ************************************************************************************")
+        if status not in (1,2):
+            logger.info(f"****\n Status: {status} **** user_id: {user_id}  ************************************************************************************")
         if status != 1:
             # create entry for unsubscribed status
             new_sub_data = {

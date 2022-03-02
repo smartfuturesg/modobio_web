@@ -389,7 +389,7 @@ def deploy_subscription_update_tasks(interval:int):
     for subscription in subscriptions:
         logger.info(f"Deploying task to update subscription for user_id: {subscription.user_id}")
         # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
-        task_eta = subscription.expire_date + timedelta(seconds=0.5) 
+        task_eta = subscription.expire_date 
         if task_eta < datetime.utcnow():
             update_apple_subscription.delay(subscription.user_id)
         else:
@@ -454,7 +454,7 @@ celery.conf.beat_schedule = {
     },
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
-        'args': (5,),
-        'schedule': crontab(minute='*/5')
+        'args': (60,),
+        'schedule': crontab(minute='*/60')
     }
 }
