@@ -461,10 +461,7 @@ def update_apple_subscription(user_id:int):
         prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 
                         'subscription_status': 'unsubscribed', 
                         'last_checked_date': datetime.utcnow().isoformat()})
-        logger.info(f"****\n Status: {status} **** user_id: {user_id}  ************************************************************************************")
-        if status not in (1,2):
-            logger.info(f"****\n Status: {status} **** user_id: {user_id}  ************************************************************************************")
-        if status != 1:
+        if status not in (1, 3, 4):
             # create entry for unsubscribed status
             new_sub_data = {
                 'subscription_status': 'unsubscribed',
