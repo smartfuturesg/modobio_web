@@ -68,8 +68,6 @@ class Instamed:
         }
         
         logger.info("Sending Instamed payment plan request")
-        logger.info(f"Headers: {self.request_header}")
-        logger.info(f"Body: {request_data}")
 
         response = requests.post(self.url_base + '/payment/paymentplan',
                                 headers=self.request_header,
@@ -122,8 +120,6 @@ class Instamed:
         }
         
         logger.info("Sending Instamed refund request")
-        logger.info(f"Headers: {self.request_header}")
-        logger.info(f"Body: {request_data}")
 
         response = requests.post(self.url_base + '/payment/refund-simple',
                         headers=self.request_header,
@@ -183,8 +179,6 @@ class Instamed:
         }
 
         logger.info("Sending Instamed void request")
-        logger.info(f"Headers: {self.request_header}")
-        logger.info(f"Body: {request_data}")
 
         response = requests.post(self.url_base + '/payment/void',
                         headers=self.request_header,
@@ -232,8 +226,6 @@ class Instamed:
         }
         
         logger.info("Sending Instamed sale request")
-        logger.info(f"Headers: {self.request_header}")
-        logger.info(f"Body: {request_data}")
 
         response = requests.post(self.url_base + '/payment/sale',
                         headers=self.request_header,
@@ -288,8 +280,6 @@ class Instamed:
                 })
                 
                 logger.info("Sending Instamed void request")
-                logger.info(f"Headers: {self.request_header}")
-                logger.info(f"Body: {request_data}")
 
                 response = requests.post(self.url_base + '/payment/void',
                                 headers=self.request_header,
