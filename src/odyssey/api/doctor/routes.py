@@ -1350,11 +1350,11 @@ class MedBloodTestImage(BaseResource):
         if not ('image' in request.files and request.files['image']):  
             raise BadRequest('No file selected.')
 
-        # add all files to S3
+        # add file to S3
         # format: id{user_id:05d}/bloodtest/id{test_id:05d}/hex_token.img_extension
         fh = FileHandling()
         img = request.files['image']
-        
+
         # validate file size - safe threashold (MAX = 10 mb)
         fh.validate_file_size(img, BLOOD_TEST_IMAGE_MAX_SIZE)
         
@@ -1378,7 +1378,22 @@ class MedBloodTestImage(BaseResource):
         test.image_path = s3key
         db.session.commit()
         
-        return test
+        test_code = MedicalBloodTestResults.query.filter_by(test_id=test.test_id).one_or_none().modobio_test_code
+        reporter = User.query.filter_by(user_id=test.reporter_id)
+        
+        res = {
+            'test_id': test.test_id,
+            'user_id': test.user_id,
+            'date': test.date,
+            'modobio_test_code': test_code,
+            'notes': test.notes,
+            'reporter_firstname': reporter.firstname,
+            'reporter_lastname': reporter.lastname,
+            'reporter_id': test.reporter_id,
+            'image': fh.get_presigned_url(test.image_path) 
+        }
+        
+        return res
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
@@ -1423,7 +1438,9 @@ class MedBloodTestAll(BaseResource):
             data.update(
                 {'reporter_firstname': test[1],
                  'reporter_lastname': test[2],
-                 'image': image_path})
+                 'image': image_path,
+                 'modobio_test_code': MedicalBloodTestResults.query.filter_by(test_id=test.test_id).one_or_none().modobio_test_code
+                 })
             response.append(data)
         payload = {}
         payload['items'] = response
