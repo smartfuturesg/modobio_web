@@ -79,6 +79,8 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
+            logger.error(f'Instamed returned the following error: {response.text} when' \
+                f' adding a payment method.')
             raise BadRequest(f'Instamed returned the following error: {response.text}')
 
         return response.json()
