@@ -1846,12 +1846,10 @@ class TelehealthTranscripts(Resource):
             }
         return payload
    
-    @token_auth.login_required(dev_only=True)
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(api=ns, status_code=200)
     def patch(self, booking_id):
         """
-        **DEV only**
-
         Store booking transcripts for the booking_id supplied.
         This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
         that is fired off following the completion of a booking. 
