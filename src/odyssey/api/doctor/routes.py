@@ -1202,7 +1202,8 @@ class MedBloodTest(BaseResource):
                 client_age = today.year - client.dob.year
                 if today.month < client.dob.month or (today.month == client.dob.month and today.day < client.dob.day):
                     client_age -= 1
-                
+
+                new_ranges = []
                 for range in ranges:
                     #prune ranges by age if relevant
                     age_min = range.age_min
@@ -1211,35 +1212,37 @@ class MedBloodTest(BaseResource):
                     age_max = range.age_max
                     if age_max == None:
                         age_max = 999
-                    if not (age_min <= client_age <= age_max):
+                    if  age_min <= client_age <= age_max:
                         #if client's age does not apply to this range's age range, remove it from the remaining ranges
-                        ranges.remove(range)
+                        new_ranges.append(range)
+                ranges = new_ranges
                 result['age'] = client_age
-                
+
                 #first prune by client biological sex if relevant
+                new_ranges = ranges
                 for range in ranges:
                     if range.biological_sex_male != None:
                         if range.biological_sex_male == client.biological_sex_male:
                             if not client.biological_sex_male:
                                 #prune by menstrual cycle if relevant
                                 client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
-                                if client_cycle == 'unknown' and range.menstrual_cycle != None:
-                                    ranges.remove(range)
-                                elif client_cycle != range.menstrual_cycle:
-                                    ranges.remove(range)
-                                else:
+                                if (client_cycle == 'unknown' and range.menstrual_cycle == None) or \
+                                   (client_cycle == range.menstrual_cycle):
+                                    new_ranges.append(range)
                                     result['menstrual_cycle'] = client_cycle
-
+                ranges = new_ranges
 
                 client_races = []
                 for race in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
                     client_races.append(race.race_id)
         
                 #prune remaining ranges by races relevant to the client
+                new_ranges = ranges
                 for range in ranges:
-                    if range.race_id != None and range.race_id not in client_races:
-                        ranges.remove(range)
-                
+                    if range.race_id == None or range.race_id in client_races:
+                        new_ranges.append(range)
+                ranges = new_ranges
+
                 if len(ranges) > 1:
                     """
                     If more than 1 range remains at this point, it is because the client has multiple
