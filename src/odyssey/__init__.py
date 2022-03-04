@@ -17,6 +17,7 @@ from flask_migrate import Migrate
 from flask_pymongo import PyMongo 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.orm import class_mapper
 from werkzeug.exceptions import HTTPException
 
 # Temporary fix
@@ -183,11 +184,36 @@ def create_app():
     return app
 
 
-# Custom method to easily update db table from a dict
-def _update(self, form: dict):
-    for k, v in form.items():
-        setattr(self, k, v)
+# TODO: this should be moved to utils/base/models.py once all models derive
+# from our custom base model.
+def _update(self, other):
+    """ Update a table instance.
 
+    Update a table instance with values from a dict or another instance
+    of the same table class. Values not present in :attr:`other` are not
+    updated.
+
+    Parameters
+    ----------
+    other : dict or :class:`sqlalchemy.Table` instance
+        The dict or table instance providing the values to be updated.
+
+    Raises
+    ------
+    :class:`sqlalchemy.orm.exc.UnmappedClassError`
+        Raised if :attr:`other` is neither a dict nor a :class:`sqlalchemy.Table` instance.
+    """
+    if isinstance(other, dict):
+        for k, v in other.items():
+            setattr(self, k, v)
+    else:
+        # This raises UnmappedClassError if other is not a table instance.
+        # Don't catch error, but let if fail.
+        class_mapper(type(other))
+        for k, v in other.__dict__.items():
+            if k.startswith('_sa'):
+                continue
+            setattr(self, k, v)
 
 def init_celery(app=None):
     """
