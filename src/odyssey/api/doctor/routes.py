@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
-from sqlalchemy import select
+from sqlalchemy import select, and_, or_
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
@@ -1192,58 +1192,78 @@ class MedBloodTest(BaseResource):
         
         #for each provided result, evaluate the results based on the range that most applies to the client
         for result in results:
-            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_code=result['modobio_test_code']).all()
+            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_code=result['modobio_test_code'])
             client = User.query.filter_by(user_id=user_id).one_or_none()
-                
-            if len(ranges) > 1:
+            
+            if ranges.count() > 1:
                 
                 #calculate client age
                 today = date.today()
                 client_age = today.year - client.dob.year
                 if today.month < client.dob.month or (today.month == client.dob.month and today.day < client.dob.day):
                     client_age -= 1
+                    
+                #filter results by client age
+                age_ranges = ranges.filter(and_(
+                    or_(LookupBloodTestRanges.age_min <= client_age, LookupBloodTestRanges.age_min == None),
+                    or_(LookupBloodTestRanges.age_max >= client_age, LookupBloodTestRanges.age_max == None)))
 
-                new_ranges = []
-                for range in ranges:
-                    #prune ranges by age if relevant
-                    age_min = range.age_min
-                    if age_min == None:
-                        age_min = 0
-                    age_max = range.age_max
-                    if age_max == None:
-                        age_max = 999
-                    if  age_min <= client_age <= age_max:
-                        #if client's age does not apply to this range's age range, remove it from the remaining ranges
-                        new_ranges.append(range)
-                ranges = new_ranges
-                result['age'] = client_age
+                #if age filtering narrowed results, record client age as a determining factor
+                if ranges.count() > age_ranges.count():
+                    result['age'] = client_age
 
-                #first prune by client biological sex if relevant
-                new_ranges = ranges
-                for range in ranges:
-                    if range.biological_sex_male != None:
-                        if range.biological_sex_male == client.biological_sex_male:
-                            if not client.biological_sex_male:
-                                #prune by menstrual cycle if relevant
-                                client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
-                                if (client_cycle == 'unknown' and range.menstrual_cycle == None) or \
-                                   (client_cycle == range.menstrual_cycle):
-                                    new_ranges.append(range)
-                                    result['menstrual_cycle'] = client_cycle
-                ranges = new_ranges
+                #filter results by client biological sex
+                sex_ranges = age_ranges.filter(
+                    or_(LookupBloodTestRanges.biological_sex_male == client.biological_sex_male,
+                        LookupBloodTestRanges.biological_sex_male == None))
+                
+                #if biological sex filtering narrowed results, record client sex as a determining factor
+                if age_ranges.count() > sex_ranges.count():
+                    result['biological_sex_male'] = client.biological_sex_male
+
+                #filter results by menstrual cycle if client bioligocal sex is female
+                if not client.biological_sex_male:
+                    client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
+                    relevant_cycles = []
+                    for cycle in sex_ranges:
+                        if cycle.menstrual_cycle:
+                            relevant_cycles.append(cycle.menstrual_cycle)
+                    if client_cycle in relevant_cycles:
+                        cycle_ranges = sex_ranges.filter_by(menstrual_cycle=client_cycle)
+                    else:
+                        #if client cycle is not in one of the cycles that explicitely matters to this test
+                        #type, only ranges with None as the menstrual cycle can be considered
+                        cycle_ranges = sex_ranges.filter_by(menstrual_cycle=None)
+                else:
+                    cycle_ranges = sex_ranges
+                        
+                #if menstrual cycle filtering narrowed results, record client cycle as a determining factor
+                if sex_ranges.count() > cycle_ranges.count():
+                    result['menstrual_cycle'] = client_cycle
 
                 client_races = []
                 for race in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
                     client_races.append(race.race_id)
         
                 #prune remaining ranges by races relevant to the client
-                new_ranges = ranges
-                for range in ranges:
-                    if range.race_id == None or range.race_id in client_races:
-                        new_ranges.append(range)
-                ranges = new_ranges
+                applicable_race = False
+                race_ranges = []
+                for range in cycle_ranges.all():
+                    if range.race_id:
+                        if range.race_id in client_races:
+                            applicable_race = True
+                            race_ranges.append(range)
+                            
+                if not applicable_race:
+                    #if the range had no races that were applicable to the client, only consider ranges
+                    #with None as the race
+                    race_ranges = cycle_ranges.filter_by(race_id=None).all()
+                    
+                #if race filtering narrowed results, record client race as a determining factor
+                if cycle_ranges.count() > len(race_ranges):
+                    result['race'] =','.join(races)
 
-                if len(ranges) > 1:
+                if len(race_ranges) > 1:
                     """
                     If more than 1 range remains at this point, it is because the client has multiple
                     races that can impact the evaluation. In this case, we want the 'most conservative'
@@ -1253,7 +1273,7 @@ class MedBloodTest(BaseResource):
                     critical_min = ref_min = 0
                     critical_max = ref_max = float("inf")
                     races = []
-                    for range in ranges:
+                    for range in race_ranges:
                         if range.critical_min != None and range.critical_min > critical_min:
                             critical_min = range.critical_min
                         if range.ref_min != None and range.ref_min > ref_min:
@@ -1274,10 +1294,10 @@ class MedBloodTest(BaseResource):
                     }
                 else:
                     eval_values = {
-                    'critical_min': ranges[0].critical_min,
-                    'ref_min': ranges[0].ref_min,
-                    'ref_max': ranges[0].ref_max,
-                    'critical_max': ranges[0].critical_max
+                    'critical_min': race_ranges[0].critical_min,
+                    'ref_min': race_ranges[0].ref_min,
+                    'ref_max': race_ranges[0].ref_max,
+                    'critical_max': race_ranges[0].critical_max
                 }
             else:
                 eval_values = {
