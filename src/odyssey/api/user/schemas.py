@@ -135,12 +135,12 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscriptions
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('start_date', 'end_date', 'user_id', )
+        dump_only = ('end_date', 'user_id', )
         load_only = ('apple_original_transaction_id',)
 
     subscription_type_id = fields.Integer(required=False, validate=validate.OneOf([2,3]))
     subscription_status = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free trial', 'sponsored']))
-    expire_date = fields.DateTime(dump_only =True, metadata={'(UTC) description': 'date this subscription purchase ends. Overall subscription may persist if it is renewed.'})
+    expire_date = fields.DateTime(metadata={'(UTC) description': 'date this subscription purchase ends. Overall subscription may persist if it is renewed.'})
     auto_renew_status = fields.Boolean(dump_only = True, metadata={'description': 'If True the subscription is set to be renewed automatically.'})
     apple_original_transaction_id = fields.String(load_only=True, missing=None)
     subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)

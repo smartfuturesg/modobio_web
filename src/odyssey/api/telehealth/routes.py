@@ -1269,7 +1269,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         else:
             #all availability is being removed, so all bookings are conflicts
             time_inc = LookupBookingTimeIncrements.query.all()
-            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()
+            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(or_(
+                TelehealthBookings.status == 'Accepted',
+                TelehealthBookings.status == 'Pending'
+                )).all()
             for conflict in conflicts:
                     conflict.start_time_utc = time_inc[conflict.booking_window_id_start_time_utc-1].start_time
         db.session.commit()
@@ -1843,12 +1846,10 @@ class TelehealthTranscripts(Resource):
             }
         return payload
    
-    @token_auth.login_required(dev_only=True)
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(api=ns, status_code=200)
     def patch(self, booking_id):
         """
-        **DEV only**
-
         Store booking transcripts for the booking_id supplied.
         This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
         that is fired off following the completion of a booking. 

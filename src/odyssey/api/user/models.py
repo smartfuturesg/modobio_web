@@ -498,6 +498,14 @@ class UserSubscriptions(db.Model):
     :type: String
     """
 
+    expire_date = db.Column(db.DateTime)
+    """
+    Date and time the subscription will expire. If subscription is renewed, there will be a new entry for the 
+    subscription renewal.
+
+    :type: datetime
+    """
+
     subscription_type_information = db.relationship("LookupSubscriptions")
     """
     Relationship lookup subscriptions
