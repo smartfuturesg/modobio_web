@@ -1,4 +1,7 @@
 import logging
+
+from sqlalchemy import text
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -6,12 +9,14 @@ import jwt
 import requests
 import json
 
-from flask import current_app, request, redirect
+from flask import current_app, g, request, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
+from pytz import utc
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequest, Unauthorized
+
 
 from odyssey import db
 from odyssey.api.client.models import ClientFertility
@@ -47,6 +52,7 @@ from odyssey.api.user.schemas import (
     NewStaffUserSchema,
     UserLegalDocsSchema
 )
+from odyssey.integrations.apple import AppStore
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
@@ -237,6 +243,7 @@ class NewStaffUser(BaseResource):
                 del user_info['password']
                 user_info['is_client'] = False
                 user_info['is_staff'] = True
+                user_info['was_staff'] = True
                 user.update(user_info)
                 
                 user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
@@ -245,25 +252,13 @@ class NewStaffUser(BaseResource):
                 else:
                     user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
                     db.session.add(user_login)
-                
-                client_info = ClientInfoSchema().load({"user_id": user.user_id})
-                db.session.add(client_info)
                 db.session.flush()
                 verify_email = True
             else:
                 #user account exists but only the client portion of the account is defined
                 user.is_staff = True
-                staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
-                db.session.add(staff_profile)
+                user.was_staff = True
                 user.update(user_info)
-
-                # add new staff subscription information
-                staff_sub = UserSubscriptionsSchema().load({
-                    'subscription_status': 'subscribed',
-                    'is_staff': True
-                })
-                staff_sub.user_id = user.user_id
-                db.session.add(staff_sub)
 
                 verify_email = False
         else:
@@ -277,6 +272,7 @@ class NewStaffUser(BaseResource):
             
             user_info["is_client"] = False
             user_info["is_staff"] = True
+            user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables
             user = UserSchema().load(user_info)
@@ -284,23 +280,26 @@ class NewStaffUser(BaseResource):
             db.session.flush()
 
             user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
-            staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
             db.session.add(user_login)
-            db.session.add(staff_profile)
-
-            # add new user subscription information
-            staff_sub = UserSubscriptionsSchema().load({
-                'subscription_status': 'subscribed',
-                'is_staff': True
-            })
-            staff_sub.user_id = user.user_id
-            db.session.add(staff_sub)
 
             verify_email = True
 
         if verify_email:
             email_verification_data = EmailVerification().begin_email_verification(user)
         
+        # create subscription entry for new staff user
+        staff_sub = UserSubscriptionsSchema().load({
+                'subscription_status': 'subscribed',
+                'is_staff': True
+            })
+        staff_sub.user_id = user.user_id
+        db.session.add(staff_sub)
+
+        # add staff_profile for user
+        staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
+        db.session.add(staff_profile)
+
+
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
             db.session.add(StaffRolesSchema().load(
@@ -396,6 +395,7 @@ class NewClientUser(BaseResource):
                 del user_info['password']
                 user_info['is_client'] = True
                 user_info['is_staff'] = False
+                user_info['was_staff'] = False
                 user.update(user_info)
                 
                 user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)).scalars().one_or_none()
@@ -404,8 +404,6 @@ class NewClientUser(BaseResource):
                 else:
                     user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
                     db.session.add(user_login)
-                client_info = ClientInfoSchema().load({"user_id": user.user_id})
-                db.session.add(client_info)
                 db.session.flush()
                 verify_email = True
 
@@ -418,9 +416,6 @@ class NewClientUser(BaseResource):
                 user.update(user_info)
                 #Create client account for existing staff member
                 user.is_client = True
-                client_info = ClientInfoSchema().load({'user_id': user.user_id})
-                
-                db.session.add(client_info)
                 verify_email = False
         else:
             # user account does not yet exist for this email
@@ -431,12 +426,11 @@ class NewClientUser(BaseResource):
             del user_info['password']
             user_info['is_client'] = True
             user_info['is_staff'] = False
+            user_info['was_staff'] = False
             user = UserSchema().load(user_info)
             db.session.add(user)
             db.session.flush()
             user_login = UserLoginSchema().load({"user_id": user.user_id, "password": password})
-            client_info = ClientInfoSchema().load({"user_id": user.user_id})
-            db.session.add(client_info)
             db.session.add(user_login)
 
             verify_email = True
@@ -447,6 +441,9 @@ class NewClientUser(BaseResource):
             # #Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
+        client_info = ClientInfoSchema().load({"user_id": user.user_id})
+        db.session.add(client_info)
+        
         # add new client subscription information
         client_sub = UserSubscriptionsSchema().load({
             'subscription_status': 'unsubscribed',
@@ -712,6 +709,7 @@ class VerifyPortalId(BaseResource):
             db.session.add(client_info)
         elif decoded_token['utype'] == 'staff':
             user.is_staff = True
+            user.was_staff = True
 
         # mark user email as verified        
         user.email_verified = True
@@ -722,17 +720,29 @@ class VerifyPortalId(BaseResource):
 @ns.route('/subscription/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserSubscriptionApi(BaseResource):
+    __check_resource__ = False
 
-    @token_auth.login_required
-    @responds(schema=UserSubscriptionsSchema(many=True), api=ns, status_code=200)
+    @token_auth.login_required(user_type=('staff', 'client'), staff_role=('client_services',))
+    @responds(schema=UserSubscriptionsSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns active subscription information for the given user_id. 
         Because a user_id can belong to both a client and staff account, both active subscriptions will be returned in this case.
         """
         check_user_existence(user_id)
+        
+        # bring up most recent subscription
+        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
 
-        return UserSubscriptions.query.filter_by(user_id=user_id).filter_by(end_date=None).all()
+        renewal_info = None
+        if current_subscription.apple_original_transaction_id and current_subscription.subscription_status == 'subscribed':
+            appstore  = AppStore()
+            _, renewal_info, _ = appstore.latest_transaction(current_subscription.apple_original_transaction_id)
+
+        if renewal_info:
+            current_subscription.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
+
+        return current_subscription
 
     @token_auth.login_required
     @accepts(schema=UserSubscriptionsSchema, api=ns)
@@ -746,34 +756,61 @@ class UserSubscriptionApi(BaseResource):
             check_staff_existence(user_id)
         else:
             check_client_existence(user_id)
-        
-        new_sub_info =  LookupSubscriptions.query.filter_by(sub_id=request.parsed_obj.subscription_type_id).one_or_none()
-            
-        if not new_sub_info:
-            raise BadRequest('Invalid subscription type.')
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
         #      in this table as an 'unsubscribed' subscription
-        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, end_date=None, is_staff=request.parsed_obj.is_staff).one_or_none()
-        prev_sub.update({'end_date': DB_SERVER_TIME})
+        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
 
+        if request.parsed_obj.apple_original_transaction_id:
+            # Verify subscription through apple
+            appstore  = AppStore()
+            transaction_info, renewal_info, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
+            if status != 1:
+                raise BadRequest('Appstore subscription status does not match request')
+
+            # NOTE: We check the app store and use the subscription type from apple. This potentially overrides request from FE. 
+            request.parsed_obj.subscription_type_id = LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id
+        
+        elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
+            raise BadRequest('Missing original transaction id')
+
+        # Update the previous subscription if necessary
+        if prev_sub.subscription_status == 'subscribed':
+            if prev_sub.expire_date:
+                if prev_sub.expire_date < datetime.utcnow() or transaction_info.get('productId') != prev_sub.subscription_type_information.ios_product_id:
+                    prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
+                else:
+                    # new subscription entry not required return the current subscription
+                    prev_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
+                    prev_sub.update({'last_checked_date': datetime.utcnow().isoformat()})
+                    db.session.commit()
+                    return prev_sub
+        else:
+            prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
+    
+        # make a new subscription entry
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
             'subscription_type_id': request.parsed_obj.subscription_type_id,
             'is_staff': request.parsed_obj.is_staff,
+            'apple_original_transaction_id': request.parsed_obj.apple_original_transaction_id,
+            'last_checked_date': datetime.utcnow().isoformat()
         }
 
         new_sub = UserSubscriptionsSchema().load(new_data)
         new_sub.user_id = user_id
+
+        if request.parsed_obj.apple_original_transaction_id:
+            new_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
+            new_sub.expire_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None)
+            new_sub.start_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None)
         
         db.session.add(new_sub)
         db.session.commit()
 
-        new_sub.subscription_type_information = new_sub_info
         return new_sub
 
-    
 
 @ns.route('/subscription/history/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -790,13 +827,6 @@ class UserSubscriptionHistoryApi(BaseResource):
 
         client_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
         staff_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
-
-        for sub in client_history:
-            sub.subscription_type_information = LookupSubscriptions.query.filter_by(sub_id=sub.subscription_type_id).one_or_none()
-
-        for sub in staff_history:
-            sub.subscription_type_information = LookupSubscriptions.query.filter_by(sub_id=sub.subscription_type_id).one_or_none()
-
 
         res = {}
         res['client_subscription_history'] = client_history

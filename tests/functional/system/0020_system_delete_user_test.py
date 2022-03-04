@@ -8,10 +8,11 @@ from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserPe
 from odyssey.api.doctor.models import MedicalImaging
 from tests.functional.user.data import users_to_delete_data
 from tests.functional.doctor.data import doctor_medical_imaging_data
+from tests.functional.client.data import client_profile_picture_data
 from tests.utils import login
 
-def test_account_delete_request(test_client):
-    #Just need two users added to db, one client and one staff/client
+def test_account_delete_client_and_staff(test_client):
+    #Create a new staff user and a new client user
     #1. Create self created client user
     payload = users_to_delete_data['client_user']
     client_user = test_client.post(
@@ -98,11 +99,10 @@ def test_account_delete_request(test_client):
 
     # 5. Delete staff/client
     deleting_staff_client = test_client.delete(
-        f'/user/{staff_client_id}/',
-        headers=staff_auth_header)
+        f'/system/delete-user/{staff_client_id}/?delete_type=both',
+        headers=test_client.staff_auth_header)
 
-    assert deleting_staff_client.status_code == 200
-    assert deleting_staff_client.json['message'] == f'User with id {staff_client_id} has been removed'
+    assert deleting_staff_client.status_code == 204
 
     # Check no info for user_id is in staff tables
     tables = test_client.db.session.execute(text(
@@ -138,14 +138,13 @@ def test_account_delete_request(test_client):
     assert staff_user.user_id
     assert staff_user.firstname
     assert staff_user.lastname
-    assert staff_user.email
 
     # 5. Delete client
     deleting_client = test_client.delete(
-        f'/user/{client_id}/',
+        f'/system/delete-user/{client_id}/?delete_type=client',
         headers=test_client.staff_auth_header)
 
-    assert deleting_client.status_code == 200
+    assert deleting_client.status_code == 204
 
     # Check only modobioid and userid are in User table
     client_user = User.query.filter_by(user_id=client_id).first()
@@ -161,8 +160,6 @@ def test_account_delete_request(test_client):
     removal_request = UserRemovalRequests.query.all()
 
     assert removal_request[0].user_id == staff_client_id
-    assert removal_request[0].requester_user_id == staff_client_id
+    assert removal_request[0].requester_user_id == test_client.staff_id
     assert removal_request[1].user_id == client_id
-
-    #requester is the staff member created in conftest
     assert removal_request[1].requester_user_id == test_client.staff_id

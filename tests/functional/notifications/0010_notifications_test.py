@@ -26,7 +26,6 @@ def test_notifications_get(test_client):
         notif = response.json[0]
         assert notif.get('title') == notification['title']
         assert notif.get('content') == notification['content']
-        assert notif.get('action') == notification['action']
         assert notif.get('read') == notification['read']
         assert notif.get('deleted') == notification['deleted']
         assert notif.get('notification_type') == notification_type
@@ -55,7 +54,6 @@ def test_notifications_put(test_client):
         # Unchanged
         assert notif.get('title') == notification['title']
         assert notif.get('content') == notification['content']
-        assert notif.get('action') == notification['action']
         assert notif.get('notification_type') == notification_type
 
         # CHanged

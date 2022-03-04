@@ -10,6 +10,7 @@ BEGIN
         firstname,
         lastname,
         is_staff,
+		was_staff,
         is_client,
         email_verified,
         biological_sex_male,
@@ -20,6 +21,7 @@ BEGIN
         'Firstname',
         'Lastname',
         true,
+		true,
         false,
         true,
         true,
@@ -42,7 +44,6 @@ BEGIN
         (_user_id, 'staff_admin'),
         (_user_id, 'client_services'),
         (_user_id, 'medical_doctor'),
-        (_user_id, 'physical_therapist'),
         (_user_id, 'nutritionist'),
         (_user_id, 'trainer'),
         (_user_id, 'community_manager');

@@ -2,6 +2,7 @@
 Database tables for the DoseSpot's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``DoseSpot``.
 """
+from sqlalchemy import UniqueConstraint
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
@@ -10,6 +11,8 @@ class DoseSpotPractitionerID(BaseModelWithIdx, UserIdFkeyMixin):
     
     This table is used for storing the practitioner DoseSpot User ID.
     """    
+
+    __table_args__ = (UniqueConstraint('user_id',),)
 
     ds_user_id = db.Column(db.Integer)
     """
@@ -30,6 +33,7 @@ class DoseSpotPatientID(BaseModelWithIdx, UserIdFkeyMixin):
     
     This table is used for storing the patients DoseSpot User ID.
     """    
+    __table_args__ = (UniqueConstraint('user_id',),)
 
     ds_user_id = db.Column(db.Integer)
     """

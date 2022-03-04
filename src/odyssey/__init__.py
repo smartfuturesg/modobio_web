@@ -82,8 +82,9 @@ db = SQLAlchemy()
 migrate = Migrate()
 cors = CORS()
 ma = Marshmallow()
-celery = Celery()
 mongo = PyMongo()
+
+celery = Celery(__name__, broker=Config().broker_url, backend=Config().result_backend)
 
 def create_app():
     """ Initialize an instance of the Flask app.
@@ -119,7 +120,8 @@ def create_app():
     migrate.init_app(app, db)
     cors.init_app(app)
     ma.init_app(app)
-    init_celery(app)
+
+    celery.conf.update(app.config)
 
     # Convenience function
     db.Model.update = _update
@@ -163,7 +165,9 @@ def create_app():
         app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
         if not app.config['TESTING']:
             with app.app_context():
-                app.elasticsearch.indices.delete('_all')
+                # action.destructive_requires_namesetting defaults to true in v8,
+                # which disallows use of wildcards or _all.
+                app.elasticsearch.indices.delete(index='clients,staff', ignore_unavailable=True)
                 from odyssey.utils import search
                 try:
                     search.build_ES_indices()
@@ -193,7 +197,8 @@ def init_celery(app=None):
     """
 
     app = app or create_app()
-    celery.config_from_object(Config())
+    app.app_context().push()
+    celery.conf.update(app.config)
 
     class ContextTask(celery.Task):
         """Make celery tasks work with Flask app context"""
@@ -202,4 +207,5 @@ def init_celery(app=None):
                 return self.run(*args, **kwargs)
 
     celery.Task = ContextTask
+
     return celery

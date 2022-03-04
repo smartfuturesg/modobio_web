@@ -3,14 +3,14 @@ import logging
 from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
 logger = logging.getLogger(__name__)
 
-import os, boto3, secrets, pathlib
+import secrets
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace
 from sqlalchemy import select
 from werkzeug.exceptions import BadRequest, Unauthorized
 
@@ -38,12 +38,7 @@ from odyssey.api.doctor.models import (
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
-from odyssey.utils.misc import (
-    check_client_existence,
-    check_blood_test_existence,
-    check_blood_test_result_type_existence,
-    check_medical_condition_existence,
-)
+from odyssey.utils.misc import check_medical_condition_existence
 from odyssey.utils.file_handling import FileHandling
 from odyssey.utils.constants import IMAGE_MAX_SIZE, MED_ALLOWED_IMAGE_TYPES, BLOOD_TEST_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
@@ -65,7 +60,6 @@ from odyssey.api.doctor.schemas import (
     MedicalInstitutionsSchema,
     MedicalBloodTestsInputSchema,
     MedicalBloodTestSchema,
-    MedicalBloodTestResultsSchema,
     MedicalBloodTestResultsOutputSchema,
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema,
@@ -1275,6 +1269,13 @@ class MedBloodTest(BaseResource):
                         'ref_max': ref_max,
                         'critical_max': critical_max
                     }
+                else:
+                    eval_values = {
+                    'critical_min': ranges[0].critical_min,
+                    'ref_min': ranges[0].ref_min,
+                    'ref_max': ranges[0].ref_max,
+                    'critical_max': ranges[0].critical_max
+                }
             else:
                 eval_values = {
                     'critical_min': ranges[0].critical_min,
@@ -1282,6 +1283,16 @@ class MedBloodTest(BaseResource):
                     'ref_max': ranges[0].ref_max,
                     'critical_max': ranges[0].critical_max
                 }
+
+            #fix ranges if any are null
+            if eval_values['critical_min'] == None:
+                eval_values['critical_min'] = 0
+            if eval_values['ref_min'] == None:
+                eval_values['ref_min'] = 0
+            if eval_values['ref_max'] == None:
+                eval_values['ref_max'] = float('inf')
+            if eval_values['critical_max'] == None:
+                eval_values['critical_max'] = float('inf')
 
             #make the evaluation based on the eval values found above
             if result['result_value'] < eval_values['critical_min']:
@@ -1621,7 +1632,7 @@ class MedHistory(BaseResource):
 @ns.route('/physical/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedPhysical(BaseResource):
-    @token_auth.login_required()
+    @token_auth.login_required(resources=('general_medical_info',))
     @responds(schema=MedicalPhysicalExamSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all client's medical physical exams for the user_id specified"""
@@ -1645,7 +1656,7 @@ class MedPhysical(BaseResource):
 
         return response
 
-    @token_auth.login_required(staff_role=('medical_doctor',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('general_medical_info',))
     @accepts(schema=MedicalPhysicalExamSchema, api=ns)
     @responds(schema=MedicalPhysicalExamSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -1673,7 +1684,7 @@ class MedPhysical(BaseResource):
 
 @ns.route('/medicalinstitutions/')
 class AllMedInstitutes(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required()
     @responds(schema=MedicalInstitutionsSchema(many=True), api=ns)
     def get(self):
         """returns all medical institutes currently in the database"""
@@ -1685,7 +1696,7 @@ class AllMedInstitutes(BaseResource):
 @ns.route('/medicalinstitutions/recordid/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ExternalMedicalRecordIDs(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(staff_role=('medical_doctor',))
     @accepts(schema=MedicalExternalMREntrySchema,  api=ns)
     @responds(schema=MedicalExternalMREntrySchema,status_code=201, api=ns)
     def post(self, user_id):
@@ -1729,7 +1740,7 @@ class ExternalMedicalRecordIDs(BaseResource):
 @ns.doc(params={'user_id': 'Client user ID number'})
 class MedicalSurgeriesAPI(BaseResource):
 
-    @token_auth.login_required(staff_role=('medical_doctor',))
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('general_medical_info',))
     @accepts(schema=MedicalSurgeriesSchema,  api=ns)
     @responds(schema=MedicalSurgeriesSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -1745,7 +1756,7 @@ class MedicalSurgeriesAPI(BaseResource):
 
         return request.parsed_obj
 
-    @token_auth.login_required()
+    @token_auth.login_required(resources=('general_medical_info',))
     @responds(schema=MedicalSurgeriesSchema(many=True), api=ns)
     def get(self, user_id):
         """returns a list of all surgeries for the given user_id"""
@@ -1753,39 +1764,3 @@ class MedicalSurgeriesAPI(BaseResource):
 
         return MedicalSurgeries.query.filter_by(user_id=user_id).all()
 
-##########################
-# This code became obsolete, because the medical lookup tables is now
-# provided by endpoint. But I'm keeping the code around because it might
-# be useful in the future.
-#
-# def _generate_lut_endpoints(name, lut):
-#     # Set up the GET method
-#     @token_auth.login_required
-#     @responds(status_code=200, api=ns)
-#     def get(self):
-#         return jsonify(lut)
-#
-#     # Normal docstring cannot be an f-string or use .format(), but this works.
-#     get.__doc__ = f"""
-#         Lookup table for supported medical conditions -- {name}.
-#
-#         Returns
-#         -------
-#         dict(dict(...))
-#             Nested dicts, where the keys are the supported (category of)
-#             medical issues. The values are either another dict to specify
-#             a subdivision, or ``null`` indicating no further nesting.
-#         """
-#
-#     # Create class based on name
-#     endp = type(f'MedicalLUT{name}Endpoint', (Resource,), {'get': get})
-#
-#     # Add class as endpoint to namespace (instead of class decorator)
-#     ns.add_resource(endp, f'/condition/{name}/')
-#
-#     return endp
-#
-# for name, lut in MEDICAL_CONDITIONS:
-#     _generate_lut_endpoints(name, lut)
-#
-##########################
