@@ -36,16 +36,6 @@ class NotificationsEndpoint(BaseResource):
         """ Returns a list of notifications for the given user_id. """
         return Notifications.query.filter_by(user_id=user_id).all()
 
-    @token_auth.login_required
-    @accepts(schema=NotificationSchema, api=ns)
-    @responds(status_code=201, api=ns)
-    def post(self, user_id):
-        """ Create a new notification for the user with user_id. """
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-
 @ns.route('/<int:user_id>/<int:notification_id>/')
 @ns.doc(params={
     'user_id': 'User ID number',
