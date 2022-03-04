@@ -404,7 +404,8 @@ class TokenAuth(BasicAuth):
         secret = current_app.config['SECRET_KEY']
         try:
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
-        except jwt.exceptions.DecodeError:
+        # Capture all possible JWT errors
+        except jwt.exceptions.PyJWTError:
             raise Unauthorized
 
         # ensure token is an access token type
