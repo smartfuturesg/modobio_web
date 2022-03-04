@@ -200,16 +200,27 @@ def _update(self, other):
 
     Raises
     ------
-    :class:`sqlalchemy.orm.exc.UnmappedClassError`
+    TypeError
         Raised if :attr:`other` is neither a dict nor a :class:`sqlalchemy.Table` instance.
+
+    ValueError
+        Raised if :attr:`other` is an instance of a different sqlalchemy model than the
+        instance it is trying to update.
     """
     if isinstance(other, dict):
         for k, v in other.items():
             setattr(self, k, v)
     else:
-        # This raises UnmappedClassError if other is not a table instance.
-        # Don't catch error, but let if fail.
-        class_mapper(type(other))
+        try:
+            self_type = class_mapper(type(self))
+            other_type = class_mapper(type(other))
+        except sqlalchemy.orm.exc.UnmappedClassError:
+            raise ValueError(f'{other!r} is not a dict or sqlalchemy model.')
+
+        if self_type != other_type:
+            raise TypeError(f'Trying to update an instance of {self_type.class_} '
+                            f'with an instance of {other_type.class_}')
+
         for k, v in other.__dict__.items():
             if k.startswith('_sa'):
                 continue
