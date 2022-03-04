@@ -560,9 +560,6 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.start_time <= target_time.time(),
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
-<<<<<<< HEAD
-
-
 
 
 class EmailVerification():
@@ -746,7 +743,6 @@ class EmailVerification():
         return
 
 
-=======
         
 def delete_staff_data(user_id):
     """
@@ -930,4 +926,3 @@ def create_notification(user_id, severity_id, notification_type_id, title, conte
     
     db.session.add(notification)
     db.session.commit()
->>>>>>> b3d728e4a3180c61e899f43bb13939cfdb0ccae5
