@@ -6,7 +6,6 @@ from flask.json import dumps
 from sqlalchemy import select
 
 from odyssey.api.user.models import User, UserLogin, UserPendingEmailVerifications, UserTokenHistory
-from tests.functional.user.data import users_new_self_registered_client_data
 
 def test_client_user_email_update(test_client):
     """
