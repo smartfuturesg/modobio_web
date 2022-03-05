@@ -67,7 +67,7 @@ class MaintenanceApi(BaseResource):
             return True if start > now + std_notice else False
         # Overnight
         elif start.hour in overnight_hours and end.hour in overnight_hours:
-            return True if start > datetime.now() + short_notice else False
+            return True if start > now + short_notice else False
         else:
             return False
 
