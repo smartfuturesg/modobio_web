@@ -29,6 +29,7 @@ BEGIN
         firstname,
         lastname,
         is_staff,
+        was_staff,
         is_client,
         email_verified)
     VALUES (
@@ -36,6 +37,7 @@ BEGIN
         'WRBLSCRPR000',
         'Wearables',
         'Scraper',
+        true,
         true,
         false,
         true)

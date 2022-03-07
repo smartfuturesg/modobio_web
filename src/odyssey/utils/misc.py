@@ -1,5 +1,6 @@
 """ Utility functions for the odyssey package. """
 import logging
+from time import mktime
 
 from marshmallow.fields import Dict
 
@@ -34,9 +35,16 @@ from odyssey.api.doctor.models import (
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
+from odyssey.api.user.models import UserRemovalRequests
 from odyssey.api.lookup.models import LookupDrinks
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME
+from odyssey.utils.constants import ALPHANUMERIC, CLIENT_S3_TABLES, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, STAFF_S3_TABLES
 from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
+from odyssey.api.notifications.models import Notifications
+
+from odyssey.utils.auth import token_auth
+from odyssey.utils.message import send_email_delete_account
+from odyssey.utils.file_handling import FileHandling
+from odyssey.utils import search
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -554,8 +562,6 @@ def get_time_index(target_time: datetime):
         ).one_or_none().idx
 
 
-
-
 class EmailVerification():
     """
     Class for handling email verification routines
@@ -603,8 +609,9 @@ class EmailVerification():
         dict: email verification code, token, email, and user_id
         """
         # Check if email is already in use
-        if User.query.filter_by(email = email).one_or_none():
-            raise BadRequest("Email in use")
+        if email:
+            if User.query.filter_by(email = email).one_or_none():
+                raise BadRequest("Email in use")
             
         # check if there is already a Pending email verification entry
         pending_verification = UserPendingEmailVerifications.query.filter_by(user_id = user.user_id).one_or_none()
@@ -737,3 +744,186 @@ class EmailVerification():
         return
 
 
+        
+def delete_staff_data(user_id):
+    """
+    This function is used by the delete_user function to delete staff specific data. This includes:
+    
+    *staff specific s3 files(profile picture)
+    *rows in staff specific tables
+    """
+    
+    #delete client specific files or images saved in S3 bucket for user_id
+    fh = FileHandling()
+    for table in STAFF_S3_TABLES:
+        fh.delete_from_s3(prefix=f'id{user_id:05d}/' + table)
+    
+    #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+    # NOTE - Order matters, must delete these tables before those with user_id 
+    # to avoid problems while deleting payment methods
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+    
+    for table in tableList:
+        #Do not delete from TelehealthBookings when deleting staff data
+        if table.table_name == 'TelehealthBookings':
+            continue
+        else:
+            db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE staff_user_id={user_id};")
+
+    #Get a list of all staff-specific tables in database that have field: user_id
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='user_id' and (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
+
+    #delete from staff specific tables where user_id is the user to be deleted
+    for table in tableList:
+        #added data_per_client table due to issues with the testing database
+        if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
+            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+
+    #only delete staff subscription
+    db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=True")
+
+    db.session.commit()
+    
+def delete_client_data(user_id):
+    """
+    This function is used by the below delete_user function to delete client specific data. This includes:
+    
+    *any s3 files stored under the given user_id
+    *telehealth booking details, status history
+    *rows in client specific tables
+    """
+    
+    #delete client specific files or images saved in S3 bucket for user_id
+    fh = FileHandling()
+    for table in CLIENT_S3_TABLES:
+        fh.delete_from_s3(prefix=f'id{user_id:05d}/' + table)
+    
+    #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+    # NOTE - Order matters, must delete these tables before those with user_id 
+    # to avoid problems while deleting payment methods
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+    
+    #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+    for table in tableList:
+        db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE client_user_id={user_id};")
+
+    #Get a list of all client-specific tables in database that have field: user_id
+    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+            WHERE column_name='user_id' and NOT (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
+    
+
+    #delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
+    for table in tableList:
+        #added data_per_client table due to issues with the testing database
+        if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
+            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+            
+    #only delete client subscription
+    db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=False")
+
+    db.session.commit()
+        
+def delete_user(user_id, requestor_id, delete_type):
+    """
+    This function is used to delete a user and any relevant user date. It is leveraged by the system
+    admin delete user endpoint and (in the future) the task that automatically deletes accounts that have
+    been marked as 'closed' for at least 30 days.
+    
+    Args:
+        user_id (int): int id of the user to be deleted
+        requestor_id (int): id of the user requesting to delete this user
+        staff_delete (str): denotes what type of delete to do. Can be 'client', 'staff', or 'both'.
+    """
+    check_user_existence(user_id, requestor_id)
+    
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+    
+    #save user email before it is nulled so we can send email after everything is done
+    user_email = user.email
+    
+    requester = token_auth.current_user()[0]
+    removal_request = UserRemovalRequests(
+        requester_user_id=requester.user_id, 
+        user_id=user.user_id,
+        removal_type=delete_type)
+
+    db.session.add(removal_request)
+    db.session.flush()
+
+    if user.was_staff:
+        #cases where the user is either only staff or client and staff
+        
+        #staff users must always retain name, modobio_id, and user_id
+        user.phone_number = None
+        if delete_type == 'both':
+            user.phone_number = None
+            user.email = None
+            user.deleted = True
+            user.is_staff = False
+            user.is_client = False
+            delete_client_data(user_id)
+            delete_staff_data(user_id)
+            
+            #since entire user is being deleted, we can delete the login info
+            db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+            
+            #remove user from elastic search indices (must be done after commit)
+            search.delete_from_index(user_id)
+        elif delete_type == 'client':
+            delete_client_data(user_id)
+            user.is_client = False
+        elif delete_type == 'staff':
+            delete_staff_data(user_id)
+            if not user.is_client:
+                #user was only staff, so we can delete the login info
+                db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+                user.phone_number = None
+                user.email = None
+                user.deleted = True
+                
+                #remove user from elastic search indices (must be done after commit)
+                search.delete_from_index(user_id)
+                
+            user.is_staff = False
+        else:
+            raise BadRequest('Invalid delete type.')
+    else:
+        #cases where the user is only a client user
+        if delete_type in ('client', 'both'):
+            user.email = None
+            user.firstname = None
+            user.middlename = None
+            user.lastname = None
+            user.phone_number = None
+            user.deleted = True
+            user.is_client = False
+            delete_client_data(user_id)
+            
+            db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+            
+            #remove user from elastic search indices (must be done after commit)
+            search.delete_from_index(user_id)
+    db.session.commit()
+    #Send notification email to user being deleted and user requesting deletion
+    #when FLASK_ENV=production
+    if user_email != requester.email:
+        send_email_delete_account(requester.email, user_email)
+    send_email_delete_account(user_email, user_email)
+
+
+def create_notification(user_id, severity_id, notification_type_id, title, content):
+    #used to create a notification
+    
+    notification = Notifications(**{
+        'user_id': user_id,
+        'title': title,
+        'content': content,
+        'severity_id': severity_id,
+        'notification_type_id': notification_type_id
+    })
+    
+    db.session.add(notification)
+    db.session.commit()

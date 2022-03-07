@@ -1,4 +1,5 @@
 import logging
+from flask import request
 from sqlalchemy import and_
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,14 @@ class PaymentMethodsApi(BaseResource):
         if payment:
             #check if payment is involved with future bookings
             bookings = TelehealthBookings.query.filter_by(payment_method_id=payment.idx, charged=False).all()
+            
+            #check if booking has been cancelled or completed. If so, remove it from the list.
+            for booking in bookings:
+                for status in booking.status_history:
+                    if status.status in ('Cancelled', 'Canceled', 'Completed'):
+                        bookings.remove(booking)
+                        continue
+                        
             if len(bookings) > 0:
                 replacement_id = request.args.get('replacement_id', type=int)
                 if replacement_id == 0:

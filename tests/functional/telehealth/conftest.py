@@ -1,11 +1,10 @@
-from contextlib import contextmanager
-import logging
 import uuid
 from bson.objectid import ObjectId
 import pytest
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
+from flask import g
 from flask.json import dumps
 from sqlalchemy import select
 from twilio.base.exceptions import TwilioRestException
@@ -16,7 +15,7 @@ from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthBookingStatus, TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils.constants import ACCESS_ROLES, TELEHEALTH_BOOKING_LEAD_TIME_HRS
 from odyssey.utils.message import PushNotification
@@ -33,6 +32,7 @@ def telehealth_clients(test_client):
             email=f'client{i}@example.com',
             phone_number=f'91111111{i}',
             is_staff=False,
+            was_staff=False,
             is_client=True,
             email_verified=True,
             modobio_id = f'KW99TSVWP88{i}')
@@ -62,6 +62,7 @@ def telehealth_staff(test_client):
             email=f'staff{i}@example.com',
             phone_number=f'922222222{i}',
             is_staff=True,
+            was_staff=True,
             is_client=False,
             email_verified=True,
             modobio_id=f'ZW99TSVWP88{i}')
@@ -206,19 +207,24 @@ def register_device(test_client):
     test_client.db.session.delete(device)
     test_client.db.session.commit()
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def booking(test_client, payment_method):
     """ Create a telehealth booking, needed for testing.
 
     This bookings fixture is used in the Telehealth section of testing.
     The Twilio section has its own bookings fixture.
     """
-    tomorrow = date.today() + timedelta(days=1)
+    # simulates logged-in user accepting a booking. Necessary to satisfy background process: telehealth.models.add_booking_status_history
+    g.flask_httpauth_user = (test_client.staff, UserLogin.query.filter_by(user_id = test_client.staff_id).one_or_none())
 
     # make a telehealth booking by direct db call
     # booking is made with minimum lead time
-    target_datetime = datetime.now() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
-    target_datetime = target_datetime.replace(minute = 45, second=0)
+    target_datetime = datetime.utcnow() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    start_minute = target_datetime.minute + (10 - target_datetime.minute % 10) 
+    target_datetime = target_datetime.replace(
+        hour = target_datetime.hour + 1 if start_minute == 60 else target_datetime.hour,
+        minute = 0 if start_minute == 60 else start_minute, 
+        second=0)
     time_inc = LookupBookingTimeIncrements.query.all()
         
     start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
@@ -231,7 +237,7 @@ def booking(test_client, payment_method):
         booking_end_idx = abs(time_inc[-1].idx - (booking_start_idx + 3))
     else:
         booking_end_idx = booking_start_idx + 3
-
+    
     bk = TelehealthBookings(
         client_user_id=test_client.client_id,
         staff_user_id=test_client.staff_id,
@@ -274,6 +280,10 @@ def booking(test_client, payment_method):
         test_client.db.session.delete(status)
         
     test_client.db.session.delete(chat_room)
+
+    if bk.booking_details:
+        test_client.db.session.delete(bk.booking_details)
+
     test_client.db.session.delete(bk)
     test_client.db.session.flush()
     

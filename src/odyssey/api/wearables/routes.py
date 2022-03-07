@@ -46,7 +46,7 @@ ns = Namespace('wearables', description='Endpoints for registering wearable devi
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesEndpoint(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
     @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Wearable device information for client ``user_id`` in response to a GET request.

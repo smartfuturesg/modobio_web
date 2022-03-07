@@ -114,6 +114,15 @@ class User(db.Model):
     :type: boolean
     """
 
+    was_staff = db.Column(db.Boolean, nullable=False, server_default='false')
+    """
+    Denotes if this user was ever a staff member. This is important to retain necessary staff info 
+    even if a user has deleted their staff account and then later deletes their client account.
+
+    :type: boolean
+    """
+
+
     staff_profile = db.relationship('StaffProfile', uselist=False, back_populates='user_info')
     """
     One-to-One relationship with StaffProfile
@@ -250,6 +259,58 @@ class UserLogin(db.Model):
     :type: boolean
     """
 
+    # Explicitly setting nullable and default to indicate that None has meaning.
+    staff_account_closed = db.Column(db.DateTime, nullable=True, default=None)
+    """
+    User closed staff portion of the account on this date. A closed account will
+    be deleted some time after the close date (initially, 30 days after). If the
+    user logs in after closing, but before the account is deleted, this timestamp
+    is set to None.
+
+    :type: datetime or None
+    """
+
+    staff_account_blocked = db.Column(db.Boolean, server_default='f')
+    """
+    Indicates when the staff portion of the account is blocked.
+    See :attr:`staff_account_blocked_reason` for the reason why it was blocked.
+
+    :type: bool
+    """
+
+    staff_account_blocked_reason = db.Column(db.String(500))
+    """
+    Reason why the staff portion of the account was blocked.
+
+    :type: str, max length 500
+    """
+
+    # Explicitly setting nullable and default to indicate that None has meaning.
+    client_account_closed = db.Column(db.DateTime, nullable=True, default=None)
+    """
+    User closed client portion of the account on this date. A closed account will
+    be deleted some time after the close date (initially, 30 days after). If the
+    user logs in after closing, but before the account is deleted, this timestamp
+    is set to None.
+
+    :type: datetime or None
+    """
+
+    client_account_blocked = db.Column(db.Boolean, server_default='f')
+    """
+    Indicates when the client portion of the account is blocked.
+    See :attr:`client_account_blocked_reason` for the reason why it was blocked.
+
+    :type: bool
+    """
+
+    client_account_blocked_reason = db.Column(db.String(500))
+    """
+    Reason why the client portion of the account was blocked.
+
+    :type: str, max length 500
+    """
+
     last_login = db.Column(db.DateTime)
     """
     **Deprecated 4.12.21 use UserTokensHistory to find last login**
@@ -342,6 +403,13 @@ class UserRemovalRequests(db.Model):
 
     :type: :class:`datetime.datetime`, primary key
     """
+    
+    removal_type = db.Column(db.String)
+    """
+    Type of removal requested. Can be 'client', 'staff', 'or both.
+
+    :type: str
+    """
 
 class UserSubscriptions(db.Model):
     """ 
@@ -412,6 +480,35 @@ class UserSubscriptions(db.Model):
     Id of this subscription plan. Comes from the LookupSubscriptions table.
 
     :type: int, foreign key('LookupSubscriptions.sub_id')
+    """
+
+    last_checked_date = db.Column(db.DateTime)
+    """
+    Date the subscription status was last checked with the Apple Store. 
+    
+    :type: datetime
+    """
+
+    apple_original_transaction_id = db.Column(db.String)
+    """
+    Original transaction id used to track all in-app purchases. This id remains the same for each client purchase.
+
+    https://developer.apple.com/documentation/appstoreserverapi/originaltransactionid
+
+    :type: String
+    """
+
+    expire_date = db.Column(db.DateTime)
+    """
+    Date and time the subscription will expire. If subscription is renewed, there will be a new entry for the 
+    subscription renewal.
+
+    :type: datetime
+    """
+
+    subscription_type_information = db.relationship("LookupSubscriptions")
+    """
+    Relationship lookup subscriptions
     """
 
     

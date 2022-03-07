@@ -22,6 +22,8 @@ config = context.config
 current_app.config.from_object(Config())
 db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
 
+
+
 # Load metadata from sqlalchemy
 target_metadata = current_app.extensions['migrate'].db.metadata
 

@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from flask.json import dumps
 from sqlalchemy import select
 
@@ -152,6 +152,26 @@ def test_put_1_client_staff_bookings(test_client, booking):
         .where(
             StaffCalendarEvents.location == f'Telehealth_{booking.idx}'))
         .one_or_none())
+
+
+def test_put_2_client_staff_bookings(test_client, booking_function_scope):
+    """
+    Attempt to cancel a booking that has already started. should respond with 400
+    """
+    # change the timing of the call so that it has already ended
+    booking_function_scope.target_date_utc = booking_function_scope.target_date_utc - timedelta(days=1)
+
+    test_client.db.session.add(booking_function_scope)
+    test_client.db.session.commit()
+
+    response = test_client.put(
+        f'/telehealth/bookings/?booking_id={booking_function_scope.idx}',
+        headers=test_client.staff_auth_header,
+        data=dumps(telehealth_client_staff_bookings_put_1_data),
+        content_type='application/json')
+
+    assert response.status_code == 400
+
 
 def test_get_4_staff_client_bookings(test_client, booking):
     response = test_client.get(

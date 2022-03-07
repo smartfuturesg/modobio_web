@@ -12,7 +12,7 @@ from datetime import datetime, date, timedelta, timezone
 from flask import current_app
 
 from celery.schedules import crontab
-from celery.signals import worker_ready   
+from celery.signals import task_prerun, worker_ready   
 from celery.utils.log import get_task_logger
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
@@ -25,14 +25,15 @@ from odyssey.tasks.tasks import (
     upcoming_appointment_notification_2hr, 
     charge_telehealth_appointment, 
     store_telehealth_transcript,
-    cancel_noshow_appointment
+    cancel_noshow_appointment,
+    update_apple_subscription
 )
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.system.models import SystemTelehealthSessionCosts
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import cancel_telehealth_appointment
 
 from odyssey.config import Config
@@ -340,7 +341,6 @@ def detect_practitioner_no_show():
                                                TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
                                                TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2)
-
     for booking in bookings:
         logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client
@@ -364,7 +364,42 @@ def get_dosespot_notifications():
         ds = DoseSpot()
         ds.practitioner_ds_id = practitioner.ds_user_id
         ds.notifications(practitioner.user_id) 
+
+@celery.task()
+def deploy_subscription_update_tasks(interval:int):
+    """
+    Checks for subscriptions that are near expiration and then shoots off tasks to 
+    check if those subscriptions have been renewed. 
     
+    Parameters
+    ----------
+    interval: int
+        Sets time window where upcoming subscription expirations will be checked for updates. Corresponds
+        to the frequency of this periodic task. 
+ 
+    """
+    # check for subscriptions expiring in the near future
+    expired_by = datetime.utcnow() + timedelta(minutes = interval)
+
+    subscriptions = db.session.execute(
+        select(UserSubscriptions). 
+        where(UserSubscriptions.expire_date < expired_by, UserSubscriptions.subscription_status == 'subscribed'
+            )).scalars().all()
+    
+    for subscription in subscriptions:
+        logger.info(f"Deploying task to update subscription for user_id: {subscription.user_id}")
+        # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
+        task_eta = subscription.expire_date 
+        if task_eta < datetime.utcnow():
+            update_apple_subscription.delay(subscription.user_id)
+        else:
+            update_apple_subscription.apply_async((subscription.user_id,),eta=task_eta)
+    
+    return 
+    
+@task_prerun.connect()
+def close_previous_db_connection(**kwargs):
+    db.engine.dispose()
 
 celery.conf.beat_schedule = {
     # look for upcoming apppointment within moving windows:
@@ -416,5 +451,10 @@ celery.conf.beat_schedule = {
     'get_dosespot_notifications': {
         'task': 'odyssey.tasks.periodic.get_dosespot_notifications',
         'schedule': crontab(hour=1, minute=0)
+    },
+    'update_active_subscriptions': {
+        'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
+        'args': (60,),
+        'schedule': crontab(minute='*/60')
     }
 }

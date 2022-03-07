@@ -40,6 +40,10 @@ class BasicAuth(object):
                   get_auth()
                   authenticate(auth,pass)
         '''
+        logger.debug(f'Login required wrapper called with args: f={f}, user_type={user_type}, '
+                     f'staff_role={staff_role}, internal_required={internal_required} '
+                     f'email_required={email_required}, resources={resources}, dev_only={dev_only}.')
+
         ###
         ##  Validate kwargs: user_type, staff_role
         ###
@@ -79,6 +83,11 @@ class BasicAuth(object):
                     
                 Any issues coming from the above should raise a 401 error with no message.
                 """
+                logger.debug(f'Login required decorator called with: f={f}, user_type={user_type}, '
+                             f'staff_role={staff_role}, internal_required={internal_required} '
+                             f'email_required={email_required}, resources={resources}, '
+                             f'dev_only={dev_only}.')
+
                 if dev_only:
                     if not current_app.config['DEV']:
                         raise BadRequest('This request is only available in dev')
@@ -99,7 +108,13 @@ class BasicAuth(object):
                 if user_type:
                     # If user_type exists (Staff or Client, etc)
                     # Check user and role access
-                    self.user_role_check(user,user_type=user_type, staff_roles=staff_role, user_context = user_context, resources=resources)
+                    self.user_role_check(
+                        user,
+                        user_login,
+                        user_type,
+                        user_context,
+                        staff_roles=staff_role,
+                        resources=resources)
                 
                 # If necessary, restrict access to internal users
                 if internal_required:
@@ -114,35 +129,49 @@ class BasicAuth(object):
             return login_required_internal(f)
         return login_required_internal
    
-    def user_role_check(self, user, user_type, user_context, staff_roles=None, resources=()):
+    def user_role_check(self, user, user_login, user_type, user_context, staff_roles=None, resources=()):
         ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
-        # Check if logged-in user is authorized by type (staff,client)
-        # then ensure the logged_in user has role
-
-        # user is logged in  as a modobio user, they may access the endpoint
-        if user_context in ('staff', 'client') and  'modobio' in user_type:
+        # user is logged in as a modobio user, they may access the endpoint
+        if user_context in ('staff', 'client') and 'modobio' in user_type:
             return
-        # if the user is logged in as staff member, follow staff authorization routine
-        elif user_context == 'staff' and ('staff' in user_type or 'staff_self' in user_type):
-            if user.is_staff:
-                if staff_roles or 'staff_self' in user_type or len(resources) > 0: # role-based authorization 
-                    self.staff_access_check(user, user_type, resources, staff_roles=staff_roles)
-                else:
-                    return
-            else:
-                raise Unauthorized
-        # if the user is logged in as a client, follow the client authorization routine
-        elif user_context == 'client' and 'client' in user_type:
-            if user.is_client:
-                self.client_access_check(user, resources)
-            else:
-                raise Unauthorized
+
+        # User is logged in, claims staff in token (user_context),
+        # user is registered as staff member (user.is_staff),
+        # and endpoint requests staff or staff_self (user_type).
+        elif (user_context == 'staff' and user.is_staff and
+              ('staff' in user_type or 'staff_self' in user_type)):
+            # Account is blocked
+            if user_login.staff_account_blocked:
+                raise Unauthorized('Your staff account has been blocked. Please contact '
+                                   'client_services@modobio.com to resolve the issue.')
+            # Check staff roles and access.
+            if staff_roles or 'staff_self' in user_type or len(resources) > 0:
+                self.staff_access_check(user, user_type, resources, staff_roles=staff_roles)
+
+        # User is logged in, claims client in token (user_context),
+        # user is registered as client (user.is_client),
+        # and endpoint requests client (user_type).
+        elif user_context == 'client' and user.is_client and 'client' in user_type:
+            # Account is blocked.
+            if user_login.client_account_blocked:
+                raise Unauthorized('Your client account has been blocked. Please contact '
+                                   'client_services@modobio.com to resolve the issue.')
+            # Check client access.
+            self.client_access_check(user, resources)
+
+        # User is logging in
         elif user_context == 'basic_auth':
-            if 'staff' in user_type and user.is_staff:
-                return
-            elif 'client' in user_type and user.is_client:
-                return
+            # /staff/token/ endpoint and user is registered staff member
+            if user_type == ('staff',) and user.is_staff:
+                if user_login.staff_account_blocked:
+                    raise Unauthorized('Your staff account has been blocked. Please contact '
+                                       'client_services@modobio.com to resolve the issue.')
+            # /client/token/ endpoint and user is registered client
+            elif user_type == ('client',) and user.is_client:
+                if user_login.client_account_blocked:
+                    raise Unauthorized('Your client account has been blocked. Please contact '
+                                       'client_services@modobio.com to resolve the issue.')
             else:
                 raise Unauthorized
         else:
@@ -280,8 +309,8 @@ class BasicAuth(object):
                 raise Unauthorized
 
         # Staff is accessing client resources without role or resource authorization
-        # TODO: leaving this here for debugging and (enventually) logging
         else:
+            logger.debug(f'Staff user granted access to endpoint without checks: {request.path}')
             return
 
         # authorization checks all end here
@@ -300,11 +329,14 @@ class BasicAuth(object):
             that is defined in auth.py """
             
         user_details = db.session.execute(
-            select(User, UserLogin).
-            join(UserLogin, User.user_id==UserLogin.user_id).
-            where(User.email==username.lower())
+            select(User, UserLogin)
+            .join(
+                UserLogin,
+                User.user_id == UserLogin.user_id)
+            .where(
+                User.email == username.lower())
         ).one_or_none()
-            
+
         # make sure login details exist, check password
         if not user_details:
             db.session.add(UserTokenHistory(event='login', ua_string=request.headers.get('User-Agent')))
@@ -382,14 +414,17 @@ class TokenAuth(BasicAuth):
         if decoded_token['ttype'] != 'access':
             raise Unauthorized
 
-        query = db.session.execute(
-            select(User, UserLogin
-                    ).join(
-                        UserLogin, User.user_id == UserLogin.user_id
-                    ).where(User.user_id == decoded_token['uid'])).one_or_none()    
-                    
+        user, user_login = db.session.execute(
+            select(User, UserLogin)
+            .join(
+                UserLogin,
+                User.user_id == UserLogin.user_id)
+            .where(
+                User.user_id == decoded_token['uid'])
+        ).one_or_none()
+
         g.user_type = decoded_token.get('utype')
-        return query[0], query[1], decoded_token.get('utype')
+        return user, user_login, decoded_token.get('utype')
 
     def get_auth(self):
         ''' This method is to authorize tokens '''

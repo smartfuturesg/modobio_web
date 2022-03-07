@@ -1,3 +1,5 @@
+""" Schemas for user accounts. """
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -9,9 +11,7 @@ from odyssey.api.staff.schemas import StaffRolesSchema
 from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserPendingEmailVerifications, UserLegalDocs
 from odyssey.utils.constants import ACCESS_ROLES
 
-"""
-   Schemas for user accounts
-"""
+
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -23,9 +23,15 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         new_user = User(**data)
         return new_user
 
+
 class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserLogin
+        exclude = (
+            'staff_account_blocked',
+            'staff_account_blocked_reason',
+            'client_account_blocked',
+            'client_account_blocked_reason')
 
     user_id = fields.Integer()
 
@@ -35,7 +41,7 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
         new_user.set_password(data['password'])
         return new_user
 
-    
+
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -129,11 +135,14 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscriptions
         exclude = ('created_at', 'updated_at', 'idx')
-        dump_only = ('start_date', 'end_date', 'user_id')
+        dump_only = ('end_date', 'user_id', )
+        load_only = ('apple_original_transaction_id',)
 
-    subscription_type_id = fields.Integer(required=False)
+    subscription_type_id = fields.Integer(required=False, validate=validate.OneOf([2,3]))
     subscription_status = fields.String(validate=validate.OneOf(['unsubscribed', 'subscribed', 'free trial', 'sponsored']))
-
+    expire_date = fields.DateTime(metadata={'(UTC) description': 'date this subscription purchase ends. Overall subscription may persist if it is renewed.'})
+    auto_renew_status = fields.Boolean(dump_only = True, metadata={'description': 'If True the subscription is set to be renewed automatically.'})
+    apple_original_transaction_id = fields.String(load_only=True, missing=None)
     subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
     
     @post_load
