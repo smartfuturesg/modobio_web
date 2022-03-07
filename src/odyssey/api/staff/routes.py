@@ -1011,7 +1011,7 @@ class StaffOfficesRoute(BaseResource):
         if not state:    
             raise BadRequest(f'State not found.')
 
-        office.update(request.json)
+        office.update(request.parsed_obj)
         db.session.commit()
 
         #fill in country name for the response
