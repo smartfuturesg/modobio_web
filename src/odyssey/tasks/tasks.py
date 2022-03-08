@@ -388,7 +388,7 @@ def store_telehealth_transcript(booking_id: int):
                 else:
                     img = BytesIO(media_content)
                     tmp = Image.open(img)
-                    file_extension = tmp.format.lower()
+                    file_extension = '.'+ tmp.format.lower()
                     tfile = BytesIO()
                     tmp.save(tfile, format='jpeg')
                     media_file = FileStorage(tfile, filename=f'{media_id}{file_extension}', content_type=media['content_type'])
