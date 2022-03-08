@@ -1793,7 +1793,7 @@ class TelehealthTranscripts(Resource):
     """
     Operations related to stored telehealth transcripts
     """
-    @token_auth.login_required()
+    # @token_auth.login_required()
     @responds(api=ns, schema = TelehealthTranscriptsSchema, status_code=200)
     @ns.doc(params={'page': 'pagination index',
                 'per_page': 'results per page'})
@@ -1802,6 +1802,7 @@ class TelehealthTranscripts(Resource):
         Retrieve messages from booking transscripts that have been stored on modobio's end
         """
         current_user, _ = token_auth.current_user()
+
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
         
@@ -1810,13 +1811,15 @@ class TelehealthTranscripts(Resource):
         if not booking:
             raise BadRequest('Meeting does not exist yet.')
 
-        # make sure the requester is one of the participants
+        # make sure the requester is one of booking the participants
         if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
             raise Unauthorized('You must be a participant in this booking.')
+        
+        if not booking.chat_room.transcript_object_id:
+            raise BadRequest('Chat transcript not yet cached.')
 
         # bring up the transcript messages from mongo db
         transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
-
 
         # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
         fh = FileHandling()
