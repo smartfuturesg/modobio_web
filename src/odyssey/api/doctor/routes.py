@@ -1333,13 +1333,13 @@ class MedBloodTest(BaseResource):
         else:
             raise BadRequest("test_id must be an integer.")
         
-@ns.route('/bloodtest/image/<int:test_id>/')
-@ns.doc(params={'test_id': 'User ID number'})
+@ns.route('/bloodtest/image/<int:user_id>/')
+@ns.doc(params={'test_id': 'Test ID number'})
 class MedBloodTestImage(BaseResource):
     
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestSchema, api=ns, status_code=200)
-    def patch(self, test_id):
+    def patch(self, user_id):
         """
         This resource can be used to add an image to submitted blood test results.
 
@@ -1349,6 +1349,11 @@ class MedBloodTestImage(BaseResource):
 
         if not ('image' in request.files and request.files['image']):  
             raise BadRequest('No file selected.')
+        
+        test_id = request.args.get('test_id', type=int)
+        test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
+        if not test:
+            raise BadRequest(f'No test exists with test id {test_id} for the user with user_id {user_id}.')
 
         # add file to S3
         # format: id{user_id:05d}/bloodtest/id{test_id:05d}/hex_token.img_extension
@@ -1364,7 +1369,6 @@ class MedBloodTestImage(BaseResource):
         #get hex token
         hex_token = secrets.token_hex(4)
         
-        test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
         _prefix = f'id{test.user_id:05d}/bloodtest/id{test.test_id:05d}'
 
         # if any, delete files with prefix
@@ -1438,9 +1442,7 @@ class MedBloodTestAll(BaseResource):
             data.update(
                 {'reporter_firstname': test[1],
                  'reporter_lastname': test[2],
-                 'image': image_path,
-                 'modobio_test_code': MedicalBloodTestResults.query.filter_by(test_id=test.test_id).one_or_none().modobio_test_code
-                 })
+                 'image': image_path})
             response.append(data)
         payload = {}
         payload['items'] = response
