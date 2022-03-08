@@ -368,8 +368,6 @@ def store_telehealth_transcript(booking_id: int):
     # For now, the boooking state does not matter. 
     booking = db.session.execute(select(TelehealthBookings
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
-    # close conversation so that no more messages can be added to transcript
-    twilio.close_telehealth_chatroom(booking.idx)
     
     transcript = twilio.get_booking_transcript(booking.idx)
 
@@ -390,8 +388,8 @@ def store_telehealth_transcript(booking_id: int):
                     media_file = FileStorage(media_content, filename=f'{media_id}.pdf', content_type=media['content_type'])
                 else:
                     img = BytesIO(media_content)
-                    file_extension = '.' + imghdr.what('', media_content)
                     tmp = Image.open(img)
+                    file_extension = tmp.format.lower()
                     tfile = BytesIO()
                     tmp.save(tfile, format='jpeg')
                     media_file = FileStorage(tfile, filename=f'{media_id}{file_extension}', content_type=media['content_type'])
