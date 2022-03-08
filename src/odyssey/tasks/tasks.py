@@ -12,7 +12,6 @@ from pytz import utc
 
 from bson import ObjectId
 from flask_migrate import current_app
-import imghdr
 from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
 
