@@ -1867,8 +1867,7 @@ class TelehealthTranscripts(Resource):
         if not booking:
             raise BadRequest('Meeting does not exist yet.')
 
-        # store_telehealth_transcript.delay(booking.idx)
-        store_telehealth_transcript(booking.idx)
+        store_telehealth_transcript.delay(booking.idx)
                     
         return 
 
