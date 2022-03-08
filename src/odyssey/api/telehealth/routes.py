@@ -1793,7 +1793,7 @@ class TelehealthTranscripts(Resource):
     """
     Operations related to stored telehealth transcripts
     """
-    # @token_auth.login_required()
+    @token_auth.login_required()
     @responds(api=ns, schema = TelehealthTranscriptsSchema, status_code=200)
     @ns.doc(params={'page': 'pagination index',
                 'per_page': 'results per page'})
