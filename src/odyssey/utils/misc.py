@@ -39,6 +39,7 @@ from odyssey.api.user.models import UserRemovalRequests
 from odyssey.api.lookup.models import LookupDrinks
 from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, CLIENT_S3_TABLES, STAFF_S3_TABLES
 from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
+from odyssey.api.notifications.models import Notifications
 
 from odyssey.utils.auth import token_auth
 from odyssey.utils.message import send_email_delete_account
@@ -560,9 +561,6 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
 
-
-
-
 class EmailVerification():
     """
     Class for handling email verification routines
@@ -610,8 +608,9 @@ class EmailVerification():
         dict: email verification code, token, email, and user_id
         """
         # Check if email is already in use
-        if User.query.filter_by(email = email).one_or_none():
-            raise BadRequest("Email in use")
+        if email:
+            if User.query.filter_by(email = email).one_or_none():
+                raise BadRequest("Email in use")
             
         # check if there is already a Pending email verification entry
         pending_verification = UserPendingEmailVerifications.query.filter_by(user_id = user.user_id).one_or_none()
@@ -912,3 +911,18 @@ def delete_user(user_id, requestor_id, delete_type):
     if user_email != requester.email:
         send_email_delete_account(requester.email, user_email)
     send_email_delete_account(user_email, user_email)
+
+
+def create_notification(user_id, severity_id, notification_type_id, title, content):
+    #used to create a notification
+    
+    notification = Notifications(**{
+        'user_id': user_id,
+        'title': title,
+        'content': content,
+        'severity_id': severity_id,
+        'notification_type_id': notification_type_id
+    })
+    
+    db.session.add(notification)
+    db.session.commit()

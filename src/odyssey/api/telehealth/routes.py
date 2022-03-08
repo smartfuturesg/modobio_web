@@ -283,6 +283,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
             practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
             for block in time_blocks:
                 _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                
+                #if the user has a staff + client account, it may be possible for their staff account
+                #to appear as an option when attempting to book a meeting as a client
+                #to prevent this, we check if the given user id is in the list of practitioners and remove it
+                if user_id in _practitioner_ids:
+                    _practitioner_ids.remove(token_auth.current_user()[0].user_id)
+                    
                 if _practitioner_ids:
                     date1, day1, day1_start, day1_end = time_blocks[block][0]
                     available_times_with_practitioners[block] = {
@@ -578,7 +585,10 @@ class TelehealthBookingsApi(BaseResource):
         if not staff_user_id:
             raise BadRequest('Missing practitioner ID.')    
         # Check staff existence
-        self.check_user(staff_user_id, user_type='staff')    
+        self.check_user(staff_user_id, user_type='staff')
+        
+        if client_user_id == staff_user_id:
+            raise BadRequest('Staff user id cannot be the same as client user id.')
         
         # make sure the requester is one of the participants
         if not (current_user.user_id == client_user_id or
@@ -1260,7 +1270,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         else:
             #all availability is being removed, so all bookings are conflicts
             time_inc = LookupBookingTimeIncrements.query.all()
-            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).all()
+            conflicts = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(or_(
+                TelehealthBookings.status == 'Accepted',
+                TelehealthBookings.status == 'Pending'
+                )).all()
             for conflict in conflicts:
                     conflict.start_time_utc = time_inc[conflict.booking_window_id_start_time_utc-1].start_time
         db.session.commit()
@@ -1834,12 +1847,10 @@ class TelehealthTranscripts(Resource):
             }
         return payload
    
-    @token_auth.login_required(dev_only=True)
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(api=ns, status_code=200)
     def patch(self, booking_id):
         """
-        **DEV only**
-
         Store booking transcripts for the booking_id supplied.
         This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
         that is fired off following the completion of a booking. 

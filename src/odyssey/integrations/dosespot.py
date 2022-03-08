@@ -234,7 +234,7 @@ class DoseSpot:
                     user_id=user_id,
                     title=f"You have {notification_count} DoseSpot Notifications.",
                     content="Click this notification to be brought to the DoseSpot platform to view notifications.",
-                    action=url,
+                    severity_id=1,
                     time_to_live = 0 
                 )
                 db.session.add(ds_notification)

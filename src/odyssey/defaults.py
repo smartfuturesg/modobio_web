@@ -227,12 +227,8 @@ DOSESPOT_API_KEY = ''
 DOSESPOT_MODOBIO_ID = ''
 """ DoseSpot ModoBio ID. """
 
-DOSESPOT_ENCRYPTED_MODOBIO_ID = ''
-
 DOSESPOT_ADMIN_ID = ''
 """ DoseSpot Admin ID"""
-
-DOSESPOT_ENCRYPTED_ADMIN_ID = ''
 
 DOSESPOT_PROXY_USER_ID = '238851'
 
@@ -271,6 +267,7 @@ APPLE_APPSTORE_ISSUER_ID = 'a81919e2-a4c0-4611-b8d0-7b260a6fdd62'
 APPLE_APPSTORE_BUNDLE_ID = 'com.modobio.ModoBioClient'
 
 APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'
+
 MAINTENANCE_DYNAMO_TABLE='dev_maintenance_v02'
 
 # Maintenance timezone, 

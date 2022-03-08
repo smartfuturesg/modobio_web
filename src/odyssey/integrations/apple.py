@@ -26,7 +26,7 @@ class AppStore:
     def __init__(self):
         self.bundle_id = current_app.config.get('APPLE_APPSTORE_BUNDLE_ID')
         self.private_api_key = current_app.config.get('APPLE_APPSTORE_API_KEY').replace('\\\n', '\n') # additional '\' added when reading in from env var (\\ in DEV)
-        self.private_api_key = current_app.config.get('APPLE_APPSTORE_API_KEY').replace('\\n', '\n') # additional '\' added when reading in from env var
+        self.private_api_key = self.private_api_key.replace('\\n', '\n') # additional '\' added when reading in from env var
         self.api_key_id = current_app.config.get('APPLE_APPSTORE_API_KEY_ID')
 
     def _generate_auth_jwt(self):
@@ -114,6 +114,7 @@ class AppStore:
         # end current subscription
         end_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc)
         current_subscription.end_date = end_date
+        current_subscription.subscription_status = 'unsubscribed'
 
         new_subscription_data = {
             'subscription_status': 'subscribed',
