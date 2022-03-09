@@ -871,16 +871,25 @@ BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed'
 ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg')
 
 #medical image types allowed for upload
-MED_ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', 'DCOM','.bmp', '.gif', '.webp', '.psd', '.pdf')
+MED_ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', '.dcm', '.dicom', '.pdf')
 
-#image resize thumbnail demensions (w, h) two-tuple
-IMAGE_DIMENSIONS = ((512,512),(256,256),(128,128),(64,64))
-
-#image max size 10MB = 10485760 binary bytes
-IMAGE_MAX_SIZE = 10485760
+# Generic allowed files
+ALLOWED_FILE_TYPE = ('.png', '.jpg', '.jpeg', '.doc', '.pdf', '.txt', '.md', '.csv')
 
 #audio types allowed for upload
 ALLOWED_AUDIO_TYPES = ('.m4a', '.caf')
+
+#image resize thumbnail demensions (w, h) two-tuple
+IMAGE_DIMENSIONS = (
+    (512, 512),
+    (256, 256),
+    (128, 128),
+    (64, 64))
+
+#image max size 10MB = 10485760 binary bytes
+IMAGE_MAX_SIZE = 10485760
+FILE_MAX_SIZE = 10485760
+AUDIO_MAX_SIZE = 10485760
 
 ### Event's Calendar constants ###
 EVENT_AVAILABILITY = ('Busy', 'Available')
