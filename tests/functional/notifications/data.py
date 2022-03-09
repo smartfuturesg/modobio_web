@@ -1,11 +1,3 @@
-notification = {
-    'title': 'A nice title',
-    'content': 'You have Spam!',
-    'severity_id': 3,
-    'read': False,
-    'deleted': False,
-    'notification_type_id': 1}
-
 notification_type = 'Account Management'
 
 notification_update = {

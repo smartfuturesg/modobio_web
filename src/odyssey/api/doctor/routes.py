@@ -1,13 +1,9 @@
 import logging
-
-from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
-logger = logging.getLogger(__name__)
-
 import secrets
 
 from datetime import datetime, date
-from dateutil.relativedelta import relativedelta
 
+from dateutil.relativedelta import relativedelta
 from flask import g, request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
@@ -36,6 +32,7 @@ from odyssey.api.doctor.models import (
     MedicalSurgeries
 )
 from odyssey.api.facility.models import MedicalInstitutions
+from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
@@ -74,6 +71,8 @@ from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.utils.base.resources import BaseResource
+
+logger = logging.getLogger(__name__)
 
 ns = Namespace('doctor', description='Operations related to doctor')
 
@@ -787,165 +786,148 @@ class MedicalLookUpSTDResource(BaseResource):
 
         return payload
 
+
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(BaseResource):
-    @token_auth.login_required(resources=('sexual_history','social_history'))
+    @token_auth.login_required(resources=('sexual_history', 'social_history'))
     @responds(schema=MedicalSocialHistoryOutputSchema, api=ns)
     def get(self, user_id):
-        """ This request retrieves the social history
-        for client ``user_id`` in response to a GET request.
-
-        The example returned payload will look like::
-
-            {
-                "social_history": {
-                    "currently_smoke": bool,
-                    "avg_num_cigs": int,
-                    "num_years_smoked": int,
-                    "last_smoke": int,
-                    "last_smoke_time": str,
-                    "plan_to_stop": bool,
-                    "avg_weekly_drinks": int,
-                    "avg_weekly_workouts": int,
-                    "job_title": str,
-                    "avg_hourly_meditation": int,
-                    "sexual_preference": str
-                }
-                "std_history": [
-                    {"std_id": int},
-                    {"std_id: int}
-                ]
-            }
+        """ Social and sexual history information.
 
         Parameters
         ----------
-
         user_id : int
             User ID number.
 
         Returns
         -------
-
         dict
             JSON encoded dict.
         """
         current_user, _ = token_auth.current_user()
         self.check_user(user_id, user_type='client')
+        care_team_resources = g.get('clinical_care_authorized_resources')
 
-        social_hist = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
-        std_hist = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
-
-        payload = {'social_history': (social_hist if (current_user.user_id == user_id or 'social_history' in g.get('clinical_care_authorized_resources')) else None),
-                   'std_history': (std_hist if (current_user.user_id == user_id or 'sexual_history' in g.get('clinical_care_authorized_resources')) else None)}
-        return payload
-
-    @token_auth.login_required(staff_role=('medical_doctor',), resources=('sexual_history','social_history'))
-    @accepts(schema=MedicalSocialHistoryOutputSchema, api=ns)
-    @responds(schema=MedicalSocialHistoryOutputSchema, status_code=201, api=ns)
-    def post(self, user_id):
-        """ This request submits the social history
-        for client ``user_id`` in response to a POST request.
-
-        The example returned payload will look like::
-
-            {
-                "social_history":{
-                    "currently_smoke": bool,
-                    "avg_num_cigs": int,
-                    "num_years_smoked": int,
-                    "last_smoke": int,
-                    "last_smoke_time": str,
-                    "plan_to_stop": bool,
-                    "avg_weekly_drinks": int,
-                    "avg_weekly_workouts": int,
-                    "job_title": str,
-                    "avg_hourly_meditation": int,
-                    "sexual_preference": str
-                }
-                "std_history": [
-                    {"std_id": int},
-                    {"std_id": int}
-                ]
-            }
-
-        Parameters
-        ----------
-
-        user_id : int
-            User ID number.
-
-        Returns
-        -------
-
-        dict
-            JSON encoded dict.
-        """
-        current_user, _ = token_auth.current_user()
-        self.check_user(user_id, user_type='client')
-        # Check if this information is already in the DB
-
-        # Check if this information is already in the DB
         payload = {}
 
-        social = request.parsed_obj['social_history']
-
-        # If the user submits something for Social history, then removes it from the payload, 
-        # remove the everything for that user in social history table
-        if social and (current_user.user_id == user_id or 'social_history' in g.get('clinical_care_authorized_resources')):
-            social_hist_current = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
-            if social_hist_current:
-                db.session.delete(social_hist_current)
-
-            if social.last_smoke_time == '':
-                social.last_smoke_time = None
-            
-            if social.ever_smoked:
-                if not social.currently_smoke:
-                    # if last smoke or last smoke time (months/years)
-                    # is present, then both must be present
-                    if social.last_smoke or social.last_smoke_time:
-                        if social.last_smoke is None or social.last_smoke_time is None: 
-                            db.session.rollback()
-                            raise BadRequest('Date of last smoked and duration required.')
-                        
-                        if(social.last_smoke_time == 'days'):
-                            social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=social.last_smoke) 
-                        elif(social.last_smoke_time == 'months'):
-                            social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(months=social.last_smoke)
-                        elif(social.last_smoke_time == 'years'):
-                            social.__dict__['last_smoke_date'] = datetime.now() - relativedelta(years=social.last_smoke)
-            social.__dict__['user_id'] = user_id
-
-            db.session.add(social)
-
+        if (current_user.user_id == user_id or
+            'social_history' in care_team_resources):
+            social = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
             payload['social_history'] = social
 
-        # If the user submits something for STD history, then removes it from the payload, 
-        # remove their STD history from the table
-        stds = request.parsed_obj['std_history']
-        if stds and (current_user.user_id == user_id or 'sexual_history' in g.get('clinical_care_authorized_resources')):
-            std_history_current = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
-            # If the payload contains an STD for a user already, then just continue
-            if std_history_current:
-                for std in std_history_current:
-                    db.session.delete(std)
-            
-            payload['std_history'] = []
+        if (current_user.user_id == user_id or
+            'sexual_history' in care_team_resources):
+            std = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
+            payload['std_history'] = std
 
-            for std in stds:
-                stdInDB = MedicalLookUpSTD.query.filter_by(std_id=std.std_id).one_or_none()
-                if not stdInDB:
-                    db.session.rollback()
-                    raise BadRequest('STD ID not found.')
-
-                std.user_id = user_id
-                db.session.add(std)
-                payload['std_history'].append(std)
-
-        # insert results into the result table
-        db.session.commit()
         return payload
+
+    @token_auth.login_required(
+        staff_role=('medical_doctor',),
+        resources=('sexual_history', 'social_history'))
+    @accepts(schema=MedicalSocialHistoryOutputSchema, api=ns)
+    @responds(status_code=201, api=ns)
+    def post(self, user_id):
+        """ Update social and sexual history information.
+
+        The two parts "social_history" and "sexual_history" can be updated independently
+        from each other. For each part:
+
+        1. If the part is not there, it will not be updated or deleted.
+        2. If the part is there and contains data, it will override the current
+           entry in the database.
+        3. If the part is present but empty, the entry will be deleted from the database.
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict.
+        """
+        # TODO: this is all kinds of wrong.
+        # - POST method should be used to add new info for user only, not updates or deletes.
+        # - There should be a PATCH method to allow partial updates of individual items.
+        # - There should be a DELETE method to delete all info, not rely on empty body.
+        # - This should be split into two endpoints, one for social and one for sexual.
+        #   Why were they forced together?
+        # - The use of multiple inputs for last_smoke_date (N as number + days/months/years
+        #   as text) is infuriating. Backend should only deal with a datetime. Let
+        #   frontend handle how it's entered.
+
+        current_user, _ = token_auth.current_user()
+        self.check_user(user_id, user_type='client')
+        care_team_resources = g.get('clinical_care_authorized_resources')
+
+        # If social_history is empty, it will get filled with 'missing' values from schema.
+        social = request.parsed_obj['social_history']
+
+        if (social and
+            (current_user.user_id == user_id or
+             'social_history' in care_team_resources)):
+
+            if social.ever_smoked and not social.currently_smoke:
+                # if last_smoke or last_smoke_time (in days/months/years) is present,
+                # then both must be present
+                if social.last_smoke is not None and social.last_smoke_time is None:
+                    raise BadRequest('Last smoked date unit (days/months/years) is missing.')
+                if social.last_smoke_time is not None and social.last_smoke is None:
+                    raise BadRequest('Number of last smoked days/months/years is missing.')
+
+                if(social.last_smoke_time == 'days'):
+                    social.last_smoke_date = datetime.now() - relativedelta(days=social.last_smoke)
+                elif(social.last_smoke_time == 'months'):
+                    social.last_smoke_date = datetime.now() - relativedelta(months=social.last_smoke)
+                elif(social.last_smoke_time == 'years'):
+                    social.last_smoke_date = datetime.now() - relativedelta(years=social.last_smoke)
+                else:
+                    # both are None, clear entry
+                    social.last_smoke_date = None
+
+            social_current = MedicalSocialHistory.query.filter_by(user_id=user_id).one_or_none()
+
+            if social_current:
+                social_current.update(social)
+            else:
+                social.user_id = user_id
+                db.session.add(social)
+
+            db.session.commit()
+
+        # stds is None if not present, empty list if deleting all entries, or list with entries.
+        stds = request.parsed_obj['std_history']
+
+        if (stds is not None and
+            (current_user.user_id == user_id or
+             'sexual_history' in care_team_resources)):
+
+            stds_current = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
+            possible_stds = db.session.execute(select(MedicalLookUpSTD.std_id)).scalars().all()
+
+            # Maps std_ids to instances, for both existing and requested
+            existing = {s.std_id: s for s in stds_current}
+            requested = {s.std_id: s for s in stds}
+
+            to_add = set(requested.keys()) - set(existing.keys())
+            to_del = set(existing.keys()) - set(requested.keys())
+
+            invalid = to_add - set(possible_stds)
+            if invalid:
+                raise BadRequest(f'Invalid STD IDs: {invalid}')
+
+            for std_id in to_del:
+                db.session.delete(existing[std_id])
+            for std_id in to_add:
+                req = requested[std_id]
+                req.user_id = user_id
+                db.session.add(req)
+
+        db.session.commit()
+
 
 @ns.route('/medicalconditions/')
 class MedicalCondition(BaseResource):

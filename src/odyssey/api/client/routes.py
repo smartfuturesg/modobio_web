@@ -349,7 +349,6 @@ class Client(BaseResource):
     @responds(schema=ClientAndUserInfoSchema, status_code=200, api=ns)
     def put(self, user_id):
         """edit client info"""
-
         self.check_user(user_id, user_type='client')
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
@@ -400,13 +399,6 @@ class Client(BaseResource):
                 dob = client_info['dob']
                 del client_info['dob']
                 user_data.update({'dob':dob})
-                
-            # handle state_id field: 
-            #  ClientInfo.state_id removed and replaced with territory_id as of 12.8.21 
-            #  however the FE still expects to send it in this request
-            if 'state_id' in client_info:
-                client_info['territory_id'] = client_info['state_id']
-                del client_info['state_id']
 
             client_data.update(client_info)
         if request.parsed_obj['user_info']:
@@ -427,8 +419,8 @@ class Client(BaseResource):
             client_info_payload['dob'] = dob
 
         #validate territory_id if supplied
-        if 'territory_id' in request.parsed_obj['client_info'].keys():
-            territory_id = request.parsed_obj['client_info']['territory_id']
+        territory_id = request.parsed_obj['client_info'].get('territory_id')
+        if territory_id:
             territory = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id).one_or_none()
             if not territory:
                 raise BadRequest(f'Territory {territory_id} not found.')

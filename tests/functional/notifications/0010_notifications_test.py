@@ -1,19 +1,26 @@
 from flask.json import dumps
 
+from odyssey import db
 from odyssey.api.notifications.models import Notifications
 
-from .data import notification, notification_type, notification_update
-
-def test_notifications_post(test_client):
-        response = test_client.post(
-            f'/notifications/{test_client.client_id}/',
-            headers=test_client.client_auth_header,
-            data=dumps(notification),
-            content_type='application/json')
-
-        assert response.status_code == 201
+from .data import notification_type, notification_update
 
 def test_notifications_get(test_client):
+        notification = {
+            'user_id': test_client.client_id,
+            'title': 'A nice title',
+            'content': 'You have Spam!',
+            'severity_id': 3,
+            'read': False,
+            'deleted': False,
+            'notification_type_id': 1
+        }
+    
+        obj = Notifications(**notification)
+        
+        db.session.add(obj)
+        db.session.commit()
+    
         response = test_client.get(
             f'/notifications/{test_client.client_id}/',
             headers=test_client.client_auth_header,
@@ -52,8 +59,8 @@ def test_notifications_put(test_client):
 
         notif = response.json[0]
         # Unchanged
-        assert notif.get('title') == notification['title']
-        assert notif.get('content') == notification['content']
+        assert notif.get('title') == 'A nice title'
+        assert notif.get('content') == 'You have Spam!'
         assert notif.get('notification_type') == notification_type
 
         # CHanged
