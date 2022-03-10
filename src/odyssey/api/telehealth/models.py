@@ -407,6 +407,25 @@ class TelehealthStaffAvailability(BaseModelWithIdx):
 
     :type: :class:`TelehealthStaffSettings` instance
     """
+    
+class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    Holds information for temporary availability exceptions
+    """
+    
+    exception_start_time = db.Column(db.Datetime)
+    """
+    Start date and time of this exception.
+    
+    :type: Datetime
+    """
+    
+    exception_end_time = db.Column(db.Datetime)
+    """
+    End date and time of this exception.
+    
+    :type: Datetime
+    """
 
 
 class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):

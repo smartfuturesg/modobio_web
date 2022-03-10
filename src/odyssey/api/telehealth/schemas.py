@@ -19,10 +19,11 @@ from odyssey.api.telehealth.models import (
     TelehealthBookings,
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
+    TelehealthStaffAvailabilityExceptions,
     TelehealthMeetingRooms,
     TelehealthQueueClientPool,
     TelehealthBookingDetails,
-    TelehealthStaffSettings
+    TelehealthStaffSettings,  
 )
 from odyssey.api.user.models import User
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, USSTATES_2
@@ -154,6 +155,18 @@ class TelehealthStaffAvailabilityInputSchema(Schema):
     day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
     start_time = fields.Time()
     end_time = fields.Time()
+    
+class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAchemyAutoSchema):
+    class Meta:
+        model = TelehealthStaffAvailabilityExceptions
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx')
+    user_id = fields.Integer()
+        
+    @post_load
+    def make_object(self, data, **kwargs):
+        return TelehealthStaffAvailabilityExceptions(**data)
+    
  
 class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

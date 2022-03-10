@@ -48,6 +48,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthStaffAvailabilityConflictSchema,
+    TelehealthStaffAvailabilityExceptionsSchema,
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema,
     TelehealthBookingsPUTSchema,
@@ -1278,6 +1279,41 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                     conflict.start_time_utc = time_inc[conflict.booking_window_id_start_time_utc-1].start_time
         db.session.commit()
         return {'conflicts': conflicts}
+
+@ns.route('/settings/staff/availability/exceptions/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID for a staff'})
+class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
+    """
+    This API resource is used to view and interact with temporary availability exceptions.
+    """
+    
+    @token_auth.login_required(user_type=('staff',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    def post(self, user_id):
+        """
+        Add new availability exception.
+        """
+        return
+    
+    @token_auth.login_required(user_type=('staff',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    def get(self, user_id):
+        """
+        View availability exceptions.
+        """
+        return
+    
+    @token_auth.login_required(user_type=('staff',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    def delete(self, user_id):
+        """
+        Remove availability exceptions.
+        """
+        return
+
 
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(BaseResource):
