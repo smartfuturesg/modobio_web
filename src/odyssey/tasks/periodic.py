@@ -9,7 +9,7 @@ from datetime import datetime, date, timedelta
 from datetime import datetime, date, timedelta, timezone
 
 from celery.schedules import crontab
-from celery.signals import task_prerun, worker_process_init   
+from celery.signals import worker_process_init, worker_ready   
 from celery.utils.log import get_task_logger
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
@@ -285,12 +285,9 @@ def deploy_webhook_tasks(**kwargs):
             if wh_payload['ns']['coll'] == 'wheel':
                 process_wheel_webhooks.delay(wh_payload['fullDocument'])
 
-@worker_process_init.connect
-def close_previous_db_connection(**kwargs):
-    if db.session:
-        db.session.close()
-        db.engine.dispose()
-        logger.info("engine disposed")
+@worker_ready.connect()
+def startup_tasks(**kwargs):
+    deploy_webhook_tasks.delay()
 
 @celery.task()
 def find_chargable_bookings():
@@ -396,9 +393,11 @@ def deploy_subscription_update_tasks(interval:int):
     
     return 
     
-@task_prerun.connect()
+@worker_process_init.connect
 def close_previous_db_connection(**kwargs):
-    db.engine.dispose()
+    if db.session:
+        db.session.close()
+        db.engine.dispose()
 
 celery.conf.beat_schedule = {
     # look for upcoming apppointment within moving windows:
