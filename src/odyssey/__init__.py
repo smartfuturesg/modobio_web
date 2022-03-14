@@ -17,6 +17,7 @@ from flask_migrate import Migrate
 from flask_pymongo import PyMongo 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.orm import class_mapper
 from werkzeug.exceptions import HTTPException
 
 # Temporary fix
@@ -183,11 +184,53 @@ def create_app():
     return app
 
 
-# Custom method to easily update db table from a dict
-def _update(self, form: dict):
-    for k, v in form.items():
-        setattr(self, k, v)
+# TODO: this should be moved to utils/base/models.py once all models derive
+# from our custom base model.
+def _update(self, other):
+    """ Update a table instance.
 
+    Update a table instance with values from a dict or another instance
+    of the same table class. Values not present in :attr:`other` are not
+    updated.
+
+    Parameters
+    ----------
+    other : dict or :class:`sqlalchemy.Table` instance
+        The dict or table instance providing the values to be updated.
+
+    Raises
+    ------
+    TypeError
+        Raised if :attr:`other` is neither a dict nor a :class:`sqlalchemy.Table` instance.
+
+    ValueError
+        Raised if :attr:`other` is an instance of a different sqlalchemy model than the
+        instance it is trying to update.
+
+    AttributeError
+        Raised if key from :attr:`other` as dict does not exist on the model it is trying
+        to update.
+    """
+    if isinstance(other, dict):
+        for k, v in other.items():
+            # Raises AttributeError if key does not exist on self.
+            getattr(self, k)
+            setattr(self, k, v)
+    else:
+        try:
+            self_type = class_mapper(type(self))
+            other_type = class_mapper(type(other))
+        except sqlalchemy.orm.exc.UnmappedClassError:
+            raise TypeError(f'{other!r} is not a dict or sqlalchemy model.')
+
+        if self_type != other_type:
+            raise ValueError(f'Trying to update an instance of {self_type.class_} '
+                            f'with an instance of {other_type.class_}')
+
+        for k, v in other.__dict__.items():
+            if k.startswith('_sa'):
+                continue
+            setattr(self, k, v)
 
 def init_celery(app=None):
     """

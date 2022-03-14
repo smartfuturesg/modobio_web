@@ -249,11 +249,11 @@ class Instamed:
                                 3, 
                                 5, 
                                 "Your Card Could Not Be Charged", 
-                                f"Your telehealth appointment with {booking.practitioner.firstname} \
-                                {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
-                                unfortunately, had to be canceled as your payment method ending in \
-                                {payment_last_four} could not be charged. Please revise your payment \
-                                method or perhaps speak with your bank to resolve the issue")
+                                f"Your telehealth appointment with {booking.practitioner.firstname} " + \
+                                f"{booking.practitioner.lastname} at {start_time} on {booking.target_date}, " + \
+                                "unfortunately, had to be canceled as your payment method ending in " + \
+                                f"{payment_last_four} could not be charged. Please revise your payment " + \
+                                "method or perhaps speak with your bank to resolve the issue")
             return
 
         #convert response data to json (python dict)
@@ -304,11 +304,11 @@ class Instamed:
                                     3, 
                                     5, 
                                     "Your Card Could Not Be Charged", 
-                                    f"Your telehealth appointment with {booking.practitioner.firstname} \
-                                    {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
-                                    unfortunately, had to be canceled as your payment method ending in \
-                                    {payment_last_four} could not be charged. Please revise your payment \
-                                    method or perhaps speak with your bank to resolve the issue")
+                                    f"Your telehealth appointment with {booking.practitioner.firstname} " + \
+                                    f"{booking.practitioner.lastname} at {start_time} on {booking.target_date}, " + \
+                                    "unfortunately, had to be canceled as your payment method ending in " + \
+                                    f"{payment_last_four} could not be charged. Please revise your payment " + \
+                                    "method or perhaps speak with your bank to resolve the issue")
             
                 #add void data to history and commit
                 history.voided = True
@@ -342,11 +342,11 @@ class Instamed:
                                 3, 
                                 5, 
                                 "Your Card Could Not Be Charged", 
-                                f"Your telehealth appointment with {booking.practitioner.firstname} \
-                                {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
-                                unfortunately, had to be canceled as your payment method ending in \
-                                {payment_last_four} could not be charged. Please revise your payment \
-                                method or perhaps speak with your bank to resolve the issue")
+                                f"Your telehealth appointment with {booking.practitioner.firstname} " + \
+                                f"{booking.practitioner.lastname} at {start_time} on {booking.target_date}, " + \
+                                "unfortunately, had to be canceled as your payment method ending in " + \
+                                f"{payment_last_four} could not be charged. Please revise your payment " + \
+                                "method or perhaps speak with your bank to resolve the issue")
 
         return response_data
 
