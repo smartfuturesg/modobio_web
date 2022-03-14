@@ -28,6 +28,7 @@ class Instamed:
                                         'Api-Secret': current_app.config.get('INSTAMED_API_SECRET'),
                                         'Content-Type': 'application/json'}
         self.url_base = "https://connect.instamed.com/rest"
+        
         self.outlet = {
                 "MerchantID": current_app.config.get('INSTAMED_MERCHANT_ID').replace('/',''),
                 "StoreID": '0001',
