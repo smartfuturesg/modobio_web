@@ -156,17 +156,20 @@ class TelehealthStaffAvailabilityInputSchema(Schema):
     start_time = fields.Time()
     end_time = fields.Time()
     
-class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAchemyAutoSchema):
+class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthStaffAvailabilityExceptions
         exclude = ('created_at', 'updated_at')
-        dump_only = ('idx')
-    user_id = fields.Integer()
+        dump_only = ('idx',)
+        
+    user_id = fields.Integer(dump_only=True)
         
     @post_load
     def make_object(self, data, **kwargs):
         return TelehealthStaffAvailabilityExceptions(**data)
     
+class TelehealthStaffAvailabilityExceptionsDeleteSchema(Schema):
+    exception_id = fields.Integer()
  
 class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

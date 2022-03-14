@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 import secrets
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 from dateutil import tz
 
 from flask import request, current_app, g, url_for
@@ -33,6 +33,7 @@ from odyssey.api.telehealth.models import (
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
     TelehealthBookingDetails,
+    TelehealthStaffAvailabilityExceptions,
     TelehealthStaffSettings
 )
 from odyssey.api.telehealth.schemas import (
@@ -49,6 +50,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthStaffAvailabilityConflictSchema,
     TelehealthStaffAvailabilityExceptionsSchema,
+    TelehealthStaffAvailabilityExceptionsDeleteSchema,
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema,
     TelehealthBookingsPUTSchema,
@@ -73,7 +75,8 @@ from odyssey.utils.constants import (
 from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_staff_existence
+    check_staff_existence,
+    check_user_existence
 )
 from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
@@ -1287,32 +1290,60 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     This API resource is used to view and interact with temporary availability exceptions.
     """
     
-    @token_auth.login_required(user_type=('staff',))
-    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema)
-    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=201)
     def post(self, user_id):
         """
         Add new availability exception.
         """
-        return
+        check_user_existence(user_id, user_type='staff')
+        
+        current_datetime = datetime.now(timezone.utc)
+
+        for exception in request.parsed_obj:
+            print(exception)
+            #exception start time must be in the future
+            if exception.exception_start_time < current_datetime:
+                raise BadRequest('Exception start time must be in the future.')
+
+            if exception.exception_start_time >= exception.exception_end_time:
+                raise BadRequest('Exception start time must be before exception end time.')
+            else:
+                exception.user_id = user_id
+                db.session.add(exception)
+                
+        db.session.commit()
+        
+        return request.parsed_obj
     
     @token_auth.login_required(user_type=('staff',))
-    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema)
-    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         View availability exceptions.
         """
-        return
+        check_user_existence(user_id, user_type='staff')
+        
+        return TelehealthStaffAvailabilityExceptions.query.all()
     
-    @token_auth.login_required(user_type=('staff',))
-    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema)
-    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema)
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsDeleteSchema(many=True), api=ns)
     def delete(self, user_id):
         """
         Remove availability exceptions.
         """
-        return
+        exception_ids = []
+        for exception in request.parsed_obj:
+            exception_ids.append(exception['exception_id'])
+        
+        TelehealthStaffAvailabilityExceptions.query.filter(
+            TelehealthStaffAvailabilityExceptions.user_id == user_id,
+            TelehealthStaffAvailabilityExceptions.idx.in_(exception_ids)
+        ).delete()
+        db.session.commit()       
+        
+        return 204
 
 
 @ns.route('/queue/client-pool/')

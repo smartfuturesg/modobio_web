@@ -413,14 +413,14 @@ class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
     Holds information for temporary availability exceptions
     """
     
-    exception_start_time = db.Column(db.Datetime)
+    exception_start_time = db.Column(db.DateTime)
     """
     Start date and time of this exception.
     
     :type: Datetime
     """
     
-    exception_end_time = db.Column(db.Datetime)
+    exception_end_time = db.Column(db.DateTime)
     """
     End date and time of this exception.
     
