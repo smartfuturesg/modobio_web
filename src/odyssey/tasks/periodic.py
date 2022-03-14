@@ -5,14 +5,11 @@ from odyssey.integrations.dosespot import DoseSpot
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, date, timedelta
-import requests
-import json
 
 from datetime import datetime, date, timedelta, timezone
-from flask import current_app
 
 from celery.schedules import crontab
-from celery.signals import task_prerun, worker_ready   
+from celery.signals import task_prerun, worker_process_init   
 from celery.utils.log import get_task_logger
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
@@ -32,7 +29,6 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
-from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import cancel_telehealth_appointment
 
@@ -289,9 +285,12 @@ def deploy_webhook_tasks(**kwargs):
             if wh_payload['ns']['coll'] == 'wheel':
                 process_wheel_webhooks.delay(wh_payload['fullDocument'])
 
-@worker_ready.connect()
-def startup_tasks(**kwargs):
-    deploy_webhook_tasks.delay()
+@worker_process_init.connect
+def close_previous_db_connection(**kwargs):
+    if db.session:
+        db.session.close()
+        db.engine.dispose()
+        logger.info("engine disposed")
 
 @celery.task()
 def find_chargable_bookings():
