@@ -1,5 +1,4 @@
 import logging
-from flask import request
 from sqlalchemy import and_
 logger = logging.getLogger(__name__)
 

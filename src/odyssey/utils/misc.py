@@ -37,7 +37,7 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
 from odyssey.api.user.models import UserRemovalRequests
 from odyssey.api.lookup.models import LookupDrinks
-from odyssey.utils.constants import ALPHANUMERIC, CLIENT_S3_TABLES, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, STAFF_S3_TABLES
+from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, CLIENT_S3_TABLES, STAFF_S3_TABLES
 from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
 from odyssey.api.notifications.models import Notifications
 
@@ -560,7 +560,6 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.start_time <= target_time.time(),
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
-
 
 class EmailVerification():
     """
