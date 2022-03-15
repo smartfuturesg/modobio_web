@@ -243,7 +243,6 @@ class MedicalBloodTestSchema(Schema):
     test_id = fields.Integer()
     user_id = fields.Integer()
     date = fields.Date(required=True)
-    modobio_test_code = fields.String(required=True)
     notes = fields.String(required=False)
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
