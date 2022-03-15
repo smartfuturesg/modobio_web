@@ -1,10 +1,10 @@
 """ Various constants used throughout the Odyssey package. """
-import logging
-logger = logging.getLogger(__name__)
-
 import enum
+import logging
 
 from sqlalchemy import text
+
+logger = logging.getLogger(__name__)
 
 TABLE_TO_URI = {
     'ClientPolicies': '/client/policies/{}/',
@@ -867,17 +867,17 @@ TWILIO_ACCESS_KEY_TTL = 14400
 
 BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed', 'Document Review')
 
-#profile and other image types allowed for upload
-ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg')
+# profile and other image types allowed for upload
+ALLOWED_IMAGE_TYPES = ('png', 'jpg', 'jpeg')
 
-#medical image types allowed for upload
-MED_ALLOWED_IMAGE_TYPES = ('.png', '.jpg', '.jpeg', '.dcm', '.dicom', '.pdf')
+# medical image types allowed for upload
+ALLOWED_MEDICAL_IMAGE_TYPES = ('png', 'jpg', 'jpeg', 'dcm', 'dicom', 'pdf')
 
 # Generic allowed files
-ALLOWED_FILE_TYPE = ('.png', '.jpg', '.jpeg', '.doc', '.pdf', '.txt', '.md', '.csv')
+ALLOWED_FILE_TYPES = ('png', 'jpg', 'jpeg', 'doc', 'pdf', 'txt', 'md', 'csv')
 
-#audio types allowed for upload
-ALLOWED_AUDIO_TYPES = ('.m4a', '.caf')
+# audio types allowed for upload
+ALLOWED_AUDIO_TYPES = ('m4a', 'caf')
 
 #image resize thumbnail demensions (w, h) two-tuple
 IMAGE_DIMENSIONS = (
@@ -952,9 +952,3 @@ FERTILITY_STATUSES = {
         'postmenopausal'
     ]
 }
-
-#List of s3 tables containing client data for use when deleting a client
-CLIENT_S3_TABLES = ['medical_images', 'bloodtest', 'meeting_files', 'signed_documents', 'telehealth', 'client_profile_picture']
-
-#List of s3 tables containing staff data for use when deleting a client
-STAFF_S3_TABLES = ['staff_profile_picture']
