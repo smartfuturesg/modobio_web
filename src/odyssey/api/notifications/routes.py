@@ -21,7 +21,7 @@ from odyssey.api.notifications.schemas import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.message import PushNotification
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.files import FileDownload
 from odyssey.api.user.models import UserProfilePictures
 
 ns = Namespace('notifications', description='Endpoints for all types of notifications.')
@@ -321,16 +321,16 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
         pn = PushNotification()
         content = request.json.get('content', {})
 
-        # return the smallest size saved for staff profile picture
-        # currently saved as size30x30.jpeg
         if content:
             staff_id = content['data']['staff_id']
-            _prefix = f'id{staff_id:05d}/staff_profile_picture'
-            # Verify the staff member has a profile picture
-            profile_pictures_exist = UserProfilePictures.query.filter_by(staff_user_id=staff_id).all()
-            if profile_pictures_exist:
-                fh = FileHandling()
-                urls = fh.get_presigned_urls(prefix=_prefix)
-                content['data']['staff_profile_picture'] = urls
+            profile_pictures = UserProfilePictures.query.filter_by(staff_user_id=staff_id).all()
+
+            urls = {}
+            for pic in profile_pictures:
+                fd = FileDownload()
+                urls[pic.image_path] = fd.url(pic.image_path)
+
+            content['data']['staff_profile_picture'] = urls
+
         msg = pn.send(user_id, 'voip', content)
         return {'message': msg}

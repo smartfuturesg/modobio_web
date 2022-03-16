@@ -20,8 +20,8 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupOrganiz
 from odyssey.api.practitioner.models import PractitionerCredentials, PractitionerOrganizationAffiliation
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
 from odyssey.api.user.models import User, UserLogin, UserProfilePictures
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.constants import ALPHANUMERIC, IMAGE_DIMENSIONS
+from odyssey.utils.files import ImageUpload
 
 
 class Wheel:
@@ -464,69 +464,38 @@ class Wheel:
             ###
             # Save profile pic
             ###
-
-            #  if provided, get profile picture and store in s3
-            # if profile_picture field was included, profile pic is removed
-            # then if image was provided, it is updated, otherwise, it remains deleted
-            fh = FileHandling()
-            _prefix = f'id{user.user_id:05d}/staff_profile_picture'
-            
-            # when an image is provided, then the image is updated to the new one
-            # we're only allowing one profile picture for staff profile, so only one will be processed
             response = requests.get(clinician.get('photo'), stream=True)
             
             if response:
-                # validate file size - safe threashold (MAX = 10 mb)
-                img = BytesIO(response.content)
-                fh.validate_file_size(img, IMAGE_MAX_SIZE)
-                # validate file type
-                import imghdr
-                
-                img_extension = '.' + imghdr.what('', response.content)
-                if img_extension not in ALLOWED_IMAGE_TYPES:
-                    return
+                prefix = f'id{user.user_id:05d}/staff_profile_picture'
 
-                tmp = Image.open(img)
-                tfile = BytesIO()
-                img_w, img_h = tmp.size
-                tmp.save(tfile, format='jpeg')
-                original_s3key = f'{_prefix}/original{img_extension}'
-                img_file = FileStorage(tfile, filename=f'size{img_w}x{img_h}.jpeg', content_type=f'image/jpeg')
+                fs = FileStorage(BytesIO(response.content))
+                original = ImageUpload(fs)
+                original.validate()
+                name = f'{prefix}/original.{original.extension}'
+                original.save(name)
 
-                fh.save_file_to_s3(img_file, original_s3key)
-                # Save original to S3
+                upp = UserProfilePictures(
+                    staff_user_id=user.user_id,
+                    image_path=name,
+                    width=original.width,
+                    height=original.height,
+                    original=True)
+                db.session.add(upp)
 
-                # Save original to db
-                user_profile_pic = UserProfilePictures()
-                user_profile_pic.original = True
-                user_profile_pic.staff_user_id = user.user_id
-                user_profile_pic.image_path = original_s3key
-                user_profile_pic.width = img_w
-                user_profile_pic.height = img_h
-                db.session.add(user_profile_pic)
+                cropped = original.crop()
 
-                # crop image to a square
-                squared = fh.image_crop_square(img_file)
-
-                # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
                 for dimension in IMAGE_DIMENSIONS:
-                    _img = fh.image_resize(squared, dimension)
-                    # save to s3 bucket
-                    #add all 3 files to S3 - Naming it specifically as staff_profile_picture to differentiate from client profile pic
-                    #format: id{user_id:05d}/staff_profile_picture/size{img.length}x{img.width}.img_extension)
-                    _img_s3key = f'{_prefix}/{_img.filename}'
-                    fh.save_file_to_s3(_img, _img_s3key)
+                    resized = cropped.resize(dimension)
+                    name = resized.file.filename
+                    resized.save(name)
 
-                    # save to database
-                    w, h = dimension
-                    user_profile_pic = UserProfilePictures()
-                    user_profile_pic.staff_user_id = user.user_id
-                    user_profile_pic.image_path = _img_s3key
-                    user_profile_pic.width = w
-                    user_profile_pic.height = h
-                    user_profile_pic.original = False
-                    db.session.add(user_profile_pic)
-                
+                    upp = UserProfilePictures(
+                        staff_user_id=user.user_id,
+                        image_path=name,
+                        width=dimension[0],
+                        height=dimension[1])
+                    db.session.add(upp)
 
             db.session.commit()
 

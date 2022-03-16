@@ -25,7 +25,7 @@ from odyssey.api.staff.models import (
     StaffProfile,
     StaffCalendarEvents,
     StaffOffices)
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.files import FileDownload, ImageUpload
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
     StaffProfileSchema, 
@@ -362,19 +362,18 @@ class StaffProfilePage(BaseResource):
             'middlename': user.middlename,
             'lastname': user.lastname,
             'biological_sex_male': user.biological_sex_male,
-            'dob': user.dob
-        }
+            'dob': user.dob}
 
-        #as long as a staff member exists(checked above), they have a profile 
-        #because it is made for them when the staff user is created
+        # as long as a staff member exists(checked above), they have a profile
+        # because it is made for them when the staff user is created
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
 
         res['bio'] = profile.bio
-        #get presigned link to this user's profile picture
-        res['profile_picture'] = None
-        if profile.profile_pictures:
-            fh = FileHandling()
-            res['profile_picture'] = fh.get_presigned_urls(prefix=f'id{user_id:05d}/staff_profile_picture')
+        res['profile_picture'] = {}
+
+        fd = FileDownload()
+        for pic in profile.profile_pictures:
+            res['profile_picture'][pic.image_path] = fd.url(pic.image_path)
 
         return res
 
@@ -405,15 +404,12 @@ class StaffProfilePage(BaseResource):
         #To keep all data as is, the field should not be included in request
         user_update = {}
 
-        #stored here so we know if bio should be returned with the payload
-        #we don't want it returned if the key wasn't provided in the request
-        bio = None
-        pic = False
+        has_bio = False
 
         for key in request.form:
             if key == 'bio':
-                bio = request.form.get('bio')
-                profile.bio = bio
+                profile.bio = request.form.get('bio')
+                has_bio = True
             else:
                 data = request.form.get(key)
                 if key == 'biological_sex_male':
@@ -425,85 +421,66 @@ class StaffProfilePage(BaseResource):
                     else:
                         raise BadRequest(f'Invalid value for {key}.')
                 if key == 'dob':
-                    data = datetime.strptime(data,'%Y-%m-%d')
+                    data = datetime.strptime(data, '%Y-%m-%d')
                 user_update[key] = data
 
-        # if provided, get profile picture and store in s3
         if 'profile_picture' in request.files:
-            # if profile_picture field was included, profile pic is removed
-            # then if image was provided, it is updated, otherwise, it remains deleted
-            fh = FileHandling()
-            _prefix = f'id{user_id:05d}/staff_profile_picture'
-            
-            # will delete anything starting with this prefix if it exists
-            # if nothing matches the prefix, nothing will happen
-            fh.delete_from_s3(prefix=_prefix)
-
-            # Delete from db
-            for _obj in profile.profile_pictures:
-                db.session.delete(_obj)
-                
-            pic = True
-            urls = None
-
-            # when an image is provided, then the image is updated to the new one
-            # we're only allowing one profile picture for staff profile, so only one will be processed
+            # Only allowing one profile picture for staff, use first if multiple uploaded.
             img = request.files['profile_picture']
+            if isinstance(img, (list, tuple)):
+                img = img[0]
+
+            # Store current pictures, delete only after upload of new pictures is successful.
+            previous_pics = profile.profile_pictures
+
+            prefix = f'id{user_id:05d}/staff_profile_picture'
+            urls = {}
             if img:
-                # validate file size - safe threashold (MAX = 10 mb)
-                fh.validate_file_size(img, IMAGE_MAX_SIZE)
+                # Original image
+                original = ImageUpload(img)
+                original.validate()
+                name = f'{prefix}/original.{original.extension}'
+                original.save(name)
+                urls[name] = original.url()
 
-                # validate file type
-                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+                upp = UserProfilePictures(
+                    staff_user_id=user_id,
+                    image_path=name,
+                    width=original.width,
+                    height=original.height,
+                    original=True)
+                db.session.add(upp)
 
-                # Save original to S3
-                open_img = Image.open(img)
-                img_w, img_h = open_img.size
-                original_s3key = f'{_prefix}/original{img_extension}'
-                fh.save_file_to_s3(img, original_s3key)
+                # Make image square
+                cropped = original.crop()
 
-                # Save original to db
-                user_profile_pic = UserProfilePictures()
-                user_profile_pic.original = True
-                user_profile_pic.staff_user_id = user_id
-                user_profile_pic.image_path = original_s3key
-                user_profile_pic.width = img_w
-                user_profile_pic.height = img_h
-                db.session.add(user_profile_pic)
-
-                # crop image to a square
-                squared = fh.image_crop_square(img)
-
-                # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
+                # Resized images
                 for dimension in IMAGE_DIMENSIONS:
-                    _img = fh.image_resize(squared, dimension)
-                    # save to s3 bucket
-                    #add all 3 files to S3 - Naming it specifically as staff_profile_picture to differentiate from client profile pic
-                    #format: id{user_id:05d}/staff_profile_picture/size{img.length}x{img.width}.img_extension)
-                    _img_s3key = f'{_prefix}/{_img.filename}'
-                    fh.save_file_to_s3(_img, _img_s3key)
+                    resized = cropped.resize(dimension)
+                    name = f'{prefix}/{resized.file.filename}'
+                    resized.save(name)
+                    urls[name] = resized.url()
 
-                    # save to database
-                    w, h = dimension
-                    user_profile_pic = UserProfilePictures()
-                    user_profile_pic.staff_user_id = user_id
-                    user_profile_pic.image_path = _img_s3key
-                    user_profile_pic.width = w
-                    user_profile_pic.height = h
-                    db.session.add(user_profile_pic)
+                    upp = UserProfilePictures(
+                        staff_user_id=user_id,
+                        image_path=name,
+                        width=dimension[0],
+                        height=dimension[1])
+                    db.session.add(upp)
 
-                #get presigned urls to return in response
-                urls = fh.get_presigned_urls(prefix=_prefix)
-                img.close()
+            # Pictures successfully stored, now delete previous
+            fd = FileDownload()
+            for pic in previous_pics:
+                fd.delete(pic.image_path)
+                db.session.delete(pic)
 
-        #update user in db
         user.update(user_update)
         db.session.commit()
 
-        #add profile keys to user_update to match @responds
-        if bio:
+        # add profile keys to user_update to match @responds
+        if has_bio:
             user_update['bio'] = profile.bio
-        if pic:
+        if urls:
             user_update['profile_picture'] = urls
         
         if len(user_update.keys()) == 0:

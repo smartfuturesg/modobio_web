@@ -36,8 +36,8 @@ from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, L
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
-from odyssey.utils.file_handling import FileHandling
-from odyssey.utils.constants import IMAGE_MAX_SIZE, MED_ALLOWED_IMAGE_TYPES
+from odyssey.utils.files import FileDownload, ImageUpload
+from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
@@ -1044,11 +1044,11 @@ class MedImaging(BaseResource):
             img_dat.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
             response.append(img_dat)
 
-        #get presigned link for AWS for each image being returned
-        fh = FileHandling()
+        # get presigned link for AWS for each image being returned
+        fd = FileDownload()
         for img in response:
-            if img.get('image_path'):
-                img['image_path'] = fh.get_presigned_url(img.get('image_path'))
+            if path := img.get('image_path'):
+                img['image_path'] = fd.url(path)
 
         return response
 
@@ -1070,47 +1070,35 @@ class MedImaging(BaseResource):
         """
         self.check_user(user_id, user_type='client')
 
-        # bring up reporting staff member
-        reporter = token_auth.current_user()[0]
+        reporter, _ = token_auth.current_user()
         mi_schema = MedicalImagingSchema()
-        #Verify at least 1 file with key-name:image is selected for upload
-        if 'image' not in request.files:
-            mi_data = mi_schema.load(request.form)
-            mi_data.user_id = user_id
-            mi_data.reporter_id = reporter.user_id
-            db.session.add(mi_data)
-            db.session.commit()
-            return 
-
-        files = request.files #ImmutableMultiDict of key : FileStorage object
-        data_list = []
         hex_token = secrets.token_hex(4)
+        prefix = f'id{user_id:05d}/medical_images'
 
-        # add all files to S3
-        # format: id{user_id:05d}/medical_images/img_type_date_hex_token_i.img_extension
-        fh = FileHandling()
-        img = request.files['image']
-        _prefix = f'id{user_id:05d}/medical_images'
-
-        for i, img in enumerate(files.getlist('image')):
-            # validate file size - safe threashold (MAX = 10 mb)
-            fh.validate_file_size(img, IMAGE_MAX_SIZE)
-            # validate file type
-            img_extension = fh.validate_file_type(img, MED_ALLOWED_IMAGE_TYPES)
-
+        images = []
+        for i, img in enumerate(request.files.getlist('image')):
             mi_data = mi_schema.load(request.form)
             mi_data.user_id = user_id
             mi_data.reporter_id = reporter.user_id
-            date = mi_data.image_date
 
-            # Save image to S3
-            s3key = f'{_prefix}/{mi_data.image_type}_{date}_{hex_token}_{i}{img_extension}'
-            fh.save_file_to_s3(img, s3key)
-            mi_data.image_path = s3key
+            img = ImageUpload(img)
+            img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+            img.validate()
+            name = f'{prefix}/{mi_data.image_type}_{mi_data.image_date}_{hex_token}_{i}.{img.extension}'
+            img.save(name)
+            mi_data.image_path = name
 
-            data_list.append(mi_data)
+            images.append(mi_data)
 
-        db.session.add_all(data_list)  
+        if not images:
+            # No images uploaded, still want to store rest of form data.
+            mi_data = mi_schema.load(request.form)
+            mi_data.user_id = user_id
+            mi_data.reporter_id = reporter.user_id
+
+            images.append(mi_data)
+
+        db.session.add_all(images)
         db.session.commit()
 
     @ns.doc(params={'image_id': 'ID of the image to be deleted'})
@@ -1119,22 +1107,21 @@ class MedImaging(BaseResource):
     def delete(self, user_id):
         idx = request.args.get('image_id', type=int)
 
-        if idx:
-            data = MedicalImaging.query.filter_by(user_id=user_id, idx=idx).one_or_none()
-            if not data:
-                raise BadRequest(f'Image {idx} not found.')
+        if not idx:
+            raise BadRequest(f'Please provide an image ID.')
 
-            #ensure logged in user is the reporter for this image
-            self.check_ehr_permissions(data)
+        data = MedicalImaging.query.filter_by(user_id=user_id, idx=idx).one_or_none()
+        if not data:
+            raise BadRequest(f'Image {idx} not found.')
 
-            #delete image saved in S3 bucket
-            fh = FileHandling()
-            fh.delete_from_s3(prefix=data.image_path)
+        # ensure logged in user is the reporter for this image
+        self.check_ehr_permissions(data)
 
-            db.session.delete(data)
-            db.session.commit()
-        else:
-            raise BadRequest("image_id must be an integer.")   
+        fd = FileDownload()
+        fd.delete(data.image_path)
+
+        db.session.delete(data)
+        db.session.commit()
 
 
 @ns.route('/bloodtest/<int:user_id>/')
