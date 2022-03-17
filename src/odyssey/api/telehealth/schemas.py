@@ -167,7 +167,7 @@ class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return TelehealthStaffAvailabilityExceptions(**data)
-    
+        
 class TelehealthStaffAvailabilityExceptionsDeleteSchema(Schema):
     exception_id = fields.Integer()
  

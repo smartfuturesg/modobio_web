@@ -413,18 +413,25 @@ class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
     Holds information for temporary availability exceptions
     """
     
-    exception_start_time = db.Column(db.DateTime)
+    exception_date = db.Column(db.Date)
     """
-    Start date and time of this exception.
+    Date of this exception.
     
     :type: Datetime
     """
     
-    exception_end_time = db.Column(db.DateTime)
+    exception_booking_window_id_start_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
     """
-    End date and time of this exception.
+    exception start time as a booking window id
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
     
-    :type: Datetime
+    exception_booking_window_id_end_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """
+    exception end time as a booking window id
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
 
