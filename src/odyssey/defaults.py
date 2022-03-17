@@ -139,16 +139,22 @@ AWS_S3_BUCKET = 'local-dev-393511634479'
 AWS_S3_PREFIX = ''
 """ Prefix (path) of files in the AWS S3 bucket.
 
+This prefix will be added to **every file** stored in the bucket. Deeper nesting
+of directories in the path (such as per user: id000017/profile_pic/...) must be
+done when uploading each individual file.
+
 There is only one S3 bucket for development. To prevent multiple developers from
 interfering with each other, the prefix will be set to the local username during
 development. When not in development (production environment), the prefix will
 be empty.
 
-When pytest is run, the prefix will be set to "pytest-xxxxxx", where xxxxxx is a
-random 6-digit hex string. Pytest should delete this prefix when finished.
+There is a special prefix "temp". The buckets are configured to delete anything
+in "temp" automatically after 24 hours.
 
-Finally, prefix can be set to "temp". The buckets are configured to delete anything
-in "temp" automatically after 24 h.
+When pytest is run, the prefix will be set to "temp/pytest-xxxxxx", where xxxxxx
+is a random 6-digit hex string. Pytest should delete this prefix when finished,
+but sometimes this does not happen (e.g. when pytest is interrupted). In that case,
+the files are still deleted after 24 hours because they are in temp/.
 
 Set ``export AWS_S3_PREFIX=none`` in the environment to force an empty prefix, even
 during development and testing.
