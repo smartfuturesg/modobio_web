@@ -1289,6 +1289,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     """
     This API resource is used to view and interact with temporary availability exceptions.
     """
+    __check_resource__ = False
     
     @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns)
@@ -1298,16 +1299,9 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         Add new availability exception.
         """
         check_user_existence(user_id, user_type='staff')
-        
-        current_datetime = datetime.now(timezone.utc)
 
         for exception in request.parsed_obj:
-            print(exception)
-            #exception start time must be in the future
-            if exception.exception_start_time < current_datetime:
-                raise BadRequest('Exception start time must be in the future.')
-
-            if exception.exception_start_time >= exception.exception_end_time:
+            if exception.exception_booking_window_id_start_time >= exception.exception_booking_window_id_end_time:
                 raise BadRequest('Exception start time must be before exception end time.')
             else:
                 exception.user_id = user_id
