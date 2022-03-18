@@ -285,3 +285,11 @@ telehealth_put_booking_details = {
         'images': None,
         'voice': None,
         'details': ''}}
+
+telehealth_exceptions_post_data = [
+    {
+    "exception_date": "2030-01-01",
+    "exception_booking_window_id_end_time": 0,
+    "exception_booking_window_id_start_time": 0
+    }
+]
