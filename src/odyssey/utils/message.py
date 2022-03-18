@@ -90,10 +90,6 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     # TODO consider editing url according to environment being used, and if it will open the web app or mobile app.
     remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
-    # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        recipient = "success@simulator.amazonses.com"
-
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = ("Welcome to Modo Bio!\n"
                 "Please visit your unique portal to complete your user registration:\n"
@@ -165,10 +161,6 @@ def send_email_delete_account(recipient, deleted_account):
     
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
-    # route emails to AWS mailbox simulator when in dev environment
-    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        recipient = "success@simulator.amazonses.com"
-
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = ("The the account with email: "f"{deleted_account} has been deleted.\n"
                 "If you have not requested to delete your account, please contact your admin."
@@ -185,14 +177,12 @@ def send_email_delete_account(recipient, deleted_account):
     </html>
     """     
 
-    send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
 
 def send_test_email(subject="testing-success", recipient="success@simulator.amazonses.com"):
     """
         Use the AWS mailbox simulator to test different scenarios: success, bounce, complaint
     """
-
-    SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
     # testing scenarios
     if "simulator.amazonses.com" not in recipient:
@@ -231,6 +221,10 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
 
 
 def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None, sender="Modo Bio No Reply <no-reply@modobio.com>"):
+    
+    # route emails to AWS mailbox simulator when in dev environment or not in the accepted domains list
+    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
+        recipient = "success@simulator.amazonses.com"
 
     # The character encoding for the email.
     CHARSET = "UTF-8"
