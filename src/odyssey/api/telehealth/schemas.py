@@ -163,6 +163,8 @@ class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('idx',)
         
     user_id = fields.Integer(dump_only=True)
+    exception_booking_window_id_start_time = fields.Integer()
+    exception_booking_window_id_end_time = fields.Integer()
         
     @post_load
     def make_object(self, data, **kwargs):
