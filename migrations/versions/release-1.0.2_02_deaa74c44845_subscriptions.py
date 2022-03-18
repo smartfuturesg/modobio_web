@@ -22,6 +22,10 @@ def upgrade():
 
     op.create_unique_constraint('user_id_ds_patient_unique', 'DoseSpotPatientID', ['user_id'])
     op.create_unique_constraint('user_id_ds_practitioner_unique', 'DoseSpotPractitionerID', ['user_id'])
+
+    op.alter_column('User', 'was_staff',
+            existing_type=sa.BOOLEAN(),
+            nullable=False)
     # ### end Alembic commands ###
 
 
@@ -31,4 +35,8 @@ def downgrade():
 
     op.drop_constraint('user_id_ds_practitioner_unique', 'DoseSpotPractitionerID', type_='unique')
     op.drop_constraint('user_id_ds_patient_unique', 'DoseSpotPatientID', type_='unique')
+
+    op.alter_column('User', 'was_staff',
+               existing_type=sa.BOOLEAN(),
+               nullable=True)
     # ### end Alembic commands ###
