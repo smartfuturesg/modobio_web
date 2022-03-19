@@ -229,7 +229,7 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
                 StaffRoles.consult_rate != None
             ).all()
 
-    fd = FileDownload()
+    fd = FileDownload(user_id)
 
     # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
     practitioner_details = {}
@@ -239,7 +239,7 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
         for pic in practitioner.staff_profile.profile_pictures:
             if pic.original:
                 continue
-            urls[pic.width] = fd.url(pic.image_path)
+            urls[str(pic.width)] = fd.url(pic.image_path)
 
         # get presinged url to available practitioners' profile picture
         # it's done here so we only call S3 once per practitioner available

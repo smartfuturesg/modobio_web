@@ -1015,42 +1015,41 @@ class MedicalFamilyHist(BaseResource):
 
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
-class MedImaging(BaseResource):
+class MedicalImagingEndpoint(BaseResource):
     __check_resource__ = False
     
     @token_auth.login_required(resources=('diagnostic_imaging',))
-    @responds(schema=MedicalImagingSchema(many=True), api=ns)
     def get(self, user_id):
-        """returns a json file of all the medical images in the database for the specified user_id
+        """ Get all medical images for this user.
 
-            Note:
-            image_path is a sharable url for an image saved in S3 Bucket,
-            if running locally, it is the path to a local temp file
+        Images are returned as URLs to the actual image on AWS S3.
         """
         self.check_user(user_id, user_type='client')
 
-        query = db.session.query(
-                    MedicalImaging, User.firstname, User.lastname
-                ).filter(
-                    MedicalImaging.user_id == user_id
-                ).filter(
-                    MedicalImaging.reporter_id == User.user_id
-                ).all()
-        
-        # prepare response with reporter info
-        response = []
-        for data in query:
-            img_dat = data[0].__dict__
-            img_dat.update({'reporter_firstname': data[1], 'reporter_lastname': data[2]})
-            response.append(img_dat)
+        med_images = (db.session.query(
+                MedicalImaging, User.firstname, User.lastname)
+            .filter(
+                MedicalImaging.user_id == user_id,
+                MedicalImaging.reporter_id == User.user_id)
+            .all())
 
-        # get presigned link for AWS for each image being returned
-        fd = FileDownload()
-        for img in response:
-            if path := img.get('image_path'):
-                img['image_path'] = fd.url(path)
+        fd = FileDownload(user_id)
 
-        return response
+        images = []
+        for row in med_images:
+            med_image, firstname, lastname = row
+            med_image.reporter_firstname = firstname
+            med_image.reporter_lastname = lastname
+            images.append(med_image)
+
+        # Serialize here, because we want to replace image_path with URL,
+        # but only in the response, not store it in the DB.
+        images = MedicalImagingSchema(many=True).dump(images)
+        for img in images:
+            if 'image_path' in img and img['image_path']:
+                img['image_path'] = fd.url(img['image_path'])
+
+        return images
 
     #Unable to use @accepts because the input files come in a form-data, not json.
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('diagnostic_imaging',))
@@ -1073,7 +1072,6 @@ class MedImaging(BaseResource):
         reporter, _ = token_auth.current_user()
         mi_schema = MedicalImagingSchema()
         hex_token = secrets.token_hex(4)
-        prefix = f'id{user_id:05d}/medical_images'
 
         images = []
         for i, img in enumerate(request.files.getlist('image')):
@@ -1081,12 +1079,11 @@ class MedImaging(BaseResource):
             mi_data.user_id = user_id
             mi_data.reporter_id = reporter.user_id
 
-            img = ImageUpload(img)
+            img = ImageUpload(img.stream, user_id, prefix='medical_images')
             img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
             img.validate()
-            name = f'{prefix}/{mi_data.image_type}_{mi_data.image_date}_{hex_token}_{i}.{img.extension}'
-            img.save(name)
-            mi_data.image_path = name
+            img.save(f'{mi_data.image_type}_{mi_data.image_date}_{hex_token}_{i}.{img.extension}')
+            mi_data.image_path = img.filename
 
             images.append(mi_data)
 
@@ -1117,7 +1114,7 @@ class MedImaging(BaseResource):
         # ensure logged in user is the reporter for this image
         self.check_ehr_permissions(data)
 
-        fd = FileDownload()
+        fd = FileDownload(user_id)
         fd.delete(data.image_path)
 
         db.session.delete(data)

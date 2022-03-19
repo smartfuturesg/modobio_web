@@ -371,7 +371,7 @@ class StaffProfilePage(BaseResource):
         res['bio'] = profile.bio
         res['profile_picture'] = {}
 
-        fd = FileDownload()
+        fd = FileDownload(user_id)
         for pic in profile.profile_pictures:
             res['profile_picture'][pic.image_path] = fd.url(pic.image_path)
 
@@ -424,52 +424,52 @@ class StaffProfilePage(BaseResource):
                     data = datetime.strptime(data, '%Y-%m-%d')
                 user_update[key] = data
 
-        if 'profile_picture' in request.files:
-            # Only allowing one profile picture for staff, use first if multiple uploaded.
-            img = request.files['profile_picture']
-            if isinstance(img, (list, tuple)):
-                img = img[0]
+        if request.files:
+            if len(request.files) != 1:
+                raise BadRequest('Only one image upload allowed.')
+
+            if 'profile_picture' not in request.files or not request.files['profile_picture']:
+                raise BadRequest('No file selected.')
 
             # Store current pictures, delete only after upload of new pictures is successful.
             previous_pics = profile.profile_pictures
 
-            prefix = f'id{user_id:05d}/staff_profile_picture'
             urls = {}
-            if img:
-                # Original image
-                original = ImageUpload(img)
-                original.validate()
-                name = f'{prefix}/original.{original.extension}'
-                original.save(name)
-                urls[name] = original.url()
+
+            # Original image
+            original = ImageUpload(
+                request.files['profile_picture'].stream,
+                user_id,
+                prefix='staff_profile_picture')
+            original.validate()
+            original.save(f'original.{original.extension}')
+            urls['original'] = original.url()
+
+            upp = UserProfilePictures(
+                staff_user_id=user_id,
+                image_path=original.filename,
+                width=original.width,
+                height=original.height,
+                original=True)
+            db.session.add(upp)
+
+            # Resized images
+            for dimensions in IMAGE_DIMENSIONS:
+                resized = original.resize(dimensions)
+                resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
+                urls[str(resized.width)] = resized.url()
 
                 upp = UserProfilePictures(
                     staff_user_id=user_id,
-                    image_path=name,
-                    width=original.width,
-                    height=original.height,
-                    original=True)
+                    image_path=resized.filename,
+                    width=resized.width,
+                    height=resized.height)
                 db.session.add(upp)
 
-                # Make image square
-                cropped = original.crop()
-
-                # Resized images
-                for dimension in IMAGE_DIMENSIONS:
-                    resized = cropped.resize(dimension)
-                    name = f'{prefix}/{resized.file.filename}'
-                    resized.save(name)
-                    urls[name] = resized.url()
-
-                    upp = UserProfilePictures(
-                        staff_user_id=user_id,
-                        image_path=name,
-                        width=dimension[0],
-                        height=dimension[1])
-                    db.session.add(upp)
+            db.session.commit()
 
             # Pictures successfully stored, now delete previous
-            fd = FileDownload()
+            fd = FileDownload(user_id)
             for pic in previous_pics:
                 fd.delete(pic.image_path)
                 db.session.delete(pic)
@@ -484,7 +484,7 @@ class StaffProfilePage(BaseResource):
             user_update['profile_picture'] = urls
         
         if len(user_update.keys()) == 0:
-            #request was successful but there is no body to return
+            # request was successful but there is no body to return
             return Response(status=204)
 
         return user_update

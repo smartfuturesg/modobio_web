@@ -372,9 +372,6 @@ def store_telehealth_transcript(booking_id: int):
     
     transcript = twilio.get_booking_transcript(booking.idx)
 
-    # s3 bucket path for the media associated with this booking transcript
-    transcript_media_prefix = f'id{booking.client_user_id:05d}/telehealth/{booking_id}/transcript/media'
-
     # if there is media present in the transcript, store it in an s3 bucket
     media_id = 0
     for idx, message in enumerate(transcript):
@@ -383,15 +380,17 @@ def store_telehealth_transcript(booking_id: int):
                 # download media from twilio 
                 media_content = twilio.get_media(media['sid'])
 
-                fu = FileUpload(FileStorage(stream=BytesIO(media_content)))
+                fu = FileUpload(
+                    BytesIO(media_content),
+                    booking.client_user_id,
+                    prefix=f'telehealth/{booking_id}/transcript/media')
                 fu.validate()
-                name = f'{transcript_media_prefix}/{media_id}.{fu.extension}'
-                fu.save(name)
+                fu.save(f'{media_id}.{fu.extension}')
 
-                media['s3_path'] = name
+                media['s3_path'] = fu.filename
                 transcript[idx]['media'][media_idx] = media
             
-                media_id+=1
+                media_id += 1
 
     payload = {
         'created_at': datetime.utcnow().isoformat(),

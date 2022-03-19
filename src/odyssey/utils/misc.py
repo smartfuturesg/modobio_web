@@ -575,7 +575,7 @@ def delete_staff_data(user_id):
     """
     
     # Delete all staff profile pictures from S3.
-    fd = FileDownload()
+    fd = FileDownload(user_id)
     paths = (db.session.execute(
         select(UserProfilePictures.image_path)
         .filter_by(staff_user_id=user_id))
@@ -620,7 +620,7 @@ def delete_client_data(user_id):
     *telehealth booking details, status history
     *rows in client specific tables
     """
-    fd = FileDownload()
+    fd = FileDownload(user_id)
 
     # Go through all columns that store S3 paths. Delete files from S3.
     cols = (
@@ -639,7 +639,8 @@ def delete_client_data(user_id):
             .all())
 
         for path in results:
-            fd.delete(path)
+            if path:
+                fd.delete(path)
 
     # This one is special, because it is identified by client_user_id
     paths = (db.session.execute(
@@ -648,7 +649,8 @@ def delete_client_data(user_id):
         .scalars()
         .all())
     for path in paths:
-        fd.delete(path)
+        if path:
+            fd.delete(path)
 
     # TelehealthBookingDetails.images and .voice are identified by booking_id,
     # so filter TelehealthBookings table and use relationships.
@@ -658,32 +660,46 @@ def delete_client_data(user_id):
         .scalars()
         .all())
     for booking_details in bookings:
-        fd.delete(booking_details.voice)
+        if booking_details.voice:
+            fd.delete(booking_details.voice)
         for path in booking_details.images:
-            fd.delete(path)
+            if path:
+                fd.delete(path)
 
-    #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+    # At this point, all files should be deleted from S3.
+    # Double check that that's true, warn if not and delete rest.
+    remaining = tuple(fd.bucket.objects.filter(Prefix=fd.prefix))
+    if remaining:
+        files = (r.key for r in remaining)
+        files = '\n'.join(files)
+        logger.warning(f'Found the following files remaining in S3 bucket {fd.bucket.name} '
+                       f'after deleting all registered files for user {user_id}:\n'
+                       f'{files}')
+        for f in files:
+            fd.delete(f)
+
+    # Get a list of all tables in database that have fields: client_user_id & staff_user_id
     # NOTE - Order matters, must delete these tables before those with user_id 
     # to avoid problems while deleting payment methods
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
             WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
     
-    #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+    # Delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
     for table in tableList:
         db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE client_user_id={user_id};")
 
-    #Get a list of all client-specific tables in database that have field: user_id
+    # Get a list of all client-specific tables in database that have field: user_id
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
             WHERE column_name='user_id' and NOT (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
     
 
-    #delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
+    # Delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
     for table in tableList:
-        #added data_per_client table due to issues with the testing database
+        # added data_per_client table due to issues with the testing database
         if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
             db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
             
-    #only delete client subscription
+    # only delete client subscription
     db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=False")
 
     db.session.commit()

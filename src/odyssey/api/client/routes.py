@@ -203,55 +203,55 @@ class ClientProfilePicture(BaseResource):
         """
         self.check_user(user_id, user_type='client')
 
+        if len(request.files) != 1:
+            raise BadRequest('Only one image upload allowed.')
+
         if 'profile_picture' not in request.files or not request.files['profile_picture']:
             raise BadRequest('No file selected.')
 
-        # Using client_profile_picture in path to differentiate from staff profile picture.
-        prefix = f'id{user_id:05d}/client_profile_picture'
-        fd = FileDownload()
-
-        # Delete existing
-        pics = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
-        for pic in pics:
-            fd.delete(pic.image_path)
-            db.session.delete(pic)
+        # Keep existing, delete only after successfully uploading new images.
+        prev_pics = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
 
         urls = {}
 
         # Save original image to S3.
-        original = ImageUpload(request.files['profile_picture'])
-        name = f'{prefix}/original.{original.extension}'
-        original.save(name)
-        urls[name] = original.url()
+        original = ImageUpload(
+            request.files['profile_picture'].stream,
+            user_id,
+            prefix='client_profile_pictures')
+        original.validate()
+        original.save(f'original.{original.extension}')
+        urls['original'] = original.url()
 
         # Save image metadata in DB.
         upp = UserProfilePictures(
             client_user_id=user_id,
-            image_path=name,
+            image_path=original.filename,
             width=original.width,
             height=original.height,
             original=True)
         db.session.add(upp)
 
-        # Crop original image to a square.
-        cropped = original.crop()
-
         # Resize cropped image to multiple sizes.
-        for dimension in IMAGE_DIMENSIONS:
-            resized = cropped.resize(dimension)
+        for dimensions in IMAGE_DIMENSIONS:
+            resized = original.resize(dimensions)
+            resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
+            urls[str(resized.width)] = resized.url()
 
-            # save to S3 bucket
-            name = f'{prefix}/{resized.file.filename}'
-            resized.save(name)
-            urls[name] = resized.url()
-
-            # save to database
             upp = UserProfilePictures(
                 client_user_id=user_id,
-                image_path=name,
+                image_path=resized.filename,
                 width=resized.width,
                 height=resized.height)
             db.session.add(upp)
+
+        db.session.commit()
+
+        # Successfully stored new images, delete previous.
+        fd = FileDownload(user_id)
+        for pic in prev_pics:
+            fd.delete(pic.image_path)
+            db.session.delete(pic)
 
         db.session.commit()
         return {'user_id': user_id, 'profile_picture': urls}
@@ -262,7 +262,7 @@ class ClientProfilePicture(BaseResource):
         """ Delete client profile picture. """
         self.check_user(user_id, user_type='client')
 
-        fd = FileDownload()
+        fd = FileDownload(user_id)
         pics = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
         for pic in pics:
             fd.delete(pic.image_path)
@@ -332,7 +332,7 @@ class Client(BaseResource):
         client_info_payload["dob"] = user_data.dob
 
         # Include profile picture in different sizes
-        fd = FileDownload()
+        fd = FileDownload(user_id)
         urls = {}
         for pic in client_data.profile_pictures:
             if pic.original:
@@ -863,7 +863,7 @@ class SignedDocuments(BaseResource):
         urls = {}
         paths = []
 
-        fd = FileDownload()
+        fd = FileDownload(user_id)
 
         for table in (
             ClientPolicies,
@@ -1144,7 +1144,8 @@ class ClinicalCareTeamMembers(BaseResource):
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
-        fd = FileDownload()
+
+        fd = FileDownload(user_id)
 
         for team_member in current_team_users:
             staff_roles = None
@@ -1158,7 +1159,8 @@ class ClinicalCareTeamMembers(BaseResource):
 
             if staff_profile:
                 membersince = staff_profile.membersince
-                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]                
+                profile_pic_path = [
+                    pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]
                 profile_pic = None
                 if profile_pic_path:
                     profile_pic = fd.url(profile_pic_path[0])
@@ -1175,7 +1177,8 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 if client_profile:
                     membersince = client_profile.membersince
-                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]
+                    profile_pic_path = [
+                        pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]
                     profile_pic = None
                     if profile_pic_path:
                         profile_pic = fd.url(profile_pic_path[0])
@@ -1271,7 +1274,7 @@ class ClinicalCareTeamMembers(BaseResource):
                 ClientClinicalCareTeam.team_member_user_id == User.user_id
             ).all()
 
-        fd = FileDownload()
+        fd = FileDownload(user_id)
 
         for team_member in current_team_users:
             staff_roles = None
@@ -1289,7 +1292,6 @@ class ClinicalCareTeamMembers(BaseResource):
                 membersince = staff_profile.membersince
                 profile_pic_path = [
                     pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]
-
                 profile_pic = None
                 if profile_pic_path:
                     profile_pic = fd.url(profile_pic_path[0])
@@ -1313,7 +1315,6 @@ class ClinicalCareTeamMembers(BaseResource):
                     membersince = client_profile.membersince
                     profile_pic_path = [
                         pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]
-
                     profile_pic = None
                     if profile_pic_path:
                         profile_pic = fd.url(profile_pic_path[0])
@@ -1470,7 +1471,7 @@ class UserClinicalCareTeamApi(BaseResource):
         is a part of along with the permissions granted to them
         """
         res = []
-        fd = FileDownload()
+        fd = FileDownload(user_id)
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = (db.session.

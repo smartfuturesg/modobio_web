@@ -467,34 +467,30 @@ class Wheel:
             response = requests.get(clinician.get('photo'), stream=True)
             
             if response:
-                prefix = f'id{user.user_id:05d}/staff_profile_picture'
-
-                fs = FileStorage(BytesIO(response.content))
-                original = ImageUpload(fs)
+                original = ImageUpload(
+                    BytesIO(response.content),
+                    user.user_id,
+                    prefix='staff_profile_picture')
                 original.validate()
-                name = f'{prefix}/original.{original.extension}'
-                original.save(name)
+                original.save(f'original.{original.extension}')
 
                 upp = UserProfilePictures(
                     staff_user_id=user.user_id,
-                    image_path=name,
+                    image_path=original.filename,
                     width=original.width,
                     height=original.height,
                     original=True)
                 db.session.add(upp)
 
-                cropped = original.crop()
-
-                for dimension in IMAGE_DIMENSIONS:
-                    resized = cropped.resize(dimension)
-                    name = resized.file.filename
-                    resized.save(name)
+                for dimensions in IMAGE_DIMENSIONS:
+                    resized = original.resize(dimensions)
+                    resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
 
                     upp = UserProfilePictures(
                         staff_user_id=user.user_id,
-                        image_path=name,
-                        width=dimension[0],
-                        height=dimension[1])
+                        image_path=resized.filename,
+                        width=resized.width,
+                        height=resized.height)
                     db.session.add(upp)
 
             db.session.commit()

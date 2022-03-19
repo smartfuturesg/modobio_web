@@ -325,10 +325,13 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
             staff_id = content['data']['staff_id']
             profile_pictures = UserProfilePictures.query.filter_by(staff_user_id=staff_id).all()
 
+            fd = FileDownload(staff_id)
+
             urls = {}
             for pic in profile_pictures:
-                fd = FileDownload()
-                urls[pic.image_path] = fd.url(pic.image_path)
+                if pic.original:
+                    continue
+                urls[str(pic.width)] = fd.url(pic.image_path)
 
             content['data']['staff_profile_picture'] = urls
 
