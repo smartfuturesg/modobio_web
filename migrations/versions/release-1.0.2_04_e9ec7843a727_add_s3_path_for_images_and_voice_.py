@@ -25,7 +25,8 @@ def upgrade():
             sa.ARRAY(
                 sa.String(length=1024),
                 dimensions=1),
-            nullable=True))
+            nullable=False,
+            default=[]))
     op.add_column(
         'TelehealthBookingDetails',
         sa.Column(
