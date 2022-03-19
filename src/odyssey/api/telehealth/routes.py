@@ -1479,16 +1479,15 @@ class TelehealthBookingDetailsApi(BaseResource):
                 if len(images) > 3:
                     raise BadRequest('Maximum 3 images upload allowed.')
 
-                paths = []
+                booking_details.images = []
                 for i, img in enumerate(images):
                     image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
                     image.validate()
                     image.save(f'image_{hex_token}_{i}.{image.extension}')
-                    paths.append(image.filename)
-
-                booking_details.images = paths
+                    booking_details.images.append(image.filename)
 
                 # Upload successfull, now delete previous
+                fd = FileDownload(booking.client_user_id)
                 for path in prev_images:
                     fd.delete(path)
 
@@ -1550,7 +1549,6 @@ class TelehealthBookingDetailsApi(BaseResource):
             if len(images) > 3:
                 raise BadRequest('Maximum 3 images upload allowed.')
 
-            booking_details.images = []
             for i, img in enumerate(images):
                 image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
                 image.validate()
