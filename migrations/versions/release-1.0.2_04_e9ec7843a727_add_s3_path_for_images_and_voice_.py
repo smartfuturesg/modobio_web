@@ -1,7 +1,7 @@
 """Add S3 path for images and voice recording to TelehealthBookingDetails
 
 Revision ID: e9ec7843a727
-Revises: deaa74c44845
+Revises: f3d34506c9c3
 Create Date: 2022-03-15 13:19:34.057949
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'e9ec7843a727'
-down_revision = 'deaa74c44845'
+down_revision = 'f3d34506c9c3'
 branch_labels = None
 depends_on = None
 
