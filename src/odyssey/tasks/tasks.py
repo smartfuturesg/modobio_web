@@ -367,8 +367,6 @@ def store_telehealth_transcript(booking_id: int):
     # For now, the boooking state does not matter. 
     booking = db.session.execute(select(TelehealthBookings
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
-    # close conversation so that no more messages can be added to transcript
-    twilio.close_telehealth_chatroom(booking.idx)
     
     transcript = twilio.get_booking_transcript(booking.idx)
 
