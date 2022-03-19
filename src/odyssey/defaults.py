@@ -139,27 +139,45 @@ AWS_S3_BUCKET = 'local-dev-393511634479'
 AWS_S3_PREFIX = ''
 """ Prefix (path) of files in the AWS S3 bucket.
 
-This prefix will be added to **every file** stored in the bucket. Deeper nesting
-of directories in the path (such as per user: id000017/profile_pic/...) must be
-done when uploading each individual file.
+This prefix will be prepended to **every file** stored in the bucket.
 
 There is only one S3 bucket for development. To prevent multiple developers from
-interfering with each other, the prefix will be set to the local username during
-development. When not in development (production environment), the prefix will
-be empty.
+interfering with each other, this prefix will be set to the local username during
+development.
 
 There is a special prefix "temp". The buckets are configured to delete anything
 in "temp" automatically after 24 hours.
 
 When pytest is run, the prefix will be set to "temp/pytest-xxxxxx", where xxxxxx
 is a random 6-digit hex string. Pytest should delete this prefix when finished,
-but sometimes this does not happen (e.g. when pytest is interrupted). In that case,
-the files are still deleted after 24 hours because they are in temp/.
+but sometimes this does not happen (e.g. when pytest is interrupted or when
+:const:`AWS_S3_PYTEST_KEEP` is set). In that case, the files are still deleted
+after 24 hours because they are in temp/.
 
-Set ``export AWS_S3_PREFIX=none`` in the environment to force an empty prefix, even
-during development and testing.
+When defining ``AWS_S3_PREFIX``, do **not** add leading or trailing /.
 
-When defining ``AWS_S3_PREFIX``, do **not** using leading or trailing /.
+.. seealso:: :const:`AWS_S3_USER_PREFIX`
+             :const:`AWS_S3_PYTEST_KEEP`
+             :mod:`odyssey.utils.files`
+"""
+
+AWS_S3_USER_PREFIX = 'id{user_id:05d}'
+""" User specific prefix (path) for files in the AWS S3 bucket.
+
+This prefix will be **appended after** :const:`AWS_S3_PREFIX` and is
+specific for each user. It must hold a string formatting template
+that will be formatted with ``user_id``.
+
+The full prefix as used in :mod:`odyssey.utils.files` is:
+
+.. code:: python
+
+    prefix = AWS_S3_PREFIX + '/' + AWS_S3_USER_PREFIX.format(user_id=user_id)
+
+:attr:`~odyssey.utils.files.FileUpload.prefix` will be prepended to every
+file uploaded through :class:`odyssey.utils.files.FileUpload`.
+
+.. seealso:: :const:`AWS_S3_PREFIX` and :mod:`odyssey.utils.files`
 """
 
 AWS_S3_PYTEST_KEEP = False
@@ -167,6 +185,11 @@ AWS_S3_PYTEST_KEEP = False
 
 Set this to True (default is False) to keep files on AWS S3 after a pytest run ends.
 This may be useful to debug tests in combination with file uploads.
+
+Note that files will be kept for only 24 hours after a pytest run, unless
+:const:`AWS_S3_PREFIX` is changed to something outside of temp/.
+
+.. seealso:: :const:`AWS_S3_PREFIX`
 """
 
 # Twilio settings
