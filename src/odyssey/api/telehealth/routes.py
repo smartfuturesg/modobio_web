@@ -1398,21 +1398,19 @@ class TelehealthBookingDetailsApi(BaseResource):
         """
         Returns a list of details about the specified booking_id
         """
-        #Check booking_id exists
+        # Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
             return
 
-        #verify user trying to access details is the client or staff involved in scheulded booking
+        current_user, _ = token_auth.current_user()
+        # verify user trying to access details is the client or staff involved in scheulded booking
         # TODO allow access to Client Services?
-        if booking.client_user_id != token_auth.current_user()[0].user_id \
-            and booking.staff_user_id != token_auth.current_user()[0].user_id:
-
+        if not (booking.client_user_id == current_user.user_id or
+                booking.staff_user_id == current_user.user_id):
             raise Unauthorized('Only booking participants can view the details.')
 
-        res = {'details': None,
-                'images': [],
-                'voice': None}
+        res = {'details': None, 'images': [], 'voice': None}
 
         # if there aren't any details saved for the booking_id, GET will return empty
         booking_details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).first()
@@ -1422,7 +1420,7 @@ class TelehealthBookingDetailsApi(BaseResource):
         res['details'] = booking_details.details
 
         # retrieve all files associated with this booking id
-        fd = FileDownload(user_id)
+        fd = FileDownload(current_user.user_id)
         if booking_details.images:
             for path in booking_details.images:
                 if path:
@@ -1464,8 +1462,7 @@ class TelehealthBookingDetailsApi(BaseResource):
         if not booking_details:
             raise BadRequest('Booking details you are trying to edit not found.')
 
-        # If details is not present, existing details will *NOT* be deleted, unlike files.
-        if 'details' in request.form:
+        if 'details' in request.form and request.form['details']:
             booking_details.details = request.form.get('details')
 
         if request.files:
@@ -1504,7 +1501,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
                 # If recordings is an empty list, then no new voice recording will be uploaded,
                 # effectively deleting the current recording.
-                recordings = files.getlist('voice')
+                recordings = request.files.getlist('voice')
                 if len(recordings) > 1:
                     raise BadRequest('Maximum 1 voice recording upload allowed.')
 
@@ -1591,14 +1588,15 @@ class TelehealthBookingDetailsApi(BaseResource):
         if not booking:
             return
 
-        if booking.client_user_id != token_auth.current_user()[0].user_id:
+        current_user, _ = token_auth.current_user()
+        if booking.client_user_id != current_user.user_id:
             raise Unauthorized('Only the client of this booking is allowed to edit details.')
 
         details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
         if not details:
             return
 
-        fd = FileDownload(user_id)
+        fd = FileDownload(current_user.user_id)
         if details.images:
             for path in details.images:
                 if path:
