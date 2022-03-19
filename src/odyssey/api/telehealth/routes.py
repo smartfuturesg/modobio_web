@@ -451,7 +451,6 @@ class TelehealthBookingsApi(BaseResource):
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
         
-        fd = FileDownload(user_id)
         time_inc = LookupBookingTimeIncrements.query.all()
         bookings_payload = []
 
@@ -471,6 +470,7 @@ class TelehealthBookingsApi(BaseResource):
             if (current_user.user_id == booking.client_user_id or
                 ('client_services' in [role.role for role in current_user.roles])):
                 practitioner['profile_picture'] = None
+                fd = FileDownload(booking.practitioner.user_id)
                 for pic in booking.practitioner.staff_profile.profile_pictures:
                     if pic.width == 128:
                         practitioner['profile_picture'] = fd.url(pic.image_path)
