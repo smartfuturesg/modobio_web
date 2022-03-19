@@ -1550,6 +1550,7 @@ class TelehealthBookingDetailsApi(BaseResource):
             if len(images) > 3:
                 raise BadRequest('Maximum 3 images upload allowed.')
 
+            booking_details.images = []
             for i, img in enumerate(images):
                 image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
                 image.validate()
@@ -1801,7 +1802,7 @@ class TelehealthTranscripts(Resource):
         transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
 
         # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
-        fd = FileDownload(user_id)
+        fd = FileDownload(current_user.user_id)
 
         payload = {'booking_id': booking_id, 'transcript': []}
         has_next = False
