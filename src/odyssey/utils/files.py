@@ -123,7 +123,7 @@ import filetype
 
 from botocore.exceptions import ClientError
 from flask import current_app
-from PIL import Image
+from PIL import Image, ImageOps
 from werkzeug.exceptions import BadRequest
 
 from odyssey.utils.constants import (
@@ -567,6 +567,10 @@ class ImageUpload(FileUpload):
 
         # Open PIL image
         self.image = Image.open(self.file)
+
+        # Rotate image in case EXIF tags have a orientation
+        self.image = ImageOps.exif_transpose(self.image)
+
         self.width, self.height = self.image.size
 
     def _pil_to_imageupload(self, image: Image, **kwargs):
