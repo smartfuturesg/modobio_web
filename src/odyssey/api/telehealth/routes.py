@@ -1557,7 +1557,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 image.save(f'image_{hex_token}_{i}.{image.extension}')
                 booking_details.images.append(image.filename)
 
-            recordings = files.getlist('voice')
+            recordings = request.files.getlist('voice')
             if len(images) > 1:
                 raise BadRequest('Maximum 1 voice recording upload allowed.')
 
