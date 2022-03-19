@@ -1423,10 +1423,13 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         # retrieve all files associated with this booking id
         fd = FileDownload(user_id)
-        for img in booking_details.images:
-            res['images'].append(fd.url(img))
+        if booking_details.images:
+            for path in booking_details.images:
+                if path:
+                    res['images'].append(fd.url(path))
 
-        res['voice'] = fd.url(booking_details.voice)
+        if booking_details.voice:
+            res['voice'] = fd.url(booking_details.voice)
 
         return res
 
@@ -1479,17 +1482,21 @@ class TelehealthBookingDetailsApi(BaseResource):
                 if len(images) > 3:
                     raise BadRequest('Maximum 3 images upload allowed.')
 
-                booking_details.images = []
+                paths = []
                 for i, img in enumerate(images):
                     image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
                     image.validate()
                     image.save(f'image_{hex_token}_{i}.{image.extension}')
-                    booking_details.images.append(image.filename)
+                    paths.append(image.filename)
+
+                booking_details.images = paths
 
                 # Upload successfull, now delete previous
-                fd = FileDownload(booking.client_user_id)
-                for path in prev_images:
-                    fd.delete(path)
+                if prev_images:
+                    fd = FileDownload(booking.client_user_id)
+                    for path in prev_images:
+                        if path:
+                            fd.delete(path)
 
             if 'voice' in request.files:
                 # Save previous recording, only delete after successful upload.
@@ -1508,7 +1515,9 @@ class TelehealthBookingDetailsApi(BaseResource):
                     recording.save(f'voice_{hex_token}_0.{recording.extension}')
                     booking_details.voice = recording.filename
 
-                fd.delete(prev_recording)
+                if prev_recording:
+                    fd = FileDownload(booking.client_user_id)
+                    fd.delete(prev_recording)
 
         db.session.commit()
 
@@ -1549,11 +1558,14 @@ class TelehealthBookingDetailsApi(BaseResource):
             if len(images) > 3:
                 raise BadRequest('Maximum 3 images upload allowed.')
 
+            paths = []
             for i, img in enumerate(images):
                 image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
                 image.validate()
                 image.save(f'image_{hex_token}_{i}.{image.extension}')
-                booking_details.images.append(image.filename)
+                paths.append(image.filename)
+
+            booking_details.images = paths
 
             recordings = request.files.getlist('voice')
             if len(images) > 1:
@@ -1587,8 +1599,10 @@ class TelehealthBookingDetailsApi(BaseResource):
             return
 
         fd = FileDownload(user_id)
-        for img in details.images:
-            fd.delete(img)
+        if details.images:
+            for path in details.images:
+                if path:
+                    fd.delete(path)
         if details.voice:
             fd.delete(details.voice)
 
