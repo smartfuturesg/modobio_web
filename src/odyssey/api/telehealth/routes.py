@@ -207,7 +207,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
             msg['data']['staff_last_name'] = booking.practitioner.lastname
 
             urls = {}
-            fd = FileDownload(user_id)
+            fd = FileDownload(booking.staff_user_id)
             for pic in booking.practitioner.staff_profile.profile_pictures:
                 if pic.original:
                     continue
