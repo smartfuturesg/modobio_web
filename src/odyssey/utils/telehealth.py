@@ -229,12 +229,10 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
                 StaffRoles.consult_rate != None
             ).all()
 
-    fd = FileDownload(user_id)
-
     # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
     practitioner_details = {}
     for practitioner, consult_rate in practitioners:
-        # if the practitioner has a profile picture, get the prefix from the first image path found
+        fd = FileDownload(practitioner.user_id)
         urls = {}
         for pic in practitioner.staff_profile.profile_pictures:
             if pic.original:
