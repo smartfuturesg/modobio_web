@@ -523,8 +523,8 @@ class AudioUpload(FileUpload):
     specifically for audio file types.
     """
 
-    max_size = IMAGE_MAX_SIZE
-    allowed_types = ALLOWED_IMAGE_TYPES
+    max_size = AUDIO_MAX_SIZE
+    allowed_types = ALLOWED_AUDIO_TYPES
 
     def __init__(self, file, user_id: int, prefix: str=''):
         """ Instantiate the :class:`.AudioUpload` class.
