@@ -11,6 +11,7 @@ Entities
    User <odyssey.api.user.routes>
    Client <odyssey.api.client.routes>
    Staff <odyssey.api.staff.routes>
+   Practitioner <odyssey.api.practitioner.routes>
 
 Roles
 -----
@@ -28,8 +29,10 @@ Other
 .. toctree::
 
    Wearable devices <odyssey.api.wearables.routes>
-   Notifications <odyssey.api.notifications.routes>
    Telehealth <odyssey.api.telehealth.routes>
+   Payment <odyssey.api.payment.routes>
+   DoseSpot <odyssey.api.dosespot.routes>
+   Notifications <odyssey.api.notifications.routes>
    System config <odyssey.api.system.routes>
    Facilities <odyssey.api.facility.routes>
    Lookup tables <odyssey.api.lookup.routes>

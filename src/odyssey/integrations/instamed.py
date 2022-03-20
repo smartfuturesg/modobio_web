@@ -41,17 +41,18 @@ class Instamed:
         InstaMed URI: /payment/paymentplan
 
 
-        Params
-        ------
-        token: (string)
+        Parameters
+        ----------
+        token : str
             tokenized card information provided by an InstaMed FE component
-        
-        expiration: (string)
+
+        expiration : str
             card expiration date
-        
+
         Returns
         -------
-        dict of information regarding the newly saved payment method
+        dict
+            information regarding the newly saved payment method
         """
 
         request_data = {
@@ -90,26 +91,27 @@ class Instamed:
         InstaMed URI: /payment/refund
 
 
-        Params
-        ------
-        transaction_id: (string)
+        Parameters
+        ----------
+        transaction_id : str
             InstaMed ID for the transaction to be refunded
-        
-        amount: (string)
+
+        amount : str
             amount of money to be refunded
-        
-        booking: TelehealthBooking object
+
+        booking : :class:`TelehealthBooking` instance
             object for the booking this transaction is associated with
 
-        reason:
+        reason : str
             reason for this refund
 
-        reporter_id:
+        reporter_id : int
             id the the staff that approved this refund, None if system automated
 
         Returns
         -------
-        dict of information regarding the refund
+        dict
+            information regarding the refund
         """
         request_data = {
             "Outlet": self.outlet,
@@ -158,14 +160,15 @@ class Instamed:
 
         InstaMed URI: /payment/void
 
-        Params
-        ------
-        booking: (TelehealthBookings object)
+        Parameters
+        ----------
+        booking : :class:`TelehealthBookings` instance
             the booking for which this payment is associated with
-        
+
         Returns
         -------
-        dict of information regarding the void
+        dict
+            information regarding the void
         """
         transaction = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none()
         if not transaction.transaction_id:
@@ -207,14 +210,15 @@ class Instamed:
         InstaMed URI: /payment/sale
 
 
-        Params
-        ------
-        booking: (TelehealthBookings object)
+        Parameters
+        ----------
+        booking : :class:`TelehealthBookings` instance
             the booking for which this payment is associated with
-        
+
         Returns
         -------
-        dict of information regarding the sale
+        dict
+            information regarding the sale
         """
         request_data = {
             "Outlet": self.outlet,

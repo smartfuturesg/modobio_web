@@ -326,7 +326,9 @@ def find_decorator_value(
     ) -> t.Any:
     """ Return the value of an argument or keyword passed to a decorator placed on a function or class.
 
-    For example, in the code ::
+    For example, in the code
+
+    .. code:: python
 
         class SomeEndpoint(BaseResource):
             @accepts(schema=SomeSchema)
@@ -335,10 +337,12 @@ def find_decorator_value(
 
         schema = find_decorator_value(SomeEndpoint.post, decorator='accepts', keyword='schema')
 
-    :func:`find_decorator_value` will find the decorator :func:`@accepts` which is decorating
+    :func:`find_decorator_value` will find the decorator :func:`accepts` which is decorating
     :func:`post()` and return the value ``SomeSchema`` passed to the argument :attr:`schema`.
 
-    This function can also find positional arguments passed into the decorator::
+    This function can also find positional arguments passed into the decorator
+
+    .. code:: python
 
         class SomeEndpoint(BaseResource):
             # incorrect use of @accepts for this example only
@@ -350,8 +354,8 @@ def find_decorator_value(
 
     will return the same ``SomeSchema`` object as the first example.
 
-    Params
-    ------
+    Parameters
+    ----------
     function : Callable
         A function, method, or class which has a decorator on it.
 
@@ -567,13 +571,16 @@ def get_time_index(target_time: datetime):
         ).one_or_none().idx
         
 def delete_staff_data(user_id):
-    """
-    This function is used by the delete_user function to delete staff specific data. This includes:
+    """ Delete staff specific data.
     
-    *staff specific s3 files(profile picture)
-    *rows in staff specific tables
+    This function is called by :func:`delete_user` to delete staff specific files
+    from S3 and rows in staff specific tables.
+
+    Parameters
+    ----------
+    user_id : int
+        User ID number for staff member to be deleted.
     """
-    
     # Delete all staff profile pictures from S3.
     fd = FileDownload(user_id)
     paths = (db.session.execute(
@@ -613,12 +620,16 @@ def delete_staff_data(user_id):
     db.session.commit()
     
 def delete_client_data(user_id):
-    """
-    This function is used by the below delete_user function to delete client specific data. This includes:
+    """ Delete client specific data.
     
-    *any s3 files stored under the given user_id
-    *telehealth booking details, status history
-    *rows in client specific tables
+    This function is called by :func:`delete_user` to delete client specific files
+    from S3, telehealth booking details, status history, and rows in client specific
+    tables.
+
+    Parameters
+    ----------
+    user_id : int
+        User ID number for client member to be deleted.
     """
     fd = FileDownload(user_id)
 

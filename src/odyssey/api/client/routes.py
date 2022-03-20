@@ -1903,9 +1903,9 @@ class ClientHeightEndpoint(BaseResource):
     def post(self, user_id):
         """ New height measurement.
 
-        Params
-        ------
-        height : float (cm)
+        Parameters
+        ----------
+        height : float
             Height of the client in centimeters.
         """
         self.check_user(user_id, user_type='client')
@@ -1948,9 +1948,9 @@ class ClientWeightEndpoint(BaseResource):
     def post(self, user_id):
         """ New weight measurement.
 
-        Params
-        ------
-        weight : float (kg)
+        Parameters
+        ----------
+        weight : float
             Weight of the client in kilograms.
         """
         self.check_user(user_id, user_type='client')
@@ -1993,9 +1993,9 @@ class ClientWaistSizeEndpoint(BaseResource):
     def post(self, user_id):
         """ New waist size measurement.
 
-        Params
-        ------
-        waist_size : float (cm)
+        Parameters
+        ----------
+        waist_size : float
             Waist size of the client in centimeters.
         """
         self.check_user(user_id, user_type='client')
@@ -2037,11 +2037,12 @@ class ClientWeightEndpoint(BaseResource):
     def post(self, user_id):
         """ New fertility status.
 
-        Params
-        ------
-        pregnant : boolean
+        Parameters
+        ----------
+        pregnant : bool
             Denotes if this fertility status is pregnant.
-        status : string
+
+        status : str
             Phase of this fertility status.
         """
         self.check_user(user_id, user_type='client')

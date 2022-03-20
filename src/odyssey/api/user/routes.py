@@ -858,17 +858,20 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
 
     @responds(status_code=200)
     def post(self, user_id):
-        """
-        Verify the user's email address.
+        """ Verify the user's email address.
 
-        Params
-        -------
-        user_id int
-        code: email verification code provided during client creation
-
-        Verifying an email requires both a valid code that the client retrieved from their email and a valid 
-        token stored on the modobio side. The token has a short lifetime so the email varification process must happen within
+        Verifying an email requires both a valid code that the client retrieved
+        from their email and a valid token stored on the modobio side. The token
+        has a short lifetime so the email varification process must happen within
         that time. 
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number
+
+        code : str
+            email verification code provided during client creation
         """
 
         verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
