@@ -1573,8 +1573,9 @@ class AllMedBloodTestResults(BaseResource):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
                     # get presigned s3 link if present
-                    if test['image_path']:
-                        test['image'] = fh.get_presigned_url(test.get('image_path'))
+                    image_path = test.get('image_path')
+                    if image_path:
+                        test['image'] = fh.get_presigned_url(image_path)
                         
         payload = {}
         payload['items'] = nested_results
