@@ -1382,14 +1382,12 @@ class MedBloodTestImage(BaseResource):
         test.image_path = s3key
         db.session.commit()
         
-        test_code = MedicalBloodTestResults.query.filter_by(test_id=test.test_id).one_or_none().modobio_test_code
         reporter = User.query.filter_by(user_id=test.reporter_id).one_or_none()
         
         res = {
             'test_id': test.test_id,
             'user_id': test.user_id,
             'date': test.date,
-            'modobio_test_code': test_code,
             'notes': test.notes,
             'reporter_firstname': reporter.firstname,
             'reporter_lastname': reporter.lastname,
