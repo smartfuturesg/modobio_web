@@ -192,36 +192,26 @@ def get_practitioners_available(time_block, q_request):
         #if avail falls inside an exception, do not add it
         exception = False
         
-        #detect if day 1 of booking is inside an exception for this practitioner on this date
-        exception1 = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=user_id,
-                                                                exception_date=date1.date())
-
-
-        if exception1.count() >= 1:
-            exception1 = exception1.filter(
-                or_(
-                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day1_start < TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time,
-                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end >= TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time
-                )
-            )
-        
-        if not day2:
-            if exception1.count() >= 1:
-                exception = True
-        else:
-            #detect if day 2 of booking is inside an exception for this practitioner on this date
-            exception2 = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=user_id,
-                                                                exception_date=date2.date())
-            if exception2.count() >= 1:
-                exception2 = exception2.filter(
-                    or_(
-                    TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day2_start < TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time,
-                    TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end >= TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time
-                    )
-                )
+        #detect if day 1 of booking is inside an exception for this practitioner on this date       
+        exception1 = TelehealthStaffAvailabilityExceptions.query \
+            .filter_by(user_id=user_id, exception_date=date1.date()).all()
             
-            if exception1.count() >= 1 or exception2.count() >= 1:
+        for excep in exception1:
+            if excep.exception_booking_window_id_start_time <= day1_start < excep.exception_booking_window_id_end_time \
+            or excep.exception_booking_window_id_start_time < day1_end <= excep.exception_booking_window_id_end_time:
                 exception = True
+                break
+            
+        if day2:
+            #detect if day 2 of booking is inside an exception for this practitioner on this date       
+            exception2 = TelehealthStaffAvailabilityExceptions.query \
+                .filter_by(user_id=user_id, exception_date=date2.date()).all()
+                
+            for excep in exception2:
+                if excep.exception_booking_window_id_start_time <= day2_start < excep.exception_booking_window_id_end_time \
+                or excep.exception_booking_window_id_start_time < day2_end <= excep.exception_booking_window_id_end_time:
+                    exception = True
+                    break
                 
         if not exception:
             if user_id not in available:
