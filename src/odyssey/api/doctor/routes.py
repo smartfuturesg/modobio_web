@@ -1553,6 +1553,7 @@ class AllMedBloodTestResults(BaseResource):
         
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
+        fh = FileHandling()
         for test_info, test_result, result_type, _ in results:
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
@@ -1571,6 +1572,10 @@ class AllMedBloodTestResults(BaseResource):
                     if not test.get('date', False):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
+                    # get presigned s3 link if present
+                    if test['image_path']:
+                        test['image'] = fh.get_presigned_url(test.get('image_path'))
+                        
         payload = {}
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)
