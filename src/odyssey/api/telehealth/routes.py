@@ -1337,7 +1337,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         ).delete()
         db.session.commit()       
         
-        return 204
+        return ('', 204)
 
 
 @ns.route('/queue/client-pool/')
