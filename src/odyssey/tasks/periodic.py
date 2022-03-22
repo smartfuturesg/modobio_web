@@ -441,7 +441,7 @@ celery.conf.beat_schedule = {
     },
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
-        'args': (60,),
-        'schedule': crontab(minute='*/60')
+        'args': (25,),
+        'schedule': crontab(minute='*/30')
     }
 }
