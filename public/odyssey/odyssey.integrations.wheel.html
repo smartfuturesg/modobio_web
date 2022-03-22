@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.integrations.wheel module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.tasks" href="odyssey.tasks.html" />
+    <link rel="prev" title="odyssey.integrations.twilio module" href="odyssey.integrations.twilio.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.apple.html">Apple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.dosespot.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.instamed.html">InstaMed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.twilio.html">Twilio</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Wheel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.integrations.html">Third party integrations</a> &raquo;</li>
+      <li>odyssey.integrations.wheel module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.integrations.wheel.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.integrations.wheel">
+<span id="odyssey-integrations-wheel-module"></span><h1>odyssey.integrations.wheel module<a class="headerlink" href="#module-odyssey.integrations.wheel" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.integrations.wheel.</span></span><span class="sig-name descname"><span class="pre">Wheel</span></span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A class for performing common wheel API calls</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.available_timeslots">
+<span class="sig-name descname"><span class="pre">available_timeslots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_time_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">flask_restx.fields.DateTime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">flask_restx.fields.DateTime</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clinician_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.available_timeslots" title="Permalink to this definition"></a></dt>
+<dd><p>Query wheel’s API to find timeslots for a specific datetime range.
+Wheel URI: /v1/consult_rates/&lt;consult_rate&gt;/timeslots</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_time_range</strong> (tuple(<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>)) – tuple containing the start and end datetimes of the target booking window in UTC</p></li>
+<li><p><strong>location_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – where the client is located. Converted to state abbreviation for wheel request</p></li>
+<li><p><strong>clinician_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – optional wheel_clinician_id of the clinician</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – available time increments: {user_id: [booking_availability_ids]}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.openings">
+<span class="sig-name descname"><span class="pre">openings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_time_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clinician_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.openings" title="Permalink to this definition"></a></dt>
+<dd><p>Query wheel’s API to find timeslots for a specific datetime range.
+Wheel URI: /v1/consult_rates/&lt;consult_rate&gt;/openings</p>
+<p>The API will respond with blocks of continuous openings at least 30 minutes in duration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_time_range</strong> (tuple(<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>)) – tuple containing the start and end datetimes of the target booking window in UTC</p></li>
+<li><p><strong>location_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – where the client is located. Converted to state abbreviation for wheel request</p></li>
+<li><p><strong>clinician_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – optional wheel_clinician_id of the clinician</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – available time increments: {user_id: [booking_availability_ids]}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.clinician_ids">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clinician_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'user_id'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.clinician_ids" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>returns dictionary:</dt><dd><p>keys: user_id or wheel_clinician_id
+values: wheel_clinician_id or user_id</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.make_booking_request">
+<span class="sig-name descname"><span class="pre">make_booking_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">staff_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">location_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">booking_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">booking_start_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">flask_restx.fields.DateTime</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.make_booking_request" title="Permalink to this definition"></a></dt>
+<dd><p>Make request to wheel for booking using the provided user_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>tuple(str, str)</em> – Returns the booking_external_id and consult_url_deeplink.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.physician_roster">
+<span class="sig-name descname"><span class="pre">physician_roster</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.physician_roster" title="Permalink to this definition"></a></dt>
+<dd><p>responds with wheel’s full clinician roster</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.get_wheel_physician">
+<span class="sig-name descname"><span class="pre">get_wheel_physician</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">affiliate_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.get_wheel_physician" title="Permalink to this definition"></a></dt>
+<dd><p>Bring up the wheel clinician using their affiliate_id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.update_modobio_physician_roster">
+<span class="sig-name descname"><span class="pre">update_modobio_physician_roster</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.update_modobio_physician_roster" title="Permalink to this definition"></a></dt>
+<dd><p>Add or update wheel clinicians in the modobio system. If new clinician is found, create a new user account</p>
+<p>‘email’,
+‘status’: ‘active’ or otherwise,
+‘name’: needs to be split into first and last name,
+‘practitioner_type’: ‘md’, ‘np’
+‘timezone’: IANA Tzones
+‘sex’: ‘Male’ or otherwise fem
+‘npi’:
+‘license_info’[‘ca’][‘expires_at’]/[‘license_number’]
+‘photo’: ** Not sure what to do here, download and then upload to s3?
+‘about’: bio if we will have one</p>
+<p>Must Populate:
+User: generic info and sex
+TelehealthStaffSettings: timezone
+UserLogin (if user is new, create a password) TODO: send email? password
+UserProfilePictures: profile pic from wheel if they provide one
+StaffProfile: bio, memebrsince (added automatically by db)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.cancel_booking">
+<span class="sig-name descname"><span class="pre">cancel_booking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">external_booking_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.cancel_booking" title="Permalink to this definition"></a></dt>
+<dd><p>Cancel the wheel consultation using PATCH v1/consults/&lt;external_booking_id&gt;/cancel</p>
+<p>Expected response is 200 OK and payload of {“status”: “success”}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.start_consult">
+<span class="sig-name descname"><span class="pre">start_consult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">external_booking_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.start_consult" title="Permalink to this definition"></a></dt>
+<dd><p>Send a consult start request to wheel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>external_booking_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Booking reference id from TelehealthBookings.external_booking_id</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.wheel.Wheel.complete_consult">
+<span class="sig-name descname"><span class="pre">complete_consult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">external_booking_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.wheel.Wheel.complete_consult" title="Permalink to this definition"></a></dt>
+<dd><p>Send a consult complete request to wheel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>external_booking_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Booking reference id from TelehealthBookings.external_booking_id</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.integrations.twilio.html" class="btn btn-neutral float-left" title="odyssey.integrations.twilio module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.tasks.html" class="btn btn-neutral float-right" title="odyssey.tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -44,26 +44,23 @@ class Wheel:
         Wheel URI: /v1/consult_rates/<consult_rate>/timeslots
 
 
-        Params
-        ------
-        target_time_range: (datetime, datetime)
+        Parameters
+        ----------
+        target_time_range : tuple(:class:`datetime.datetime`, :class:`datetime.datetime`)
             tuple containing the start and end datetimes of the target booking window in UTC
-        
-        location_id:
+
+        location_id : int
             where the client is located. Converted to state abbreviation for wheel request
 
-        clinician_id
+        clinician_id : str
             optional wheel_clinician_id of the clinician
         
         Returns
         -------
         dict
-        of available time increments: {user_id : [booking_availability_ids]}
-  
-        
-        TODO: add practitioner sex to query when wheel has implemented the feature
+            available time increments: {user_id: [booking_availability_ids]}
         """
-
+        # TODO: add practitioner sex to query when wheel has implemented the feature
         # use location_id to get the state abbreviation
         state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
              
@@ -128,26 +125,23 @@ class Wheel:
 
         The API will respond with blocks of continuous openings at least 30 minutes in duration. 
 
-        Params
-        ------
-        target_time_range: (datetime, datetime)
+        Parameters
+        ----------
+        target_time_range : tuple(:class:`datetime.datetime`, :class:`datetime.datetime`)
             tuple containing the start and end datetimes of the target booking window in UTC
-        
-        location_id:
+
+        location_id : int
             where the client is located. Converted to state abbreviation for wheel request
 
-        clinician_id
+        clinician_id : str
             optional wheel_clinician_id of the clinician
-        
+
         Returns
         -------
         dict
-        of available time increments: {user_id : [booking_availability_ids]}
-  
-        
-        TODO: add practitioner sex to query when wheel has implemented the feature
+            available time increments: {user_id: [booking_availability_ids]}
         """
-
+        # TODO: add practitioner sex to query when wheel has implemented the feature
         # use location_id to get the state abbreviation
         state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
              
@@ -249,9 +243,10 @@ class Wheel:
         """
         Make request to wheel for booking using the provided user_id
         
-        Responds
-        --------
-        (booking_external_id: str, consult_url_deeplink: str)
+        Returns
+        -------
+        tuple(str, str)
+            Returns the booking_external_id and consult_url_deeplink.
         """
 
         # bring up staff user. Get wheel id
@@ -524,9 +519,9 @@ class Wheel:
         """
         Send a consult start request to wheel. 
 
-        Params
-        -------
-        external_booking_id: 
+        Parameters
+        ----------
+        external_booking_id : str
             Booking reference id from TelehealthBookings.external_booking_id
         """
 
@@ -552,9 +547,9 @@ class Wheel:
         """
         Send a consult complete request to wheel. 
 
-        Params
-        -------
-        external_booking_id: 
+        Parameters
+        ----------
+        external_booking_id : str
             Booking reference id from TelehealthBookings.external_booking_id
         """
 

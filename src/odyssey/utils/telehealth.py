@@ -37,7 +37,6 @@ booking_time_increment_length = 0
 booking_max_increment_idx = 0
 
 def get_utc_start_day_time(target_date: datetime, client_tz: str) -> tuple:
-
     # consider if the request is being made less than TELEHEALTH_BOOKING_LEAD_TIME_HRS before the start of the next day
     # if it's thurs 11 pm, we should offer friday 1 am the earliest, not midnight
     localized_target_date = datetime.combine(target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
@@ -61,19 +60,13 @@ def get_utc_start_day_time(target_date: datetime, client_tz: str) -> tuple:
     return (day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc)
 
 
-def get_possible_ranges(target_date: datetime, weekday_start:int,\
-    start_time_idx:int, weekday_end:int, end_time_idx:int, duration:int) -> dict:
-    """
-    time_blocks = 
-    {
-        possible_client_start_time_utc(int:index): 
-            ((day1_start_utc(datetime), weekday_num(idx), start_time1_idx(int:index), end_time1_idx(int:index)), 
-            (day2_start_utc(datetime), weekday_num(idx), start_time2_idx(int:index), end_time2_idx(int:index)))
-      
-        possible_client_start_time_utc(int:index): 
-            ((day1_start_utc(datetime), weekday_num(idx), start_time1_idx(int:index), end_time1_idx), )
-    }
-    """
+def get_possible_ranges(
+    target_date: datetime,
+    weekday_start: int,
+    start_time_idx: int,
+    weekday_end: int,
+    end_time_idx: int,
+    duration: int) -> dict:
     # Duration is taken from the client queue.
     # we divide it by 5 because our look up tables are in increments of 5 mintues
     # so, this represents the number of time blocks we will need to look at.
@@ -213,15 +206,13 @@ def get_practitioners_available(time_block, q_request):
     
     return practitioner_ids
 
-def calculate_consult_rate(hourly_rate:float, duration:int) -> float:
-    
+def calculate_consult_rate(hourly_rate: float, duration: int) -> float:
     hour_in_min = 60.0
     rate = round(float(hourly_rate) * int(duration) / hour_in_min, 2)
     
     return rate
 
 def get_practitioner_details(user_ids: set, profession_type: str, duration: int) -> dict:
-
     practitioners = db.session.query(User, StaffRoles.consult_rate)\
         .join(StaffRoles, StaffRoles.user_id==User.user_id)\
             .filter(User.user_id.in_(user_ids),
@@ -253,7 +244,14 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
 
     return practitioner_details
 
-def verify_availability(client_user_id, staff_user_id, utc_start_idx, utc_end_idx, target_start_datetime_utc, target_end_datetime_utc, client_location_id):
+def verify_availability(
+    client_user_id,
+    staff_user_id,
+    utc_start_idx,
+    utc_end_idx,
+    target_start_datetime_utc,
+    target_end_datetime_utc,
+    client_location_id):
     ###
     # Check to see the client and staff still have the requested time slot available
     # - current bookings
@@ -325,7 +323,6 @@ def verify_availability(client_user_id, staff_user_id, utc_start_idx, utc_end_id
     return 
 
 def update_booking_status_history(new_status: str, booking_id: int, reporter_id: int, reporter_role: str):
-
     # create TelehealthBookingStatus object
     status_history = TelehealthBookingStatus(
         booking_id = booking_id,
@@ -337,8 +334,10 @@ def update_booking_status_history(new_status: str, booking_id: int, reporter_id:
     db.session.add(status_history)
 
 def complete_booking(booking_id: int):
-    """
+    """ Complete a booking.
+
     After booking gets started, make sure it gets completed
+
     1. Update booking status
     2. Send signal to twilio
     """
@@ -367,8 +366,10 @@ def complete_booking(booking_id: int):
     db.session.commit()
     return 'Booking Completed by System'
 
-def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_staff_localized):
-
+def add_booking_to_calendar(
+    booking,
+    booking_start_staff_localized,
+    booking_end_staff_localized):
     add_to_calendar = StaffCalendarEvents(user_id=booking.staff_user_id,
                                         start_date=booking_start_staff_localized.date(),
                                         end_date=booking_end_staff_localized.date(),
@@ -382,7 +383,6 @@ def add_booking_to_calendar(booking, booking_start_staff_localized, booking_end_
                                         timezone = booking_start_staff_localized.astimezone().tzname()
                                         )
     db.session.add(add_to_calendar)
-    return
 
 def get_booking_increment_data():
     global booking_time_increment_length

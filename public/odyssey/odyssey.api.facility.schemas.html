@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.api.facility.schemas &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.api.facility.schemas &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.lookup.schemas" href="odyssey.api.lookup.schemas.html" />
     <link rel="prev" title="odyssey.api.system.schemas module" href="odyssey.api.system.schemas.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
@@ -99,170 +47,77 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.schemas.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.schemas.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.schemas.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.schemas.html">Practitioner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.client_services.schemas.html">Client services</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.schemas.html">Doctor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.schemas.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.schemas.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.schemas.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.schemas.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.schemas.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.payment.schemas.html">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.schemas.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.schemas.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.schemas.html">System config</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.schemas.html">Lookup tables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="odyssey.schemas.html">Validation schemas</a> &raquo;</li>
-        
       <li>odyssey.api.facility.schemas</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.api.facility.schemas.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.api.facility.schemas">
-<span id="odyssey-api-facility-schemas"></span><h1>odyssey.api.facility.schemas<a class="headerlink" href="#module-odyssey.api.facility.schemas" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-api-facility-schemas"></span><h1>odyssey.api.facility.schemas<a class="headerlink" href="#module-odyssey.api.facility.schemas" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.facility.schemas.RegisteredFacilitiesSchema">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.facility.schemas.</span></span><span class="sig-name descname"><span class="pre">RegisteredFacilitiesSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">many</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.facility.schemas.</span></span><span class="sig-name descname"><span class="pre">RegisteredFacilitiesSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">many</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.RegisteredFacilitiesSchema.facility_id">
-<span class="sig-name descname"><span class="pre">facility_id</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.Integer(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">integer.',</span> <span class="pre">'too_large':</span> <span class="pre">'Number</span> <span class="pre">too</span> <span class="pre">large.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.facility_id" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.RegisteredFacilitiesSchema.facility_name">
-<span class="sig-name descname"><span class="pre">facility_name</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.String(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=True,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">string.',</span> <span class="pre">'invalid_utf8':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">utf-8</span> <span class="pre">string.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.facility_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.RegisteredFacilitiesSchema.facility_address">
-<span class="sig-name descname"><span class="pre">facility_address</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.String(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=True,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">string.',</span> <span class="pre">'invalid_utf8':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">utf-8</span> <span class="pre">string.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.facility_address" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.RegisteredFacilitiesSchema.modobio_facility">
-<span class="sig-name descname"><span class="pre">modobio_facility</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.Boolean(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=True,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">boolean.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.modobio_facility" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.facility.schemas.RegisteredFacilitiesSchema.make_object">
-<span class="sig-name descname"><span class="pre">make_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.make_object" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">make_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.make_object" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.facility.schemas.RegisteredFacilitiesSchema.opts">
-<span class="sig-name descname"><span class="pre">opts</span></span><em class="property"><span class="pre">:</span> <span class="pre">SchemaOpts</span></em><em class="property"> <span class="pre">=</span> <span class="pre">&lt;marshmallow.schema.SchemaOpts</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.opts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">opts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SchemaOpts</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;marshmallow.schema.SchemaOpts</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.RegisteredFacilitiesSchema.opts" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.facility.schemas.</span></span><span class="sig-name descname"><span class="pre">ClientSummarySchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">many</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.facility.schemas.</span></span><span class="sig-name descname"><span class="pre">ClientSummarySchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">many</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">types.StrSequenceOrSet</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">marshmallow.schema.Schema</span></code></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.firstname">
-<span class="sig-name descname"><span class="pre">firstname</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.String(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">string.',</span> <span class="pre">'invalid_utf8':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">utf-8</span> <span class="pre">string.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.firstname" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.middlename">
-<span class="sig-name descname"><span class="pre">middlename</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.String(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">string.',</span> <span class="pre">'invalid_utf8':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">utf-8</span> <span class="pre">string.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.middlename" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.lastname">
-<span class="sig-name descname"><span class="pre">lastname</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.String(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">string.',</span> <span class="pre">'invalid_utf8':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">utf-8</span> <span class="pre">string.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.lastname" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.dob">
-<span class="sig-name descname"><span class="pre">dob</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.Date(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">date.',</span> <span class="pre">'invalid_awareness':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">{awareness}</span> <span class="pre">{obj_type}.',</span> <span class="pre">'format':</span> <span class="pre">'&quot;{input}&quot;</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">formatted</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">date.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.dob" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.Integer(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">integer.',</span> <span class="pre">'too_large':</span> <span class="pre">'Number</span> <span class="pre">too</span> <span class="pre">large.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.user_id" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.membersince">
-<span class="sig-name descname"><span class="pre">membersince</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.Date(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'invalid':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">date.',</span> <span class="pre">'invalid_awareness':</span> <span class="pre">'Not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">{awareness}</span> <span class="pre">{obj_type}.',</span> <span class="pre">'format':</span> <span class="pre">'&quot;{input}&quot;</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">formatted</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">date.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.membersince" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.facilities">
-<span class="sig-name descname"><span class="pre">facilities</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;fields.Nested(default=&lt;marshmallow.missing&gt;,</span> <span class="pre">attribute=None,</span> <span class="pre">validate=None,</span> <span class="pre">required=False,</span> <span class="pre">load_only=False,</span> <span class="pre">dump_only=False,</span> <span class="pre">missing=&lt;marshmallow.missing&gt;,</span> <span class="pre">allow_none=False,</span> <span class="pre">error_messages={'required':</span> <span class="pre">'Missing</span> <span class="pre">data</span> <span class="pre">for</span> <span class="pre">required</span> <span class="pre">field.',</span> <span class="pre">'null':</span> <span class="pre">'Field</span> <span class="pre">may</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">null.',</span> <span class="pre">'validator_failed':</span> <span class="pre">'Invalid</span> <span class="pre">value.',</span> <span class="pre">'type':</span> <span class="pre">'Invalid</span> <span class="pre">type.'})&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.facilities" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.facility.schemas.ClientSummarySchema.opts">
-<span class="sig-name descname"><span class="pre">opts</span></span><em class="property"><span class="pre">:</span> <span class="pre">SchemaOpts</span></em><em class="property"> <span class="pre">=</span> <span class="pre">&lt;marshmallow.schema.SchemaOpts</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.opts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">opts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SchemaOpts</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;marshmallow.schema.SchemaOpts</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#odyssey.api.facility.schemas.ClientSummarySchema.opts" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -271,50 +126,33 @@
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.api.lookup.schemas.html" class="btn btn-neutral float-right" title="odyssey.api.lookup.schemas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="odyssey.api.system.schemas.html" class="btn btn-neutral float-left" title="odyssey.api.system.schemas module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.lookup.schemas.html" class="btn btn-neutral float-right" title="odyssey.api.lookup.schemas" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

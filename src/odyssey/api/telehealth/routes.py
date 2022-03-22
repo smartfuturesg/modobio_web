@@ -1840,18 +1840,16 @@ class TelehealthTranscripts(Resource):
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(api=ns, status_code=200)
     def patch(self, booking_id):
-        """
-        Store booking transcripts for the booking_id supplied.
-        This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
-        that is fired off following the completion of a booking. 
+        """ Store booking transcripts for the booking_id supplied.
 
-        Params
-        ------
-        booking_id
+        This endpoint is only available in the dev environment. Normally booking 
+        transcripts are stored by a background process that is fired off following
+        the completion of a booking. 
 
-        Returns
-        -------
-        None
+        Parameters
+        ----------
+        booking_id : int
+            Numerical booking identifier
         """
         booking = TelehealthBookings.query.get(booking_id)
 
@@ -1859,6 +1857,3 @@ class TelehealthTranscripts(Resource):
             raise BadRequest('Meeting does not exist yet.')
 
         store_telehealth_transcript.delay(booking.idx)
-                    
-        return 
-

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.utils.files &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.utils.message" href="odyssey.utils.message.html" />
+    <link rel="prev" title="odyssey.utils.auth" href="odyssey.utils.auth.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.auth.html">Login</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.message.html">Messaging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.logging.html">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.telehealth.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.search.html">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.pdf.html">PDF generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.misc.html">Other</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.utils.html">Utilities</a> &raquo;</li>
+      <li>odyssey.utils.files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.utils.files.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.utils.files">
+<span id="odyssey-utils-files"></span><h1>odyssey.utils.files<a class="headerlink" href="#module-odyssey.utils.files" title="Permalink to this headline"></a></h1>
+<p>This module handles various aspects of file storage such as validation,
+storing to, and retrieving from AWS S3.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline"></a></h2>
+<p><a class="reference internal" href="#odyssey.utils.files.FileDownload" title="odyssey.utils.files.FileDownload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileDownload</span></code></a> deals with files already uploaded to S3. The
+methods in <a class="reference internal" href="#odyssey.utils.files.FileDownload" title="odyssey.utils.files.FileDownload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileDownload</span></code></a> require a <strong>full path</strong> (or key) to
+the uploaded file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The path to the file, typically retrieved from the database.</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;id00017/images/picture.jpg&#39;</span>
+<span class="n">user_id</span> <span class="o">=</span> <span class="mi">17</span>
+
+<span class="c1"># User_id is needed at instantiation time. Methods of this</span>
+<span class="c1"># class check wether the requested file is within the same</span>
+<span class="c1"># prefix, which includes user_id number.</span>
+<span class="n">fd</span> <span class="o">=</span> <span class="n">FileDownload</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+<span class="c1"># Create a &quot;pre-signed&quot; URL to allow frontend to download the file.</span>
+<span class="c1"># URL expires after some time (default 10 min).</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+<span class="c1"># Delete file</span>
+<span class="n">fd</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#odyssey.utils.files.FileUpload" title="odyssey.utils.files.FileUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileUpload</span></code></a> deals with files not yet uploaded to S3. In
+contrast to <a class="reference internal" href="#odyssey.utils.files.FileDownload" title="odyssey.utils.files.FileDownload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileDownload</span></code></a>, the methods in <a class="reference internal" href="#odyssey.utils.files.FileUpload" title="odyssey.utils.files.FileUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileUpload</span></code></a>
+need a <strong>filename only</strong> and a full path will be created from a
+prefix and the supplied filename. Read the sections below to learn
+more about files and prefixes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The data for the upload can come from anything that supports</span>
+<span class="c1"># read(), seek(), and tell(). That can be the handle to an</span>
+<span class="c1"># opened file, a BytesIO object, or the stream attribute to</span>
+<span class="c1"># a FileStorage instance.</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span>
+
+<span class="c1"># Use ImageUpload or AudioUpload for specific files.</span>
+<span class="n">fu</span> <span class="o">=</span> <span class="n">FileUpload</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">stream</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;user_files&#39;</span><span class="p">)</span>
+
+<span class="c1"># Validate size and type, raises BadRequest</span>
+<span class="n">fu</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+
+<span class="c1"># File type and extension is guessed from binary data stream.</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;filename.</span><span class="si">{</span><span class="n">fu</span><span class="o">.</span><span class="n">extension</span><span class="si">}</span><span class="s1">&#39;</span>
+
+<span class="c1"># Optionally, an additional prefix given here.</span>
+<span class="n">fu</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="c1"># Full path available, store in db</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fu</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+<span class="c1"># &#39;id00017/user_files/filename.ext&#39;</span>
+</pre></div>
+</div>
+<p>For uploading images or audio recordings, use <a class="reference internal" href="#odyssey.utils.files.ImageUpload" title="odyssey.utils.files.ImageUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageUpload</span></code></a> and
+<a class="reference internal" href="#odyssey.utils.files.AudioUpload" title="odyssey.utils.files.AudioUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">AudioUpload</span></code></a>, respectively. These classes guess type and validate
+for the specific purpose. <a class="reference internal" href="#odyssey.utils.files.ImageUpload" title="odyssey.utils.files.ImageUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageUpload</span></code></a> also has a few methods
+to <code class="xref py py-meth docutils literal notranslate"><span class="pre">crop()</span></code> and <a class="reference internal" href="#odyssey.utils.files.ImageUpload.resize" title="odyssey.utils.files.ImageUpload.resize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resize()</span></code></a> the image.</p>
+</section>
+<section id="files-on-s3">
+<h2>Files on S3<a class="headerlink" href="#files-on-s3" title="Permalink to this headline"></a></h2>
+<p>S3’s top level division is the bucket. Buckets contain objects. Each
+object has a unique key. Keys may contain <code class="docutils literal notranslate"><span class="pre">/</span></code> characters, which make
+keys look like a directory structure. In fact, in the AWS S3 console
+objects are displayed as files and directories, but under the hood
+objects act differently.</p>
+<p>There is no way to distinguish an object with key “path/file” from
+“path/file/” (other than the name itself). There is no is_file()
+method or something similar. That is because, in fact, both are
+<em>objects</em> and not a file or a directory. Both objects can exist at
+the same time.</p>
+<p>Another surprising fact is that empty directories are automatically
+deleted. So if a file is uploaded with key “files/images/image1.jpg”
+and image1.jpg is later deleted, “files/images/” is deleted as well,
+assuming no other files with prefix “files/” or “files/images/” were
+uploaded in the mean time.</p>
+<p>This means that we need to be carefull in handling file and prefix
+names. In this module, <code class="docutils literal notranslate"><span class="pre">prefix</span></code> will always refer to a string ending
+with a <code class="docutils literal notranslate"><span class="pre">/</span></code> character and will represent a directory. <code class="docutils literal notranslate"><span class="pre">filename</span></code>
+will refer to a string <em>not</em> ending with a <code class="docutils literal notranslate"><span class="pre">/</span></code> character and
+represents a file. No path will ever start with <code class="docutils literal notranslate"><span class="pre">/</span></code>.</p>
+</section>
+<section id="the-prefix">
+<h2>The prefix<a class="headerlink" href="#the-prefix" title="Permalink to this headline"></a></h2>
+<p>When uploading a file, a <code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code> is created which will be
+prepended to every file. The prefix consists of 3 parts.</p>
+<p>The first part is a system-wide prefix, loaded from <a class="reference internal" href="odyssey.defaults.html#odyssey.defaults.AWS_S3_PREFIX" title="odyssey.defaults.AWS_S3_PREFIX"><code class="xref py py-const docutils literal notranslate"><span class="pre">AWS_S3_PREFIX</span></code></a>.</p>
+<p>The second part is a per-user prefix. The per-user prefix is rendered from the
+string template stored in <a class="reference internal" href="odyssey.defaults.html#odyssey.defaults.AWS_S3_USER_PREFIX" title="odyssey.defaults.AWS_S3_USER_PREFIX"><code class="xref py py-const docutils literal notranslate"><span class="pre">AWS_S3_USER_PREFIX</span></code></a>, using
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">user_id</span></code> to format the template.</p>
+<p>The third part is an extra prefix. It can be thought of as a subdirectory
+within the directory of this user. It is set from <code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code> parameter supplied
+to the methods in <a class="reference internal" href="#odyssey.utils.files.FileUpload" title="odyssey.utils.files.FileUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileUpload</span></code></a>.</p>
+<p>The final <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpload.prefix</span></code> will be:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AWS_S3_PREFIX</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">AWS_S3_USER_PREFIX</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+</pre></div>
+</div>
+<p>For more on the prefixes, also see <a class="reference internal" href="odyssey.defaults.html#odyssey.defaults.AWS_S3_BUCKET" title="odyssey.defaults.AWS_S3_BUCKET"><code class="xref py py-const docutils literal notranslate"><span class="pre">AWS_S3_BUCKET</span></code></a>,
+<a class="reference internal" href="odyssey.defaults.html#odyssey.defaults.AWS_S3_PREFIX" title="odyssey.defaults.AWS_S3_PREFIX"><code class="xref py py-const docutils literal notranslate"><span class="pre">AWS_S3_PREFIX</span></code></a>, and <a class="reference internal" href="odyssey.defaults.html#odyssey.defaults.AWS_S3_USER_PREFIX" title="odyssey.defaults.AWS_S3_USER_PREFIX"><code class="xref py py-const docutils literal notranslate"><span class="pre">AWS_S3_USER_PREFIX</span></code></a>
+in the <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a> module.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.files.S3Bucket">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.files.</span></span><span class="sig-name descname"><span class="pre">S3Bucket</span></span><a class="headerlink" href="#odyssey.utils.files.S3Bucket" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Loads the S3 boto3 resource and an S3 bucket.</p>
+<p>Use this class if you need direct access to the S3 bucket without
+any of the other predefined file upload and download actions.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileDownload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.files.</span></span><span class="sig-name descname"><span class="pre">FileDownload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.FileDownload" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.utils.files.S3Bucket" title="odyssey.utils.files.S3Bucket"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.files.S3Bucket</span></code></a></p>
+<p>Utilities to download or delete files from an AWS S3 bucket.</p>
+<p>This class operates on files that already exist in the S3 bucket. Each method
+requires a <code class="docutils literal notranslate"><span class="pre">filename</span></code> parameter, which must be a filename that includes the
+full prefix. A check is performed to make sure the provided filename is not
+outside the system-wide prefix.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileDownload.check_filename">
+<span class="sig-name descname"><span class="pre">check_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.FileDownload.check_filename" title="Permalink to this definition"></a></dt>
+<dd><p>Make sure filename starts with self.prefix</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileDownload.url">
+<span class="sig-name descname"><span class="pre">url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expires</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3600</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#odyssey.utils.files.FileDownload.url" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a presigned URL for <code class="docutils literal notranslate"><span class="pre">filename</span></code>.</p>
+<p>A presigned URL can be used to download the file directly from S3.
+The URL expires after <code class="docutils literal notranslate"><span class="pre">expires</span></code> seconds (default: 10 min).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the file to generate a URL for.</p></li>
+<li><p><strong>expires</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The number of seconds after which the generated URL expires.
+Defaults to 3600 (10 min).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>str</em> – The presigned URL.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/#werkzeug.exceptions.BadRequest" title="(in Werkzeug v2.0.x)"><strong>BadRequest</strong></a> – Raised in case of a boto3 error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileDownload.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.FileDownload.delete" title="Permalink to this definition"></a></dt>
+<dd><p>Delete a file.</p>
+<p>Only one file can be deleted per call. An INFO log message
+is send when the file is successfully deleted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the file to delete.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/#werkzeug.exceptions.BadRequest" title="(in Werkzeug v2.0.x)"><strong>BadRequest</strong></a> – Raised in case of a boto3 error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.files.</span></span><span class="sig-name descname"><span class="pre">FileUpload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.FileUpload" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.utils.files.FileDownload" title="odyssey.utils.files.FileDownload"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.files.FileDownload</span></code></a></p>
+<p>Utilities to upload files to an AWS S3 bucket.</p>
+<p>This class operates on newly created files the S3 bucket. Each method
+requires a <code class="docutils literal notranslate"><span class="pre">filename</span></code> parameter, which must be a filename without any
+prefixes. Setting the prefix (the directory) where to store the file
+is handled during instantiation of this class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.max_size">
+<span class="sig-name descname"><span class="pre">max_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10485760</span></em><a class="headerlink" href="#odyssey.utils.files.FileUpload.max_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.allowed_types">
+<span class="sig-name descname"><span class="pre">allowed_types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('png',</span> <span class="pre">'jpg',</span> <span class="pre">'jpeg',</span> <span class="pre">'doc',</span> <span class="pre">'pdf',</span> <span class="pre">'txt',</span> <span class="pre">'md',</span> <span class="pre">'csv')</span></em><a class="headerlink" href="#odyssey.utils.files.FileUpload.allowed_types" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.parse_filename">
+<span class="sig-name descname"><span class="pre">parse_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#odyssey.utils.files.FileUpload.parse_filename" title="Permalink to this definition"></a></dt>
+<dd><p>Validate and clean up filename.</p>
+<p>The following actions will be performed:</p>
+<ul class="simple">
+<li><p>Check that filename is a string, raise error if not.</p></li>
+<li><p>Strip any leading or trailing / characters.</p></li>
+<li><p>Check that filename is not empty after stripping /, raise error if it is.</p></li>
+<li><p>Prepend <code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code> if not empty.</p></li>
+<li><p>Prepend <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileDownload.prefix</span></code>.</p></li>
+</ul>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">FileDownload.prefix</span></code> will only be added once, so it is safe to call
+this function multiple times on the same filename. The returned value will
+always be the same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The filename to check.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> (</em><em>default ''</em><em>)</em>) – An additional prefix to append to <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileDownload.prefix</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>str</em> – The cleaned and validated filename.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/#werkzeug.exceptions.BadRequest" title="(in Werkzeug v2.0.x)"><strong>BadRequest</strong></a> – Raised if filename is not a string or if it is empty (after removing
+    any leading or trailing / characters).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.validate_size">
+<span class="sig-name descname"><span class="pre">validate_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#odyssey.utils.files.FileUpload.validate_size" title="Permalink to this definition"></a></dt>
+<dd><p>Validate the file size.</p>
+<p>Checks whether <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpoad.size</span></code> does not exceed <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpoad.max_size</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>bool</em> – Returns <code class="docutils literal notranslate"><span class="pre">False</span></code> if file size exceeds maximum allowed file size, <code class="docutils literal notranslate"><span class="pre">True</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.validate_type">
+<span class="sig-name descname"><span class="pre">validate_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#odyssey.utils.files.FileUpload.validate_type" title="Permalink to this definition"></a></dt>
+<dd><p>Validate the filetype.</p>
+<p>Checks whether <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpoad.extension</span></code> is in <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpoad.allowed_types</span></code>.
+The file extension is determined by inspecting the file magic of the binary
+data stream. It does therefore not rely on the file extension or mime type
+presented to the API by the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>bool</em> – Returns <code class="docutils literal notranslate"><span class="pre">True</span></code> if <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpoad.extension</span></code> is found in the list of
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpoad.allowed_types</span></code>, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.FileUpload.validate" title="Permalink to this definition"></a></dt>
+<dd><p>Validate both size and type of uploaded file.</p>
+<p>Checks both <a class="reference internal" href="#odyssey.utils.files.FileUpload.validate_size" title="odyssey.utils.files.FileUpload.validate_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_size()</span></code></a> and <a class="reference internal" href="#odyssey.utils.files.FileUpload.validate_type" title="odyssey.utils.files.FileUpload.validate_type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_type()</span></code></a>. Raises
+<a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/#werkzeug.exceptions.BadRequest" title="(in Werkzeug v2.0.x)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BadRequest</span></code></a> in case either one fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/#werkzeug.exceptions.BadRequest" title="(in Werkzeug v2.0.x)"><strong>BadRequest</strong></a> – Raised when either <a class="reference internal" href="#odyssey.utils.files.FileUpload.validate_size" title="odyssey.utils.files.FileUpload.validate_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_size()</span></code></a> or <a class="reference internal" href="#odyssey.utils.files.FileUpload.validate_type" title="odyssey.utils.files.FileUpload.validate_type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_type()</span></code></a> fail.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.FileUpload.save" title="Permalink to this definition"></a></dt>
+<dd><p>Store the uploaded file on S3 under the given filename.</p>
+<p>After upload is complete, sets <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileUpoad.filename</span></code> to the
+full path constructed from <code class="xref py py-attr docutils literal notranslate"><span class="pre">filename</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name to save the file under on S3.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> (</em><em>default ''</em><em>)</em>) – An additional prefix to append to <code class="xref py py-attr docutils literal notranslate"><span class="pre">FileDownload.prefix</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/#werkzeug.exceptions.BadRequest" title="(in Werkzeug v2.0.x)"><strong>BadRequest</strong></a> – Raised in case of boto3 errors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.FileUpload.url">
+<span class="sig-name descname"><span class="pre">url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expires</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3600</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#odyssey.utils.files.FileUpload.url" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a presigned URL for the uploaded file.</p>
+<p>Same as <a class="reference internal" href="#odyssey.utils.files.FileDownload.url" title="odyssey.utils.files.FileDownload.url"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FileDownload.url()</span></code></a> except that <code class="xref py py-attr docutils literal notranslate"><span class="pre">filename</span></code>
+is used as a filename. An error will be raised if the file was not saved
+before calling this method.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#odyssey.utils.files.FileDownload.url" title="odyssey.utils.files.FileDownload.url"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FileDownload.url()</span></code></a></p>
+</aside>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.files.AudioUpload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.files.</span></span><span class="sig-name descname"><span class="pre">AudioUpload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.AudioUpload" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.utils.files.FileUpload" title="odyssey.utils.files.FileUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.files.FileUpload</span></code></a></p>
+<p>Utilities to upload audio recordings to an AWS S3 bucket.</p>
+<p>This class is similar to <a class="reference internal" href="#odyssey.utils.files.FileUpload" title="odyssey.utils.files.FileUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileUpload</span></code></a> except that it validates
+specifically for audio file types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.files.AudioUpload.max_size">
+<span class="sig-name descname"><span class="pre">max_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10485760</span></em><a class="headerlink" href="#odyssey.utils.files.AudioUpload.max_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.files.AudioUpload.allowed_types">
+<span class="sig-name descname"><span class="pre">allowed_types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('m4a',</span> <span class="pre">'caf')</span></em><a class="headerlink" href="#odyssey.utils.files.AudioUpload.allowed_types" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.utils.files.ImageUpload">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.files.</span></span><span class="sig-name descname"><span class="pre">ImageUpload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.ImageUpload" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#odyssey.utils.files.FileUpload" title="odyssey.utils.files.FileUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.files.FileUpload</span></code></a></p>
+<p>Utilities to upload image files to an AWS S3 bucket.</p>
+<p>This class is similar to <a class="reference internal" href="#odyssey.utils.files.FileUpload" title="odyssey.utils.files.FileUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileUpload</span></code></a> except that it validates
+specifically for image file types. During instantiation of the class,
+the image is loaded as a <code class="xref py py-class docutils literal notranslate"><span class="pre">PIL.Image</span></code> in <code class="xref py py-attr docutils literal notranslate"><span class="pre">image</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.files.ImageUpload.max_size">
+<span class="sig-name descname"><span class="pre">max_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10485760</span></em><a class="headerlink" href="#odyssey.utils.files.ImageUpload.max_size" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.utils.files.ImageUpload.allowed_types">
+<span class="sig-name descname"><span class="pre">allowed_types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('png',</span> <span class="pre">'jpg',</span> <span class="pre">'jpeg')</span></em><a class="headerlink" href="#odyssey.utils.files.ImageUpload.allowed_types" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.utils.files.ImageUpload.resize">
+<span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.files.ImageUpload.resize" title="Permalink to this definition"></a></dt>
+<dd><p>Resize image to <code class="docutils literal notranslate"><span class="pre">dimension</span></code>.</p>
+<p>Resizes <code class="xref py py-attr docutils literal notranslate"><span class="pre">ImageUpload.file</span></code> to the given dimension. If the original
+image is not square, it will crop the image to a square before resizing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em>) – The (width, height) tuple of the new image.</p></li>
+<li><p><strong>**kwargs</strong> – Any additional parameters are passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">PIL.Image.save()</span></code>.
+They default to <code class="docutils literal notranslate"><span class="pre">format='jpeg',</span> <span class="pre">quality=90</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#odyssey.utils.files.ImageUpload" title="odyssey.utils.files.ImageUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageUpload</span></code></a> – A new instance of <a class="reference internal" href="#odyssey.utils.files.ImageUpload" title="odyssey.utils.files.ImageUpload"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageUpload</span></code></a> with <code class="xref py py-attr docutils literal notranslate"><span class="pre">file</span></code>
+and <code class="xref py py-attr docutils literal notranslate"><span class="pre">image</span></code> set to the cropped image.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/exceptions/#werkzeug.exceptions.BadRequest" title="(in Werkzeug v2.0.x)"><strong>BadRequest</strong></a> – Raised in case dimensions is not of shape tuple(int, int).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.utils.auth.html" class="btn btn-neutral float-left" title="odyssey.utils.auth" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.utils.message.html" class="btn btn-neutral float-right" title="odyssey.utils.message" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -106,8 +106,7 @@ def upcoming_appointment_notification_2hr(booking_id):
 @celery.task()
 def upcoming_appointment_care_team_permissions(booking_id):
     """
-    Apply temporary care team access permissions to the staff member involved in the booking 
-
+    Apply temporary care team access permissions to the staff member involved in the booking
     """
 
     # bring up resouce_group_ids required for medical doctor visits
@@ -192,11 +191,10 @@ def upcoming_appointment_care_team_permissions(booking_id):
 
 @celery.task()
 def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
-    """
-    TODO: Perform the necessary action depending on the `event` field of the payload
-    
+    """    
     Update the database entry with acknowledgement that the task has been completed
     """
+    # TODO: Perform the necessary action depending on the `event` field of the payload
     # bring up the booking in the request
     # if booking does not exist and env != production, skip
     # note, dev mongo db is shared between devlopers, dev environment, and testing environment
@@ -327,9 +325,8 @@ def charge_telehealth_appointment(booking_id):
     """
     This task will go through the process of attemping to charge a user for a telehealth booking.
     If the payment is unsuccesful, the booking will be canceled.
-
-    TODO: Notify user of the canceled booking via email/notfication
     """
+    # TODO: Notify user of the canceled booking via email/notfication
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
     Instamed().charge_user(booking)
@@ -346,20 +343,23 @@ def cancel_noshow_appointment(booking_id):
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):
-
+    """ Text """
     completion_info = complete_booking(booking_id)
 
     return completion_info
 
 @celery.task()
 def store_telehealth_transcript(booking_id: int):
-    """
-    Cache the telehealth transcript related to the booking id provided. Delete the conversation on twilio's platform once
-    this is acheived. 
+    """ Store telehealth transcript in cache.
 
-    Params
-    ------
-    booking_id: TelehealthBookings.idx for a booking that has been completed and is beyond the telehealth review period. 
+    Cache the telehealth transcript related to the booking id provided.
+    Delete the conversation on twilio's platform once this is acheived. 
+
+    Parameters
+    ----------
+    booking_id : int
+        TelehealthBookings.idx for a booking that has been completed
+        and is beyond the telehealth review period. 
     """
     twilio = Twilio()
 
@@ -420,16 +420,15 @@ def store_telehealth_transcript(booking_id: int):
     return
 
 @celery.task(base=BaseTaskWithRetry)
-def update_apple_subscription(user_id:int):
+def update_apple_subscription(user_id: int):
     """
     Updates the user's subscription by checking the subscription status with apple. 
     This task is intended to be scheduled right after the current subscription expires.
 
-    Params
-    ------
-    user_id: int
+    Parameters
+    ----------
+    user_id : int
         used to grab the latest subscription
-    
     """
     
     prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()

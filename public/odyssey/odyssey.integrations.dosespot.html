@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.integrations.dosespot module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.integrations.instamed module" href="odyssey.integrations.instamed.html" />
+    <link rel="prev" title="odyssey.integrations.apple module" href="odyssey.integrations.apple.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.apple.html">Apple</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.instamed.html">InstaMed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.twilio.html">Twilio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.wheel.html">Wheel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.integrations.html">Third party integrations</a> &raquo;</li>
+      <li>odyssey.integrations.dosespot module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.integrations.dosespot.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.integrations.dosespot">
+<span id="odyssey-integrations-dosespot-module"></span><h1>odyssey.integrations.dosespot module<a class="headerlink" href="#module-odyssey.integrations.dosespot" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.integrations.dosespot.</span></span><span class="sig-name descname"><span class="pre">DoseSpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">practitioner_user_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">char_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Object to handle dose spot routines</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.registered_practitioners">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">registered_practitioners</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.registered_practitioners" title="Permalink to this definition"></a></dt>
+<dd><p>Bring up all practitioners registered with DoseSpot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.prescribe">
+<span class="sig-name descname"><span class="pre">prescribe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.prescribe" title="Permalink to this definition"></a></dt>
+<dd><p>Generates an SSO link for the DoseSpot prescribing portal</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>client_user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – User ID for the client user. Used to bring up the client’s dose spot id</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>str</em> – The single sign on URL</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.notifications">
+<span class="sig-name descname"><span class="pre">notifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.notifications" title="Permalink to this definition"></a></dt>
+<dd><p>Bring up notifications the practitioner has on DoseSpot
+Store these inthe modobio notification system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – User ID number</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.onboard_client">
+<span class="sig-name descname"><span class="pre">onboard_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.onboard_client" title="Permalink to this definition"></a></dt>
+<dd><p>Create the patient in the DoseSpot System</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>client_user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Modobio user_id for a client</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.onboard_practitioner">
+<span class="sig-name descname"><span class="pre">onboard_practitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">staff_user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.onboard_practitioner" title="Permalink to this definition"></a></dt>
+<dd><p>Register practitioner with DoseSpot. Pracatitioner must meet the following requirements:
+- valid NPI
+- Staff office
+- medical_doctor role</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>staff_user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Modobio user_id for a staff member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.allergies">
+<span class="sig-name descname"><span class="pre">allergies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.allergies" title="Permalink to this definition"></a></dt>
+<dd><p>Bring up the allergies to medications using DS API</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.prescriptions">
+<span class="sig-name descname"><span class="pre">prescriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.prescriptions" title="Permalink to this definition"></a></dt>
+<dd><p>Query the DoseSpot API for the client’s prescriptions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.enrollment_status">
+<span class="sig-name descname"><span class="pre">enrollment_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'staff'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.enrollment_status" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the DoseSpot enrollment status of the user.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.pharmacy_search">
+<span class="sig-name descname"><span class="pre">pharmacy_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zipcode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.pharmacy_search" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the pharmacies near the provied address details</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zipcode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Zipcode where client is located</p></li>
+<li><p><strong>state_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Numerical ID of the state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list(dict)</em> – list of pharmacies</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.client_pharmacies">
+<span class="sig-name descname"><span class="pre">client_pharmacies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.client_pharmacies" title="Permalink to this definition"></a></dt>
+<dd><p>Bring up the client’s pharmacies saved on the DS platform. Use the proxy user for this request</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.dosespot.DoseSpot.pharmacy_select">
+<span class="sig-name descname"><span class="pre">pharmacy_select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pharmacies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">marshmallow.fields.Dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.dosespot.DoseSpot.pharmacy_select" title="Permalink to this definition"></a></dt>
+<dd><p>Bring up the client’s pharmacies saved on the DS platform. Use the proxy user for this request</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.integrations.apple.html" class="btn btn-neutral float-left" title="odyssey.integrations.apple module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.integrations.instamed.html" class="btn btn-neutral float-right" title="odyssey.integrations.instamed module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

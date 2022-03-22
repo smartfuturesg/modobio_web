@@ -1,24 +1,27 @@
-""" File storage utilities.
-
+"""
 This module handles various aspects of file storage such as validation,
 storing to, and retrieving from AWS S3.
 
-Quick start
------------
+Overview
+--------
 
 :class:`FileDownload` deals with files already uploaded to S3. The
-methods in :class:`FileDownload` require a *full path* (key) to the
-uploaded file.
+methods in :class:`FileDownload` require a **full path** (or key) to
+the uploaded file.
 
 .. code:: python
 
     # The path to the file, typically retrieved from the database.
     path = 'id00017/images/picture.jpg'
+    user_id = 17
 
-    fd = FileDownload()
+    # User_id is needed at instantiation time. Methods of this
+    # class check wether the requested file is within the same
+    # prefix, which includes user_id number.
+    fd = FileDownload(user_id)
 
-    # Create a "pre-signed" URL to allow frontend to download the
-    # file. URL expires after some time (default 10 min).
+    # Create a "pre-signed" URL to allow frontend to download the file.
+    # URL expires after some time (default 10 min).
     url = fd.url(path)
 
     # Delete file
@@ -26,16 +29,16 @@ uploaded file.
 
 :class:`FileUpload` deals with files not yet uploaded to S3. In
 contrast to :class:`FileDownload`, the methods in :class:`FileUpload`
-need a *filename only* and a full path will be created from a
+need a **filename only** and a full path will be created from a
 prefix and the supplied filename. Read the sections below to learn
 more about files and prefixes.
 
 .. code:: python
 
     # The data for the upload can come from anything that supports
-    # ``read()``, ``seek()``, and ``tell()``. That can be the handle
-    # to an opened file, a :class:`~io.BytesIO` object, or the
-    # stream attribute to :class:`~werkzeug.datastructures.FileStorage`.
+    # read(), seek(), and tell(). That can be the handle to an
+    # opened file, a BytesIO object, or the stream attribute to
+    # a FileStorage instance.
     f = response.files['file']
 
     # Use ImageUpload or AudioUpload for specific files.
@@ -48,12 +51,11 @@ more about files and prefixes.
     filename = f'filename.{fu.extension}'
 
     # Optionally, an additional prefix given here.
-    # Or give the prefix instead of giving it to FileUpload.
     fu.save(filename)
 
     # Full path available, store in db
-    fu.filename
-    'id00017/user_files/filename.ext'
+    print(fu.filename)
+    # 'id00017/user_files/filename.ext'
 
 For uploading images or audio recordings, use :class:`ImageUpload` and
 :class:`AudioUpload`, respectively. These classes guess type and validate
@@ -71,8 +73,9 @@ objects act differently.
 
 There is no way to distinguish an object with key "path/file" from
 "path/file/" (other than the name itself). There is no is_file()
-method or attribute to distinguish the first from the latter. Both
-objects can exist at the same time.
+method or something similar. That is because, in fact, both are
+*objects* and not a file or a directory. Both objects can exist at
+the same time.
 
 Another surprising fact is that empty directories are automatically
 deleted. So if a file is uploaded with key "files/images/image1.jpg"
@@ -99,17 +102,18 @@ string template stored in :const:`~odyssey.defaults.AWS_S3_USER_PREFIX`, using
 :attr:`user_id` to format the template.
 
 The third part is an extra prefix. It can be thought of as a subdirectory
-within the directory of this user. It is set from :attr:`prefix` supplied to
-the methdods in :class:`FileUpload`.
+within the directory of this user. It is set from :attr:`prefix` parameter supplied
+to the methods in :class:`FileUpload`.
 
-The final :attr:`~.FileUpload.prefix` will be:
-.. code:: python
+The final :attr:`.FileUpload.prefix` will be:
+
+.. code-block:: python
 
     AWS_S3_PREFIX + '/' + AWS_S3_USER_PREFIX.format(user_id=user_id) + '/' + prefix + '/'
 
-.. seealso:: :const:`~odyssey.defaults.AWS_S3_BUCKET`,
-             :const:`~odyssey.defaults.AWS_S3_PREFIX`, and
-             :const:`~odyssey.defaults.AWS_S3_USER_PREFIX`
+For more on the prefixes, also see :const:`~odyssey.defaults.AWS_S3_BUCKET`,
+:const:`~odyssey.defaults.AWS_S3_PREFIX`, and :const:`~odyssey.defaults.AWS_S3_USER_PREFIX`
+in the :mod:`odyssey.defaults` module.
 """
 
 import base64
