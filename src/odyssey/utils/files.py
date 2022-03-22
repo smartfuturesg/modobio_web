@@ -480,10 +480,6 @@ class FileUpload(FileDownload):
         """
         filename = self.parse_filename(filename, prefix=prefix)
 
-        # TODO: Why an exception for PDF files?
-        # if self.file.content_type != 'application/pdf':
-        #     self.file.seek(0)
-
         # Integrity check: AWS automatically verifies md5 checksum if provided.
         md5 = hashlib.md5()
         for data in self._read_chunk():
