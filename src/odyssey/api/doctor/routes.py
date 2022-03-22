@@ -1546,8 +1546,8 @@ class AllMedBloodTestResults(BaseResource):
                             MedicalBloodTests.reporter_id == User.user_id
                         ).all()
 
-        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
-        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname, x[0].image_path) for x in results])
+        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'image': x[5], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
@@ -1571,7 +1571,7 @@ class AllMedBloodTestResults(BaseResource):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
                     # get presigned s3 link if present
-                    image_path = test.get('image_path')
+                    image_path = test.get('image')
                     if image_path:
                         test['image'] = fh.get_presigned_url(image_path)
                         
