@@ -194,24 +194,42 @@ def get_practitioners_available(time_block, q_request):
         
         #detect if day 1 of booking is inside an exception for this practitioner on this date       
         exception1 = TelehealthStaffAvailabilityExceptions.query \
-            .filter_by(user_id=user_id, exception_date=date1.date()).all()
+            .filter_by(user_id=user_id, exception_date=date1.date()) \
+            .filter(
+                or_(
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day1_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day1_end
+                    )
+                )
+            ).all()
             
-        for excep in exception1:
-            if excep.exception_booking_window_id_start_time <= day1_start < excep.exception_booking_window_id_end_time \
-            or excep.exception_booking_window_id_start_time < day1_end <= excep.exception_booking_window_id_end_time:
-                exception = True
-                break
+        if len(exception1) > 0:
+            exception = True
             
-        if day2:
+        if day2 and not exception:
             #detect if day 2 of booking is inside an exception for this practitioner on this date       
             exception2 = TelehealthStaffAvailabilityExceptions.query \
-                .filter_by(user_id=user_id, exception_date=date2.date()).all()
-                
-            for excep in exception2:
-                if excep.exception_booking_window_id_start_time <= day2_start < excep.exception_booking_window_id_end_time \
-                or excep.exception_booking_window_id_start_time < day2_end <= excep.exception_booking_window_id_end_time:
-                    exception = True
-                    break
+            .filter_by(user_id=user_id, exception_date=date2.date()) \
+            .filter(
+                or_(
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day2_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day2_end
+                    )
+                )
+            ).all()
+            
+            if len(exception2) > 0:
+                exception = True
                 
         if not exception:
             if user_id not in available:
