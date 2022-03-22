@@ -144,7 +144,10 @@ def test_conversation_cache_scheduler(test_client, booking_function_scope):
 
 
     # test the scheduler 
-    bookings = deploy_appointment_transcript_store_tasks(booking.target_date)
+    bookings = deploy_appointment_transcript_store_tasks()
+
+    breakpoint()
+    assert len(bookings) == 1
 
 def test_telehealth_transcript_get(test_client, booking_function_scope):
     """
