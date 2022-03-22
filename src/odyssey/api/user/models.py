@@ -785,11 +785,15 @@ class UserLegalDocs(db.Model):
 class UserProfilePictures(BaseModelWithIdx):
     """ 
     Stores S3 keys to profile pictures saved in aws s3
-
     """
-    __table_args__ = (CheckConstraint('(client__user_id IS NULL) != (staff_user_id IS NULL)'),)
 
-    client_user_id= db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"))
+    # Either client_user_id OR staff_user_id is used but not both and not neither (XOR).
+    __table_args__ = (
+        CheckConstraint(
+            '(client_user_id IS NULL) != (staff_user_id IS NULL)',
+            name='UserProfilePictures_check_user_id'),)
+
+    client_user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"))
     """
     User ID number, foreign key to User.user_id
 
@@ -803,7 +807,7 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: :class:`ClientInfo` instance
     """
 
-    staff_user_id= db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete="CASCADE"))
+    staff_user_id = db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete="CASCADE"))
     """
     User ID number, foreign key to User.user_id
 
@@ -838,7 +842,7 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: int
     """
     
-    original = db.Column(db.Boolean, server_default='false')
+    original = db.Column(db.Boolean, server_default='f')
     """
     Boolean determining if the image is the original or not, false by default
 

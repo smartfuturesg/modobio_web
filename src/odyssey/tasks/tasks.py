@@ -24,7 +24,7 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
 
 @celery.task()
@@ -370,11 +370,7 @@ def store_telehealth_transcript(booking_id: int):
     
     transcript = twilio.get_booking_transcript(booking.idx)
 
-    # s3 bucket path for the media associated with this booking transcript
-    transcript_media_prefix = f'id{booking.client_user_id:05d}/telehealth/{booking_id}/transcript/media'
-
     # if there is media present in the transcript, store it in an s3 bucket
-    fh = FileHandling()
     media_id = 0
     for idx, message in enumerate(transcript):
         if message['media']:
@@ -382,25 +378,17 @@ def store_telehealth_transcript(booking_id: int):
                 # download media from twilio 
                 media_content = twilio.get_media(media['sid'])
 
-                if media['content_type'] == 'application/pdf':
-                    file_extension = '.pdf'
-                    media_file = FileStorage(media_content, filename=f'{media_id}.pdf', content_type=media['content_type'])
-                else:
-                    img = BytesIO(media_content)
-                    tmp = Image.open(img)
-                    file_extension = '.'+ tmp.format.lower()
-                    tfile = BytesIO()
-                    tmp.save(tfile, format='jpeg')
-                    media_file = FileStorage(tfile, filename=f'{media_id}{file_extension}', content_type=media['content_type'])
+                fu = FileUpload(
+                    BytesIO(media_content),
+                    booking.client_user_id,
+                    prefix=f'telehealth/{booking_id}/transcript/media')
+                fu.validate()
+                fu.save(f'{media_id}.{fu.extension}')
 
-                # save media to s3, update transcript with file save path
-                save_file_path_s3 = f'{transcript_media_prefix}/{media_id}{file_extension}'
-                fh.save_file_to_s3(media_file, save_file_path_s3)
-
-                media['s3_path'] = save_file_path_s3 
+                media['s3_path'] = fu.filename
                 transcript[idx]['media'][media_idx] = media
             
-                media_id+=1
+                media_id += 1
 
     payload = {
         'created_at': datetime.utcnow().isoformat(),

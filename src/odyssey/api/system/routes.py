@@ -119,7 +119,7 @@ class SystemDeleteUserApi(BaseResource):
 
 
 @ns.route('/celery/test/')
-class SystemDeleteUserApi(BaseResource):
+class SystemDeleteUserTestEndpoint(BaseResource):
     """Send a test task """
     @token_auth.login_required
     def get(self):

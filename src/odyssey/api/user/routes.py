@@ -55,7 +55,6 @@ from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
-from odyssey.utils.file_handling import FileHandling
 from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import (

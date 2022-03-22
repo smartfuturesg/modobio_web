@@ -1,18 +1,15 @@
 import logging
-
-from marshmallow.fields import Number
-
-from odyssey.utils.file_handling import FileHandling
-logger = logging.getLogger(__name__)
-
-from typing import Any
-from flask import current_app
 import random
-from flask_restx.fields import Integer, String
-from sqlalchemy import select
+
 from datetime import date, datetime, timedelta, time
+from typing import Any
+
 from dateutil import tz
+from flask import current_app
+from sqlalchemy import select
 from sqlalchemy.sql.expression import and_, or_
+from werkzeug.exceptions import BadRequest
+
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupTerritoriesOfOperations
 from odyssey.api.practitioner.models import PractitionerCredentials
@@ -21,23 +18,25 @@ from odyssey.api.telehealth.models import(
     TelehealthChatRooms, 
     TelehealthBookings, 
     TelehealthStaffAvailability, 
-    TelehealthBookingStatus
-)
+    TelehealthBookingStatus)
 from odyssey.api.telehealth.schemas import TelehealthBookingStatusSchema
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
 from odyssey.api.payment.models import PaymentHistory
 from odyssey.integrations.wheel import Wheel
-from werkzeug.exceptions import BadRequest
 from odyssey.integrations.twilio import Twilio
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.constants import (
+    DAY_OF_WEEK,
+    TELEHEALTH_BOOKING_LEAD_TIME_HRS,
+    TELEHEALTH_START_END_BUFFER)
+from odyssey.utils.files import FileDownload
 
-from odyssey.utils.constants import DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS, TELEHEALTH_START_END_BUFFER
+logger = logging.getLogger(__name__)
 
 booking_time_increment_length = 0
 booking_max_increment_idx = 0
 
-def get_utc_start_day_time(target_date:datetime, client_tz:str) -> tuple:
+def get_utc_start_day_time(target_date: datetime, client_tz: str) -> tuple:
 
     # consider if the request is being made less than TELEHEALTH_BOOKING_LEAD_TIME_HRS before the start of the next day
     # if it's thurs 11 pm, we should offer friday 1 am the earliest, not midnight
@@ -230,15 +229,15 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
                 StaffRoles.consult_rate != None
             ).all()
 
-
-    fh = FileHandling()
-
     # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
     practitioner_details = {}
     for practitioner, consult_rate in practitioners:
-        # if the practitioner has a profile picture, get the prefix from the first image path found
-        image_path = practitioner.staff_profile.profile_pictures[0].image_path if practitioner.staff_profile.profile_pictures else None
-        prefix = image_path[0:image_path.rfind('/')] if image_path else None
+        fd = FileDownload(practitioner.user_id)
+        urls = {}
+        for pic in practitioner.staff_profile.profile_pictures:
+            if pic.original:
+                continue
+            urls[str(pic.width)] = fd.url(pic.image_path)
 
         # get presinged url to available practitioners' profile picture
         # it's done here so we only call S3 once per practitioner available
@@ -248,11 +247,9 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
             'gender': 'm' if practitioner.biological_sex_male else 'f',
             'bio': practitioner.staff_profile.bio,
             'hourly_consult_rate': consult_rate,
-            'consult_cost': calculate_consult_rate(consult_rate,duration),
-            'profile_pictures': fh.get_presigned_urls(prefix) if prefix else None,
-            'roles' : [role.role for role in practitioner.roles]
-        }
-
+            'consult_cost': calculate_consult_rate(consult_rate, duration),
+            'profile_pictures': urls,
+            'roles' : [role.role for role in practitioner.roles]}
 
     return practitioner_details
 
@@ -327,7 +324,7 @@ def verify_availability(client_user_id, staff_user_id, utc_start_idx, utc_end_id
 
     return 
 
-def update_booking_status_history(new_status:String, booking_id:Integer, reporter_id:Integer, reporter_role:String):
+def update_booking_status_history(new_status: str, booking_id: int, reporter_id: int, reporter_role: str):
 
     # create TelehealthBookingStatus object
     status_history = TelehealthBookingStatus(
@@ -338,8 +335,6 @@ def update_booking_status_history(new_status:String, booking_id:Integer, reporte
     )
     # save TelehealthBookingStatus object connected to this booking.
     db.session.add(status_history)
-    return 
-
 
 def complete_booking(booking_id: int):
     """
