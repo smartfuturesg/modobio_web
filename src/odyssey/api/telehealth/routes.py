@@ -1318,50 +1318,51 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
                 exceptions.append(exception)
                 
                 #detect if conflicts exist with this exception
-                bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(
-                    or_(
-                        TelehealthBookings.status == 'Accepted',
-                        TelehealthBookings.status == 'Pending'
-                    )) \
-                    .filter(
+                if exception.is_busy:
+                    bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(
                         or_(
-                            and_(
-                                TelehealthBookings.booking_window_id_start_time >= exception.exception_booking_window_id_start_time,
-                                TelehealthBookings.booking_window_id_start_time < exception.exception_booking_window_id_end_time
-                            ),
-                            and_(
-                                TelehealthBookings.booking_window_id_end_time < exception.exception_booking_window_id_start_time,
-                                TelehealthBookings.booking_window_id_end_time >= exception.exception_booking_window_id_end_time
-                            ),
-                            and_(
-                                TelehealthBookings.booking_window_id_start_time <= exception.exception_booking_window_id_start_time,
-                                TelehealthBookings.booking_window_id_end_time > exception.exception_booking_window_id_start_time
-                            ),
-                            and_(
-                                TelehealthBookings.booking_window_id_start_time < exception.exception_booking_window_id_end_time,
-                                TelehealthBookings.booking_window_id_end_time >= exception.exception_booking_window_id_end_time
+                            TelehealthBookings.status == 'Accepted',
+                            TelehealthBookings.status == 'Pending'
+                        )) \
+                        .filter(
+                            or_(
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time >= exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_start_time < exception.exception_booking_window_id_end_time
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_end_time < exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_end_time >= exception.exception_booking_window_id_end_time
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time <= exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_end_time > exception.exception_booking_window_id_start_time
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time < exception.exception_booking_window_id_end_time,
+                                    TelehealthBookings.booking_window_id_end_time >= exception.exception_booking_window_id_end_time
+                                )
                             )
-                        )
-                    ).all()
-                
-                for booking in bookings:
-                        client = {**booking.client.__dict__}
-                        start_time_utc = LookupBookingTimeIncrements.query \
-                            .filter_by(idx=booking.booking_window_id_end_time_utc).one_or_none().start_time
-                        
-                        conflicts.append({
-                            'booking_id': booking.idx,
-                            'target_date_utc': booking.target_date_utc,
-                            'start_time_utc': start_time_utc,
-                            'status': booking.status,
-                            'profession_type': booking.profession_type,
-                            'client_location_id': booking.client_location_id,
-                            'payment_method_id': booking.payment_method_id,
-                            'status_history': booking.status_history,
-                            'client': client,
-                            'consult_rate': booking.consult_rate,
-                            'charged': booking.charged
-                        })
+                        ).all()
+                    
+                    for booking in bookings:
+                            client = {**booking.client.__dict__}
+                            start_time_utc = LookupBookingTimeIncrements.query \
+                                .filter_by(idx=booking.booking_window_id_end_time_utc).one_or_none().start_time
+                            
+                            conflicts.append({
+                                'booking_id': booking.idx,
+                                'target_date_utc': booking.target_date_utc,
+                                'start_time_utc': start_time_utc,
+                                'status': booking.status,
+                                'profession_type': booking.profession_type,
+                                'client_location_id': booking.client_location_id,
+                                'payment_method_id': booking.payment_method_id,
+                                'status_history': booking.status_history,
+                                'client': client,
+                                'consult_rate': booking.consult_rate,
+                                'charged': booking.charged
+                            })
                 
         db.session.commit()
         
