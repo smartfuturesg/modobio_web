@@ -169,6 +169,10 @@ class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return TelehealthStaffAvailabilityExceptions(**data)
+    
+class TelehealthStaffAvailabilityExceptionsOutputSchema(Schema):
+    exceptions = fields.Nested(TelehealthStaffAvailabilityExceptionsSchema(many=True), missing=[])
+    conflicts = fields.Nested(TelehealthBookingsSchema(many=True), missing=[])
         
 class TelehealthStaffAvailabilityExceptionsDeleteSchema(Schema):
     exception_id = fields.Integer()

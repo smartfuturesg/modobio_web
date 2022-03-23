@@ -194,7 +194,7 @@ def get_practitioners_available(time_block, q_request):
         
         #detect if day 1 of booking is inside an exception for this practitioner on this date       
         exception1 = TelehealthStaffAvailabilityExceptions.query \
-            .filter_by(user_id=user_id, exception_date=date1.date()) \
+            .filter_by(user_id=user_id, exception_date=date1.date(), is_busy=True) \
             .filter(
                 or_(
                     and_(
@@ -214,7 +214,7 @@ def get_practitioners_available(time_block, q_request):
         if day2 and not exception:
             #detect if day 2 of booking is inside an exception for this practitioner on this date       
             exception2 = TelehealthStaffAvailabilityExceptions.query \
-            .filter_by(user_id=user_id, exception_date=date2.date()) \
+            .filter_by(user_id=user_id, exception_date=date2.date(), is_busy=True) \
             .filter(
                 or_(
                     and_(

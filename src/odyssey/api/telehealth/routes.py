@@ -10,11 +10,12 @@ import secrets
 
 from datetime import datetime, time, timedelta, timezone
 from dateutil import tz
+from dateutil.relativedelta import relativedelta
 
 from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, and_
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -51,6 +52,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilityConflictSchema,
     TelehealthStaffAvailabilityExceptionsSchema,
     TelehealthStaffAvailabilityExceptionsDeleteSchema,
+    TelehealthStaffAvailabilityExceptionsOutputSchema,
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema,
     TelehealthBookingsPUTSchema,
@@ -1293,23 +1295,70 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     
     @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns)
-    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=201)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsOutputSchema, api=ns, status_code=201)
     def post(self, user_id):
         """
         Add new availability exception.
         """
         check_user_existence(user_id, user_type='staff')
+        current_date = datetime.now(timezone.utc).date()
 
+        conflicts = []
+        exceptions = []
         for exception in request.parsed_obj:
             if exception.exception_booking_window_id_start_time >= exception.exception_booking_window_id_end_time:
                 raise BadRequest('Exception start time must be before exception end time.')
+            elif current_date + relativedelta(months=+6) < exception.exception_date:
+                raise BadRequest('Exceptions cannot be set more than 6 months in the future.')
             else:
                 exception.user_id = user_id
                 db.session.add(exception)
+                exceptions.append(exception)
+                
+                #detect if conflicts exist with this exception
+                bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(
+                    or_(
+                        TelehealthBookings.status == 'Accepted',
+                        TelehealthBookings.status == 'Pending'
+                    )) \
+                    .filter(
+                        or_(
+                            and_(
+                                TelehealthBookings.booking_window_id_start_time >= exception.exception_booking_window_id_start_time,
+                                TelehealthBookings.booking_window_id_start_time < exception.exception_booking_window_id_end_time
+                            ),
+                            and_(
+                                TelehealthBookings.booking_window_id_end_time < exception.exception_booking_window_id_start_time,
+                                TelehealthBookings.booking_window_id_end_time >= exception.exception_booking_window_id_end_time
+                            )
+                        )
+                    ).all()
+                
+                for booking in bookings:
+                        client = {**booking.client.__dict__}
+                        start_time_utc = LookupBookingTimeIncrements.query \
+                            .filter_by(idx=booking.booking_window_id_end_time_utc).one_or_none().start_time
+                        
+                        conflicts.append({
+                            'booking_id': booking.idx,
+                            'target_date_utc': booking.target_date_utc,
+                            'start_time_utc': start_time_utc.time(),
+                            'status': booking.status,
+                            'profession_type': booking.profession_type,
+                            'client_location_id': booking.client_location_id,
+                            'payment_method_id': booking.payment_method_id,
+                            'status_history': booking.status_history,
+                            'client': client,
+                            'consult_rate': booking.consult_rate,
+                            'charged': booking.charged
+                        })
                 
         db.session.commit()
         
-        return request.parsed_obj
+        return {
+            'exceptions': exceptions,
+            'conflicts': conflicts
+        }
     
     @token_auth.login_required(user_type=('staff',))
     @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
