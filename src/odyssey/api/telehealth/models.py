@@ -422,14 +422,14 @@ class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
     
     exception_booking_window_id_start_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
     """
-    exception start time as a booking window id
+    Exception start time as a booking window id in refernce to UTC time.
 
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
     
     exception_booking_window_id_end_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
     """
-    exception end time as a booking window id
+    Exception end time as a booking window id in reference to UTC time.
 
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
