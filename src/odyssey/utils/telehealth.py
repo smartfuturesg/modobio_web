@@ -204,6 +204,14 @@ def get_practitioners_available(time_block, q_request):
                     and_(
                         TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end,
                         TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day1_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day1_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day1_end
                     )
                 )
             ).all()
@@ -224,6 +232,14 @@ def get_practitioners_available(time_block, q_request):
                     and_(
                         TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end,
                         TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day2_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day2_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day2_end
                     )
                 )
             ).all()
