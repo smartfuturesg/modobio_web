@@ -37,7 +37,7 @@ from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
 from odyssey.utils.files import FileDownload, ImageUpload
-from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES
+from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
@@ -1081,6 +1081,7 @@ class MedicalImagingEndpoint(BaseResource):
 
             img = ImageUpload(img.stream, user_id, prefix='medical_images')
             img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+            img.max_size = MEDICAL_IMAGE_MAX_SIZE
             img.validate()
             img.save(f'{mi_data.image_type}_{mi_data.image_date}_{hex_token}_{i}.{img.extension}')
             mi_data.image_path = img.filename
@@ -1349,14 +1350,14 @@ class MedBloodTestImage(BaseResource):
         # add file to S3
         hex_token = secrets.token_hex(4)
 
-        img_upload = ImageUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
-        img_upload.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
-        img_upload.max_size = BLOOD_TEST_IMAGE_MAX_SIZE
-        img_upload.validate()
-        img_upload.save(f'test{test.test_id:05d}_{hex_token}.{img_upload.extension}')
+        img = ImageUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
+        img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+        img.max_size = MEDICAL_IMAGE_MAX_SIZE
+        img.validate()
+        img.save(f'test{test.test_id:05d}_{hex_token}.{img_upload.extension}')
 
         # store file path in db
-        test.image_path = img_upload.filename
+        test.image_path = img.filename
         db.session.commit()
 
         # Upload successfull, delete previous
