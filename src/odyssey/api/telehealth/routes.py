@@ -1419,8 +1419,9 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         res['details'] = booking_details.details
 
-        # retrieve all files associated with this booking id
-        fd = FileDownload(current_user.user_id)
+        # Retrieve all files associated with this booking id.
+        # Files belong to client, store with client_user_id.
+        fd = FileDownload(booking.client_user_id)
         if booking_details.images:
             for path in booking_details.images:
                 if path:
