@@ -1332,20 +1332,20 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
                         .filter(
                             or_(
                                 and_(
-                                    TelehealthBookings.booking_window_id_start_time >= exception.exception_booking_window_id_start_time,
-                                    TelehealthBookings.booking_window_id_start_time < exception.exception_booking_window_id_end_time
+                                    TelehealthBookings.booking_window_id_start_time_utc >= exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception.exception_booking_window_id_end_time
                                 ),
                                 and_(
-                                    TelehealthBookings.booking_window_id_end_time < exception.exception_booking_window_id_start_time,
-                                    TelehealthBookings.booking_window_id_end_time >= exception.exception_booking_window_id_end_time
+                                    TelehealthBookings.booking_window_id_end_time_utc < exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception.exception_booking_window_id_end_time
                                 ),
                                 and_(
-                                    TelehealthBookings.booking_window_id_start_time <= exception.exception_booking_window_id_start_time,
-                                    TelehealthBookings.booking_window_id_end_time > exception.exception_booking_window_id_start_time
+                                    TelehealthBookings.booking_window_id_start_time_utc <= exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_end_time_utc > exception.exception_booking_window_id_start_time
                                 ),
                                 and_(
-                                    TelehealthBookings.booking_window_id_start_time < exception.exception_booking_window_id_end_time,
-                                    TelehealthBookings.booking_window_id_end_time >= exception.exception_booking_window_id_end_time
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception.exception_booking_window_id_end_time,
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception.exception_booking_window_id_end_time
                                 )
                             )
                         ).all()
