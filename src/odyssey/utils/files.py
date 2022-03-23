@@ -134,9 +134,11 @@ from odyssey.utils.constants import (
     ALLOWED_AUDIO_TYPES,
     ALLOWED_FILE_TYPES,
     ALLOWED_IMAGE_TYPES,
+    ALLOWED_MEDICAL_IMAGE_TYPES,
     AUDIO_MAX_SIZE,
     FILE_MAX_SIZE,
-    IMAGE_MAX_SIZE)
+    IMAGE_MAX_SIZE,
+    MEDICAL_IMAGE_MAX_SIZE)
 
 logger = logging.getLogger(__name__)
 
@@ -650,3 +652,36 @@ class ImageUpload(FileUpload):
         resized = self.image.resize(dimensions, box=box, reducing_gap=2.0)
 
         return self._pil_to_imageupload(resized, **kwargs)
+
+
+# TODO: finish work on this class.
+# I want this class to work like ImageUpload (with resize()) for raster
+# images and like generic FileUpload for other file types (pdf, dicom).
+# Need to play around more with multiple inheritance and mixins to get
+# this to work.
+class MedicalImageUpload(ImageUpload, FileUpload):
+    """ Utilities to upload medical images to an AWS S3 bucket.
+
+    This class is similar to :class:`.ImageUpload` except that it includes
+    PDF files and DICOM images as allowed images types. The maximum file
+    size is also larger that regular images.
+    """
+    max_size = MEDICAL_IMAGE_MAX_SIZE
+    allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+
+    def __init__(self, file, user_id: int, prefix: str=''):
+        """ Instantiate the :class:`.MedicalImageUpload` class.
+
+        .. see:: :meth:`.ImageUpload.__init__`
+        """
+        # Create set of matchers, unique and remove None.
+        matchers = {filetype.get_type(t) for t in ALLOWED_MEDICAL_IMAGE_TYPES} - {None}
+
+        ft = filetype.match(self.file, matchers=m)
+        self.extension = ft.extension
+        self.mime = ft.mime
+
+        if self.extension in ('pdf', 'dcm'):
+            super(FileUpload, self).__init__(file, user_id, prefix=prefix)
+        else:
+            super(ImageUpload).__init__(file, user_id, prefix=prefix)
