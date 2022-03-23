@@ -120,7 +120,7 @@ class ApiUser(BaseResource):
 
     @token_auth.login_required
     def delete(self, user_id):
-        #Search for user by user_id in User table
+        # Search for user by user_id in User table
         check_user_existence(user_id)
         user = User.query.filter_by(user_id=user_id).one_or_none()
         requester = token_auth.current_user()[0]
@@ -131,15 +131,15 @@ class ApiUser(BaseResource):
         db.session.add(removal_request)
         db.session.flush()
         
-        #Send notification email to user being deleted and user requesting deletion
-        #when FLASK_ENV=production
+        # Send notification email to user being deleted and user requesting deletion
+        # when FLASK_ENV=production
         if user.email != requester.email:
             send_email_delete_account(requester.email, user.email)
         send_email_delete_account(user.email, user.email)
 
-        #when user is staff
-        #keep name, email, modobio id, user id in User table
-        #keep lines in tables where user_id is the reporter_id
+        # when user is staff
+        # keep name, email, modobio id, user id in User table
+        # keep lines in tables where user_id is the reporter_id
         if user.is_client and not user.is_staff:
             #keep only modobio id, user id in User table
             user.email = None
@@ -148,12 +148,22 @@ class ApiUser(BaseResource):
             user.lastname = None
         user.phone_number = None
         user.deleted = True
+
+        # TODO: File handling has been changed in release 1.0.2 (merge commit 96e32a7c)
+        # This should be changed to fit the new FileDownload.delete() function.
+        # That function only takes full paths to files to delete, which is a lot
+        # of work to implement.
+        #
+        # At the same time, account deletion was implemented in
+        # utils/misc.py::delete_user() and this endpoint will soon be deprecated.
+        #
+        # Not going to spend time to re-implement the file deletion from delete_user()
+        # here if this is going to be deprecated anyway.
+        #
+        # fh = FileHandling()
+        # fh.delete_from_s3(prefix=f'id{user_id:05d}/')
         
-        #delete files or images saved in S3 bucket for user_id
-        fh = FileHandling()
-        fh.delete_from_s3(prefix=f'id{user_id:05d}/')
-        
-        #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+        # Get a list of all tables in database that have fields: client_user_id & staff_user_id
         # NOTE - Order matters, must delete these tables before those with user_id 
         # to avoid problems while deleting payment methods
         tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
