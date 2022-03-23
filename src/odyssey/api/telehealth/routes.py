@@ -1344,7 +1344,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
                         conflicts.append({
                             'booking_id': booking.idx,
                             'target_date_utc': booking.target_date_utc,
-                            'start_time_utc': start_time_utc.time(),
+                            'start_time_utc': start_time_utc,
                             'status': booking.status,
                             'profession_type': booking.profession_type,
                             'client_location_id': booking.client_location_id,
