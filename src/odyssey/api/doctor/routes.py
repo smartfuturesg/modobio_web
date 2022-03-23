@@ -1414,10 +1414,10 @@ class MedBloodTestAll(BaseResource):
 
         # prepare response items with reporter name from User table
         response = []
-        fh = FileHandling()
+        fh = FileDownload(user_id)
         for test in blood_tests:
             if test[0].image_path:
-                image_path = fh.get_presigned_url(test[0].image_path)
+                image_path = fd.url(test[0].image_path)
             else:
                 image_path = None
             data = test[0].__dict__
@@ -1466,9 +1466,10 @@ class MedBloodTestResults(BaseResource):
 
         if not results:
             return
-        fh = FileHandling()
+
+        fd = FileDownload(results[0][0].user_id)
         if results[0][0].image_path:
-            image_path = fh.get_presigned_url(results[0][0].image_path)
+            image_path = fd.url(results[0][0].image_path)
         else:
             image_path = None
         # prepare response with test details   
