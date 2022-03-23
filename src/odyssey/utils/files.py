@@ -127,7 +127,7 @@ import filetype
 
 from botocore.exceptions import ClientError
 from flask import current_app
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, UnidentifiedImageError
 from werkzeug.exceptions import BadRequest
 
 from odyssey.utils.constants import (
