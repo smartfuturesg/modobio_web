@@ -286,18 +286,35 @@ telehealth_put_booking_details = {
         'voice': None,
         'details': ''}}
 
-telehealth_exceptions_post_data_bad = [
+telehealth_exceptions_post_data = {
+  "bad_data_1":
+    [
       {
-    "exception_date": "2030-01-01",
-    "exception_booking_window_id_end_time": 100,
-    "exception_booking_window_id_start_time": 120
-    }
-] 
-
-telehealth_exceptions_post_data = [
-    {
-    "exception_date": "2030-01-01",
-    "exception_booking_window_id_end_time": 150,
-    "exception_booking_window_id_start_time": 120
-    }
-]
+      "exception_date": "2022-09-20",
+      "exception_booking_window_id_end_time": 100,
+      "exception_booking_window_id_start_time": 120,
+      "is_busy": True,
+      "label": "end time before start time"
+      }
+    ],
+  "bad_data_2": 
+    [
+        {
+      "exception_date": "2030-01-01",
+      "exception_booking_window_id_end_time": 150,
+      "exception_booking_window_id_start_time": 120,
+      "is_busy": True,
+      "label": "end date too far in the future"
+      }
+    ],
+  "good_data":
+    [
+      {
+      "exception_date": "2022-09-20",
+      "exception_booking_window_id_end_time": 150,
+      "exception_booking_window_id_start_time": 120,
+      "is_busy": True,
+      "label": "test good data"
+      }
+  ]
+}
