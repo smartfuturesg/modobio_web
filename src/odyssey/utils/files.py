@@ -563,15 +563,19 @@ class ImageUpload(FileUpload):
         ft = filetype.image_match(self.file)
         self.extension = ft.extension
         self.mime = ft.mime
-        self.validate()
 
-        # Open PIL image
-        self.image = Image.open(self.file)
+        # Open PIL image for supported formats
+        try:
+            self.image = Image.open(self.file)
+        except UnidentifiedImageError:
+            self.image = None
+            self.width = 0
+            self.height = 0
+        else:
+            # Rotate image in case EXIF tags have a orientation
+            self.image = ImageOps.exif_transpose(self.image)
 
-        # Rotate image in case EXIF tags have a orientation
-        self.image = ImageOps.exif_transpose(self.image)
-
-        self.width, self.height = self.image.size
+            self.width, self.height = self.image.size
 
     def _pil_to_imageupload(self, image: Image, **kwargs):
         """ Convert a PIL image to a new instance of ImageUpload. """
