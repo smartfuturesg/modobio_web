@@ -10,9 +10,12 @@ Utilities
 .. toctree::
 
    Login <odyssey.utils.auth>
+   File storage <odyssey.utils.files>
    Messaging <odyssey.utils.message>
-   Search <odyssey.utils.search>
-   Constants <odyssey.utils.constants>
+   Logging <odyssey.utils.logging>
    Errors <odyssey.utils.errors>
+   Constants <odyssey.utils.constants>
+   Telehealth <odyssey.utils.telehealth>
+   Search <odyssey.utils.search>
    PDF generation <odyssey.utils.pdf>
    Other <odyssey.utils.misc>

@@ -57,7 +57,6 @@ from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
-from odyssey.utils.file_handling import FileHandling
 from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import (
@@ -907,17 +906,20 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
     
     @responds(status_code=200)
     def post(self, user_id):
-        """
-        Verify the user's email address.
+        """ Verify the user's email address.
 
-        Params
-        -------
-        user_id int
-        code: email verification code provided during client creation
-
-        Verifying an email requires both a valid code that the client retrieved from their email and a valid 
-        token stored on the modobio side. The token has a short lifetime so the email varification process must happen within
+        Verifying an email requires both a valid code that the client retrieved
+        from their email and a valid token stored on the modobio side. The token
+        has a short lifetime so the email varification process must happen within
         that time. 
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number
+
+        code : str
+            email verification code provided during client creation
         """
         EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
 

@@ -2,6 +2,7 @@ boto3
 celery
 cryptography
 elasticsearch
+filetype
 Flask
 flask-accepts
 Flask-Cors

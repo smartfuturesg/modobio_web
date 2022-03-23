@@ -1,50 +1,55 @@
 """ Utility functions for the odyssey package. """
-import logging
-from time import mktime
-
-from marshmallow.fields import Dict
-
-from odyssey.api.telehealth.models import TelehealthBookingStatus
-from odyssey.utils.auth import BasicAuth
-from odyssey.utils.message import send_email_verify_email
-logger = logging.getLogger(__name__)
 
 import ast
 import inspect
 import jwt
+import logging
 import random
 import re
 import statistics
 import textwrap
 import typing as t
 import uuid
+
 from datetime import datetime, date, time, timedelta, timezone
-from flask import current_app, request
+from time import mktime
+
 import flask.json
-from werkzeug.exceptions import (
-    BadRequest,
-    Unauthorized)
+
+from flask import current_app, request
+from sqlalchemy import or_, select
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
-from odyssey.api.client.models import ClientFacilities
+from odyssey.api.client.models import (
+    ClientConsent,
+    ClientConsultContract,
+    ClientFacilities,
+    ClientIndividualContract,
+    ClientPolicies,
+    ClientRelease,
+    ClientSubscriptionContract)
 from odyssey.api.doctor.models import (
     MedicalBloodTests,
     MedicalBloodTestResultTypes,
     MedicalConditions,
+    MedicalImaging,
     MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.lookup.models import LookupBookingTimeIncrements
-from odyssey.api.telehealth.models import TelehealthChatRooms, TelehealthBookingStatus
-from odyssey.api.user.models import UserRemovalRequests
-from odyssey.api.lookup.models import LookupDrinks
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, CLIENT_S3_TABLES, STAFF_S3_TABLES
-from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
+from odyssey.api.lookup.models import LookupDrinks, LookupBookingTimeIncrements
 from odyssey.api.notifications.models import Notifications
-
+from odyssey.api.telehealth.models import (
+    TelehealthBookings,
+    TelehealthChatRooms)
+from odyssey.api.user.models import User, UserTokenHistory
+from odyssey.api.user.models import UserRemovalRequests, UserProfilePictures
 from odyssey.utils.auth import token_auth
+from odyssey.utils.constants import ALPHANUMERIC
+from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email_delete_account
-from odyssey.utils.file_handling import FileHandling
 from odyssey.utils import search
+
+logger = logging.getLogger(__name__)
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
@@ -321,7 +326,9 @@ def find_decorator_value(
     ) -> t.Any:
     """ Return the value of an argument or keyword passed to a decorator placed on a function or class.
 
-    For example, in the code ::
+    For example, in the code
+
+    .. code:: python
 
         class SomeEndpoint(BaseResource):
             @accepts(schema=SomeSchema)
@@ -330,10 +337,12 @@ def find_decorator_value(
 
         schema = find_decorator_value(SomeEndpoint.post, decorator='accepts', keyword='schema')
 
-    :func:`find_decorator_value` will find the decorator :func:`@accepts` which is decorating
+    :func:`find_decorator_value` will find the decorator :func:`accepts` which is decorating
     :func:`post()` and return the value ``SomeSchema`` passed to the argument :attr:`schema`.
 
-    This function can also find positional arguments passed into the decorator::
+    This function can also find positional arguments passed into the decorator
+
+    .. code:: python
 
         class SomeEndpoint(BaseResource):
             # incorrect use of @accepts for this example only
@@ -345,8 +354,8 @@ def find_decorator_value(
 
     will return the same ``SomeSchema`` object as the first example.
 
-    Params
-    ------
+    Parameters
+    ----------
     function : Callable
         A function, method, or class which has a decorator on it.
 
@@ -745,19 +754,27 @@ class EmailVerification():
 
         
 def delete_staff_data(user_id):
+    """ Delete staff specific data.
+    
+    This function is called by :func:`delete_user` to delete staff specific files
+    from S3 and rows in staff specific tables.
+
+    Parameters
+    ----------
+    user_id : int
+        User ID number for staff member to be deleted.
     """
-    This function is used by the delete_user function to delete staff specific data. This includes:
+    # Delete all staff profile pictures from S3.
+    fd = FileDownload(user_id)
+    paths = (db.session.execute(
+        select(UserProfilePictures.image_path)
+        .filter_by(staff_user_id=user_id))
+        .scalars()
+        .all())
+    for path in paths:
+        fd.delete(path)
     
-    *staff specific s3 files(profile picture)
-    *rows in staff specific tables
-    """
-    
-    #delete client specific files or images saved in S3 bucket for user_id
-    fh = FileHandling()
-    for table in STAFF_S3_TABLES:
-        fh.delete_from_s3(prefix=f'id{user_id:05d}/' + table)
-    
-    #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+    # Get a list of all tables in database that have fields: client_user_id & staff_user_id
     # NOTE - Order matters, must delete these tables before those with user_id 
     # to avoid problems while deleting payment methods
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
@@ -786,41 +803,98 @@ def delete_staff_data(user_id):
     db.session.commit()
     
 def delete_client_data(user_id):
+    """ Delete client specific data.
+    
+    This function is called by :func:`delete_user` to delete client specific files
+    from S3, telehealth booking details, status history, and rows in client specific
+    tables.
+
+    Parameters
+    ----------
+    user_id : int
+        User ID number for client member to be deleted.
     """
-    This function is used by the below delete_user function to delete client specific data. This includes:
-    
-    *any s3 files stored under the given user_id
-    *telehealth booking details, status history
-    *rows in client specific tables
-    """
-    
-    #delete client specific files or images saved in S3 bucket for user_id
-    fh = FileHandling()
-    for table in CLIENT_S3_TABLES:
-        fh.delete_from_s3(prefix=f'id{user_id:05d}/' + table)
-    
-    #Get a list of all tables in database that have fields: client_user_id & staff_user_id
+    fd = FileDownload(user_id)
+
+    # Go through all columns that store S3 paths. Delete files from S3.
+    cols = (
+        ClientConsent.pdf_path,
+        ClientConsultContract.pdf_path,
+        ClientPolicies.pdf_path,
+        ClientRelease.pdf_path,
+        ClientSubscriptionContract.pdf_path,
+        ClientIndividualContract.pdf_path,
+        MedicalImaging.image_path)
+    for col in cols:
+        results = (db.session.execute(
+            select(col)
+            .filter_by(user_id=user_id))
+            .scalars()
+            .all())
+
+        for path in results:
+            if path:
+                fd.delete(path)
+
+    # This one is special, because it is identified by client_user_id
+    paths = (db.session.execute(
+        select(UserProfilePictures.image_path)
+        .filter_by(client_user_id=user_id))
+        .scalars()
+        .all())
+    for path in paths:
+        if path:
+            fd.delete(path)
+
+    # TelehealthBookingDetails.images and .voice are identified by booking_id,
+    # so filter TelehealthBookings table and use relationships.
+    bookings = (db.session.execute(
+        select(TelehealthBookings)
+        .filter_by(client_user_id=user_id))
+        .scalars()
+        .all())
+    for booking in bookings:
+        if booking.booking_details.voice:
+            fd.delete(booking.booking_details.voice)
+        if booking.booking_details.images:
+            for path in booking.booking_details.images:
+                if path:
+                    fd.delete(path)
+
+    # At this point, all files should be deleted from S3.
+    # Double check that that's true, warn if not and delete rest.
+    remaining = tuple(fd.bucket.objects.filter(Prefix=fd.prefix))
+    if remaining:
+        files = (r.key for r in remaining)
+        files = '\n'.join(files)
+        logger.warning(f'Found the following files remaining in S3 bucket {fd.bucket.name} '
+                       f'after deleting all registered files for user {user_id}:\n'
+                       f'{files}')
+        for f in files:
+            fd.delete(f)
+
+    # Get a list of all tables in database that have fields: client_user_id & staff_user_id
     # NOTE - Order matters, must delete these tables before those with user_id 
     # to avoid problems while deleting payment methods
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
             WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
     
-    #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+    # Delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
     for table in tableList:
         db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE client_user_id={user_id};")
 
-    #Get a list of all client-specific tables in database that have field: user_id
+    # Get a list of all client-specific tables in database that have field: user_id
     tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
             WHERE column_name='user_id' and NOT (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
     
 
-    #delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
+    # Delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
     for table in tableList:
-        #added data_per_client table due to issues with the testing database
+        # added data_per_client table due to issues with the testing database
         if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
             db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
             
-    #only delete client subscription
+    # only delete client subscription
     db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=False")
 
     db.session.commit()

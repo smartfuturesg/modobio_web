@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.api.payment.models module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.api.dosespot.models module" href="odyssey.api.dosespot.models.html" />
+    <link rel="prev" title="odyssey.api.telehealth.models module" href="odyssey.api.telehealth.models.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Database models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.models.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.models.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.models.html">Practitioner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.models.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.models.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.models.html">Database models</a> &raquo;</li>
+      <li>odyssey.api.payment.models module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.api.payment.models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.api.payment.models">
+<span id="odyssey-api-payment-models-module"></span><h1>odyssey.api.payment.models module<a class="headerlink" href="#module-odyssey.api.payment.models" title="Permalink to this headline"></a></h1>
+<p>Database tables for supporting miscellaneous functionality.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.models.</span></span><span class="sig-name descname"><span class="pre">PaymentMethods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.UserIdFkeyMixin</span></code></p>
+<p>This table links user with their saved payment methods.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.payment_id">
+<span class="sig-name descname"><span class="pre">payment_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.payment_id" title="Permalink to this definition"></a></dt>
+<dd><p>InstaMed payment id to reference when charging this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.payment_type">
+<span class="sig-name descname"><span class="pre">payment_type</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.payment_type" title="Permalink to this definition"></a></dt>
+<dd><p>Type of this payment. Options are ‘Mastercard’, ‘Visa’, ‘American Express’, and ‘Discover’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.number">
+<span class="sig-name descname"><span class="pre">number</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.number" title="Permalink to this definition"></a></dt>
+<dd><p>Last 4 digits of the card number for this payment method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.expiration">
+<span class="sig-name descname"><span class="pre">expiration</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.expiration" title="Permalink to this definition"></a></dt>
+<dd><p>Expiration date of this payment method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.cardholder_name">
+<span class="sig-name descname"><span class="pre">cardholder_name</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.cardholder_name" title="Permalink to this definition"></a></dt>
+<dd><p>Cardholder name for this payment method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.is_default">
+<span class="sig-name descname"><span class="pre">is_default</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.is_default" title="Permalink to this definition"></a></dt>
+<dd><p>Denotes if this method is the default payment method for this user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.PaymentHistory">
+<span class="sig-name descname"><span class="pre">PaymentHistory</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.PaymentHistory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentMethods.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentMethods.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.models.</span></span><span class="sig-name descname"><span class="pre">PaymentStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.UserIdFkeyMixin</span></code></p>
+<p>This table tracks payment activities processed outside of ModoBio’s platform.
+InstaMed will send payment events orignating on their platform (refunds, voids, declines, etc.) to a webhook.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.card_present_status">
+<span class="sig-name descname"><span class="pre">card_present_status</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.card_present_status" title="Permalink to this definition"></a></dt>
+<dd><p>Describes the method card information was received. Either PresentManualKey or NotPresentInternet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.current_transaction_status_code">
+<span class="sig-name descname"><span class="pre">current_transaction_status_code</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.current_transaction_status_code" title="Permalink to this definition"></a></dt>
+<dd><p>Describes the current status of this payment.       Possible values:
+C = Approved
+V = Voided
+CB = charge back
+RI = Returns
+SE = Settlement Error
+S = Settled
+D = Declined</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.original_transaction_id">
+<span class="sig-name descname"><span class="pre">original_transaction_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.original_transaction_id" title="Permalink to this definition"></a></dt>
+<dd><p>ID of the original transaction as defined by InstaMed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.original_transaction_status_code">
+<span class="sig-name descname"><span class="pre">original_transaction_status_code</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.original_transaction_status_code" title="Permalink to this definition"></a></dt>
+<dd><p>Describes the current status of the original transaction.   Possible values:
+C = Approved
+V = Voided
+CB = charge back
+RI = Returns
+SE = Settlement Error
+S = Settled
+D = Declined</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.payment_transaction_id">
+<span class="sig-name descname"><span class="pre">payment_transaction_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.payment_transaction_id" title="Permalink to this definition"></a></dt>
+<dd><p>ID of this transaction as defined by InstaMed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.request_amount">
+<span class="sig-name descname"><span class="pre">request_amount</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.request_amount" title="Permalink to this definition"></a></dt>
+<dd><p>Amount of this transaction in dollars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.save_on_file_transaction_id">
+<span class="sig-name descname"><span class="pre">save_on_file_transaction_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.save_on_file_transaction_id" title="Permalink to this definition"></a></dt>
+<dd><p>ID of this transaction’s SaveOnFile payment method as defined by InstaMed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.transaction_action">
+<span class="sig-name descname"><span class="pre">transaction_action</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.transaction_action" title="Permalink to this definition"></a></dt>
+<dd><p>Type of this transaction.</p>
+<p>Possible values:
+Sale
+Chargeback
+Return
+Refund</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentStatus.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentStatus.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.models.</span></span><span class="sig-name descname"><span class="pre">PaymentHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.UserIdFkeyMixin</span></code></p>
+<p>This keeps track of payments that have been charged to users.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.payment_method">
+<span class="sig-name descname"><span class="pre">payment_method</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.payment_method" title="Permalink to this definition"></a></dt>
+<dd><p>Relationship to PaymentMethods</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.PaymentRefunds">
+<span class="sig-name descname"><span class="pre">PaymentRefunds</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.PaymentRefunds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.payment_method_id">
+<span class="sig-name descname"><span class="pre">payment_method_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.payment_method_id" title="Permalink to this definition"></a></dt>
+<dd><p>Foreign key to the payment method used for this payment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreignkey(PaymentMethods.idx)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.transaction_id">
+<span class="sig-name descname"><span class="pre">transaction_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.transaction_id" title="Permalink to this definition"></a></dt>
+<dd><p>Instamed transaction id to be provided for the purpose of refunds or voids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.transaction_amount">
+<span class="sig-name descname"><span class="pre">transaction_amount</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.transaction_amount" title="Permalink to this definition"></a></dt>
+<dd><p>Amount of this transaction in USD.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.booking">
+<span class="sig-name descname"><span class="pre">booking</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.booking" title="Permalink to this definition"></a></dt>
+<dd><p>Relationship to the booking that this payment is associated with.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.booking_id">
+<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.booking_id" title="Permalink to this definition"></a></dt>
+<dd><p>Foreign key to the booking this payment is associated with.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreignkey(TelehealthBookings.idx)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.voided">
+<span class="sig-name descname"><span class="pre">voided</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.voided" title="Permalink to this definition"></a></dt>
+<dd><p>Denotes if this transaction has been voided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.void_reason">
+<span class="sig-name descname"><span class="pre">void_reason</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.void_reason" title="Permalink to this definition"></a></dt>
+<dd><p>Reason this transaction was voided if applicable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentHistory.void_id">
+<span class="sig-name descname"><span class="pre">void_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentHistory.void_id" title="Permalink to this definition"></a></dt>
+<dd><p>InstaMed transaction id for the void request if applicable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.models.</span></span><span class="sig-name descname"><span class="pre">PaymentRefunds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.UserIdFkeyMixin</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.ReporterIdFkeyMixin</span></code></p>
+<p>This table keeps track of refunds that have been issued as well as the staff member who
+issued the refund.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.reporter_id">
+<span class="sig-name descname"><span class="pre">reporter_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.reporter_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.payment">
+<span class="sig-name descname"><span class="pre">payment</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.payment" title="Permalink to this definition"></a></dt>
+<dd><p>Relationship to the payment that was refunded in the PaymentHistory table.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.payment_id">
+<span class="sig-name descname"><span class="pre">payment_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.payment_id" title="Permalink to this definition"></a></dt>
+<dd><p>Foreign key to the payment this refund is associated with</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreignkey(PaymentHistory.idx)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.refund_transaction_id">
+<span class="sig-name descname"><span class="pre">refund_transaction_id</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.refund_transaction_id" title="Permalink to this definition"></a></dt>
+<dd><p>InstaMed transaction id for this refund.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.refund_amount">
+<span class="sig-name descname"><span class="pre">refund_amount</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.refund_amount" title="Permalink to this definition"></a></dt>
+<dd><p>Amount that was refunded in USD. Note that refunds can be partial, so they may not always be
+the full amount as seen in the original payment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.models.PaymentRefunds.refund_reason">
+<span class="sig-name descname"><span class="pre">refund_reason</span></span><a class="headerlink" href="#odyssey.api.payment.models.PaymentRefunds.refund_reason" title="Permalink to this definition"></a></dt>
+<dd><p>Reason this refund was issued as reported by the staff member that issued the refund.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.api.telehealth.models.html" class="btn btn-neutral float-left" title="odyssey.api.telehealth.models module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.dosespot.models.html" class="btn btn-neutral float-right" title="odyssey.api.dosespot.models module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

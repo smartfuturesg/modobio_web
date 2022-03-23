@@ -31,6 +31,7 @@ class Instamed:
                                         'Api-Secret': current_app.config.get('INSTAMED_API_SECRET'),
                                         'Content-Type': 'application/json'}
         self.url_base = "https://connect.instamed.com/rest"
+        
         self.outlet = {
                 "MerchantID": current_app.config.get('INSTAMED_MERCHANT_ID').replace('/',''),
                 "StoreID": '0001',
@@ -43,17 +44,18 @@ class Instamed:
         InstaMed URI: /payment/paymentplan
 
 
-        Params
-        ------
-        token: (string)
+        Parameters
+        ----------
+        token : str
             tokenized card information provided by an InstaMed FE component
-        
-        expiration: (string)
+
+        expiration : str
             card expiration date
-        
+
         Returns
         -------
-        dict of information regarding the newly saved payment method
+        dict
+            information regarding the newly saved payment method
         """
 
         request_data = {
@@ -91,24 +93,27 @@ class Instamed:
         Refund a payment.
         InstaMed URI: /payment/refund
 
+        Parameters
+        ----------
+        transaction_id : str
+            InstaMed ID for the transaction to be refunded
 
-        Params
-        ------
-        payment: (PaymentHistory)
-            PaymentHistory entry for the transaction to be refunded.
-        
-        amount: (string)
+        amount : str
             amount of money to be refunded
-        
-        reason:
+
+        booking : :class:`TelehealthBooking` instance
+            object for the booking this transaction is associated with
+
+        reason : str
             reason for this refund
 
-        reporter_id:
+        reporter_id : int
             id the the staff that approved this refund, None if system automated
 
         Returns
         -------
-        dict of information regarding the refund
+        dict
+            information regarding the refund
         """
         request_data = {
             "Outlet": self.outlet,
@@ -157,14 +162,18 @@ class Instamed:
 
         InstaMed URI: /payment/void
 
-        Params
-        ------
-        payment_history_id: (PaymentHistory.idx)
-            Payment id for the PaymentHistory entry
-        
+        Parameters
+        ----------
+        payment_history_id : int
+            Payment id for the PaymentHistory entry.
+
+        reason : str
+            Reason for voiding the payment.
+
         Returns
         -------
-        dict of information regarding the void
+        dict
+            information regarding the void
         """
         transaction = PaymentHistory.query.filter_by(idx=payment_history_id).one_or_none()
         if not transaction:
@@ -205,23 +214,29 @@ class Instamed:
         Charge a user.
         InstaMed URI: /payment/sale
 
-        Params
-        ------
+        Parameters
+        ----------
         user_id : int
             the booking for which this payment is associated with
+
         payment_method_id : int
-            Refers to PaymentMethods.idx. Payment method selected by user for this transaction. Defaults to their default payment method.
+            Refers to PaymentMethods.idx. Payment method selected by user for this transaction. 
+            Defaults to their default payment method.
+
         amount : str
             tansaction ammount formatted for currency
+
         transaction_descriptor : str
-            Standard format transaction descriptio e.g. “Telehealth-MedicalDoctor-30mins”
+            Standard format transaction description e.g. “Telehealth-MedicalDoctor-30mins”
+
         payment_method_id : int
             Refers to PaymentMethods.idx. Payment method to be used for the transaction. 
-                If none specified, the default payment method for the user will be used
+            If none specified, the default payment method for the user will be used
 
         Returns
         -------
-        dict of information regarding the instamed transaction
+        dict
+            information regarding the instamed transaction
         """
         user = User.query.filter_by(user_id=user_id).one_or_none()
         payment_method =  PaymentMethods.query.filter_by(idx=payment_method_id).one_or_none() if payment_method_id \
@@ -249,7 +264,8 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
-            #transaction was not successful, cancel booking
+            # transaction was not successful, cancel booking
+            #
             # TODO: Logging disabled for now 3.4.22, Alejandro will come back to this in NRV-2786
             # logger.error(f'Instamed returned the following error: {response.text} when' \
             #     f' attempting to charge booking with id {booking.idx}.')
@@ -310,7 +326,7 @@ class Instamed:
 
                 # TODO: Notofication disabled for now 3.4.22, Alejandro will come back to this in NRV-2786
                 # cancel_telehealth_appointment(booking)
-
+                #
                 # #create notification for failed payment
                 # start_time = LookupBookingTimeIncrements.query \
                 #     .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
@@ -357,7 +373,7 @@ class Instamed:
             #transaction was declined, cancel appointment
             # TODO: Notification disabled for now 3.4.22, Alejandro will come back to this in NRV-2786
             # cancel_telehealth_appointment(booking)
-            
+            #
             # #create notification for failed payment
             # start_time = LookupBookingTimeIncrements.query \
             #     .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
@@ -372,7 +388,6 @@ class Instamed:
             #                     unfortunately, had to be canceled as your payment method ending in \
             #                     {payment_last_four} could not be charged. Please revise your payment \
             #                     method or perhaps speak with your bank to resolve the issue")
-
         return response_data
 
 

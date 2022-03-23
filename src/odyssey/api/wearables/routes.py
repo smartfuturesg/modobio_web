@@ -751,17 +751,20 @@ class WearablesData(BaseResource):
     @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
     @responds(status_code=200, api=ns)
     def get(self, user_id, device_type):
-        """
-        Bring down the wearables data from dynamodb
+        """ Retrieve wearables data from dynamodb.
 
-        Tables queried depend on environment:
-        ['Wearables-V1-dev', 'Wearables-V1-prod']
+        Parameters
+        ----------
+        user_id : int
+            User ID number
 
-        Params
-        ------
-        user_id
+        device_type : str
+            only the data from one device per request.
 
-        device_type: only the data from one device per request.
+        Returns
+        -------
+        dict
+            The requested wearables data.
         """
 
         # connect to dynamo
@@ -804,6 +807,3 @@ class WearablesData(BaseResource):
         payload['items'] = response.get('Items', [])
 
         return jsonify(payload)
-
-
-

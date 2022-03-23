@@ -5,12 +5,12 @@ import base64
 def login(test_client, user, password='password') -> dict:
     """ Login user, return header with token.
     
-    Params
-    ------
-    test_client
-        The Flask.app.test_client object that runs the tests.
+    Parameters
+    ----------
+    test_client : :class:`Flask.app.test_client`
+        The :class:`Flask.app.test_client` object that runs the tests.
 
-    user
+    user : :class:`~odyssey.api.user.models.User`
         User model instance, can be staff or client.
 
     password : str

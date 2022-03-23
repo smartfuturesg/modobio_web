@@ -57,15 +57,15 @@ class AppStore:
         """
         User the appstore API to bring up the client's most recent transaction.
 
-        Params
-        ------
-        original_transaction_id: str
+        Parameters
+        ----------
+        original_transaction_id : str
             ID unique to each client that can be used to track all appstore purchases
 
         Returns
-        ------
-        transaction_info, renewal_info, status: tuple(Dict, Dict, int)
-
+        -------
+        tuple(dict, dict, int)
+            A tuple containing transaction_info, renewal_info, and status.
         """
 
         # query Apple Storekit for subscription status and details, update if necessary
@@ -95,21 +95,24 @@ class AppStore:
         return  json.loads(transaction_info), json.loads(renewal_info), status
 
     @staticmethod
-    def update_user_subscription(current_subscription: UserSubscriptions, transaction_info: Dict):
+    def update_user_subscription(current_subscription: UserSubscriptions, transaction_info: dict):
         """
         Update user subscription:
         -end current subscription
         -create new subscription entry from transaction info
         
-        Params
-        ------
-        current_subscription: UserSubscriptions
-        transaction_info: dict
+        Parameters
+        ----------
+        current_subscription : UserSubscriptions
+            An instance of :class:`UserSubscriptions`
+
+        transaction_info : dict
             From the response the Apple API subscription status request
 
         Returns
-        ------
+        -------
         UserSubscriptions
+            A new instance of :class:`UserSubscriptions`
         """
         # end current subscription
         end_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc)
@@ -128,6 +131,3 @@ class AppStore:
         db.session.add(new_subscription)
 
         return new_subscription
-
-
-    
