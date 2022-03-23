@@ -1,8 +1,8 @@
-"""add availability exceptions table
+"""Add availability exceptions table
 
-Revision ID: 6ba8fa2f9238
+Revision ID: 5ddda1e5f73a
 Revises: c3854ec8f9ee
-Create Date: 2022-03-17 16:17:51.911495
+Create Date: 2022-03-22 16:29:48.667150
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6ba8fa2f9238'
+revision = '5ddda1e5f73a'
 down_revision = 'c3854ec8f9ee'
 branch_labels = None
 depends_on = None
@@ -22,9 +22,11 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('exception_date', sa.Date(), nullable=True),
+    sa.Column('exception_date', sa.Date(), nullable=False),
     sa.Column('exception_booking_window_id_start_time', sa.Integer(), nullable=False),
     sa.Column('exception_booking_window_id_end_time', sa.Integer(), nullable=False),
+    sa.Column('is_busy', sa.Boolean(), nullable=False),
+    sa.Column('label', sa.String(length=100), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['exception_booking_window_id_end_time'], ['LookupBookingTimeIncrements.idx'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['exception_booking_window_id_start_time'], ['LookupBookingTimeIncrements.idx'], ondelete='CASCADE'),
