@@ -1310,6 +1310,8 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
                 raise BadRequest('Exception start time must be before exception end time.')
             elif current_date + relativedelta(months=+6) < exception.exception_date:
                 raise BadRequest('Exceptions cannot be set more than 6 months in the future.')
+            elif current_date > exception.exception_date:
+                raise BadRequest('Exceptions cannot be in the past.')
             else:
                 exception.user_id = user_id
                 db.session.add(exception)
