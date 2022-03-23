@@ -47,22 +47,15 @@ class Twilio():
         """
         Brings up the full conversation using the conversation_sid and twilio's API
 
-        Params
-        ------
-        conversation_sid: Twilio's id for the conversation. 
+        Parameters
+        ----------
+        conversation_sid : int
+            Twilio's id for the conversation. 
 
         Returns
-        ------
-        transcript: List[Dict]
-        {
-            idx: int,
-            body: str,
-            media: List[Dict],
-            author: str -> modobio_id 
-            date_created: DateTime
-            date_updated: DateTime
-            attributes: str
-        }
+        -------
+        list(dict)
+            list of transcripts
         """
         transcript = []
 
@@ -90,13 +83,15 @@ class Twilio():
         """
         Returns the full chat transcript for the bookings
 
-        Params
-        ------
-        booking_id: TelehealthBookings.idx for the booking
+        Parameters
+        ----------
+        booking_id : int
+            Booking ID number
 
         Returns
-        ------
-        messages: Dict
+        -------
+        dict
+            The transcript
         """
 
         # bring up the chat room 
@@ -156,14 +151,18 @@ class Twilio():
         """
         Name and create a conversation room on the twilio platform. Adds the users by their modobio_id
         
-        Params
-        ------
-        staff_user_id: user_id of staff participant
-        client_user_id: user_id of client participant
+        Parameters
+        ----------
+        staff_user_id : int
+            user_id of staff participant
+
+        client_user_id : int
+            user_id of client participant
 
         Returns
-        ------
-        conversation_sid: twilio's id for referecing the conversation instance
+        -------
+        int
+            twilio's id for referencing the conversation instance
         """
         
         room_name = self.generate_meeting_room_name(meeting_type='CHATROOM')
@@ -189,13 +188,15 @@ class Twilio():
         Provision a telehealth chatroom using the twilio API. Store chatroom details in 
         the TelehealthChatrooms table
 
-        Params
-        ------
-        booking_id: TelehealthBookings.idx for bringing up booking details.
+        Parameters
+        ----------
+        booking_id : int
+            TelehealthBookings.idx for bringing up booking details.
 
         Returns
-        conversation_sid
-        ------
+        -------
+        int
+            Conversation ID number
         """
         # bring up the booking
         booking = db.session.execute(select(TelehealthBookings
@@ -221,17 +222,20 @@ class Twilio():
         Add a message to the conversation on behalf of the user in user_id. 
 
         User must already be a conversation participant. 
-        Params
-        ------
-        user_id: conversation participant
-        conversation_sid: twilio id for the conversation to be deleted
-        message_body: message text. 
-        media_sid: sid of the media file attached to this message
 
-        Returns
-        ------
-        None
-        
+        Parameters
+        ----------
+        user_id : int
+            conversation participant
+
+        conversation_sid : str
+            twilio id for the conversation to be deleted
+
+        message_body : str
+            message text
+
+        media_sid : str
+            sid of the media file attached to this message        
         """
         user = db.session.execute(select(User).where(User.user_id == user_id)).scalars().one_or_none()
        
@@ -254,33 +258,25 @@ class Twilio():
             # intended to catch errors when message is sent to a closed conversation
             raise e
         
-        return
-        
     def delete_conversation(self, conversation_sid: str):
         """
         Delete the conversation refereced by the `conversation_sid`
 
-        Params
-        ------
-        conversation_sid: twilio id for the conversation to be deleted
-
-        Returns
-        ------
-        None
+        Parameters
+        ----------
+        conversation_sid : str
+            twilio id for the conversation to be deleted
         """
-
         self.client.conversations.conversations(conversation_sid).delete()
-
-        return
 
     def complete_telehealth_video_room(self, booking_id: int):
         """
         Update the video room state to completed
 
-        Params
-        ------
-        booking_id
-
+        Parameters
+        ----------
+        booking_id : int
+            The booking ID number
         """
         room = db.session.execute(
             select(TelehealthMeetingRooms
@@ -294,16 +290,14 @@ class Twilio():
             if t_room.status == 'in-progress':
                 t_room.update(status='completed')
 
-        return
-
     def close_telehealth_chatroom(self, booking_id):
         """
         Update the conversation state to closed
         
-        Params
-        ------
-        booking_id
-
+        Parameters
+        ----------
+        booking_id : int
+            The booking ID number
         """
         # bring up the chat room 
         telehealth_chat = db.session.execute(select(TelehealthChatRooms
@@ -314,20 +308,20 @@ class Twilio():
                      .conversations(telehealth_chat.conversation_sid) \
                      .update(state='closed')
 
-        return
-
     def get_media(self, media_sid: str):
         """
         Retrieve a media url from 
 
-        Params
-        ------
+        Parameters
+        ----------
+        media_sid : str
+            A media ID
 
-        Response
-        ------
-        str: contents of image download
+        Returns
+        -------
+        str
+            contents of image download
         """
-
         response = requests.get(f"https://mcs.us1.twilio.com/v1/Services/{self.conversation_service_sid}/Media/{media_sid}/Content", 
                             auth = (self.twilio_credentials['api_key'], self.twilio_credentials['api_key_secret']),
                             stream=True)
@@ -347,13 +341,15 @@ class Twilio():
 
         Note: this is only used for testing
 
-        Params
-        ------
-        media_path: relative path to media file
+        Parameters
+        ----------
+        media_path : str
+            relative path to media file
 
-        Response
-        ------
-        media_sid
+        Returns
+        -------
+        str
+            The media ID number
         """
         with open(media_path, 'rb') as f:
             data = f.read()
@@ -368,7 +364,3 @@ class Twilio():
             raise BadRequest(response.text)                    
 
         return response.json()['sid']
-
-    
-
-

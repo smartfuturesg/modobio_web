@@ -483,11 +483,25 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     :type: str
     """
 
+    images = db.Column(db.ARRAY(db.String(1024), dimensions=1))
+    """
+    List of paths to images stored on S3.
+
+    :type: list(str)
+    """
+
+    voice = db.Column(db.String(1024))
+    """
+    Path to voice recording stored on S3.
+
+    :type: str
+    """
+
     booking = db.relationship('TelehealthBookings', uselist=False, back_populates='booking_details')
     """
     One-to-One relationship with TelehealthBookings
 
-    :type: :class: `TelehalthBookings` instance
+    :type: :class:`TelehealthBookings` instance
     """
     
 

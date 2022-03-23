@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.api.user.models &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.api.user.models &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.client.models" href="odyssey.api.client.models.html" />
     <link rel="prev" title="Database models" href="odyssey.models.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,30 +39,22 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Database models</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.models.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.models.html">Practitioner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.models.html">Doctor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.payment.models.html">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.models.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
@@ -111,92 +62,62 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="odyssey.models.html">Database models</a> &raquo;</li>
-        
       <li>odyssey.api.user.models</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.api.user.models.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.api.user.models">
-<span id="odyssey-api-user-models"></span><h1>odyssey.api.user.models<a class="headerlink" href="#module-odyssey.api.user.models" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-api-user-models"></span><h1>odyssey.api.user.models<a class="headerlink" href="#module-odyssey.api.user.models" title="Permalink to this headline"></a></h1>
 <p>Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ‘User’.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">User</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.User" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">User</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.User" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Stores details to relating to user account not related to the login system</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.membersince">
+<span class="sig-name descname"><span class="pre">membersince</span></span><a class="headerlink" href="#odyssey.api.user.models.User.membersince" title="Permalink to this definition"></a></dt>
+<dd><p>Member since date, populated when email has been verified</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.User.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.User.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was created. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -204,10 +125,10 @@ All tables in this module are prefixed with ‘User’.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.User.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.User.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was updated. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -215,128 +136,181 @@ All tables in this module are prefixed with ‘User’.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.User.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.User.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>User ID number</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, auto-incrementing</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, auto-incrementing</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.modobio_id">
-<span class="sig-name descname"><span class="pre">modobio_id</span></span><a class="headerlink" href="#odyssey.api.user.models.User.modobio_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">modobio_id</span></span><a class="headerlink" href="#odyssey.api.user.models.User.modobio_id" title="Permalink to this definition"></a></dt>
 <dd><p>User modobio id - serves as a public id for api usage.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.email">
-<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#odyssey.api.user.models.User.email" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#odyssey.api.user.models.User.email" title="Permalink to this definition"></a></dt>
 <dd><p>Email address.</p>
 <p>The email address is also the login username.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50, non-null, unique</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 50, non-null, unique</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.phone_number">
-<span class="sig-name descname"><span class="pre">phone_number</span></span><a class="headerlink" href="#odyssey.api.user.models.User.phone_number" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">phone_number</span></span><a class="headerlink" href="#odyssey.api.user.models.User.phone_number" title="Permalink to this definition"></a></dt>
 <dd><p>User phone number</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 50</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.firstname">
-<span class="sig-name descname"><span class="pre">firstname</span></span><a class="headerlink" href="#odyssey.api.user.models.User.firstname" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">firstname</span></span><a class="headerlink" href="#odyssey.api.user.models.User.firstname" title="Permalink to this definition"></a></dt>
 <dd><p>User first name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 50</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.middlename">
-<span class="sig-name descname"><span class="pre">middlename</span></span><a class="headerlink" href="#odyssey.api.user.models.User.middlename" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">middlename</span></span><a class="headerlink" href="#odyssey.api.user.models.User.middlename" title="Permalink to this definition"></a></dt>
 <dd><p>User first name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 50</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.lastname">
-<span class="sig-name descname"><span class="pre">lastname</span></span><a class="headerlink" href="#odyssey.api.user.models.User.lastname" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">lastname</span></span><a class="headerlink" href="#odyssey.api.user.models.User.lastname" title="Permalink to this definition"></a></dt>
 <dd><p>User first name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 50</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 50</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.biological_sex_male">
-<span class="sig-name descname"><span class="pre">biological_sex_male</span></span><a class="headerlink" href="#odyssey.api.user.models.User.biological_sex_male" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">biological_sex_male</span></span><a class="headerlink" href="#odyssey.api.user.models.User.biological_sex_male" title="Permalink to this definition"></a></dt>
 <dd><p>Client biological sex, true for male, false for female.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.is_staff">
-<span class="sig-name descname"><span class="pre">is_staff</span></span><a class="headerlink" href="#odyssey.api.user.models.User.is_staff" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_staff</span></span><a class="headerlink" href="#odyssey.api.user.models.User.is_staff" title="Permalink to this definition"></a></dt>
 <dd><p>a user can be both a client and a staff member.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>boolean</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Denotes if this user is a staff member. Note</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.user.models.User.is_client">
-<span class="sig-name descname"><span class="pre">is_client</span></span><a class="headerlink" href="#odyssey.api.user.models.User.is_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>a user can be both a client and a staff member.</p>
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.was_staff">
+<span class="sig-name descname"><span class="pre">was_staff</span></span><a class="headerlink" href="#odyssey.api.user.models.User.was_staff" title="Permalink to this definition"></a></dt>
+<dd><p>Denotes if this user was ever a staff member. This is important to retain necessary staff info
+even if a user has deleted their staff account and then later deletes their client account.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>boolean</p>
 </dd>
-<dt class="field-even">Type</dt>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.staff_profile">
+<span class="sig-name descname"><span class="pre">staff_profile</span></span><a class="headerlink" href="#odyssey.api.user.models.User.staff_profile" title="Permalink to this definition"></a></dt>
+<dd><p>One-to-One relationship with StaffProfile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>StaffProfile</cite> instance</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.roles">
+<span class="sig-name descname"><span class="pre">roles</span></span><a class="headerlink" href="#odyssey.api.user.models.User.roles" title="Permalink to this definition"></a></dt>
+<dd><p>One-to-Many relationship between User and StaffRoles tables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">StaffRoles</span></code> instance list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.is_client">
+<span class="sig-name descname"><span class="pre">is_client</span></span><a class="headerlink" href="#odyssey.api.user.models.User.is_client" title="Permalink to this definition"></a></dt>
+<dd><p>a user can be both a client and a staff member.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Denotes if this user is a client. Note</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.client_info">
+<span class="sig-name descname"><span class="pre">client_info</span></span><a class="headerlink" href="#odyssey.api.user.models.User.client_info" title="Permalink to this definition"></a></dt>
+<dd><p>One-to-One relatinoship with ClientInfo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>ClientInfo</cite> instance</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.is_internal">
-<span class="sig-name descname"><span class="pre">is_internal</span></span><a class="headerlink" href="#odyssey.api.user.models.User.is_internal" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_internal</span></span><a class="headerlink" href="#odyssey.api.user.models.User.is_internal" title="Permalink to this definition"></a></dt>
 <dd><p>Whether or not the user is internal. If True, the user may be able to user features not yet
 fully released.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>boolean, non-null</p>
 </dd>
 </dl>
@@ -344,10 +318,10 @@ fully released.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.deleted">
-<span class="sig-name descname"><span class="pre">deleted</span></span><a class="headerlink" href="#odyssey.api.user.models.User.deleted" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">deleted</span></span><a class="headerlink" href="#odyssey.api.user.models.User.deleted" title="Permalink to this definition"></a></dt>
 <dd><p>Flags if the user has been deleted</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>boolean</p>
 </dd>
 </dl>
@@ -355,74 +329,47 @@ fully released.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.User.email_verified">
-<span class="sig-name descname"><span class="pre">email_verified</span></span><a class="headerlink" href="#odyssey.api.user.models.User.email_verified" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">email_verified</span></span><a class="headerlink" href="#odyssey.api.user.models.User.email_verified" title="Permalink to this definition"></a></dt>
 <dd><p>Flags if the user has verified their email</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>boolean</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="odyssey.api.user.models.User.generate_modobio_id">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_modobio_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">firstname</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lastname</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><a class="headerlink" href="#odyssey.api.user.models.User.generate_modobio_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate the user’s mdobio_id.</p>
-<p>The modo bio identifier is used as a public user id, it
-can also be exported to other healthcare providers (clients only).
-It is made up of the firstname and lastname initials and 10 random alphanumeric
-characters.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.User.dob">
+<span class="sig-name descname"><span class="pre">dob</span></span><a class="headerlink" href="#odyssey.api.user.models.User.dob" title="Permalink to this definition"></a></dt>
+<dd><p>User date of birth.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>firstname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Client first name.</p></li>
-<li><p><strong>lastname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Client last name.</p></li>
-<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – User ID number.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>str</em> – Medical record ID</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="odyssey.api.user.models.add_modobio_id">
-<span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">add_modobio_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.add_modobio_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Listens for new entries into the User table and
-automatically assigns a modibio_id to new users.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mapper</strong> – What does this do? Not used.</p></li>
-<li><p><strong>connection</strong> (<a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.engine.Connection</span></code></a>) – Connection to the database engine.</p></li>
-<li><p><strong>target</strong> (<a class="reference external" href="https://docs.sqlalchemy.org/en/14/core/metadata.html#sqlalchemy.schema.Table" title="(in SQLAlchemy v1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.schema.Table</span></code></a>) – Target SQLAlchemy table, fixed to <a class="reference internal" href="#odyssey.api.user.models.User" title="odyssey.api.user.models.User"><code class="xref py py-class docutils literal notranslate"><span class="pre">User</span></code></a> by decorator.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="odyssey.api.user.models.update_ES_index">
-<span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">update_ES_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.update_ES_index" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">update_ES_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.update_ES_index" title="Permalink to this definition"></a></dt>
 <dd><p>Listens for any updates to the User table</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserLogin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserLogin" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserLogin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserLogin" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Stores details to relating to user login and verification.</p>
 <p>The primary index of this table is the
 <a class="reference internal" href="#odyssey.api.user.models.UserLogin.user_id" title="odyssey.api.user.models.UserLogin.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">user_id</span></code></a> number.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was created. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -430,10 +377,10 @@ automatically assigns a modibio_id to new users.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was updated. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -441,55 +388,141 @@ automatically assigns a modibio_id to new users.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Auto incrementing primary key</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>User ID number, foreign key to User.user_id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.password">
-<span class="sig-name descname"><span class="pre">password</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.password" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">password</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.password" title="Permalink to this definition"></a></dt>
 <dd><p>Hashed password string, as generated by <a class="reference external" href="https://werkzeug.palletsprojects.com/en/2.0.x/utils/#werkzeug.security.generate_password_hash" title="(in Werkzeug v2.0.x)"><code class="xref py py-func docutils literal notranslate"><span class="pre">werkzeug.security.generate_password_hash()</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 128</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 128</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.password_created_at">
-<span class="sig-name descname"><span class="pre">password_created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.password_created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">password_created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.password_created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation time of the password</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.password_reset">
+<span class="sig-name descname"><span class="pre">password_reset</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.password_reset" title="Permalink to this definition"></a></dt>
+<dd><p>Used to denote when a user must be forced to change their password. This should be set
+from a background service based on the user’s desired password timeout settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.staff_account_closed">
+<span class="sig-name descname"><span class="pre">staff_account_closed</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.staff_account_closed" title="Permalink to this definition"></a></dt>
+<dd><p>User closed staff portion of the account on this date. A closed account will
+be deleted some time after the close date (initially, 30 days after). If the
+user logs in after closing, but before the account is deleted, this timestamp
+is set to None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.staff_account_blocked">
+<span class="sig-name descname"><span class="pre">staff_account_blocked</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.staff_account_blocked" title="Permalink to this definition"></a></dt>
+<dd><p>Indicates when the staff portion of the account is blocked.
+See <a class="reference internal" href="#odyssey.api.user.models.UserLogin.staff_account_blocked_reason" title="odyssey.api.user.models.UserLogin.staff_account_blocked_reason"><code class="xref py py-attr docutils literal notranslate"><span class="pre">staff_account_blocked_reason</span></code></a> for the reason why it was blocked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.staff_account_blocked_reason">
+<span class="sig-name descname"><span class="pre">staff_account_blocked_reason</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.staff_account_blocked_reason" title="Permalink to this definition"></a></dt>
+<dd><p>Reason why the staff portion of the account was blocked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 500</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.client_account_closed">
+<span class="sig-name descname"><span class="pre">client_account_closed</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.client_account_closed" title="Permalink to this definition"></a></dt>
+<dd><p>User closed client portion of the account on this date. A closed account will
+be deleted some time after the close date (initially, 30 days after). If the
+user logs in after closing, but before the account is deleted, this timestamp
+is set to None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.client_account_blocked">
+<span class="sig-name descname"><span class="pre">client_account_blocked</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.client_account_blocked" title="Permalink to this definition"></a></dt>
+<dd><p>Indicates when the client portion of the account is blocked.
+See <a class="reference internal" href="#odyssey.api.user.models.UserLogin.client_account_blocked_reason" title="odyssey.api.user.models.UserLogin.client_account_blocked_reason"><code class="xref py py-attr docutils literal notranslate"><span class="pre">client_account_blocked_reason</span></code></a> for the reason why it was blocked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.client_account_blocked_reason">
+<span class="sig-name descname"><span class="pre">client_account_blocked_reason</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.client_account_blocked_reason" title="Permalink to this definition"></a></dt>
+<dd><p>Reason why the client portion of the account was blocked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 500</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.last_login">
-<span class="sig-name descname"><span class="pre">last_login</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.last_login" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">last_login</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.last_login" title="Permalink to this definition"></a></dt>
 <dd><p><strong>Deprecated 4.12.21 use UserTokensHistory to find last login</strong></p>
 <p>Time the user last logged in</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -497,25 +530,25 @@ automatically assigns a modibio_id to new users.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.refresh_token">
-<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.refresh_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.refresh_token" title="Permalink to this definition"></a></dt>
 <dd><p><strong>Deprecated 4.12.21 refresh tokens stored in UserTokenHistory</strong></p>
 <p>API refresh authentication token. Used to generate new access and refresh tokens
 We keep track of the current refresh tokens so we may blacklist tokens as needed.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, unique</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, unique</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.set_password">
-<span class="sig-name descname"><span class="pre">set_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.set_password" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.set_password" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserLogin.generate_token">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.generate_token" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserLogin.generate_token" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a JWT with the appropriate user type and user_id</p>
 </dd></dl>
 
@@ -523,49 +556,49 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserRemovalRequests</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserRemovalRequests</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>User removal request table.</p>
 <p>Stores the history of user removal request by all Users.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests.requester_user_id">
-<span class="sig-name descname"><span class="pre">requester_user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.requester_user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">requester_user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.requester_user_id" title="Permalink to this definition"></a></dt>
 <dd><p>user_id number, foreign key to User.user_id of the User requesting removal</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -573,10 +606,10 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>user_id number, foreign key to User.user_id of the User to be removed</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -584,11 +617,22 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests.timestamp">
-<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.timestamp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.timestamp" title="Permalink to this definition"></a></dt>
 <dd><p>Timestamp of the removal request.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserRemovalRequests.removal_type">
+<span class="sig-name descname"><span class="pre">removal_type</span></span><a class="headerlink" href="#odyssey.api.user.models.UserRemovalRequests.removal_type" title="Permalink to this definition"></a></dt>
+<dd><p>Type of removal requested. Can be ‘client’, ‘staff’, ‘or both.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -597,15 +641,15 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserSubscriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserSubscriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Stores details to relating to user account not related to the subscription system</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was created. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -613,10 +657,10 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was updated. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -624,10 +668,10 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.idx" title="Permalink to this definition"></a></dt>
 <dd><p>table index</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>integer, primary key, autoincrementing</p>
 </dd>
 </dl>
@@ -635,33 +679,33 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>Id of the user that this subscription belongs to</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘User.user_id’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.is_staff">
-<span class="sig-name descname"><span class="pre">is_staff</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.is_staff" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_staff</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.is_staff" title="Permalink to this definition"></a></dt>
 <dd><p>Denotes if this subscription is for a staff member. Distinguishes between
 subscriptions for users with both account types</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.start_date">
-<span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.start_date" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.start_date" title="Permalink to this definition"></a></dt>
 <dd><p>Datetime that this subscription level started</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -669,10 +713,10 @@ subscriptions for users with both account types</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.end_date">
-<span class="sig-name descname"><span class="pre">end_date</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.end_date" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">end_date</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.end_date" title="Permalink to this definition"></a></dt>
 <dd><p>Datetime that this subscription level ended</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -680,13 +724,13 @@ subscriptions for users with both account types</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.subscription_status">
-<span class="sig-name descname"><span class="pre">subscription_status</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.subscription_status" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">subscription_status</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.subscription_status" title="Permalink to this definition"></a></dt>
 <dd><p>unsubscribed, subscribed, free_trial and sponsored</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>String</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Status of this subscription. Possible values are</p>
 </dd>
 </dl>
@@ -694,30 +738,71 @@ subscriptions for users with both account types</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.subscription_type_id">
-<span class="sig-name descname"><span class="pre">subscription_type_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.subscription_type_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">subscription_type_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.subscription_type_id" title="Permalink to this definition"></a></dt>
 <dd><p>Id of this subscription plan. Comes from the LookupSubscriptions table.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘LookupSubscriptions.sub_id’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘LookupSubscriptions.sub_id’)</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.last_checked_date">
+<span class="sig-name descname"><span class="pre">last_checked_date</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.last_checked_date" title="Permalink to this definition"></a></dt>
+<dd><p>Date the subscription status was last checked with the Apple Store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.apple_original_transaction_id">
+<span class="sig-name descname"><span class="pre">apple_original_transaction_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.apple_original_transaction_id" title="Permalink to this definition"></a></dt>
+<dd><p>Original transaction id used to track all in-app purchases. This id remains the same for each client purchase.</p>
+<p><a class="reference external" href="https://developer.apple.com/documentation/appstoreserverapi/originaltransactionid">https://developer.apple.com/documentation/appstoreserverapi/originaltransactionid</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>String</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.expire_date">
+<span class="sig-name descname"><span class="pre">expire_date</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.expire_date" title="Permalink to this definition"></a></dt>
+<dd><p>Date and time the subscription will expire. If subscription is renewed, there will be a new entry for the
+subscription renewal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserSubscriptions.subscription_type_information">
+<span class="sig-name descname"><span class="pre">subscription_type_information</span></span><a class="headerlink" href="#odyssey.api.user.models.UserSubscriptions.subscription_type_information" title="Permalink to this definition"></a></dt>
+<dd><p>Relationship lookup subscriptions</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokensBlacklist">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserTokensBlacklist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserTokensBlacklist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>API tokens for either refresh or access which have been revoked either by the
 user or the API.</p>
 <p><a class="reference internal" href="#odyssey.api.user.models.UserTokensBlacklist.token" title="odyssey.api.user.models.UserTokensBlacklist.token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">token</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokensBlacklist.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was created. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -725,10 +810,10 @@ user or the API.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokensBlacklist.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was updated. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -736,22 +821,22 @@ user or the API.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokensBlacklist.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Auto incrementing primary key</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokensBlacklist.token">
-<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokensBlacklist.token" title="Permalink to this definition"></a></dt>
 <dd><p>API token that has been revoked by the user or the API.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, unique</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, unique</p>
 </dd>
 </dl>
 </dd></dl>
@@ -760,15 +845,15 @@ user or the API.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserPendingEmailVerifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserPendingEmailVerifications</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Holds information about user’s who have not yet verified their email.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was created. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -776,10 +861,10 @@ user or the API.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was updated. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -787,32 +872,32 @@ user or the API.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Auto incrementing primary key</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>Id of the user that this pending verification belongs to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘User.user_id’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.token">
-<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.token" title="Permalink to this definition"></a></dt>
 <dd><p>JWT token that will verify this user’s email when the link is clicked.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
 </dd>
 </dl>
@@ -820,10 +905,10 @@ user or the API.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.code">
-<span class="sig-name descname"><span class="pre">code</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.code" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">code</span></span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.code" title="Permalink to this definition"></a></dt>
 <dd><p>4 digit code that can be used in place of the token in case of problems with the token.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string</p>
 </dd>
 </dl>
@@ -831,13 +916,13 @@ user or the API.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.generate_token">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.generate_token" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.generate_token" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a JWT with the appropriate user type and user_id</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserPendingEmailVerifications.generate_code">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.generate_code" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserPendingEmailVerifications.generate_code" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a 4 digit code</p>
 </dd></dl>
 
@@ -845,7 +930,7 @@ user or the API.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserTokenHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserTokenHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Stores details of user token generation events. This includes logging in through basic authorization
 and when users request a new access token using a refresh token</p>
@@ -853,10 +938,10 @@ and when users request a new access token using a refresh token</p>
 <a class="reference internal" href="#odyssey.api.user.models.UserTokenHistory.user_id" title="odyssey.api.user.models.UserTokenHistory.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">user_id</span></code></a> number.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was created. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -864,10 +949,10 @@ and when users request a new access token using a refresh token</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>timestamp for when object was updated. DB server time is used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -875,58 +960,325 @@ and when users request a new access token using a refresh token</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Auto incrementing primary key</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>User ID number, foreign key to User.user_id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory.event">
-<span class="sig-name descname"><span class="pre">event</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.event" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">event</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.event" title="Permalink to this definition"></a></dt>
 <dd><p>Used to specify the token issueance type. Options are
 - ‘login’
 - ‘refresh’</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory.refresh_token">
-<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.refresh_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.refresh_token" title="Permalink to this definition"></a></dt>
 <dd><p>API refresh authentication token. Used to generate new access and refresh tokens
 We keep track of the current refresh tokens so we may blacklist tokens as needed.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, unique</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, unique</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.user.models.UserTokenHistory.ua_string">
-<span class="sig-name descname"><span class="pre">ua_string</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.ua_string" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ua_string</span></span><a class="headerlink" href="#odyssey.api.user.models.UserTokenHistory.ua_string" title="Permalink to this definition"></a></dt>
 <dd><p>Stores contents of user-agent string</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserResetPasswordRequestHistory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserResetPasswordRequestHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserResetPasswordRequestHistory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Stores a history of password reset requests</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserResetPasswordRequestHistory.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserResetPasswordRequestHistory.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Auto incrementing primary key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserResetPasswordRequestHistory.requested_at">
+<span class="sig-name descname"><span class="pre">requested_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserResetPasswordRequestHistory.requested_at" title="Permalink to this definition"></a></dt>
+<dd><p>timestamp for when request is submitted</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserResetPasswordRequestHistory.email">
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#odyssey.api.user.models.UserResetPasswordRequestHistory.email" title="Permalink to this definition"></a></dt>
+<dd><p>email provided with password reset request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 75</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserResetPasswordRequestHistory.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserResetPasswordRequestHistory.user_id" title="Permalink to this definition"></a></dt>
+<dd><p>user_id connected to email provided if it exists, otherwise blank</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserResetPasswordRequestHistory.ua_string">
+<span class="sig-name descname"><span class="pre">ua_string</span></span><a class="headerlink" href="#odyssey.api.user.models.UserResetPasswordRequestHistory.ua_string" title="Permalink to this definition"></a></dt>
+<dd><p>Stores contents of user-agent string for device submitting request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLegalDocs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserLegalDocs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserLegalDocs" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Stores details of which legal docs users have seen and signed or attempted to ignore.
+If no entry exists for a given user_id and document id, that user has not yet viewed the document.
+If an entry exists and signed = False, the user has viewed the document but did not sign it.</p>
+<p>The primary index of this table is the
+<a class="reference internal" href="#odyssey.api.user.models.UserLegalDocs.idx" title="odyssey.api.user.models.UserLegalDocs.idx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">idx</span></code></a> number.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLegalDocs.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLegalDocs.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>timestamp for when object was created. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLegalDocs.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLegalDocs.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>timestamp for when object was updated. DB server time is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLegalDocs.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLegalDocs.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Auto incrementing primary key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLegalDocs.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLegalDocs.user_id" title="Permalink to this definition"></a></dt>
+<dd><p>User ID number, foreign key to User.user_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLegalDocs.doc_id">
+<span class="sig-name descname"><span class="pre">doc_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLegalDocs.doc_id" title="Permalink to this definition"></a></dt>
+<dd><p>Document ID number, foreigh key to LookupLegalDocs.idx</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserLegalDocs.signed">
+<span class="sig-name descname"><span class="pre">signed</span></span><a class="headerlink" href="#odyssey.api.user.models.UserLegalDocs.signed" title="Permalink to this definition"></a></dt>
+<dd><p>Denotes if the user has signed this document. If False, the user has viewed the document but no signed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.user.models.</span></span><span class="sig-name descname"><span class="pre">UserProfilePictures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code></p>
+<p>Stores S3 keys to profile pictures saved in aws s3</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.client_user_id">
+<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.client_user_id" title="Permalink to this definition"></a></dt>
+<dd><p>User ID number, foreign key to User.user_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.client_info">
+<span class="sig-name descname"><span class="pre">client_info</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.client_info" title="Permalink to this definition"></a></dt>
+<dd><p>Many to one relationship with ClientInfo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ClientInfo</span></code> instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.staff_user_id">
+<span class="sig-name descname"><span class="pre">staff_user_id</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.staff_user_id" title="Permalink to this definition"></a></dt>
+<dd><p>User ID number, foreign key to User.user_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.staff_profile">
+<span class="sig-name descname"><span class="pre">staff_profile</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.staff_profile" title="Permalink to this definition"></a></dt>
+<dd><p>Many to one relationship with StaffProfile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">StaffProfile</span></code> instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.image_path">
+<span class="sig-name descname"><span class="pre">image_path</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.image_path" title="Permalink to this definition"></a></dt>
+<dd><p>String of image path as it is saved in S3. Required</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.width">
+<span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.width" title="Permalink to this definition"></a></dt>
+<dd><p>Width of image in pixels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.height">
+<span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.height" title="Permalink to this definition"></a></dt>
+<dd><p>Height of image in pixels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.user.models.UserProfilePictures.original">
+<span class="sig-name descname"><span class="pre">original</span></span><a class="headerlink" href="#odyssey.api.user.models.UserProfilePictures.original" title="Permalink to this definition"></a></dt>
+<dd><p>Boolean determining if the image is the original or not, false by default</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -937,50 +1289,33 @@ We keep track of the current refresh tokens so we may blacklist tokens as needed
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.api.client.models.html" class="btn btn-neutral float-right" title="odyssey.api.client.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="odyssey.models.html" class="btn btn-neutral float-left" title="Database models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.client.models.html" class="btn btn-neutral float-right" title="odyssey.api.client.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

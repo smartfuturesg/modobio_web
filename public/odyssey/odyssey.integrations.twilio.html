@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.integrations.twilio module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.integrations.wheel module" href="odyssey.integrations.wheel.html" />
+    <link rel="prev" title="odyssey.integrations.instamed module" href="odyssey.integrations.instamed.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.apple.html">Apple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.dosespot.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.instamed.html">InstaMed</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Twilio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.wheel.html">Wheel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.integrations.html">Third party integrations</a> &raquo;</li>
+      <li>odyssey.integrations.twilio module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.integrations.twilio.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.integrations.twilio">
+<span id="odyssey-integrations-twilio-module"></span><h1>odyssey.integrations.twilio module<a class="headerlink" href="#module-odyssey.integrations.twilio" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.integrations.twilio.</span></span><span class="sig-name descname"><span class="pre">Twilio</span></span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.grab_twilio_credentials">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grab_twilio_credentials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.grab_twilio_credentials" title="Permalink to this definition"></a></dt>
+<dd><p>Helper funtion to bring up twilio credentials for API acces.
+Raises an error if one or more of the credentials are None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.get_conversation_messages">
+<span class="sig-name descname"><span class="pre">get_conversation_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_sid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.get_conversation_messages" title="Permalink to this definition"></a></dt>
+<dd><p>Brings up the full conversation using the conversation_sid and twilio’s API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conversation_sid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Twilio’s id for the conversation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list(dict)</em> – list of transcripts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.get_booking_transcript">
+<span class="sig-name descname"><span class="pre">get_booking_transcript</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.get_booking_transcript" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the full chat transcript for the bookings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>booking_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Booking ID number</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – The transcript</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.create_twilio_access_token">
+<span class="sig-name descname"><span class="pre">create_twilio_access_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modobio_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">meeting_room_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.create_twilio_access_token" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a twilio access token for the provided modobio_id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.generate_meeting_room_name">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_meeting_room_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meeting_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'TELEHEALTH'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.generate_meeting_room_name" title="Permalink to this definition"></a></dt>
+<dd><p>Generates unique, internally used names for meeting rooms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>meeting_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Meeting types will be either TELEHEALTH or CHATROOM</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.create_conversation">
+<span class="sig-name descname"><span class="pre">create_conversation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">staff_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.create_conversation" title="Permalink to this definition"></a></dt>
+<dd><p>Name and create a conversation room on the twilio platform. Adds the users by their modobio_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>staff_user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – user_id of staff participant</p></li>
+<li><p><strong>client_user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – user_id of client participant</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>int</em> – twilio’s id for referencing the conversation instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.create_telehealth_chatroom">
+<span class="sig-name descname"><span class="pre">create_telehealth_chatroom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.create_telehealth_chatroom" title="Permalink to this definition"></a></dt>
+<dd><p>Provision a telehealth chatroom using the twilio API. Store chatroom details in
+the TelehealthChatrooms table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>booking_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – TelehealthBookings.idx for bringing up booking details.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>int</em> – Conversation ID number</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.send_message">
+<span class="sig-name descname"><span class="pre">send_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversation_sid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">message_body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">media_sid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.send_message" title="Permalink to this definition"></a></dt>
+<dd><p>Add a message to the conversation on behalf of the user in user_id.</p>
+<p>User must already be a conversation participant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – conversation participant</p></li>
+<li><p><strong>conversation_sid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – twilio id for the conversation to be deleted</p></li>
+<li><p><strong>message_body</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – message text</p></li>
+<li><p><strong>media_sid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – sid of the media file attached to this message</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.delete_conversation">
+<span class="sig-name descname"><span class="pre">delete_conversation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_sid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.delete_conversation" title="Permalink to this definition"></a></dt>
+<dd><p>Delete the conversation refereced by the <cite>conversation_sid</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conversation_sid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – twilio id for the conversation to be deleted</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.complete_telehealth_video_room">
+<span class="sig-name descname"><span class="pre">complete_telehealth_video_room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.complete_telehealth_video_room" title="Permalink to this definition"></a></dt>
+<dd><p>Update the video room state to completed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>booking_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The booking ID number</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.close_telehealth_chatroom">
+<span class="sig-name descname"><span class="pre">close_telehealth_chatroom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.close_telehealth_chatroom" title="Permalink to this definition"></a></dt>
+<dd><p>Update the conversation state to closed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>booking_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The booking ID number</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.get_media">
+<span class="sig-name descname"><span class="pre">get_media</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_sid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.get_media" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve a media url from</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>media_sid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A media ID</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>str</em> – contents of image download</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.twilio.Twilio.upload_media">
+<span class="sig-name descname"><span class="pre">upload_media</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">media_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'image/jpeg'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.twilio.Twilio.upload_media" title="Permalink to this definition"></a></dt>
+<dd><p>Upload a media file to twilio. Twilio responds with details on the media object they store on their end. We can use the sid in the response to
+add the media file to a conversation.</p>
+<p>Note: this is only used for testing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>media_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – relative path to media file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>str</em> – The media ID number</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.integrations.instamed.html" class="btn btn-neutral float-left" title="odyssey.integrations.instamed module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.integrations.wheel.html" class="btn btn-neutral float-right" title="odyssey.integrations.wheel module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

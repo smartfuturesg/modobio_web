@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.api.wearables.models &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.api.wearables.models &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.api.notifications.models module" href="odyssey.api.notifications.models.html" />
+    <link rel="next" title="odyssey.api.telehealth.models module" href="odyssey.api.telehealth.models.html" />
     <link rel="prev" title="odyssey.api.trainer.models" href="odyssey.api.trainer.models.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,30 +39,22 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Database models</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.models.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.models.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.models.html">Practitioner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.models.html">Doctor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.payment.models.html">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.models.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
@@ -111,125 +62,84 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="odyssey.models.html">Database models</a> &raquo;</li>
-        
       <li>odyssey.api.wearables.models</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.api.wearables.models.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.api.wearables.models">
-<span id="odyssey-api-wearables-models"></span><h1>odyssey.api.wearables.models<a class="headerlink" href="#module-odyssey.api.wearables.models" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-api-wearables-models"></span><h1>odyssey.api.wearables.models<a class="headerlink" href="#module-odyssey.api.wearables.models" title="Permalink to this headline"></a></h1>
 <p>Database tables for the wearable devices section of the Modo Bio API.
 All tables in this module are prefixed with ‘Wearables’.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">Wearables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">Wearables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Table that lists which supported wearables a client has.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>User ID number.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, unique, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -237,98 +147,98 @@ All tables in this module are prefixed with ‘Wearables’.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.has_oura">
-<span class="sig-name descname"><span class="pre">has_oura</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_oura" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_oura</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_oura" title="Permalink to this definition"></a></dt>
 <dd><p>Client has an Oura Ring wearable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.registered_oura">
-<span class="sig-name descname"><span class="pre">registered_oura</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_oura" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">registered_oura</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_oura" title="Permalink to this definition"></a></dt>
 <dd><p>Client granted Modo Bio access to Oura Cloud.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.has_fitbit">
-<span class="sig-name descname"><span class="pre">has_fitbit</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_fitbit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_fitbit</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_fitbit" title="Permalink to this definition"></a></dt>
 <dd><p>Client has an Fitbit wearable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.registered_fitbit">
-<span class="sig-name descname"><span class="pre">registered_fitbit</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_fitbit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">registered_fitbit</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_fitbit" title="Permalink to this definition"></a></dt>
 <dd><p>Client granted Modo Bio access to Fitbit data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.has_freestyle">
-<span class="sig-name descname"><span class="pre">has_freestyle</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_freestyle" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_freestyle</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_freestyle" title="Permalink to this definition"></a></dt>
 <dd><p>Client has an FreeStyle Libre continuous glucose monitoring (CGM) wearable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.registered_freestyle">
-<span class="sig-name descname"><span class="pre">registered_freestyle</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_freestyle" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">registered_freestyle</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_freestyle" title="Permalink to this definition"></a></dt>
 <dd><p>Client has activated the FreeStyle Libre continuous glucose monitoring (CGM) wearable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.has_applewatch">
-<span class="sig-name descname"><span class="pre">has_applewatch</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_applewatch" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_applewatch</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.has_applewatch" title="Permalink to this definition"></a></dt>
 <dd><p>Client has an Apple Watch wearable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.registered_applewatch">
-<span class="sig-name descname"><span class="pre">registered_applewatch</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_applewatch" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">registered_applewatch</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.registered_applewatch" title="Permalink to this definition"></a></dt>
 <dd><p>Client granted Modo Bio access to Apple Watch data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a>, default = False</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>, default = False</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.oura">
-<span class="sig-name descname"><span class="pre">oura</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.oura" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">oura</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.oura" title="Permalink to this definition"></a></dt>
 <dd><p>WearablesOura instance holding Oura specific data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.wearables.models.WearablesOura" title="odyssey.api.wearables.models.WearablesOura"><code class="xref py py-class docutils literal notranslate"><span class="pre">WearablesOura</span></code></a> instance</p>
 </dd>
 </dl>
@@ -336,10 +246,10 @@ All tables in this module are prefixed with ‘Wearables’.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.fitbit">
-<span class="sig-name descname"><span class="pre">fitbit</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.fitbit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fitbit</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.fitbit" title="Permalink to this definition"></a></dt>
 <dd><p>WearablesFitbit instance holding Fitbit specific data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.wearables.models.WearablesFitbit" title="odyssey.api.wearables.models.WearablesFitbit"><code class="xref py py-class docutils literal notranslate"><span class="pre">WearablesFitbit</span></code></a> instance</p>
 </dd>
 </dl>
@@ -347,10 +257,10 @@ All tables in this module are prefixed with ‘Wearables’.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.Wearables.freestyle">
-<span class="sig-name descname"><span class="pre">freestyle</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.freestyle" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">freestyle</span></span><a class="headerlink" href="#odyssey.api.wearables.models.Wearables.freestyle" title="Permalink to this definition"></a></dt>
 <dd><p>WearablesFreeStyle instance holding FreeStyle specific data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.wearables.models.WearablesFreeStyle" title="odyssey.api.wearables.models.WearablesFreeStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">WearablesFreeStyle</span></code></a> instance</p>
 </dd>
 </dl>
@@ -360,26 +270,26 @@ All tables in this module are prefixed with ‘Wearables’.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">WearablesOura</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">WearablesOura</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Oura Ring specific information.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>Client ID number.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, unique, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -387,91 +297,91 @@ All tables in this module are prefixed with ‘Wearables’.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.oauth_state">
-<span class="sig-name descname"><span class="pre">oauth_state</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.oauth_state" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">oauth_state</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.oauth_state" title="Permalink to this definition"></a></dt>
 <dd><p>State token for OAuth2 exchange with Oura Cloud.</p>
 <p>This token is a state parameter, it must not change in between the various phases
 of OAuth2 authorization. It is stored temporarily in the database, but has no meaning
 after the OAuth2 process is completed. If a token exists in this column, it is a sign
 that the grant-to-access token exchange did not complete successfully.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 512</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 512</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.access_token">
-<span class="sig-name descname"><span class="pre">access_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.access_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">access_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.access_token" title="Permalink to this definition"></a></dt>
 <dd><p>OAuth2 access token to authorize Oura Cloud access.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 512</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 512</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.refresh_token">
-<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.refresh_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.refresh_token" title="Permalink to this definition"></a></dt>
 <dd><p>OAuth2 refresh token to obtain a new <a class="reference internal" href="#odyssey.api.wearables.models.WearablesOura.access_token" title="odyssey.api.wearables.models.WearablesOura.access_token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">access_token</span></code></a> after it expires.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 512</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 512</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.token_expires">
-<span class="sig-name descname"><span class="pre">token_expires</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.token_expires" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">token_expires</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.token_expires" title="Permalink to this definition"></a></dt>
 <dd><p>Date and time of <a class="reference internal" href="#odyssey.api.wearables.models.WearablesOura.access_token" title="odyssey.api.wearables.models.WearablesOura.access_token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">access_token</span></code></a> expiry.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.last_scrape">
-<span class="sig-name descname"><span class="pre">last_scrape</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.last_scrape" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">last_scrape</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.last_scrape" title="Permalink to this definition"></a></dt>
 <dd><p>Date and time of last access to Oura Cloud.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.wearable_id">
-<span class="sig-name descname"><span class="pre">wearable_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.wearable_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wearable_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.wearable_id" title="Permalink to this definition"></a></dt>
 <dd><p>Wearable index this WearablesOura instance is linked to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, unique, foreign key to <a class="reference internal" href="#odyssey.api.wearables.models.Wearables.idx" title="odyssey.api.wearables.models.Wearables.idx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Wearables.idx</span></code></a></p>
 </dd>
 </dl>
@@ -479,10 +389,10 @@ that the grant-to-access token exchange did not complete successfully.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesOura.wearable">
-<span class="sig-name descname"><span class="pre">wearable</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.wearable" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wearable</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesOura.wearable" title="Permalink to this definition"></a></dt>
 <dd><p>Wearable instance this WearablesOura instance is linked to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.wearables.models.Wearables" title="odyssey.api.wearables.models.Wearables"><code class="xref py py-class docutils literal notranslate"><span class="pre">Wearables</span></code></a></p>
 </dd>
 </dl>
@@ -492,26 +402,26 @@ that the grant-to-access token exchange did not complete successfully.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">WearablesFitbit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">WearablesFitbit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Fitbit specific information.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>Client ID number.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, unique, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -519,93 +429,93 @@ that the grant-to-access token exchange did not complete successfully.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.oauth_state">
-<span class="sig-name descname"><span class="pre">oauth_state</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.oauth_state" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">oauth_state</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.oauth_state" title="Permalink to this definition"></a></dt>
 <dd><p>State token for OAuth2 exchange with Fitbit servers.</p>
 <p>This token is a state parameter, it must not change in between the various phases
 of OAuth2 authorization. It is stored temporarily in the database, but has no meaning
 after the OAuth2 process is completed. If a token exists in this column, it is a sign
 that the grant-to-access token exchange did not complete successfully.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 512</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 512</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.access_token">
-<span class="sig-name descname"><span class="pre">access_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.access_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">access_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.access_token" title="Permalink to this definition"></a></dt>
 <dd><p>OAuth2 access token to authorize Fitbit access. Fitbit uses JWT for access token, which
 may be up to 1024 bytes in size.
 <a class="reference external" href="https://dev.fitbit.com/build/reference/web-api/oauth2/#fitbit-api-notes">https://dev.fitbit.com/build/reference/web-api/oauth2/#fitbit-api-notes</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.refresh_token">
-<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.refresh_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">refresh_token</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.refresh_token" title="Permalink to this definition"></a></dt>
 <dd><p>OAuth2 refresh token to obtain a new <a class="reference internal" href="#odyssey.api.wearables.models.WearablesFitbit.access_token" title="odyssey.api.wearables.models.WearablesFitbit.access_token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">access_token</span></code></a> after it expires.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 512</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 512</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.token_expires">
-<span class="sig-name descname"><span class="pre">token_expires</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.token_expires" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">token_expires</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.token_expires" title="Permalink to this definition"></a></dt>
 <dd><p>Date and time of <a class="reference internal" href="#odyssey.api.wearables.models.WearablesFitbit.access_token" title="odyssey.api.wearables.models.WearablesFitbit.access_token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">access_token</span></code></a> expiry.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.last_scrape">
-<span class="sig-name descname"><span class="pre">last_scrape</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.last_scrape" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">last_scrape</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.last_scrape" title="Permalink to this definition"></a></dt>
 <dd><p>Date and time of last access to Fitbit account.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.wearable_id">
-<span class="sig-name descname"><span class="pre">wearable_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.wearable_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wearable_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.wearable_id" title="Permalink to this definition"></a></dt>
 <dd><p>Wearable index this WearablesFitbit instance is linked to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, unique, foreign key to <a class="reference internal" href="#odyssey.api.wearables.models.Wearables.idx" title="odyssey.api.wearables.models.Wearables.idx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Wearables.idx</span></code></a></p>
 </dd>
 </dl>
@@ -613,10 +523,10 @@ may be up to 1024 bytes in size.
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFitbit.wearable">
-<span class="sig-name descname"><span class="pre">wearable</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.wearable" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wearable</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFitbit.wearable" title="Permalink to this definition"></a></dt>
 <dd><p>Wearable instance this WearablesFitbit instance is linked to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.wearables.models.Wearables" title="odyssey.api.wearables.models.Wearables"><code class="xref py py-class docutils literal notranslate"><span class="pre">Wearables</span></code></a></p>
 </dd>
 </dl>
@@ -626,26 +536,26 @@ may be up to 1024 bytes in size.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">WearablesFreeStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.wearables.models.</span></span><span class="sig-name descname"><span class="pre">WearablesFreeStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>FreeStyle Libre continuous glucose monitoring wearable specific information.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>Client ID number.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -653,68 +563,68 @@ may be up to 1024 bytes in size.
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.timestamps">
-<span class="sig-name descname"><span class="pre">timestamps</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.timestamps" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">timestamps</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.timestamps" title="Permalink to this definition"></a></dt>
 <dd><p>Timestamps for the glucose data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>(datetime.datatime)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>(datetime.datatime)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.glucose">
-<span class="sig-name descname"><span class="pre">glucose</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.glucose" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">glucose</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.glucose" title="Permalink to this definition"></a></dt>
 <dd><p>Glucose data from the GCM.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a>)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a>)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.activation_timestamp">
-<span class="sig-name descname"><span class="pre">activation_timestamp</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.activation_timestamp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">activation_timestamp</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.activation_timestamp" title="Permalink to this definition"></a></dt>
 <dd><p>Timestamp when last CGM was activated.</p>
 <p>On the CGM device, the time is stored as minutes since activation. It must
 be converted to a timestamp before it can be added to the timestamps array.
 This timestamp can be used to calculate the timestamp for each data point.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.wearable_id">
-<span class="sig-name descname"><span class="pre">wearable_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.wearable_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wearable_id</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.wearable_id" title="Permalink to this definition"></a></dt>
 <dd><p>Wearable index this WearablesFreeStyle instance is linked to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, unique, foreign key to <a class="reference internal" href="#odyssey.api.wearables.models.Wearables.idx" title="odyssey.api.wearables.models.Wearables.idx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Wearables.idx</span></code></a></p>
 </dd>
 </dl>
@@ -722,10 +632,10 @@ This timestamp can be used to calculate the timestamp for each data point.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.wearables.models.WearablesFreeStyle.wearable">
-<span class="sig-name descname"><span class="pre">wearable</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.wearable" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wearable</span></span><a class="headerlink" href="#odyssey.api.wearables.models.WearablesFreeStyle.wearable" title="Permalink to this definition"></a></dt>
 <dd><p>Wearable instance this WearablesFreeStyle instance is linked to.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.wearables.models.Wearables" title="odyssey.api.wearables.models.Wearables"><code class="xref py py-class docutils literal notranslate"><span class="pre">Wearables</span></code></a></p>
 </dd>
 </dl>
@@ -737,50 +647,33 @@ This timestamp can be used to calculate the timestamp for each data point.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.api.notifications.models.html" class="btn btn-neutral float-right" title="odyssey.api.notifications.models module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="odyssey.api.trainer.models.html" class="btn btn-neutral float-left" title="odyssey.api.trainer.models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.telehealth.models.html" class="btn btn-neutral float-right" title="odyssey.api.telehealth.models module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

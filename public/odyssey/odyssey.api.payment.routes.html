@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.api.payment.routes module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.api.dosespot.routes module" href="odyssey.api.dosespot.routes.html" />
+    <link rel="prev" title="odyssey.api.telehealth.routes" href="odyssey.api.telehealth.routes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.api.html">API endpoints</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.routes.html">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.routes.html">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.routes.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.routes.html">Practitioner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.client_services.routes.html">Client services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.routes.html">Doctor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.routes.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.misc.postman.html">Postman</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.api.html">API endpoints</a> &raquo;</li>
+      <li>odyssey.api.payment.routes module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.api.payment.routes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.api.payment.routes">
+<span id="odyssey-api-payment-routes-module"></span><h1>odyssey.api.payment.routes module<a class="headerlink" href="#module-odyssey.api.payment.routes" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentMethodsApi">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.routes.</span></span><span class="sig-name descname"><span class="pre">PaymentMethodsApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentMethodsApi" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentMethodsApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentMethodsApi.get" title="Permalink to this definition"></a></dt>
+<dd><p>get active user payment methods</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentMethodsApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentMethodsApi.post" title="Permalink to this definition"></a></dt>
+<dd><p>add a new payment method</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentMethodsApi.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentMethodsApi.delete" title="Permalink to this definition"></a></dt>
+<dd><p>remove an existing payment method</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentMethodsApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'payment_payment_methods_api_2'</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentMethodsApi.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentMethodsApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentMethodsApi.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentMethodsApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentMethodsApi.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusApi">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.routes.</span></span><span class="sig-name descname"><span class="pre">PaymentStatusApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusApi" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusApi.post" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'payment_payment_status_api_2'</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusApi.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusApi.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusApi.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusGetApi">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.routes.</span></span><span class="sig-name descname"><span class="pre">PaymentStatusGetApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusGetApi" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusGetApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusGetApi.get" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusGetApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'payment_payment_status_get_api_2'</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusGetApi.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusGetApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusGetApi.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentStatusGetApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentStatusGetApi.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentHistoryApi">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.routes.</span></span><span class="sig-name descname"><span class="pre">PaymentHistoryApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentHistoryApi" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentHistoryApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentHistoryApi.get" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of transactions for the given user_id.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentHistoryApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'payment_payment_history_api_2'</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentHistoryApi.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentHistoryApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentHistoryApi.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentHistoryApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentHistoryApi.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentRefundApi">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.routes.</span></span><span class="sig-name descname"><span class="pre">PaymentRefundApi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentRefundApi" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentRefundApi.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentRefundApi.get" title="Permalink to this definition"></a></dt>
+<dd><p>Returns all refunds that have been issued for the given user_id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentRefundApi.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentRefundApi.post" title="Permalink to this definition"></a></dt>
+<dd><p>Issue a refund for a user. Multiple refunds may be issued for a single transaction, but the
+total amount refunded cannot exceed the amount of the original transaction.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentRefundApi.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'payment_payment_refund_api_2'</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentRefundApi.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentRefundApi.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentRefundApi.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentRefundApi.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentRefundApi.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentTestCharge">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.routes.</span></span><span class="sig-name descname"><span class="pre">PaymentTestCharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentTestCharge" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<p>[DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
+charging in the InstaMed system.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>This endpoint is only available in DEV environments.</strong></p>
+</aside>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentTestCharge.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentTestCharge.post" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentTestCharge.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentTestCharge.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentVoidRefund">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.payment.routes.</span></span><span class="sig-name descname"><span class="pre">PaymentVoidRefund</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentVoidRefund" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<p>[DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
+voids in the InstaMed system.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>This endpoint is only available in DEV environments.</strong></p>
+</aside>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentVoidRefund.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.payment.routes.PaymentVoidRefund.post" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.payment.routes.PaymentVoidRefund.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.payment.routes.PaymentVoidRefund.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.api.telehealth.routes.html" class="btn btn-neutral float-left" title="odyssey.api.telehealth.routes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.dosespot.routes.html" class="btn btn-neutral float-right" title="odyssey.api.dosespot.routes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

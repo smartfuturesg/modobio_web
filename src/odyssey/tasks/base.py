@@ -1,13 +1,14 @@
 import logging
-logger = logging.getLogger(__name__)
 
 import celery
 
-class BaseTaskWithRetry(celery.Task):
-    """
-    Base class for celery tasks which defines rules for autoretries
+logger = logging.getLogger(__name__)
 
-    Retries will automatically occur for the exceptions listen in the `autoretry_for` attribute
+class BaseTaskWithRetry(celery.Task):
+    """ Base class for celery tasks which defines rules for autoretries.
+
+    Retries will automatically occur for the exceptions listed in the
+    ``autoretry_for`` attribute.
     """
     autoretry_for = (Exception,)
     max_retries = 5
