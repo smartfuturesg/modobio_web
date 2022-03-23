@@ -23,6 +23,7 @@ setup(
         'boto3',
         'celery',
         'elasticsearch',
+        'filetype',
         'Flask',
         'flask-accepts',
         'Flask-Cors',

@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.api.client_services.routes &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.api.client_services.routes &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.doctor.routes" href="odyssey.api.doctor.routes.html" />
-    <link rel="prev" title="odyssey.api.staff.routes" href="odyssey.api.staff.routes.html" /> 
+    <link rel="prev" title="odyssey.api.practitioner.routes module" href="odyssey.api.practitioner.routes.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
@@ -100,13 +48,16 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.routes.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.routes.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.routes.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.routes.html">Practitioner</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Client services</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.routes.html">Doctor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.routes.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.routes.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.routes.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.routes.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.payment.routes.html">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.routes.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.routes.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.routes.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.routes.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.routes.html">Lookup tables</a></li>
@@ -114,89 +65,136 @@
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.version.routes.html">Version</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="odyssey.api.html">API endpoints</a> &raquo;</li>
-        
       <li>odyssey.api.client_services.routes</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.api.client_services.routes.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.api.client_services.routes">
-<span id="odyssey-api-client-services-routes"></span><h1>odyssey.api.client_services.routes<a class="headerlink" href="#module-odyssey.api.client_services.routes" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-api-client-services-routes"></span><h1>odyssey.api.client_services.routes<a class="headerlink" href="#module-odyssey.api.client_services.routes" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountEndpoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">CSAccountEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountEndpoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<p>User account info endpoint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountEndpoint.get" title="Permalink to this definition"></a></dt>
+<dd><p>Get user account info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The user_id of the <strong>requested account</strong>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – User account information.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'client-services_cs_account_endpoint'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountEndpoint.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountEndpoint.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountEndpoint.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountBlockEndpoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">CSAccountBlockEndpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountBlockEndpoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
+<p>Account block and unblock endpoint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountBlockEndpoint.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountBlockEndpoint.post" title="Permalink to this definition"></a></dt>
+<dd><p>Block a user account.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>staff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Block the staff (True) or client (False) portion of the account.</p></li>
+<li><p><strong>reason</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>max length 500</em>) – Reason for the block.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountBlockEndpoint.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountBlockEndpoint.delete" title="Permalink to this definition"></a></dt>
+<dd><p>Remove block from a user account.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>staff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Block the staff (True) or client (False) portion of the account.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountBlockEndpoint.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'client-services_cs_account_block_endpoint'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountBlockEndpoint.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountBlockEndpoint.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountBlockEndpoint.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.CSAccountBlockEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DELETE',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.CSAccountBlockEndpoint.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">NewUserClientServices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">NewUserClientServices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
 <p>Create, Update, Retrieve user basic information.
 This endpoint is intended to be used by client services.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.post">
-<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.post" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new user using only email (and/or phone number) and name. Returns a password and portal link for the new user.
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.post" title="Permalink to this definition"></a></dt>
+<dd><p>Create new user using only email, phone number, and name.</p>
+<p><strong>Deprecated 2022-02-01</strong>: registration portal and the ability to add accounts
+on behalf of users has not been used for a long time.</p>
+<p>Create new user using only email (and/or phone number) and name. Returns a password and portal link for the new user.
 Portal link includes a portal_id which is a JWT with a 72 hour lifetime. New Users must use this link to complete their registration.</p>
 <p>This API will create a new account but not will assign the account to a user context (‘client’ or ‘staff’). To complete registration,
 users must have their portal_id verified by another API. At this step, the user’s context will be assigned in the database so
@@ -205,17 +203,17 @@ they may go ahead and request an API token (log in).</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.endpoint">
-<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client-services_new_user_client_services'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.endpoint" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'client-services_new_user_client_services'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.endpoint" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.mediatypes">
-<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.mediatypes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.mediatypes" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.client_services.routes.NewUserClientServices.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.methods" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.NewUserClientServices.methods" title="Permalink to this definition"></a></dt>
 <dd><p>A list of methods this view can handle.</p>
 </dd></dl>
 
@@ -223,13 +221,32 @@ they may go ahead and request an API token (log in).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">RefreshRegistrationPortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_restx.resource.Resource</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.client_services.routes.</span></span><span class="sig-name descname"><span class="pre">RefreshRegistrationPortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.resources.BaseResource</span></code></p>
 <p>Routines related to registration portals.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint">
+<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'client-services_refresh_registration_portal'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes">
+<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'PUT'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.methods" title="Permalink to this definition"></a></dt>
+<dd><p>A list of methods this view can handle.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.put">
-<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes the email of a client already in the system and
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.put" title="Permalink to this definition"></a></dt>
+<dd><p>Refresh portal ID for continued registration.</p>
+<p><strong>Deprecated 2022-02-01</strong>: registration portal and the ability to add accounts
+on behalf of users has not been used for a long time.</p>
+<p>Takes the email of a client already in the system and
 returns a fresh portal_id and registration url so the client can continue their registration.</p>
 <p>This API can be used as part of the creation of a new user account or to assign a user new
 privileges (like registering a current client account as a staff account)</p>
@@ -238,72 +255,39 @@ or an account that’s been updated to include a new staff or client side.</p>
 <p>user_type must be either ‘client’ or ‘staff’</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint">
-<span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'client-services_refresh_registration_portal'</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.endpoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes">
-<span class="sig-name descname"><span class="pre">mediatypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.mediatypes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.client_services.routes.RefreshRegistrationPortal.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'PUT'}</span></em><a class="headerlink" href="#odyssey.api.client_services.routes.RefreshRegistrationPortal.methods" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of methods this view can handle.</p>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.api.practitioner.routes.html" class="btn btn-neutral float-left" title="odyssey.api.practitioner.routes module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="odyssey.api.doctor.routes.html" class="btn btn-neutral float-right" title="odyssey.api.doctor.routes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="odyssey.api.staff.routes.html" class="btn btn-neutral float-left" title="odyssey.api.staff.routes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

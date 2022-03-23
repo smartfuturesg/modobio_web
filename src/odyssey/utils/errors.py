@@ -15,7 +15,7 @@ def http_exception_handler(error: HTTPException) -> tuple:
     error, including the error traceback. It is logged at the :attr:`logging.INFO` level,
     because it is a handled error, i.e. the message is forwarded to the user.
 
-    This handles :class:`werkzeug.exceptions.HTTPException`s and **all it's subclasses**.
+    This handles :class:`werkzeug.exceptions.HTTPException` and **all it's subclasses**.
 
     Traceback information is added to the response for ``DEV`` and ``TESTING`` environments.
     It is **not** added in the production environment, for security reasons. It is
@@ -36,8 +36,8 @@ def http_exception_handler(error: HTTPException) -> tuple:
          "extra": "output",
          "trace": ["File ..., line x:", "..."]}
 
-    Params
-    ------
+    Parameters
+    ----------
     error : :class:`werkzeug.exceptions.HTTPException`
         The error raised in the code. Must be a subclass of :class:`werkzeug.exceptions.HTTPException`.
         If an extra parameter ``data`` (``dict``) exists on the error object, it will be merged into
@@ -102,8 +102,8 @@ def exception_handler(error: Exception) -> tuple:
     This handles :class:`Exception`s and **all it's subclasses** that are not otherwise
     handled by :func:`http_exception_handler`.
 
-    Params
-    ------
+    Parameters
+    ----------
     error : :class:`Exception`
         The error raised in the code. If an extra parameter ``data`` (``dict``) exists on the
         error object, it will be merged into the response.

@@ -20,8 +20,8 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupOrganiz
 from odyssey.api.practitioner.models import PractitionerCredentials, PractitionerOrganizationAffiliation
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
 from odyssey.api.user.models import User, UserLogin, UserProfilePictures
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, ALPHANUMERIC, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.constants import ALPHANUMERIC, IMAGE_DIMENSIONS
+from odyssey.utils.files import ImageUpload
 
 
 class Wheel:
@@ -44,26 +44,23 @@ class Wheel:
         Wheel URI: /v1/consult_rates/<consult_rate>/timeslots
 
 
-        Params
-        ------
-        target_time_range: (datetime, datetime)
+        Parameters
+        ----------
+        target_time_range : tuple(:class:`datetime.datetime`, :class:`datetime.datetime`)
             tuple containing the start and end datetimes of the target booking window in UTC
-        
-        location_id:
+
+        location_id : int
             where the client is located. Converted to state abbreviation for wheel request
 
-        clinician_id
+        clinician_id : str
             optional wheel_clinician_id of the clinician
         
         Returns
         -------
         dict
-        of available time increments: {user_id : [booking_availability_ids]}
-  
-        
-        TODO: add practitioner sex to query when wheel has implemented the feature
+            available time increments: {user_id: [booking_availability_ids]}
         """
-
+        # TODO: add practitioner sex to query when wheel has implemented the feature
         # use location_id to get the state abbreviation
         state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
              
@@ -128,26 +125,23 @@ class Wheel:
 
         The API will respond with blocks of continuous openings at least 30 minutes in duration. 
 
-        Params
-        ------
-        target_time_range: (datetime, datetime)
+        Parameters
+        ----------
+        target_time_range : tuple(:class:`datetime.datetime`, :class:`datetime.datetime`)
             tuple containing the start and end datetimes of the target booking window in UTC
-        
-        location_id:
+
+        location_id : int
             where the client is located. Converted to state abbreviation for wheel request
 
-        clinician_id
+        clinician_id : str
             optional wheel_clinician_id of the clinician
-        
+
         Returns
         -------
         dict
-        of available time increments: {user_id : [booking_availability_ids]}
-  
-        
-        TODO: add practitioner sex to query when wheel has implemented the feature
+            available time increments: {user_id: [booking_availability_ids]}
         """
-
+        # TODO: add practitioner sex to query when wheel has implemented the feature
         # use location_id to get the state abbreviation
         state = db.session.execute(select(LookupTerritoriesOfOperations.sub_territory_abbreviation).where(LookupTerritoriesOfOperations.idx==location_id)).scalar_one_or_none()
              
@@ -249,9 +243,10 @@ class Wheel:
         """
         Make request to wheel for booking using the provided user_id
         
-        Responds
-        --------
-        (booking_external_id: str, consult_url_deeplink: str)
+        Returns
+        -------
+        tuple(str, str)
+            Returns the booking_external_id and consult_url_deeplink.
         """
 
         # bring up staff user. Get wheel id
@@ -464,69 +459,34 @@ class Wheel:
             ###
             # Save profile pic
             ###
-
-            #  if provided, get profile picture and store in s3
-            # if profile_picture field was included, profile pic is removed
-            # then if image was provided, it is updated, otherwise, it remains deleted
-            fh = FileHandling()
-            _prefix = f'id{user.user_id:05d}/staff_profile_picture'
-            
-            # when an image is provided, then the image is updated to the new one
-            # we're only allowing one profile picture for staff profile, so only one will be processed
             response = requests.get(clinician.get('photo'), stream=True)
             
             if response:
-                # validate file size - safe threashold (MAX = 10 mb)
-                img = BytesIO(response.content)
-                fh.validate_file_size(img, IMAGE_MAX_SIZE)
-                # validate file type
-                import imghdr
-                
-                img_extension = '.' + imghdr.what('', response.content)
-                if img_extension not in ALLOWED_IMAGE_TYPES:
-                    return
+                original = ImageUpload(
+                    BytesIO(response.content),
+                    user.user_id,
+                    prefix='staff_profile_picture')
+                original.validate()
+                original.save(f'original.{original.extension}')
 
-                tmp = Image.open(img)
-                tfile = BytesIO()
-                img_w, img_h = tmp.size
-                tmp.save(tfile, format='jpeg')
-                original_s3key = f'{_prefix}/original{img_extension}'
-                img_file = FileStorage(tfile, filename=f'size{img_w}x{img_h}.jpeg', content_type=f'image/jpeg')
+                upp = UserProfilePictures(
+                    staff_user_id=user.user_id,
+                    image_path=original.filename,
+                    width=original.width,
+                    height=original.height,
+                    original=True)
+                db.session.add(upp)
 
-                fh.save_file_to_s3(img_file, original_s3key)
-                # Save original to S3
+                for dimensions in IMAGE_DIMENSIONS:
+                    resized = original.resize(dimensions)
+                    resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
 
-                # Save original to db
-                user_profile_pic = UserProfilePictures()
-                user_profile_pic.original = True
-                user_profile_pic.staff_user_id = user.user_id
-                user_profile_pic.image_path = original_s3key
-                user_profile_pic.width = img_w
-                user_profile_pic.height = img_h
-                db.session.add(user_profile_pic)
-
-                # crop image to a square
-                squared = fh.image_crop_square(img_file)
-
-                # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
-                for dimension in IMAGE_DIMENSIONS:
-                    _img = fh.image_resize(squared, dimension)
-                    # save to s3 bucket
-                    #add all 3 files to S3 - Naming it specifically as staff_profile_picture to differentiate from client profile pic
-                    #format: id{user_id:05d}/staff_profile_picture/size{img.length}x{img.width}.img_extension)
-                    _img_s3key = f'{_prefix}/{_img.filename}'
-                    fh.save_file_to_s3(_img, _img_s3key)
-
-                    # save to database
-                    w, h = dimension
-                    user_profile_pic = UserProfilePictures()
-                    user_profile_pic.staff_user_id = user.user_id
-                    user_profile_pic.image_path = _img_s3key
-                    user_profile_pic.width = w
-                    user_profile_pic.height = h
-                    user_profile_pic.original = False
-                    db.session.add(user_profile_pic)
-                
+                    upp = UserProfilePictures(
+                        staff_user_id=user.user_id,
+                        image_path=resized.filename,
+                        width=resized.width,
+                        height=resized.height)
+                    db.session.add(upp)
 
             db.session.commit()
 
@@ -559,9 +519,9 @@ class Wheel:
         """
         Send a consult start request to wheel. 
 
-        Params
-        -------
-        external_booking_id: 
+        Parameters
+        ----------
+        external_booking_id : str
             Booking reference id from TelehealthBookings.external_booking_id
         """
 
@@ -587,9 +547,9 @@ class Wheel:
         """
         Send a consult complete request to wheel. 
 
-        Params
-        -------
-        external_booking_id: 
+        Parameters
+        ----------
+        external_booking_id : str
             Booking reference id from TelehealthBookings.external_booking_id
         """
 

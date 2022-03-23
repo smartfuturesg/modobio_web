@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.integrations.instamed module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="odyssey.integrations.twilio module" href="odyssey.integrations.twilio.html" />
+    <link rel="prev" title="odyssey.integrations.dosespot module" href="odyssey.integrations.dosespot.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.apple.html">Apple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.dosespot.html">DoseSpot</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">InstaMed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.twilio.html">Twilio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.integrations.wheel.html">Wheel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.integrations.html">Third party integrations</a> &raquo;</li>
+      <li>odyssey.integrations.instamed module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.integrations.instamed.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.integrations.instamed">
+<span id="odyssey-integrations-instamed-module"></span><h1>odyssey.integrations.instamed module<a class="headerlink" href="#module-odyssey.integrations.instamed" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.integrations.instamed.Instamed">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.integrations.instamed.</span></span><span class="sig-name descname"><span class="pre">Instamed</span></span><a class="headerlink" href="#odyssey.integrations.instamed.Instamed" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A class for performing common InstaMed API calls</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.instamed.Instamed.add_payment_method">
+<span class="sig-name descname"><span class="pre">add_payment_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modobio_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.instamed.Instamed.add_payment_method" title="Permalink to this definition"></a></dt>
+<dd><p>Add a payment method for a user and save the reference token in our db.
+InstaMed URI: /payment/paymentplan</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – tokenized card information provided by an InstaMed FE component</p></li>
+<li><p><strong>expiration</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – card expiration date</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – information regarding the newly saved payment method</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.instamed.Instamed.refund_payment">
+<span class="sig-name descname"><span class="pre">refund_payment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaction_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">booking</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reporter_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.instamed.Instamed.refund_payment" title="Permalink to this definition"></a></dt>
+<dd><p>Refund a payment.
+InstaMed URI: /payment/refund</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transaction_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – InstaMed ID for the transaction to be refunded</p></li>
+<li><p><strong>amount</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – amount of money to be refunded</p></li>
+<li><p><strong>booking</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthBooking</span></code> instance) – object for the booking this transaction is associated with</p></li>
+<li><p><strong>reason</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – reason for this refund</p></li>
+<li><p><strong>reporter_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – id the the staff that approved this refund, None if system automated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – information regarding the refund</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.instamed.Instamed.void_payment">
+<span class="sig-name descname"><span class="pre">void_payment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.instamed.Instamed.void_payment" title="Permalink to this definition"></a></dt>
+<dd><p>Void a payment before it has been processed. If the transfer of funds has already
+started, refund must be used instead.</p>
+<p>InstaMed URI: /payment/void</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>booking</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthBookings</span></code> instance) – the booking for which this payment is associated with</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – information regarding the void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="odyssey.integrations.instamed.Instamed.charge_user">
+<span class="sig-name descname"><span class="pre">charge_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.instamed.Instamed.charge_user" title="Permalink to this definition"></a></dt>
+<dd><p>Charge a user.
+InstaMed URI: /payment/sale</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>booking</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthBookings</span></code> instance) – the booking for which this payment is associated with</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> – information regarding the sale</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.integrations.instamed.cancel_telehealth_appointment">
+<span class="sig-prename descclassname"><span class="pre">odyssey.integrations.instamed.</span></span><span class="sig-name descname"><span class="pre">cancel_telehealth_appointment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">booking</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refund</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Failed</span> <span class="pre">Payment'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.integrations.instamed.cancel_telehealth_appointment" title="Permalink to this definition"></a></dt>
+<dd><p>Used to cancel an appointment in the event a payment is unsuccessful
+and from bookings PUT to cancel a booking</p>
+<p>args:
+booking: a booking object for the telehealth appointment to be canceled
+refund: boolean denoting whether this booking should be refunded, should only happen when called
+due to practitioner cancellation or practitioner no-show
+reason: reason for the cancellation, either (Practitioner Cancellation, Practitioner No-Show, or Failed Payment)
+reporter_id: user_id of the user that initiated the cancellation, null if system automated
+reporter_role: role of the user that initiated the cancellation(staff or client), System if system automated</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.integrations.dosespot.html" class="btn btn-neutral float-left" title="odyssey.integrations.dosespot module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.integrations.twilio.html" class="btn btn-neutral float-right" title="odyssey.integrations.twilio module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

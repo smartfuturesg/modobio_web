@@ -13,3 +13,4 @@ odyssey.tasks
    Celery instance <odyssey.celery_app>
    Tasks <odyssey.tasks.tasks>
    Periodic tasks <odyssey.tasks.periodic>
+   Base classes <odyssey.tasks.base>

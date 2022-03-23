@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.api.telehealth.models module &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.api.telehealth.models module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.api.system.models module" href="odyssey.api.system.models.html" />
-    <link rel="prev" title="odyssey.api.notifications.models module" href="odyssey.api.notifications.models.html" /> 
+    <link rel="next" title="odyssey.api.payment.models module" href="odyssey.api.payment.models.html" />
+    <link rel="prev" title="odyssey.api.wearables.models" href="odyssey.api.wearables.models.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,30 +39,22 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Database models</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.models.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.models.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.models.html">Practitioner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.models.html">Doctor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.physiotherapy.models.html">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.payment.models.html">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.models.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
@@ -111,137 +62,104 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="odyssey.models.html">Database models</a> &raquo;</li>
-        
       <li>odyssey.api.telehealth.models module</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.api.telehealth.models.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.api.telehealth.models">
-<span id="odyssey-api-telehealth-models-module"></span><h1>odyssey.api.telehealth.models module<a class="headerlink" href="#module-odyssey.api.telehealth.models" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-api-telehealth-models-module"></span><h1>odyssey.api.telehealth.models module<a class="headerlink" href="#module-odyssey.api.telehealth.models" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code></p>
 <p>Holds all of the client and Staff bookings</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was created. DB server time is used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Auto incrementing primary key</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.client_user_id">
-<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.client_user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.client_user_id" title="Permalink to this definition"></a></dt>
 <dd><p>staff member id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘User.user_id’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.staff_user_id">
-<span class="sig-name descname"><span class="pre">staff_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.staff_user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">staff_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.staff_user_id" title="Permalink to this definition"></a></dt>
 <dd><p>staff member id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘User.user_id’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.client">
+<span class="sig-name descname"><span class="pre">client</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.client" title="Permalink to this definition"></a></dt>
+<dd><p>Many-to-One relationship with User</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>User</cite> intance</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.practitioner">
+<span class="sig-name descname"><span class="pre">practitioner</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.practitioner" title="Permalink to this definition"></a></dt>
+<dd><p>Many-to-One relationship with User</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>User</cite> intance</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.profession_type">
-<span class="sig-name descname"><span class="pre">profession_type</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.profession_type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">profession_type</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.profession_type" title="Permalink to this definition"></a></dt>
 <dd><p>doctor, trainer, nutritionist, etc</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str:</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Profession type, IE</p>
 </dd>
 </dl>
@@ -249,40 +167,337 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.target_date">
-<span class="sig-name descname"><span class="pre">target_date</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.target_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>target date is the date of the appointment</p>
+<span class="sig-name descname"><span class="pre">target_date</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.target_date" title="Permalink to this definition"></a></dt>
+<dd><p>target date is the date of the appointment in client’s timezone</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>date</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_start_time">
-<span class="sig-name descname"><span class="pre">booking_window_id_start_time</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_start_time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">booking_window_id_start_time</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_start_time" title="Permalink to this definition"></a></dt>
 <dd><p>start time booking_window_id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘LookupBookingTimeIncrements.idx’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘LookupBookingTimeIncrements.idx’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_end_time">
-<span class="sig-name descname"><span class="pre">booking_window_id_end_time</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_end_time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">booking_window_id_end_time</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_end_time" title="Permalink to this definition"></a></dt>
 <dd><p>end time booking_window_id
 :type: int, foreign key(‘LookupBookingTimeIncrements.idx’)</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.status_history">
+<span class="sig-name descname"><span class="pre">status_history</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.status_history" title="Permalink to this definition"></a></dt>
+<dd><p>One-to-Many relationship with TelehealthBookingStatus, hitory of all statuses the booking has gone through.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.telehealth.models.TelehealthBookingStatus" title="odyssey.api.telehealth.models.TelehealthBookingStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthBookingStatus</span></code></a> instance list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.status">
-<span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.status" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.status" title="Permalink to this definition"></a></dt>
 <dd><p>Status of the booking</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.client_timezone">
+<span class="sig-name descname"><span class="pre">client_timezone</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.client_timezone" title="Permalink to this definition"></a></dt>
+<dd><p>Staff’s timezone setting at the time of booking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.staff_timezone">
+<span class="sig-name descname"><span class="pre">staff_timezone</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.staff_timezone" title="Permalink to this definition"></a></dt>
+<dd><p>Staff’s timezone setting at the time of booking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.target_date_utc">
+<span class="sig-name descname"><span class="pre">target_date_utc</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.target_date_utc" title="Permalink to this definition"></a></dt>
+<dd><p>target date converted to utc</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_start_time_utc">
+<span class="sig-name descname"><span class="pre">booking_window_id_start_time_utc</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_start_time_utc" title="Permalink to this definition"></a></dt>
+<dd><p>start time booking_window_id in UTC</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘LookupBookingTimeIncrements.idx’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_end_time_utc">
+<span class="sig-name descname"><span class="pre">booking_window_id_end_time_utc</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.booking_window_id_end_time_utc" title="Permalink to this definition"></a></dt>
+<dd><p>end time booking_window_id in UTC</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘LookupBookingTimeIncrements.idx’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.client_location_id">
+<span class="sig-name descname"><span class="pre">client_location_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.client_location_id" title="Permalink to this definition"></a></dt>
+<dd><p>client location id for this booking
+:type: int, foreign key(LookupTerritoriesOfOperations.idx)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.payment_method_id">
+<span class="sig-name descname"><span class="pre">payment_method_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.payment_method_id" title="Permalink to this definition"></a></dt>
+<dd><p>client payment method selected from PaymentMethods previously set up</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(PaymentMethods.idx)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.charged">
+<span class="sig-name descname"><span class="pre">charged</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.charged" title="Permalink to this definition"></a></dt>
+<dd><p>Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
+is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
+by the inital charge task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.external_booking_id">
+<span class="sig-name descname"><span class="pre">external_booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.external_booking_id" title="Permalink to this definition"></a></dt>
+<dd><p>UUID of booking used for external reference. Only used when booking external physicians (wheel).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.chat_room">
+<span class="sig-name descname"><span class="pre">chat_room</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.chat_room" title="Permalink to this definition"></a></dt>
+<dd><p>One-to_One relationship with TelehealthChatRooms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>TelehealthChatRooms</cite> instance</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.booking_details">
+<span class="sig-name descname"><span class="pre">booking_details</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.booking_details" title="Permalink to this definition"></a></dt>
+<dd><p>One-to_One relationship with TelehealthBookingDetails</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>TelehealthBookingDetails</cite> instance</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.medical_gender_preference">
+<span class="sig-name descname"><span class="pre">medical_gender_preference</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.medical_gender_preference" title="Permalink to this definition"></a></dt>
+<dd><p>preferred gender of the medical professional</p>
+<p>options: male, female, no-preference</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.consult_rate">
+<span class="sig-name descname"><span class="pre">consult_rate</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.consult_rate" title="Permalink to this definition"></a></dt>
+<dd><p>HOURLY practitioner consultation rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.TelehealthBookings">
+<span class="sig-name descname"><span class="pre">TelehealthBookings</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.TelehealthBookings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookings.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookings.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.add_booking_status_history">
+<span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">add_booking_status_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.add_booking_status_history" title="Permalink to this definition"></a></dt>
+<dd><p>Listens for any new status change
+Updates the booking status history</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.update_booking_status_history">
+<span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">update_booking_status_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.update_booking_status_history" title="Permalink to this definition"></a></dt>
+<dd><p>Listens for any new status change
+Updates the booking status history</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookingStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<p>Holds all status changes a booking goes through</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus.booking_id">
+<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus.booking_id" title="Permalink to this definition"></a></dt>
+<dd><p>booking_id is the idx of the booking from TelehealthBookings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘TelehealthBookings.idx’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus.booking">
+<span class="sig-name descname"><span class="pre">booking</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus.booking" title="Permalink to this definition"></a></dt>
+<dd><p>Many-to-One relationship with TelehealthBookings, the full booking info object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.telehealth.models.TelehealthBookings" title="odyssey.api.telehealth.models.TelehealthBookings"><code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthBookings</span></code></a> instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus.reporter_id">
+<span class="sig-name descname"><span class="pre">reporter_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus.reporter_id" title="Permalink to this definition"></a></dt>
+<dd><p>Reporter ID number, foreign key to User.user_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus.reporter_role">
+<span class="sig-name descname"><span class="pre">reporter_role</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus.reporter_role" title="Permalink to this definition"></a></dt>
+<dd><p>role of the user reporting the status, could be client or practitioner</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 30</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus.status">
+<span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus.status" title="Permalink to this definition"></a></dt>
+<dd><p>status of the booking, should be one of constant BOOKINGS_STATUS = (‘Pending’, ‘Accepted’, ‘Canceled’, ‘In Progress’ ‘Completed’, ‘Document Review’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 20</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingStatus.time">
+<span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingStatus.time" title="Permalink to this definition"></a></dt>
+<dd><p>date and time when the booking status was updated to current status</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -291,116 +506,127 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthMeetingRooms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthMeetingRooms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModel</span></code></p>
 <p>Meeting room details for one-on-one meetings between clients and medical professionals.
 Details from Twilio will be stored here, including: session identifiers, meeting access tokens
 for both participants, and the unique room name</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was created. DB server time is used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.updated_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>Last update timestamp of this row in the database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.room_id">
-<span class="sig-name descname"><span class="pre">room_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.room_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">room_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.room_id" title="Permalink to this definition"></a></dt>
 <dd><p>autoincrementing primary key representing the internal id of the chat room. This is
 seperate from the IDs that are assigned by twilio.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.booking_id">
-<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.booking_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.booking_id" title="Permalink to this definition"></a></dt>
 <dd><p>booking_id is the idx of the booking from TelehealthBookings</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘TelehealthBookings.idx’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘TelehealthBookings.idx’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.room_name">
-<span class="sig-name descname"><span class="pre">room_name</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.room_name" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">room_name</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.room_name" title="Permalink to this definition"></a></dt>
 <dd><p>Name of room assigned internally and given to Twilio API. When interacting with twilio, this name
 will be under the attribute <cite>friendly_name</cite>. We will use this in order to call up the room
 from twilio for access grants and webhooks.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.sid">
+<span class="sig-name descname"><span class="pre">sid</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.sid" title="Permalink to this definition"></a></dt>
+<dd><p>SID for the video room, it allows fetching the room and updating it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.room_status">
-<span class="sig-name descname"><span class="pre">room_status</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.room_status" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">room_status</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.room_status" title="Permalink to this definition"></a></dt>
 <dd><p>Status of meeting room to be updated by Twilio.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.client_user_id">
-<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.client_user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.client_user_id" title="Permalink to this definition"></a></dt>
 <dd><p>user_id of the client participant</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.staff_user_id">
-<span class="sig-name descname"><span class="pre">staff_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.staff_user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">staff_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.staff_user_id" title="Permalink to this definition"></a></dt>
 <dd><p>user_id of the staff participant</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.client_access_token">
-<span class="sig-name descname"><span class="pre">client_access_token</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.client_access_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">client_access_token</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.client_access_token" title="Permalink to this definition"></a></dt>
 <dd><p>Token provied by Twilio which grants access to the chat room</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthMeetingRooms.staff_access_token">
-<span class="sig-name descname"><span class="pre">staff_access_token</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.staff_access_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">staff_access_token</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthMeetingRooms.staff_access_token" title="Permalink to this definition"></a></dt>
 <dd><p>Token provied by Twilio which grants access to the chat room</p>
 </dd></dl>
 
@@ -408,61 +634,83 @@ from twilio for access grants and webhooks.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthStaffAvailability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthStaffAvailability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code></p>
 <p>Holds all of the clients in a pool for their appointments.
 This is used for BEFORE they are accepted and see their medical professional.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was created. DB server time is used.</p>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Auto incrementing primary key</p>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.user_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>staff member id</p>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.user_id" title="Permalink to this definition"></a></dt>
+<dd><p>staff user id TelehealthStaffSettings Foreign key</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘TelehealthStaffSettings.user_id’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability.day_of_week">
-<span class="sig-name descname"><span class="pre">day_of_week</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.day_of_week" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">day_of_week</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.day_of_week" title="Permalink to this definition"></a></dt>
 <dd><p>Day of the week</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability.booking_window_id">
-<span class="sig-name descname"><span class="pre">booking_window_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.booking_window_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">booking_window_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.booking_window_id" title="Permalink to this definition"></a></dt>
 <dd><p>booking window id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘LookupBookingTimeIncrements.idx’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘LookupBookingTimeIncrements.idx’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffAvailability.settings">
+<span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Many to one relationshp with TelehealthStaffSettings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.telehealth.models.TelehealthStaffSettings" title="odyssey.api.telehealth.models.TelehealthStaffSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthStaffSettings</span></code></a> instance</p>
 </dd>
 </dl>
 </dd></dl>
@@ -471,64 +719,58 @@ This is used for BEFORE they are accepted and see their medical professional.</p
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthQueueClientPool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthQueueClientPool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.UserIdFkeyMixin</span></code></p>
 <p>Holds all of the clients in a pool for their appointments.
 This is used for BEFORE they are accepted and see their medical professional.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was created. DB server time is used.</p>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.updated_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was updated. DB server time is used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Auto incrementing primary key</p>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.user_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Id of the user that this notification belongs to</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘User.user_id’)</p>
-</dd>
-</dl>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.profession_type">
-<span class="sig-name descname"><span class="pre">profession_type</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.profession_type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">profession_type</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.profession_type" title="Permalink to this definition"></a></dt>
 <dd><p>Change this to a relationship with the type of professional ID
 Professional type is used for what type of professional the client wants to meet with</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>TODO</p>
 </dd>
 </dl>
@@ -536,10 +778,10 @@ Professional type is used for what type of professional the client wants to meet
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.target_date">
-<span class="sig-name descname"><span class="pre">target_date</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.target_date" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">target_date</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.target_date" title="Permalink to this definition"></a></dt>
 <dd><p>target date is the date that the client wants for their appointment</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>datetime</p>
 </dd>
 </dl>
@@ -547,45 +789,63 @@ Professional type is used for what type of professional the client wants to meet
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.priority">
-<span class="sig-name descname"><span class="pre">priority</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.priority" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">priority</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.priority" title="Permalink to this definition"></a></dt>
 <dd><p>priority is a flag most likely set by the system admin, default is false.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.timezone">
-<span class="sig-name descname"><span class="pre">timezone</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.timezone" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">timezone</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.timezone" title="Permalink to this definition"></a></dt>
 <dd><p>timezone the client is in</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.duration">
-<span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.duration" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.duration" title="Permalink to this definition"></a></dt>
 <dd><p>3/3/2021, initially, we will default this to 20 minutes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.medical_gender">
-<span class="sig-name descname"><span class="pre">medical_gender</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.medical_gender" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">medical_gender</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.medical_gender" title="Permalink to this definition"></a></dt>
 <dd><p>preferred gender of the medical professional</p>
 <p>options: male, female, no-preference</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.location_id">
+<span class="sig-name descname"><span class="pre">location_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.location_id" title="Permalink to this definition"></a></dt>
+<dd><p>client location id for this booking request
+:type: int, foreign key(LookupTerritoriesOfOperations.idx)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthQueueClientPool.payment_method_id">
+<span class="sig-name descname"><span class="pre">payment_method_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthQueueClientPool.payment_method_id" title="Permalink to this definition"></a></dt>
+<dd><p>client payment method selected from PaymentMethods previously set up</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(PaymentMethods.idx)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -594,71 +854,93 @@ Professional type is used for what type of professional the client wants to meet
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookingDetails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthBookingDetails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModelWithIdx</span></code></p>
 <p>Table holding text, images or sound recording details about a booking</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was created. DB server time is used.</p>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.updated_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was updated. DB server time is used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>datetime</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Auto incrementing primary key</p>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.idx" title="Permalink to this definition"></a></dt>
+<dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.booking_id">
-<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.booking_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.booking_id" title="Permalink to this definition"></a></dt>
 <dd><p>booking_id is the idx of the booking from TelehealthBookings</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘TelehealthBookings.idx’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘TelehealthBookings.idx’)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.details">
-<span class="sig-name descname"><span class="pre">details</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.details" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">details</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.details" title="Permalink to this definition"></a></dt>
 <dd><p>client details about a booked teleheath call</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.location_id">
-<span class="sig-name descname"><span class="pre">location_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.location_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>client location id for this booking</p>
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.images">
+<span class="sig-name descname"><span class="pre">images</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.images" title="Permalink to this definition"></a></dt>
+<dd><p>List of paths to images stored on S3.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(LookupTerritoriesofOperation.idx)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.voice">
+<span class="sig-name descname"><span class="pre">voice</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.voice" title="Permalink to this definition"></a></dt>
+<dd><p>Path to voice recording stored on S3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthBookingDetails.booking">
+<span class="sig-name descname"><span class="pre">booking</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthBookingDetails.booking" title="Permalink to this definition"></a></dt>
+<dd><p>One-to-One relationship with TelehealthBookings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.telehealth.models.TelehealthBookings" title="odyssey.api.telehealth.models.TelehealthBookings"><code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthBookings</span></code></a> instance</p>
 </dd>
 </dl>
 </dd></dl>
@@ -667,65 +949,80 @@ Professional type is used for what type of professional the client wants to meet
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthChatRooms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthChatRooms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModel</span></code></p>
 <p>Table stores details on chat rooms created through the Twiliio Conversations API.</p>
 <p>Unlike TelehealthMeetingRooms, there will be only one unique room created per
 client-staff pair. We do this so that chat threads persist through subsequent client and
 staff interactions.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.created_at" title="Permalink to this definition">¶</a></dt>
-<dd><p>timestamp for when object was created. DB server time is used.</p>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.room_id">
-<span class="sig-name descname"><span class="pre">room_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.room_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">room_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.room_id" title="Permalink to this definition"></a></dt>
 <dd><p>autoincrementing primary key representing the internal id of the room</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.booking_id">
-<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.booking_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">booking_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.booking_id" title="Permalink to this definition"></a></dt>
 <dd><p>booking_id is the idx of the booking from TelehealthBookings</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, foreign key(‘TelehealthBookings.idx’)</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, foreign key(‘TelehealthBookings.idx’)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.booking">
+<span class="sig-name descname"><span class="pre">booking</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.booking" title="Permalink to this definition"></a></dt>
+<dd><p>One-to-One relationship with TelehealthBookings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="field-list simple">
+<dt class="field-odd">class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>TelehalthBookings</cite> instance</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.conversation_sid">
-<span class="sig-name descname"><span class="pre">conversation_sid</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.conversation_sid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">conversation_sid</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.conversation_sid" title="Permalink to this definition"></a></dt>
 <dd><p>CHXXX</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Conversation SID form Twilio API. Format</p>
 </dd>
 </dl>
@@ -733,44 +1030,141 @@ staff interactions.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.room_name">
-<span class="sig-name descname"><span class="pre">room_name</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.room_name" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">room_name</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.room_name" title="Permalink to this definition"></a></dt>
 <dd><p>Name of room assigned internally and given to Twilio API.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.room_status">
-<span class="sig-name descname"><span class="pre">room_status</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.room_status" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">room_status</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.room_status" title="Permalink to this definition"></a></dt>
 <dd><p>Status of chat room to be updated by Twilio.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.client_user_id">
-<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.client_user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">client_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.client_user_id" title="Permalink to this definition"></a></dt>
 <dd><p>user_id of the client participant</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.staff_user_id">
-<span class="sig-name descname"><span class="pre">staff_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.staff_user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">staff_user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.staff_user_id" title="Permalink to this definition"></a></dt>
 <dd><p>user_id of the staff participant</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.transcript_object_id">
+<span class="sig-name descname"><span class="pre">transcript_object_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.transcript_object_id" title="Permalink to this definition"></a></dt>
+<dd><p>Object id for telehealth transcript entry on mongo db</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthChatRooms.write_access_timeout">
+<span class="sig-name descname"><span class="pre">write_access_timeout</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthChatRooms.write_access_timeout" title="Permalink to this definition"></a></dt>
+<dd><p>Time write accesss to the conversation threaf will expire. After this time, the conversation will be cached on the modobio end
+and will be removed from twilio.</p>
+<p>timezone is always in UTC</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffSettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.telehealth.models.</span></span><span class="sig-name descname"><span class="pre">TelehealthStaffSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffSettings" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.base.models.BaseModel</span></code></p>
+<p>Holds staff preferred settings for Telehealth appointments</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffSettings.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffSettings.created_at" title="Permalink to this definition"></a></dt>
+<dd><p>Creation timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffSettings.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffSettings.updated_at" title="Permalink to this definition"></a></dt>
+<dd><p>Last update timestamp of this row in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffSettings.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffSettings.user_id" title="Permalink to this definition"></a></dt>
+<dd><p>User ID number, foreign key to User.user_id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffSettings.auto_confirm">
+<span class="sig-name descname"><span class="pre">auto_confirm</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffSettings.auto_confirm" title="Permalink to this definition"></a></dt>
+<dd><p>Setting to determine if Staff member wants to auto confirm appointments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffSettings.timezone">
+<span class="sig-name descname"><span class="pre">timezone</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffSettings.timezone" title="Permalink to this definition"></a></dt>
+<dd><p>Staff’s timezone setting for the current telehealth availability submisison</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.api.telehealth.models.TelehealthStaffSettings.availability">
+<span class="sig-name descname"><span class="pre">availability</span></span><a class="headerlink" href="#odyssey.api.telehealth.models.TelehealthStaffSettings.availability" title="Permalink to this definition"></a></dt>
+<dd><p>One to many relationship with staff availability</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#odyssey.api.telehealth.models.TelehealthStaffAvailability" title="odyssey.api.telehealth.models.TelehealthStaffAvailability"><code class="xref py py-class docutils literal notranslate"><span class="pre">TelehealthStaffAvailability</span></code></a> instance list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -781,50 +1175,33 @@ staff interactions.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.api.system.models.html" class="btn btn-neutral float-right" title="odyssey.api.system.models module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="odyssey.api.notifications.models.html" class="btn btn-neutral float-left" title="odyssey.api.notifications.models module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.api.wearables.models.html" class="btn btn-neutral float-left" title="odyssey.api.wearables.models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.payment.models.html" class="btn btn-neutral float-right" title="odyssey.api.payment.models module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
