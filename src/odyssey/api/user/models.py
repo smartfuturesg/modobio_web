@@ -15,7 +15,7 @@ from flask import current_app
 from sqlalchemy import text, CheckConstraint
 
 from odyssey import db
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME, EMAIL_TOKEN_LIFETIME
+from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.staff.models import StaffProfile
