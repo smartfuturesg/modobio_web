@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>odyssey.tasks.base module &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Utilities" href="odyssey.utils.html" />
+    <link rel="prev" title="odyssey.tasks.periodic module" href="odyssey.tasks.periodic.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Odyssey
+          </a>
+              <div class="version">
+                version: 0.2.189
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="odyssey.tasks.html">Tasks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="odyssey.celery_app.html">Celery instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.tasks.tasks.html">Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.tasks.periodic.html">Periodic tasks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Base classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Odyssey</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="odyssey.tasks.html">odyssey.tasks</a> &raquo;</li>
+      <li>odyssey.tasks.base module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/odyssey/odyssey.tasks.base.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-odyssey.tasks.base">
+<span id="odyssey-tasks-base-module"></span><h1>odyssey.tasks.base module<a class="headerlink" href="#module-odyssey.tasks.base" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.tasks.base.</span></span><span class="sig-name descname"><span class="pre">BaseTaskWithRetry</span></span><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">celery.app.task.Task</span></code></p>
+<p>Base class for celery tasks which defines rules for autoretries.</p>
+<p>Retries will automatically occur for the exceptions listed in the
+<code class="docutils literal notranslate"><span class="pre">autoretry_for</span></code> attribute.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.autoretry_for">
+<span class="sig-name descname"><span class="pre">autoretry_for</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;class</span> <span class="pre">'Exception'&gt;,)</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.autoretry_for" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.max_retries">
+<span class="sig-name descname"><span class="pre">max_retries</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.max_retries" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum number of retries before giving up.  If set to <code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code>,
+it will <strong>never</strong> stop retrying.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.retry_backoff">
+<span class="sig-name descname"><span class="pre">retry_backoff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.retry_backoff" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.retry_backoff_max">
+<span class="sig-name descname"><span class="pre">retry_backoff_max</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">700</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.retry_backoff_max" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.retry_jitter">
+<span class="sig-name descname"><span class="pre">retry_jitter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.retry_jitter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.ignore_result">
+<span class="sig-name descname"><span class="pre">ignore_result</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.ignore_result" title="Permalink to this definition"></a></dt>
+<dd><p>If enabled the worker won’t store task state and return values
+for this task.  Defaults to the <a href="#id1"><span class="problematic" id="id2">:setting:`task_ignore_result`</span></a>
+setting.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.priority" title="Permalink to this definition"></a></dt>
+<dd><p>Default task priority.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.rate_limit">
+<span class="sig-name descname"><span class="pre">rate_limit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.rate_limit" title="Permalink to this definition"></a></dt>
+<dd><p><code class="xref py py-const docutils literal notranslate"><span class="pre">None</span></code> (no rate
+limit), <cite>‘100/s’</cite> (hundred tasks a second), <cite>‘100/m’</cite> (hundred tasks
+a minute),`’100/h’` (hundred tasks an hour)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Rate limit for this task type.  Examples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.reject_on_worker_lost">
+<span class="sig-name descname"><span class="pre">reject_on_worker_lost</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.reject_on_worker_lost" title="Permalink to this definition"></a></dt>
+<dd><p>Even if <code class="xref py py-attr docutils literal notranslate"><span class="pre">acks_late</span></code> is enabled, the worker will
+acknowledge tasks when the worker process executing them abruptly
+exits or is signaled (e.g., <a href="#id3"><span class="problematic" id="id4">:sig:`KILL`</span></a>/<a href="#id5"><span class="problematic" id="id6">:sig:`INT`</span></a>, etc).</p>
+<p>Setting this to true allows the message to be re-queued instead,
+so that the task will execute again by the same worker, or another
+worker.</p>
+<p>Warning: Enabling this can cause message loops; make sure you know
+what you’re doing.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.request_stack">
+<span class="sig-name descname"><span class="pre">request_stack</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;celery.utils.threads._LocalStack</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.request_stack" title="Permalink to this definition"></a></dt>
+<dd><p>Task request stack, the current request will be the topmost.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.serializer">
+<span class="sig-name descname"><span class="pre">serializer</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'json'</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.serializer" title="Permalink to this definition"></a></dt>
+<dd><p>The name of a serializer that are registered with
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">kombu.serialization.registry</span></code>.  Default is <cite>‘json’</cite>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.store_errors_even_if_ignored">
+<span class="sig-name descname"><span class="pre">store_errors_even_if_ignored</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.store_errors_even_if_ignored" title="Permalink to this definition"></a></dt>
+<dd><p>When enabled errors will be stored even if the task is otherwise
+configured to ignore results.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.track_started">
+<span class="sig-name descname"><span class="pre">track_started</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.track_started" title="Permalink to this definition"></a></dt>
+<dd><p>If enabled the task will report its status as ‘started’ when the task
+is executed by a worker.  Disabled by default as the normal behavior
+is to not report that level of granularity.  Tasks are either pending,
+finished, or waiting to be retried.</p>
+<p>Having a ‘started’ status can be useful for when there are long
+running tasks and there’s a need to report what task is currently
+running.</p>
+<p>The application default can be overridden using the
+<a href="#id7"><span class="problematic" id="id8">:setting:`task_track_started`</span></a> setting.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="odyssey.tasks.base.BaseTaskWithRetry.typing">
+<span class="sig-name descname"><span class="pre">typing</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#odyssey.tasks.base.BaseTaskWithRetry.typing" title="Permalink to this definition"></a></dt>
+<dd><p>Enable argument checking.
+You can set this to false if you don’t want the signature to be
+checked when calling the task.
+Defaults to <code class="xref py py-attr docutils literal notranslate"><span class="pre">app.strict_typing</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="odyssey.tasks.periodic.html" class="btn btn-neutral float-left" title="odyssey.tasks.periodic module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.utils.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

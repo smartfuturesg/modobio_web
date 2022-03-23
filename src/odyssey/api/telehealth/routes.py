@@ -76,7 +76,7 @@ from odyssey.utils.misc import (
 )
 from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.files import AudioUpload, ImageUpload, FileDownload
 from odyssey.utils.base.resources import BaseResource
 from odyssey.tasks.tasks import cleanup_unended_call, store_telehealth_transcript
 
@@ -207,13 +207,12 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
             msg['data']['staff_last_name'] = booking.practitioner.lastname
 
             urls = {}
-            fh = FileHandling()
+            fd = FileDownload(booking.staff_user_id)
             for pic in booking.practitioner.staff_profile.profile_pictures:
                 if pic.original:
                     continue
 
-                url = fh.get_presigned_url(pic.image_path)
-                urls[pic.height] = url
+                urls[str(pic.height)] = fd.url(pic.image_path)
 
             msg['data']['staff_profile_picture'] = urls
 
@@ -395,8 +394,6 @@ class TelehealthBookingsApi(BaseResource):
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
 
-        fh = FileHandling()
-
         ###
         # There are 5 cases to decide what to return:
         # 1. booking_id is provided: other parameters are ignored, only that booking will be returned to the participating client/staff or any cs
@@ -468,10 +465,15 @@ class TelehealthBookingsApi(BaseResource):
 
             # bookings stored in staff timezone
             practitioner['timezone'] = booking.staff_timezone
-            #return the practioner profile_picture width=128 if the logged in user is the client involved or client services
-            if current_user.user_id == booking.client_user_id or ('client_services' in [role.role for role in current_user.roles]):
-                image_paths = {pic.width: pic.image_path for pic in booking.practitioner.staff_profile.profile_pictures}
-                practitioner['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
+
+            # return the practioner profile_picture width=128 if the logged in user is the client involved or client services
+            if (current_user.user_id == booking.client_user_id or
+                ('client_services' in [role.role for role in current_user.roles])):
+                practitioner['profile_picture'] = None
+                fd = FileDownload(booking.practitioner.user_id)
+                for pic in booking.practitioner.staff_profile.profile_pictures:
+                    if pic.width == 128:
+                        practitioner['profile_picture'] = fd.url(pic.image_path)
 
             start_time_utc = datetime.combine(
                     booking.target_date_utc,
@@ -501,8 +503,11 @@ class TelehealthBookingsApi(BaseResource):
             client['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
             if current_user.user_id == booking.staff_user_id:
-                image_paths = {pic.width: pic.image_path for pic in booking.client.client_info.profile_pictures}
-                client['profile_picture'] = (fh.get_presigned_url(image_paths[128]) if image_paths else None)
+                # return the practioner profile_picture width=128 if the logged in user is the client involved or client services
+                client['profile_picture'] = None
+                for pic in booking.client.client_info.profile_pictures:
+                    if pic.width == 128:
+                        client['profile_picture'] = fd.url(pic.image_path)
             
             # if the associated chat room has an id for the mongo db entry of the transcript, generate a link to retrieve the 
             # transcript messages
@@ -1394,40 +1399,41 @@ class TelehealthBookingDetailsApi(BaseResource):
         """
         Returns a list of details about the specified booking_id
         """
-        #Check booking_id exists
+        # Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
             return
 
-        #verify user trying to access details is the client or staff involved in scheulded booking
+        current_user, _ = token_auth.current_user()
+        # verify user trying to access details is the client or staff involved in scheulded booking
         # TODO allow access to Client Services?
-        if booking.client_user_id != token_auth.current_user()[0].user_id \
-            and booking.staff_user_id != token_auth.current_user()[0].user_id:
-
+        if not (booking.client_user_id == current_user.user_id or
+                booking.staff_user_id == current_user.user_id):
             raise Unauthorized('Only booking participants can view the details.')
 
-        res = {'details': None,
-                'images': [],
-                'voice': None}
+        res = {'details': None, 'images': [], 'voice': None}
 
-        #if there aren't any details saved for the booking_id, GET will return empty
-        booking_dets = TelehealthBookingDetails.query.filter_by(booking_id = booking_id).first()
-        if not booking_dets:
+        # if there aren't any details saved for the booking_id, GET will return empty
+        booking_details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).first()
+        if not booking_details:
             return
 
-        res['details'] = booking_dets.details
+        res['details'] = booking_details.details
 
-        #retrieve all files associated with this booking id
-        fh = FileHandling()
+        # retrieve all files associated with this booking id
+        fd = FileDownload(current_user.user_id)
+        if booking_details.images:
+            for path in booking_details.images:
+                if path:
+                    res['images'].append(fd.url(path))
 
-        prefix = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/'
-        res['voice'] = fh.get_presigned_urls(prefix=prefix + 'voice')
-        res['images'] = fh.get_presigned_urls(prefix=prefix + 'image')
+        if booking_details.voice:
+            res['voice'] = fd.url(booking_details.voice)
 
         return res
 
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
+    @responds(api=ns, status_code=200)
     def put(self, booking_id):
         """
         Updates telehealth booking details for a specific db entry, filtered by idx
@@ -1444,84 +1450,77 @@ class TelehealthBookingDetailsApi(BaseResource):
         details : str (optional)
             Further details.
         """
-        #verify the editor of details is the client or staff from schedulded booking
+        # verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
             raise BadRequest('Booking {booking_id} not found.')
 
-        #only the client involved with the booking should be allowed to edit details
+        # only the client involved with the booking should be allowed to edit details
         if booking.client_user_id != token_auth.current_user()[0].user_id:
             raise Unauthorized('Only the client of this booking is allowed to edit details.')
 
-        query = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
-        if not query:
+        booking_details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
+        if not booking_details:
             raise BadRequest('Booking details you are trying to edit not found.')
 
-        files = request.files #ImmutableMultiDict of key : FileStorage object
+        if 'details' in request.form and request.form['details']:
+            booking_details.details = request.form.get('details')
 
-        #verify there's something to submit, if nothing, raise input error
-        #if (not request.form.get('details') and len(files) == 0):
-        if not ('details' in request.form or
-                'images' in request.files or
-                'voice' in request.files):
-            return
-
-        #if 'details' is present in form, details will be updated to new string value of details
-        #if 'details' is not present, details will not be affected
-        if request.form.get('details'):
-            query.details = request.form.get('details')
-
-        #if 'images' and 'voice' are both not present, no changes will be made to the current media file
-        #if 'images' or 'voice' are present, but empty, the current media file(s) for that category will be removed
-        if files:
-            fh = FileHandling()
-
-            #if images key is present, delete existing images
-            if 'images' in files:
-                fh.delete_from_s3(prefix=f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/image')
-
-            #if voice key is present, delete existing recording
-            if 'voice' in files:
-                fh.delete_from_s3(prefix=f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/voice')
-
+        if request.files:
+            prefix = f'meeting_files/booking{booking_id:05d}'
             hex_token = secrets.token_hex(4)
 
-            #upload images from request to s3
-            for i, img in enumerate(files.getlist('images')):
-                # validate file size - safe threashold (MAX = 10 mb)
-                fh.validate_file_size(img, IMAGE_MAX_SIZE)
-                # validate file type
-                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+            if 'images' in request.files:
+                # Delete images only after successful upload of new images.
+                prev_images = booking_details.images
 
-                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
-                fh.save_file_to_s3(img, s3key)
+                # If images is an empty list, then no new images will be uploaded,
+                # effectively deleting the current images.
+                images = request.files.getlist('images')
+                if len(images) > 3:
+                    raise BadRequest('Maximum 3 images upload allowed.')
 
-                #exit loop if this is the 4th picture, as that is the max allowed
-                #setup this way to allow us to easily change the allowed number in the future
-                if i >= 3:
-                    break
+                paths = []
+                for i, img in enumerate(images):
+                    image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
+                    image.validate()
+                    image.save(f'image_{hex_token}_{i}.{image.extension}')
+                    paths.append(image.filename)
 
-            #upload voice recording from request to S3
-            for i, recording in enumerate(files.getlist('voice')):
-                # validate file size - safe threashold (MAX = 10 mb)
-                fh.validate_file_size(recording, IMAGE_MAX_SIZE)
-                # validate file type
-                recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
+                booking_details.images = paths
 
-                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
-                fh.save_file_to_s3(recording, s3key)
+                # Upload successfull, now delete previous
+                if prev_images:
+                    fd = FileDownload(booking.client_user_id)
+                    for path in prev_images:
+                        if path:
+                            fd.delete(path)
 
-                #exit loop if this is the 1st recording, as that is the max allowed
-                #setup this way to allow us to easily change the allowed number in the future
-                if i >= 1:
-                    break
+            if 'voice' in request.files:
+                # Save previous recording, only delete after successful upload.
+                prev_recording = booking_details.voice
+
+                # If recordings is an empty list, then no new voice recording will be uploaded,
+                # effectively deleting the current recording.
+                recordings = request.files.getlist('voice')
+                if len(recordings) > 1:
+                    raise BadRequest('Maximum 1 voice recording upload allowed.')
+
+                booking_details.voice = None
+                if recordings:
+                    recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
+                    recording.validate()
+                    recording.save(f'voice_{hex_token}_0.{recording.extension}')
+                    booking_details.voice = recording.filename
+
+                if prev_recording:
+                    fd = FileDownload(booking.client_user_id)
+                    fd.delete(prev_recording)
 
         db.session.commit()
-        return query
-
 
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=201)
+    @responds(api=ns, status_code=201)
     def post(self, booking_id):
         """
         Adds details to a booking_id
@@ -1532,67 +1531,52 @@ class TelehealthBookingDetailsApi(BaseResource):
             voice : file
             details : str
         """
-        form = request.form
-        files = request.files
-
-        #Check booking_id exists
+        # Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
             raise BadRequest('Can not submit booking details without submitting a booking first.')
 
-        details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
-        if details:
+        booking_details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
+        if booking_details:
             raise BadRequest(f'Booking details for booking {booking_id} already exist.')
 
-        #only the client involved with the booking should be allowed to edit details
+        # only the client involved with the booking should be allowed to edit details
         if booking.client_user_id != token_auth.current_user()[0].user_id:
             raise Unauthorized('Only the client of this booking is allowed to edit details.')
 
-        #verify there's something to submit, if nothing, raise input error
-        if not (form.get('details') or files):
-            return {}, 204
+        booking_details = TelehealthBookingDetails(booking_id=booking_id)
 
-        details = form.get('details', '')
+        booking_details.details = request.form.get('details')
 
-        data = TelehealthBookingDetails(booking_id=booking_id, details=details)
-        #Saving media files into s3
-        if files:
-            fh = FileHandling()
+        if request.files:
+            prefix = f'meeting_files/booking{booking_id:05d}'
             hex_token = secrets.token_hex(4)
 
-            #upload images from request to s3
-            for i, img in enumerate(files.getlist('images')):
-                # validate file size - safe threashold (MAX = 10 mb)
-                fh.validate_file_size(img, IMAGE_MAX_SIZE)
-                # validate file type
-                img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+            images = request.files.getlist('images')
+            if len(images) > 3:
+                raise BadRequest('Maximum 3 images upload allowed.')
 
-                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/image_{hex_token}_{i}{img_extension}'
-                fh.save_file_to_s3(img, s3key)
+            paths = []
+            for i, img in enumerate(images):
+                image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
+                image.validate()
+                image.save(f'image_{hex_token}_{i}.{image.extension}')
+                paths.append(image.filename)
 
-                #exit loop if this is the 4th picture, as that is the max allowed
-                #setup this way to allow us to easily change the allowed number in the future
-                if i >= 3:
-                    break
+            booking_details.images = paths
 
-            #upload voice recording from request to S3
-            for i, recording in enumerate(files.getlist('voice')):
-                # validate file size - safe threashold (MAX = 10 mb)
-                fh.validate_file_size(recording, IMAGE_MAX_SIZE)
-                # validate file type
-                recording_extension = fh.validate_file_type(recording, ALLOWED_AUDIO_TYPES)
+            recordings = request.files.getlist('voice')
+            if len(images) > 1:
+                raise BadRequest('Maximum 1 voice recording upload allowed.')
 
-                s3key = f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/voice_{hex_token}_{i}{recording_extension}'
-                fh.save_file_to_s3(recording, s3key)
+            if recordings:
+                recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
+                recording.validate()
+                recording.save(f'voice_{hex_token}_0.{recording.extension}')
+                booking_details.voice = recording.filename
 
-                #exit loop if this is the 1st recording, as that is the max allowed
-                #setup this way to allow us to easily change the allowed number in the future
-                if i >= 1:
-                    break
-
-        db.session.add(data)
+        db.session.add(booking_details)
         db.session.commit()
-        return data
 
     @token_auth.login_required
     @responds(status_code=204)
@@ -1600,24 +1584,30 @@ class TelehealthBookingDetailsApi(BaseResource):
         """
         Deletes all booking details entries from db
         """
-        #only the client involved with the booking should be allowed to edit details
+        # only the client involved with the booking should be allowed to edit details
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
         if not booking:
             return
 
-        if booking.client_user_id != token_auth.current_user()[0].user_id:
+        current_user, _ = token_auth.current_user()
+        if booking.client_user_id != current_user.user_id:
             raise Unauthorized('Only the client of this booking is allowed to edit details.')
 
         details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).one_or_none()
         if not details:
             return
 
+        fd = FileDownload(current_user.user_id)
+        if details.images:
+            for path in details.images:
+                if path:
+                    fd.delete(path)
+        if details.voice:
+            fd.delete(details.voice)
+
         db.session.delete(details)
         db.session.commit()
 
-        #delete s3 resources for this booking id
-        fh = FileHandling()
-        fh.delete_from_s3(prefix=f'id{booking.client_user_id:05d}/meeting_files/booking{booking_id:05d}/')
 
 @ns.route('/chat-room/access-token')
 @ns.deprecated
@@ -1803,6 +1793,7 @@ class TelehealthTranscripts(Resource):
         Retrieve messages from booking transscripts that have been stored on modobio's end
         """
         current_user, _ = token_auth.current_user()
+
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
         
@@ -1811,16 +1802,18 @@ class TelehealthTranscripts(Resource):
         if not booking:
             raise BadRequest('Meeting does not exist yet.')
 
-        # make sure the requester is one of the participants
+        # make sure the requester is one of booking the participants
         if not any(current_user.user_id == uid for uid in [booking.client_user_id, booking.staff_user_id]):
             raise Unauthorized('You must be a participant in this booking.')
+        
+        if not booking.chat_room.transcript_object_id:
+            raise BadRequest('Chat transcript not yet cached.')
 
         # bring up the transcript messages from mongo db
         transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
 
-
         # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
-        fh = FileHandling()
+        fd = FileDownload(current_user.user_id)
 
         payload = {'booking_id': booking_id, 'transcript': []}
         has_next = False
@@ -1834,11 +1827,9 @@ class TelehealthTranscripts(Resource):
 
             if message['media']:
                 for media_idx, media in enumerate(message['media']):
-                    _prefix = media['s3_path']
-                    s3_link = fh.get_presigned_urls(prefix=_prefix)
-                    media['media_link'] = [val for val in s3_link.values()][0]
+                    media['media_link'] = fd.url(media['s3_path'])
                     transcript['transcript'][message_idx]['media'][media_idx] = media
-            
+
             payload['transcript'].append(transcript['transcript'][message_idx])
 
         payload['_links'] =  {
@@ -1850,18 +1841,16 @@ class TelehealthTranscripts(Resource):
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(api=ns, status_code=200)
     def patch(self, booking_id):
-        """
-        Store booking transcripts for the booking_id supplied.
-        This endpoint is only available in the dev environment. Normally booking transcripts are stored by a background process
-        that is fired off following the completion of a booking. 
+        """ Store booking transcripts for the booking_id supplied.
 
-        Params
-        ------
-        booking_id
+        This endpoint is only available in the dev environment. Normally booking 
+        transcripts are stored by a background process that is fired off following
+        the completion of a booking. 
 
-        Returns
-        -------
-        None
+        Parameters
+        ----------
+        booking_id : int
+            Numerical booking identifier
         """
         booking = TelehealthBookings.query.get(booking_id)
 
@@ -1869,6 +1858,3 @@ class TelehealthTranscripts(Resource):
             raise BadRequest('Meeting does not exist yet.')
 
         store_telehealth_transcript.delay(booking.idx)
-                    
-        return 
-

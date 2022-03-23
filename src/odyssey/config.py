@@ -157,7 +157,7 @@ class Config:
         if self.DEV and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX:
             if testing:
                 rand = secrets.token_hex(3)
-                self.AWS_S3_PREFIX = f'pytest-{rand}'
+                self.AWS_S3_PREFIX = f'temp/pytest-{rand}'
             else:
                 username = getpass.getuser()
                 self.AWS_S3_PREFIX = f'{username}'

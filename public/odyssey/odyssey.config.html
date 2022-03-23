@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.config &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.config &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.defaults" href="odyssey.defaults.html" />
     <link rel="prev" title="Odyssey" href="../index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.defaults.html">Defaults</a></li>
@@ -100,129 +48,89 @@
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>odyssey.config</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.config.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.config">
-<span id="odyssey-config"></span><h1>odyssey.config<a class="headerlink" href="#module-odyssey.config" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-config"></span><h1>odyssey.config<a class="headerlink" href="#module-odyssey.config" title="Permalink to this headline"></a></h1>
 <section id="flask-app-configuration">
-<h2>Flask app configuration<a class="headerlink" href="#flask-app-configuration" title="Permalink to this headline">¶</a></h2>
-<p>The configuration of the Odyssey API is defined by two environmental parameters, <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code>
-and <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> is native to Flask and can be set to <code class="docutils literal notranslate"><span class="pre">production</span></code> (the
-default) or <code class="docutils literal notranslate"><span class="pre">development</span></code>. Setting <code class="docutils literal notranslate"><span class="pre">FLASK_ENV=development</span></code> enables debugging
-and automatic reloading of changed code.</p>
-<p><code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code> determines the development environment and can be either <code class="docutils literal notranslate"><span class="pre">local</span></code> or
-<code class="docutils literal notranslate"><span class="pre">remote</span></code>. In local development, all storage (database and files) are kept on the localhost.
-Configuration parameters are read from <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>.</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code> is set to <code class="docutils literal notranslate"><span class="pre">remote</span></code>, the default configuration parameters are obtained
-from the AWS Parameter store where possible. The database is a database on a separate machine,
-and files are stored in AWS S3 buckets.</p>
+<h2>Flask app configuration<a class="headerlink" href="#flask-app-configuration" title="Permalink to this headline"></a></h2>
+<p>The configuration of the Odyssey API follows the Flask environmental variable <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code>,
+but with stricter requirements. Here, it is only allowed to be set to <code class="docutils literal notranslate"><span class="pre">production</span></code> or
+<code class="docutils literal notranslate"><span class="pre">development</span></code>. Any other value for <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> will raise an error. Not setting
+<code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code> in the environment will also raise an error, forcing the user to make a
+concious decision when running the API. There is no default value for <code class="docutils literal notranslate"><span class="pre">FLASK_ENV</span></code>.</p>
 </section>
 <section id="defaults">
-<h2>Defaults<a class="headerlink" href="#defaults" title="Permalink to this headline">¶</a></h2>
-<p>Configuration parameters can be set in one of four ways (in order of precedense):</p>
-<ol class="arabic simple">
-<li><p>Environmental variables</p></li>
-<li><p>AWS Parameter Store, if available</p></li>
-<li><p>Defaults from <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a></p></li>
-<li><p>Hard-coded defaults if all else fails</p></li>
-</ol>
-<p>Defaults are set in <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>. These defaults can be overriden by setting an
-environmental variable with the same name. If AWS credentials are available and
-<code class="docutils literal notranslate"><span class="pre">FLASK_ENV=remote</span></code>, default parameters are pulled from the AWS parameter store.</p>
+<h2>Defaults<a class="headerlink" href="#defaults" title="Permalink to this headline"></a></h2>
+<p>The API is configured by settings in <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>. Each parameter in defaults can
+be overridden by setting an environmental variable with the same name (all upper case).</p>
 </section>
-<section id="aws-access">
-<h2>AWS access<a class="headerlink" href="#aws-access" title="Permalink to this headline">¶</a></h2>
+<section id="how-to-use">
+<h2>How to use<a class="headerlink" href="#how-to-use" title="Permalink to this headline"></a></h2>
+<p>In the rest of the API code, any of the variables set in <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a> can be
+called from the config dict:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">current_app</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PARAMETER_NAME&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The API should <strong>always assume to be in production</strong>. Only if there are specific requirements
+to introduce dev-only or test-only code, for example a debug endpoint or testing helpers, can
+conditionals be used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;DEV&#39;</span><span class="p">]:</span>
+    <span class="c1"># True when in development</span>
+    <span class="o">...</span>
+<span class="k">if</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;TESTING&#39;</span><span class="p">]:</span>
+    <span class="c1"># True when running pytest</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="aws-and-other-3rd-party-services">
+<h2>AWS and other 3rd party services<a class="headerlink" href="#aws-and-other-3rd-party-services" title="Permalink to this headline"></a></h2>
 <p>In order for remote development to work, the program must have access to AWS. A client key
 ID and secret key must be provided either in <code class="docutils literal notranslate"><span class="pre">$HOME/.aws/credentials</span></code> or in the environment as
 <code class="docutils literal notranslate"><span class="pre">AWS_ACCESS_KEY_ID</span></code> and <code class="docutils literal notranslate"><span class="pre">AWS_SECRET_ACCESS_KEY</span></code>, respectively. Additionally, a default
 region must be set in <code class="docutils literal notranslate"><span class="pre">$HOME/.aws/config</span></code> or <code class="docutils literal notranslate"><span class="pre">AWS_DEFAULT_REGION</span></code>.</p>
-</section>
-<section id="special-cases">
-<h2>Special cases<a class="headerlink" href="#special-cases" title="Permalink to this headline">¶</a></h2>
-<p><strong>Testing</strong>: when <code class="docutils literal notranslate"><span class="pre">pytest</span></code> is running the unit tests, the environment is always local
-(i.e. <code class="docutils literal notranslate"><span class="pre">FLASK_DEV=local</span></code> and <code class="docutils literal notranslate"><span class="pre">LOCAL_CONFIG=True</span></code>).</p>
-<p><strong>Production</strong>: when <code class="docutils literal notranslate"><span class="pre">FLASK_ENV=development</span></code>, the environment is always remote
-(i.e. <code class="docutils literal notranslate"><span class="pre">FLASK_DEV=remote</span></code> and  <code class="docutils literal notranslate"><span class="pre">LOCAL_CONFIG=False</span></code>).</p>
 <p class="rubric">Notes</p>
 <ul class="simple">
 <li><p>This file is loaded by the main Flask app using <code class="docutils literal notranslate"><span class="pre">app.config.from_object(Config())</span></code>.</p></li>
-<li><p>Only uppercase attributes defined on the Config instance will be added to app.config.</p></li>
-<li><p>The development environment is accessible in the Flask program as <code class="docutils literal notranslate"><span class="pre">LOCAL_CONFIG</span></code> (bool).</p></li>
-<li><p><strong>Do NOT</strong> use any other logic to determine what state the app is in. All configuration
-logic should take place in config.py.</p></li>
+<li><p>Only uppercase parameters will be added to app.config.</p></li>
 </ul>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version release: </span>0.7
+<code class="docutils literal notranslate"><span class="pre">FLASK_DEV</span></code> is no longer used.</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.config.Config">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.config.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#odyssey.config.Config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.config.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#odyssey.config.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Main configuration class.</p>
 <p>This class needs to be instantiated before it can be loaded by Flask.
 Load this class in the <a class="reference internal" href="../index.html#odyssey.create_app" title="odyssey.create_app"><code class="xref py py-func docutils literal notranslate"><span class="pre">odyssey.create_app()</span></code></a> app factory using
@@ -236,25 +144,20 @@ Load this class in the <a class="reference internal" href="../index.html#odyssey
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.config.Config.getvar">
-<span class="sig-name descname"><span class="pre">getvar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">decrypt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Any</span><a class="headerlink" href="#odyssey.config.Config.getvar" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">getvar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></span><a class="headerlink" href="#odyssey.config.Config.getvar" title="Permalink to this definition"></a></dt>
 <dd><p>Get a configuration setting.</p>
 <p>Order of lookup:</p>
 <ol class="arabic simple">
-<li><p>Environmental variables</p></li>
-<li><p>AWS Parameter Store</p></li>
-<li><p>Defaults from <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a></p></li>
-<li><p>Given <code class="docutils literal notranslate"><span class="pre">default</span></code> (defaults to ‘’) if all else fails</p></li>
+<li><p>Environmental variables,</p></li>
+<li><p>Defaults from <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>,</p></li>
+<li><p>None if all else fails.</p></li>
 </ol>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>var</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the configuration variable, which has the same name as the
-environmental variable and the variable in <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>.</p></li>
-<li><p><strong>param</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the parameter on the AWS Parameter Store. AWS lookup will
-be skipped if param is None.</p></li>
-</ul>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>var</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of the configuration variable, which has the same name as the
+environmental variable and the variable in <a class="reference internal" href="odyssey.defaults.html#module-odyssey.defaults" title="odyssey.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">odyssey.defaults</span></code></a>.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>object</em> – Value of the parameter, interpreted as None, True, False, int, or float if
 possible, str otherwise.</p>
 </dd>
@@ -264,20 +167,32 @@ possible, str otherwise.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="odyssey.config.database_uri">
-<span class="sig-prename descclassname"><span class="pre">odyssey.config.</span></span><span class="sig-name descname"><span class="pre">database_uri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">docstring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.config.database_uri" title="Permalink to this definition">¶</a></dt>
-<dd><p>Database selection, for use in scripts not under control of Flask.</p>
+<dt class="sig sig-object py" id="odyssey.config.database_parser">
+<span class="sig-prename descclassname"><span class="pre">odyssey.config.</span></span><span class="sig-name descname"><span class="pre">database_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.10)"><span class="pre">argparse.ArgumentParser</span></a></span></span><a class="headerlink" href="#odyssey.config.database_parser" title="Permalink to this definition"></a></dt>
+<dd><p>Return CLI parser for database arguments.</p>
+<p>For use in scripts that need to access the database, but are not under control
+of Flask. Use this function for full control over and extension of command line
+parameters. For the database URI as a string without further control, use
+<a class="reference internal" href="#odyssey.config.database_uri" title="odyssey.config.database_uri"><code class="xref py py-func docutils literal notranslate"><span class="pre">database_uri()</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>docstring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Pass in the doctring of the script in which this function is used. The docstring
-will be prepended to the help text of this function. It will show up on the
-command line when the calling script is run without parameters.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>str</em> – URI of the database.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>argparse.ArgumentParser</em> – Command line argument parser, useful for extending functionality.</p>
 </dd>
 </dl>
-<p class="rubric">Notes</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="odyssey.config.database_uri">
+<span class="sig-prename descclassname"><span class="pre">odyssey.config.</span></span><span class="sig-name descname"><span class="pre">database_uri</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#odyssey.config.database_uri" title="Permalink to this definition"></a></dt>
+<dd><p>Database URI as a string.</p>
+<p>For use in scripts that need to access the database, but are not under control
+of Flask. For more control over the options and an extendible command line
+parser, use <a class="reference internal" href="#odyssey.config.database_parser" title="odyssey.config.database_parser"><code class="xref py py-func docutils literal notranslate"><span class="pre">database_parser()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em> – URI of the database.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -292,50 +207,33 @@ command line when the calling script is run without parameters.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.defaults.html" class="btn btn-neutral float-right" title="odyssey.defaults" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="Odyssey" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.defaults.html" class="btn btn-neutral float-right" title="odyssey.defaults" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

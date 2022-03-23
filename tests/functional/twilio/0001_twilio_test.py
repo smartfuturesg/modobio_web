@@ -103,10 +103,7 @@ def test_conversation_cache(test_client, booking_function_scope):
 
     stored_transcript = store_telehealth_transcript(booking.idx)
 
-    fname = f'id{test_client.client_id:05d}/telehealth/{booking.idx}/transcript/media/0.jpeg'
-
     assert len(stored_transcript['transcript']) == 2
-    assert stored_transcript['transcript'][1]['media'][0]['s3_path'] == fname
 
 
 def test_conversation_cache_scheduler(test_client, booking_function_scope):

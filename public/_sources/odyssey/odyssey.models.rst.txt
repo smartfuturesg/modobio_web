@@ -17,6 +17,7 @@ Entities
    User <odyssey.api.user.models>
    Client <odyssey.api.client.models>
    Staff <odyssey.api.staff.models>
+   Practitioner <odyssey.api.practitioner.models>
 
 Roles
 -----
@@ -33,8 +34,10 @@ Other
 .. toctree::
 
    Wearable devices <odyssey.api.wearables.models>
-   Notifications <odyssey.api.notifications.models>
    Telehealth <odyssey.api.telehealth.models>
+   Payment <odyssey.api.payment.models>
+   DoseSpot <odyssey.api.dosespot.models>
+   Notifications <odyssey.api.notifications.models>
    System config <odyssey.api.system.models>
    Facilities <odyssey.api.facility.models>
    Lookup tables <odyssey.api.lookup.models>

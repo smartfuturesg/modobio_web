@@ -43,8 +43,8 @@ class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """ Format :class:`logging.LogRecord` as a JSON string.
 
-        Params
-        ------
+        Parameters
+        ----------
         record : :class:`logging.LogRecord`
             The LogRecord instance to be formatted.
 

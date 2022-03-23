@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.api.physiotherapy.models &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.api.physiotherapy.models &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="odyssey.api.trainer.models" href="odyssey.api.trainer.models.html" />
     <link rel="prev" title="odyssey.api.doctor.models" href="odyssey.api.doctor.models.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,30 +39,22 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.models.html">Database models</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.user.models.html">User</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.client.models.html">Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.staff.models.html">Staff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.practitioner.models.html">Practitioner</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.doctor.models.html">Doctor</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Physical therapist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.trainer.models.html">Trainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.wearables.models.html">Wearable devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.telehealth.models.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.payment.models.html">Payment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.dosespot.models.html">DoseSpot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.api.notifications.models.html">Notifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.system.models.html">System config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.facility.models.html">Facilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.api.lookup.models.html">Lookup tables</a></li>
@@ -111,132 +62,91 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.utils.html">Utilities</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="odyssey.models.html">Database models</a> &raquo;</li>
-        
       <li>odyssey.api.physiotherapy.models</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.api.physiotherapy.models.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.api.physiotherapy.models">
-<span id="odyssey-api-physiotherapy-models"></span><h1>odyssey.api.physiotherapy.models<a class="headerlink" href="#module-odyssey.api.physiotherapy.models" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-api-physiotherapy-models"></span><h1>odyssey.api.physiotherapy.models<a class="headerlink" href="#module-odyssey.api.physiotherapy.models" title="Permalink to this headline"></a></h1>
 <p>Database tables for the physical therapist’s portion of the Modo Bio Staff application.
 All tables in this module are prefixed with <code class="docutils literal notranslate"><span class="pre">PT</span></code>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">PTHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">PTHistory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Physical therapy history table.</p>
 <p>This table stores the physical therapy history of a client. The information
 is taken only once, during the initial consult.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.displayname">
-<span class="sig-name descname"><span class="pre">displayname</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Physical</span> <span class="pre">therapy</span> <span class="pre">history'</span></em><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.displayname" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">displayname</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Physical</span> <span class="pre">therapy</span> <span class="pre">history'</span></em><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.displayname" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>User ID number</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -244,147 +154,147 @@ is taken only once, during the initial consult.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.exercise">
-<span class="sig-name descname"><span class="pre">exercise</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.exercise" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">exercise</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.exercise" title="Permalink to this definition"></a></dt>
 <dd><p>Description of the client’s current exercise schedule.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_pt">
-<span class="sig-name descname"><span class="pre">has_pt</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_pt" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_pt</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_pt" title="Permalink to this definition"></a></dt>
 <dd><p>Indicates whether or not client has had physical therapy in the past.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_chiro">
-<span class="sig-name descname"><span class="pre">has_chiro</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_chiro" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_chiro</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_chiro" title="Permalink to this definition"></a></dt>
 <dd><p>Indicates whether or not client has had chiropractor therapy in the past.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_massage">
-<span class="sig-name descname"><span class="pre">has_massage</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_massage" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_massage</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_massage" title="Permalink to this definition"></a></dt>
 <dd><p>Indicates whether or not client has had massage therapy in the past.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_surgery">
-<span class="sig-name descname"><span class="pre">has_surgery</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_surgery" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_surgery</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_surgery" title="Permalink to this definition"></a></dt>
 <dd><p>Indicates whether or not client has had surgery in the past.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_medication">
-<span class="sig-name descname"><span class="pre">has_medication</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_medication" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_medication</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_medication" title="Permalink to this definition"></a></dt>
 <dd><p>Indicates whether or not client uses any type of medication.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.has_acupuncture">
-<span class="sig-name descname"><span class="pre">has_acupuncture</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_acupuncture" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">has_acupuncture</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.has_acupuncture" title="Permalink to this definition"></a></dt>
 <dd><p>Indicates whether or not client has had acupuncture in the past.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.pain_areas">
-<span class="sig-name descname"><span class="pre">pain_areas</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.pain_areas" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pain_areas</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.pain_areas" title="Permalink to this definition"></a></dt>
 <dd><p>Describes pain areas in the client’s body.</p>
 <p>The client or staff member indicates pain areas by drawing on the silhouette
 of a human (front and back) and circling the pain areas. The drawings are
 translated to bezier curves in canvas coordinates, which are stored as a
 JSON dictionary.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.best_pain">
-<span class="sig-name descname"><span class="pre">best_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.best_pain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">best_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.best_pain" title="Permalink to this definition"></a></dt>
 <dd><p>Numerical score of client’s best pain level.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.worst_pain">
-<span class="sig-name descname"><span class="pre">worst_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.worst_pain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">worst_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.worst_pain" title="Permalink to this definition"></a></dt>
 <dd><p>Numerical score of client’s worst pain level.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.current_pain">
-<span class="sig-name descname"><span class="pre">current_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.current_pain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">current_pain</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.current_pain" title="Permalink to this definition"></a></dt>
 <dd><p>Numerical score of client’s current pain level.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.makes_worse">
-<span class="sig-name descname"><span class="pre">makes_worse</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_worse" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">makes_worse</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_worse" title="Permalink to this definition"></a></dt>
 <dd><p>Description of factors that make client’s pain worse.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.PTHistory.makes_better">
-<span class="sig-name descname"><span class="pre">makes_better</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_better" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">makes_better</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.PTHistory.makes_better" title="Permalink to this definition"></a></dt>
 <dd><p>Description of factors that make client’s pain better.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 1024</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 1024</p>
 </dd>
 </dl>
 </dd></dl>
@@ -393,7 +303,7 @@ JSON dictionary.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">Chessboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">Chessboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Mobility assessment table a.k.a the chessboard.</p>
 <p>This table stores the repeated mobility assessment measurements. The measurements
@@ -401,21 +311,21 @@ are indexed by <a class="reference internal" href="#odyssey.api.physiotherapy.mo
 this table, with the exception of <code class="xref py py-attr docutils literal notranslate"><span class="pre">isa_dynamic</span></code>, are angles in degrees.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>Client ID number.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -423,40 +333,40 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.timestamp">
-<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.timestamp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.timestamp" title="Permalink to this definition"></a></dt>
 <dd><p>Timestamp of the assessment.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.isa_structure">
-<span class="sig-name descname"><span class="pre">isa_structure</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_structure" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isa_structure</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_structure" title="Permalink to this definition"></a></dt>
 <dd><p>Structure of the Infrasternal Angle (ISA). Allowed values are:</p>
 <ul class="simple">
 <li><p>inhaled</p></li>
@@ -465,15 +375,15 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <li><p>asymmetrical atypical</p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 24</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 24</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.isa_movement">
-<span class="sig-name descname"><span class="pre">isa_movement</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_movement" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isa_movement</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.isa_movement" title="Permalink to this definition"></a></dt>
 <dd><p>Movement of the Infrasternal Angle (ISA). Allowed values are:</p>
 <ul class="simple">
 <li><p>static</p></li>
@@ -482,21 +392,21 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 <li><p>left dynamic/right static</p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, max length 24</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, max length 24</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_er">
-<span class="sig-name descname"><span class="pre">left_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_er" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -504,13 +414,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_ir">
-<span class="sig-name descname"><span class="pre">left_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -518,13 +428,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_abd">
-<span class="sig-name descname"><span class="pre">left_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -532,13 +442,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_add">
-<span class="sig-name descname"><span class="pre">left_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_add" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -546,13 +456,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_flexion">
-<span class="sig-name descname"><span class="pre">left_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -560,13 +470,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_shoulder_extension">
-<span class="sig-name descname"><span class="pre">left_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_shoulder_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -574,13 +484,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_er">
-<span class="sig-name descname"><span class="pre">right_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_er" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -588,13 +498,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_ir">
-<span class="sig-name descname"><span class="pre">right_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -602,13 +512,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_abd">
-<span class="sig-name descname"><span class="pre">right_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -616,13 +526,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_add">
-<span class="sig-name descname"><span class="pre">right_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_add" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -630,13 +540,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_flexion">
-<span class="sig-name descname"><span class="pre">right_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -644,13 +554,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_shoulder_extension">
-<span class="sig-name descname"><span class="pre">right_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_shoulder_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -658,13 +568,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_er">
-<span class="sig-name descname"><span class="pre">left_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_er" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -672,13 +582,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_ir">
-<span class="sig-name descname"><span class="pre">left_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -686,13 +596,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_abd">
-<span class="sig-name descname"><span class="pre">left_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -700,13 +610,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_add">
-<span class="sig-name descname"><span class="pre">left_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_add" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -714,13 +624,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_flexion">
-<span class="sig-name descname"><span class="pre">left_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -728,13 +638,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_extension">
-<span class="sig-name descname"><span class="pre">left_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -742,13 +652,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.left_hip_slr">
-<span class="sig-name descname"><span class="pre">left_hip_slr</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_slr" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_slr</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.left_hip_slr" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip straight leg raise angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -756,13 +666,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_er">
-<span class="sig-name descname"><span class="pre">right_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_er" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -770,13 +680,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_ir">
-<span class="sig-name descname"><span class="pre">right_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -784,13 +694,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_abd">
-<span class="sig-name descname"><span class="pre">right_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -798,13 +708,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_add">
-<span class="sig-name descname"><span class="pre">right_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_add" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -812,13 +722,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_flexion">
-<span class="sig-name descname"><span class="pre">right_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -826,13 +736,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_extension">
-<span class="sig-name descname"><span class="pre">right_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -840,13 +750,13 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.right_hip_slr">
-<span class="sig-name descname"><span class="pre">right_hip_slr</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_slr" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_slr</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.right_hip_slr" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip straight leg raise angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -854,11 +764,11 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.Chessboard.notes">
-<span class="sig-name descname"><span class="pre">notes</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.notes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">notes</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.Chessboard.notes" title="Permalink to this definition"></a></dt>
 <dd><p>Assessment notes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -867,7 +777,7 @@ this table, with the exception of <code class="xref py py-attr docutils literal 
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">MobilityAssessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.api.physiotherapy.models.</span></span><span class="sig-name descname"><span class="pre">MobilityAssessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.orm.decl_api.Model</span></code></p>
 <p>Mobility assessment table.</p>
 <p>The previous version of the mobility assessment table.
@@ -881,13 +791,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#odyssey.api.physiotherapy.models.Chessboard" title="odyssey.api.physiotherapy.models.Chessboard"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chessboard</span></code></a></p>
-</div>
+</aside>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.user_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.user_id" title="Permalink to this definition"></a></dt>
 <dd><p>User ID number</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int, foreign key to <code class="xref py py-attr docutils literal notranslate"><span class="pre">User.user_id</span></code></p>
 </dd>
 </dl>
@@ -895,57 +805,57 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.idx">
-<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.idx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.idx" title="Permalink to this definition"></a></dt>
 <dd><p>Table index.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, primary key, autoincrement</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, primary key, autoincrement</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.timestamp">
-<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.timestamp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.timestamp" title="Permalink to this definition"></a></dt>
 <dd><p>Timestamp of the assessment.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.created_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.created_at" title="Permalink to this definition"></a></dt>
 <dd><p>Creation timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.updated_at">
-<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.updated_at" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">updated_at</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.updated_at" title="Permalink to this definition"></a></dt>
 <dd><p>Last update timestamp of this row in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_left">
-<span class="sig-name descname"><span class="pre">isa_left</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_left" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isa_left</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_left" title="Permalink to this definition"></a></dt>
 <dd><p>Infasternal angle (ISA) left.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -953,13 +863,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_right">
-<span class="sig-name descname"><span class="pre">isa_right</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_right" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isa_right</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_right" title="Permalink to this definition"></a></dt>
 <dd><p>Infasternal angle (ISA) right.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -967,24 +877,24 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.isa_dynamic">
-<span class="sig-name descname"><span class="pre">isa_dynamic</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_dynamic" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isa_dynamic</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.isa_dynamic" title="Permalink to this definition"></a></dt>
 <dd><p>Indicates whether or not the Infasternal angle (ISA) is dynamic.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_er">
-<span class="sig-name descname"><span class="pre">left_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_er" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -992,13 +902,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_ir">
-<span class="sig-name descname"><span class="pre">left_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1006,13 +916,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_abd">
-<span class="sig-name descname"><span class="pre">left_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1020,13 +930,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_add">
-<span class="sig-name descname"><span class="pre">left_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_add" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1034,13 +944,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_flexion">
-<span class="sig-name descname"><span class="pre">left_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1048,13 +958,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_extension">
-<span class="sig-name descname"><span class="pre">left_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_shoulder_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Left shoulder extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1062,13 +972,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_er">
-<span class="sig-name descname"><span class="pre">right_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_er" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1076,13 +986,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_ir">
-<span class="sig-name descname"><span class="pre">right_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1090,13 +1000,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_abd">
-<span class="sig-name descname"><span class="pre">right_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1104,13 +1014,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_add">
-<span class="sig-name descname"><span class="pre">right_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_add" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1118,13 +1028,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_flexion">
-<span class="sig-name descname"><span class="pre">right_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1132,13 +1042,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_extension">
-<span class="sig-name descname"><span class="pre">right_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_shoulder_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_shoulder_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Right shoulder extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1146,13 +1056,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_er">
-<span class="sig-name descname"><span class="pre">left_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_er" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1160,13 +1070,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_ir">
-<span class="sig-name descname"><span class="pre">left_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1174,13 +1084,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_abd">
-<span class="sig-name descname"><span class="pre">left_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1188,13 +1098,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_add">
-<span class="sig-name descname"><span class="pre">left_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_add" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1202,13 +1112,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_flexion">
-<span class="sig-name descname"><span class="pre">left_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1216,13 +1126,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_extension">
-<span class="sig-name descname"><span class="pre">left_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.left_hip_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Left hip extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1230,13 +1140,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_er">
-<span class="sig-name descname"><span class="pre">right_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_er" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_er</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_er" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip external rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1244,13 +1154,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_ir">
-<span class="sig-name descname"><span class="pre">right_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_ir" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_ir</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_ir" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip internal rotation angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1258,13 +1168,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_abd">
-<span class="sig-name descname"><span class="pre">right_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_abd" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_abd</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_abd" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip abduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1272,13 +1182,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_add">
-<span class="sig-name descname"><span class="pre">right_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_add" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_add</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_add" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip adduction angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1286,13 +1196,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_flexion">
-<span class="sig-name descname"><span class="pre">right_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_flexion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_flexion</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_flexion" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip flexion angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1300,13 +1210,13 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_extension">
-<span class="sig-name descname"><span class="pre">right_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_extension" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_hip_extension</span></span><a class="headerlink" href="#odyssey.api.physiotherapy.models.MobilityAssessment.right_hip_extension" title="Permalink to this definition"></a></dt>
 <dd><p>Right hip extension angle.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
-<dt class="field-even">Unit</dt>
+<dt class="field-even">Unit<span class="colon">:</span></dt>
 <dd class="field-even"><p>degree</p>
 </dd>
 </dl>
@@ -1318,50 +1228,33 @@ this table, with the exception of <a class="reference internal" href="#odyssey.a
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.api.trainer.models.html" class="btn btn-neutral float-right" title="odyssey.api.trainer.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="odyssey.api.doctor.models.html" class="btn btn-neutral float-left" title="odyssey.api.doctor.models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.api.trainer.models.html" class="btn btn-neutral float-right" title="odyssey.api.trainer.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
