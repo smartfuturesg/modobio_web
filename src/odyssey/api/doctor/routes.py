@@ -1354,7 +1354,7 @@ class MedBloodTestImage(BaseResource):
         img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
         img.max_size = MEDICAL_IMAGE_MAX_SIZE
         img.validate()
-        img.save(f'test{test.test_id:05d}_{hex_token}.{img_upload.extension}')
+        img.save(f'test{test.test_id:05d}_{hex_token}.{img.extension}')
 
         # store file path in db
         test.image_path = img.filename
@@ -1375,7 +1375,7 @@ class MedBloodTestImage(BaseResource):
             'reporter_firstname': reporter.firstname,
             'reporter_lastname': reporter.lastname,
             'reporter_id': test.reporter_id,
-            'image': fh.get_presigned_url(test.image_path) 
+            'image': fd.url(test.image_path) 
         }
         
         return res
@@ -1413,7 +1413,7 @@ class MedBloodTestAll(BaseResource):
 
         # prepare response items with reporter name from User table
         response = []
-        fh = FileDownload(user_id)
+        fd = FileDownload(user_id)
         for test in blood_tests:
             if test[0].image_path:
                 image_path = fd.url(test[0].image_path)
@@ -1535,7 +1535,7 @@ class AllMedBloodTestResults(BaseResource):
         
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
-        fh = FileHandling()
+        fd = FileDownload(user_id)
         for test_info, test_result, result_type, _ in results:
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
@@ -1557,7 +1557,7 @@ class AllMedBloodTestResults(BaseResource):
                     # get presigned s3 link if present
                         image_path = test.get('image')
                         if image_path:
-                            test['image'] = fh.get_presigned_url(image_path)
+                            test['image'] = fd.url(image_path)
                                 
         payload = {}
         payload['items'] = nested_results
