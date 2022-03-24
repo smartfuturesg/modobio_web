@@ -36,7 +36,7 @@ from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, L
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
-from odyssey.utils.files import FileDownload, ImageUpload
+from odyssey.utils.files import FileDownload, FileUpload, ImageUpload
 from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
@@ -1336,7 +1336,6 @@ class MedBloodTestImage(BaseResource):
         Args:
             image ([file]): image file to be added to test results (only .pdf files are supported, max size 20MB)
         """
-
         if not ('image' in request.files and request.files['image']):  
             raise BadRequest('No file selected.')
         
@@ -1349,13 +1348,12 @@ class MedBloodTestImage(BaseResource):
 
         # add file to S3
         hex_token = secrets.token_hex(4)
-
-        img = ImageUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
-        img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+        img = FileUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
+        img.allowed_types = ('pdf')
         img.max_size = MEDICAL_IMAGE_MAX_SIZE
         img.validate()
         img.save(f'test{test.test_id:05d}_{hex_token}.{img.extension}')
-
+        
         # store file path in db
         test.image_path = img.filename
         db.session.commit()
