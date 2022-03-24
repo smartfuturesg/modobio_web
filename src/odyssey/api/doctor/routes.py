@@ -36,7 +36,7 @@ from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, L
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
-from odyssey.utils.files import FileDownload, ImageUpload
+from odyssey.utils.files import FileDownload, FileUpload, ImageUpload
 from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
@@ -1336,7 +1336,6 @@ class MedBloodTestImage(BaseResource):
         Args:
             image ([file]): image file to be added to test results (only .pdf files are supported, max size 20MB)
         """
-
         if not ('image' in request.files and request.files['image']):  
             raise BadRequest('No file selected.')
         
@@ -1349,13 +1348,12 @@ class MedBloodTestImage(BaseResource):
 
         # add file to S3
         hex_token = secrets.token_hex(4)
-
-        img = ImageUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
-        img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+        img = FileUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
+        img.allowed_types = ('pdf',)
         img.max_size = MEDICAL_IMAGE_MAX_SIZE
         img.validate()
-        img.save(f'test{test.test_id:05d}_{hex_token}.{img_upload.extension}')
-
+        img.save(f'test{test.test_id:05d}_{hex_token}.{img.extension}')
+        
         # store file path in db
         test.image_path = img.filename
         db.session.commit()
@@ -1365,19 +1363,17 @@ class MedBloodTestImage(BaseResource):
             fd = FileDownload(test.user_id)
             fd.delete(prev_image)
 
-        test_code = MedicalBloodTestResults.query.filter_by(test_id=test.test_id).one_or_none().modobio_test_code
         reporter = User.query.filter_by(user_id=test.reporter_id).one_or_none()
         
         res = {
             'test_id': test.test_id,
             'user_id': test.user_id,
             'date': test.date,
-            'modobio_test_code': test_code,
             'notes': test.notes,
             'reporter_firstname': reporter.firstname,
             'reporter_lastname': reporter.lastname,
             'reporter_id': test.reporter_id,
-            'image': fh.get_presigned_url(test.image_path) 
+            'image': fd.url(test.image_path) 
         }
         
         return res
@@ -1415,7 +1411,7 @@ class MedBloodTestAll(BaseResource):
 
         # prepare response items with reporter name from User table
         response = []
-        fh = FileDownload(user_id)
+        fd = FileDownload(user_id)
         for test in blood_tests:
             if test[0].image_path:
                 image_path = fd.url(test[0].image_path)
@@ -1532,11 +1528,12 @@ class AllMedBloodTestResults(BaseResource):
                             MedicalBloodTests.reporter_id == User.user_id
                         ).all()
 
-        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
-        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname, x[0].image_path) for x in results])
+        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'image': x[4], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
+        fd = FileDownload(user_id)
         for test_info, test_result, result_type, _ in results:
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
@@ -1555,6 +1552,11 @@ class AllMedBloodTestResults(BaseResource):
                     if not test.get('date', False):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
+                        # get presigned s3 link if present
+                        image_path = test.get('image')
+                        if image_path:
+                            test['image'] = fd.url(image_path)
+                                
         payload = {}
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)

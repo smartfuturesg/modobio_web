@@ -407,6 +407,47 @@ class TelehealthStaffAvailability(BaseModelWithIdx):
 
     :type: :class:`TelehealthStaffSettings` instance
     """
+    
+class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    Holds information for temporary availability exceptions
+    """
+    
+    exception_date = db.Column(db.Date, nullable=False)
+    """
+    Date of this exception.
+    
+    :type: Datetime
+    """
+    
+    exception_booking_window_id_start_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """
+    Exception start time as a booking window id in refernce to UTC time.
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+    
+    exception_booking_window_id_end_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """
+    Exception end time as a booking window id in reference to UTC time.
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+    
+    is_busy = db.Column(db.Boolean, nullable=False)
+    """
+    Denotes the types of exception. Exceptions can be 'busy' (true) meaning they remove blocks from
+    normal availability or 'free' (false) meaning that add blocks to normal availability.
+    
+    :type: bool
+    """
+    
+    label = db.Column(db.String(100))
+    """
+    An optional label placed on this exception to explain what the exception is for.
+    
+    :type: string(100)
+    """
 
 
 class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):

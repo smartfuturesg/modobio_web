@@ -8,13 +8,14 @@ logger = logging.getLogger(__name__)
 
 import secrets
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 from dateutil import tz
+from dateutil.relativedelta import relativedelta
 
 from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, and_
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -33,6 +34,7 @@ from odyssey.api.telehealth.models import (
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
     TelehealthBookingDetails,
+    TelehealthStaffAvailabilityExceptions,
     TelehealthStaffSettings
 )
 from odyssey.api.telehealth.schemas import (
@@ -48,6 +50,9 @@ from odyssey.api.telehealth.schemas import (
     TelehealthTimeSelectOutputSchema,
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthStaffAvailabilityConflictSchema,
+    TelehealthStaffAvailabilityExceptionsSchema,
+    TelehealthStaffAvailabilityExceptionsDeleteSchema,
+    TelehealthStaffAvailabilityExceptionsOutputSchema,
     TelehealthBookingDetailsSchema,
     TelehealthBookingDetailsGetSchema,
     TelehealthBookingsPUTSchema,
@@ -72,7 +77,8 @@ from odyssey.utils.constants import (
 from odyssey.utils.message import PushNotification, PushNotificationType
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_staff_existence
+    check_staff_existence,
+    check_user_existence
 )
 from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
@@ -1283,6 +1289,123 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
                     conflict.start_time_utc = time_inc[conflict.booking_window_id_start_time_utc-1].start_time
         db.session.commit()
         return {'conflicts': conflicts}
+
+@ns.route('/settings/staff/availability/exceptions/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID for a staff'})
+class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
+    """
+    This API resource is used to view and interact with temporary availability exceptions.
+    """
+    __check_resource__ = False
+    
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsOutputSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Add new availability exception. Start and end window_ids should be in reference to UTC.
+        To determine the correct window_ids, please see /lookup/telehealth/booking-increments/.
+        """
+        check_user_existence(user_id, user_type='staff')
+        current_date = datetime.now(timezone.utc).date()
+
+        conflicts = []
+        exceptions = []
+        for exception in request.parsed_obj:
+            if exception.exception_booking_window_id_start_time >= exception.exception_booking_window_id_end_time:
+                raise BadRequest('Exception start time must be before exception end time.')
+            elif current_date + relativedelta(months=+6) < exception.exception_date:
+                raise BadRequest('Exceptions cannot be set more than 6 months in the future.')
+            elif current_date > exception.exception_date:
+                raise BadRequest('Exceptions cannot be in the past.')
+            else:
+                exception.user_id = user_id
+                db.session.add(exception)
+                exceptions.append(exception)
+                
+                #detect if conflicts exist with this exception
+                if exception.is_busy:
+                    bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(
+                        or_(
+                            TelehealthBookings.status == 'Accepted',
+                            TelehealthBookings.status == 'Pending'
+                        )) \
+                        .filter(
+                            or_(
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time_utc >= exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception.exception_booking_window_id_end_time
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_end_time_utc < exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception.exception_booking_window_id_end_time
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time_utc <= exception.exception_booking_window_id_start_time,
+                                    TelehealthBookings.booking_window_id_end_time_utc > exception.exception_booking_window_id_start_time
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception.exception_booking_window_id_end_time,
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception.exception_booking_window_id_end_time
+                                )
+                            )
+                        ).all()
+                    
+                    for booking in bookings:
+                            client = {**booking.client.__dict__}
+                            start_time_utc = LookupBookingTimeIncrements.query \
+                                .filter_by(idx=booking.booking_window_id_end_time_utc).one_or_none().start_time
+                            
+                            conflicts.append({
+                                'booking_id': booking.idx,
+                                'target_date_utc': booking.target_date_utc,
+                                'start_time_utc': start_time_utc,
+                                'status': booking.status,
+                                'profession_type': booking.profession_type,
+                                'client_location_id': booking.client_location_id,
+                                'payment_method_id': booking.payment_method_id,
+                                'status_history': booking.status_history,
+                                'client': client,
+                                'consult_rate': booking.consult_rate,
+                                'charged': booking.charged
+                            })
+                
+        db.session.commit()
+        
+        return {
+            'exceptions': exceptions,
+            'conflicts': conflicts
+        }
+    
+    @token_auth.login_required(user_type=('staff',))
+    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        View availability exceptions. start and end window_ids are in reference to UTC.
+        To convert window_ids to real time please see /lookup/telehealth/booking-increments/.
+        """
+        check_user_existence(user_id, user_type='staff')
+        
+        return TelehealthStaffAvailabilityExceptions.query.all()
+    
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsDeleteSchema(many=True), api=ns)
+    def delete(self, user_id):
+        """
+        Remove availability exceptions.
+        """
+        exception_ids = []
+        for exception in request.parsed_obj:
+            exception_ids.append(exception['exception_id'])
+        
+        TelehealthStaffAvailabilityExceptions.query.filter(
+            TelehealthStaffAvailabilityExceptions.user_id == user_id,
+            TelehealthStaffAvailabilityExceptions.idx.in_(exception_ids)
+        ).delete()
+        db.session.commit()       
+        
+        return ('', 204)
+
 
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(BaseResource):

@@ -25,7 +25,7 @@ from odyssey.tasks.tasks import (
     cancel_noshow_appointment,
     update_apple_subscription
 )
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAvailabilityExceptions
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
@@ -392,6 +392,23 @@ def deploy_subscription_update_tasks(interval:int):
             update_apple_subscription.apply_async((subscription.user_id,),eta=task_eta)
     
     return 
+
+@celery.task()
+def remove_expired_availability_exceptions():
+    """
+    Checks for availability exceptions whose exception_date is in the past and removes them.
+    """
+    
+    current_date = datetime.now(timezone.utc)
+    logger.info('Deploying remove expired exceptions test')
+    exceptions = TelehealthStaffAvailabilityExceptions.query.filter(
+        TelehealthStaffAvailabilityExceptions.exception_date < current_date
+    )
+    
+    for exception in exceptions:
+        db.session.delete(exception)
+    db.session.commit()
+    logger.info('Completed remove expired exceptions task')
     
 @worker_process_init.connect
 def close_previous_db_connection(**kwargs):
@@ -454,5 +471,10 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
         'args': (60,),
         'schedule': crontab(minute='*/60')
+    },
+    #availability
+    'remove_expired_availability_exceptions': {
+        'task': 'odyssey.periodic.remove_expired_availability_exceptions',
+        'schedule': crontab(hour='0', minute='0')
     }
 }

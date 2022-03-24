@@ -18,7 +18,9 @@ from odyssey.api.telehealth.models import(
     TelehealthChatRooms, 
     TelehealthBookings, 
     TelehealthStaffAvailability, 
-    TelehealthBookingStatus)
+    TelehealthBookingStatus,
+    TelehealthStaffAvailabilityExceptions
+)
 from odyssey.api.telehealth.schemas import TelehealthBookingStatusSchema
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
@@ -129,7 +131,7 @@ def get_possible_ranges(
                 time_blocks[pos_start] = (
                     (target_date, weekday_start, pos_start - TELEHEALTH_START_END_BUFFER, pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER),
                 )
-    
+
     return time_blocks
 
 def get_practitioners_available(time_block, q_request):
@@ -180,10 +182,69 @@ def get_practitioners_available(time_block, q_request):
     # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
     available = {}
     for user_id, avail in query.all():
-        if user_id not in available:
-            available[user_id] = []
-        if avail:
-            available[user_id].append(avail)
+        #if avail falls inside an exception, do not add it
+        exception = False
+        
+        #detect if day 1 of booking is inside an exception for this practitioner on this date       
+        exception1 = TelehealthStaffAvailabilityExceptions.query \
+            .filter_by(user_id=user_id, exception_date=date1.date(), is_busy=True) \
+            .filter(
+                or_(
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day1_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day1_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day1_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day1_end
+                    )
+                )
+            ).all()
+            
+        if len(exception1) > 0:
+            exception = True
+            
+        if day2 and not exception:
+            #detect if day 2 of booking is inside an exception for this practitioner on this date       
+            exception2 = TelehealthStaffAvailabilityExceptions.query \
+            .filter_by(user_id=user_id, exception_date=date2.date(), is_busy=True) \
+            .filter(
+                or_(
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day2_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day2_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day2_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end
+                    ),
+                    and_(
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start,
+                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day2_end
+                    )
+                )
+            ).all()
+            
+            if len(exception2) > 0:
+                exception = True
+                
+        if not exception:
+            if user_id not in available:
+                available[user_id] = []
+            if avail:
+                available[user_id].append(avail)
     
 
     # filtering through scheduled bookings and removing those availabilities occupied by a booking.
