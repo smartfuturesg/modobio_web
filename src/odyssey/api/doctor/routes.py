@@ -1349,7 +1349,7 @@ class MedBloodTestImage(BaseResource):
         # add file to S3
         hex_token = secrets.token_hex(4)
         img = FileUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
-        img.allowed_types = ('pdf')
+        img.allowed_types = ('pdf',)
         img.max_size = MEDICAL_IMAGE_MAX_SIZE
         img.validate()
         img.save(f'test{test.test_id:05d}_{hex_token}.{img.extension}')
@@ -1552,7 +1552,7 @@ class AllMedBloodTestResults(BaseResource):
                     if not test.get('date', False):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
-                    # get presigned s3 link if present
+                        # get presigned s3 link if present
                         image_path = test.get('image')
                         if image_path:
                             test['image'] = fd.url(image_path)
