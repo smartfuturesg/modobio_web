@@ -1303,7 +1303,8 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     @responds(schema=TelehealthStaffAvailabilityExceptionsOutputSchema, api=ns, status_code=201)
     def post(self, user_id):
         """
-        Add new availability exception.
+        Add new availability exception. Start and end window_ids should be in reference to UTC.
+        To determine the correct window_ids, please see /lookup/telehealth/booking-increments/.
         """
         check_user_existence(user_id, user_type='staff')
         current_date = datetime.now(timezone.utc).date()
@@ -1380,7 +1381,8 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
-        View availability exceptions.
+        View availability exceptions. start and end window_ids are in reference to UTC.
+        To convert window_ids to real time please see /lookup/telehealth/booking-increments/.
         """
         check_user_existence(user_id, user_type='staff')
         
