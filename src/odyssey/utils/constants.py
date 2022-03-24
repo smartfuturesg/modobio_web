@@ -868,16 +868,16 @@ TWILIO_ACCESS_KEY_TTL = 14400
 BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed', 'Document Review')
 
 # profile and other image types allowed for upload
-ALLOWED_IMAGE_TYPES = ('png', 'jpg', 'jpeg')
+ALLOWED_IMAGE_TYPES = ('png', 'jpg')
 
 # medical image types allowed for upload
-ALLOWED_MEDICAL_IMAGE_TYPES = ('png', 'jpg', 'jpeg', 'dcm', 'dicom', 'pdf')
+ALLOWED_MEDICAL_IMAGE_TYPES = ('png', 'jpg', 'dcm', 'pdf')
 
 # Generic allowed files
-ALLOWED_FILE_TYPES = ('png', 'jpg', 'jpeg', 'doc', 'pdf', 'txt', 'md', 'csv')
+ALLOWED_FILE_TYPES = ('png', 'jpg', 'doc', 'pdf', 'txt', 'md', 'csv')
 
 # audio types allowed for upload
-ALLOWED_AUDIO_TYPES = ('m4a', 'caf')
+ALLOWED_AUDIO_TYPES = ('m4a',)
 
 #image resize thumbnail demensions (w, h) two-tuple
 IMAGE_DIMENSIONS = (
@@ -886,10 +886,11 @@ IMAGE_DIMENSIONS = (
     (128, 128),
     (64, 64))
 
-#image max size 10MB = 10485760 binary bytes
-IMAGE_MAX_SIZE = 10485760
+# 10485760 bytes = 10 Mb
 FILE_MAX_SIZE = 10485760
 AUDIO_MAX_SIZE = 10485760
+IMAGE_MAX_SIZE = 10485760
+MEDICAL_IMAGE_MAX_SIZE = 20971520
 
 ### Event's Calendar constants ###
 EVENT_AVAILABILITY = ('Busy', 'Available')
