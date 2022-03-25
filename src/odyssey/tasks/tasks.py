@@ -375,7 +375,7 @@ def store_telehealth_transcript(booking_id: int):
 
     # if there is media present in the transcript, store it in an s3 bucket
     hex_token = secrets.token_hex(4)
-    for message_id, message in enumerate(ranscript):
+    for message_id, message in enumerate(transcript):
         if message['media']:
             for media_id, media in enumerate(message['media']):
                 # download media from twilio 
