@@ -1,8 +1,9 @@
 import logging
+import secrets
+
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 
 from odyssey.integrations.apple import AppStore
-logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -26,6 +27,8 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
+
+logger = logging.getLogger(__name__)
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
