@@ -274,9 +274,9 @@ class FileDownload(S3Bucket):
         objs = tuple(self.bucket.objects.filter(Prefix=filename))
 
         if len(objs) == 0:
-            BadRequest(f'Filename {filename} not found.')
+            raise BadRequest(f'Filename {filename} not found.')
         elif len(objs) > 1:
-            BadRequest(f'Multiple files with name {filename} found.')
+            raise BadRequest(f'Multiple files with name {filename} found.')
 
         try:
             objs[0].delete()
