@@ -9,6 +9,7 @@ from io import BytesIO
 from PIL import Image
 import requests
 import uuid
+import secrets
 
 from flask import current_app
 from sqlalchemy import select
@@ -462,12 +463,13 @@ class Wheel:
             response = requests.get(clinician.get('photo'), stream=True)
             
             if response:
+                hex_token = secrets.token_hex(4)
                 original = ImageUpload(
                     BytesIO(response.content),
                     user.user_id,
                     prefix='staff_profile_picture')
                 original.validate()
-                original.save(f'original.{original.extension}')
+                original.save(f'original_{hex_token}.{original.extension}')
 
                 upp = UserProfilePictures(
                     staff_user_id=user.user_id,
@@ -477,9 +479,9 @@ class Wheel:
                     original=True)
                 db.session.add(upp)
 
-                for dimensions in IMAGE_DIMENSIONS:
-                    resized = original.resize(dimensions)
-                    resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
+                for dim in IMAGE_DIMENSIONS:
+                    resized = original.resize(dim)
+                    resized.save(f'size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}')
 
                     upp = UserProfilePictures(
                         staff_user_id=user.user_id,

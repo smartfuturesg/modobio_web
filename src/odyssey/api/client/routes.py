@@ -1,5 +1,5 @@
 import logging
-logger = logging.getLogger(__name__)
+import secrets
 
 import boto3
 from datetime import datetime, timedelta
@@ -112,6 +112,8 @@ from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.facility.schemas import ClientSummarySchema
 from odyssey.utils.base.resources import BaseResource
 
+logger = logging.getLogger(__name__)
+
 ns = Namespace('client', description='Operations related to clients')
 
 def process_race_and_ethnicity(user_id, mother, father):
@@ -209,18 +211,23 @@ class ClientProfilePicture(BaseResource):
         if 'profile_picture' not in request.files or not request.files['profile_picture']:
             raise BadRequest('No file selected.')
 
+        client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
+        if not client:
+            raise BadRequest(f'Client {user_id} not found.')
+
         # Keep existing, delete only after successfully uploading new images.
-        prev_pics = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+        prev_pics = client.profile_pictures
 
         urls = {}
 
         # Save original image to S3.
+        hex_token = secrets.token_hex(4)
         original = ImageUpload(
             request.files['profile_picture'].stream,
             user_id,
             prefix='client_profile_pictures')
         original.validate()
-        original.save(f'original.{original.extension}')
+        original.save(f'original_{hex_token}.{original.extension}')
         urls['original'] = original.url()
 
         # Save image metadata in DB.
@@ -233,9 +240,9 @@ class ClientProfilePicture(BaseResource):
         db.session.add(upp)
 
         # Resize cropped image to multiple sizes.
-        for dimensions in IMAGE_DIMENSIONS:
-            resized = original.resize(dimensions)
-            resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
+        for dim in IMAGE_DIMENSIONS:
+            resized = original.resize(dim)
+            resized.save(f'size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}')
             urls[str(resized.width)] = resized.url()
 
             upp = UserProfilePictures(
