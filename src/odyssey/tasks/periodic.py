@@ -303,6 +303,8 @@ def find_chargable_bookings():
 
     for booking in bookings:
         logger.info(f'chargable booking detected with id {booking.idx}')
+        booking.charged = True
+        db.session.commit()
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('charge booking task completed')
         
