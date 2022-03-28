@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 from odyssey.utils.constants import DAY_OF_WEEK
 
 today = datetime.utcnow().weekday()
-days_til_monday = timedelta(weeks= 1, days= -today + DAY_OF_WEEK.index('Monday'))
+days_til_monday = timedelta(weeks= 2, days= -today + DAY_OF_WEEK.index('Monday'))
 target_date_next_monday = datetime.utcnow() + days_til_monday
 
 # For readability
