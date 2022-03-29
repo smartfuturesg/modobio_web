@@ -145,7 +145,7 @@ telehealth_staff_14_general_availability_post_data = {
 # client staff bookings
 # ---------------------
 telehealth_bookings_staff_4_client_1_data = {
-  'target_date': '2022-04-04',
+  'target_date': (datetime.now() + timedelta(days=1)).isoformat(),
   'booking_window_id_start_time': 109, #9:00
   'booking_window_id_end_time': 112
 }

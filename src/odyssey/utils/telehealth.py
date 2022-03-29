@@ -223,13 +223,13 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
     # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
     practitioner_details = {}
     for practitioner, consult_rate in practitioners:
-        breakpoint()
-        fd = FileDownload(practitioner.user_id)
         urls = {}
-        for pic in practitioner.staff_profile.profile_pictures:
-            if pic.original:
-                continue
-            urls[str(pic.width)] = fd.url(pic.image_path)
+        if len(practitioner.staff_profile.profile_pictures) > 0:
+            fd = FileDownload(practitioner.user_id)
+            for pic in practitioner.staff_profile.profile_pictures:
+                if pic.original:
+                    continue
+                urls[str(pic.width)] = fd.url(pic.image_path)
 
         # get presinged url to available practitioners' profile picture
         # it's done here so we only call S3 once per practitioner available

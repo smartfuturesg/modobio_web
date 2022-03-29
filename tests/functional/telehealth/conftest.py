@@ -14,7 +14,7 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
+from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffOperationalTerritories
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthStaffSettings
 from odyssey.integrations.twilio import Twilio
@@ -76,6 +76,9 @@ def telehealth_staff(test_client):
         test_client.db.session.add(staff_login)
         consult_rate = 100.00
 
+        staff_profile = StaffProfile(user_id = staff.user_id)
+        test_client.db.session.add(staff_profile)
+        test_client.db.session.commit()
         if i < 5:
             staff_role = StaffRoles(
                 user_id=staff.user_id,

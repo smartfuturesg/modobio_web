@@ -43,7 +43,7 @@ def test_client_time_select(test_client, staff_availabilities):
         headers=test_client.client_auth_header)
 
     assert response.status_code == 200
-    assert response.json['total_options'] == 30
+    assert response.json['total_options'] == 89
 
 def test_generate_staff_availability(test_client, telehealth_staff):
     """
@@ -78,8 +78,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
 
     queue_data = {
         'profession_type': 'medical_doctor',
-        'target_date': datetime.strptime(
-            telehealth_bookings_staff_4_client_1_data.get('target_date'), '%Y-%m-%d').isoformat(),
+        'target_date': telehealth_bookings_staff_4_client_1_data.get('target_date'),
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
