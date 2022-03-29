@@ -1,0 +1,20 @@
+INSERT INTO "LookupDevNames" ("name") 
+VALUES
+('Alejandro Lorenzo'),
+('Dalton Harenza'),
+('Rendell Banzon'),
+('Rosangelica Magdaleno'),
+('Steve Thach'),
+('Zan Peeters'),
+('Aneta Opletalová'),
+('David Kuboš'),
+('Jakub Freywald'),
+('Libor Zahradka'),
+('Lukas Krajci'),
+('Matej Kubinec'),
+('Ondřej Patočka'),
+('Sebastian Brostl'),
+('Tomáš Blažek'),
+('Erika Doniecova'),
+('Darrian Brown'),
+('Trevor Stahl');
