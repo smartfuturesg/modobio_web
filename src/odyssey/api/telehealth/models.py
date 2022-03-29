@@ -483,7 +483,7 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     :type: str
     """
 
-    images = db.Column(db.ARRAY(db.String(1024), dimensions=1))
+    images = db.Column(db.ARRAY(db.String(1024), dimensions=1), nullable=True)
     """
     List of paths to images stored on S3.
 
