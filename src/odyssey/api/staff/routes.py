@@ -1,6 +1,7 @@
 import calendar
 import copy
 import logging
+import secrets
 
 from datetime import time, datetime, timedelta
 
@@ -437,12 +438,13 @@ class StaffProfilePage(BaseResource):
             urls = {}
 
             # Original image
+            hex_token = secrets.token_hex(4)
             original = ImageUpload(
                 request.files['profile_picture'].stream,
                 user_id,
                 prefix='staff_profile_picture')
             original.validate()
-            original.save(f'original.{original.extension}')
+            original.save(f'original_{hex_token}.{original.extension}')
             urls['original'] = original.url()
 
             upp = UserProfilePictures(
@@ -454,9 +456,9 @@ class StaffProfilePage(BaseResource):
             db.session.add(upp)
 
             # Resized images
-            for dimensions in IMAGE_DIMENSIONS:
-                resized = original.resize(dimensions)
-                resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
+            for dim in IMAGE_DIMENSIONS:
+                resized = original.resize(dim)
+                resized.save(f'size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}')
                 urls[str(resized.width)] = resized.url()
 
                 upp = UserProfilePictures(
