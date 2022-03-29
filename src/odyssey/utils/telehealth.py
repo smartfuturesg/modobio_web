@@ -223,6 +223,7 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
     # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
     practitioner_details = {}
     for practitioner, consult_rate in practitioners:
+        breakpoint()
         fd = FileDownload(practitioner.user_id)
         urls = {}
         for pic in practitioner.staff_profile.profile_pictures:

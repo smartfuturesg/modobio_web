@@ -25,7 +25,32 @@ from .client_select_data import (
     payment_method_data
 )
 
+def test_generate_client_queue(test_client, payment_method):
+    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    response = test_client.post(
+        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(telehealth_queue_client_3_data),
+        content_type='application/json')
+
+    assert response.status_code == 201
+
+def test_client_time_select(test_client, staff_availabilities):
+    # clear queue, staff availabilities and create another entry
+    # clear all availabilities before this
+    response = test_client.get(
+        f'/telehealth/client/time-select/{test_client.client_id}/',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+    assert response.json['total_options'] == 30
+
 def test_generate_staff_availability(test_client, telehealth_staff):
+    """
+    fill up the staff availabilities
+    add client to queue
+    view current availabilities
+    """
     availability_data = [
         telehealth_staff_4_general_availability_post_data,
         telehealth_staff_6_general_availability_post_data,
@@ -147,23 +172,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
 
     assert response.status_code == 201
 
-def test_generate_client_queue(test_client, payment_method):
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
-    response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
 
-    assert response.status_code == 201
-
-def test_client_time_select(test_client):
-    response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
-
-    assert response.status_code == 200
-    assert response.json['total_options'] == 30
 
 def test_full_system_with_settings(test_client, payment_method):
     """

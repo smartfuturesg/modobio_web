@@ -2,6 +2,9 @@
 # Data to generate staff availability
 # -----------------------------------
 # Staff ID 4
+from datetime import datetime, timedelta
+
+
 telehealth_staff_4_general_availability_post_data = {
   'settings': {
     'timezone': 'UTC',
@@ -163,7 +166,7 @@ telehealth_bookings_staff_8_client_5_data = {
 
 telehealth_queue_client_3_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2022-04-04T02:00:00.000',
+  'target_date': (datetime.now() + timedelta(days=1)).isoformat(),
   'priority': True,
   'medical_gender': 'np',
   'location_id': 1,
