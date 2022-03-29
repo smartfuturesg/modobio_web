@@ -1358,20 +1358,21 @@ class MedBloodTestImage(BaseResource):
         test.image_path = img.filename
         db.session.commit()
 
-        fd = FileDownload(test.user_id)
-
         # Upload successful, delete previous
         if prev_image:
+            fd = FileDownload(test.user_id)
             fd.delete(prev_image)
 
-        reporter = User.query.filter_by(user_id=test[0].reporter_id).one_or_none()
+        reporter = User.query.filter_by(user_id=test.reporter_id).one_or_none()
         reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
         reporter_pic = None
         if reporter_pictures:
-            fd2 = FileDownload(reporter.user_id)
+            fd = FileDownload(reporter.user_id)
             reporter_pic = {}
             for pic in reporter_pictures:
-                reporter_pic[pic.image_path] = fd2.url(pic.image_path)
+                if pic.original:
+                    continue
+                reporter_pic[str(pic.width)] = fd.url(pic.image_path)
         
         res = {
             'test_id': test.test_id,
@@ -1382,7 +1383,7 @@ class MedBloodTestImage(BaseResource):
             'reporter_lastname': reporter.lastname,
             'reporter_id': test.reporter_id,
             'reporter_profile_pictures': reporter_pic,
-            'image': fd.url(test.image_path) 
+            'image': img.url() 
         }
         
         return res
@@ -1435,7 +1436,9 @@ class MedBloodTestAll(BaseResource):
                 fd2 = FileDownload(reporter.user_id)
                 reporter_pic = {}
                 for pic in reporter_pictures:
-                    reporter_pic[pic.image_path] = fd2.url(pic.image_path)
+                    if pic.original:
+                        continue
+                    reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
                     
             data = test[0].__dict__
             data.update(
@@ -1498,7 +1501,9 @@ class MedBloodTestResults(BaseResource):
             fd2 = FileDownload(reporter.user_id)
             reporter_pic = {}
             for pic in reporter_pictures:
-                reporter_pic[pic.image_path] = fd2.url(pic.image_path)
+                if pic.original:
+                    continue
+                reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
                 
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
@@ -1597,7 +1602,9 @@ class AllMedBloodTestResults(BaseResource):
                     fd2 = FileDownload(reporter.user_id)
                     reporter_pic = {}
                     for pic in reporter_pictures:
-                        reporter_pic[pic.image_path] = fd2.url(pic.image_path)
+                        if pic.original:
+                            continue
+                        reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
                 test['reporter_profile_pictures'] = reporter_pic
                                 
         payload = {}
