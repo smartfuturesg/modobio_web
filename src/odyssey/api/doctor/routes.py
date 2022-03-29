@@ -33,7 +33,7 @@ from odyssey.api.doctor.models import (
 )
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserProfilePictures
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
 from odyssey.utils.files import FileDownload, FileUpload, ImageUpload
@@ -1358,12 +1358,21 @@ class MedBloodTestImage(BaseResource):
         test.image_path = img.filename
         db.session.commit()
 
-        # Upload successfull, delete previous
+        # Upload successful, delete previous
         if prev_image:
             fd = FileDownload(test.user_id)
             fd.delete(prev_image)
 
         reporter = User.query.filter_by(user_id=test.reporter_id).one_or_none()
+        reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+        reporter_pic = None
+        if reporter_pictures:
+            fd = FileDownload(reporter.user_id)
+            reporter_pic = {}
+            for pic in reporter_pictures:
+                if pic.original:
+                    continue
+                reporter_pic[str(pic.width)] = fd.url(pic.image_path)
         
         res = {
             'test_id': test.test_id,
@@ -1373,7 +1382,8 @@ class MedBloodTestImage(BaseResource):
             'reporter_firstname': reporter.firstname,
             'reporter_lastname': reporter.lastname,
             'reporter_id': test.reporter_id,
-            'image': fd.url(test.image_path) 
+            'reporter_profile_pictures': reporter_pic,
+            'image': img.url() 
         }
         
         return res
@@ -1412,15 +1422,29 @@ class MedBloodTestAll(BaseResource):
         # prepare response items with reporter name from User table
         response = []
         fd = FileDownload(user_id)
+            
         for test in blood_tests:
             if test[0].image_path:
                 image_path = fd.url(test[0].image_path)
             else:
                 image_path = None
+            
+            reporter = User.query.filter_by(user_id=test[0].reporter_id).one_or_none()
+            reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+            reporter_pic = None
+            if reporter_pictures:
+                fd2 = FileDownload(reporter.user_id)
+                reporter_pic = {}
+                for pic in reporter_pictures:
+                    if pic.original:
+                        continue
+                    reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+                    
             data = test[0].__dict__
             data.update(
                 {'reporter_firstname': test[1],
                  'reporter_lastname': test[2],
+                 'reporter_profile_pictures': reporter_pic,
                  'image': image_path})
             response.append(data)
         payload = {}
@@ -1469,6 +1493,18 @@ class MedBloodTestResults(BaseResource):
             image_path = fd.url(results[0][0].image_path)
         else:
             image_path = None
+            
+        reporter = User.query.filter_by(user_id=results[0][0].reporter_id).one_or_none()
+        reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+        reporter_pic = None
+        if reporter_pictures:
+            fd2 = FileDownload(reporter.user_id)
+            reporter_pic = {}
+            for pic in reporter_pictures:
+                if pic.original:
+                    continue
+                reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+                
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
@@ -1477,6 +1513,7 @@ class MedBloodTestResults(BaseResource):
                           'reporter_id': results[0][0].reporter_id,
                           'reporter_firstname': results[0][3].firstname,
                           'reporter_lastname': results[0][3].lastname,
+                          'reporter_profile_pictures': reporter_pic,
                           'results': []} 
         
         # loop through results in order to nest results in their respective test
@@ -1556,6 +1593,19 @@ class AllMedBloodTestResults(BaseResource):
                         image_path = test.get('image')
                         if image_path:
                             test['image'] = fd.url(image_path)
+
+                #retrieve reporter profile pic
+                reporter = User.query.filter_by(user_id=test['reporter_id']).one_or_none()
+                reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+                reporter_pic = None
+                if reporter_pictures:
+                    fd2 = FileDownload(reporter.user_id)
+                    reporter_pic = {}
+                    for pic in reporter_pictures:
+                        if pic.original:
+                            continue
+                        reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+                test['reporter_profile_pictures'] = reporter_pic
                                 
         payload = {}
         payload['items'] = nested_results
