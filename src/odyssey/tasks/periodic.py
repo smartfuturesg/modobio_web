@@ -5,14 +5,11 @@ from odyssey.integrations.dosespot import DoseSpot
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, date, timedelta
-import requests
-import json
 
 from datetime import datetime, date, timedelta, timezone
-from flask import current_app
 
 from celery.schedules import crontab
-from celery.signals import task_prerun, worker_ready   
+from celery.signals import worker_process_init, worker_ready   
 from celery.utils.log import get_task_logger
 from sqlalchemy import delete, text
 from sqlalchemy import and_, or_, select
@@ -28,11 +25,10 @@ from odyssey.tasks.tasks import (
     cancel_noshow_appointment,
     update_apple_subscription
 )
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAvailabilityExceptions
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
-from odyssey.api.system.models import SystemTelehealthSessionCosts
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import cancel_telehealth_appointment
 
@@ -396,10 +392,29 @@ def deploy_subscription_update_tasks(interval:int):
             update_apple_subscription.apply_async((subscription.user_id,),eta=task_eta)
     
     return 
+
+@celery.task()
+def remove_expired_availability_exceptions():
+    """
+    Checks for availability exceptions whose exception_date is in the past and removes them.
+    """
     
-@task_prerun.connect()
+    current_date = datetime.now(timezone.utc)
+    logger.info('Deploying remove expired exceptions test')
+    exceptions = TelehealthStaffAvailabilityExceptions.query.filter(
+        TelehealthStaffAvailabilityExceptions.exception_date < current_date
+    )
+    
+    for exception in exceptions:
+        db.session.delete(exception)
+    db.session.commit()
+    logger.info('Completed remove expired exceptions task')
+    
+@worker_process_init.connect
 def close_previous_db_connection(**kwargs):
-    db.engine.dispose()
+    if db.session:
+        db.session.close()
+        db.engine.dispose()
 
 celery.conf.beat_schedule = {
     # look for upcoming apppointment within moving windows:
@@ -456,5 +471,10 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
         'args': (60,),
         'schedule': crontab(minute='*/60')
+    },
+    #availability
+    'remove_expired_availability_exceptions': {
+        'task': 'odyssey.periodic.remove_expired_availability_exceptions',
+        'schedule': crontab(hour='0', minute='0')
     }
 }

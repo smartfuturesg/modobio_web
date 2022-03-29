@@ -223,42 +223,45 @@ class BasicAuth(object):
         return
 
     def staff_access_check(self, user, user_type, resources, staff_roles=None):
-        '''
+        """ Check whether staff member has access rights.
+
         staff_access_check method will be used to determine if a Staff
         member has the correct role and care team priveledges to access the API
 
         Altogether, here are the variables involved in staff member authorization:
-            - being logged in as a staff member (utype='staff' in the token payload)
-            - care team resources (e.g. token_auth.login_required(resources=('MedicalHistory',)))
-            - staff_role (e.g. token_auth.login_required(staff_role=('medical_doctor',)
+
+        - being logged in as a staff member (utype='staff' in the token payload)
+        - care team resources (e.g. token_auth.login_required(resources=('MedicalHistory',)))
+        - staff_role (e.g. token_auth.login_required(staff_role=('medical_doctor',)
             
         There are several scenarios which staff can access endpoints from:
-        1. Endpoint requires only a valid token. In which case, no further access checks are required
-           this function is skipped.
 
-        2. Staff is trying to access their own resources.
+        1.  Endpoint requires only a valid token. In which case, no further access
+            checks are required this function is skipped.
+        2.  Staff is trying to access their own resources.
+
             - user_id (or sometimes staff_user_id) will be a request argument
             - 'staff_self' will be in user_type
-           Using these two pieces of info, we will just check that the logged-in
-           user is the same as the user being requested in the request argument (user_id or staff_user_id)
 
-        3a. Staff is accessing a client's resources and there are no role or resource checks specified:
-            - Just being a staff member grants access to endpoint
+            Using these two pieces of info, we will just check that the logged-in
+            user is the same as the user being requested in the request argument
+            (user_id or staff_user_id)
 
-        3b. Staff is accessing a client's resources and ONLY user_type is specified
-            - staff member must meet role requirements for all request methods
+        3.  Staff is accessing client's resouces. There are several possibilities.
 
-        3c. Staff is accessing a client's resources and ONLY resources are specified
-            - check against resources authorized through the clinical care team system
-            -all request methods allowed if resource access check passes
-
-        3d. Staff is accessing a client's resources and BOTH resources and user_type are specified
-            - check against resources authorized through the clinical care team system
-            - if the request method != GET, staff must also meet role requirements
-                e.g. only medical_doctor role may view AND edit blood test results for a clien
-
-
-        '''
+            a.  There are no role or resource checks specified. Just being a staff
+                member grants access to endpoint.
+            b.  Only ``user_type`` is specified. Staff member must meet role
+                requirements for all request methods.
+            c.  Only resources are specified. Check against resources authorized
+                through the clinical care team system. All request methods allowed
+                if resource access check passes.
+            d.  Both resources and ``user_type`` are specified. Check against
+                resources authorized through the clinical care team system. If the
+                request method is not GET, staff must also meet role requirements,
+                e.g. only medical_doctor role may view and edit blood test results
+                for a client.
+        """
         # bring up the roles for the staff member
         staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==user.user_id).all()
         staff_user_roles = [x[0] for x in staff_user_roles]
@@ -407,7 +410,8 @@ class TokenAuth(BasicAuth):
         secret = current_app.config['SECRET_KEY']
         try:
             decoded_token = jwt.decode(token, secret, algorithms='HS256')
-        except jwt.exceptions.DecodeError:
+        # Capture all possible JWT errors
+        except jwt.exceptions.PyJWTError:
             raise Unauthorized
 
         # ensure token is an access token type

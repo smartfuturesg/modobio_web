@@ -120,7 +120,6 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
         exclude = ('created_at', 'updated_at', 'user_id')
         dump_only = ( 'membersince', 'membersince', 'height', 'weight', 'waist_size')
-    state_id = fields.Integer() #TODO remove when FE sends territory_id instead
     dob = fields.Date()
     primary_goal = fields.String()
     race_information = fields.Nested(ClientRaceAndEthnicityEditSchema)

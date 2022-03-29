@@ -2,9 +2,11 @@ import logging
 import pathlib
 import pytz
 
-from flask import current_app
+from flask import current_app, request
 from flask_accepts import responds
 from flask_restx import Namespace
+
+from werkzeug.exceptions import BadRequest
 
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
@@ -33,7 +35,8 @@ from odyssey.api.lookup.models import (
      LookupCurrencies,
      LookupNotificationSeverity,
      LookupBloodTests,
-     LookupBloodTestRanges
+     LookupBloodTestRanges,
+     LookupVisitReasons
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -66,7 +69,8 @@ from odyssey.api.lookup.schemas import (
     LookupNotificationSeverityOutputSchema,
     LookupBloodTestsOutputSchema,
     LookupBloodTestRangesOutputSchema,
-    LookupBloodTestRangesAllOutputSchema
+    LookupBloodTestRangesAllOutputSchema,
+    LookupVisitReasonsOutputSchema
 )
 from odyssey import db
 from odyssey.utils.auth import token_auth
@@ -547,3 +551,24 @@ class LookupBloodTestRangesAllApi(BaseResource):
                 range.race = None
             res.append({'test': test, 'range': range})
         return {'total_items': len(res), 'items': res}
+
+@ns.route('/visit-reasons/')
+@ns.doc(params={'role': 'role for which some of all visit reasons apply'})
+class LookupVisitReasonsApi(BaseResource):
+    """
+    Endpoint that returns visit reasons for all or a specific role
+    """
+    @token_auth.login_required
+    @responds(schema=LookupVisitReasonsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        role_param = request.args.get('role')
+
+        if role_param == None:
+            reasons = LookupVisitReasons.query.all()
+        else:
+            role = LookupRoles.query.filter_by(role_name = role_param).one_or_none()
+            if not role:
+                raise BadRequest(f'Role:{role_param} not found.')
+            reasons = LookupVisitReasons.query.filter_by(role_id=role.idx).all()
+
+        return {'total_items': len(reasons), 'items': reasons}

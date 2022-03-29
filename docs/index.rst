@@ -17,6 +17,7 @@ Odyssey
    Database models <odyssey/odyssey.models>
    Validation schemas <odyssey/odyssey.schemas>
    API endpoints <odyssey/odyssey.api>
+   Third party integrations <odyssey/odyssey.integrations>
    Tasks <odyssey/odyssey.tasks>
    Utilities <odyssey/odyssey.utils>
 

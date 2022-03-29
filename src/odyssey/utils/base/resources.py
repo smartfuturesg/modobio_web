@@ -37,8 +37,8 @@ class BaseResource(Resource):
         :attr:`User.is_staff`=True. If ``user_type``=None, any combination of
         :attr:`User.is_client` and :attr:`User.is_staff` is accepted.
 
-        Params
-        ------
+        Parameters
+        ----------
         user_id : int
             User ID number of the requested User info.
 
@@ -119,8 +119,8 @@ class BaseResource(Resource):
                     # SomeTable will _not_ be checked.
                     ...
 
-        Params
-        ------
+        Parameters
+        ----------
         func : callable
             HTTP method function to wrap.
 

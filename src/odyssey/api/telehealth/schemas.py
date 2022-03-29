@@ -19,10 +19,11 @@ from odyssey.api.telehealth.models import (
     TelehealthBookings,
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
+    TelehealthStaffAvailabilityExceptions,
     TelehealthMeetingRooms,
     TelehealthQueueClientPool,
     TelehealthBookingDetails,
-    TelehealthStaffSettings
+    TelehealthStaffSettings,  
 )
 from odyssey.api.user.models import User
 from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, USSTATES_2
@@ -154,6 +155,27 @@ class TelehealthStaffAvailabilityInputSchema(Schema):
     day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
     start_time = fields.Time()
     end_time = fields.Time()
+    
+class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthStaffAvailabilityExceptions
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx',)
+        
+    user_id = fields.Integer(dump_only=True)
+    exception_booking_window_id_start_time = fields.Integer()
+    exception_booking_window_id_end_time = fields.Integer()
+        
+    @post_load
+    def make_object(self, data, **kwargs):
+        return TelehealthStaffAvailabilityExceptions(**data)
+    
+class TelehealthStaffAvailabilityExceptionsOutputSchema(Schema):
+    exceptions = fields.Nested(TelehealthStaffAvailabilityExceptionsSchema(many=True), missing=[])
+    conflicts = fields.Nested(TelehealthBookingsSchema(many=True), missing=[])
+        
+class TelehealthStaffAvailabilityExceptionsDeleteSchema(Schema):
+    exception_id = fields.Integer()
  
 class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

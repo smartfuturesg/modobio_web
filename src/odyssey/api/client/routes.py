@@ -70,7 +70,7 @@ from odyssey.utils.misc import (
     check_client_existence, 
     check_drink_existence
 )
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.files import FileDownload, ImageUpload
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 
 from odyssey.api.client.schemas import(
@@ -177,101 +177,96 @@ def process_race_and_ethnicity(user_id, mother, father):
 
 @ns.route('/profile-picture/<int:user_id>/')
 class ClientProfilePicture(BaseResource):
-    """
-    Enpoint to edit client's profile picture
-    """
-    @token_auth.login_required(user_type=('client',))
-    @responds(schema=ClientInfoSchema(only=['user_id','profile_picture']), status_code=200, api=ns)
-    def put(self, user_id):
-        """
-        Put will be used to add new or change a profile picture for a client
+    """ Enpoint to edit client profile picture. """
 
-        Accepts form-data, will only handle one image
-        "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
+    @token_auth.login_required(user_type=('client',))
+    @responds(schema=ClientInfoSchema(only=['user_id', 'profile_picture']), status_code=200, api=ns)
+    def put(self, user_id):
+        """ Add or change profile picture.
+
+        Accepts only form-data, will only handle one image per request.
+
+        Parameters
+        ----------
+        user_id : int
+            User ID number.
+
+        profile_picture : bytes
+            Form entry name that holds the uploaded image.
+
+        Returns
+        -------
+        dict
+            The response contains user_id (why?) and profile_picture. Profile_picture
+            is another dict that contains the filenames and the presigned URLs for
+            the profile picture in different sizes.
         """
         self.check_user(user_id, user_type='client')
 
-        if not ('profile_picture' in request.files and request.files['profile_picture']):  
+        if len(request.files) != 1:
+            raise BadRequest('Only one image upload allowed.')
+
+        if 'profile_picture' not in request.files or not request.files['profile_picture']:
             raise BadRequest('No file selected.')
 
-        # add all files to S3 - Naming it specifically as client_profile_picture to differentiate from staff profile pic
-        # format: id{user_id:05d}/client_profile_picture/size{img.length}x{img.width}.img_extension
-        fh = FileHandling()
-        img = request.files['profile_picture']
-        res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
-        _prefix = f'id{user_id:05d}/client_profile_picture'
+        # Keep existing, delete only after successfully uploading new images.
+        prev_pics = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
 
-        # validate file size - safe threashold (MAX = 10 mb)
-        fh.validate_file_size(img, IMAGE_MAX_SIZE)
-        # validate file type
-        img_extension = fh.validate_file_type(img, ALLOWED_IMAGE_TYPES)
+        urls = {}
 
-        # if any, delete files with clien_profile_picture prefix
-        fh.delete_from_s3(prefix=_prefix)
-        # delete entries to UserProfilePictures in db
-        for _obj in res:
-            db.session.delete(_obj)
+        # Save original image to S3.
+        original = ImageUpload(
+            request.files['profile_picture'].stream,
+            user_id,
+            prefix='client_profile_pictures')
+        original.validate()
+        original.save(f'original.{original.extension}')
+        urls['original'] = original.url()
 
-        # Save original to S3
-        open_img = Image.open(img)
-        img_w, img_h = open_img.size
-        original_s3key = f'{_prefix}/original{img_extension}'
-        fh.save_file_to_s3(img, original_s3key)
+        # Save image metadata in DB.
+        upp = UserProfilePictures(
+            client_user_id=user_id,
+            image_path=original.filename,
+            width=original.width,
+            height=original.height,
+            original=True)
+        db.session.add(upp)
 
-        # Save original to db
-        user_profile_pic = UserProfilePictures()
-        user_profile_pic.original = True
-        user_profile_pic.client_user_id = user_id
-        user_profile_pic.image_path = original_s3key
-        user_profile_pic.width = img_w
-        user_profile_pic.height = img_h
-        db.session.add(user_profile_pic)
+        # Resize cropped image to multiple sizes.
+        for dimensions in IMAGE_DIMENSIONS:
+            resized = original.resize(dimensions)
+            resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
+            urls[str(resized.width)] = resized.url()
 
-        # crop new uploaded image into a square
-        squared = fh.image_crop_square(img)
-
-        # resize to sizes specified by the tuple of tuples in constant IMAGE_DEMENSIONS
-        for dimension in IMAGE_DIMENSIONS:
-            _img = fh.image_resize(squared, dimension)
-            # save to s3 bucket
-            _img_s3key = f'{_prefix}/{_img.filename}'
-            fh.save_file_to_s3(_img, _img_s3key)
-
-            # save to database
-            w, h = dimension
-            user_profile_pic = UserProfilePictures()
-            user_profile_pic.client_user_id = user_id
-            user_profile_pic.image_path = _img_s3key
-            user_profile_pic.width = w
-            user_profile_pic.height = h
-            db.session.add(user_profile_pic)
-
-        # get presigned urls
-        res = fh.get_presigned_urls(prefix=_prefix)
-        img.close()
+            upp = UserProfilePictures(
+                client_user_id=user_id,
+                image_path=resized.filename,
+                width=resized.width,
+                height=resized.height)
+            db.session.add(upp)
 
         db.session.commit()
-        return {'user_id': user_id, 'profile_picture': res}
+
+        # Successfully stored new images, delete previous.
+        fd = FileDownload(user_id)
+        for pic in prev_pics:
+            fd.delete(pic.image_path)
+            db.session.delete(pic)
+
+        db.session.commit()
+        return {'user_id': user_id, 'profile_picture': urls}
 
     @token_auth.login_required(user_type=('client',))
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
-        """
-        Request to delete the client's profile picture
-        """
+        """ Delete client profile picture. """
         self.check_user(user_id, user_type='client')
 
-        fh = FileHandling()
-        _prefix = f'id{user_id:05d}/client_profile_picture'
-
-        # if any, delete files with clien_profile_picture prefix
-        fh.delete_from_s3(prefix=_prefix)
-
-        # delete entries to UserProfilePictures in db
-        res = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
-        for _obj in res:
-            db.session.delete(_obj)
-
+        fd = FileDownload(user_id)
+        pics = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
+        for pic in pics:
+            fd.delete(pic.image_path)
+            db.session.delete(pic)
         db.session.commit()
 
 
@@ -336,11 +331,14 @@ class Client(BaseResource):
         # keep to not have the FE change any code on their side
         client_info_payload["dob"] = user_data.dob
 
-        #Include profile picture in different sizes
-        if client_data.profile_pictures:
-            fh = FileHandling()
-            _prefix = f'id{user_id:05d}/client_profile_picture'
-            client_info_payload["profile_picture"] = fh.get_presigned_urls(_prefix)
+        # Include profile picture in different sizes
+        fd = FileDownload(user_id)
+        urls = {}
+        for pic in client_data.profile_pictures:
+            if pic.original:
+                continue
+            urls[pic.width] = fd.url(pic.image_path)
+        client_info_payload['profile_picture'] = urls
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 
@@ -349,7 +347,6 @@ class Client(BaseResource):
     @responds(schema=ClientAndUserInfoSchema, status_code=200, api=ns)
     def put(self, user_id):
         """edit client info"""
-
         self.check_user(user_id, user_type='client')
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
@@ -400,13 +397,6 @@ class Client(BaseResource):
                 dob = client_info['dob']
                 del client_info['dob']
                 user_data.update({'dob':dob})
-                
-            # handle state_id field: 
-            #  ClientInfo.state_id removed and replaced with territory_id as of 12.8.21 
-            #  however the FE still expects to send it in this request
-            if 'state_id' in client_info:
-                client_info['territory_id'] = client_info['state_id']
-                del client_info['state_id']
 
             client_data.update(client_info)
         if request.parsed_obj['user_info']:
@@ -427,8 +417,8 @@ class Client(BaseResource):
             client_info_payload['dob'] = dob
 
         #validate territory_id if supplied
-        if 'territory_id' in request.parsed_obj['client_info'].keys():
-            territory_id = request.parsed_obj['client_info']['territory_id']
+        territory_id = request.parsed_obj['client_info'].get('territory_id')
+        if territory_id:
             territory = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id).one_or_none()
             if not territory:
                 raise BadRequest(f'Territory {territory_id} not found.')
@@ -873,7 +863,7 @@ class SignedDocuments(BaseResource):
         urls = {}
         paths = []
 
-        fh = FileHandling()
+        fd = FileDownload(user_id)
 
         for table in (
             ClientPolicies,
@@ -891,7 +881,7 @@ class SignedDocuments(BaseResource):
             if result and result.pdf_path:
                 paths.append(result.pdf_path)
 
-                url = fh.get_presigned_url(result.pdf_path)
+                url = fd.url(result.pdf_path)
                 urls[table.displayname] = url
 
         concat = merge_pdfs(paths, user_id)
@@ -1154,7 +1144,8 @@ class ClinicalCareTeamMembers(BaseResource):
                                     ClientClinicalCareTeam.user_id == user_id
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
-        fh = FileHandling()
+
+        fd = FileDownload(user_id)
 
         for team_member in current_team_users:
             staff_roles = None
@@ -1168,8 +1159,12 @@ class ClinicalCareTeamMembers(BaseResource):
 
             if staff_profile:
                 membersince = staff_profile.membersince
-                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]                
-                profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
+                profile_pic_path = [
+                    pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]
+                profile_pic = None
+                if profile_pic_path:
+                    profile_pic = fd.url(profile_pic_path[0])
+
                 staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
                 is_staff = True
             else:
@@ -1182,9 +1177,12 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 if client_profile:
                     membersince = client_profile.membersince
-                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
-                    profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
-            
+                    profile_pic_path = [
+                        pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]
+                    profile_pic = None
+                    if profile_pic_path:
+                        profile_pic = fd.url(profile_pic_path[0])
+
             #bring up the authorizations this care team member has for the client
             team_member_authorizations = db.session.execute(
                 select(ClientClinicalCareTeamAuthorizations, LookupClinicalCareTeamResources.display_name
@@ -1270,53 +1268,74 @@ class ClinicalCareTeamMembers(BaseResource):
         # prepare response with names for clinical care team members who are also users 
         current_team = []
         current_team_users = db.session.query(
-                                    ClientClinicalCareTeam, User
-                                ).filter(
-                                    ClientClinicalCareTeam.user_id == user_id
-                                ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
-                                ).all()
-        fh = FileHandling()
+                ClientClinicalCareTeam, User
+            ).filter(
+                ClientClinicalCareTeam.user_id == user_id,
+                ClientClinicalCareTeam.team_member_user_id == User.user_id
+            ).all()
+
+        fd = FileDownload(user_id)
 
         for team_member in current_team_users:
             staff_roles = None
             membersince = None
             profile_pic = None
+
             # bring up a profile photo and membersince date for the team member
-            staff_profile = db.session.execute(select(
-                StaffProfile
-            ).where(StaffProfile.user_id == team_member[1].user_id
-            )).scalars().one_or_none()
+            staff_profile = (db.session.execute(
+                select(StaffProfile)
+                .where(StaffProfile.user_id == team_member[1].user_id))
+                .scalars()
+                .one_or_none())
 
             if staff_profile:
                 membersince = staff_profile.membersince
-                profile_pic_path = [pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]                
-                profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
-                staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
+                profile_pic_path = [
+                    pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]
+                profile_pic = None
+                if profile_pic_path:
+                    profile_pic = fd.url(profile_pic_path[0])
+
+                staff_roles = (db.session.execute(
+                    select(StaffRoles.role)
+                    .where(StaffRoles.user_id == team_member[1].user_id))
+                    .scalars()
+                    .all())
+
                 is_staff = True
             else:
                 is_staff = False
-                client_profile = db.session.execute(select(
-                    ClientInfo
-                ).where(
-                    ClientInfo.user_id == team_member[0].team_member_user_id
-                )).scalars().one_or_none()
+                client_profile = (db.session.execute(
+                    select(ClientInfo)
+                    .where(ClientInfo.user_id == team_member[0].team_member_user_id))
+                    .scalars()
+                    .one_or_none())
 
                 if client_profile:
                     membersince = client_profile.membersince
-                    profile_pic_path = [pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]                
-                    profile_pic = (fh.get_presigned_url(file_path=profile_pic_path[0]) if len(profile_pic_path) > 0 else None)
-                
-            #bring up the authorizations this care team member has for the client
-            team_member_authorizations = db.session.execute(
-                select(ClientClinicalCareTeamAuthorizations, LookupClinicalCareTeamResources.display_name
-                ).join(LookupClinicalCareTeamResources, LookupClinicalCareTeamResources.resource_id == ClientClinicalCareTeamAuthorizations.resource_id
-                ).where(
-                    ClientClinicalCareTeamAuthorizations.user_id == user_id,
-                    ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member[1].user_id
-                    )
-            ).all()
+                    profile_pic_path = [
+                        pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]
+                    profile_pic = None
+                    if profile_pic_path:
+                        profile_pic = fd.url(profile_pic_path[0])
 
-            authorizations = [{'resource_id': auth.resource_id, 'status': auth.status, 'display_name': display_name} for auth, display_name in team_member_authorizations]
+            #bring up the authorizations this care team member has for the client
+            team_member_authorizations = (db.session.execute(
+                select(
+                    ClientClinicalCareTeamAuthorizations,
+                    LookupClinicalCareTeamResources.display_name)
+                .join(
+                    LookupClinicalCareTeamResources,
+                    LookupClinicalCareTeamResources.resource_id == ClientClinicalCareTeamAuthorizations.resource_id)
+                .where(
+                    ClientClinicalCareTeamAuthorizations.user_id == user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id == team_member[1].user_id))
+                .all())
+
+            authorizations = [{
+                'resource_id': auth.resource_id,
+                'status': auth.status,
+                'display_name': display_name} for auth, display_name in team_member_authorizations]
 
             member_data = {
                 'firstname': team_member[1].firstname,
@@ -1330,23 +1349,22 @@ class ClinicalCareTeamMembers(BaseResource):
                 'membersince': membersince,
                 'is_staff': is_staff,
                 'authorizations' : authorizations,
-                'bio': team_member[1].staff_profile.bio if team_member[1].is_staff else None
-            }
+                'bio': team_member[1].staff_profile.bio if team_member[1].is_staff else None}
 
-            #calculate how much time is remaining for temporary members
+            # calculate how much time is remaining for temporary members
             if team_member[0].is_temporary:
                 expire_date = team_member[0].created_at + timedelta(hours=180)
                 time_remaining = expire_date - datetime.utcnow()
                 member_data['days_remaining'] = time_remaining.days
-                member_data['hours_remaining'] = time_remaining.seconds//3600
-
+                member_data['hours_remaining'] = time_remaining.seconds // 3600
 
             current_team.append(member_data)
-        
+
         response = {"care_team": current_team,
-                    "total_items": len(current_team) }
+                    "total_items": len(current_team)}
 
         return response
+
 
 @ns.route('/clinical-care-team/members/temporary/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -1436,6 +1454,7 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
 
         return {"care_team": current_team, "total_items": len(current_team)}
 
+
 @ns.route('/clinical-care-team/member-of/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserClinicalCareTeamApi(BaseResource):
@@ -1452,36 +1471,50 @@ class UserClinicalCareTeamApi(BaseResource):
         is a part of along with the permissions granted to them
         """
         res = []
-        fh = FileHandling()
+        fd = FileDownload(user_id)
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
-            authorizations_query = db.session.query(
-                                    ClientClinicalCareTeamAuthorizations.resource_id, 
-                                    ClientClinicalCareTeamAuthorizations.status, 
-                                    LookupClinicalCareTeamResources.display_name
-                                ).filter(
-                                    ClientClinicalCareTeamAuthorizations.team_member_user_id == user_id
-                                ).filter(
-                                    ClientClinicalCareTeamAuthorizations.user_id == client.user_id
-                                ).filter(
-                                    ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id
-                                ).all()
-            
-            profile_pic_path = db.session.execute(
+            authorizations_query = (db.session.
+                query(
+                    ClientClinicalCareTeamAuthorizations.resource_id,
+                    ClientClinicalCareTeamAuthorizations.status,
+                    LookupClinicalCareTeamResources.display_name)
+                .filter(
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id == user_id,
+                    ClientClinicalCareTeamAuthorizations.user_id == client.user_id,
+                    ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id)
+                .all())
+
+            profile_pic_path = (db.session.execute(
                 select(
-                    UserProfilePictures.image_path
-                ).where(UserProfilePictures.client_user_id == client_user.user_id, UserProfilePictures.width == 64)
-                ).scalars().one_or_none()                
-            profile_pic = (fh.get_presigned_url(file_path=profile_pic_path) if profile_pic_path else None)
-            res.append({'client_user_id': client_user.user_id, 
-                        'client_name': ' '.join(filter(None, (client_user.firstname, client_user.middlename ,client_user.lastname))),
-                        'client_email': client_user.email,
-                        'client_modobio_id': client_user.modobio_id,
-                        'client_profile_picture': profile_pic,
-                        'client_added_date': client.created_at,
-                        'authorizations': [{'display_name': x[2], 'resource_id': x[0], 'status': x[1]} for x in authorizations_query]})
-        
+                    UserProfilePictures.image_path)
+                .where(
+                    UserProfilePictures.client_user_id == client_user.user_id,
+                    UserProfilePictures.width == 64))
+                .scalars()
+                .one_or_none())
+
+            profile_pic = None
+            if profile_pic_path:
+                profile_pic = fd.url(profile_pic_path)
+
+            res.append({
+                'client_user_id': client_user.user_id,
+                'client_name': ' '.join(
+                    filter(
+                        None,
+                        (client_user.firstname, client_user.middlename, client_user.lastname))),
+                'client_email': client_user.email,
+                'client_modobio_id': client_user.modobio_id,
+                'client_profile_picture': profile_pic,
+                'client_added_date': client.created_at,
+                'authorizations': [{
+                    'display_name': x[2],
+                    'resource_id': x[0],
+                    'status': x[1]} for x in authorizations_query]})
+
         return {'member_of_care_teams': res, 'total': len(res)}
+
 
 @ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -1870,9 +1903,9 @@ class ClientHeightEndpoint(BaseResource):
     def post(self, user_id):
         """ New height measurement.
 
-        Params
-        ------
-        height : float (cm)
+        Parameters
+        ----------
+        height : float
             Height of the client in centimeters.
         """
         self.check_user(user_id, user_type='client')
@@ -1915,9 +1948,9 @@ class ClientWeightEndpoint(BaseResource):
     def post(self, user_id):
         """ New weight measurement.
 
-        Params
-        ------
-        weight : float (kg)
+        Parameters
+        ----------
+        weight : float
             Weight of the client in kilograms.
         """
         self.check_user(user_id, user_type='client')
@@ -1960,9 +1993,9 @@ class ClientWaistSizeEndpoint(BaseResource):
     def post(self, user_id):
         """ New waist size measurement.
 
-        Params
-        ------
-        waist_size : float (cm)
+        Parameters
+        ----------
+        waist_size : float
             Waist size of the client in centimeters.
         """
         self.check_user(user_id, user_type='client')
@@ -2004,11 +2037,12 @@ class ClientWeightEndpoint(BaseResource):
     def post(self, user_id):
         """ New fertility status.
 
-        Params
-        ------
-        pregnant : boolean
+        Parameters
+        ----------
+        pregnant : bool
             Denotes if this fertility status is pregnant.
-        status : string
+
+        status : str
             Phase of this fertility status.
         """
         self.check_user(user_id, user_type='client')

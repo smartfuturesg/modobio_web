@@ -21,7 +21,7 @@ from odyssey.api.notifications.schemas import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.message import PushNotification
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.files import FileDownload
 from odyssey.api.user.models import UserProfilePictures
 
 ns = Namespace('notifications', description='Endpoints for all types of notifications.')
@@ -35,16 +35,6 @@ class NotificationsEndpoint(BaseResource):
     def get(self, user_id):
         """ Returns a list of notifications for the given user_id. """
         return Notifications.query.filter_by(user_id=user_id).all()
-
-    @token_auth.login_required
-    @accepts(schema=NotificationSchema, api=ns)
-    @responds(status_code=201, api=ns)
-    def post(self, user_id):
-        """ Create a new notification for the user with user_id. """
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
 
 @ns.route('/<int:user_id>/<int:notification_id>/')
 @ns.doc(params={
@@ -331,16 +321,19 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
         pn = PushNotification()
         content = request.json.get('content', {})
 
-        # return the smallest size saved for staff profile picture
-        # currently saved as size30x30.jpeg
         if content:
             staff_id = content['data']['staff_id']
-            _prefix = f'id{staff_id:05d}/staff_profile_picture'
-            # Verify the staff member has a profile picture
-            profile_pictures_exist = UserProfilePictures.query.filter_by(staff_user_id=staff_id).all()
-            if profile_pictures_exist:
-                fh = FileHandling()
-                urls = fh.get_presigned_urls(prefix=_prefix)
-                content['data']['staff_profile_picture'] = urls
+            profile_pictures = UserProfilePictures.query.filter_by(staff_user_id=staff_id).all()
+
+            fd = FileDownload(staff_id)
+
+            urls = {}
+            for pic in profile_pictures:
+                if pic.original:
+                    continue
+                urls[str(pic.width)] = fd.url(pic.image_path)
+
+            content['data']['staff_profile_picture'] = urls
+
         msg = pn.send(user_id, 'voip', content)
         return {'message': msg}

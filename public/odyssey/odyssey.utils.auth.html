@@ -1,78 +1,37 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>odyssey.utils.auth &mdash; Odyssey version: 0.7.53 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>odyssey.utils.auth &mdash; Odyssey version: 0.2.189 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="odyssey.utils.message" href="odyssey.utils.message.html" />
+    <link rel="next" title="odyssey.utils.files" href="odyssey.utils.files.html" />
     <link rel="prev" title="Utilities" href="odyssey.utils.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html" class="icon icon-home"> Odyssey
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                version: 0.7.53
+                version: 0.2.189
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,115 +39,66 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="odyssey.config.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.models.html">Database models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.schemas.html">Validation schemas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.api.html">API endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="odyssey.integrations.html">Third party integrations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="odyssey.tasks.html">Tasks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="odyssey.utils.html">Utilities</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Login</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.files.html">File storage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.message.html">Messaging</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.search.html">Search</a></li>
-<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.logging.html">Logging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.constants.html">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.telehealth.html">Telehealth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odyssey.utils.search.html">Search</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.pdf.html">PDF generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="odyssey.utils.misc.html">Other</a></li>
 </ul>
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Odyssey</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="odyssey.utils.html">Utilities</a> &raquo;</li>
-        
       <li>odyssey.utils.auth</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/odyssey/odyssey.utils.auth.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-odyssey.utils.auth">
-<span id="odyssey-utils-auth"></span><h1>odyssey.utils.auth<a class="headerlink" href="#module-odyssey.utils.auth" title="Permalink to this headline">¶</a></h1>
+<span id="odyssey-utils-auth"></span><h1>odyssey.utils.auth<a class="headerlink" href="#module-odyssey.utils.auth" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.auth.</span></span><span class="sig-name descname"><span class="pre">BasicAuth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.auth.</span></span><span class="sig-name descname"><span class="pre">BasicAuth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>BasicAuth class is the main authentication class for
 the ModoBio project. It’s primary function is to do basic
 authentications.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.login_required">
-<span class="sig-name descname"><span class="pre">login_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('staff',</span> <span class="pre">'client')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">staff_role</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email_required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.login_required" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">login_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('staff',</span> <span class="pre">'client')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">staff_role</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email_required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.login_required" title="Permalink to this definition"></a></dt>
 <dd><p>The login_required method is the main method that we will be using
 for authenticating both tokens and basic authorizations.
 This method decorates each CRUD request and verifies the person
@@ -204,14 +114,14 @@ authenticate(auth,pass)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.user_role_check">
-<span class="sig-name descname"><span class="pre">user_role_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">staff_roles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.user_role_check" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">user_role_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_login</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">staff_roles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.user_role_check" title="Permalink to this definition"></a></dt>
 <dd><p>user_role_check is to determine if the user accessing the API
 is a Staff member or Client</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.client_access_check">
-<span class="sig-name descname"><span class="pre">client_access_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.client_access_check" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">client_access_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.client_access_check" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Clients can access content in one of two scenarios:</dt><dd><ol class="arabic simple">
 <li><p>They are attempting to access their own content.</p></li>
@@ -227,21 +137,56 @@ is a Staff member or Client</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.staff_access_check">
-<span class="sig-name descname"><span class="pre">staff_access_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">staff_roles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.staff_access_check" title="Permalink to this definition">¶</a></dt>
-<dd><p>staff_access_check method will be used to determine if a Staff
-member has the correct role to access the API
-Checks to see that staff memner is accessing their own resources
-if ‘staff_self’ is in the user_type</p>
+<span class="sig-name descname"><span class="pre">staff_access_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">staff_roles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.staff_access_check" title="Permalink to this definition"></a></dt>
+<dd><p>Check whether staff member has access rights.</p>
+<p>staff_access_check method will be used to determine if a Staff
+member has the correct role and care team priveledges to access the API</p>
+<p>Altogether, here are the variables involved in staff member authorization:</p>
+<ul class="simple">
+<li><p>being logged in as a staff member (utype=’staff’ in the token payload)</p></li>
+<li><p>care team resources (e.g. token_auth.login_required(resources=(‘MedicalHistory’,)))</p></li>
+<li><p>staff_role (e.g. token_auth.login_required(staff_role=(‘medical_doctor’,)</p></li>
+</ul>
+<p>There are several scenarios which staff can access endpoints from:</p>
+<ol class="arabic">
+<li><p>Endpoint requires only a valid token. In which case, no further access
+checks are required this function is skipped.</p></li>
+<li><p>Staff is trying to access their own resources.</p>
+<ul class="simple">
+<li><p>user_id (or sometimes staff_user_id) will be a request argument</p></li>
+<li><p>‘staff_self’ will be in user_type</p></li>
+</ul>
+<p>Using these two pieces of info, we will just check that the logged-in
+user is the same as the user being requested in the request argument
+(user_id or staff_user_id)</p>
+</li>
+<li><p>Staff is accessing client’s resouces. There are several possibilities.</p>
+<ol class="loweralpha simple">
+<li><p>There are no role or resource checks specified. Just being a staff
+member grants access to endpoint.</p></li>
+<li><p>Only <code class="docutils literal notranslate"><span class="pre">user_type</span></code> is specified. Staff member must meet role
+requirements for all request methods.</p></li>
+<li><p>Only resources are specified. Check against resources authorized
+through the clinical care team system. All request methods allowed
+if resource access check passes.</p></li>
+<li><p>Both resources and <code class="docutils literal notranslate"><span class="pre">user_type</span></code> are specified. Check against
+resources authorized through the clinical care team system. If the
+request method is not GET, staff must also meet role requirements,
+e.g. only medical_doctor role may view and edit blood test results
+for a client.</p></li>
+</ol>
+</li>
+</ol>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.validate_roles">
-<span class="sig-name descname"><span class="pre">validate_roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constants</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.validate_roles" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">validate_roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constants</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.validate_roles" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.verify_password">
-<span class="sig-name descname"><span class="pre">verify_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.verify_password" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">verify_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.verify_password" title="Permalink to this definition"></a></dt>
 <dd><p>This method is used as a decorator and to store
 the basic authorization password check
 that is defined in auth.py</p>
@@ -249,20 +194,20 @@ that is defined in auth.py</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.get_auth">
-<span class="sig-name descname"><span class="pre">get_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.get_auth" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.get_auth" title="Permalink to this definition"></a></dt>
 <dd><p>This method is to authorize basic connections</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.authenticate">
-<span class="sig-name descname"><span class="pre">authenticate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.authenticate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">authenticate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.authenticate" title="Permalink to this definition"></a></dt>
 <dd><p>authenticate method will use the verify_password_callback method
 to return the person’s basic authentication.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.BasicAuth.current_user">
-<span class="sig-name descname"><span class="pre">current_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.current_user" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">current_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.BasicAuth.current_user" title="Permalink to this definition"></a></dt>
 <dd><p>current_user method returns the current instance
 user, flask_httpauth_user, if it exists.</p>
 </dd></dl>
@@ -271,26 +216,26 @@ user, flask_httpauth_user, if it exists.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="odyssey.utils.auth.TokenAuth">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.auth.</span></span><span class="sig-name descname"><span class="pre">TokenAuth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bearer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">odyssey.utils.auth.</span></span><span class="sig-name descname"><span class="pre">TokenAuth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bearer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#odyssey.utils.auth.BasicAuth" title="odyssey.utils.auth.BasicAuth"><code class="xref py py-class docutils literal notranslate"><span class="pre">odyssey.utils.auth.BasicAuth</span></code></a></p>
 <p>TokenAuth class extends the OdyBasicAuth class.
 It’s primary function is to do token authentications.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.TokenAuth.verify_token">
-<span class="sig-name descname"><span class="pre">verify_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth.verify_token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">verify_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth.verify_token" title="Permalink to this definition"></a></dt>
 <dd><p>verify_token is a method that is used as a decorator to store
 the token checking process that is defined in auth.py</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.TokenAuth.get_auth">
-<span class="sig-name descname"><span class="pre">get_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth.get_auth" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth.get_auth" title="Permalink to this definition"></a></dt>
 <dd><p>This method is to authorize tokens</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="odyssey.utils.auth.TokenAuth.authenticate">
-<span class="sig-name descname"><span class="pre">authenticate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth.authenticate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">authenticate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#odyssey.utils.auth.TokenAuth.authenticate" title="Permalink to this definition"></a></dt>
 <dd><p>This authenticate method overrides the authenticate method in
 the OdyBasicAuth authenticate method and returns an object defined
 in verify_token_callback</p>
@@ -302,50 +247,33 @@ in verify_token_callback</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="odyssey.utils.message.html" class="btn btn-neutral float-right" title="odyssey.utils.message" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="odyssey.utils.html" class="btn btn-neutral float-left" title="Utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="odyssey.utils.files.html" class="btn btn-neutral float-right" title="odyssey.utils.files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.
-
-    </p>
+    <p>&#169; Copyright Copyright 2019-2021 Atlantic Venture Partners, all rights reserved.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

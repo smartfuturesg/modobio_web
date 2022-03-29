@@ -79,9 +79,9 @@ class DoseSpotPatientCreation(BaseResource):
         Returns the client's prescriptions that have been prescribed through DoseSpot. Both client and medical doctor practitioners have access 
         to this endpoint. 
 
-        Params
-        ------
-        user_id: int
+        Parameters
+        ----------
+        user_id : int
             user_id for the client
         """
         ds = DoseSpot()
@@ -100,14 +100,14 @@ class DoseSpotPatientCreation(BaseResource):
         have access to this endpoint. 
         TODO: restrict this endpoint to practitioners given care team access to the user in the path parameter
 
-        Params
-        ------
-        user_id: int
+        Parameters
+        ----------
+        user_id : int
             user_id for the client
         
         Returns
-        ------
-        url: str
+        -------
+        url : str
             SSO to the DoseSpot prescribing portal
         """
         curr_user,_ = token_auth.current_user()
@@ -125,14 +125,14 @@ class DoseSpotNotificationSSO(BaseResource):
         Bring up DoseSpot notifications for the practitioner. Stores notification count as a notification 
         entry on the modobio platform. Responds with SSO to access notification content on DoseSpot. 
 
-        Params
-        ------
-        user_id: int
+        Parameters
+        ----------
+        user_id : int
             Must be a practitioner registered with DoseSpot
         
         Returns
-        ------
-        url: str
+        -------
+        url : str
             SSO which sends user directly to their notifications
         """
         ds = DoseSpot(practitioner_user_id = user_id)
@@ -149,14 +149,14 @@ class DoseSpotEnrollmentStatus(BaseResource):
         """
         Returns the DoseSpot enrollment status for the provided user_id. Responds in error if the user is not enrolled at all. 
 
-        Params
-        ------
-        user_id: int
+        Parameters
+        ----------
+        user_id : int
             Must be a practitioner registered with DoseSpot
         
         Returns
-        ------
-        enrollment status: str
+        -------
+        enrollment status : str
             'enrolled', 'pending', 'not enrolled' (client only) 
         """
         ds = DoseSpot()
@@ -173,18 +173,21 @@ class DoseSpotSelectPharmacies(BaseResource):
         Queries DoseSpot for a list of available pharmacies. By default this endpoint uses the client's address
         to locate pharmacies. Optionally a user may submit a zipcode and state_id 
 
-        Params
-        ------
-        user_id: int
-        zipcode: str
+        Parameters
+        ----------
+        user_id : int
+            User ID
+
+        zipcode : str
             Optional zipcode for pharmacy search
-        state_id: int
+
+        state_id : int
             Optional state_id from LookupTerritoriesOfOperations
 
         Returns
-        ------
-        pharmacies: [dict]
-            big list of pharmacies
+        -------
+        list(dict)
+            list of pharmacies
         """
         zipcode = request.args.get('zipcode', None)
         state_id = request.args.get('state_id', None)
@@ -207,13 +210,14 @@ class DoseSpotPatientPharmacies(BaseResource):
     def get(self, user_id):
         """
         Retrieve from DoseSpot the pharmacies the Modobio client has selected (at most 3.)
-        Params
-        ------
-        user_id: int
+        Parameters
+        ----------
+        user_id : int
+            User ID
 
         Returns
-        ------
-        pharamacies: [dict]
+        -------
+        list(dict)
             list of up to 3 pharmacies
         """
         

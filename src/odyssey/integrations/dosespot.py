@@ -102,9 +102,9 @@ class DoseSpot:
         DoseSpot RESTful API Guide 
         Section 2.3.1 
 
-        Params
-        ------
-        user_ds_id: str
+        Parameters
+        ----------
+        user_ds_id : str
             DoseSpot user id
         """    
         temp_str = str(user_ds_id) + self.encrypted_clinic_id[:22] + self.clinic_api_key
@@ -126,14 +126,15 @@ class DoseSpot:
         WITH patient_id -> SSO will take the practitioner to prescribe to the patient on DS platform
         NO patient_id -> SSO will take the practitioner to DS notifications
 
-        Params
-        ------
-        patient_id: str
+        Parameters
+        ----------
+        patient_id : str
             optional, DoseSpot ID of the patient. 
 
         Returns
-        ------
-        sso url
+        -------
+        str
+            The single sign on URL
         """
         encrypted_user_id_url = self._generate_encrypted_user_id(self.practitioner_ds_id, url=True)
         
@@ -175,13 +176,15 @@ class DoseSpot:
         """
         Generates an SSO link for the DoseSpot prescribing portal
 
-        Params
-        ------
-        client_user_id, str: user_id for the client user. Used to bring up the client's dose spot id 
+        Parameters
+        ----------
+        client_user_id : str
+            User ID for the client user. Used to bring up the client's dose spot id 
 
         Returns
-        ------
-        sso url, str
+        -------
+        str
+            The single sign on URL
         """
         client_ds_id = db.session.execute(select(DoseSpotPatientID.ds_user_id).where(DoseSpotPatientID.user_id == client_user_id)
                 ).scalars().one_or_none()
@@ -198,10 +201,10 @@ class DoseSpot:
         Bring up notifications the practitioner has on DoseSpot
         Store these inthe modobio notification system
 
-        Params
-        ------
-        user_id: int
-            modobio user_id
+        Parameters
+        ----------
+        user_id : int
+            User ID number
         """
         # log user in 
         access_token = self._get_access_token(self.practitioner_ds_id)
@@ -249,9 +252,9 @@ class DoseSpot:
         """
         Create the patient in the DoseSpot System
 
-        Params
-        ------
-        client_user_id: int
+        Parameters
+        ----------
+        client_user_id : int
             Modobio user_id for a client
         """ 
         # This user is the patient
@@ -326,9 +329,9 @@ class DoseSpot:
         - Staff office 
         - medical_doctor role
 
-        Params
+        Parameters
         ------
-        staff_user_id: int
+        staff_user_id : int
             Modobio user_id for a staff member. 
         """
         user = User.query.filter_by(user_id=staff_user_id).one_or_none()
@@ -532,14 +535,17 @@ class DoseSpot:
         """
         Returns the pharmacies near the provied address details
 
-        Params
-        ------
-        zipcode: str
+        Parameters
+        ----------
+        zipcode : str
+            Zipcode where client is located
+
         state_id: int
+            Numerical ID of the state.
 
         Returns
-        ------
-        parmacies_list: [dict]
+        -------
+        list(dict)
             list of pharmacies 
         """
         # Bring up client's ds details. if not registered, make an account

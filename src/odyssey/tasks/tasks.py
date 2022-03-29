@@ -12,7 +12,6 @@ from pytz import utc
 
 from bson import ObjectId
 from flask_migrate import current_app
-import imghdr
 from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
 
@@ -25,7 +24,7 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
-from odyssey.utils.file_handling import FileHandling
+from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
 
 @celery.task()
@@ -107,8 +106,7 @@ def upcoming_appointment_notification_2hr(booking_id):
 @celery.task()
 def upcoming_appointment_care_team_permissions(booking_id):
     """
-    Apply temporary care team access permissions to the staff member involved in the booking 
-
+    Apply temporary care team access permissions to the staff member involved in the booking
     """
 
     # bring up resouce_group_ids required for medical doctor visits
@@ -193,11 +191,10 @@ def upcoming_appointment_care_team_permissions(booking_id):
 
 @celery.task()
 def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
-    """
-    TODO: Perform the necessary action depending on the `event` field of the payload
-    
+    """    
     Update the database entry with acknowledgement that the task has been completed
     """
+    # TODO: Perform the necessary action depending on the `event` field of the payload
     # bring up the booking in the request
     # if booking does not exist and env != production, skip
     # note, dev mongo db is shared between devlopers, dev environment, and testing environment
@@ -328,9 +325,8 @@ def charge_telehealth_appointment(booking_id):
     """
     This task will go through the process of attemping to charge a user for a telehealth booking.
     If the payment is unsuccesful, the booking will be canceled.
-
-    TODO: Notify user of the canceled booking via email/notfication
     """
+    # TODO: Notify user of the canceled booking via email/notfication
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
     Instamed().charge_telehealth_booking(booking)
@@ -347,20 +343,23 @@ def cancel_noshow_appointment(booking_id):
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):
-
+    """ Text """
     completion_info = complete_booking(booking_id)
 
     return completion_info
 
 @celery.task()
 def store_telehealth_transcript(booking_id: int):
-    """
-    Cache the telehealth transcript related to the booking id provided. Delete the conversation on twilio's platform once
-    this is acheived. 
+    """ Store telehealth transcript in cache.
 
-    Params
-    ------
-    booking_id: TelehealthBookings.idx for a booking that has been completed and is beyond the telehealth review period. 
+    Cache the telehealth transcript related to the booking id provided.
+    Delete the conversation on twilio's platform once this is acheived. 
+
+    Parameters
+    ----------
+    booking_id : int
+        TelehealthBookings.idx for a booking that has been completed
+        and is beyond the telehealth review period. 
     """
     twilio = Twilio()
 
@@ -368,16 +367,10 @@ def store_telehealth_transcript(booking_id: int):
     # For now, the boooking state does not matter. 
     booking = db.session.execute(select(TelehealthBookings
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
-    # close conversation so that no more messages can be added to transcript
-    twilio.close_telehealth_chatroom(booking.idx)
     
     transcript = twilio.get_booking_transcript(booking.idx)
 
-    # s3 bucket path for the media associated with this booking transcript
-    transcript_media_prefix = f'id{booking.client_user_id:05d}/telehealth/{booking_id}/transcript/media'
-
     # if there is media present in the transcript, store it in an s3 bucket
-    fh = FileHandling()
     media_id = 0
     for idx, message in enumerate(transcript):
         if message['media']:
@@ -385,25 +378,17 @@ def store_telehealth_transcript(booking_id: int):
                 # download media from twilio 
                 media_content = twilio.get_media(media['sid'])
 
-                if media['content_type'] == 'application/pdf':
-                    file_extension = '.pdf'
-                    media_file = FileStorage(media_content, filename=f'{media_id}.pdf', content_type=media['content_type'])
-                else:
-                    img = BytesIO(media_content)
-                    file_extension = '.' + imghdr.what('', media_content)
-                    tmp = Image.open(img)
-                    tfile = BytesIO()
-                    tmp.save(tfile, format='jpeg')
-                    media_file = FileStorage(tfile, filename=f'{media_id}{file_extension}', content_type=media['content_type'])
+                fu = FileUpload(
+                    BytesIO(media_content),
+                    booking.client_user_id,
+                    prefix=f'telehealth/{booking_id}/transcript/media')
+                fu.validate()
+                fu.save(f'{media_id}.{fu.extension}')
 
-                # save media to s3, update transcript with file save path
-                save_file_path_s3 = f'{transcript_media_prefix}/{media_id}{file_extension}'
-                fh.save_file_to_s3(media_file, save_file_path_s3)
-
-                media['s3_path'] = save_file_path_s3 
+                media['s3_path'] = fu.filename
                 transcript[idx]['media'][media_idx] = media
             
-                media_id+=1
+                media_id += 1
 
     payload = {
         'created_at': datetime.utcnow().isoformat(),
@@ -435,16 +420,15 @@ def store_telehealth_transcript(booking_id: int):
     return
 
 @celery.task(base=BaseTaskWithRetry)
-def update_apple_subscription(user_id:int):
+def update_apple_subscription(user_id: int):
     """
     Updates the user's subscription by checking the subscription status with apple. 
     This task is intended to be scheduled right after the current subscription expires.
 
-    Params
-    ------
-    user_id: int
+    Parameters
+    ----------
+    user_id : int
         used to grab the latest subscription
-    
     """
     
     prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
