@@ -288,8 +288,10 @@ class PaymentTestCharge(BaseResource):
 
         payment_data = Instamed().charge_telehealth_booking(booking)
         if payment_data.get('is_partially_approved') or not payment_data['is_successful']:
-            raise BadRequest("Attempted charge failed")
-        return payment_data 
+            status_code = 400
+        else:
+            status_code = 200
+        return payment_data, status_code
 
 @ns_dev.route('/void/')
 class PaymentVoidRefund(BaseResource):
