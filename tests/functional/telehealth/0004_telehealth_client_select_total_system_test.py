@@ -161,7 +161,6 @@ def test_client_time_select(test_client):
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header)
-
     assert response.status_code == 200
     assert response.json['total_options'] == 30
 

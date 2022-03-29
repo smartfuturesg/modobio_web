@@ -1,6 +1,7 @@
 from flask.json import dumps, loads
 
 from odyssey import db
+from odyssey.api.notifications.models import Notifications
 from odyssey.api.payment.models import PaymentHistory
 from odyssey.api.telehealth.models import TelehealthBookingStatus
 
@@ -40,8 +41,13 @@ def test_sale_deny(test_client, test_booking):
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
 
-    #should fail, check that booking is cancelled
+    # bring up client's notifications
+    notifications = Notifications.query.filter_by(user_id = test_booking.client_user_id, notification_type_id=5
+        ).order_by(Notifications.notification_id.desc()).all()
+    
+    # should fail, check that booking is cancelled
     res = loads(response.data)
+    assert len(notifications) == 1 # payment failed notification
     assert res['TransactionStatus'] == "D"
     assert test_booking.status == 'Canceled'
     assert not test_booking.charged 
@@ -60,6 +66,11 @@ def test_sale_partial(test_client, test_booking):
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
 
+    # bring up client's notifications
+    notifications = Notifications.query.filter_by(user_id = test_booking.client_user_id, notification_type_id=5
+        ).order_by(Notifications.notification_id.desc()).all()
+        
+    assert len(notifications) == 2 # includes notification from test_sale_deny
     #should fail, check that booking is canceled and partial payment is voided
     assert response.status_code == 400
     assert test_booking.status == 'Canceled'

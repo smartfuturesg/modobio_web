@@ -286,7 +286,10 @@ class PaymentTestCharge(BaseResource):
         if booking.charged:
             raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
 
-        return Instamed().charge_telehealth_booking(booking)
+        payment_data = Instamed().charge_telehealth_booking(booking)
+        if payment_data.get('is_partially_approved') or not payment_data['is_successful']:
+            raise BadRequest("Attempted charge failed")
+        return payment_data 
 
 @ns_dev.route('/void/')
 class PaymentVoidRefund(BaseResource):
