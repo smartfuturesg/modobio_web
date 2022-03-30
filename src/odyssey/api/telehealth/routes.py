@@ -1482,6 +1482,8 @@ class TelehealthBookingDetailsApi(BaseResource):
                     raise BadRequest('Maximum 4 images upload allowed.')
 
                 paths = []
+                #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
+                #In some cases we receive [FileStorage '' (None)] and in some we receive just []
                 if len(images) >= 1 and images[0].filename != '':
                     for i, img in enumerate(images):
                         image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
@@ -1509,6 +1511,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                     raise BadRequest('Maximum 1 voice recording upload allowed.')
 
                 booking_details.voice = None
+                #please see the above comment for a similar check for images for an explaination
                 if len(recordings) >= 1 and recordings[0].filename != '':
                     recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
                     recording.validate()
@@ -1559,6 +1562,8 @@ class TelehealthBookingDetailsApi(BaseResource):
                 raise BadRequest('Maximum 4 images upload allowed.')
 
             paths = []
+            #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
+            #In some cases we receive [FileStorage '' (None)] and in some we receive just []
             if len(images) >= 1 and images[0].filename != '':
                 for i, img in enumerate(images):
                     image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
@@ -1572,6 +1577,7 @@ class TelehealthBookingDetailsApi(BaseResource):
             if len(recordings) > 1:
                 raise BadRequest('Maximum 1 voice recording upload allowed.')
 
+            #please see the above comment for a similar check for images for an explaination
             if len(recordings) >= 1 and recordings[0].filename != '':
                 recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
                 recording.validate()
