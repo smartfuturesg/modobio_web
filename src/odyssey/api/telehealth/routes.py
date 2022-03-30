@@ -1478,11 +1478,11 @@ class TelehealthBookingDetailsApi(BaseResource):
                 # If images is an empty list, then no new images will be uploaded,
                 # effectively deleting the current images.
                 images = request.files.getlist('images')
-                if len(images) > 3:
-                    raise BadRequest('Maximum 3 images upload allowed.')
+                if len(images) > 4:
+                    raise BadRequest('Maximum 4 images upload allowed.')
 
                 paths = []
-                if not (len(images) <= 1 and images[0].content_type == None):
+                if len(images) > 0 and images[0].content_type != None:
                     for i, img in enumerate(images):
                         image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
                         image.validate()
@@ -1509,12 +1509,11 @@ class TelehealthBookingDetailsApi(BaseResource):
                     raise BadRequest('Maximum 1 voice recording upload allowed.')
 
                 booking_details.voice = None
-                if not (len(recordings) <= 1 and recordings[0].content_type == None):
-                    if recordings:
-                        recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
-                        recording.validate()
-                        recording.save(f'voice_{hex_token}_0.{recording.extension}')
-                        booking_details.voice = recording.filename
+                if len(recordings) > 0 and recordings[0].content_type != None:
+                    recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
+                    recording.validate()
+                    recording.save(f'voice_{hex_token}_0.{recording.extension}')
+                    booking_details.voice = recording.filename
 
                 if prev_recording:
                     fd = FileDownload(booking.client_user_id)
@@ -1556,23 +1555,24 @@ class TelehealthBookingDetailsApi(BaseResource):
             hex_token = secrets.token_hex(4)
 
             images = request.files.getlist('images')
-            if len(images) > 3:
-                raise BadRequest('Maximum 3 images upload allowed.')
+            if len(images) > 4:
+                raise BadRequest('Maximum 4 images upload allowed.')
 
             paths = []
-            for i, img in enumerate(images):
-                image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
-                image.validate()
-                image.save(f'image_{hex_token}_{i}.{image.extension}')
-                paths.append(image.filename)
+            if len(images) > 0 and images[0].content_type != None:
+                for i, img in enumerate(images):
+                    image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
+                    image.validate()
+                    image.save(f'image_{hex_token}_{i}.{image.extension}')
+                    paths.append(image.filename)
 
             booking_details.images = paths
 
             recordings = request.files.getlist('voice')
-            if len(images) > 1:
+            if len(recordings) > 1:
                 raise BadRequest('Maximum 1 voice recording upload allowed.')
 
-            if recordings:
+            if len(recordings) > 0 and recordings[0].content_type != None:
                 recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
                 recording.validate()
                 recording.save(f'voice_{hex_token}_0.{recording.extension}')
