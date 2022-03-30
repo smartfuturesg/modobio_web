@@ -1812,7 +1812,7 @@ class TelehealthTranscripts(Resource):
         transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
 
         # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
-        fd = FileDownload(current_user.user_id)
+        fd = FileDownload(booking.client_user_id)
 
         payload = {'booking_id': booking_id, 'transcript': []}
         has_next = False
