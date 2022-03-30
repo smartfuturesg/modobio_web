@@ -424,7 +424,7 @@ class StaffProfilePage(BaseResource):
                 if key == 'dob':
                     data = datetime.strptime(data, '%Y-%m-%d')
                 user_update[key] = data
-
+        urls = {}
         if request.files:
             if len(request.files) != 1:
                 raise BadRequest('Only one image upload allowed.')
@@ -434,8 +434,6 @@ class StaffProfilePage(BaseResource):
 
             # Store current pictures, delete only after upload of new pictures is successful.
             previous_pics = profile.profile_pictures
-
-            urls = {}
 
             # Original image
             hex_token = secrets.token_hex(4)
