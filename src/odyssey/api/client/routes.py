@@ -1187,7 +1187,7 @@ class ClinicalCareTeamMembers(BaseResource):
                     .where(
                         ClientInfo.user_id == team_member[0].team_member_user_id))
                     .scalars()
-                    .one_or_none()
+                    .one_or_none())
 
                 if client_profile:
                     membersince = client_profile.membersince
