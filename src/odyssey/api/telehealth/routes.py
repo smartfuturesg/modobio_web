@@ -470,7 +470,7 @@ class TelehealthBookingsApi(BaseResource):
             if (current_user.user_id == booking.client_user_id or
                 ('client_services' in [role.role for role in current_user.roles])):
                 practitioner['profile_picture'] = None
-                fd = FileDownload(booking.practitioner.user_id)
+                fd = FileDownload(booking.staff_user_id)
                 for pic in booking.practitioner.staff_profile.profile_pictures:
                     if pic.width == 128:
                         practitioner['profile_picture'] = fd.url(pic.image_path)
@@ -503,8 +503,8 @@ class TelehealthBookingsApi(BaseResource):
             client['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
             if current_user.user_id == booking.staff_user_id:
-                # return the practioner profile_picture width=128 if the logged in user is the client involved or client services
                 client['profile_picture'] = None
+                fd = FileDownload(booking.client_user_id)
                 for pic in booking.client.client_info.profile_pictures:
                     if pic.width == 128:
                         client['profile_picture'] = fd.url(pic.image_path)
@@ -1419,8 +1419,10 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         res['details'] = booking_details.details
 
-        # retrieve all files associated with this booking id
-        fd = FileDownload(current_user.user_id)
+        # Retrieve all files associated with this booking id.
+        # Files belonging to client are stored with client_user_id,
+        # even if staff member is viewing them.
+        fd = FileDownload(booking.client_user_id)
         if booking_details.images:
             for path in booking_details.images:
                 if path:
