@@ -1482,7 +1482,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                     raise BadRequest('Maximum 4 images upload allowed.')
 
                 paths = []
-                if len(images) == 0 and images[0].filename != '':
+                if len(images) == 1 and images[0].filename != '':
                     for i, img in enumerate(images):
                         image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
                         image.validate()
@@ -1572,7 +1572,7 @@ class TelehealthBookingDetailsApi(BaseResource):
             if len(recordings) > 1:
                 raise BadRequest('Maximum 1 voice recording upload allowed.')
 
-            if len(recordings) == 0 and recordings[0].filename != '':
+            if len(recordings) == 1 and recordings[0].filename != '':
                 recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
                 recording.validate()
                 recording.save(f'voice_{hex_token}_0.{recording.extension}')
