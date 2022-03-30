@@ -1152,8 +1152,6 @@ class ClinicalCareTeamMembers(BaseResource):
                                 ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id
                                 ).all()
 
-        fd = FileDownload(user_id)
-
         for team_member in current_team_users:
             staff_roles = None
             membersince = None
@@ -1166,29 +1164,39 @@ class ClinicalCareTeamMembers(BaseResource):
 
             if staff_profile:
                 membersince = staff_profile.membersince
-                profile_pic_path = [
-                    pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]
-                profile_pic = None
-                if profile_pic_path:
-                    profile_pic = fd.url(profile_pic_path[0])
 
-                staff_roles = db.session.execute(select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)).scalars().all() 
+                for pic in staff_profile.profile_pictures:
+                    if pic.width == 64:
+                        fd = FileDownload(staff_profile.user_id)
+                        profile_pic = fd.url(pic.image_path)
+                        break
+
+                staff_roles = (db.session.execute(
+                    select(StaffRoles.role)
+                    .where(
+                        StaffRoles.user_id == team_member[1].user_id))
+                    .scalars()
+                    .all())
+
                 is_staff = True
             else:
                 is_staff = False
-                client_profile = db.session.execute(select(
-                    ClientInfo
-                ).where(
-                    ClientInfo.user_id == team_member[0].team_member_user_id
-                )).scalars().one_or_none()
+
+                client_profile = (db.session.execute(
+                    select(ClientInfo)
+                    .where(
+                        ClientInfo.user_id == team_member[0].team_member_user_id))
+                    .scalars()
+                    .one_or_none()
 
                 if client_profile:
                     membersince = client_profile.membersince
-                    profile_pic_path = [
-                        pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]
-                    profile_pic = None
-                    if profile_pic_path:
-                        profile_pic = fd.url(profile_pic_path[0])
+
+                    for pic in client_profile.profile_pictures:
+                        if pic.width == 64:
+                            fd = FileDownload(client_profile.user_id)
+                            profile_pic = fd.url(pic.image_path)
+                            break
 
             #bring up the authorizations this care team member has for the client
             team_member_authorizations = db.session.execute(
@@ -1243,7 +1251,6 @@ class ClinicalCareTeamMembers(BaseResource):
         """
         
         data = request.parsed_obj
-       
 
         for team_member in data.get("care_team"):
             # TODO remove one of these authorization table in a followup story
@@ -1281,8 +1288,6 @@ class ClinicalCareTeamMembers(BaseResource):
                 ClientClinicalCareTeam.team_member_user_id == User.user_id
             ).all()
 
-        fd = FileDownload(user_id)
-
         for team_member in current_team_users:
             staff_roles = None
             membersince = None
@@ -1291,40 +1296,46 @@ class ClinicalCareTeamMembers(BaseResource):
             # bring up a profile photo and membersince date for the team member
             staff_profile = (db.session.execute(
                 select(StaffProfile)
-                .where(StaffProfile.user_id == team_member[1].user_id))
+                .where(
+                    StaffProfile.user_id == team_member[1].user_id))
                 .scalars()
                 .one_or_none())
 
             if staff_profile:
                 membersince = staff_profile.membersince
-                profile_pic_path = [
-                    pic.image_path for pic in staff_profile.profile_pictures if pic.width == 64]
-                profile_pic = None
-                if profile_pic_path:
-                    profile_pic = fd.url(profile_pic_path[0])
+
+                for pic in staff_profile.profile_pictures:
+                    if pic.width == 64:
+                        fd = FileDownload(staff_profile.user_id)
+                        profile_pic = fd.url(pic.image_path)
+                        break
 
                 staff_roles = (db.session.execute(
                     select(StaffRoles.role)
-                    .where(StaffRoles.user_id == team_member[1].user_id))
+                    .where(
+                        StaffRoles.user_id == team_member[1].user_id))
                     .scalars()
                     .all())
 
                 is_staff = True
             else:
                 is_staff = False
+
                 client_profile = (db.session.execute(
                     select(ClientInfo)
-                    .where(ClientInfo.user_id == team_member[0].team_member_user_id))
+                    .where(
+                        ClientInfo.user_id == team_member[0].team_member_user_id))
                     .scalars()
                     .one_or_none())
 
                 if client_profile:
                     membersince = client_profile.membersince
-                    profile_pic_path = [
-                        pic.image_path for pic in client_profile.profile_pictures if pic.width == 64]
-                    profile_pic = None
-                    if profile_pic_path:
-                        profile_pic = fd.url(profile_pic_path[0])
+
+                    for pic in client_profile.profile_pictures:
+                        if pic.width == 64:
+                            fd = FileDownload(client_profile.user_id)
+                            profile_pic = fd.url(pic.image_path)
+                            break
 
             #bring up the authorizations this care team member has for the client
             team_member_authorizations = (db.session.execute(
@@ -1478,7 +1489,6 @@ class UserClinicalCareTeamApi(BaseResource):
         is a part of along with the permissions granted to them
         """
         res = []
-        fd = FileDownload(user_id)
         for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = (db.session.
@@ -1503,6 +1513,7 @@ class UserClinicalCareTeamApi(BaseResource):
 
             profile_pic = None
             if profile_pic_path:
+                fd = FileDownload(client_user.user_id)
                 profile_pic = fd.url(profile_pic_path)
 
             res.append({
