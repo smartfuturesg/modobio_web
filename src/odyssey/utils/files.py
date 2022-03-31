@@ -121,6 +121,7 @@ from io import BytesIO
 import boto3
 import filetype
 
+from typing import List
 from botocore.exceptions import ClientError
 from flask import current_app
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -248,7 +249,7 @@ class FileDownload(S3Bucket):
 
         return url
     
-    def urls(self, filenames: list(str), expires: int = 3600):
+    def urls(self, filenames: List[str], expires: int = 3600):
         """ Generate a dict of presigned URLs for each ``filename`` in ``filenames``.
 
         A presigned URL can be used to download the file directly from S3.
