@@ -70,7 +70,7 @@ from odyssey.utils.misc import (
     check_client_existence, 
     check_drink_existence
 )
-from odyssey.utils.files import FileDownload, ImageUpload
+from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.pdf import to_pdf, merge_pdfs
 
 from odyssey.api.client.schemas import(
@@ -228,7 +228,6 @@ class ClientProfilePicture(BaseResource):
             prefix='client_profile_pictures')
         original.validate()
         original.save(f'original_{hex_token}.{original.extension}')
-        urls['original'] = original.url()
 
         # Save image metadata in DB.
         upp = UserProfilePictures(
@@ -339,13 +338,7 @@ class Client(BaseResource):
         client_info_payload["dob"] = user_data.dob
 
         # Include profile picture in different sizes
-        fd = FileDownload(user_id)
-        urls = {}
-        for pic in client_data.profile_pictures:
-            if pic.original:
-                continue
-            urls[pic.width] = fd.url(pic.image_path)
-        client_info_payload['profile_picture'] = urls
+        client_info_payload['profile_picture'] = get_profile_pictures(user_id, False)
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 
