@@ -322,7 +322,7 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
         content = request.json.get('content', {})
 
         if content:
-            content['data']['staff_profile_picture'] = get_profile_pictures(content['data']['staff_id'])
+            content['data']['staff_profile_picture'] = get_profile_pictures(content['data']['staff_id'], True)
 
         msg = pn.send(user_id, 'voip', content)
         return {'message': msg}

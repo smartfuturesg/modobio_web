@@ -338,7 +338,7 @@ class Client(BaseResource):
         client_info_payload["dob"] = user_data.dob
 
         # Include profile picture in different sizes
-        client_info_payload['profile_picture'] = get_profile_pictures(user_id)
+        client_info_payload['profile_picture'] = get_profile_pictures(user_id, False)
 
         return {'client_info': client_info_payload, 'user_info': user_data}
 
