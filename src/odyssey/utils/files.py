@@ -125,6 +125,7 @@ from botocore.exceptions import ClientError
 from flask import current_app
 from PIL import Image, ImageOps, UnidentifiedImageError
 from werkzeug.exceptions import BadRequest
+from odyssey.api.user.models import UserProfilePictures
 
 from odyssey.utils.constants import (
     ALLOWED_AUDIO_TYPES,
@@ -246,6 +247,37 @@ class FileDownload(S3Bucket):
             raise BadRequest(f'AWS returned the following error: {msg}')
 
         return url
+    
+    def urls(self, filenames: list(str), expires: int = 3600):
+        """ Generate a dict of presigned URLs for each ``filename`` in ``filenames``.
+
+        A presigned URL can be used to download the file directly from S3.
+        The URL expires after ``expires`` seconds (default: 10 min).
+
+        Parameters
+        ----------
+        filenames : list(str)
+            List of names of the files to generate a URL for.
+
+        expires : int
+            The number of seconds after which the generated URL expires.
+            Defaults to 3600 (10 min).
+
+        Returns
+        -------
+        list(str)
+            The presigned URLs.
+
+        Raises
+        ------
+        :exc:`~werkzeug.exceptions.BadRequest`
+            Raised in case of a boto3 error.
+        """
+        urls = {}
+        for filename in filenames:
+            url = self.url(filename, expires)
+            urls[filename] = url
+        return urls
 
     def delete(self, filename: str):
         """ Delete a file.
@@ -702,3 +734,49 @@ class MedicalImageUpload(ImageUpload, FileUpload):
             super(FileUpload, self).__init__(file, user_id, prefix=prefix)
         else:
             super(ImageUpload).__init__(file, user_id, prefix=prefix)
+
+def get_profile_pictures(user_id, is_staff):
+    """ Gets a dict of reized profile pictures
+    
+    Returns a dict of resized profile pictures for the given ``user_id`` and ``is_staff`` 
+    status in the format {(picture width): (presigned url)}.
+    
+     Parameters
+        ----------
+        user_id : int
+            User id of the user to fetch the profile pictures of.
+
+        is_staff : bool
+            Denotes if the staff or client profile pictures should be fetched for the given user id.
+
+        Returns
+        -------
+        dict{str: str} : 
+            The strigified image width and the presigned url.
+
+        Raises
+        ------
+        :exc:`~werkzeug.exceptions.BadRequest`
+            Raised in case dimensions is not of shape tuple(int, int).
+    """
+    if is_staff:
+        pics = UserProfilePictures.query.filter_by(staff_user_id=user_id).all()
+    else:
+        pics = UserProfilePictures.query.filter_by(client_user_id=user_id).all()
+        
+    res = {}
+    if not pics:
+        return res
+    
+    for pic in pics:
+        res[str(pic.width)] = pic.image_path
+        
+    #get a dict of presigned urls
+    fd = FileDownload(user_id)
+    urls = fd.urls(list(res.values()))
+    
+    #update value of width with presigned url for this image
+    for width, path in res:
+        res[str(width)] = urls[path]
+        
+    return res
