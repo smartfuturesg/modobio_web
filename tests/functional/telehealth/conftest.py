@@ -248,7 +248,7 @@ def booking(test_client, payment_method):
     target_datetime = datetime.utcnow() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
     start_minute = target_datetime.minute + (10 - target_datetime.minute % 10) 
     target_datetime = target_datetime.replace(
-        hour = target_datetime.hour + 1 if start_minute == 60 else target_datetime.hour,
+        hour = target_datetime.hour + 1 if (start_minute == 60 and target_datetime.hour < 23) else target_datetime.hour,
         minute = 0 if start_minute == 60 else start_minute, 
         second=0)
     time_inc = LookupBookingTimeIncrements.query.all()
@@ -326,6 +326,9 @@ def staff_availabilities(test_client, telehealth_staff):
     """ 
     Fills up the staff availability table with 5 staff members
     """
+    # clear current staff availability and telehealth settings
+    test_client.db.session.query(TelehealthStaffAvailability).delete()
+    test_client.db.session.query(TelehealthStaffSettings).delete()
 
     time_inc = LookupBookingTimeIncrements.query.all()
     availabilities = []

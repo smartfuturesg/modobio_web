@@ -144,18 +144,18 @@ telehealth_staff_14_general_availability_post_data = {
 # ---------------------
 # client staff bookings
 # ---------------------
-telehealth_bookings_staff_4_client_1_data = {
-  'target_date': (datetime.now() + timedelta(days=1)).isoformat(),
+telehealth_booking_data_1 = {
+  'target_date': (datetime.now() + timedelta(days=1)).date().isoformat(),
   'booking_window_id_start_time': 109, #9:00
   'booking_window_id_end_time': 112
 }
-telehealth_bookings_staff_4_client_3_data = {
-  'target_date': '2022-04-04',
+telehealth_booking_data_2 = {
+  'target_date': (datetime.now() + timedelta(days=1)).date().isoformat(),
   'booking_window_id_start_time': 187, #15:30
   'booking_window_id_end_time': 190
 }
-telehealth_bookings_staff_8_client_5_data = {
-  'target_date': '2022-04-04',
+telehealth_booking_data_3 = {
+  'target_date': (datetime.now() + timedelta(days=1)).date().isoformat(),
   'booking_window_id_start_time': 118, #9:45
   'booking_window_id_end_time': 121
 }
@@ -166,7 +166,7 @@ telehealth_bookings_staff_8_client_5_data = {
 
 telehealth_queue_client_3_data = {
   'profession_type': 'medical_doctor',
-  'target_date': (datetime.now() + timedelta(days=1)).isoformat(),
+  'target_date': (datetime.now() + timedelta(days=28)).isoformat(),
   'priority': True,
   'medical_gender': 'np',
   'location_id': 1,
