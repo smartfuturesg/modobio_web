@@ -249,7 +249,7 @@ class FileDownload(S3Bucket):
 
         return url
     
-    def urls(self, filenames: List[str], expires: int = 3600):
+    def urls(self, filenames: dict, expires: int = 3600):
         """ Generate a dict of presigned URLs for each ``filename`` in ``filenames``.
 
         A presigned URL can be used to download the file directly from S3.
@@ -257,8 +257,9 @@ class FileDownload(S3Bucket):
 
         Parameters
         ----------
-        filenames : list(str)
-            List of names of the files to generate a URL for.
+        filenames : dict{}
+            Contains a list of image paths to be converted to presigned links. The key can be whatever
+            is needed for the final products while the values should be image paths to files in s3.
 
         expires : int
             The number of seconds after which the generated URL expires.
@@ -274,10 +275,11 @@ class FileDownload(S3Bucket):
         :exc:`~werkzeug.exceptions.BadRequest`
             Raised in case of a boto3 error.
         """
+    
         urls = {}
-        for filename in filenames:
-            url = self.url(filename, expires)
-            urls[filename] = url
+        for k, filename in filenames.items():
+            #update the image path (value for each key) to be a presigned link
+            urls[k] = self.url(filename, expires)
         return urls
 
     def delete(self, filename: str):
@@ -736,8 +738,8 @@ class MedicalImageUpload(ImageUpload, FileUpload):
         else:
             super(ImageUpload).__init__(file, user_id, prefix=prefix)
 
-def get_profile_pictures(user_id, is_staff):
-    """ Gets a dict of reized profile pictures
+def get_profile_pictures(user_id : int, is_staff: bool):
+    """ Gets a dict of resized profile pictures
     
     Returns a dict of resized profile pictures for the given ``user_id`` and ``is_staff`` 
     status in the format {(picture width): (presigned url)}.
@@ -765,19 +767,14 @@ def get_profile_pictures(user_id, is_staff):
     else:
         pics = UserProfilePictures.query.filter_by(client_user_id=user_id).all()
         
-    res = {}
+    urls = {}
     if not pics:
-        return res
+        return urls
     
-    for pic in pics:
-        res[str(pic.width)] = pic.image_path
-        
-    #get a dict of presigned urls
     fd = FileDownload(user_id)
-    urls = fd.urls(list(res.values()))
-    
-    #update value of width with presigned url for this image
-    for width, path in res:
-        res[str(width)] = urls[path]
+    for pic in pics:
+        if pic.original:
+            continue
+        urls[str(pic.width)] = fd.url(pic.image_path)
         
-    return res
+    return urls
