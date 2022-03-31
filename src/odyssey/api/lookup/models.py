@@ -1358,17 +1358,14 @@ class LookupBloodTestRanges(BaseModelWithIdx):
     :type: float
     """
 
-class LookupVisitReasons(BaseModelWithIdx):
+class LookupDevNames(BaseModelWithIdx):
     """
-    Lookup table for visit reason ids
-    """
-
-    reason = db.Column(db.String)
-    """
-    Name of reason for a visit
+    Lookup table for development team names
     """
 
-    role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
+    name = db.Column(db.String)
     """
-    Role that the reason would justify a visit with
+    name of development team member.
+    
+    :type: string
     """

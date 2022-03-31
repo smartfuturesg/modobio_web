@@ -476,7 +476,7 @@ class TelehealthBookingsApi(BaseResource):
             if (current_user.user_id == booking.client_user_id or
                 ('client_services' in [role.role for role in current_user.roles])):
                 practitioner['profile_picture'] = None
-                fd = FileDownload(booking.practitioner.user_id)
+                fd = FileDownload(booking.staff_user_id)
                 for pic in booking.practitioner.staff_profile.profile_pictures:
                     if pic.width == 128:
                         practitioner['profile_picture'] = fd.url(pic.image_path)
@@ -509,8 +509,8 @@ class TelehealthBookingsApi(BaseResource):
             client['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
             if current_user.user_id == booking.staff_user_id:
-                # return the practioner profile_picture width=128 if the logged in user is the client involved or client services
                 client['profile_picture'] = None
+                fd = FileDownload(booking.client_user_id)
                 for pic in booking.client.client_info.profile_pictures:
                     if pic.width == 128:
                         client['profile_picture'] = fd.url(pic.image_path)
@@ -1543,8 +1543,10 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         res['details'] = booking_details.details
 
-        # retrieve all files associated with this booking id
-        fd = FileDownload(current_user.user_id)
+        # Retrieve all files associated with this booking id.
+        # Files belonging to client are stored with client_user_id,
+        # even if staff member is viewing them.
+        fd = FileDownload(booking.client_user_id)
         if booking_details.images:
             for path in booking_details.images:
                 if path:
@@ -1600,15 +1602,18 @@ class TelehealthBookingDetailsApi(BaseResource):
                 # If images is an empty list, then no new images will be uploaded,
                 # effectively deleting the current images.
                 images = request.files.getlist('images')
-                if len(images) > 3:
-                    raise BadRequest('Maximum 3 images upload allowed.')
+                if len(images) > 4:
+                    raise BadRequest('Maximum 4 images upload allowed.')
 
                 paths = []
-                for i, img in enumerate(images):
-                    image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
-                    image.validate()
-                    image.save(f'image_{hex_token}_{i}.{image.extension}')
-                    paths.append(image.filename)
+                #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
+                #In some cases we receive [FileStorage '' (None)] and in some we receive just []
+                if len(images) >= 1 and images[0].filename != '':
+                    for i, img in enumerate(images):
+                        image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
+                        image.validate()
+                        image.save(f'image_{hex_token}_{i}.{image.extension}')
+                        paths.append(image.filename)
 
                 booking_details.images = paths
 
@@ -1630,7 +1635,8 @@ class TelehealthBookingDetailsApi(BaseResource):
                     raise BadRequest('Maximum 1 voice recording upload allowed.')
 
                 booking_details.voice = None
-                if recordings:
+                #please see the above comment for a similar check for images for an explaination
+                if len(recordings) >= 1 and recordings[0].filename != '':
                     recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
                     recording.validate()
                     recording.save(f'voice_{hex_token}_0.{recording.extension}')
@@ -1676,23 +1682,27 @@ class TelehealthBookingDetailsApi(BaseResource):
             hex_token = secrets.token_hex(4)
 
             images = request.files.getlist('images')
-            if len(images) > 3:
-                raise BadRequest('Maximum 3 images upload allowed.')
+            if len(images) > 4:
+                raise BadRequest('Maximum 4 images upload allowed.')
 
             paths = []
-            for i, img in enumerate(images):
-                image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
-                image.validate()
-                image.save(f'image_{hex_token}_{i}.{image.extension}')
-                paths.append(image.filename)
+            #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
+            #In some cases we receive [FileStorage '' (None)] and in some we receive just []
+            if len(images) >= 1 and images[0].filename != '':
+                for i, img in enumerate(images):
+                    image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
+                    image.validate()
+                    image.save(f'image_{hex_token}_{i}.{image.extension}')
+                    paths.append(image.filename)
 
             booking_details.images = paths
 
             recordings = request.files.getlist('voice')
-            if len(images) > 1:
+            if len(recordings) > 1:
                 raise BadRequest('Maximum 1 voice recording upload allowed.')
 
-            if recordings:
+            #please see the above comment for a similar check for images for an explaination
+            if len(recordings) >= 1 and recordings[0].filename != '':
                 recording = AudioUpload(recordings[0].stream, booking.client_user_id, prefix=prefix)
                 recording.validate()
                 recording.save(f'voice_{hex_token}_0.{recording.extension}')
@@ -1936,7 +1946,7 @@ class TelehealthTranscripts(Resource):
         transcript = mongo.db.telehealth_transcripts.find_one({"_id": ObjectId(booking.chat_room.transcript_object_id)})
 
         # if there is any media in the transcript, generate a link to the download from the user's s3 bucket
-        fd = FileDownload(current_user.user_id)
+        fd = FileDownload(booking.client_user_id)
 
         payload = {'booking_id': booking_id, 'transcript': []}
         has_next = False
