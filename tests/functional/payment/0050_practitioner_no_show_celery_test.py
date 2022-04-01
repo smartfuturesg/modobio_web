@@ -1,16 +1,12 @@
-import pytest
 from datetime import datetime, timezone, timedelta
 from flask.json import dumps, loads
 
-from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.payment.models import PaymentHistory
 from odyssey.api.telehealth.models import TelehealthBookings
 
 from odyssey.tasks.periodic import detect_practitioner_no_show
 from odyssey.utils.misc import get_time_index
 
-from .data import test_booking
-from odyssey import db
 
 def test_no_show_scan(test_client, test_booking):
     #set booking to 10 mins ago

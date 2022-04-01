@@ -1,15 +1,13 @@
-from base64 import b64encode
 from datetime import datetime, timedelta
 from random import choice
 
 from flask.json import dumps
-from sqlalchemy import and_, or_, select
+from sqlalchemy import or_, select
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms
 
-from odyssey.api.user.models import User
 from tests.functional.telehealth.client_select_data import(
     telehealth_staff_full_availability,
     telehealth_bookings_data_full_day
@@ -18,13 +16,16 @@ from tests.functional.telehealth.client_select_data import(
 from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
 from odyssey.tasks.tasks import upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
 
-# from odyssey.tests.utils import login
-
-def test_upcoming_bookings_scan(test_client, payment_method):
+def test_upcoming_bookings_scan(test_client, payment_method, telehealth_staff, staff_availabilities):
     global upcoming_bookings_all
     ##
     # Submit availability for staff memeber
     ##
+    # clear all bookings 
+    test_client.db.session.query(TelehealthChatRooms).delete()
+    test_client.db.session.query(TelehealthBookingDetails).delete()
+    test_client.db.session.query(TelehealthBookings).delete()
+    test_client.db.session.commit()
 
     # generate availability
     response = test_client.post(
@@ -54,7 +55,7 @@ def test_upcoming_bookings_scan(test_client, payment_method):
         assert response.status_code == 201
         
         response = test_client.post(
-            f'/telehealth/bookings/?client_user_id={test_client.client_id}&staff_user_id={test_client.staff_id}',
+            f'/telehealth/bookings/?client_user_id={test_client.client_id}&staff_user_id={telehealth_staff[0].user_id}',
             headers=test_client.client_auth_header,
             data=dumps(booking),
             content_type='application/json')
@@ -72,8 +73,8 @@ def test_upcoming_bookings_scan(test_client, payment_method):
     #   1 - 96    (00:00 - 08:00) <-next day
     ###
 
-    target_date = datetime(2022, 4, 4)
-
+    target_date = datetime.strptime(booking.get('target_date'), '%Y-%m-%d')
+    
     upcoming_bookings_1 = deploy_upcoming_appointment_tasks(
         target_date=target_date,
         booking_window_id_start=1,
@@ -123,9 +124,9 @@ def test_upcoming_bookings_scan(test_client, payment_method):
         + upcoming_bookings_3
         + upcoming_bookings_4
         + upcoming_bookings_5))
-
+        
     assert len(upcoming_bookings_all) == len(all_bookings_day_1 + all_bookings_day_2)
-    assert type(upcoming_bookings_today) == list # there may be some bookings leftover from other tests so this is jsut a type check
+    assert type(upcoming_bookings_today) == list # there may be some bookings leftover from other tests so this is just a type check
 
 def test_upcoming_bookings_notification(test_client):
     ##
