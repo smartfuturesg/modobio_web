@@ -193,6 +193,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     test_client.db.session.query(TelehealthChatRooms).delete()
     test_client.db.session.query(TelehealthBookingDetails).delete()
     test_client.db.session.query(TelehealthBookings).delete()
+    test_client.db.session.commit()
 
     ##
     # 1. Set staff's availability

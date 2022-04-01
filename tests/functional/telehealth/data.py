@@ -225,31 +225,31 @@ telehealth_client_staff_bookings_post_1_data = {
 }
 
 telehealth_client_staff_bookings_post_2_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 157,
   'booking_window_id_end_time': 160
 }
 #client already has appointment at this time
 telehealth_client_staff_bookings_post_3_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 157,
   'booking_window_id_end_time': 160
 }
 # This should break
 telehealth_client_staff_bookings_post_4_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 105,
   'booking_window_id_end_time': 107
 }
 # This should break
 telehealth_client_staff_bookings_post_5_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 80,
   'booking_window_id_end_time': 97
 }
 # This should break
 telehealth_client_staff_bookings_post_6_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 90,
   'booking_window_id_end_time': 85
 }
