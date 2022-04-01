@@ -296,5 +296,14 @@ APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'
 
 MAINTENANCE_DYNAMO_TABLE='dev_maintenance_v02'
 
-# Maintenance timezone, 
-MAINTENANCE_TIMEZONE='America/Phoenix'
+MAINTENANCE_TIMEZONE='UTC'
+
+# Maintenance Business Hours Time Window In UTC
+BUSINESS_HRS_START=13
+
+BUSINESS_HRS_END=6
+
+# Maintenance Notice Periods (in days)
+MAINT_SHORT_NOTICE = 2
+
+MAINT_STD_NOTICE = 14
