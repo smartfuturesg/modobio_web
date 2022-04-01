@@ -1,6 +1,7 @@
 import calendar
 import copy
 import logging
+import secrets
 
 from datetime import time, datetime, timedelta
 
@@ -25,7 +26,7 @@ from odyssey.api.staff.models import (
     StaffProfile,
     StaffCalendarEvents,
     StaffOffices)
-from odyssey.utils.files import FileDownload, ImageUpload
+from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
     StaffProfileSchema, 
@@ -369,11 +370,7 @@ class StaffProfilePage(BaseResource):
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
 
         res['bio'] = profile.bio
-        res['profile_picture'] = {}
-
-        fd = FileDownload(user_id)
-        for pic in profile.profile_pictures:
-            res['profile_picture'][pic.image_path] = fd.url(pic.image_path)
+        res['profile_picture'] = get_profile_pictures(user_id, True)
 
         return res
 
@@ -423,7 +420,7 @@ class StaffProfilePage(BaseResource):
                 if key == 'dob':
                     data = datetime.strptime(data, '%Y-%m-%d')
                 user_update[key] = data
-
+        urls = {}
         if request.files:
             if len(request.files) != 1:
                 raise BadRequest('Only one image upload allowed.')
@@ -434,16 +431,14 @@ class StaffProfilePage(BaseResource):
             # Store current pictures, delete only after upload of new pictures is successful.
             previous_pics = profile.profile_pictures
 
-            urls = {}
-
             # Original image
+            hex_token = secrets.token_hex(4)
             original = ImageUpload(
                 request.files['profile_picture'].stream,
                 user_id,
                 prefix='staff_profile_picture')
             original.validate()
-            original.save(f'original.{original.extension}')
-            urls['original'] = original.url()
+            original.save(f'original_{hex_token}.{original.extension}')
 
             upp = UserProfilePictures(
                 staff_user_id=user_id,
@@ -454,9 +449,9 @@ class StaffProfilePage(BaseResource):
             db.session.add(upp)
 
             # Resized images
-            for dimensions in IMAGE_DIMENSIONS:
-                resized = original.resize(dimensions)
-                resized.save(f'size{dimensions[0]}x{dimensions[1]}.{resized.extension}')
+            for dim in IMAGE_DIMENSIONS:
+                resized = original.resize(dim)
+                resized.save(f'size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}')
                 urls[str(resized.width)] = resized.url()
 
                 upp = UserProfilePictures(

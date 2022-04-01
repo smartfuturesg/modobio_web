@@ -1,6 +1,7 @@
 import logging
 import pathlib
 import pytz
+import random
 
 from flask import current_app
 from flask_accepts import responds
@@ -33,7 +34,8 @@ from odyssey.api.lookup.models import (
      LookupCurrencies,
      LookupNotificationSeverity,
      LookupBloodTests,
-     LookupBloodTestRanges
+     LookupBloodTestRanges,
+     LookupDevNames,
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -66,7 +68,8 @@ from odyssey.api.lookup.schemas import (
     LookupNotificationSeverityOutputSchema,
     LookupBloodTestsOutputSchema,
     LookupBloodTestRangesOutputSchema,
-    LookupBloodTestRangesAllOutputSchema
+    LookupBloodTestRangesAllOutputSchema,
+    LookupDevNamesOutputSchema,
 )
 from odyssey import db
 from odyssey.utils.auth import token_auth
@@ -547,3 +550,17 @@ class LookupBloodTestRangesAllApi(BaseResource):
                 range.race = None
             res.append({'test': test, 'range': range})
         return {'total_items': len(res), 'items': res}
+
+@ns.route('/developers/')
+class LookupDevNamesApi(BaseResource):
+    """
+    Endpoint that returns development team member names and number of names, in random order
+    """
+    @token_auth.login_required
+    @responds(schema=LookupDevNamesOutputSchema, status_code=200, api=ns)
+    def get(self): 
+        names = LookupDevNames.query.all()
+        
+        random.shuffle(names)
+
+        return {'total_items': len(names), 'items': names}
