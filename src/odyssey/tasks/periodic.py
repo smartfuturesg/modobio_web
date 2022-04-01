@@ -327,7 +327,7 @@ def detect_practitioner_no_show():
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
                                                TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
-                                               TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2)
+                                               TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2).all()
     for booking in bookings:
         logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client
