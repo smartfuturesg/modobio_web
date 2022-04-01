@@ -15,7 +15,7 @@ from flask import current_app
 from sqlalchemy import text, CheckConstraint
 
 from odyssey import db
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME, EMAIL_TOKEN_LIFETIME
+from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.staff.models import StaffProfile
@@ -579,7 +579,7 @@ class UserPendingEmailVerifications(db.Model):
     :type: int, primary key
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False, unique = True)
     """
     Id of the user that this pending verification belongs to.
 
@@ -600,28 +600,15 @@ class UserPendingEmailVerifications(db.Model):
     :type: string
     """
 
-    @staticmethod
-    def generate_token(user_id):
-        """
-        Generate a JWT with the appropriate user type and user_id
-        """
-        
-        secret = current_app.config['SECRET_KEY']
-        
-        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=EMAIL_TOKEN_LIFETIME),
-                            'uid': user_id,
-                            'ttype': 'email_verification'
-                            }, 
-                            secret, 
-                            algorithm='HS256')
+    email = db.Column(db.String(75), unique=True)
+    """
+    Email address.
 
-    @staticmethod
-    def generate_code():
-        """
-        Generate a 4 digit code
-        """
+    The email address is also the login username.
 
-        return str(random.randrange(1000, 9999))
+    :type: str, max length 75, non-null, unique
+    """
+
 
 class UserTokenHistory(db.Model):
     """ 

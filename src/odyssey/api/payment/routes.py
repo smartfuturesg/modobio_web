@@ -1,11 +1,11 @@
 import logging
-from flask import request
 from sqlalchemy import and_
 logger = logging.getLogger(__name__)
 
 
+from flask import request
 from flask_accepts import accepts, responds
-from flask_restx import  Namespace
+from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
@@ -21,7 +21,8 @@ PaymentStatusSchema,
 PaymentStatusOutputSchema,
 PaymentHistorySchema,
 PaymentRefundsSchema,
-PaymentTestChargeVoidSchema)
+PaymentTestChargeVoidSchema,
+TransactionHistorySchema)
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User
 
@@ -178,8 +179,10 @@ class PaymentStatusGetApi(BaseResource):
 
 @ns.route('/history/<int:user_id>/')
 class PaymentHistoryApi(BaseResource):
-    @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
+
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services',))
     @responds(schema=PaymentHistorySchema(many=True), api=ns, status_code=200)
+    @ns.deprecated
     def get(self, user_id):
         """
         Returns a list of transactions for the given user_id.
@@ -187,6 +190,25 @@ class PaymentHistoryApi(BaseResource):
         self.check_user(user_id, user_type='client')
 
         return  PaymentHistory.query.filter_by(user_id=user_id).all()
+
+@ns.route('/transaction-history/<int:user_id>/')
+class PaymentHistoryApi(BaseResource):
+
+    @token_auth.login_required(user_type=('client', 'staff', 'staff-self'), staff_role=('client_services',))
+    @responds(schema=TransactionHistorySchema, api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        Returns a list of transactions for the given user_id.
+        """
+        self.check_user(user_id, user_type='client')
+
+        payload = {'items': []}
+
+        for transaction in PaymentHistory.query.filter_by(user_id=user_id).all():
+            transaction.__dict__.update({'transaction_date': transaction.created_at, 'currency' : 'USD', 'transaction_updated': transaction.updated_at, 'payment_method': transaction.payment_method})
+            payload['items'].append(transaction.__dict__)
+
+        return payload
 
 @ns.route('/refunds/<int:user_id>/')
 class PaymentRefundApi(BaseResource):
@@ -233,9 +255,8 @@ class PaymentRefundApi(BaseResource):
                 f'has already been refunded for the transaction with id {payment_id} and '
                 f'the original transaction amount is {original_transaction.transaction_amount}.')
 
-        return Instamed().refund_payment(original_transaction.transaction_id,
+        return Instamed().refund_payment(original_transaction,
             request.parsed_obj.refund_amount,
-            TelehealthBookings.query.filter_by(idx=original_transaction.booking_id).one_or_none(),
             request.parsed_obj.refund_reason,
             reporter_id=token_auth.current_user()[0].user_id)
 
@@ -245,7 +266,7 @@ ns_dev = Namespace(
     path='/payment/test',
     description='[DEV ONLY] Endpoints for testing payments.')
 
-@ns_dev.route('/charge/')
+@ns_dev.route('/telehealth-charge/')
 class PaymentTestCharge(BaseResource):
     """
     [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
@@ -265,14 +286,14 @@ class PaymentTestCharge(BaseResource):
         if booking.charged:
             raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
 
-        return Instamed().charge_user(booking)
+        return Instamed().charge_telehealth_booking(booking)
 
 @ns_dev.route('/void/')
 class PaymentVoidRefund(BaseResource):
     """
     [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
     voids in the InstaMed system.
-    
+
     Note
     ---
     **This endpoint is only available in DEV environments.**
@@ -288,5 +309,4 @@ class PaymentVoidRefund(BaseResource):
         if not booking.charged:
             raise BadRequest('The booking with booking id {booking_id}'.format(**request.parsed_obj) + \
             'has not been charged yet,so it cannot be voided.')
-        return Instamed().void_payment(booking, "Test void functionality")
-
+        return Instamed().void_payment(booking.payment_history_id, "Test void functionality")

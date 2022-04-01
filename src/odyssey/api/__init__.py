@@ -60,6 +60,9 @@ api.add_namespace(ns)
 from odyssey.api.lookup.routes import ns
 api.add_namespace(ns)
 
+from odyssey.api.maintenance.routes import ns
+api.add_namespace(ns)
+
 from odyssey.api.notifications.routes import ns
 api.add_namespace(ns)
 

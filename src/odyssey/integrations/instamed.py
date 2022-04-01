@@ -1,5 +1,8 @@
 from datetime import datetime
 import logging
+from odyssey.api.lookup.models import LookupRoles
+
+from odyssey.api.telehealth.models import TelehealthBookings
 
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 logger = logging.getLogger(__name__)
@@ -85,11 +88,10 @@ class Instamed:
 
         return response.json()
     
-    def refund_payment(self, transaction_id, amount, booking, reason, reporter_id=None):
+    def refund_payment(self, payment: PaymentHistory, amount: str, reason: str, reporter_id: int=None):
         """
         Refund a payment.
         InstaMed URI: /payment/refund
-
 
         Parameters
         ----------
@@ -115,10 +117,10 @@ class Instamed:
         """
         request_data = {
             "Outlet": self.outlet,
-            "TransactionID": str(transaction_id),
-            "Amount": str(amount),
+            "TransactionID": payment.transaction_id,
+            "Amount": amount,
             "Patient": {
-                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+                "AccountNumber": User.query.filter_by(user_id=payment.user_id).one_or_none().modobio_id
             }
         }
         
@@ -133,14 +135,14 @@ class Instamed:
             response.raise_for_status()
         except:
             logger.error(f'Instamed returned the following error: {response.text} when' \
-                f' refunding a transaction with id {transaction_id}.')
+                f' refunding a transaction with id {payment.transaction_id}.')
             raise BadRequest(f'Instamed returned the following error: {response.text}')
             
 
         refund_data = {
-            'user_id': booking.client_user_id,
+            'user_id': payment.user_id,
             'reporter_id': reporter_id,
-            'payment_id': PaymentHistory.query.filter_by(transaction_id=transaction_id).one_or_none().idx,
+            'payment_id': payment.idx,
             'refund_transaction_id': response.json()['TransactionID'],
             'refund_amount': amount,
             'refund_reason': reason
@@ -153,7 +155,7 @@ class Instamed:
 
         return refund_data
 
-    def void_payment(self, booking, reason):
+    def void_payment(self, payment_history_id: int, reason: str):
         """
         Void a payment before it has been processed. If the transfer of funds has already
         started, refund must be used instead.
@@ -162,23 +164,26 @@ class Instamed:
 
         Parameters
         ----------
-        booking : :class:`TelehealthBookings` instance
-            the booking for which this payment is associated with
+        payment_history_id : int
+            Payment id for the PaymentHistory entry.
+
+        reason : str
+            Reason for voiding the payment.
 
         Returns
         -------
         dict
             information regarding the void
         """
-        transaction = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none()
-        if not transaction.transaction_id:
-            raise BadRequest(f'No transaction exists for the booking with booking id {booking.idx}.')
+        transaction = PaymentHistory.query.filter_by(idx=payment_history_id).one_or_none()
+        if not transaction:
+            raise BadRequest(f'No transaction exists for the payment with id {payment_history_id}.')
 
         request_data = {
             "Outlet": self.outlet,
             "TransactionID": str(transaction.transaction_id),
             "Patient": {
-                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+                "AccountNumber": User.query.filter_by(user_id=transaction.user_id).one_or_none().modobio_id
             }
         }
 
@@ -204,29 +209,48 @@ class Instamed:
 
         return response.json()
 
-    def charge_user(self, booking):
+    def charge_user(self, user_id: int, amount: str, transaction_descriptor: str, payment_method_id: int = None, booking_id: int=None):
         """
         Charge a user.
         InstaMed URI: /payment/sale
 
-
         Parameters
         ----------
-        booking : :class:`TelehealthBookings` instance
+        user_id : int
             the booking for which this payment is associated with
+
+        payment_method_id : int
+            Refers to PaymentMethods.idx. Payment method selected by user for this transaction. 
+            Defaults to their default payment method.
+
+        amount : str
+            tansaction ammount formatted for currency
+
+        transaction_descriptor : str
+            Standard format transaction description e.g. “Telehealth-MedicalDoctor-30mins”
+
+        payment_method_id : int
+            Refers to PaymentMethods.idx. Payment method to be used for the transaction. 
+            If none specified, the default payment method for the user will be used
 
         Returns
         -------
         dict
-            information regarding the sale
+            information regarding the instamed transaction
         """
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        payment_method =  PaymentMethods.query.filter_by(idx=payment_method_id).one_or_none() if payment_method_id \
+                                        else PaymentMethods.query.filter_by(user_id=user_id, is_default=True).one_or_none()
+        if not payment_method:
+            raise BadRequest('user missing payment method')
+
         request_data = {
             "Outlet": self.outlet,
             "PaymentMethod": "OnFile",
-            "PaymentMethodID": str(PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none().payment_id),
-            "Amount": str(booking.consult_rate),
+            "PaymentMethodID": str(payment_method.payment_id),
+            "Amount": amount,
             "Patient": {
-                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+                "AccountNumber": user.modobio_id
             }
         }
         
@@ -240,25 +264,27 @@ class Instamed:
         try:
             response.raise_for_status()
         except:
-            #transaction was not successful, cancel booking
-            logger.error(f'Instamed returned the following error: {response.text} when' \
-                f' attempting to charge booking with id {booking.idx}.')
-            cancel_telehealth_appointment(booking)
-            #create notification for failed payment
-            start_time = LookupBookingTimeIncrements.query \
-                .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
-            payment_last_four = PaymentMethods.query \
-                .filter_by(idx=booking.payment_method_id).one_or_none().number
-            create_notification(booking.client_user_id,
-                                3, 
-                                5, 
-                                "Your Card Could Not Be Charged", 
-                                f"Your telehealth appointment with {booking.practitioner.firstname} " + \
-                                f"{booking.practitioner.lastname} at {start_time} on {booking.target_date}, " + \
-                                "unfortunately, had to be canceled as your payment method ending in " + \
-                                f"{payment_last_four} could not be charged. Please revise your payment " + \
-                                "method or perhaps speak with your bank to resolve the issue")
-            return
+            # transaction was not successful, cancel booking
+            #
+            # TODO: Logging disabled for now 3.4.22, Alejandro will come back to this in NRV-2786
+            # logger.error(f'Instamed returned the following error: {response.text} when' \
+            #     f' attempting to charge booking with id {booking.idx}.')
+            # cancel_telehealth_appointment(booking)
+            # #create notification for failed payment
+            # start_time = LookupBookingTimeIncrements.query \
+            #     .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
+            # payment_last_four = PaymentMethods.query \
+            #     .filter_by(idx=booking.payment_method_id).one_or_none().number
+            # create_notification(booking.client_user_id,
+            #                     3, 
+            #                     5, 
+            #                     "Your Card Could Not Be Charged", 
+            #                     f"Your telehealth appointment with {booking.practitioner.firstname} \
+            #                     {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
+            #                     unfortunately, had to be canceled as your payment method ending in \
+            #                     {payment_last_four} could not be charged. Please revise your payment \
+            #                     method or perhaps speak with your bank to resolve the issue")
+            return {'is_successful': False}
 
         #convert response data to json (python dict)
         response_data = response.json()
@@ -272,16 +298,17 @@ class Instamed:
                     "Outlet": self.outlet,
                     "TransactionID": str(response_data['TransactionID']),
                     "Patient": {
-                        "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+                        "AccountNumber": user.modobio_id
                     }
                 }
 
                 history = PaymentHistory(**{
-                    'user_id': booking.client_user_id,
-                    'payment_method_id': booking.payment_method_id,
+                    'user_id': user_id,
+                    'payment_method_id': payment_method.idx,
                     'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': booking.consult_rate,
-                    'booking_id': booking.idx
+                    'transaction_amount': amount,
+                    'transaction_descriptor': transaction_descriptor,
+                    'authorization_number': response_data.get('AuthorizationNumber')
                 })
                 
                 logger.info("Sending Instamed void request")
@@ -297,62 +324,111 @@ class Instamed:
                     logger.error(f'Instamed returned the following error: {response.text} when' \
                         ' voiding a partial transaction.')
 
-                cancel_telehealth_appointment(booking)
-
-                #create notification for failed payment
-                start_time = LookupBookingTimeIncrements.query \
-                    .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
-                payment_last_four = PaymentMethods.query \
-                    .filter_by(idx=booking.payment_method_id).one_or_none().number
-                create_notification(booking.client_user_id,
-                                    3, 
-                                    5, 
-                                    "Your Card Could Not Be Charged", 
-                                    f"Your telehealth appointment with {booking.practitioner.firstname} " + \
-                                    f"{booking.practitioner.lastname} at {start_time} on {booking.target_date}, " + \
-                                    "unfortunately, had to be canceled as your payment method ending in " + \
-                                    f"{payment_last_four} could not be charged. Please revise your payment " + \
-                                    "method or perhaps speak with your bank to resolve the issue")
+                # TODO: Notofication disabled for now 3.4.22, Alejandro will come back to this in NRV-2786
+                # cancel_telehealth_appointment(booking)
+                #
+                # #create notification for failed payment
+                # start_time = LookupBookingTimeIncrements.query \
+                #     .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
+                # payment_last_four = PaymentMethods.query \
+                #     .filter_by(idx=booking.payment_method_id).one_or_none().number
+                # create_notification(booking.client_user_id,
+                #                     3, 
+                #                     5, 
+                #                     "Your Card Could Not Be Charged", 
+                #                     f"Your telehealth appointment with {booking.practitioner.firstname} \
+                #                     {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
+                #                     unfortunately, had to be canceled as your payment method ending in \
+                #                     {payment_last_four} could not be charged. Please revise your payment \
+                #                     method or perhaps speak with your bank to resolve the issue")
             
                 #add void data to history and commit
                 history.voided = True
                 history.void_reason = "Partial payment received"
                 history.void_id = response.json()['TransactionID']
                 db.session.add(history)
-                db.session.commit()
-                return "Partial payment received. Appointment has been canceled and partial payment has been voided", 400
+                db.session.flush()
+
+                response_data['payment_history_id'] = history.idx
+                response_data['is_successful'] = True
+                response_data['is_partially_approved'] = True
             else:
                 #transaction was successful, store in PaymentHistory
                 history = PaymentHistory(**{
-                    'user_id': booking.client_user_id,
-                    'payment_method_id': booking.payment_method_id,
+                    'user_id': user_id,
+                    'payment_method_id': payment_method.idx,
                     'transaction_id': response_data['TransactionID'],
-                    'transaction_amount': booking.consult_rate,
-                    'booking_id': booking.idx
+                    'transaction_amount': amount,
+                    'transaction_descriptor': transaction_descriptor,
+                    'authorization_number': response_data.get('AuthorizationNumber')
                 })
                 db.session.add(history)
-                booking.charged = True
-                db.session.commit()
+                db.session.flush()
+                
+                response_data['payment_history_id'] = history.idx
+                response_data['is_successful'] = True
         else:
+            #transaction was declined
+            response_data['is_successful'] = False
             #transaction was declined, cancel appointment
-            cancel_telehealth_appointment(booking)
-            
-            #create notification for failed payment
-            start_time = LookupBookingTimeIncrements.query \
-                .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
-            payment_last_four = PaymentMethods.query \
-                .filter_by(idx=booking.payment_method_id).one_or_none().number
-            create_notification(booking.client_user_id,
-                                3, 
-                                5, 
-                                "Your Card Could Not Be Charged", 
-                                f"Your telehealth appointment with {booking.practitioner.firstname} " + \
-                                f"{booking.practitioner.lastname} at {start_time} on {booking.target_date}, " + \
-                                "unfortunately, had to be canceled as your payment method ending in " + \
-                                f"{payment_last_four} could not be charged. Please revise your payment " + \
-                                "method or perhaps speak with your bank to resolve the issue")
-
+            # TODO: Notification disabled for now 3.4.22, Alejandro will come back to this in NRV-2786
+            # cancel_telehealth_appointment(booking)
+            #
+            # #create notification for failed payment
+            # start_time = LookupBookingTimeIncrements.query \
+            #     .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
+            # payment_last_four = PaymentMethods.query \
+            #     .filter_by(idx=booking.payment_method_id).one_or_none().number
+            # create_notification(booking.client_user_id,
+            #                     3, 
+            #                     5, 
+            #                     "Your Card Could Not Be Charged", 
+            #                     f"Your telehealth appointment with {booking.practitioner.firstname} \
+            #                     {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
+            #                     unfortunately, had to be canceled as your payment method ending in \
+            #                     {payment_last_four} could not be charged. Please revise your payment \
+            #                     method or perhaps speak with your bank to resolve the issue")
         return response_data
+
+
+    def charge_telehealth_booking(self, booking: TelehealthBookings):
+        """
+        Charge a user for their telehealth appointment
+
+        Params
+        ------
+        booking : TelehealthBookings
+
+        Returns
+        ------
+        dict : instamed response
+        """
+
+        professional_role = LookupRoles.query.filter_by(role_name = booking.profession_type).one_or_none().display_name
+        professional_role = professional_role.replace(" ", "")
+        transaction_descriptor = f"Telehealth-{professional_role}-{booking.scheduled_duration_mins}mins"
+        payment_data = self.charge_user(
+            user_id = booking.client_user_id, 
+            payment_method_id = booking.payment_method_id, 
+            amount = str(booking.consult_rate), 
+            transaction_descriptor = transaction_descriptor)
+
+        if not payment_data['is_successful']:
+            cancel_telehealth_appointment(booking)
+            return payment_data
+        elif payment_data.get('is_partially_approved'):
+            cancel_telehealth_appointment(booking)
+            payment_data['message'] = "Partial payment received. Appointment has been canceled and partial payment has been voided"
+            db.session.commit()
+            return payment_data, 400
+
+        booking.charged = True
+        booking.payment_history_id = payment_data['payment_history_id']
+
+        db.session.commit()
+
+        return payment_data
+
 
 def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'):
     """
@@ -393,15 +469,15 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
 
     if refund:
         #check if booking has been charged yet, if not do nothing
-        history = PaymentHistory.query.filter_by(booking_id=booking.idx).one_or_none()
+        history = PaymentHistory.query.filter_by(idx=booking.payment_history_id).one_or_none()
         if history:
             #first attempt to void, if that fails payment was likely more than 24 hours ago
             #in which case we should refund instead of void
             im = Instamed()
             try:
-                im.void_payment(booking, reason)
+                im.void_payment(history.idx, reason)
             except:
-                im.refund_payment(history.transaction_id, booking.consult_rate, booking, reason)
+                im.refund_payment(history, booking.consult_rate, reason)
 
     #TODO: Create notification/send email(?) to user that their appointment 
 

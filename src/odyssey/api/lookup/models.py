@@ -1369,3 +1369,18 @@ class LookupDevNames(BaseModelWithIdx):
     
     :type: string
     """
+    
+class LookupVisitReasons(BaseModelWithIdx):
+    """
+    Lookup table for visit reason ids
+    """
+
+    reason = db.Column(db.String)
+    """
+    Name of reason for a visit
+    """
+
+    role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
+    """
+    Role that the reason would justify a visit with
+    """

@@ -30,6 +30,7 @@ from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
     UserLogin,
+    UserRemovalRequests,
     UserSubscriptions,
     UserTokenHistory,
     UserTokensBlacklist,
@@ -38,6 +39,7 @@ from odyssey.api.user.models import (
     UserResetPasswordRequestHistory
 )
 from odyssey.api.user.schemas import (
+    UserInfoPutSchema,
     UserSchema, 
     UserLoginSchema,
     UserPasswordRecoveryContactSchema,
@@ -63,10 +65,10 @@ from odyssey.utils.message import (
     send_email_delete_account,
     send_email_verify_email)
 from odyssey.utils.misc import (
+    EmailVerification,
     check_user_existence,
     check_client_existence,
     check_staff_existence,
-    generate_modobio_id,
     verify_jwt)
 
 ns = Namespace('user', description='Endpoints for user accounts.')
@@ -75,6 +77,9 @@ ns = Namespace('user', description='Endpoints for user accounts.')
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class ApiUser(BaseResource):
+    """
+    Retrieve, Update, and Delete a User's basic information.
+    """
     
     @token_auth.login_required
     @responds(schema=UserSchema, api=ns)
@@ -82,6 +87,114 @@ class ApiUser(BaseResource):
         check_user_existence(user_id)
 
         return User.query.filter_by(user_id=user_id).one_or_none()
+
+    @token_auth.login_required(user_type=('staff', 'client', 'staff_self'), staff_role=('client_services',))
+    @accepts(schema=UserInfoPutSchema)
+    @responds(schema=NewClientUserSchema, status_code=200)
+    def patch(self, user_id):
+        """
+        Update attributes from user's basic info. See api.user.schemas.UserInfoPutSchema for attributes that can be updated. 
+        
+        Client services role will have access to this endpoint. All other staff roles are locked out unless editing their own resource. 
+        """
+        user = self.check_user(user_id)
+
+        user_info = request.json
+        email = user_info.get('email')
+
+        payload = {}
+        #if email is part of payload, use email update routine
+        if email:
+            email_domain_blacklisted(email)
+            email_verification_data = EmailVerification().begin_email_verification(user, email = email)
+            del user_info['email']
+            # respond with verification code in dev/testing
+            if any((current_app.config['DEV'], current_app.config['TESTING'])) :
+                payload['email_verification_code'] = email_verification_data.get('code')
+        
+        user.update(user_info)
+        db.session.commit()
+
+        return payload
+
+
+    @token_auth.login_required
+    def delete(self, user_id):
+        # Search for user by user_id in User table
+        check_user_existence(user_id)
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        requester = token_auth.current_user()[0]
+        removal_request = UserRemovalRequests(
+            requester_user_id=requester.user_id, 
+            user_id=user.user_id)
+
+        db.session.add(removal_request)
+        db.session.flush()
+        
+        # Send notification email to user being deleted and user requesting deletion
+        # when FLASK_ENV=production
+        if user.email != requester.email:
+            send_email_delete_account(requester.email, user.email)
+        send_email_delete_account(user.email, user.email)
+
+        # when user is staff
+        # keep name, email, modobio id, user id in User table
+        # keep lines in tables where user_id is the reporter_id
+        if user.is_client and not user.is_staff:
+            #keep only modobio id, user id in User table
+            user.email = None
+            user.firstname = None
+            user.middlename = None
+            user.lastname = None
+        user.phone_number = None
+        user.deleted = True
+
+        # TODO: File handling has been changed in release 1.0.2 (merge commit 96e32a7c)
+        # This should be changed to fit the new FileDownload.delete() function.
+        # That function only takes full paths to files to delete, which is a lot
+        # of work to implement.
+        #
+        # At the same time, account deletion was implemented in
+        # utils/misc.py::delete_user() and this endpoint will soon be deprecated.
+        #
+        # Not going to spend time to re-implement the file deletion from delete_user()
+        # here if this is going to be deprecated anyway.
+        #
+        # fh = FileHandling()
+        # fh.delete_from_s3(prefix=f'id{user_id:05d}/')
+        
+        # Get a list of all tables in database that have fields: client_user_id & staff_user_id
+        # NOTE - Order matters, must delete these tables before those with user_id 
+        # to avoid problems while deleting payment methods
+        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+                WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+        
+        #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+        for table in tableList:
+            tblname = table.table_name
+            #Only delete telehealth bookings when the client is being deleted, keep if it's the practitioner
+            if tblname == 'TelehealthBookings':
+                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE client_user_id={user_id};")
+            else:
+                db.session.execute(f"DELETE FROM \"{tblname}\" WHERE staff_user_id={user_id} OR client_user_id={user_id};")
+
+        #Get a list of all tables in database that have field: user_id
+        tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
+                WHERE column_name='user_id';").fetchall()
+
+        #delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
+        for table in tableList:
+            tblname = table.table_name
+            #added data_per_client table due to issues with the testing database
+            if tblname != "User" and tblname != "UserRemovalRequests" and tblname != "data_per_client":
+                db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(tblname, user_id))
+
+        db.session.commit()
+
+        #remove user from elastic search indices (must be done after commit)
+        search.delete_from_index(user.user_id)
+
+        return {'message': f'User with id {user_id} has been removed'}
 
 @ns.route('/staff/')
 class NewStaffUser(BaseResource):
@@ -181,22 +294,7 @@ class NewStaffUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            # generate token and code for email verifciation
-            token = UserPendingEmailVerifications.generate_token(user.user_id)
-            code = UserPendingEmailVerifications.generate_code()
-
-            # create pending email verification in db
-            email_verification_data = {
-                'user_id': user.user_id,
-                'token': token,
-                'code': code
-            }
-
-            verification = UserPendingEmailVerifications(**email_verification_data)
-            db.session.add(verification)
-
-            # send email to the user
-            send_email_verify_email(user, token, code)
+            email_verification_data = EmailVerification().begin_email_verification(user)
         
         # create subscription entry for new staff user
         staff_sub = UserSubscriptionsSchema().load({
@@ -329,7 +427,6 @@ class NewClientUser(BaseResource):
                 user.is_client = True
                 verify_email = False
         else:
-
             # user account does not yet exist for this email
             password=user_info.get('password', None)
             if not password:
@@ -348,24 +445,9 @@ class NewClientUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            # generate token and code for email verification
-            token = UserPendingEmailVerifications.generate_token(user.user_id)
-            code = UserPendingEmailVerifications.generate_code()
+            email_verification_data = EmailVerification().begin_email_verification(user)
 
-            # create pending email verification in db
-            email_verification_data = {
-                'user_id': user.user_id,
-                'token': token,
-                'code': code
-            }
-
-            verification = UserPendingEmailVerifications(**email_verification_data)
-            db.session.add(verification)
-
-            # send email to the user
-            send_email_verify_email(user, token, code)
-
-            #Authenticate newly created client accnt for immediate login
+            # #Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
         client_info = ClientInfoSchema().load({"user_id": user.user_id})
@@ -425,7 +507,6 @@ class NewClientUser(BaseResource):
         # respond with verification code in dev
         if current_app.config['DEV'] and verify_email:
             payload['email_verification_code'] = email_verification_data.get('code')
-
 
         return payload
 
@@ -781,7 +862,6 @@ class UserLogoutApi(BaseResource):
 
         return 200
 
-
 # TODO: remove these redirects once fixed on frontend
 
 from odyssey.api.notifications.schemas import NotificationSchema
@@ -825,37 +905,15 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
         Checks if token has not expired and exists in db.
         If true, removes pending verification object and returns 200.
         """
-        # decode and validate token 
-        secret = current_app.config['SECRET_KEY']
+        EmailVerification().complete_email_verification(token = token)
 
-        try:
-            decoded_token = jwt.decode(token, secret, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
-            raise Unauthorized('Email verification token expired.')
-
-        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
-
-        if not verification:
-            raise Unauthorized('Email verification token not found.')
-
-        #token was valid, remove the pending request, update user account and return 200
-        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
-        # if this email is being verified on a new account: create modobio_id and update membersince dates
-        
-        if user.email_verified == False and user.modobio_id == None:
-            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})
-        user.update({'email_verified': True})
-
-        db.session.delete(verification)
-        db.session.commit()
-        
+        return
 
 @ns.route('/email-verification/code/<int:user_id>/')
 @ns.doc(params={'code': 'Email verification code'})
 class UserPendingEmailVerificationsCodeApi(BaseResource):
     __check_resource__ = False
-
+    
     @responds(status_code=200)
     def post(self, user_id):
         """ Verify the user's email address.
@@ -873,30 +931,9 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         code : str
             email verification code provided during client creation
         """
+        EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
 
-        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
-
-        if not verification or verification.code != request.args.get('code'):
-            raise Unauthorized('Email verification failed.')
-
-        # Decode and validate token. Code should expire the same time the token does.
-        secret = current_app.config['SECRET_KEY']
-
-        try:
-            decoded_token = jwt.decode(verification.token, secret, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
-            raise Unauthorized('Email verification token expired.')
-
-        #code was valid, remove the pending request, update user account and return 200
-        db.session.delete(verification)
-
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-        if user.email_verified == False and user.modobio_id == None:
-            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
-        user.update({'email_verified': True})
-
-        db.session.commit()
+        return
 
 @ns.route('/email-verification/resend/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -906,6 +943,7 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
     they can use this endpoint to create another token/code and send another email. This 
     can also be used if the user never received an email.
     """
+    __check_resource__ = False
 
     @responds(status_code=200)
     def post(self, user_id):
@@ -938,9 +976,6 @@ class UserLegalDocsApi(BaseResource):
     Endpoints related to legal documents that users have viewed and signed.
     """
     
-    # Multiple docs per user allowed.
-    __check_resource__ = False
-
     # Multiple docs per user allowed.
     __check_resource__ = False
 

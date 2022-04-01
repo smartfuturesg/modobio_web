@@ -33,11 +33,11 @@ from odyssey.api.doctor.models import (
 )
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserProfilePictures
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
-from odyssey.utils.files import FileDownload, ImageUpload
-from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES
+from odyssey.utils.files import FileDownload, FileUpload, ImageUpload
+from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
@@ -1069,6 +1069,7 @@ class MedicalImagingEndpoint(BaseResource):
 
             img = ImageUpload(img.stream, user_id, prefix='medical_images')
             img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+            img.max_size = MEDICAL_IMAGE_MAX_SIZE
             img.validate()
             img.save(f'{mi_data.image_type}_{mi_data.image_date}_{hex_token}_{i}.{img.extension}')
             mi_data.image_path = img.filename
@@ -1311,7 +1312,72 @@ class MedBloodTest(BaseResource):
             db.session.delete(result)
             db.session.commit()
         else:
-            raise BadRequest("test_id must be an integer.")     
+            raise BadRequest("test_id must be an integer.")
+        
+@ns.route('/bloodtest/image/<int:user_id>/')
+@ns.doc(params={'test_id': 'Test ID number'})
+class MedBloodTestImage(BaseResource):
+    
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
+    @responds(schema=MedicalBloodTestSchema, api=ns, status_code=200)
+    def patch(self, user_id):
+        """
+        This resource can be used to add an image to submitted blood test results.
+
+        Args:
+            image ([file]): image file to be added to test results (only .pdf files are supported, max size 20MB)
+        """
+        if not ('image' in request.files and request.files['image']):  
+            raise BadRequest('No file selected.')
+        
+        test_id = request.args.get('test_id', type=int)
+        test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
+        if not test:
+            raise BadRequest(f'No test exists with test id {test_id} for the user with user_id {user_id}.')
+
+        prev_image = test.image_path
+
+        # add file to S3
+        hex_token = secrets.token_hex(4)
+        img = FileUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
+        img.allowed_types = ('pdf',)
+        img.max_size = MEDICAL_IMAGE_MAX_SIZE
+        img.validate()
+        img.save(f'test{test.test_id:05d}_{hex_token}.{img.extension}')
+        
+        # store file path in db
+        test.image_path = img.filename
+        db.session.commit()
+
+        # Upload successful, delete previous
+        if prev_image:
+            fd = FileDownload(test.user_id)
+            fd.delete(prev_image)
+
+        reporter = User.query.filter_by(user_id=test.reporter_id).one_or_none()
+        reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+        reporter_pic = None
+        if reporter_pictures:
+            fd = FileDownload(reporter.user_id)
+            reporter_pic = {}
+            for pic in reporter_pictures:
+                if pic.original:
+                    continue
+                reporter_pic[str(pic.width)] = fd.url(pic.image_path)
+        
+        res = {
+            'test_id': test.test_id,
+            'user_id': test.user_id,
+            'date': test.date,
+            'notes': test.notes,
+            'reporter_firstname': reporter.firstname,
+            'reporter_lastname': reporter.lastname,
+            'reporter_id': test.reporter_id,
+            'reporter_profile_pictures': reporter_pic,
+            'image': img.url() 
+        }
+        
+        return res
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
@@ -1346,9 +1412,31 @@ class MedBloodTestAll(BaseResource):
 
         # prepare response items with reporter name from User table
         response = []
+        fd = FileDownload(user_id)
+            
         for test in blood_tests:
+            if test[0].image_path:
+                image_path = fd.url(test[0].image_path)
+            else:
+                image_path = None
+            
+            reporter = User.query.filter_by(user_id=test[0].reporter_id).one_or_none()
+            reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+            reporter_pic = None
+            if reporter_pictures:
+                fd2 = FileDownload(reporter.user_id)
+                reporter_pic = {}
+                for pic in reporter_pictures:
+                    if pic.original:
+                        continue
+                    reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+                    
             data = test[0].__dict__
-            data.update({'reporter_firstname': test[1], 'reporter_lastname': test[2]})
+            data.update(
+                {'reporter_firstname': test[1],
+                 'reporter_lastname': test[2],
+                 'reporter_profile_pictures': reporter_pic,
+                 'image': image_path})
             response.append(data)
         payload = {}
         payload['items'] = response
@@ -1391,13 +1479,32 @@ class MedBloodTestResults(BaseResource):
         if not results:
             return
 
+        fd = FileDownload(results[0][0].user_id)
+        if results[0][0].image_path:
+            image_path = fd.url(results[0][0].image_path)
+        else:
+            image_path = None
+            
+        reporter = User.query.filter_by(user_id=results[0][0].reporter_id).one_or_none()
+        reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+        reporter_pic = None
+        if reporter_pictures:
+            fd2 = FileDownload(reporter.user_id)
+            reporter_pic = {}
+            for pic in reporter_pictures:
+                if pic.original:
+                    continue
+                reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+                
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
+                          'image': image_path,
                           'reporter_id': results[0][0].reporter_id,
                           'reporter_firstname': results[0][3].firstname,
                           'reporter_lastname': results[0][3].lastname,
+                          'reporter_profile_pictures': reporter_pic,
                           'results': []} 
         
         # loop through results in order to nest results in their respective test
@@ -1449,11 +1556,12 @@ class AllMedBloodTestResults(BaseResource):
                             MedicalBloodTests.reporter_id == User.user_id
                         ).all()
 
-        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
-        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname, x[0].image_path) for x in results])
+        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'image': x[4], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
+        fd = FileDownload(user_id)
         for test_info, test_result, result_type, _ in results:
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
@@ -1472,6 +1580,24 @@ class AllMedBloodTestResults(BaseResource):
                     if not test.get('date', False):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
+                        # get presigned s3 link if present
+                        image_path = test.get('image')
+                        if image_path:
+                            test['image'] = fd.url(image_path)
+
+                #retrieve reporter profile pic
+                reporter = User.query.filter_by(user_id=test['reporter_id']).one_or_none()
+                reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
+                reporter_pic = None
+                if reporter_pictures:
+                    fd2 = FileDownload(reporter.user_id)
+                    reporter_pic = {}
+                    for pic in reporter_pictures:
+                        if pic.original:
+                            continue
+                        reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+                test['reporter_profile_pictures'] = reporter_pic
+                                
         payload = {}
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)

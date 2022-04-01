@@ -332,7 +332,7 @@ def charge_telehealth_appointment(booking_id):
     # TODO: Notify user of the canceled booking via email/notfication
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
-    Instamed().charge_user(booking)
+    Instamed().charge_telehealth_booking(booking)
     
 @celery.task()
 def cancel_noshow_appointment(booking_id):
