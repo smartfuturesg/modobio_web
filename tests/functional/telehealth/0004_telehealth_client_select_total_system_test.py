@@ -174,7 +174,6 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
     assert response.status_code == 201
 
 
-
 def test_full_system_with_settings(test_client, payment_method, telehealth_staff):
     """
     Testing the full telehealth system:
