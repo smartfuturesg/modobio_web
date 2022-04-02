@@ -7,10 +7,11 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.tasks.periodic import detect_practitioner_no_show
 from odyssey.utils.misc import get_time_index
 
+from tests.functional.telehealth.conftest import booking, payment_method
 
-def test_no_show_scan(test_client, test_booking):
+def test_no_show_scan(test_client, booking):
     #set booking to 10 mins ago
-    booking_id = test_booking.idx
+    booking_id = booking.idx
     target_time = datetime.now(timezone.utc)
     target_time_window = get_time_index(target_time)
     if target_time_window <= 2:
@@ -19,8 +20,8 @@ def test_no_show_scan(test_client, test_booking):
         target_time_window = 288 + target_time_window
     
     target_time_window -= 2
-    test_booking.booking_window_id_start_time_utc = target_time_window
-    test_booking.target_date_utc = target_time.date()
+    booking.booking_window_id_start_time_utc = target_time_window
+    booking.target_date_utc = target_time.date()
 
     #charge the booking
     response = test_client.post(
@@ -33,10 +34,10 @@ def test_no_show_scan(test_client, test_booking):
     res = loads(response.data)
     assert response.status_code == 200
     assert res['TransactionStatus'] == "C"
-    assert test_booking.charged
+    assert booking.charged
     
     #deploy task and make sure task booking is canceled
-    assert test_booking.status == 'Accepted'
+    assert booking.status == 'Accepted'
     
     detect_practitioner_no_show()
     
