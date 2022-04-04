@@ -267,7 +267,7 @@ def booking(test_client, payment_method):
     bk = TelehealthBookings(
         client_user_id=test_client.client_id,
         staff_user_id=test_client.staff_id,
-        profession_type='doctor',
+        profession_type='medical_doctor',
         target_date = target_datetime.date(),
         target_date_utc = target_datetime.date(),
         booking_window_id_start_time = booking_start_idx,
