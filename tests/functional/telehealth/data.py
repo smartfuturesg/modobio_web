@@ -8,12 +8,13 @@ today = datetime.utcnow().weekday()
 days_til_monday = timedelta(weeks= 2, days= -today + DAY_OF_WEEK.index('Monday'))
 target_date_next_monday = datetime.utcnow() + days_til_monday
 
+now = datetime.now()
 # For readability
 # 1/5/2025
 # Sunday
 telehealth_queue_client_pool_1_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2025-01-05T02:00:00.000',
+  'target_date': (now + timedelta(weeks=1)).isoformat(),
   'priority': False,
   'medical_gender': 'f',
   'payment_method_id': None,
@@ -23,7 +24,7 @@ telehealth_queue_client_pool_1_post_data = {
 # Monday
 telehealth_queue_client_pool_2_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2025-03-03T02:00:00.000',
+  'target_date': (now + timedelta(weeks=2)).isoformat(),
   'priority': False,
   'medical_gender': 'np',
   'payment_method_id': None,
@@ -33,7 +34,7 @@ telehealth_queue_client_pool_2_post_data = {
 # Wednesday
 telehealth_queue_client_pool_3_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2025-02-05T02:00:00.000',
+  'target_date': (now + timedelta(weeks=3)).isoformat(),
   'priority': False,
   'medical_gender': 'f',
   'payment_method_id': None,
@@ -43,7 +44,7 @@ telehealth_queue_client_pool_3_post_data = {
 # Thursday
 telehealth_queue_client_pool_4_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2025-01-02T02:00:00.000',
+  'target_date': (now + timedelta(weeks=4)).isoformat(),
   'priority': False,
   'medical_gender': 'm',
   'payment_method_id': None,
@@ -53,7 +54,7 @@ telehealth_queue_client_pool_4_post_data = {
 # Friday
 telehealth_queue_client_pool_5_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2025-04-05T02:00:00.000',
+  'target_date': (now + timedelta(weeks=5)).isoformat(),
   'priority': False,
   'medical_gender': 'np',
   'payment_method_id': None,
@@ -63,17 +64,16 @@ telehealth_queue_client_pool_5_post_data = {
 # Friday
 telehealth_queue_client_pool_6_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2025-02-07T02:00:00.000',
+  'target_date': (now + timedelta(weeks=6)).isoformat(),
   'priority': True,
   'medical_gender': 'm',
   'payment_method_id': None,
   'location_id': 1
 }
-# 2/5/2025
-# Wednesday
+# Same date as telehealth_queue_client_pool_3_post_data
 telehealth_queue_client_pool_7_post_data = {
   'profession_type': 'medical_doctor',
-  'target_date': '2025-02-05T02:00:00.000',
+  'target_date': (now + timedelta(weeks=3)).isoformat(),
   'priority': True,
   'medical_gender': 'f',
   'duration': 30,
@@ -225,31 +225,31 @@ telehealth_client_staff_bookings_post_1_data = {
 }
 
 telehealth_client_staff_bookings_post_2_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 157,
   'booking_window_id_end_time': 160
 }
 #client already has appointment at this time
 telehealth_client_staff_bookings_post_3_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 157,
   'booking_window_id_end_time': 160
 }
 # This should break
 telehealth_client_staff_bookings_post_4_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 105,
   'booking_window_id_end_time': 107
 }
 # This should break
 telehealth_client_staff_bookings_post_5_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 80,
   'booking_window_id_end_time': 97
 }
 # This should break
 telehealth_client_staff_bookings_post_6_data = {
-  'target_date': '2025-02-07',
+  'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 90,
   'booking_window_id_end_time': 85
 }

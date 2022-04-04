@@ -357,7 +357,9 @@ def booking_function_scope(test_client):
         booking_window_id_end_time_utc = booking_end_idx,
         client_location_id = 1,  # TODO: make this not hardcoded
         payment_method_id = pm.idx,
-        external_booking_id = uuid.uuid4()
+        external_booking_id = uuid.uuid4(),
+        status = 'Accepted',
+        consult_rate=15
     )
 
     test_client.db.session.add(booking)

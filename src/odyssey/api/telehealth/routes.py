@@ -280,7 +280,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 day_end_utc.weekday(), 
                 end_time_window_utc.idx,
                 duration)
-
+                
             # available_times_with_practitioners =
             # {start_time_idx: {'date_start_utc': datetime.date, 'practitioner_ids': {set of available user_ids}}
             # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioner_ids': {10}}

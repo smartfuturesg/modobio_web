@@ -2,8 +2,9 @@ from datetime import datetime, time, timedelta
 from flask.json import dumps
 from sqlalchemy import select
 
-from odyssey.api.telehealth.models import TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms
 from odyssey.api.staff.models import StaffCalendarEvents
+from tests.utils import login
 
 from .data import (
     telehealth_client_staff_bookings_post_1_data,
@@ -12,20 +13,43 @@ from .data import (
     telehealth_client_staff_bookings_put_1_data
 )
 
-def test_post_1_client_staff_bookings(test_client):
+def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehealth_staff, payment_method):
+    # delete previous bookings
+    test_client.db.session.query(TelehealthChatRooms).delete()
+    test_client.db.session.query(TelehealthBookingDetails).delete()
+    test_client.db.session.query(TelehealthBookings).delete()
+    test_client.db.session.commit()
+
+    # add client to queue first
+    queue_data = {
+        'profession_type': 'medical_doctor',
+        'target_date': datetime.strptime(
+            telehealth_client_staff_bookings_post_1_data.get('target_date'), '%Y-%m-%d').isoformat(),
+        'priority': False,
+        'medical_gender': 'np',
+        'location_id': 1,
+        'payment_method_id': payment_method.idx}
+
+    
+    response = test_client.post(
+        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(queue_data),
+        content_type='application/json')
+
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
+        f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.client_auth_header,
         data=dumps(telehealth_client_staff_bookings_post_1_data),
         content_type='application/json')
 
+    assert response.status_code == 201
     # Bring up conversation to ensure it was created for this booking
     conversation = TelehealthChatRooms.query.filter_by(booking_id=response.json['bookings'][0]['booking_id']).one_or_none()
-
-    assert response.status_code == 201
-    assert conversation.staff_user_id == test_client.staff_id
+    
+    assert conversation.staff_user_id == telehealth_staff[0].user_id
     assert conversation.client_user_id == test_client.client_id
 
     staff_events = (test_client.db.session.execute(
@@ -38,7 +62,7 @@ def test_post_1_client_staff_bookings(test_client):
     assert staff_events.start_time == time(8, 15)
     assert staff_events.end_time == time(8, 45)
 
-def test_post_2_client_staff_bookings(test_client, payment_method):
+def test_post_2_client_staff_bookings(test_client, payment_method, telehealth_staff, staff_availabilities):
     # add client to queue first
     queue_data = {
         'profession_type': 'medical_doctor',
@@ -58,61 +82,31 @@ def test_post_2_client_staff_bookings(test_client, payment_method):
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
+        f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.client_auth_header,
         data=dumps(telehealth_client_staff_bookings_post_2_data),
         content_type='application/json')
 
     assert response.status_code == 201
 
-def test_post_3_client_staff_bookings(test_client):
+def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_availabilities):
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
-        headers=test_client.client_auth_header,
-        data=dumps(telehealth_client_staff_bookings_post_3_data),
-        content_type='application/json')
-    assert response.status_code == 400
-
-def test_post_4_client_staff_bookings(test_client):
-    response = test_client.post(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
+        f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.client_auth_header,
         data=dumps(telehealth_client_staff_bookings_post_3_data),
         content_type='application/json')
 
+    # booking fails because client is not in queue
     assert response.status_code == 400
 
-def test_post_5_client_staff_bookings(test_client):
-    response = test_client.post(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
-        headers=test_client.client_auth_header,
-        data=dumps(telehealth_client_staff_bookings_post_3_data),
-        content_type='application/json')
-
-    assert response.status_code == 400
-
-def test_post_6_client_staff_bookings(test_client):
-    response = test_client.post(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
-        headers=test_client.client_auth_header,
-        data=dumps(telehealth_client_staff_bookings_post_3_data),
-        content_type='application/json')
-
-    assert response.status_code == 400
-
-def test_get_1_staff_bookings(test_client):
+def test_get_1_staff_bookings(test_client, telehealth_staff):
+    staff_header = login(test_client, telehealth_staff[0])
     response = test_client.get(
         f'/telehealth/bookings/'
-        f'?staff_user_id={test_client.staff_id}',
-        headers=test_client.staff_auth_header,
+        f'?staff_user_id={telehealth_staff[0].user_id}',
+        headers=staff_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -126,11 +120,11 @@ def test_get_2_client_bookings(test_client):
 
     assert response.status_code == 200
 
-def test_get_3_staff_client_bookings(test_client):
+def test_get_3_staff_client_bookings(test_client, telehealth_staff):
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
+        f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
