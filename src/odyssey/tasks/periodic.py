@@ -25,7 +25,7 @@ from odyssey.tasks.tasks import (
     cancel_noshow_appointment,
     update_apple_subscription
 )
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAvailabilityExceptions
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAvailabilityExceptions, TelehealthChatRooms
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
@@ -134,49 +134,38 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
 
     return 
 
-
 @celery.task()
 def deploy_appointment_transcript_store_tasks(target_date=None):
     """
     Following the completion of a telehealth appointment, the practitioner and client have a window of opportunity to add messages
     to the booking transcript. After this window, we will lock the conversation on twilio and store the transcript on the modobio end. 
 
-    This task uses the TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS constant to scan the database for bookings which are
-    approaching the end of the transcipt review window. The database is queried for bookings that fall on a target date
-     int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24) days prior to the current day. Tasks to store transcipts are then schedueld
-    approximately TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS following the start of the telehealth booking.
-    
     Parameters
     ----------
-    target_date : Date the bookings took place. This will be a date sometime in the past as we are looking for bookings which have been completed. 
-                To be used if testing. Otherwise date is set using system time (UTC)
+    target_date : date of chat room write access timeout
  
     """
-    # grab the current date for the queries below
+    # target date argument is meant for testing only
     if not target_date:
-        target_date = datetime.utcnow().date() - timedelta(days = int(TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS/24))
+        target_datetime_window = datetime.utcnow() + timedelta(hours=24)
+    else:
+        target_datetime_window = target_date + timedelta(hours=24)
 
-    time_inc = LookupBookingTimeIncrements.query.all()
-    
-    bookings = db.session.execute(
-        select(TelehealthBookings). 
-        where(TelehealthBookings.target_date_utc==target_date
-            )).scalars().all()
-    
+    # search for chatroom write_access_timeouts that occur before this time and have not yet been stored on the modobio end
+    chatrooms = db.session.execute(
+        select(TelehealthChatRooms).
+        where(
+            TelehealthChatRooms.write_access_timeout <= target_datetime_window,
+            TelehealthChatRooms.transcript_object_id == None)
+    ).scalars().all()
+
     # do not deploy task in testing
     if config.TESTING:
-        return bookings
-    
-    # schedule transcript cache tasks
-    for booking in bookings:
-        # create datetime object for scheduling tasks
-        booking_start_time =  time_inc[booking.booking_window_id_start_time_utc - 1]
-        message_cache_eta = datetime.combine(booking.target_date_utc, booking_start_time.start_time) + timedelta(hours = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS)
-        if message_cache_eta < datetime.now():
-            message_cache_eta = datetime.now() + timedelta(minutes = 5)
-        
+        return chatrooms
+
+    for chat in chatrooms:
         # Deploy scheduled task 
-        store_telehealth_transcript.apply_async((booking.idx,),eta=message_cache_eta)
+        store_telehealth_transcript.apply_async((chat.booking_id,),eta=chat.write_access_timeout)
 
     return 
 
@@ -314,6 +303,8 @@ def find_chargable_bookings():
 
     for booking in bookings:
         logger.info(f'chargable booking detected with id {booking.idx}')
+        booking.charged = True
+        db.session.commit()
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('charge booking task completed')
         
@@ -336,7 +327,7 @@ def detect_practitioner_no_show():
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
                                                TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
-                                               TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2)
+                                               TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2).all()
     for booking in bookings:
         logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client

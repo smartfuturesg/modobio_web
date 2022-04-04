@@ -33,6 +33,7 @@ from odyssey.api.lookup.models import (
     LookupNotificationSeverity,
     LookupBloodTests,
     LookupBloodTestRanges,
+    LookupDevNames,
     LookupVisitReasons
 )
 from odyssey.utils.base.schemas import BaseSchema
@@ -360,6 +361,15 @@ class LookupBloodTestRangesAllOutputSchema(Schema):
     items = fields.Nested(LookupBloodTestRangesAllSchema(many=True), missing=[])
     total_items = fields.Integer()
 
+class LookupDevNamesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupDevNames
+        exclude = ('created_at', 'updated_at')
+
+class LookupDevNamesOutputSchema(Schema):
+    items = fields.Nested(LookupDevNamesSchema(many=True), missing=[])
+    total_items = fields.Integer()
+    
 class LookupVisitReasonsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupVisitReasons

@@ -325,7 +325,7 @@ def booking_function_scope(test_client):
 
     # make a telehealth booking by direct db call
     # booking is made less than 10 minutes out from the current time
-    target_datetime = datetime.utcnow() #+ timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    target_datetime = datetime.utcnow() 
 
     # Round target_datetime up to the next 10-minute time.
     target_datetime = target_datetime - timedelta(
@@ -357,7 +357,9 @@ def booking_function_scope(test_client):
         booking_window_id_end_time_utc = booking_end_idx,
         client_location_id = 1,  # TODO: make this not hardcoded
         payment_method_id = pm.idx,
-        external_booking_id = uuid.uuid4()
+        external_booking_id = uuid.uuid4(),
+        status = 'Accepted',
+        consult_rate=15
     )
 
     test_client.db.session.add(booking)

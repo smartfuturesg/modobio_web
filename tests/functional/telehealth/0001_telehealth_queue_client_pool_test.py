@@ -72,11 +72,10 @@ def test_get_1_client_appointment_queue(test_client, payment_method):
             '/telehealth/queue/client-pool/',
             headers=header,
             content_type='application/json')
-
         # queue order should be 4, 1, 3, 2, 5
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],
-                response.json['queue'][0]['priority']] == ['2025-04-05T02:00:00', False]
+                response.json['queue'][0]['priority']] == [telehealth_queue_client_pool_5_post_data['target_date'], False]
         assert response.json['total_queue'] == 1
 
 def test_post_6_client_appointment(test_client, payment_method):
@@ -97,26 +96,12 @@ def test_get_2_client_appointment_queue(test_client):
             '/telehealth/queue/client-pool/',
             headers=header,
             content_type='application/json')
-
         # queue order should be 6, 4, 1, 3, 2, 5
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],
-                response.json['queue'][0]['priority']] == ['2025-02-07T02:00:00', True]
+                response.json['queue'][0]['priority']] == [telehealth_queue_client_pool_6_post_data['target_date'], True]
         assert response.json['total_queue'] == 1
 
-def test_get_3_client_appointment_queue(test_client):
-    for header in (test_client.staff_auth_header, test_client.client_auth_header):
-        response = test_client.get(
-            '/telehealth/queue/client-pool/',
-            headers=header,
-            content_type='application/json')
-
-        # queue order should be 6, 4, 1, 3, 2, 5
-        # This should be the same as test_get_2
-        assert response.status_code == 200
-        assert [response.json['queue'][0]['target_date'],
-                response.json['queue'][0]['priority']] == ['2025-02-07T02:00:00', True]
-        assert response.json['total_queue'] == 1
 
 def test_delete_1_client_appointment_queue(test_client):
     payload = telehealth_queue_client_pool_3_post_data
@@ -152,7 +137,7 @@ def test_get_4_client_appointment_queue(test_client):
         # This should be the same as test_get_2
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],
-                response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00', True]
+                response.json['queue'][0]['priority']] == [telehealth_queue_client_pool_3_post_data['target_date'], True]
         assert response.json['total_queue'] == 1
 
 def test_delete_2_client_appointment_queue(test_client):
@@ -177,7 +162,7 @@ def test_get_5_client_appointment_queue(test_client):
         # This should be the same as test_get_2
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],
-                response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00', True]
+                response.json['queue'][0]['priority']] == [telehealth_queue_client_pool_3_post_data['target_date'], True]
         assert response.json['total_queue'] == 1
 
 def test_get_1_specific_client_appointment_queue(test_client):
@@ -191,7 +176,7 @@ def test_get_1_specific_client_appointment_queue(test_client):
         # This should be the same as test_get_5
         assert response.status_code == 200
         assert [response.json['queue'][0]['target_date'],
-                response.json['queue'][0]['priority']] == ['2025-02-05T02:00:00', True]
+                response.json['queue'][0]['priority']] == [telehealth_queue_client_pool_3_post_data['target_date'], True]
         assert response.json['queue'][0]['duration'] == 30
         assert response.json['total_queue'] == 1
 

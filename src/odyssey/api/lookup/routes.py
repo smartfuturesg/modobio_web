@@ -1,6 +1,7 @@
 import logging
 import pathlib
 import pytz
+import random
 
 from flask import current_app, request
 from flask_accepts import responds
@@ -36,6 +37,7 @@ from odyssey.api.lookup.models import (
      LookupNotificationSeverity,
      LookupBloodTests,
      LookupBloodTestRanges,
+     LookupDevNames,
      LookupVisitReasons
      )
 from odyssey.api.lookup.schemas import (
@@ -70,6 +72,7 @@ from odyssey.api.lookup.schemas import (
     LookupBloodTestsOutputSchema,
     LookupBloodTestRangesOutputSchema,
     LookupBloodTestRangesAllOutputSchema,
+    LookupDevNamesOutputSchema,
     LookupVisitReasonsOutputSchema
 )
 from odyssey import db
@@ -552,6 +555,21 @@ class LookupBloodTestRangesAllApi(BaseResource):
             res.append({'test': test, 'range': range})
         return {'total_items': len(res), 'items': res}
 
+@ns.route('/developers/')
+class LookupDevNamesApi(BaseResource):
+    """
+    Endpoint that returns development team member names and number of names, in random order
+    """
+    @token_auth.login_required
+    @responds(schema=LookupDevNamesOutputSchema, status_code=200, api=ns)
+    def get(self): 
+        names = LookupDevNames.query.all()
+        
+        random.shuffle(names)
+
+        return {'total_items': len(names), 'items': names}
+    
+    
 @ns.route('/visit-reasons/')
 @ns.doc(params={'role': 'role for which some of all visit reasons apply'})
 class LookupVisitReasonsApi(BaseResource):
