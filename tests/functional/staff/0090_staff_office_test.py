@@ -11,15 +11,6 @@ def test_post_staff_office(test_client):
     # some simple checks for validity
     assert response.status_code == 400
 
-    #test with invalid state id, should return 400
-    response = test_client.post(f'/staff/offices/{test_client.staff_id}/',
-                                headers=test_client.staff_auth_header,
-                                data=dumps(staff_office_data['invalid_state_id']),
-                                content_type='application/json')
-
-    # some simple checks for validity
-    assert response.status_code == 400
-
     #test with a field that exceeds its maximum length, should return 400
     response = test_client.post(f'/staff/offices/{test_client.staff_id}/',
                                 headers=test_client.staff_auth_header,
@@ -49,7 +40,7 @@ def test_post_staff_office(test_client):
     assert response.json['country'] == 'USA'
     assert response.json['city'] == 'Miami'
     assert response.json['phone'] == '4804389574'
-    assert response.json['state_id'] == 1
+    assert response.json['territory_id'] == 1
 
     # # There is a Database listener waiting for both medical credentials and staff office.
     # # Once those are done, the system will automatically try to onboard the practitioner.
@@ -119,7 +110,7 @@ def test_put_staff_profile(test_client):
     assert response.json['country'] == 'USA'
     assert response.json['city'] == 'Tampa'
     assert response.json['phone'] == '4804389575'
-    assert response.json['state_id'] == 1
+    assert response.json['territory_id'] == 1
 
 def test_post_2_ds_practitioner_create(test_client):
     payload = {}

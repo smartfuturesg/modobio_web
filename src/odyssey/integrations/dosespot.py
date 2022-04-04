@@ -531,7 +531,7 @@ class DoseSpot:
 
         return status
 
-    def pharmacy_search(self, zipcode = None, state_id = None):
+    def pharmacy_search(self, zipcode = None, territory_id = None):
         """
         Returns the pharmacies near the provied address details
 
@@ -540,7 +540,7 @@ class DoseSpot:
         zipcode : str
             Zipcode where client is located
 
-        state_id: int
+        territory_id: int
             Numerical ID of the state.
 
         Returns
@@ -554,7 +554,7 @@ class DoseSpot:
 
         headers = {'Authorization': f'Bearer {access_token}'}
             
-        state = LookupTerritoriesOfOperations.query.filter_by(idx=state_id).one_or_none()
+        state = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id).one_or_none()
 
         if zipcode and state:
             params = {'zip': zipcode ,'state' : state.sub_territory_abbreviation}
