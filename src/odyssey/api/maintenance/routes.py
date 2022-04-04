@@ -23,53 +23,53 @@ ns = api.namespace(
 
 @ns.route('/schedule/')
 class MaintenanceApi(BaseResource):
-    """
-    Functions encompassing DynamoDB functionality.
-    """
     def is_maint_time_allowed(self) -> bool:
         """
         Check if the given maintenance time is allowed given Modobio's policies:
-        - For maintenance between the hours of 6am and 11pm, their must be more
+        - For maintenance between the hours of 6am and 11pm, there must be more
         than 14 days of notice
-        - For maintenance between the hours of 11pm and 6am, their must be more
+        - For maintenance between the hours of 11pm and 6am, there must be more
         than 2 days of notice
         """
-        # Set timezone
+        # Set timezone based on environment variable
         zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
-        # Get and set relevant times, force timezone info
+        # Get and set relevant times, force their timezone info
+        # Start and End of the maintenance block, as defined by the user
         start = datetime.fromisoformat(request.json['start_time']).replace(tzinfo=zone)
         end = datetime.fromisoformat(request.json['end_time']).replace(tzinfo=zone)
+        # Start and End of business hours, as defined by Modobio
+        business_start_hr = current_app.config['BUSINESS_HRS_START']
+        business_end_hr = current_app.config['BUSINESS_HRS_END']
+        # Now as defined by... the authors of datetime, I guess
         now = datetime.now(tz=zone)
 
-        # Current date but with the time set to the start times of business / overnight
-        business_start = datetime.combine(now, time(hour=6, minute=0, second=0))
-        # If you use the same logic as business hours, it checks for a range(23, 6) which is not what we want
-        # Probably simpler to just use the basic range(6) below
-        # overnight_start = datetime.combine(now, time(hour=23, minute=0, second=0))
-
-        # Time windows
-        # 6AM-10:59PM
-        business_hours = [*range(business_start.hour, (business_start+timedelta(hours=17)).hour)]
-        # 11PM-5:59AM
-        overnight_hours = [*range(6)]  # 0:00 - 6:00
-        overnight_hours.append(23) # 23:00 - 6:00
-
         # Time Deltas
-        short_notice = timedelta(days=2)
-        std_notice = timedelta(days=14)
+        short_notice = timedelta(days=current_app.config['MAINT_SHORT_NOTICE'])
+        std_notice = timedelta(days=current_app.config['MAINT_STD_NOTICE'])
+        # Start of the business hours window
+        business_start = datetime.combine(start, time(hour=business_start_hr)).replace(tzinfo=zone)
 
-        # If the start datetime is later than the end datetime (e.g. start = 4am, end = 3am)
-        if start > end:
-            return False
+        # If the maintenance start is before the end
+        if start < end:
+            # If the start time is more than the standard notice window away, both overnight and business maintenance are allowed
+            if start > now + std_notice:
+                return True
+            # If it's at least further away than the short notice window
+            elif start > now + short_notice:
+                # If the defined business hours time window goes over midnight...
+                if business_end_hr < business_start_hr:
+                    # ...add a day to the business end datetime
+                    business_end = datetime.combine(end + timedelta(days=1), time(hour=business_end_hr)).replace(tzinfo=pytz.timezone('UTC'))
+                else:
+                    # Business start and end are the same day
+                    business_end = datetime.combine(end, time(hour=business_end_hr)).replace(tzinfo=pytz.timezone('UTC'))
 
-        # Business hours
-        if start.hour in business_hours or end.hour in business_hours:
-            return True if start > now + std_notice else False
-        # Overnight
-        elif start.hour in overnight_hours and end.hour in overnight_hours:
-            return True if start > now + short_notice else False
-        else:
-            return False
+                # If neither 'start' nor 'end' is in business hours, the requested maintenenace block is allowed
+                if not business_start < start < business_end and not business_start < end < business_end:
+                    return True
+        # If all else fails
+        return False
+
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     def get(self):
@@ -91,7 +91,7 @@ class MaintenanceApi(BaseResource):
         """
         Create a new maintenance block using the given start_time, end_time, and comments.
 
-        'start_time' and 'end_time' must be iso formatted, naive datetimes. e.g. 2022-04-23T13:30:00.000000
+        'start_time' and 'end_time' must be iso formatted, UTC datetimes. e.g. 2022-04-23T13:30:00.000000-00:00
         """
         if not self.is_maint_time_allowed():
             raise BadRequest('Maintenance time is not allowed')

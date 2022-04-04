@@ -26,7 +26,7 @@ from odyssey.api.staff.models import (
     StaffProfile,
     StaffCalendarEvents,
     StaffOffices)
-from odyssey.utils.files import FileDownload, ImageUpload
+from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.api.staff.schemas import (
     StaffOperationalTerritoriesNestedSchema,
     StaffProfileSchema, 
@@ -370,11 +370,7 @@ class StaffProfilePage(BaseResource):
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
 
         res['bio'] = profile.bio
-        res['profile_picture'] = {}
-
-        fd = FileDownload(user_id)
-        for pic in profile.profile_pictures:
-            res['profile_picture'][pic.image_path] = fd.url(pic.image_path)
+        res['profile_picture'] = get_profile_pictures(user_id, True)
 
         return res
 
@@ -443,7 +439,6 @@ class StaffProfilePage(BaseResource):
                 prefix='staff_profile_picture')
             original.validate()
             original.save(f'original_{hex_token}.{original.extension}')
-            urls['original'] = original.url()
 
             upp = UserProfilePictures(
                 staff_user_id=user_id,

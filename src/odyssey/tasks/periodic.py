@@ -25,7 +25,7 @@ from odyssey.tasks.tasks import (
     cancel_noshow_appointment,
     update_apple_subscription
 )
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAvailabilityExceptions, TelehealthChatRooms
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
@@ -327,7 +327,7 @@ def detect_practitioner_no_show():
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
                                                TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
-                                               TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2)
+                                               TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2).all()
     for booking in bookings:
         logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client
@@ -394,7 +394,7 @@ def remove_expired_availability_exceptions():
     logger.info('Deploying remove expired exceptions test')
     exceptions = TelehealthStaffAvailabilityExceptions.query.filter(
         TelehealthStaffAvailabilityExceptions.exception_date < current_date
-    )
+    ).all()
     
     for exception in exceptions:
         db.session.delete(exception)
@@ -460,7 +460,12 @@ celery.conf.beat_schedule = {
     },
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
-        'args': (25,),
-        'schedule': crontab(minute='*/30')
+        'args': (60,),
+        'schedule': crontab(minute='*/60')
+    },
+    #availability
+    'remove_expired_availability_exceptions': {
+        'task': 'odyssey.periodic.remove_expired_availability_exceptions',
+        'schedule': crontab(hour='0', minute='0')
     }
 }
