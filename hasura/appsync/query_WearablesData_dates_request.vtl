@@ -1,0 +1,21 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "Query",
+    "query" : {
+        "expression": "user_id = :user_id AND #min_date > :min_date",
+        "expressionNames": {
+        	"#min_date": "date"
+        },
+        "expressionValues" : {
+            ":user_id" : $util.dynamodb.toDynamoDBJson($ctx.args.get("user_id")),
+            ":min_date": $util.dynamodb.toDynamoDBJson("2000-01-01")
+        }
+    },
+    "filter": {
+    	"expression": "wearable = :wearable",
+        "expressionValues": {
+        	":wearable": $util.dynamodb.toDynamoDBJson($ctx.args.get("wearable"))
+        }
+    },
+    "nextToken": $util.toJson($util.defaultIfNullOrBlank($ctx.args.get("next_token"), null))
+}

@@ -1,0 +1,64 @@
+type Mutation {
+	insert_WearablesData(
+		user_id: Int!,
+		date: AWSDate!,
+		wearable: WearableDevice!,
+		data: AWSJSON!
+	): Int
+
+	insert_WearablesDataList(
+        items: [in_WearablesData!]!
+    ): Int
+}
+
+type Query {
+	WearablesData(
+        user_id: Int!,
+        date: AWSDate!,
+        wearable: WearableDevice!
+    ): WearablesData
+
+	WearablesData_dates(
+        user_id: Int!,
+        wearable: WearableDevice!,
+        next_token: String
+    ): WearablesDates
+
+	WearablesData_range(
+		user_id: Int!,
+		from: AWSDate!,
+		to: AWSDate!,
+		wearable: WearableDevice,
+		next_token: String
+	): WearablesDataList
+}
+
+enum WearableDevice {
+	oura
+	fitbit
+	applewatch
+}
+
+type WearablesData {
+	date: AWSDate
+	user_id: Int
+	wearable: WearableDevice
+	data: AWSJSON
+}
+
+type WearablesDataList {
+	items: [WearablesData]
+	next_token: String
+}
+
+type WearablesDates {
+	dates: [AWSDate]
+	next_token: String
+}
+
+input in_WearablesData {
+	date: AWSDate!
+	user_id: Int!
+	wearable: WearableDevice!
+	data: AWSJSON!
+}

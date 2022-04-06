@@ -1,0 +1,23 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "Query",
+    "query" : {
+        "expression": "#user_id = :user_id AND #the_date BETWEEN :from AND :to",
+        "expressionNames": {
+        	"#user_id": "user_id",
+            "#the_date": "date"
+        },
+        "expressionValues" : {
+            ":user_id" : $util.dynamodb.toDynamoDBJson($ctx.args.get("user_id")),
+            ":from" : $util.dynamodb.toDynamoDBJson($ctx.args.get("from")),
+            ":to" : $util.dynamodb.toDynamoDBJson($ctx.args.get("to"))
+        }
+    },
+    "filter": {
+    	"expression": "wearable = :wearable",
+        "expressionValues": {
+        	":wearable": $util.dynamodb.toDynamoDBJson($ctx.args.get("wearable"))
+        }
+    },
+    "nextToken": $util.toJson($util.defaultIfNullOrBlank($ctx.args.get("next_token"), null))
+}

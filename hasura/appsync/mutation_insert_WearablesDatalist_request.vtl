@@ -1,0 +1,14 @@
+## WARNING!!!!!!
+## Name of table in request, change for dev/production.
+
+#set($items = [])
+#foreach($item in ${ctx.args.items})
+    $util.qr($items.add($util.dynamodb.toMapValues($item)))
+#end
+{
+    "version" : "2018-05-29",
+    "operation" : "BatchPutItem",
+    "tables" : {
+        "Wearables-V1-dev": $utils.toJson($items)
+    }
+}
