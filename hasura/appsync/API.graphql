@@ -52,7 +52,7 @@ type WearablesDataList {
 }
 
 type WearablesDates {
-	dates: [AWSDate]
+	dates: [AWSDate]!
 	next_token: String
 }
 
