@@ -394,7 +394,7 @@ def remove_expired_availability_exceptions():
     logger.info('Deploying remove expired exceptions test')
     exceptions = TelehealthStaffAvailabilityExceptions.query.filter(
         TelehealthStaffAvailabilityExceptions.exception_date < current_date
-    )
+    ).all()
     
     for exception in exceptions:
         db.session.delete(exception)

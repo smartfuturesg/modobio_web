@@ -124,7 +124,6 @@ class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at', 'idx')
 
     territory_id = fields.Integer()
-    state_id = fields.Integer()
     country = fields.String(dump_only=True)
     territory = fields.String(dump_only=True)
     territory_abbreviation = fields.String(dump_only=True)
@@ -134,13 +133,6 @@ class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        # find the state using either the submitted tarritory_id or state_id fields
-        # both will query the same lookup table
-        # TODO 12.8.21: deprecate state_id in favor of using only territory_id 
-        if 'state_id' in data:
-            if not data.get('territory_id'): # territory_id not provided by FE
-                data['territory_id'] = data['state_id']
-            del data['state_id']
         return StaffOffices(**data)
 
 class StaffInternalRolesSchema(Schema):
