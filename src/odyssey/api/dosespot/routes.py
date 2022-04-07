@@ -190,7 +190,7 @@ class DoseSpotSelectPharmacies(BaseResource):
             list of pharmacies
         """
         zipcode = request.args.get('zipcode', None)
-        territory_id = request.args.get('statterritory_ide_id', None)
+        territory_id = request.args.get('territory_id', None)
 
         # if no zipcode not state specified, use client's address detail by default
         if not zipcode and not territory_id:
