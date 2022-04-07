@@ -1444,7 +1444,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         Parameters
         ----------
-        image : list(file) (optional)
+        images : list(file) (optional)
             Image file(s), up to 3 can be send.
         voice : file (optional)
             Audio file, only 1 can be send.
