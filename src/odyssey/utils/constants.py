@@ -438,12 +438,12 @@ fit under.
 :type: tuple
 """
 ACCESS_ROLES = (
+    'beautician',
+    'chef',
     'data_scientist',
     'dietitian',
     'medical_doctor',
     'nurse',
-    'nurse_practitioner',
-    'physician_assistant',
     'nutritionist',
     'physical_therapist',
     'therapist',
