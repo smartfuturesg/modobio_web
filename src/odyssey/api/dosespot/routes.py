@@ -37,7 +37,7 @@ ns = Namespace('dosespot', description='Operations related to DoseSpot')
 
 @ns.route('/allergies/<int:user_id>/')
 class DoseSpotAllergies(BaseResource):
-    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',))
+    @token_auth.login_required(user_type=('staff','client'), resources=('general_medical_info',))
     @responds(schema=DoseSpotAllergyOutput,status_code=200,api=ns)
     def get(self, user_id):
         """
@@ -72,7 +72,7 @@ class DoseSpotPractitionerCreation(BaseResource):
 
 @ns.route('/prescribe/<int:user_id>/')
 class DoseSpotPatientCreation(BaseResource):
-    @token_auth.login_required(user_type=('staff','client'),staff_role=('medical_doctor',), resources=('medications',))
+    @token_auth.login_required(user_type=('staff','client'), resources=('medications',))
     @responds(schema=DoseSpotPrescribedOutput,status_code=200,api=ns)
     def get(self, user_id):
         """
