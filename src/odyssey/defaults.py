@@ -279,7 +279,13 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 # Google ReCaptcha api secret
 GOOGLE_RECAPTCHA_SECRET = ""
 
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev'
+WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-1.0.2'
+""" Name of the table in AWS DynamoDB where wearables data is stored.
+
+The table name is versioned to allow multiple versions of the API to run
+at the same time. Make sure to update this value when moving to a new
+branch.
+"""
 
 # Apple app store 
 APPLE_APPSTORE_API_KEY = ''
