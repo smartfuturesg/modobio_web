@@ -1358,6 +1358,18 @@ class LookupBloodTestRanges(BaseModelWithIdx):
     :type: float
     """
 
+class LookupDevNames(BaseModelWithIdx):
+    """
+    Lookup table for development team names
+    """
+
+    name = db.Column(db.String)
+    """
+    name of development team member.
+    
+    :type: string
+    """
+    
 class LookupVisitReasons(BaseModelWithIdx):
     """
     Lookup table for visit reason ids

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 from flask import g
 from flask.json import dumps
+from pytz import timezone
 from sqlalchemy import select
 from twilio.base.exceptions import TwilioRestException
 
@@ -13,11 +14,11 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.staff.models import StaffRoles, StaffOperationalTerritories
+from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffOperationalTerritories
 from odyssey.api.user.models import User, UserLogin
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthStaffSettings
 from odyssey.integrations.twilio import Twilio
-from odyssey.utils.constants import ACCESS_ROLES, TELEHEALTH_BOOKING_LEAD_TIME_HRS
+from odyssey.utils.constants import ACCESS_ROLES, DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS
 from odyssey.utils.message import PushNotification
 
 @pytest.fixture(scope='session', autouse=True)
@@ -74,6 +75,10 @@ def telehealth_staff(test_client):
         staff_login.set_password('password')
         test_client.db.session.add(staff_login)
         consult_rate = 100.00
+
+        staff_profile = StaffProfile(user_id = staff.user_id)
+        test_client.db.session.add(staff_profile)
+        test_client.db.session.commit()
         if i < 5:
             staff_role = StaffRoles(
                 user_id=staff.user_id,
@@ -90,6 +95,27 @@ def telehealth_staff(test_client):
                     consult_rate=consult_rate)
                 test_client.db.session.add(staff_role)
 
+        test_client.db.session.commit()
+        creds = []
+        creds.append(PractitionerCredentials(
+            user_id = staff.user_id,
+            country_id = 1,
+            state = 'FL',
+            credential_type = 'med_lic',
+            credentials = '123456789',
+            status='Verified',
+            role_id = StaffRoles.query.filter_by(user_id=staff.user_id, role = 'medical_doctor').one_or_none().idx
+        ))
+
+        creds.append(PractitionerCredentials(
+            user_id = staff.user_id,
+            country_id = 1,
+            credential_type = 'npi',
+            credentials = '123456789',
+            status='Verified',
+            role_id = StaffRoles.query.filter_by(user_id=staff.user_id, role = 'medical_doctor').one_or_none().idx
+        ))
+        test_client.db.session.add_all(creds)
         test_client.db.session.commit()
         staffs.append(staff)
 
@@ -222,7 +248,7 @@ def booking(test_client, payment_method):
     target_datetime = datetime.utcnow() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
     start_minute = target_datetime.minute + (10 - target_datetime.minute % 10) 
     target_datetime = target_datetime.replace(
-        hour = target_datetime.hour + 1 if start_minute == 60 else target_datetime.hour,
+        hour = target_datetime.hour + 1 if (start_minute == 60 and target_datetime.hour < 23) else target_datetime.hour,
         minute = 0 if start_minute == 60 else start_minute, 
         second=0)
     time_inc = LookupBookingTimeIncrements.query.all()
@@ -241,7 +267,7 @@ def booking(test_client, payment_method):
     bk = TelehealthBookings(
         client_user_id=test_client.client_id,
         staff_user_id=test_client.staff_id,
-        profession_type='doctor',
+        profession_type='medical_doctor',
         target_date = target_datetime.date(),
         target_date_utc = target_datetime.date(),
         booking_window_id_start_time = booking_start_idx,
@@ -254,7 +280,8 @@ def booking(test_client, payment_method):
         charged=False,
         status='Accepted',
         payment_method_id = payment_method.idx,
-        external_booking_id = uuid.uuid4()
+        external_booking_id = uuid.uuid4(),
+        consult_rate = 15.00
     )
 
     test_client.db.session.add(bk)
@@ -295,3 +322,37 @@ def booking(test_client, payment_method):
         # conversation was already removed as part of a test
         pass
 
+@pytest.fixture(scope='function')
+def staff_availabilities(test_client, telehealth_staff):
+    """ 
+    Fills up the staff availability table with 5 staff members
+    """
+    # clear current staff availability and telehealth settings
+    test_client.db.session.query(TelehealthStaffAvailability).delete()
+    test_client.db.session.query(TelehealthStaffSettings).delete()
+
+    time_inc = LookupBookingTimeIncrements.query.all()
+    availabilities = []
+    staff_settings = []
+    for staff in telehealth_staff[:5]:
+        # each staff needs telehealth settings
+        staff_settings.append(TelehealthStaffSettings(
+            user_id = staff.user_id,
+            auto_confirm=True,
+            timezone = 'UTC'
+        ))
+        for day in DAY_OF_WEEK:
+            for time_id in time_inc:
+                availabilities.append(TelehealthStaffAvailability(
+                    user_id=staff.user_id, 
+                    day_of_week=day, 
+                    booking_window_id = time_id.idx))
+    test_client.db.session.add_all(staff_settings)
+    test_client.db.session.add_all(availabilities)
+    test_client.db.session.commit()
+
+    yield
+
+    # delete all entries
+    test_client.db.session.query(TelehealthStaffAvailability).delete()
+    test_client.db.session.query(TelehealthStaffSettings).delete()

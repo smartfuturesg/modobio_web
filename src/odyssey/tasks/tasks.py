@@ -1,8 +1,9 @@
 import logging
+import secrets
+
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 
 from odyssey.integrations.apple import AppStore
-logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -26,6 +27,8 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
+
+logger = logging.getLogger(__name__)
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -371,24 +374,22 @@ def store_telehealth_transcript(booking_id: int):
     transcript = twilio.get_booking_transcript(booking.idx)
 
     # if there is media present in the transcript, store it in an s3 bucket
-    media_id = 0
-    for idx, message in enumerate(transcript):
+    hex_token = secrets.token_hex(4)
+    for message_id, message in enumerate(transcript):
         if message['media']:
-            for media_idx, media in enumerate(message['media']):
+            for media_id, media in enumerate(message['media']):
                 # download media from twilio 
                 media_content = twilio.get_media(media['sid'])
 
                 fu = FileUpload(
                     BytesIO(media_content),
                     booking.client_user_id,
-                    prefix=f'telehealth/{booking_id}/transcript/media')
+                    prefix=f'telehealth/booking_{booking_id}/message_{message_id}/')
                 fu.validate()
-                fu.save(f'{media_id}.{fu.extension}')
+                fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
 
                 media['s3_path'] = fu.filename
-                transcript[idx]['media'][media_idx] = media
-            
-                media_id += 1
+                transcript[message_id]['media'][media_id] = media
 
     payload = {
         'created_at': datetime.utcnow().isoformat(),

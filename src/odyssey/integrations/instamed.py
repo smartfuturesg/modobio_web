@@ -284,7 +284,6 @@ class Instamed:
         response = requests.post(self.url_base + '/payment/sale',
                         headers=self.request_header,
                         json=request_data)
-
         #check if instamed api raised an error
         try:
             response.raise_for_status()

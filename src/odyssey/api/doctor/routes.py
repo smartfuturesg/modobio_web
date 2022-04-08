@@ -488,13 +488,7 @@ class MedicalGeneralInformation(BaseResource):
                     raise BadRequest('If a primary doctor name is given, the client must also '
                                      'provide the doctors phone number or email')
 
-            if generalInfo.blood_type or generalInfo.blood_type_positive:
-                # if the client starts by indication which blood type they have or the sign
-                # they also need the other.
-                if generalInfo.blood_type is None or generalInfo.blood_type_positive is None:
-                    raise BadRequest('If bloodtype or sign is given, client must provide both.')
-                else:
-                    generalInfo.user_id = user_id
+            generalInfo.user_id = user_id
             db.session.add(generalInfo)
         else:
             # If first post is empty, put in a placeholder in this table to force to use
@@ -525,13 +519,7 @@ class MedicalGeneralInformation(BaseResource):
                     raise BadRequest('If a primary doctor name is given, the client must also '
                                      'provide the doctors phone number or email')
 
-            if generalInfo.get('blood_type') or generalInfo.get('blood_type_positive'):
-                # if the client starts by indication which blood type they have or the sign
-                # they also need the other.
-                if generalInfo.get('blood_type') is None or generalInfo.get('blood_type_positive') is None:
-                    raise BadRequest('If bloodtype or sign is given, client must provide both.')
-                else:
-                    generalInfo['user_id'] = user_id
+            generalInfo['user_id'] = user_id
             genInfo = MedicalGeneralInfo.query.filter_by(user_id=user_id).one_or_none()
             genInfo.update(generalInfo)
         
@@ -1208,18 +1196,21 @@ class MedBloodTest(BaseResource):
                 if sex_ranges.count() > cycle_ranges.count():
                     result['menstrual_cycle'] = client_cycle
 
-                client_races = []
-                for race in ClientRaceAndEthnicity.query.filter_by(user_id=user_id).all():
-                    client_races.append(race.race_id)
+                client_races = {}
+                for id, name in db.session.query(ClientRaceAndEthnicity.race_id, LookupRaces.race_name) \
+                    .filter(ClientRaceAndEthnicity.race_id == LookupRaces.race_id).all():
+                    client_races[id] = name
         
                 #prune remaining ranges by races relevant to the client
                 applicable_race = False
                 race_ranges = []
+                result['race'] = []
                 for range in cycle_ranges.all():
                     if range.race_id:
                         if range.race_id in client_races:
                             applicable_race = True
                             race_ranges.append(range)
+                            result['race'].append(client_races[range.race_id])
                             
                 if not applicable_race:
                     #if the range had no races that were applicable to the client, only consider ranges
@@ -1228,7 +1219,7 @@ class MedBloodTest(BaseResource):
                     
                 #if race filtering narrowed results, record client race as a determining factor
                 if cycle_ranges.count() > len(race_ranges):
-                    result['race'] =','.join(races)
+                    result['race'] =', '.join(result['race'])
 
                 if len(race_ranges) > 1:
                     """

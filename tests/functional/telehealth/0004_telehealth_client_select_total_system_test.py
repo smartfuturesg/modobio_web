@@ -2,14 +2,15 @@
 from datetime import datetime, timedelta
 
 from flask.json import dumps
-from sqlalchemy.sql.expression import delete
 
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.telehealth.models import TelehealthStaffAvailability
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability
 from odyssey.tasks.tasks import cleanup_unended_call
 from flask import g
 
 from tests.utils import login
+
+from .data import target_date_next_monday
 
 from .client_select_data import (
     telehealth_staff_4_general_availability_post_data,
@@ -18,14 +19,38 @@ from .client_select_data import (
     telehealth_staff_10_general_availability_post_data,
     telehealth_staff_12_general_availability_post_data,
     telehealth_staff_14_general_availability_post_data,
-    telehealth_bookings_staff_4_client_1_data,
-    telehealth_bookings_staff_4_client_3_data,
-    telehealth_bookings_staff_8_client_5_data,
+    telehealth_booking_data_1,
+    telehealth_booking_data_2,
+    telehealth_booking_data_3,
     telehealth_queue_client_3_data,
     payment_method_data
 )
 
+def test_generate_client_queue(test_client, payment_method):
+    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    response = test_client.post(
+        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(telehealth_queue_client_3_data),
+        content_type='application/json')
+
+    assert response.status_code == 201
+
+def test_client_time_select(test_client, staff_availabilities):
+
+    response = test_client.get(
+        f'/telehealth/client/time-select/{test_client.client_id}/',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+    assert response.json['total_options'] == 95
+
 def test_generate_staff_availability(test_client, telehealth_staff):
+    """
+    fill up the staff availabilities
+    add client to queue
+    view current availabilities
+    """
     availability_data = [
         telehealth_staff_4_general_availability_post_data,
         telehealth_staff_6_general_availability_post_data,
@@ -45,7 +70,8 @@ def test_generate_staff_availability(test_client, telehealth_staff):
 
         assert response.status_code == 201
 
-def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, payment_method):
+def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, payment_method, staff_availabilities):
+
     ##
     # Create booking 1
     ##
@@ -54,7 +80,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
     queue_data = {
         'profession_type': 'medical_doctor',
         'target_date': datetime.strptime(
-            telehealth_bookings_staff_4_client_1_data.get('target_date'), '%Y-%m-%d').isoformat(),
+                telehealth_booking_data_1.get('target_date'), '%Y-%m-%d').isoformat(),
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
@@ -71,7 +97,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         f'?client_user_id={test_client.client_id}'
         f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.client_auth_header,
-        data=dumps(telehealth_bookings_staff_4_client_1_data),
+        data=dumps(telehealth_booking_data_1),
         content_type='application/json')
 
     assert response.status_code == 201
@@ -83,7 +109,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
     queue_data = {
         'profession_type': 'medical_doctor',
         'target_date': datetime.strptime(
-            telehealth_bookings_staff_4_client_3_data.get('target_date'), '%Y-%m-%d').isoformat(),
+                telehealth_booking_data_2.get('target_date'), '%Y-%m-%d').isoformat(),
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
@@ -100,7 +126,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         f'?client_user_id={test_client.client_id}'
         f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.client_auth_header,
-        data=dumps(telehealth_bookings_staff_4_client_3_data),
+        data=dumps(telehealth_booking_data_2),
         content_type='application/json')
 
     assert response.status_code == 201
@@ -125,7 +151,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
     queue_data = {
         'profession_type': 'medical_doctor',
         'target_date': datetime.strptime(
-            telehealth_bookings_staff_8_client_5_data.get('target_date'), '%Y-%m-%d').isoformat(),
+                telehealth_booking_data_3.get('target_date'), '%Y-%m-%d').isoformat(),
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
@@ -142,7 +168,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         f'?client_user_id={client_4.user_id}'
         f'&staff_user_id={telehealth_staff[2].user_id}',
         headers=client_4_auth_header,
-        data=dumps(telehealth_bookings_staff_8_client_5_data),
+        data=dumps(telehealth_booking_data_3),
         content_type='application/json')
 
     assert response.status_code == 201
@@ -164,7 +190,7 @@ def test_client_time_select(test_client):
     assert response.status_code == 200
     assert response.json['total_options'] == 30
 
-def test_full_system_with_settings(test_client, payment_method):
+def test_full_system_with_settings(test_client, payment_method, telehealth_staff):
     """
     Testing the full telehealth system:
 
@@ -176,10 +202,13 @@ def test_full_system_with_settings(test_client, payment_method):
 
     The staff availability in UTC should be converted to the client's timezone (America/Phoenix) for display.
     """  
-    # clear all availabilities before this
-    current_availabilities = test_client.db.session.execute(
-        delete(TelehealthStaffAvailability)
-        .where(TelehealthStaffAvailability.idx > 0))
+    staff_login = login(test_client, telehealth_staff[0])
+    # clear all availabilities and bookings before this
+    test_client.db.session.query(TelehealthStaffAvailability).delete()
+    test_client.db.session.query(TelehealthChatRooms).delete()
+    test_client.db.session.query(TelehealthBookingDetails).delete()
+    test_client.db.session.query(TelehealthBookings).delete()
+    test_client.db.session.commit()
 
     ##
     # 1. Set staff's availability
@@ -189,16 +218,16 @@ def test_full_system_with_settings(test_client, payment_method):
             'timezone': 'UTC',
             'auto_confirm': False},
         'availability' : [{
-            'day_of_week': 'Wednesday',
+            'day_of_week': 'Monday',
             'start_time': '3:00:00',
             'end_time': '12:00:00'}]}
 
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{telehealth_staff[0].user_id}/',
+        headers=staff_login,
         data=dumps(availability),
         content_type='application/json')
-
+    
     ##
     # 2. Client requests to be added to the queue
     ##
@@ -207,7 +236,7 @@ def test_full_system_with_settings(test_client, payment_method):
         "priority": "True",
         "duration": 20,
         "medical_gender": "np",
-        "target_date": "2024-11-6T00:00:00",
+        "target_date": (target_date_next_monday + timedelta(weeks=1)).isoformat(),
         "timezone": "America/Phoenix",
         'location_id': 1,
         'payment_method_id': payment_method.idx}
@@ -217,7 +246,6 @@ def test_full_system_with_settings(test_client, payment_method):
         headers=test_client.client_auth_header,
         data=dumps(client_queue),
         content_type='application/json')
-
     ##
     # 3. Client requests to view availabilities for selected target date
     ##
@@ -238,14 +266,14 @@ def test_full_system_with_settings(test_client, payment_method):
     ##
     # select the booking that is at 4:30 Phx time/ 11:30 UTC
     client_booking = {
-        'target_date': '2024-11-6',
+        'target_date': target_date_next_monday.date().isoformat(),
         'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
         'booking_window_id_end_time': response.json['appointment_times'][-1]['booking_window_id_end_time']}
 
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
+        f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.client_auth_header,
         data=dumps(client_booking),
         content_type='application/json')
@@ -263,7 +291,7 @@ def test_full_system_with_settings(test_client, payment_method):
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
+        f'&staff_user_id={telehealth_staff[0].user_id}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
     for booking in response.json['bookings']:
