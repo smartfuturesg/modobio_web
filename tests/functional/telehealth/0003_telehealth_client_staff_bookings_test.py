@@ -28,7 +28,8 @@ def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehea
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
-        'payment_method_id': payment_method.idx}
+        'payment_method_id': payment_method.idx,
+        'duration': 30}
 
     
     response = test_client.post(
