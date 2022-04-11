@@ -392,10 +392,12 @@ class Instamed:
             cancel_telehealth_appointment(booking)
             #send notification for failed payment
             self.failed_payment_notification_bookings(booking)
+            logger.audit(f"Payment failed for booking {booking.idx}. Payment was partially approved")
             payment_data['message'] = "Partial payment received. Appointment has been canceled and partial payment has been voided"
         else:
             booking.charged = True
             booking.payment_history_id = payment_data['payment_history_id']
+            logger.audit(f"Booking {booking.idx} successfully charged")
 
         db.session.commit()
 
