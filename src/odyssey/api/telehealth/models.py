@@ -144,6 +144,13 @@ class TelehealthBookings(BaseModelWithIdx):
 
     :type: boolean
     """
+    
+    notified = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent the notifications and ehr permissions for this booking.
+    
+    :type: boolean
+    """
 
     external_booking_id = db.Column(db.String(36), nullable = True)
     """
