@@ -454,10 +454,11 @@ class TelehealthBookingsApi(BaseResource):
             order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc())
 
         if status:
-            breakpoint()
             bookings_query = bookings_query.filter(TelehealthBookings.status.in_(status))
-        bookings = bookings_query.paginate(page,per_page,error_out=False).items
 
+        bookings_query = bookings_query.paginate(page,per_page,error_out=False)
+        bookings = bookings_query.items
+        
         # ensure requested booking_id is allowed
         if booking_id and len(bookings) == 1:
             if not (current_user.user_id == bookings[0].client_user_id or
