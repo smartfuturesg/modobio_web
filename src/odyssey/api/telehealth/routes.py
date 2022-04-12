@@ -386,6 +386,7 @@ class TelehealthBookingsApi(BaseResource):
     @ns.doc(params={'client_user_id': 'Client User ID',
                 'staff_user_id' : 'Staff User ID',
                 'booking_id': 'booking_id',
+                'status': 'list of booking status options',
                 'page': 'pagination index',
                 'per_page': 'results per page'})
     def get(self):
@@ -399,6 +400,7 @@ class TelehealthBookingsApi(BaseResource):
         booking_id = request.args.get('booking_id', type=int)
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
+        status = request.args.getlist('status', type=str)
 
         ###
         # There are 5 cases to decide what to return:
@@ -445,10 +447,16 @@ class TelehealthBookingsApi(BaseResource):
                 raise Unauthorized('You must be a participant in this booking.')
             query_filter = {'staff_user_id': staff_user_id, 'client_user_id': client_user_id}
             
+
+
         # grab the bookings using the filter generated above
         bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
-            order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc()).paginate(page,per_page,error_out=False)
-        bookings = bookings_query.items
+            order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc())
+
+        if status:
+            breakpoint()
+            bookings_query = bookings_query.filter(TelehealthBookings.status.in_(status))
+        bookings = bookings_query.paginate(page,per_page,error_out=False).items
 
         # ensure requested booking_id is allowed
         if booking_id and len(bookings) == 1:
