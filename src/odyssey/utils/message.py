@@ -122,7 +122,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
 
 def send_email_verify_email(RECIPIENT, token, code):
     """
-    Email sent to verifiy a user's email address.
+    Email sent to verifiy a user's email address when they have never had an email on file before.
     """
 
     data = {
@@ -133,6 +133,21 @@ def send_email_verify_email(RECIPIENT, token, code):
         
     BODY_TEXT = render_template('email-verify.txt', data=data)
     BODY_HTML = render_template('email-verify.html', data=data)
+    
+    send_email(subject=SUBJECTS["email-verification"], recipient=RECIPIENT.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="Modo Bio Verify <verify@modobio.com>")
+
+def send_email_update_email(RECIPIENT, token):
+    """
+    Email sent to verify a user's email when they are changing their email.
+    """
+    
+    data = {
+        "name": RECIPIENT.firstname,
+        "verifcaiton_link": f'{api.base_url}/user/email-verification/token/{token}'
+    }
+    
+    BODY_TEXT = render_template('email-update.txt', data=data)
+    BODY_HTML = render_template('email-update.html', data=data)
     
     send_email(subject=SUBJECTS["email-verification"], recipient=RECIPIENT.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="Modo Bio Verify <verify@modobio.com>")
 
