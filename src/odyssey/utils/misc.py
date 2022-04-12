@@ -654,7 +654,7 @@ class EmailVerification():
         # send email to the user
         if updating:
             #send update email if user already had a verified email
-            send_email_update_email(user, token)
+            send_email_update_email(user, token, email)
         else:
             #send time time verify email is user did not have an email on file
             send_email_verify_email(user, token, code)

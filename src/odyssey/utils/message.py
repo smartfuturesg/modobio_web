@@ -136,20 +136,20 @@ def send_email_verify_email(RECIPIENT, token, code):
     
     send_email(subject=SUBJECTS["email-verification"], recipient=RECIPIENT.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="Modo Bio Verify <verify@modobio.com>")
 
-def send_email_update_email(RECIPIENT, token):
+def send_email_update_email(RECIPIENT, token, new_email):
     """
     Email sent to verify a user's email when they are changing their email.
     """
     
     data = {
         "name": RECIPIENT.firstname,
-        "verifcaiton_link": f'{api.base_url}/user/email-verification/token/{token}'
+        "verification_link": f'{api.base_url}/user/email-verification/token/{token}/'
     }
     
     BODY_TEXT = render_template('email-update.txt', data=data)
     BODY_HTML = render_template('email-update.html', data=data)
     
-    send_email(subject=SUBJECTS["email-verification"], recipient=RECIPIENT.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="Modo Bio Verify <verify@modobio.com>")
+    send_email(subject=SUBJECTS["email-verification"], recipient=new_email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="Modo Bio Verify <verify@modobio.com>")
 
 def send_email_password_reset(RECIPIENT, reset_token, url_scheme):
     """
