@@ -1568,7 +1568,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         Parameters
         ----------
-        image : list(file) (optional)
+        images : list(file) (optional)
             Image file(s), up to 3 can be send.
         voice : file (optional)
             Audio file, only 1 can be send.
@@ -1606,8 +1606,63 @@ class TelehealthBookingDetailsApi(BaseResource):
                     raise BadRequest('Maximum 4 images upload allowed.')
 
                 paths = []
-                #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
-                #In some cases we receive [FileStorage '' (None)] and in some we receive just []
+
+                # File upload peculiarities
+                #
+                # In this endpoint we consider 4 cases:
+                #
+                # 1. The key 'images' is not part of the request
+                #    -> leave images untouched
+                # 2. There is a file upload with the name 'images', but it is empty
+                #    -> delete current images
+                # 3. There are files in the request with the name 'images'
+                #    -> upload new files
+                # 4. There are too many files in the request
+                #    -> error
+                #
+                # All uploaded files go into request.files, which is an
+                # ImmutableMultiDict object. This is like a dict, but it allows
+                # multiple keys with the same name. Calling getlist(key)
+                # on it returns a regular list with all the values of the same key.
+                # If key does not occur in request.files, getlist returns an empty list.
+                #
+                # Let's say a user uploads 'file1.jpg', 'file2.jpg', and 'recording.m4a'.
+                # requests.files will then look like:
+                #
+                # ImmutableMultiDict([
+                #   ('images', <FileStorage filename='file1.jpg' (image/jpeg)>),
+                #   ('images', <FileStorage filename='file2.jpg' (image/jpeg)>),
+                #   ('voice',  <FileStorage filename='recording.m4a' (audio/mp4)>)
+                # ])
+                #
+                # Each uploaded file gets wrapped in a FileStorage object. FileStorage has
+                # stream (the binary data, a BytesIO object), filename, and content_type.
+                #
+                # However, because of how the upload system works in werkzeug/flask,
+                # not selecting a file during upload (case 2), leads to a list of length 1
+                # with an empty FileStorage object:
+                #
+                # ImmutableMultiDict([
+                #   ('images', <FileStorage filename='' (<content_type>)>)
+                # ])
+                #
+                # To complicate things further, the content type is set by the uploading
+                # user agent. Postman leaves it empty, but Firefox sets it to
+                # application/octet-stream. So we cannot rely on it being set consistently.
+                #
+                # Given all that, we have the following algorithm:
+                #
+                # list = request.files.getlist('images')
+                # if len(list) == 0:
+                #    # case 1, leave images untouched
+                #    pass
+                # elif len(list) == 1 and not list[0].filename:
+                #    # case 2, delete images
+                # elif len(list) > 4:
+                #    # case 4, too many images error
+                # else:
+                #    # case 3, upload new images
+
                 if len(images) >= 1 and images[0].filename != '':
                     for i, img in enumerate(images):
                         image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
@@ -1686,8 +1741,9 @@ class TelehealthBookingDetailsApi(BaseResource):
                 raise BadRequest('Maximum 4 images upload allowed.')
 
             paths = []
-            #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
-            #In some cases we receive [FileStorage '' (None)] and in some we receive just []
+
+            # See comment in put() for a detailed explanation on file upload.
+
             if len(images) >= 1 and images[0].filename != '':
                 for i, img in enumerate(images):
                     image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)

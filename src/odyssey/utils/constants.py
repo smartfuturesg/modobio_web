@@ -1,8 +1,11 @@
 """ Various constants used throughout the Odyssey package. """
-import enum
 import logging
 
 from sqlalchemy import text
+
+from odyssey.config import Config
+
+config = Config()
 
 logger = logging.getLogger(__name__)
 
@@ -915,10 +918,8 @@ TELEHEALTH_BOOKING_LEAD_TIME_HRS = 2
 # 1 because one index is the same as 5 minutes
 TELEHEALTH_START_END_BUFFER = 0
 
-from odyssey.config import Config
-config = Config()
 # clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
-TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 48
+TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 336
 
 MODOBIO_ADDRESS = {
     "firstname": "Modo",

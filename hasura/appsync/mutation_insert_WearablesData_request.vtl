@@ -1,0 +1,12 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "PutItem",
+    "key" : {
+        "user_id": $util.dynamodb.toDynamoDBJson($ctx.args.user_id),
+        "date": $util.dynamodb.toDynamoDBJson($ctx.args.date)        
+    },
+    "attributeValues" : {
+        "wearable": $util.dynamodb.toDynamoDBJson($ctx.args.wearable),
+        "data": $util.dynamodb.toDynamoDBJson($ctx.args.data)
+    }
+}
