@@ -12,4 +12,5 @@ def test_get_legal_docs(test_client, init_database, client_auth_header):
     
     assert response.status_code == 200
     assert response.json['total_items'] == 2
-    assert response.json['items'][0]['name'] == 'Terms of Use'
+    assert response.json['items'][1]['name'] == 'Terms of Use'
+    assert response.json['items'][0]['name'] == 'Privacy Policy'

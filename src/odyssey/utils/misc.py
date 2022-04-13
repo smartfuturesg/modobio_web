@@ -50,7 +50,7 @@ from odyssey.api.user.models import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVER_TIME
 from odyssey.utils.files import FileDownload
-from odyssey.utils.message import send_email_delete_account, send_email_verify_email
+from odyssey.utils.message import send_email_delete_account, send_email_update_email, send_email_verify_email
 from odyssey.utils import search
 
 logger = logging.getLogger(__name__)
@@ -604,7 +604,7 @@ class EmailVerification():
         """
         return str(random.randrange(1000, 9999))
 
-    def begin_email_verification(self, user: User, email: str = None) -> dict:
+    def begin_email_verification(self, user: User, updating: bool, email: str = None) -> dict:
         """
         Email verification process creates an entry into the UserPendingEmailVerification table which stores
         the code and token used to verify new emails. If a user is updating their email address, the new email 
@@ -613,6 +613,9 @@ class EmailVerification():
         Params
         ------
         user : User
+        updating : bool
+            denotes if the user is updating their email (true) or the email is being provided
+            for the first time (false)
         email : str
             if provided, this email is stored in the UserPendingEmailVerifications entry
         
@@ -649,7 +652,12 @@ class EmailVerification():
         db.session.add(verification)
 
         # send email to the user
-        send_email_verify_email(user, token, code)
+        if updating:
+            #send update email if user already had a verified email
+            send_email_update_email(user, token, email)
+        else:
+            #send time time verify email is user did not have an email on file
+            send_email_verify_email(user, token, code)
 
         db.session.commit()
 
