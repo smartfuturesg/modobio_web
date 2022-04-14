@@ -4,8 +4,6 @@ from odyssey.api.dosespot.models import DoseSpotPractitionerID
 from odyssey.integrations.dosespot import DoseSpot
 logger = logging.getLogger(__name__)
 
-from datetime import datetime, date, timedelta
-
 from datetime import datetime, date, timedelta, timezone
 
 from celery.schedules import crontab
@@ -65,20 +63,48 @@ def deploy_upcoming_appointment_tasks():
     are less than 2 hours away. It will then create a notification for the client and practitioner 
     involved with the booking and deploy the needed ehr permissions to the practitioner.
     """
-    #get all bookings that are sheduled <24 hours away and have not been charged yet
+    #get all bookings that are sheduled <2 hours away and have not been notified yet
     logger.info('deploying upcoming appointments task')
-    target_time = datetime.now(timezone.utc) + timedelta(hours=2)
-    target_time_window = get_time_index(target_time)
-    logger.info(f'charge bookings task time window: {target_time_window}')
+    current_time = datetime.now(timezone.utc) 
+    target_time = current_time + timedelta(hours=2)
+    target_time_window_start = get_time_index(datetime.now(timezone.utc))
+    target_time_window_end = get_time_index(target_time)
+    logger.info(f'upcoming bookings task time window: {target_time_window_start} - {target_time_window_end}')
     
-    bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', TelehealthBookings.notified == True) \
-        .filter(or_(
-            and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.now(timezone.utc).date()),
-            and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == target_time.date())
-        )).all()
+    #find all accepted bookings who have not been notified yet
+    bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', TelehealthBookings.notified == False)
+    if target_time_window_start > target_time_window_end:
+        #this will happen from 22:00 to 23:55
+        #in this case, we have to query across two dates
+        bookings = \
+            bookings.filter(
+            or_(
+                and_(
+                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.target_date_utc == current_time.date()
+                ),
+                and_(
+                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.target_date_utc == target_time.date()
+                )
+            )
+            ).all()
+    else:
+        #otherwise just query for bookings whose start id falls between the target times on for today
+        bookings =  \
+            bookings.filter(
+            and_(
+                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.target_date_utc == target_time.date()
+                    )
+            ).all()
 
     # do not deploy appointment notifications in testing
     if config.TESTING:
+        for booking in bookings:
+            booking.notified = True
+        db.session.commit()
         return bookings
     
     #schedule pre-appointment tasks
