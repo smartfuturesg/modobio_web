@@ -286,6 +286,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioner_ids': {10}}
             available_times_with_practitioners = {}
             practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
+            
             for block in time_blocks:
                 _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
                 
@@ -388,7 +389,9 @@ class TelehealthBookingsApi(BaseResource):
                 'booking_id': 'booking_id',
                 'status': 'list of booking status options',
                 'page': 'pagination index',
-                'per_page': 'results per page'})
+                'per_page': 'results per page',
+                'target_date': 'target date for booking in UTC',
+                'date_ascending': 'order by date and time ascending'})
     def get(self):
         """
         Returns the list of bookings for clients and/or staff
@@ -401,9 +404,12 @@ class TelehealthBookingsApi(BaseResource):
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
         status = request.args.getlist('status', type=str)
+        target_date = request.args.get('target_date', type=str)
+        booking_start_time_id =request.args.get('booking_start_time_id', type=int)
+        date_ascending = request.args.get('date_ascending', False, type=bool)
 
         ###
-        # There are 5 cases to decide what to return:
+        # There are 5 cases to decide what to return based on booking participants and if a booking_id provided:
         # 1. booking_id is provided: other parameters are ignored, only that booking will be returned to the participating client/staff or any cs
         # 2. No parameter provided: an error will be raised
         # 3. Only staff_user_id provided: all bookings for the staff user will return if loggedin user = staff_user_id or cs
@@ -415,6 +421,11 @@ class TelehealthBookingsApi(BaseResource):
         #       F        |      T        |      F
         #       T        |      F        |      F
         #       T        |      T        |      F
+        # 
+        # Bookings maybe further filtered by:
+        #    booking status ('Accepted', 'Canceled' ect.)
+        #    Target date
+        #    booking start time id
         ###
 
         if not (client_user_id or staff_user_id or booking_id):
@@ -446,13 +457,22 @@ class TelehealthBookingsApi(BaseResource):
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
             query_filter = {'staff_user_id': staff_user_id, 'client_user_id': client_user_id}
-            
 
+        # apply datetime filters
+        if target_date:
+            query_filter.update({'target_date_utc': target_date})
+        if booking_start_time_id:
+            query_filter.update({'booking_window_id_start_time_utc': booking_start_time_id})
 
         # grab the bookings using the filter generated above
-        bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
-            order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc())
-
+        if date_ascending:
+            bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
+                order_by(TelehealthBookings.target_date_utc.asc(), TelehealthBookings.booking_window_id_start_time_utc.asc())
+        else:
+            bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
+                order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc())
+        
+        # apply booking status filter
         if status:
             bookings_query = bookings_query.filter(TelehealthBookings.status.in_(status))
 
@@ -555,10 +575,6 @@ class TelehealthBookingsApi(BaseResource):
                 'description': booking_details 
             })
 
-        # Sort bookings by time then sort by date
-        bookings_payload.sort(key=lambda t: t['start_time_utc'])
-        bookings_payload.sort(key=lambda t: t['target_date_utc'])
-        
         twilio = Twilio()
         # create twilio access token with chat grant 
         token, _ = twilio.create_twilio_access_token(current_user.modobio_id)
@@ -1473,6 +1489,7 @@ class TelehealthQueueClientPoolApi(BaseResource):
         client_tz = request.parsed_obj.timezone
         target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
         client_local_datetime_now = datetime.now(tz.gettz(client_tz))
+
         if target_date.date() < client_local_datetime_now.date():
             raise BadRequest("Invalid target date")
 
