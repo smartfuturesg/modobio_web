@@ -1,7 +1,7 @@
 """add notified field to th bookings
 
 Revision ID: f137d07c16ea
-Revises: 3e62a40270ee
+Revises: 1b5b185d6216
 Create Date: 2022-04-12 14:48:29.398080
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'f137d07c16ea'
-down_revision = '3e62a40270ee'
+down_revision = '1b5b185d6216'
 branch_labels = None
 depends_on = None
 
