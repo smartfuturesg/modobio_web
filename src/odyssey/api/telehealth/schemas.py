@@ -1,4 +1,7 @@
 import logging
+
+from odyssey.api.lookup.schemas import LookupVisitReasonsSchema
+
 logger = logging.getLogger(__name__)
 
 from marshmallow import (
@@ -236,6 +239,8 @@ class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
         model = TelehealthBookingDetails
         exclude = ('created_at', 'updated_at')
         include_fk = True
+
+    visit_reason = fields.String()
 
 
 class TelehealthChatRoomAccessSchema(Schema):

@@ -22,9 +22,10 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db, mongo
 from odyssey.api.lookup.models import (
-    LookupBookingTimeIncrements
+    LookupBookingTimeIncrements,
+    LookupVisitReasons,
 )
-from odyssey.api.lookup.models import LookupTerritoriesOfOperations
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupRoles
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import (
@@ -1517,7 +1518,7 @@ class TelehealthBookingDetailsApi(BaseResource):
     __check_resource__ = False
 
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsGetSchema, api=ns, status_code=200)
+    @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
     def get(self, booking_id):
         """
         Returns a list of details about the specified booking_id
@@ -1534,7 +1535,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 booking.staff_user_id == current_user.user_id):
             raise Unauthorized('Only booking participants can view the details.')
 
-        res = {'details': None, 'images': [], 'voice': None}
+        res = {'details': None, 'images': [], 'voice': None, 'visit_reason': None}
 
         # if there aren't any details saved for the booking_id, GET will return empty
         booking_details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).first()
@@ -1555,6 +1556,14 @@ class TelehealthBookingDetailsApi(BaseResource):
         if booking_details.voice:
             res['voice'] = fd.url(booking_details.voice)
 
+        reason = (db.session
+            .query(LookupVisitReasons)
+            .filter_by(
+                idx=booking_details.reason_id)
+            .one_or_none())
+        if reason:
+            res['visit_reason'] = reason.reason
+
         return res
 
     @token_auth.login_required
@@ -1574,6 +1583,8 @@ class TelehealthBookingDetailsApi(BaseResource):
             Audio file, only 1 can be send.
         details : str (optional)
             Further details.
+        reason_id : int (optional)
+            Reason for visit
         """
         # verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1589,7 +1600,42 @@ class TelehealthBookingDetailsApi(BaseResource):
             raise BadRequest('Booking details you are trying to edit not found.')
 
         if 'details' in request.form and request.form['details']:
-            booking_details.details = request.form.get('details')
+            booking_details.details = str(request.form.get('details'))
+
+        if 'reason_id' in request.form:
+            reason_id = request.form.get('reason_id')
+
+            if reason_id == '':
+                reason_id = None
+
+            if reason_id is not None:
+                try:
+                    reason_id = int(reason_id)
+                except (TypeError, ValueError):
+                    raise BadRequest('reason_id must be a number.')
+
+                # Check if reason_id is valid and if role_id matches staff
+                # linked in booking. LookupVisitReason has role_id, but
+                # StaffRoles is linked to LookupRoles by role_name, which
+                # makes looking up roles complicated.
+                match_role = (db.session
+                    .query(LookupRoles, StaffRoles, LookupVisitReasons)
+                    .join(
+                        StaffRoles,
+                        LookupRoles.role_name == StaffRoles.role)
+                    .join(
+                        LookupVisitReasons,
+                        LookupRoles.idx == LookupVisitReasons.role_id)
+                    .filter(
+                        StaffRoles.user_id == booking.staff_user_id,
+                        LookupVisitReasons.idx == reason_id)
+                    .one_or_none())
+
+                if not match_role:
+                    raise BadRequest(
+                        f"The reason for visit does not match the practitioner's qualifications.")
+
+            booking_details.reason_id = reason_id
 
         if request.files:
             prefix = f'meeting_files/booking{booking_id:05d}'
@@ -1714,6 +1760,7 @@ class TelehealthBookingDetailsApi(BaseResource):
             images : file(s) list of image files, up to 4
             voice : file
             details : str
+            reason_id : int
         """
         # Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1730,7 +1777,42 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         booking_details = TelehealthBookingDetails(booking_id=booking_id)
 
-        booking_details.details = request.form.get('details')
+        booking_details.details = str(request.form.get('details'))
+
+        if 'reason_id' in request.form:
+            reason_id = request.form.get('reason_id')
+
+            if reason_id == '':
+                reason_id = None
+
+            if reason_id is not None:
+                try:
+                    reason_id = int(reason_id)
+                except (TypeError, ValueError):
+                    raise BadRequest('reason_id must be a number.')
+
+                # Check if reason_id is valid and if role_id matches staff
+                # linked in booking. LookupVisitReason has role_id, but
+                # StaffRoles is linked to LookupRoles by role_name, which
+                # makes looking up roles complicated.
+                match_role = (db.session
+                    .query(LookupRoles, StaffRoles, LookupVisitReasons)
+                    .join(
+                        StaffRoles,
+                        LookupRoles.role_name == StaffRoles.role)
+                    .join(
+                        LookupVisitReasons,
+                        LookupRoles.idx == LookupVisitReasons.role_id)
+                    .filter(
+                        StaffRoles.user_id == booking.staff_user_id,
+                        LookupVisitReasons.idx == reason_id)
+                    .one_or_none())
+
+                if not match_role:
+                    raise BadRequest(
+                        f"The reason for visit does not match the practitioner's qualifications.")
+
+            booking_details.reason_id = reason_id
 
         if request.files:
             prefix = f'meeting_files/booking{booking_id:05d}'
