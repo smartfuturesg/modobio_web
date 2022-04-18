@@ -57,7 +57,7 @@ class PaymentMethodsApi(BaseResource):
 
         im = Instamed()
 
-        response_data = im.add_payment_method(request.json['token'], request.json['expiration'], User.query.filter_by(user_id=user_id).one_or_none().modobio_id)
+        response_data = im.add_payment_method(request.json['token'], request.json['expiration'], request.json['cardholder_name'], user_id)
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method
