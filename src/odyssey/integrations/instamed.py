@@ -35,7 +35,7 @@ class Instamed:
                 "TerminalID": '0002'
         }
 
-    def add_payment_method(self, token, expiration, modobio_id):
+    def add_payment_method(self, token, expiration, cardholder_name, user_id):
         """
         Add a payment method for a user and save the reference token in our db.
         InstaMed URI: /payment/paymentplan
@@ -48,12 +48,22 @@ class Instamed:
 
         expiration : str
             card expiration date
+            
+        cardholder_name : str
+            name on the card being used
+            
+        user_id : int
+            id of the user who this payment method belonds to
 
         Returns
         -------
         dict
             information regarding the newly saved payment method
         """
+        
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        if not user:
+            raise BadRequest(f"No user exists with the user_id {user_id}")
 
         request_data = {
             "Outlet": self.outlet,
@@ -62,10 +72,13 @@ class Instamed:
             "Card": {
                 "EntryMode": "key",
                 "CardNumber": token,
-                "Expiration": expiration
+                "Expiration": expiration,
+                "CardHolderName": cardholder_name
             },
             "Patient": {
-                "AccountNumber": modobio_id
+                "AccountNumber": user.modobio_id,
+                "FirstName": user.firstname,
+                "LastName": user.lastname
             }
         }
         
@@ -220,13 +233,17 @@ class Instamed:
         dict
             information regarding the sale
         """
+        user = User.query.filter_by(user_id=booking.client_user_id).one_or_none()
+        
         request_data = {
             "Outlet": self.outlet,
             "PaymentMethod": "OnFile",
             "PaymentMethodID": str(PaymentMethods.query.filter_by(idx=booking.payment_method_id).one_or_none().payment_id),
             "Amount": str(booking.consult_rate),
             "Patient": {
-                "AccountNumber": User.query.filter_by(user_id=booking.client_user_id).one_or_none().modobio_id
+                "AccountNumber": user.modobio_id,
+                "FirstName": user.firstname,
+                "LastName": user.lastname
             }
         }
         
