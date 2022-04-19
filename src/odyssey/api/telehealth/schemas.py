@@ -29,7 +29,7 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffSettings,  
 )
 from odyssey.api.user.models import User
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, USSTATES_2
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, TELEHEALTH_BOOKING_DURATION, USSTATES_2
 
 class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()
@@ -218,7 +218,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at')
         dump_only = ('idx', 'user_id', 'location_name')
     
-    duration = fields.Integer(missing=20)
+    duration = fields.Integer(missing=TELEHEALTH_BOOKING_DURATION)
     medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
     location_name = fields.String()
