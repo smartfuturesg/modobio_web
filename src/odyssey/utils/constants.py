@@ -921,6 +921,10 @@ TELEHEALTH_START_END_BUFFER = 0
 # clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
 TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 336
 
+
+# Default telehealth booking duration in minutes
+TELEHEALTH_BOOKING_DURATION = 30
+
 MODOBIO_ADDRESS = {
     "firstname": "Modo",
     "lastname": "Bio",
