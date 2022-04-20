@@ -3,6 +3,7 @@ import logging
 import pathlib
 
 from dataclasses import dataclass
+from site import USER_SITE
 
 import boto3
 import idna
@@ -20,6 +21,7 @@ from odyssey.api.notifications.schemas import (
     ApplePushNotificationBackgroundSchema,
     ApplePushNotificationBadgeSchema,
     ApplePushNotificationVoipSchema)
+from odyssey.api.user.models import User
 from odyssey.utils.constants import (
     DEV_EMAIL_DOMAINS,
     PASSWORD_RESET_URL,
@@ -34,7 +36,8 @@ SUBJECTS = {
     'testing-complaint': 'SES TEST EMAIL-COMPLAINT',
     'testing-success': 'SES TEST EMAIL',
     'account_deleted': 'Modo Bio Account Deleted',
-    'email-verification': 'Verify Your Modo Bio Email'}
+    'email-verification': 'Verify Your Modo Bio Email',
+    'new-subscription': 'Your Modo Bio Subscription Is Active'}
 
 # Cache value
 _blacklisted_email_domains = None
@@ -78,7 +81,7 @@ def email_domain_blacklisted(email_address: str):
     if domain in _blacklisted_email_domains:
         raise BadRequest(f'Email adresses from "{parts[1]}" are not allowed.')
 
-def send_email_user_registration_portal(recipient, password, portal_id):
+def send_email_user_registration_portal(recipient_email: str, password: str, portal_id: str):
     """
     Email for sending users their registration link and login details
     That were createrd by a client services staff member
@@ -91,17 +94,17 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = ("Welcome to Modo Bio!\n"
+    body_text = ("Welcome to Modo Bio!\n"
                 "Please visit your unique portal to complete your user registration:\n"
                 f"1) Copy and paste this portal link into your browser {remote_registration_url}\n"
                 "2) Enter your email and password to login:"
-                f"\t email: {recipient}\n"
+                f"\t email: {recipient_email}\n"
                 f"\t password: {password}\n\n"
                 "If you have any issues, please contact client services."
                 )
 
     # The HTML body of the email.
-    BODY_HTML = f"""<html>
+    body_html = f"""<html>
     <head></head>
     <body>
     <h1>Welcome to Modo Bio!</h1>
@@ -109,7 +112,7 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     <br>1) Click on this link to be directed to your registration portal <a href={remote_registration_url}></a>
     <br> or copy and paste this portal link into your browser {remote_registration_url}
     <br>2) Enter your email and password to login:
-    <br>     email: {recipient}
+    <br>     email: {recipient_email}
     <br>     password: {password}
     <br>
     <br>
@@ -118,39 +121,54 @@ def send_email_user_registration_portal(recipient, password, portal_id):
     </html>
     """
 
-    send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+    send_email(subject=SUBJECT, recipient=recipient_email, body_text=body_text, body_html=body_html, sender=SENDER)
 
-def send_email_verify_email(RECIPIENT, token, code):
+def send_email_verify_email(recipient: User, token, code):
     """
-    Email sent to verifiy a user's email address.
+    Email sent to verify a user's email address.
     """
 
     data = {
-        "name": RECIPIENT.firstname,
+        "name": recipient.firstname,
         "verification_link": f'{api.base_url}/user/email-verification/token/{token}/',
         "verification_code": code
     }
         
-    BODY_TEXT = render_template('email-verify.txt', data=data)
-    BODY_HTML = render_template('email-verify.html', data=data)
+    body_text = render_template('email-verify.txt', data=data)
+    body_html = render_template('email-verify.html', data=data)
     
-    send_email(subject=SUBJECTS["email-verification"], recipient=RECIPIENT.email, body_text=BODY_TEXT, body_html=BODY_HTML, sender="Modo Bio Verify <verify@modobio.com>")
+    send_email(subject=SUBJECTS["email-verification"], recipient=recipient.email, body_text=body_text, body_html=body_html, sender="Modo Bio Verify <verify@modobio.com>")
 
-def send_email_password_reset(RECIPIENT, reset_token, url_scheme):
+def send_email_password_reset(recipient: User, reset_token, url_scheme):
     """
     Email for sending users password reset portal
     """
 
     data = {
-        "name": RECIPIENT.firstname,
-        "email": RECIPIENT.email,
+        "name": recipient.firstname,
+        "email": recipient.email,
         "reset_password_url": PASSWORD_RESET_URL.format(url_scheme, reset_token)
     }
     
-    BODY_TEXT = render_template('password-reset.txt', data=data)
-    BODY_HTML = render_template('password-reset.html', data=data)
+    body_text = render_template('password-reset.txt', data=data)
+    body_html = render_template('password-reset.html', data=data)
     
-    send_email(subject=SUBJECTS["password_reset"], recipient=RECIPIENT.email, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECTS["password_reset"], recipient=recipient.email, body_text=body_text, body_html=body_html)
+   
+
+def send_email_new_subscription(recipient: User):
+    """
+    Email for sending users password reset portal
+    """
+
+    data = {
+        "firstname": recipient.firstname,
+    }
+    
+    body_text = render_template('password-reset.txt', data=data)
+    body_html = render_template('password-reset.html', data=data)
+    
+    send_email(subject=SUBJECTS["new-subscription"], recipient=recipient.email, body_text=body_text, body_html=body_html)
    
 def send_email_delete_account(recipient, deleted_account):
     """
@@ -162,12 +180,12 @@ def send_email_delete_account(recipient, deleted_account):
     SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = ("The the account with email: "f"{deleted_account} has been deleted.\n"
+    body_text = ("The the account with email: "f"{deleted_account} has been deleted.\n"
                 "If you have not requested to delete your account, please contact your admin."
                 )
                 
     # The HTML body of the email.
-    BODY_HTML = f"""<html>
+    body_html = f"""<html>
     <head></head>
     <body>
     <h1>Account Deleted</h1>
@@ -177,7 +195,7 @@ def send_email_delete_account(recipient, deleted_account):
     </html>
     """     
 
-    send_email(subject=SUBJECT, recipient=recipient, body_text=BODY_TEXT, body_html=BODY_HTML, sender=SENDER)
+    send_email(subject=SUBJECT, recipient=recipient, body_text=body_text, body_html=body_html, sender=SENDER)
 
 def send_test_email(subject="testing-success", recipient="success@simulator.amazonses.com"):
     """
@@ -194,19 +212,14 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
     elif subject == "testing-complaint":
         recipient = "complaint@simulator.amazonses.com" 
     
-    RECIPIENT = recipient
-
-    # The subject line for the email.
-    SUBJECT = SUBJECTS.get(subject, None)
-
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = ("Amazon SES Test (Python)\n"
+    body_text = ("Amazon SES Test (Python)\n"
                 "This email was sent with Amazon SES using the "
                 "AWS SDK for Python (Boto)."
                 )
                 
     # The HTML body of the email.
-    BODY_HTML = """<html>
+    body_html = """<html>
     <head></head>
     <body>
     <h1>Amazon SES Test (SDK for Python)</h1>
@@ -217,7 +230,7 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
     </body>
     </html>
     """          
-    send_email(subject=SUBJECT,recipient=RECIPIENT, body_text=BODY_TEXT, body_html=BODY_HTML)
+    send_email(subject=SUBJECTS.get(subject, None),recipient=recipient, body_text=body_text, body_html=body_html)
 
 
 def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None, sender="Modo Bio No Reply <no-reply@modobio.com>"):
