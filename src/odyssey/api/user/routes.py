@@ -157,7 +157,10 @@ class NewStaffUser(BaseResource):
                 user.was_staff = True
                 user.update(user_info)
 
-                verify_email = False
+                if user.email_verified:
+                    verify_email = False
+                else:
+                    verify_email = True
         else:
             # user account does not yet exist for this email
             # require password
@@ -328,7 +331,10 @@ class NewClientUser(BaseResource):
                 user.update(user_info)
                 #Create client account for existing staff member
                 user.is_client = True
-                verify_email = False
+                if user.email_verified:
+                    verify_email = False
+                else:
+                    verify_email = True
         else:
 
             # user account does not yet exist for this email
@@ -366,7 +372,7 @@ class NewClientUser(BaseResource):
             # send email to the user
             send_email_verify_email(user, token, code)
 
-            #Authenticate newly created client accnt for immediate login
+            #Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
         client_info = ClientInfoSchema().load({"user_id": user.user_id})
@@ -608,6 +614,7 @@ class RefreshToken(BaseResource):
 
 @ns.route('/registration-portal/verify')
 @ns.doc(params={'portal_id': "registration portal id"})
+@ns.deprecated
 class VerifyPortalId(BaseResource):
     """
     Verify registration portal id and update user type

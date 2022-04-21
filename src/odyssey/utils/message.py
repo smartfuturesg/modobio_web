@@ -163,8 +163,8 @@ def send_email_new_subscription(recipient: User):
 
     data = {"firstname": recipient.firstname}
     
-    body_text = render_template('password-reset.txt', data=data)
-    body_html = render_template('password-reset.html', data=data)
+    body_text = render_template('subscription-confirm.txt', data=data)
+    body_html = render_template('subscription-confirm.html', data=data)
     
     send_email(subject=SUBJECTS["new-subscription"], recipient=recipient.email, body_text=body_text, body_html=body_html)
    
