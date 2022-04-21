@@ -912,7 +912,7 @@ CREDENTIAL_TYPE = {
 DEV_EMAIL_DOMAINS = ('3pillarglobal.com', 'modobio.com', 'atventurepartners.com', 'atlanticventurepartners.tech')
 
 # bookings must be made at least this many hours in advance
-TELEHEALTH_BOOKING_LEAD_TIME_HRS = 2
+TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0 if any((config.TESTING, config.DEV)) else 2
 
 # allow a pre and post buffer for each telehealth appointment
 # 1 because one index is the same as 5 minutes

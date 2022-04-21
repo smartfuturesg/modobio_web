@@ -244,7 +244,7 @@ def booking(test_client, payment_method):
 
     # make a telehealth booking by direct db call
     # booking is made with minimum lead time
-    target_datetime = datetime.utcnow() + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    target_datetime = datetime.utcnow() + timedelta(hours=0.25)
     start_minute = target_datetime.minute + (10 - target_datetime.minute % 10) 
     target_datetime = target_datetime.replace(
         hour = target_datetime.hour + 1 if (start_minute == 60 and target_datetime.hour < 23) else target_datetime.hour,
