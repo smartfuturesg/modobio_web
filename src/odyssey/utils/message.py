@@ -161,9 +161,7 @@ def send_email_new_subscription(recipient: User):
     Email for sending users password reset portal
     """
 
-    data = {
-        "firstname": recipient.firstname,
-    }
+    data = {"firstname": recipient.firstname}
     
     body_text = render_template('password-reset.txt', data=data)
     body_html = render_template('password-reset.html', data=data)

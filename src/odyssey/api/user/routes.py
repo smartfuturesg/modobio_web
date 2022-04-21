@@ -59,6 +59,7 @@ from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import (
     email_domain_blacklisted,
+    send_email_new_subscription,
     send_email_password_reset,
     send_email_delete_account,
     send_email_verify_email)
@@ -684,6 +685,8 @@ class UserSubscriptionApi(BaseResource):
             check_staff_existence(user_id)
         else:
             check_client_existence(user_id)
+        
+        user, _ = token_auth.current_user()
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -717,6 +720,11 @@ class UserSubscriptionApi(BaseResource):
         else:
             prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
     
+            # if this subscription is following an unsubscribed status: 
+            #   either first time subscription or first subscription ever
+            # Send a Welcome email
+            send_email_new_subscription(user)
+
         # make a new subscription entry
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
@@ -862,7 +870,7 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
 
         Verifying an email requires both a valid code that the client retrieved
         from their email and a valid token stored on the modobio side. The token
-        has a short lifetime so the email varification process must happen within
+        has a short lifetime so the email verification process must happen within
         that time. 
 
         Parameters
@@ -873,7 +881,6 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         code : str
             email verification code provided during client creation
         """
-
         verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
 
         if not verification or verification.code != request.args.get('code'):
