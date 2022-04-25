@@ -33,6 +33,7 @@ from odyssey.api.staff.schemas import (
     StaffRolesSchema,
     StaffRecentClientsSchema,
     StaffTokenRequestSchema,
+    StaffCloseAccountSchema,
     StaffProfilePageGetSchema,
     StaffCalendarEventsSchema,
     StaffCalendarEventsUpdateSchema,
@@ -299,6 +300,7 @@ class StaffToken(BaseResource):
         # deletion limit, the account will be reopened and not deleted.
         if user_login.staff_account_closed:
             user_login.staff_account_closed = None
+            user_login.staff_account_closed_reason = None
 
         db.session.commit()
 
@@ -329,6 +331,7 @@ class StaffCloseAccountEndpoint(BaseResource):
     """ Close staff member account. """
 
     @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=StaffCloseAccountSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self, user_id):
         """ Close staff portion of an account.
@@ -341,6 +344,7 @@ class StaffCloseAccountEndpoint(BaseResource):
         """
         user, user_login = token_auth.current_user()
         user_login.staff_account_closed = datetime.now()
+        user_login.staff_account_closed_reason = request.json['reason']
         db.session.commit()
         UserLogoutApi().post()
 
