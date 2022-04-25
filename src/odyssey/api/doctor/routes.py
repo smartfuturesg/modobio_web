@@ -1171,7 +1171,7 @@ class MedBloodTest(BaseResource):
                 sex_ranges = age_ranges.filter(
                     or_(LookupBloodTestRanges.biological_sex_male == client.biological_sex_male,
                         LookupBloodTestRanges.biological_sex_male == None))
-                
+
                 #if biological sex filtering narrowed results, record client sex as a determining factor
                 if age_ranges.count() > sex_ranges.count():
                     result['biological_sex_male'] = client.biological_sex_male
@@ -1179,8 +1179,14 @@ class MedBloodTest(BaseResource):
                 #filter results by menstrual cycle if client bioligocal sex is female
                 if not client.biological_sex_male:
                     client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
+                    if client_cycle == None:
+                        #default if client has not submitted any fertility information
+                        client_cycle = 'follicular phase'
+                    else:
+                        client_cycle = client_cycle.status
+                        
                     relevant_cycles = []
-                    for cycle in sex_ranges:
+                    for cycle in sex_ranges.all():
                         if cycle.menstrual_cycle:
                             relevant_cycles.append(cycle.menstrual_cycle)
                     if client_cycle in relevant_cycles:
@@ -1191,7 +1197,7 @@ class MedBloodTest(BaseResource):
                         cycle_ranges = sex_ranges.filter_by(menstrual_cycle=None)
                 else:
                     cycle_ranges = sex_ranges
-                        
+
                 #if menstrual cycle filtering narrowed results, record client cycle as a determining factor
                 if sex_ranges.count() > cycle_ranges.count():
                     result['menstrual_cycle'] = client_cycle
