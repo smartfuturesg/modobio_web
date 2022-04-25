@@ -525,10 +525,17 @@ class TelehealthBookingsApi(BaseResource):
             else: 
                 booking_chat_details = booking.chat_room.__dict__
 
-            # check if a booking description has been added to the meeting
-            booking_details = None
+            # Check for booking description and reason in booking details.
+            # This is a request by the frontend to reduce the
+            # number of API calls needed to display bookings.
+            description = None
+            reason = None
             if booking.booking_details:
-                booking_details = booking.booking_details.details
+                description = booking.booking_details.details
+
+                reason = db.session.get(LookupVisitReasons, reason_id)
+                if reason:
+                    reason = reason.reason
 
             bookings_payload.append({
                 'booking_id': booking.idx,
@@ -544,7 +551,8 @@ class TelehealthBookingsApi(BaseResource):
                 'practitioner': practitioner,
                 'consult_rate': booking.consult_rate,
                 'charged': booking.charged,
-                'description': booking_details 
+                'description': description,
+                'reason': reason
             })
 
         # Sort bookings by time then sort by date
