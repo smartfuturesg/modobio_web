@@ -106,7 +106,7 @@ class ApiUser(BaseResource):
         #if email is part of payload, use email update routine
         if email:
             email_domain_blacklisted(email)
-            email_verification_data = EmailVerification().begin_email_verification(user, email = email)
+            email_verification_data = EmailVerification().begin_email_verification(user, True, email = email)
             del user_info['email']
             # respond with verification code in dev/testing
             if any((current_app.config['DEV'], current_app.config['TESTING'])) :
@@ -294,7 +294,7 @@ class NewStaffUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            email_verification_data = EmailVerification().begin_email_verification(user)
+            email_verification_data = EmailVerification().begin_email_verification(user, False)
         
         # create subscription entry for new staff user
         staff_sub = UserSubscriptionsSchema().load({
@@ -445,7 +445,7 @@ class NewClientUser(BaseResource):
             verify_email = True
 
         if verify_email:
-            email_verification_data = EmailVerification().begin_email_verification(user)
+            email_verification_data = EmailVerification().begin_email_verification(user, False)
 
             # #Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)

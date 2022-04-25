@@ -267,7 +267,15 @@ img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
     'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
     'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
-    'details': 'Testing booking details'}
+    'details': 'Testing booking details',
+    }
+
+telehealth_post_booking_details_with_visit_reason = {
+    'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
+    'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
+    'details': 'Testing booking details',
+    'reason_id': 51,
+    }
 
 telehealth_put_booking_details = {
     'remove_img_rec': {
@@ -285,6 +293,20 @@ telehealth_put_booking_details = {
         'images': None,
         'voice': None,
         'details': ''}}
+
+telehealth_put_booking_details_2 = {
+        'images': None,
+        'voice': None,
+        'details': 'Change visit reason',
+        'reason_id': 52,
+}
+
+telehealth_put_booking_details_3 = {
+        'images': None,
+        'voice': None,
+        'details': 'remove visit reason',
+        'reason_id': '',
+}
 
 telehealth_exceptions_post_data = {
   "bad_data_1":

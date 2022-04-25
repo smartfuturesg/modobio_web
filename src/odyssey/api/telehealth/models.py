@@ -144,6 +144,13 @@ class TelehealthBookings(BaseModelWithIdx):
 
     :type: boolean
     """
+    
+    notified = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent the notifications and ehr permissions for this booking.
+    
+    :type: boolean
+    """
 
     external_booking_id = db.Column(db.String(36), nullable = True)
     """
@@ -552,13 +559,20 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     :type: str
     """
 
+    reason_id = db.Column(db.Integer, db.ForeignKey('LookupVisitReasons.idx'), nullable = True)
+    """
+    Foreign key to idx of VisitReasons, nullable
+
+    :type: int, foreignkey(LookupVisitReasons.idx)
+    """
+
     booking = db.relationship('TelehealthBookings', uselist=False, back_populates='booking_details')
     """
     One-to-One relationship with TelehealthBookings
 
     :type: :class:`TelehealthBookings` instance
     """
-    
+
 
 class TelehealthChatRooms(BaseModel):
     """ 

@@ -5,7 +5,10 @@ from odyssey.api.telehealth.models import (
     TelehealthBookings)
 from tests.functional.telehealth.data import (
     telehealth_post_booking_details,
-    telehealth_put_booking_details)
+    telehealth_put_booking_details,
+    telehealth_post_booking_details_with_visit_reason, telehealth_put_booking_details_2,
+    telehealth_put_booking_details_3,
+)
 from odyssey.api.user.models import User
 
 #Process for adding telehealth booking details:
@@ -25,7 +28,7 @@ from odyssey.api.user.models import User
 #10. delete client and staff created for this purpose
 
 def test_post_booking_details(test_client, booking):
-    payload = telehealth_post_booking_details
+    payload = telehealth_post_booking_details_with_visit_reason
 
     #add booking details as to existing booking.idx
     response = test_client.post(
@@ -126,8 +129,9 @@ def test_put_booking_details(test_client, booking):
 
     assert response.status_code == 400
 
-def test_get_booking_details(test_client, booking):
-    #Get booking details for existing booking.idx
+
+def test_get_booking_details_with_reason(test_client, booking):
+    # Get booking details for existing booking.idx
     response = test_client.get(
         f'/telehealth/bookings/details/{booking.idx}',
         headers=test_client.client_auth_header)
@@ -135,6 +139,37 @@ def test_get_booking_details(test_client, booking):
     assert response.status_code == 200
     assert response.json['details'] == 'Only changed text details'
     assert response.json['images']
+    assert response.json['visit_reason'] == 'Improve Cardio'
+
+    # Try getting booking details for booking.idx that doens't exist
+    invalid_booking_idx = 500
+    response = test_client.get(
+        f'/telehealth/bookings/details/{invalid_booking_idx}',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+
+
+def test_put_booking_details_edit_visit_reason(test_client, booking):
+    payload = telehealth_put_booking_details_2
+
+    #edit visit reason
+    response = test_client.put(
+        f'/telehealth/bookings/details/{booking.idx}',
+        headers=test_client.client_auth_header,
+        data=payload)
+
+    assert response.status_code == 200
+
+
+def test_get_booking_details_edited_visit_reason(test_client, booking):
+    #Get booking details for existing booking.idx
+    response = test_client.get(
+        f'/telehealth/bookings/details/{booking.idx}',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+    assert response.json['visit_reason'] == 'Core and Balance'
 
     #Try getting booking details for booking.idx that doens't exist
     invalid_booking_idx = 500
@@ -143,6 +178,35 @@ def test_get_booking_details(test_client, booking):
         headers=test_client.client_auth_header)
 
     assert response.status_code == 200
+
+def test_put_booking_details_remove_visit_reason(test_client, booking):
+    payload = telehealth_put_booking_details_3
+
+    # Remove visit reason
+    response = test_client.put(
+        f'/telehealth/bookings/details/{booking.idx}',
+        headers=test_client.client_auth_header,
+        data=payload)
+
+    assert response.status_code == 200
+
+def test_get_booking_details_remove_visit_reason(test_client, booking):
+    # Get booking details for existing booking.idx
+    response = test_client.get(
+        f'/telehealth/bookings/details/{booking.idx}',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+    assert response.json['visit_reason'] is None
+
+    # Try getting booking details for booking.idx that doens't exist
+    invalid_booking_idx = 500
+    response = test_client.get(
+        f'/telehealth/bookings/details/{invalid_booking_idx}',
+        headers=test_client.client_auth_header)
+
+    assert response.status_code == 200
+
 
 def test_delete_booking_details(test_client, booking):
     response = test_client.delete(

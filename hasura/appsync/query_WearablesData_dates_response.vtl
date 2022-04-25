@@ -1,0 +1,9 @@
+#set($dates = [])
+#foreach($item in $ctx.result.items)
+    $util.qr($dates.add($item.get("date")))
+#end
+#set($next_token = $util.defaultIfNullOrBlank($ctx.result.nextToken, null))
+$util.toJson({
+    "dates": $dates,
+    "next_token": $next_token
+})

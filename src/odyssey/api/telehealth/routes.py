@@ -22,9 +22,10 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db, mongo
 from odyssey.api.lookup.models import (
-    LookupBookingTimeIncrements
+    LookupBookingTimeIncrements,
+    LookupVisitReasons,
 )
-from odyssey.api.lookup.models import LookupTerritoriesOfOperations
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupRoles
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import (
@@ -1543,7 +1544,7 @@ class TelehealthBookingDetailsApi(BaseResource):
     __check_resource__ = False
 
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsGetSchema, api=ns, status_code=200)
+    @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
     def get(self, booking_id):
         """
         Returns a list of details about the specified booking_id
@@ -1560,7 +1561,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 booking.staff_user_id == current_user.user_id):
             raise Unauthorized('Only booking participants can view the details.')
 
-        res = {'details': None, 'images': [], 'voice': None}
+        res = {'details': None, 'images': [], 'voice': None, 'visit_reason': None}
 
         # if there aren't any details saved for the booking_id, GET will return empty
         booking_details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).first()
@@ -1581,6 +1582,14 @@ class TelehealthBookingDetailsApi(BaseResource):
         if booking_details.voice:
             res['voice'] = fd.url(booking_details.voice)
 
+        reason = (db.session
+            .query(LookupVisitReasons)
+            .filter_by(
+                idx=booking_details.reason_id)
+            .one_or_none())
+        if reason:
+            res['visit_reason'] = reason.reason
+
         return res
 
     @token_auth.login_required
@@ -1594,12 +1603,14 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         Parameters
         ----------
-        image : list(file) (optional)
+        images : list(file) (optional)
             Image file(s), up to 3 can be send.
         voice : file (optional)
             Audio file, only 1 can be send.
         details : str (optional)
             Further details.
+        reason_id : int (optional)
+            Reason for visit
         """
         # verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1615,7 +1626,42 @@ class TelehealthBookingDetailsApi(BaseResource):
             raise BadRequest('Booking details you are trying to edit not found.')
 
         if 'details' in request.form and request.form['details']:
-            booking_details.details = request.form.get('details')
+            booking_details.details = str(request.form.get('details'))
+
+        if 'reason_id' in request.form:
+            reason_id = request.form.get('reason_id')
+
+            if reason_id == '':
+                reason_id = None
+
+            if reason_id is not None:
+                try:
+                    reason_id = int(reason_id)
+                except (TypeError, ValueError):
+                    raise BadRequest('reason_id must be a number.')
+
+                # Check if reason_id is valid and if role_id matches staff
+                # linked in booking. LookupVisitReason has role_id, but
+                # StaffRoles is linked to LookupRoles by role_name, which
+                # makes looking up roles complicated.
+                match_role = (db.session
+                    .query(LookupRoles, StaffRoles, LookupVisitReasons)
+                    .join(
+                        StaffRoles,
+                        LookupRoles.role_name == StaffRoles.role)
+                    .join(
+                        LookupVisitReasons,
+                        LookupRoles.idx == LookupVisitReasons.role_id)
+                    .filter(
+                        StaffRoles.user_id == booking.staff_user_id,
+                        LookupVisitReasons.idx == reason_id)
+                    .one_or_none())
+
+                if not match_role:
+                    raise BadRequest(
+                        f"The reason for visit does not match the practitioner's qualifications.")
+
+            booking_details.reason_id = reason_id
 
         if request.files:
             prefix = f'meeting_files/booking{booking_id:05d}'
@@ -1632,8 +1678,63 @@ class TelehealthBookingDetailsApi(BaseResource):
                     raise BadRequest('Maximum 4 images upload allowed.')
 
                 paths = []
-                #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
-                #In some cases we receive [FileStorage '' (None)] and in some we receive just []
+
+                # File upload peculiarities
+                #
+                # In this endpoint we consider 4 cases:
+                #
+                # 1. The key 'images' is not part of the request
+                #    -> leave images untouched
+                # 2. There is a file upload with the name 'images', but it is empty
+                #    -> delete current images
+                # 3. There are files in the request with the name 'images'
+                #    -> upload new files
+                # 4. There are too many files in the request
+                #    -> error
+                #
+                # All uploaded files go into request.files, which is an
+                # ImmutableMultiDict object. This is like a dict, but it allows
+                # multiple keys with the same name. Calling getlist(key)
+                # on it returns a regular list with all the values of the same key.
+                # If key does not occur in request.files, getlist returns an empty list.
+                #
+                # Let's say a user uploads 'file1.jpg', 'file2.jpg', and 'recording.m4a'.
+                # requests.files will then look like:
+                #
+                # ImmutableMultiDict([
+                #   ('images', <FileStorage filename='file1.jpg' (image/jpeg)>),
+                #   ('images', <FileStorage filename='file2.jpg' (image/jpeg)>),
+                #   ('voice',  <FileStorage filename='recording.m4a' (audio/mp4)>)
+                # ])
+                #
+                # Each uploaded file gets wrapped in a FileStorage object. FileStorage has
+                # stream (the binary data, a BytesIO object), filename, and content_type.
+                #
+                # However, because of how the upload system works in werkzeug/flask,
+                # not selecting a file during upload (case 2), leads to a list of length 1
+                # with an empty FileStorage object:
+                #
+                # ImmutableMultiDict([
+                #   ('images', <FileStorage filename='' (<content_type>)>)
+                # ])
+                #
+                # To complicate things further, the content type is set by the uploading
+                # user agent. Postman leaves it empty, but Firefox sets it to
+                # application/octet-stream. So we cannot rely on it being set consistently.
+                #
+                # Given all that, we have the following algorithm:
+                #
+                # list = request.files.getlist('images')
+                # if len(list) == 0:
+                #    # case 1, leave images untouched
+                #    pass
+                # elif len(list) == 1 and not list[0].filename:
+                #    # case 2, delete images
+                # elif len(list) > 4:
+                #    # case 4, too many images error
+                # else:
+                #    # case 3, upload new images
+
                 if len(images) >= 1 and images[0].filename != '':
                     for i, img in enumerate(images):
                         image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
@@ -1685,6 +1786,7 @@ class TelehealthBookingDetailsApi(BaseResource):
             images : file(s) list of image files, up to 4
             voice : file
             details : str
+            reason_id : int
         """
         # Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1701,7 +1803,42 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         booking_details = TelehealthBookingDetails(booking_id=booking_id)
 
-        booking_details.details = request.form.get('details')
+        booking_details.details = str(request.form.get('details'))
+
+        if 'reason_id' in request.form:
+            reason_id = request.form.get('reason_id')
+
+            if reason_id == '':
+                reason_id = None
+
+            if reason_id is not None:
+                try:
+                    reason_id = int(reason_id)
+                except (TypeError, ValueError):
+                    raise BadRequest('reason_id must be a number.')
+
+                # Check if reason_id is valid and if role_id matches staff
+                # linked in booking. LookupVisitReason has role_id, but
+                # StaffRoles is linked to LookupRoles by role_name, which
+                # makes looking up roles complicated.
+                match_role = (db.session
+                    .query(LookupRoles, StaffRoles, LookupVisitReasons)
+                    .join(
+                        StaffRoles,
+                        LookupRoles.role_name == StaffRoles.role)
+                    .join(
+                        LookupVisitReasons,
+                        LookupRoles.idx == LookupVisitReasons.role_id)
+                    .filter(
+                        StaffRoles.user_id == booking.staff_user_id,
+                        LookupVisitReasons.idx == reason_id)
+                    .one_or_none())
+
+                if not match_role:
+                    raise BadRequest(
+                        f"The reason for visit does not match the practitioner's qualifications.")
+
+            booking_details.reason_id = reason_id
 
         if request.files:
             prefix = f'meeting_files/booking{booking_id:05d}'
@@ -1712,8 +1849,9 @@ class TelehealthBookingDetailsApi(BaseResource):
                 raise BadRequest('Maximum 4 images upload allowed.')
 
             paths = []
-            #The below check is used to deal with uncertainty with how an 'empty' list of files is passed in
-            #In some cases we receive [FileStorage '' (None)] and in some we receive just []
+
+            # See comment in put() for a detailed explanation on file upload.
+
             if len(images) >= 1 and images[0].filename != '':
                 for i, img in enumerate(images):
                     image = ImageUpload(img.stream, booking.client_user_id, prefix=prefix)
