@@ -533,7 +533,7 @@ class TelehealthBookingsApi(BaseResource):
             if booking.booking_details:
                 description = booking.booking_details.details
 
-                reason = db.session.get(LookupVisitReasons, reason_id)
+                reason = db.session.get(LookupVisitReasons, booking.booking_details.reason_id)
                 if reason:
                     reason = reason.reason
 
