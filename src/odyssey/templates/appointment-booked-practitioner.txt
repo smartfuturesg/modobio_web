@@ -1,0 +1,12 @@
+{% extends "modo-bio-automated-email-template-body.txt" %}
+{% block body %}
+Hello {{ data.practitioner }},
+
+{{ data.client }} has just booked an appointment with you!
+
+Please log on to your Modo Bio account using https://providers.modobio.com to see the details of the upcoming appointment.
+
+
+Please check that this email was sent from no-reply@modobio.com
+
+{% endblock %}
