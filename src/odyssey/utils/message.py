@@ -37,7 +37,10 @@ SUBJECTS = {
     'testing-success': 'SES TEST EMAIL',
     'account_deleted': 'Modo Bio Account Deleted',
     'email-verification': 'Verify Your Modo Bio Email',
-    'new-subscription': 'Your Modo Bio Subscription Is Active'}
+    'appointment-verification': ' has just booked an appointment with you on Modo Bio!',
+    'new-subscription': 'Your Modo Bio Subscription Is Active',
+}
+
 
 # Cache value
 _blacklisted_email_domains = None
@@ -194,6 +197,26 @@ def send_email_delete_account(recipient, deleted_account):
     """     
 
     send_email(subject=SUBJECT, recipient=recipient, body_text=body_text, body_html=body_html, sender=SENDER)
+
+
+def send_email_appointment_scheduled(recipient, client):
+    """
+    Email for notifying a practitioner that they have been booked for an apptmt
+    """
+
+    data = {
+        "practitioner": recipient.firstname,
+        "client": client.firstname + " " + client.lastname,
+    }
+
+    body_text = render_template('appointment-booked-practitioner.txt', data=data)
+    body_html = render_template('appointment-booked-practitioner.html', data=data)
+
+    send_email(subject=client.firstname + " " + client.lastname + SUBJECTS["appointment-verification"],
+               recipient=recipient.email, body_text=body_text, body_html=body_html,
+               sender="Modo Bio no-reply <no-reply@modobio.com>")
+
+
 
 def send_test_email(subject="testing-success", recipient="success@simulator.amazonses.com"):
     """
