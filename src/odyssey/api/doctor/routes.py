@@ -1204,7 +1204,8 @@ class MedBloodTest(BaseResource):
 
                 client_races = {}
                 for id, name in db.session.query(ClientRaceAndEthnicity.race_id, LookupRaces.race_name) \
-                    .filter(ClientRaceAndEthnicity.race_id == LookupRaces.race_id).all():
+                    .filter(ClientRaceAndEthnicity.race_id == LookupRaces.race_id,
+                            ClientRaceAndEthnicity.user_id == user_id).all():
                     client_races[id] = name
         
                 #prune remaining ranges by races relevant to the client
