@@ -1179,7 +1179,7 @@ class MedBloodTest(BaseResource):
                 #filter results by menstrual cycle if client bioligocal sex is female
                 if not client.biological_sex_male:
                     client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
-                    if client_cycle == None or client_cycle == 'unknown':
+                    if client_cycle == None or client_cycle.status == 'unknown':
                         #default if client has not submitted any fertility information
                         client_cycle = 'follicular phase'
                     else:
