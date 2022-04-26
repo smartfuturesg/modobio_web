@@ -122,6 +122,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     start_time_utc = fields.Time()
     booking_url = fields.String()
     consult_rate = fields.Number(missing=None)
+    reason = fields.String()
     description = fields.String()
 
     @post_load
