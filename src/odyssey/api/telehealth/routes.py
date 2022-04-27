@@ -838,6 +838,9 @@ class TelehealthBookingsApi(BaseResource):
             # and that the payment method chosen is registered under the client_user_id
             if not PaymentMethods.query.filter_by(user_id=booking.client_user_id, idx=payment_id).one_or_none():
                 raise BadRequest('Invalid payment method.')
+            
+            if booking.charged:
+                raise BadRequest('Booking has already been paid for. The payment method cannot be changed.')
 
         new_status = data.get('status')
         if new_status:
