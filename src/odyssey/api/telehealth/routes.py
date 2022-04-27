@@ -851,11 +851,7 @@ class TelehealthBookingsApi(BaseResource):
                   current_user.user_id != booking.staff_user_id):
                 raise Unauthorized('Only practitioner can update this status.')
 
-            if new_status != 'Canceled':
-                booking.update(data)
-                db.session.commit()
-            
-            else:
+            if new_status == 'Canceled':
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
@@ -863,7 +859,8 @@ class TelehealthBookingsApi(BaseResource):
                 else:
                     cancel_telehealth_appointment(booking, refund=False)                
 
-
+        booking.update(data)
+        db.session.commit()
         return 201
 
     @token_auth.login_required()
