@@ -879,7 +879,10 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
             user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
 
-        send_email_welcome_email(user)
+        send_email(
+            user.email,
+            f'Hi {user.firstname}, welcome to Modo Bio!',
+            'email-welcome')
 
         db.session.delete(verification)
         db.session.commit()
@@ -929,7 +932,10 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
 
-        send_email_welcome_email(user)
+        send_email(
+            user.email,
+            'Hi {user.firstname}, welcome to Modo Bio!',
+            'email-welcome')
 
         db.session.commit()
 
