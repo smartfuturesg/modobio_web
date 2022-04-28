@@ -1118,6 +1118,7 @@ class ClinicalCareTeamMembers(BaseResource):
         # enter new team members into client's clinical care team
         # if email is associated with a current user account, add that user's id to 
         #  the database entry
+        emails_to_send = []
         for team_member in data.get("care_team"):
             
             if 'modobio_id' not in team_member and 'team_member_email' not in team_member:
@@ -1137,6 +1138,7 @@ class ClinicalCareTeamMembers(BaseResource):
                 team_member_user = User.query.filter_by(modobio_id=modo_id).one_or_none()
                 if team_member_user:
                     team_member["team_member_user_id"] = team_member_user.user_id
+                    emails_to_send.append(team_member_user.email)
                 else:
                     raise BadRequest(f'Client {modo_id} not found.')
 
@@ -1145,18 +1147,27 @@ class ClinicalCareTeamMembers(BaseResource):
                 team_member_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
                 if team_member_user:
                     team_member["team_member_user_id"] = team_member_user.user_id
+                    emails_to_send.append(team_member_user.email)
                 # email is not in our system. 
                 # create a new, unverified user using the provided email
                 # user is neither staff nor client
                 else:
-                    team_member_user = User(email = team_member['team_member_email'], is_staff=False, is_client=False)
+                    team_member_user = User(
+                        email=team_member['team_member_email'],
+                        is_staff=False,
+                        is_client=False)
+
                     db.session.add(team_member_user)
                     db.session.flush()
-                    team_member["team_member_user_id"] = team_member_user.user_id
-                    
+
+                    team_member['team_member_user_id'] = team_member_user.user_id
+                    emails_to_send.append(team_member_user.email)
+
             # add new team member to the clincial care team
-            db.session.add(ClientClinicalCareTeam(**{"team_member_user_id": team_member["team_member_user_id"],
-                                                    "user_id": user_id})) 
+            db.session.add(
+                ClientClinicalCareTeam(
+                    team_member_user_id=team_member['team_member_user_id'],
+                    user_id=user_id))
 
         db.session.commit()
 
@@ -1241,7 +1252,17 @@ class ClinicalCareTeamMembers(BaseResource):
                 'is_staff': is_staff,
                 'authorizations': authorizations
             })
-        
+
+        # Send an email to all added team members
+        for email_address in emails_to_send:
+            fullname = f'{user.firstname} {user.lastname}'
+            send_email(
+                email_address,
+                f'{fullname} added you to their Modo Bio team!',
+                'team-added',
+                fullname=fullname,
+                firstname=user.firstname)
+
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
 
