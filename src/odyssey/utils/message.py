@@ -37,6 +37,7 @@ SUBJECTS = {
     'testing-success': 'SES TEST EMAIL',
     'account_deleted': 'Modo Bio Account Deleted',
     'email-verification': 'Verify Your Modo Bio Email',
+    'email-welcome': 'Welcome To Modo Bio!',
     'appointment-verification': ' has just booked an appointment with you on Modo Bio!',
     'new-subscription': 'Your Modo Bio Subscription Is Active',
 }
@@ -142,6 +143,18 @@ def send_email_verify_email(recipient: User, token, code):
     
     send_email(subject=SUBJECTS["email-verification"], recipient=recipient.email, body_text=body_text, body_html=body_html, sender="Modo Bio Verify <verify@modobio.com>")
 
+
+def send_email_welcome_email(recipient: User):
+    """
+    Email send to welcome new users, sent after email is verified, both via token and code
+    """
+    body_text = render_template('email-welcome.txt')
+    body_html = render_template('email-welcome.html')
+
+    send_email(subject="Hi " + recipient.firstname + ", " + SUBJECTS["email-welcome"], recipient=recipient.email,
+               body_text=body_text, body_html=body_html, sender="Modo Bio Welcome <welcome@modobio.com>")
+
+
 def send_email_password_reset(recipient: User, reset_token, url_scheme):
     """
     Email for sending users password reset portal
@@ -157,7 +170,7 @@ def send_email_password_reset(recipient: User, reset_token, url_scheme):
     body_html = render_template('password-reset.html', data=data)
     
     send_email(subject=SUBJECTS["password_reset"], recipient=recipient.email, body_text=body_text, body_html=body_html)
-   
+
 
 def send_email_new_subscription(recipient: User):
     """
@@ -165,12 +178,12 @@ def send_email_new_subscription(recipient: User):
     """
 
     data = {"firstname": recipient.firstname}
-    
+
     body_text = render_template('subscription-confirm.txt', data=data)
     body_html = render_template('subscription-confirm.html', data=data)
-    
+
     send_email(subject=SUBJECTS["new-subscription"], recipient=recipient.email, body_text=body_text, body_html=body_html)
-   
+
 def send_email_delete_account(recipient, deleted_account):
     """
     Email for notifying users of account deletion
@@ -232,7 +245,7 @@ def send_test_email(subject="testing-success", recipient="success@simulator.amaz
         recipient = "bounce@simulator.amazonses.com" 
     elif subject == "testing-complaint":
         recipient = "complaint@simulator.amazonses.com" 
-    
+
     # The email body for recipients with non-HTML email clients.
     body_text = ("Amazon SES Test (Python)\n"
                 "This email was sent with Amazon SES using the "
@@ -298,10 +311,9 @@ def send_email(subject=None, recipient="success@simulator.amazonses.com", body_t
        
     # Display an error if something goes wrong.	
     except ClientError as e:
-        print(e.response['Error']['Message'])
+        logger.error(e.response['Error']['Message'])
     else:
-        print("Email sent! Message ID:"),
-        print(response['MessageId'])
+        logger.info("Email sent! Message ID: " + response['MessageId'])
 
 
 ##############################################################
