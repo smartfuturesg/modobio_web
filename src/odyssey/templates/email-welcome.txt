@@ -1,0 +1,14 @@
+{% extends "modo-bio-automated-email-template-body.txt" %}
+{% block body %}
+It’s an absolute pleasure to have you join our platform.
+
+We built Modo Bio because we believe in human expertise and relationships, data-driven care, and self-determination. We also believe in making good health care accessible to everyone.
+
+Our network of vetted health and wellness providers are ready to start helping you with your health goals. We’ve also included space for your friends and family so please be sure to add them to your team. Being on a team is FREE of charge!
+
+Join us on https://www.instagram.com/modo.bio/ so you can stay up to date, get our latest health and wellness content, meet other members, and share your experiences.
+
+We’re excited to be of assistance, talk soon!
+
+-The Modo Bio Team
+{% endblock %}

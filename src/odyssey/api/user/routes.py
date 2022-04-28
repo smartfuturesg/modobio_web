@@ -62,7 +62,9 @@ from odyssey.utils.message import (
     send_email_new_subscription,
     send_email_password_reset,
     send_email_delete_account,
-    send_email_verify_email)
+    send_email_verify_email,
+    send_email_welcome_email,
+)
 from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
@@ -853,14 +855,16 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
         if not verification:
             raise Unauthorized('Email verification token not found.')
 
-        #token was valid, remove the pending request, update user account and return 200
+        # token was valid, remove the pending request, update user account and return 200
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
         # if this email is being verified on a new account: create modobio_id and update membersince dates
         
         if user.email_verified == False and user.modobio_id == None:
-            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})
+            md_id = generate_modobio_id(user.user_id, user.firstname, user.lastname)
+            user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
+
+        send_email_welcome_email(user)
 
         db.session.delete(verification)
         db.session.commit()
@@ -901,14 +905,16 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         except jwt.ExpiredSignatureError:
             raise Unauthorized('Email verification token expired.')
 
-        #code was valid, remove the pending request, update user account and return 200
+        # code was valid, remove the pending request, update user account and return 200
         db.session.delete(verification)
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
         if user.email_verified == False and user.modobio_id == None:
-            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
+            md_id = generate_modobio_id(user.user_id, user.firstname, user.lastname)
+            user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
+
+        send_email_welcome_email(user)
 
         db.session.commit()
 
