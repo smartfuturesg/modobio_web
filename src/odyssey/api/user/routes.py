@@ -743,7 +743,11 @@ class UserSubscriptionApi(BaseResource):
             # if this subscription is following an unsubscribed status: 
             #   either first time subscription or first subscription ever
             # Send a Welcome email
-            send_email_new_subscription(user)
+            send_email(
+                user.email,
+                'Your Modo Bio subscription is active',
+                'subscription-confirm',
+                firstname=user.firstname)
 
         # make a new subscription entry
         new_data = {
