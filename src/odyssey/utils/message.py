@@ -75,6 +75,7 @@ def send_email(
     subject: str,
     template: str,
     sender: str='Modo Bio No Reply <no-reply@modobio.com>',
+    _internal: str=None,
     **kwargs):
     """ Send an email.
 
@@ -96,6 +97,11 @@ def send_email(
     sender : str (optional)
         The email address of the sender, no-reply@modobio.com by default.
 
+    _internal : str (optional, testing only)
+        Use an internal SES email address to send the email to. Must be one of
+        'success', 'bounce', or 'complaint'. This is intended to be used by
+        the /client/testemail/ endpoint only.
+
     **kwargs
         Any other keyword=value pairs will be used as replacement parameters
         when rendering the template.
@@ -106,12 +112,19 @@ def send_email(
         Raised when email address is invalid or when email failed to send through
         Amazon SES.
     """
+    if _internal:
+        if _internal not in ('success', 'bounce', 'complaint'):
+            raise BadRequest('Invalid internal address.')
+
+        to = f'{_internal}@simulator.amazonses.com'
+        subject = f'AWS SES test email - {_internal}'
+
     domain = to.split('@')
     if len(domain) != 2:
         raise BadRequest(f'Email address {to} invalid.')
 
-    # Route emails to AWS mailbox simulator when in DEV
-    # environment or not in the accepted domains list.
+    # Route emails to AWS mailbox simulator when in DEV environment,
+    # unless domain is in the accepted domains list.
     if (current_app.config['DEV'] and domain[1] not in DEV_EMAIL_DOMAINS):
         to = 'success@simulator.amazonses.com'
 
@@ -143,31 +156,11 @@ def send_email(
     except ClientError as err:
         # Log extra info to error log, info we don't want in message to end user.
         msg = err.response['Error']['Message']
-        logger.error(f'Email based on template {template} to {to} failed to send. Error: {msg}')
+        logger.error(f'Email based on template "{template}" to "{to}" failed with error: {msg}')
         raise BadRequest('Email failed to send.')
     else:
         mid = response['MessageId']
-        logger.info(f'Email based on template {template} sent to {to}, message ID: {mid}')
-
-def send_test_email(scenario='success'):
-    """ Send a test email.
-
-    Use the AWS mailbox simulator to test different scenarios:
-    success, bounce, or complaint.
-
-    Parameters
-    ----------
-    scenario : str
-        Select the scenario to test. Must be one of 'success',
-        'bounce', or 'complaint'.
-    """
-    if subject not in ('success', 'bounce', 'complaint'):
-        raise ValueError('Invalid scenario.')
-
-    to = f'{scenario}@simulator.amazonses.com'
-    subject = f'SES test email - {scenario}'
-
-    send_email(to, subject, 'test')
+        logger.info(f'Email based on template "{template}" sent to "{to}", message ID: {mid}')
 
 # DEPRECATED: 2022-04-26
 # The endpoints which call this function were already deprecated.
