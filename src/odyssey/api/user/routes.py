@@ -512,17 +512,23 @@ class PasswordResetEmail(BaseResource):
         url_scheme = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}'
 
         secret = current_app.config['SECRET_KEY']
-        password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
-                                  'sid': user.user_id}, 
-                                  secret, 
-                                  algorithm='HS256')       
-                
-        send_email_password_reset(user, password_reset_token, url_scheme)
+        token = {
+            'exp': datetime.utcnow() + timedelta(minutes=15),
+            'sid': user.user_id}
+        password_reset_token = jwt.encode(token, secret, algorithm='HS256')
+
+        send_email(
+            user.email,
+            'Reset your Modo Bio password',
+            'password-reset',
+            name=user.firstname,
+            email=user.email,
+            reset_password_url=PASSWORD_RESET_URL.format(url_scheme, password_reset_token))
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
             res['token'] = password_reset_token
-            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme,password_reset_token)
+            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme, password_reset_token)
 
         return res
         
