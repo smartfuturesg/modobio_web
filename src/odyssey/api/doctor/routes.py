@@ -1196,7 +1196,7 @@ class MedBloodTest(BaseResource):
                             if client_cycle_row.pregnant:
                                 client_cycle = 'pregnant'
                             elif client_cycle_row.status != 'postmenopausal':
-                                #is status is postmenopausal, client_cycle has already been set to that
+                                #if status is postmenopausal, client_cycle has already been set to that
                                 #otherwise, set it to 'not pregnant'
                                 client_cycle = 'not pregnant'
                         else:
