@@ -486,6 +486,11 @@ class ClientTokenRequestSchema(Schema):
     refresh_token = fields.String()
     email_verified = fields.Boolean()
 
+
+class ClientCloseAccountSchema(Schema):
+    reason = fields.String(required=True, validate=validate.Length(min=1, max=500))
+
+
 class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientTransactionHistory
