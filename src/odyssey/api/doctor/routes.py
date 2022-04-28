@@ -1183,7 +1183,7 @@ class MedBloodTest(BaseResource):
                         #default if client has not submitted any fertility information
                         client_cycle = 'follicular phase'
                     else:
-                        client_cycle = client_cycle.status
+                        client_cycle = client_cycle_row.status
                         
                     relevant_cycles = []
                     for cycle in sex_ranges.all():
@@ -1192,9 +1192,15 @@ class MedBloodTest(BaseResource):
                             
                     #some tests only care if the client is 'pregnant', 'not pregnant', or 'postmenopausal'
                     if 'pregnant' in relevant_cycles:
-                        if client_cycle_row.pregnant:
-                            client_cycle = 'pregnant'
-                        elif client_cycle_row.status != 'postmenopausal':
+                        if client_cycle_row:
+                            if client_cycle_row.pregnant:
+                                client_cycle = 'pregnant'
+                            elif client_cycle_row.status != 'postmenopausal':
+                                #if status is postmenopausal, client_cycle has already been set to that
+                                #otherwise, set it to 'not pregnant'
+                                client_cycle = 'not pregnant'
+                        else:
+                            #default to not pregnant if there is no fertility entries for the client
                             client_cycle = 'not pregnant'
                             
                     if client_cycle in relevant_cycles:
