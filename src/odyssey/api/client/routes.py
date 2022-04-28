@@ -64,8 +64,14 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
 from odyssey.api.user.routes import UserLogoutApi
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.constants import FERTILITY_STATUSES, TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
-from odyssey.utils.message import send_test_email, email_domain_blacklisted
+from odyssey.utils.constants import (
+    FERTILITY_STATUSES,
+    TABLE_TO_URI,
+    ALLOWED_IMAGE_TYPES,
+    IMAGE_MAX_SIZE,
+    IMAGE_DIMENSIONS,
+    DEV_EMAIL_DOMAINS)
+from odyssey.utils.message import send_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
     check_drink_existence
@@ -934,15 +940,33 @@ class TestEmail(BaseResource):
     """
        Send a test email
     """
-    @token_auth.login_required
-    @ns.doc(params={'recipient': 'test email recipient'})
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @ns.doc(params={
+        'email_address': 'Email address to send a test email to. If empty, '
+                         'email is send to an AWS SES internal mailbox that always succeeds.',
+        'internal': 'Use one of the AWS SES internal mailboxes. Value must '
+                    'be one of "success", "bounce", or "complaint". Overrides email address.'})
     def get(self):
-        """send a testing email"""
-        recipient = request.args.get('recipient')
+        """ Send a test email. """
+        email_address = request.args.get('email_address', '')
+        internal = request.args.get('internal')
 
-        send_test_email(recipient=recipient)
-        
-        return {}, 200  
+        if not email_address and not internal:
+            internal = 'success'
+
+        # Temporarily add domain to DEV list, so that email is always send.
+        domain = None
+        parts = email_address.split('@')
+        if len(parts) == 2 and parts[1] not in DEV_EMAIL_DOMAINS:
+            domain = parts[1]
+            DEV_EMAIL_DOMAINS.append(domain)
+
+        try:
+            send_email(email_address, 'Test email from Modo Bio', 'test', _internal=internal)
+        finally:
+            if domain:
+                DEV_EMAIL_DOMAINS.remove(domain)
+
 
 @ns.route('/datastoragetiers/')
 class ClientDataStorageTiers(BaseResource):
