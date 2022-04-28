@@ -956,21 +956,25 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
             raise Unauthorized('Email verification failed.')
 
         # create a new token and code for this user
-        token = UserPendingEmailVerifications.generate_token(user_id)
-        code = UserPendingEmailVerifications.generate_code()
-
-        verification.update(
-            {
-                'token': token,
-                'code': code
-            }
-        )
+        verification.token = UserPendingEmailVerifications.generate_token(user_id)
+        verification.code = UserPendingEmailVerifications.generate_code()
 
         db.session.commit()
 
-        recipient = User.query.filter_by(user_id=user_id).one_or_none()
+        user = User.query.filter_by(user_id=user_id).one_or_none()
 
-        send_email_verify_email(recipient, token, code)
+        link = url_for(
+            '.user_user_pending_email_verifications_token_api',
+            token=verification.token,
+            _external=True)
+
+        send_email(
+            user.email,
+            'Verify your Modo Bio email',
+            'email-verify',
+            name=user.firstname,
+            verification_link=link,
+            verification_code=verification.code)
 
         
 @ns.route('/legal-docs/<int:user_id>/')
