@@ -69,7 +69,7 @@ from odyssey.utils.constants import (
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE
 )
-from odyssey.utils.message import PushNotification, PushNotificationType, send_email_appointment_scheduled
+from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence
@@ -588,7 +588,6 @@ class TelehealthBookingsApi(BaseResource):
         self.check_user(client_user_id, user_type='client')
 
         staff_user_id = request.args.get('staff_user_id', type=int)
-        practitioner_recipient = User.query.filter_by(user_id=staff_user_id).one_or_none()
         if not staff_user_id:
             raise BadRequest('Missing practitioner ID.')    
         # Check staff existence
@@ -741,7 +740,15 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
-        send_email_appointment_scheduled(practitioner_recipient, client_scheduled)
+        client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
+        subject = f'{client_fullname} has just booked an appointment with you on Modo Bio!'
+
+        send_email(
+            booking.practitioner.email,
+            subject,
+            'appointment-booked-practitioner',
+            practitioner=booking.practitioner.firstname,
+            client=client_fullname)
 
         payload = {
             'all_bookings': 1,
@@ -816,15 +823,28 @@ class TelehealthBookingsApi(BaseResource):
             if new_status != 'Canceled':
                 booking.update(data)
                 db.session.commit()
-            
             else:
-                #if staff initiated cancellation, refund should be true
-                #if client initiated, refund should be false
+                # If staff initiated cancellation, refund should be true.
+                # If client initiated, refund should be false.
                 if current_user.user_id == booking.staff_user_id:
-                    cancel_telehealth_appointment(booking, reason="Practitioner Cancellation", refund=True)
-                else:
-                    cancel_telehealth_appointment(booking, refund=False)                
+                    cancel_telehealth_appointment(
+                        booking,
+                        reason="Practitioner Cancellation",
+                        refund=True)
 
+                    # TODO: send an email to client when practitioner cancels?
+                else:
+                    cancel_telehealth_appointment(
+                        booking,
+                        refund=False)
+
+                    client_fullname = f'{current_user.firstname} {current_user.lastname}'
+                    send_email(
+                        booking.practitioner.email,
+                        f'{client_fullname} cancelled an appointment',
+                        'appointment-client-cancelled',
+                        practitioner_firstname=booking.practitioner.firstname,
+                        client_fullname=client_fullname)
 
         return 201
 
