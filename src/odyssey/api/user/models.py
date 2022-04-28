@@ -270,6 +270,13 @@ class UserLogin(db.Model):
     :type: datetime or None
     """
 
+    staff_account_closed_reason = db.Column(db.String(500))
+    """
+    Reason why the staff portion of the account was closed.
+
+    :type: str, max length 500
+    """
+
     staff_account_blocked = db.Column(db.Boolean, server_default='f')
     """
     Indicates when the staff portion of the account is blocked.
@@ -294,6 +301,13 @@ class UserLogin(db.Model):
     is set to None.
 
     :type: datetime or None
+    """
+
+    client_account_closed_reason = db.Column(db.String(500))
+    """
+    Reason why the client portion of the account was closed.
+
+    :type: str, max length 500
     """
 
     client_account_blocked = db.Column(db.Boolean, server_default='f')
