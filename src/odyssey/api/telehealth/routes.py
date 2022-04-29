@@ -600,10 +600,9 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_end_time','booking_window_id_start_time','target_date']), api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
-    @ns.doc(params={'client_user_id': 'Client User ID',
-                'staff_user_id' : 'Staff User ID'})
+    @ns.doc(params={'client_user_id': 'Client User ID', 'staff_user_id': 'Staff User ID'})
     def post(self):
         """
         Add client and staff to a TelehealthBookings table.
@@ -618,7 +617,6 @@ class TelehealthBookingsApi(BaseResource):
         #    raise BadRequest('Start time must be before end time.')
         # NOTE commented out this check, the input for booking_window_id_end_time will not be taken into cosideration, 
         # only booking_window_id_start_time and target_date
-        # TODO depricate requiring booking_window_id_end_time as an input
 
         client_user_id = request.args.get('client_user_id', type=int)
         if not client_user_id:
