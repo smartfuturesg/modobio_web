@@ -269,7 +269,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     client_booking = {
         'target_date': target_date_next_monday.date().isoformat(),
         'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
-        'booking_window_id_end_time': response.json['appointment_times'][-1]['booking_window_id_end_time']}
+    }
 
     response = test_client.post(
         f'/telehealth/bookings/'
