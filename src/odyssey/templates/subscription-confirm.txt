@@ -1,6 +1,6 @@
 {% extends "modo-bio-automated-email-template-body.txt" %}
 {% block body %}
-Hi {{data.firstname}}
+Hi {{ firstname }}
 
 We're excited to have you as a member! 
 

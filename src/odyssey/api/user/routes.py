@@ -9,14 +9,13 @@ import jwt
 import requests
 import json
 
-from flask import current_app, g, request, redirect
+from flask import current_app, g, request, redirect, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from pytz import utc
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequest, Unauthorized
-
 
 from odyssey import db
 from odyssey.api.client.models import ClientFertility
@@ -57,14 +56,7 @@ from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils import search
 from odyssey import db
-from odyssey.utils.message import (
-    email_domain_blacklisted,
-    send_email_new_subscription,
-    send_email_password_reset,
-    send_email_delete_account,
-    send_email_verify_email,
-    send_email_welcome_email,
-)
+from odyssey.utils.message import email_domain_blacklisted, send_email
 from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
@@ -191,18 +183,25 @@ class NewStaffUser(BaseResource):
             token = UserPendingEmailVerifications.generate_token(user.user_id)
             code = UserPendingEmailVerifications.generate_code()
 
-            # create pending email verification in db
-            email_verification_data = {
-                'user_id': user.user_id,
-                'token': token,
-                'code': code
-            }
+            verification = UserPendingEmailVerifications(
+                user_id=user.user_id,
+                token=token,
+                code=code)
 
-            verification = UserPendingEmailVerifications(**email_verification_data)
             db.session.add(verification)
 
-            # send email to the user
-            send_email_verify_email(user, token, code)
+            link = url_for(
+                '.user_user_pending_email_verifications_token_api',
+                token=token,
+                _external=True)
+
+            send_email(
+                user.email,
+                'Verify your Modo Bio email',
+                'email-verify',
+                name=user.firstname,
+                verification_link=link,
+                verification_code=code)
         
         # create subscription entry for new staff user
         staff_sub = UserSubscriptionsSchema().load({
@@ -215,7 +214,6 @@ class NewStaffUser(BaseResource):
         # add staff_profile for user
         staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
         db.session.add(staff_profile)
-
 
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
@@ -235,7 +233,7 @@ class NewStaffUser(BaseResource):
 
         # respond with verification code in dev
         if current_app.config['DEV'] and verify_email:
-            payload['email_verification_code'] = email_verification_data.get('code')
+            payload['email_verification_code'] = code
 
         return payload
 
@@ -361,20 +359,27 @@ class NewClientUser(BaseResource):
             token = UserPendingEmailVerifications.generate_token(user.user_id)
             code = UserPendingEmailVerifications.generate_code()
 
-            # create pending email verification in db
-            email_verification_data = {
-                'user_id': user.user_id,
-                'token': token,
-                'code': code
-            }
+            verification = UserPendingEmailVerifications(
+                user_id=user.user_id,
+                token=token,
+                code=code)
 
-            verification = UserPendingEmailVerifications(**email_verification_data)
             db.session.add(verification)
 
-            # send email to the user
-            send_email_verify_email(user, token, code)
+            link = url_for(
+                '.user_user_pending_email_verifications_token_api',
+                token=token,
+                _external=True)
 
-            #Authenticate newly created client account for immediate login
+            send_email(
+                user.email,
+                'Verify your Modo Bio email',
+                'email-verify',
+                name=user.firstname,
+                verification_link=link,
+                verification_code=code)
+
+            # Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
         client_info = ClientInfoSchema().load({"user_id": user.user_id})
@@ -417,11 +422,11 @@ class NewClientUser(BaseResource):
                 fertility.user_id = user.user_id
                 db.session.add(fertility)
 
-        #Generate access and refresh tokens
+        # Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
         
-        #Add refresh token to db
+        # Add refresh token to db
         db.session.add(UserTokenHistory(user_id=user.user_id, 
                                         refresh_token=refresh_token,
                                         event='login',
@@ -433,10 +438,10 @@ class NewClientUser(BaseResource):
 
         # respond with verification code in dev
         if current_app.config['DEV'] and verify_email:
-            payload['email_verification_code'] = email_verification_data.get('code')
-
+            payload['email_verification_code'] = code
 
         return payload
+
 
 @ns.route('/password/forgot-password/recovery-link/')
 class PasswordResetEmail(BaseResource):
@@ -507,17 +512,23 @@ class PasswordResetEmail(BaseResource):
         url_scheme = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}'
 
         secret = current_app.config['SECRET_KEY']
-        password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
-                                  'sid': user.user_id}, 
-                                  secret, 
-                                  algorithm='HS256')       
-                
-        send_email_password_reset(user, password_reset_token, url_scheme)
+        token = {
+            'exp': datetime.utcnow() + timedelta(minutes=15),
+            'sid': user.user_id}
+        password_reset_token = jwt.encode(token, secret, algorithm='HS256')
+
+        send_email(
+            user.email,
+            'Reset your Modo Bio password',
+            'password-reset',
+            name=user.firstname,
+            email=user.email,
+            reset_password_url=PASSWORD_RESET_URL.format(url_scheme, password_reset_token))
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
             res['token'] = password_reset_token
-            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme,password_reset_token)
+            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme, password_reset_token)
 
         return res
         
@@ -732,7 +743,11 @@ class UserSubscriptionApi(BaseResource):
             # if this subscription is following an unsubscribed status: 
             #   either first time subscription or first subscription ever
             # Send a Welcome email
-            send_email_new_subscription(user)
+            send_email(
+                user.email,
+                'Your Modo Bio subscription is active',
+                'subscription-confirm',
+                firstname=user.firstname)
 
         # make a new subscription entry
         new_data = {
@@ -864,7 +879,10 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
             user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
 
-        send_email_welcome_email(user)
+        send_email(
+            user.email,
+            f'Hi {user.firstname}, welcome to Modo Bio!',
+            'email-welcome')
 
         db.session.delete(verification)
         db.session.commit()
@@ -914,7 +932,10 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
 
-        send_email_welcome_email(user)
+        send_email(
+            user.email,
+            'Hi {user.firstname}, welcome to Modo Bio!',
+            'email-welcome')
 
         db.session.commit()
 
@@ -935,21 +956,25 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
             raise Unauthorized('Email verification failed.')
 
         # create a new token and code for this user
-        token = UserPendingEmailVerifications.generate_token(user_id)
-        code = UserPendingEmailVerifications.generate_code()
-
-        verification.update(
-            {
-                'token': token,
-                'code': code
-            }
-        )
+        verification.token = UserPendingEmailVerifications.generate_token(user_id)
+        verification.code = UserPendingEmailVerifications.generate_code()
 
         db.session.commit()
 
-        recipient = User.query.filter_by(user_id=user_id).one_or_none()
+        user = User.query.filter_by(user_id=user_id).one_or_none()
 
-        send_email_verify_email(recipient, token, code)
+        link = url_for(
+            '.user_user_pending_email_verifications_token_api',
+            token=verification.token,
+            _external=True)
+
+        send_email(
+            user.email,
+            'Verify your Modo Bio email',
+            'email-verify',
+            name=user.firstname,
+            verification_link=link,
+            verification_code=verification.code)
 
         
 @ns.route('/legal-docs/<int:user_id>/')

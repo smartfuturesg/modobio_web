@@ -24,24 +24,9 @@ from odyssey.api.notifications.schemas import (
 from odyssey.api.user.models import User
 from odyssey.utils.constants import (
     DEV_EMAIL_DOMAINS,
-    PASSWORD_RESET_URL,
     REGISTRATION_PORTAL_URL)
 
 logger = logging.getLogger(__name__)
-
-SUBJECTS = {
-    'remote_registration_portal': 'Modo Bio User Registration Portal',
-    'password_reset': 'Reset Your Modo Bio Password',
-    'testing-bounce': 'SES TEST EMAIL-BOUNCE',
-    'testing-complaint': 'SES TEST EMAIL-COMPLAINT',
-    'testing-success': 'SES TEST EMAIL',
-    'account_deleted': 'Modo Bio Account Deleted',
-    'email-verification': 'Verify Your Modo Bio Email',
-    'email-welcome': 'Welcome To Modo Bio!',
-    'appointment-verification': ' has just booked an appointment with you on Modo Bio!',
-    'new-subscription': 'Your Modo Bio Subscription Is Active',
-}
-
 
 # Cache value
 _blacklisted_email_domains = None
@@ -85,15 +70,109 @@ def email_domain_blacklisted(email_address: str):
     if domain in _blacklisted_email_domains:
         raise BadRequest(f'Email adresses from "{parts[1]}" are not allowed.')
 
+def send_email(
+    to: str,
+    subject: str,
+    template: str,
+    sender: str='Modo Bio No Reply <no-reply@modobio.com>',
+    _internal: str=None,
+    **kwargs):
+    """ Send an email.
+
+    Send an email using Amazon SES service. The body text is based on an email
+    template in '/templates'. Any optional keyword arguments passed in here are
+    used as replacement values when rendering the template.
+
+    Parameters
+    ----------
+    to : str
+        The email address of the recipient.
+
+    subject : str
+        The subject line of the email.
+
+    template : str
+        The filename (without extension) of the template to use for the email body.
+
+    sender : str (optional)
+        The email address of the sender, no-reply@modobio.com by default.
+
+    _internal : str (optional, testing only)
+        Use an internal SES email address to send the email to. Must be one of
+        'success', 'bounce', or 'complaint'. This is intended to be used by
+        the /client/testemail/ endpoint only.
+
+    **kwargs
+        Any other keyword=value pairs will be used as replacement parameters
+        when rendering the template.
+
+    Raises
+    ------
+    :class:`~werkzeug.exceptions.BadRequest`
+        Raised when email address is invalid or when email failed to send through
+        Amazon SES.
+    """
+    if _internal:
+        if _internal not in ('success', 'bounce', 'complaint'):
+            raise BadRequest('Invalid internal address.')
+
+        to = f'{_internal}@simulator.amazonses.com'
+        subject = f'AWS SES test email - {_internal}'
+
+    domain = to.split('@')
+    if len(domain) != 2:
+        raise BadRequest(f'Email address {to} invalid.')
+
+    # Route emails to AWS mailbox simulator when in DEV environment,
+    # unless domain is in the accepted domains list.
+    if (current_app.config['DEV'] and domain[1] not in DEV_EMAIL_DOMAINS):
+        to = 'success@simulator.amazonses.com'
+
+    if template.endswith('.html'):
+        template = template[:-5]
+    elif template.endswith('.txt'):
+        template = template[:-4]
+
+    body_html = render_template(f'{template}.html', **kwargs)
+    body_text = render_template(f'{template}.txt', **kwargs)
+
+    destination = {'ToAddresses': [to]}
+    message = {
+        'Subject': {
+            'Charset': 'utf-8',
+            'Data': subject},
+        'Body': {
+            'Html': {
+                'Charset': 'utf-8',
+                'Data': body_html},
+            'Text': {
+                'Charset': 'utf-8',
+                'Data': body_text}}}
+
+    # Create a new SES resource; use default region.
+    client = boto3.client('ses')
+    try:
+        response = client.send_email(Destination=destination, Message=message, Source=sender)
+    except ClientError as err:
+        # Log extra info to error log, info we don't want in message to end user.
+        msg = err.response['Error']['Message']
+        logger.error(f'Email based on template "{template}" to "{to}" failed with error: {msg}')
+        raise BadRequest('Email failed to send.')
+    else:
+        mid = response['MessageId']
+        logger.info(f'Email based on template "{template}" sent to "{to}", message ID: {mid}')
+
+# DEPRECATED: 2022-04-26
+# The endpoints which call this function were already deprecated.
 def send_email_user_registration_portal(recipient_email: str, password: str, portal_id: str):
     """
     Email for sending users their registration link and login details
     That were createrd by a client services staff member
     """
 
-    SUBJECT = SUBJECTS["remote_registration_portal"]
+    subject = 'Modo Bio User Registration Portal'
 
-    SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
+    sender = "Modo Bio no-reply <no-reply@modobio.com>"
     # TODO consider editing url according to environment being used, and if it will open the web app or mobile app.
     remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
 
@@ -125,196 +204,7 @@ def send_email_user_registration_portal(recipient_email: str, password: str, por
     </html>
     """
 
-    send_email(subject=SUBJECT, recipient=recipient_email, body_text=body_text, body_html=body_html, sender=SENDER)
-
-def send_email_verify_email(recipient: User, token, code):
-    """
-    Email sent to verify a user's email address.
-    """
-
-    data = {
-        "name": recipient.firstname,
-        "verification_link": f'{api.base_url}/user/email-verification/token/{token}/',
-        "verification_code": code
-    }
-        
-    body_text = render_template('email-verify.txt', data=data)
-    body_html = render_template('email-verify.html', data=data)
-    
-    send_email(subject=SUBJECTS["email-verification"], recipient=recipient.email, body_text=body_text, body_html=body_html, sender="Modo Bio Verify <verify@modobio.com>")
-
-
-def send_email_welcome_email(recipient: User):
-    """
-    Email send to welcome new users, sent after email is verified, both via token and code
-    """
-    body_text = render_template('email-welcome.txt')
-    body_html = render_template('email-welcome.html')
-
-    send_email(subject="Hi " + recipient.firstname + ", " + SUBJECTS["email-welcome"], recipient=recipient.email,
-               body_text=body_text, body_html=body_html, sender="Modo Bio Welcome <welcome@modobio.com>")
-
-
-def send_email_password_reset(recipient: User, reset_token, url_scheme):
-    """
-    Email for sending users password reset portal
-    """
-
-    data = {
-        "name": recipient.firstname,
-        "email": recipient.email,
-        "reset_password_url": PASSWORD_RESET_URL.format(url_scheme, reset_token)
-    }
-    
-    body_text = render_template('password-reset.txt', data=data)
-    body_html = render_template('password-reset.html', data=data)
-    
-    send_email(subject=SUBJECTS["password_reset"], recipient=recipient.email, body_text=body_text, body_html=body_html)
-
-
-def send_email_new_subscription(recipient: User):
-    """
-    Email for sending users password reset portal
-    """
-
-    data = {"firstname": recipient.firstname}
-
-    body_text = render_template('subscription-confirm.txt', data=data)
-    body_html = render_template('subscription-confirm.html', data=data)
-
-    send_email(subject=SUBJECTS["new-subscription"], recipient=recipient.email, body_text=body_text, body_html=body_html)
-
-def send_email_delete_account(recipient, deleted_account):
-    """
-    Email for notifying users of account deletion
-    """
-    
-    SUBJECT = SUBJECTS["account_deleted"]
-    
-    SENDER = "Modo Bio no-reply <no-reply@modobio.com>"
-
-    # The email body for recipients with non-HTML email clients.
-    body_text = ("The the account with email: "f"{deleted_account} has been deleted.\n"
-                "If you have not requested to delete your account, please contact your admin."
-                )
-                
-    # The HTML body of the email.
-    body_html = f"""<html>
-    <head></head>
-    <body>
-    <h1>Account Deleted</h1>
-    <p>The account with email: {deleted_account} has been deleted.
-    <br>If you have not requested to delete your account, please contact your admin.
-    </body>
-    </html>
-    """     
-
-    send_email(subject=SUBJECT, recipient=recipient, body_text=body_text, body_html=body_html, sender=SENDER)
-
-
-def send_email_appointment_scheduled(recipient, client):
-    """
-    Email for notifying a practitioner that they have been booked for an apptmt
-    """
-
-    data = {
-        "practitioner": recipient.firstname,
-        "client": client.firstname + " " + client.lastname,
-    }
-
-    body_text = render_template('appointment-booked-practitioner.txt', data=data)
-    body_html = render_template('appointment-booked-practitioner.html', data=data)
-
-    send_email(subject=client.firstname + " " + client.lastname + SUBJECTS["appointment-verification"],
-               recipient=recipient.email, body_text=body_text, body_html=body_html,
-               sender="Modo Bio no-reply <no-reply@modobio.com>")
-
-
-
-def send_test_email(subject="testing-success", recipient="success@simulator.amazonses.com"):
-    """
-        Use the AWS mailbox simulator to test different scenarios: success, bounce, complaint
-    """
-
-    # testing scenarios
-    if "simulator.amazonses.com" not in recipient:
-        pass
-    elif subject == "testing-success":
-        recipient="success@simulator.amazonses.com"
-    elif subject == "testing-bounce":
-        recipient = "bounce@simulator.amazonses.com" 
-    elif subject == "testing-complaint":
-        recipient = "complaint@simulator.amazonses.com" 
-
-    # The email body for recipients with non-HTML email clients.
-    body_text = ("Amazon SES Test (Python)\n"
-                "This email was sent with Amazon SES using the "
-                "AWS SDK for Python (Boto)."
-                )
-                
-    # The HTML body of the email.
-    body_html = """<html>
-    <head></head>
-    <body>
-    <h1>Amazon SES Test (SDK for Python)</h1>
-    <p>This email was sent with
-        <a href='https://aws.amazon.com/ses/'>Amazon SES</a> using the
-        <a href='https://aws.amazon.com/sdk-for-python/'>
-        AWS SDK for Python (Boto)</a>.</p>
-    </body>
-    </html>
-    """          
-    send_email(subject=SUBJECTS.get(subject, None),recipient=recipient, body_text=body_text, body_html=body_html)
-
-
-def send_email(subject=None, recipient="success@simulator.amazonses.com", body_text=None, body_html=None, sender="Modo Bio No Reply <no-reply@modobio.com>"):
-    
-    # route emails to AWS mailbox simulator when in dev environment or not in the accepted domains list
-    if current_app.config['DEV'] and not any([recipient.endswith(domain) for domain in DEV_EMAIL_DOMAINS]):
-        recipient = "success@simulator.amazonses.com"
-
-    # The character encoding for the email.
-    CHARSET = "UTF-8"
-    # Create a new SES resource and specify a region.
-    AWS_REGION = "us-east-2"
-    
-    client = boto3.client('ses', region_name=AWS_REGION)
-    
-    # Try to send the email.
-    try:
-        #Provide the contents of the email.
-        
-        response = client.send_email(
-            Destination={
-                'ToAddresses': [
-                    recipient,
-                ],
-            },
-            Message={
-                'Body': {
-                    'Html': {
-                        'Charset': CHARSET,
-                        'Data': body_html,
-                    },
-                    'Text': {
-                        'Charset': CHARSET,
-                        'Data': body_text,
-                    },
-                },
-                'Subject': {
-                    'Charset': CHARSET,
-                    'Data': subject,
-                },
-            },
-            Source=sender
-        )
-       
-    # Display an error if something goes wrong.	
-    except ClientError as e:
-        logger.error(e.response['Error']['Message'])
-    else:
-        logger.info("Email sent! Message ID: " + response['MessageId'])
-
+    send_email(subject=subject, recipient=recipient_email, body_text=body_text, body_html=body_html, sender=sender)
 
 ##############################################################
 #
