@@ -1260,6 +1260,7 @@ class ClinicalCareTeamMembers(BaseResource):
                 email_address,
                 f'{fullname} added you to their Modo Bio team!',
                 'team-added',
+                sender='Modo Bio Team <team@modobio.com>',
                 fullname=fullname,
                 firstname=user.firstname)
 
