@@ -934,7 +934,7 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
 
         send_email(
             user.email,
-            'Hi {user.firstname}, welcome to Modo Bio!',
+            f'Hi {user.firstname}, welcome to Modo Bio!',
             'email-welcome')
 
         db.session.commit()
