@@ -82,7 +82,7 @@ class StaffTokenRequestSchema(Schema):
 
 
 class StaffCloseAccountSchema(Schema):
-    reason = fields.String(required=True, validate=validate.Length(min=1, max=500))
+    reason = fields.String(required=False, missing=None, validate=validate.Length(max=500))
 
 
 class StaffOperationalTerritoriesSchema(ma.SQLAlchemyAutoSchema):
