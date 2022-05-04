@@ -962,7 +962,7 @@ class TestEmail(BaseResource):
             DEV_EMAIL_DOMAINS.append(domain)
 
         try:
-            send_email(email_address, 'Test email from Modo Bio', 'test', _internal=internal)
+            send_email('test', email_address, _internal=internal)
         finally:
             if domain:
                 DEV_EMAIL_DOMAINS.remove(domain)
@@ -1257,9 +1257,8 @@ class ClinicalCareTeamMembers(BaseResource):
         for email_address in emails_to_send:
             fullname = f'{user.firstname} {user.lastname}'
             send_email(
-                email_address,
-                f'{fullname} added you to their Modo Bio team!',
                 'team-added',
+                email_address,
                 sender='Modo Bio Team <team@modobio.com>',
                 fullname=fullname,
                 firstname=user.firstname)

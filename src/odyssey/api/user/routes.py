@@ -196,9 +196,8 @@ class NewStaffUser(BaseResource):
                 _external=True)
 
             send_email(
-                user.email,
-                'Verify your Modo Bio email',
                 'email-verify',
+                user.email,
                 name=user.firstname,
                 verification_link=link,
                 verification_code=code)
@@ -372,9 +371,8 @@ class NewClientUser(BaseResource):
                 _external=True)
 
             send_email(
-                user.email,
-                'Verify your Modo Bio email',
                 'email-verify',
+                user.email,
                 name=user.firstname,
                 verification_link=link,
                 verification_code=code)
@@ -518,9 +516,8 @@ class PasswordResetEmail(BaseResource):
         password_reset_token = jwt.encode(token, secret, algorithm='HS256')
 
         send_email(
-            user.email,
-            'Reset your Modo Bio password',
             'password-reset',
+            user.email,
             name=user.firstname,
             email=user.email,
             reset_password_url=PASSWORD_RESET_URL.format(url_scheme, password_reset_token))
@@ -743,11 +740,7 @@ class UserSubscriptionApi(BaseResource):
             # if this subscription is following an unsubscribed status: 
             #   either first time subscription or first subscription ever
             # Send a Welcome email
-            send_email(
-                user.email,
-                'Your Modo Bio subscription is active',
-                'subscription-confirm',
-                firstname=user.firstname)
+            send_email('subscription-confirm', user.email, firstname=user.firstname)
 
         # make a new subscription entry
         new_data = {
@@ -879,10 +872,7 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
             user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
 
-        send_email(
-            user.email,
-            f'Hi {user.firstname}, welcome to Modo Bio!',
-            'email-welcome')
+        send_email('email-welcome', user.email, firstname=user.firstname)
 
         db.session.delete(verification)
         db.session.commit()
@@ -932,10 +922,7 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
         user.update({'email_verified': True})
 
-        send_email(
-            user.email,
-            f'Hi {user.firstname}, welcome to Modo Bio!',
-            'email-welcome')
+        send_email('email-welcome', user.email, firstname=user.firstname)
 
         db.session.commit()
 
@@ -969,9 +956,8 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
             _external=True)
 
         send_email(
-            user.email,
-            'Verify your Modo Bio email',
             'email-verify',
+            user.email,
             name=user.firstname,
             verification_link=link,
             verification_code=verification.code)
