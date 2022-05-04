@@ -134,7 +134,7 @@ def test_get_3_staff_client_bookings(test_client, telehealth_staff):
     assert response.status_code == 200
     assert response.json['bookings'][0]['status'] == 'Accepted'
     
-@pytest.mark.skip('randomly failing on pipeline but not locally')
+#@pytest.mark.skip('randomly failing on pipeline but not locally')
 def test_put_1_client_staff_bookings(test_client, booking):
     
     response = test_client.put(

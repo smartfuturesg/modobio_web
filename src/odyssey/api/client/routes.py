@@ -97,6 +97,7 @@ from odyssey.api.client.schemas import(
     ClientWeightSchema,
     ClientWaistSizeSchema,
     ClientTokenRequestSchema,
+    ClientCloseAccountSchema,
     ClinicalCareTeamAuthorizationNestedSchema,
     ClinicalCareTeamMemberOfSchema,
     SignAndDateSchema,
@@ -990,6 +991,7 @@ class ClientToken(BaseResource):
         # deletion limit, the account will be reopened and not deleted.
         if user_login.client_account_closed:
             user_login.client_account_closed = None
+            user_login.client_account_closed_reason = None
 
         db.session.commit()
 
@@ -1017,6 +1019,7 @@ class ClientCloseAccountEndpoint(BaseResource):
     """ Close client account. """
 
     @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientCloseAccountSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self):
         """ Close client portion of an account.
@@ -1029,6 +1032,7 @@ class ClientCloseAccountEndpoint(BaseResource):
         """
         user, user_login = token_auth.current_user()
         user_login.client_account_closed = datetime.now()
+        user_login.client_account_closed_reason = request.json['reason']
         db.session.commit()
         UserLogoutApi().post()
 

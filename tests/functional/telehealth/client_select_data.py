@@ -147,17 +147,14 @@ telehealth_staff_14_general_availability_post_data = {
 telehealth_booking_data_1 = {
   'target_date': (datetime.now() + timedelta(days=1)).date().isoformat(),
   'booking_window_id_start_time': 109, #9:00
-  'booking_window_id_end_time': 112
 }
 telehealth_booking_data_2 = {
   'target_date': (datetime.now() + timedelta(days=1)).date().isoformat(),
   'booking_window_id_start_time': 187, #15:30
-  'booking_window_id_end_time': 190
 }
 telehealth_booking_data_3 = {
   'target_date': (datetime.now() + timedelta(days=1)).date().isoformat(),
   'booking_window_id_start_time': 118, #9:45
-  'booking_window_id_end_time': 121
 }
 
 # ------------

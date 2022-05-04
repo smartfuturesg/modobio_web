@@ -36,7 +36,7 @@ from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, L
 from odyssey.api.user.models import User, UserProfilePictures
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
-from odyssey.utils.files import FileDownload, FileUpload, ImageUpload
+from odyssey.utils.files import FileDownload, FileUpload, ImageUpload, get_profile_pictures
 from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
@@ -1183,7 +1183,7 @@ class MedBloodTest(BaseResource):
                         #default if client has not submitted any fertility information
                         client_cycle = 'follicular phase'
                     else:
-                        client_cycle = client_cycle.status
+                        client_cycle = client_cycle_row.status
                         
                     relevant_cycles = []
                     for cycle in sex_ranges.all():
@@ -1370,16 +1370,13 @@ class MedBloodTestImage(BaseResource):
             fd = FileDownload(test.user_id)
             fd.delete(prev_image)
 
+
         reporter = User.query.filter_by(user_id=test.reporter_id).one_or_none()
-        reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
-        reporter_pic = None
-        if reporter_pictures:
-            fd = FileDownload(reporter.user_id)
-            reporter_pic = {}
-            for pic in reporter_pictures:
-                if pic.original:
-                    continue
-                reporter_pic[str(pic.width)] = fd.url(pic.image_path)
+
+        if test.reporter_id != user_id:
+            reporter_pic = get_profile_pictures(test.reporter_id, True)            
+        else:
+            reporter_pic = get_profile_pictures(user_id, False)
         
         res = {
             'test_id': test.test_id,
@@ -1436,16 +1433,10 @@ class MedBloodTestAll(BaseResource):
             else:
                 image_path = None
             
-            reporter = User.query.filter_by(user_id=test[0].reporter_id).one_or_none()
-            reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
-            reporter_pic = None
-            if reporter_pictures:
-                fd2 = FileDownload(reporter.user_id)
-                reporter_pic = {}
-                for pic in reporter_pictures:
-                    if pic.original:
-                        continue
-                    reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+            if test[0].reporter_id != user_id:
+                reporter_pic = get_profile_pictures(test[0].reporter_id, True)            
+            else:
+                reporter_pic = get_profile_pictures(user_id, False)
                     
             data = test[0].__dict__
             data.update(
@@ -1501,16 +1492,11 @@ class MedBloodTestResults(BaseResource):
         else:
             image_path = None
             
-        reporter = User.query.filter_by(user_id=results[0][0].reporter_id).one_or_none()
-        reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
-        reporter_pic = None
-        if reporter_pictures:
-            fd2 = FileDownload(reporter.user_id)
-            reporter_pic = {}
-            for pic in reporter_pictures:
-                if pic.original:
-                    continue
-                reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+            
+        if results[0][0].reporter_id != results[0][0].user_id:
+            reporter_pic = get_profile_pictures(results[0][0].reporter_id, True)            
+        else:
+            reporter_pic = get_profile_pictures(results[0][0].user_id, False)
                 
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
@@ -1602,16 +1588,10 @@ class AllMedBloodTestResults(BaseResource):
                             test['image'] = fd.url(image_path)
 
                 #retrieve reporter profile pic
-                reporter = User.query.filter_by(user_id=test['reporter_id']).one_or_none()
-                reporter_pictures = UserProfilePictures.query.filter_by(staff_user_id=reporter.user_id).all()
-                reporter_pic = None
-                if reporter_pictures:
-                    fd2 = FileDownload(reporter.user_id)
-                    reporter_pic = {}
-                    for pic in reporter_pictures:
-                        if pic.original:
-                            continue
-                        reporter_pic[str(pic.width)] = fd2.url(pic.image_path)
+                if test['reporter_id'] != user_id:
+                    reporter_pic = get_profile_pictures(test['reporter_id'], True)            
+                else:
+                    reporter_pic = get_profile_pictures(user_id, False)
                 test['reporter_profile_pictures'] = reporter_pic
                                 
         payload = {}

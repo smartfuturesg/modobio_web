@@ -600,10 +600,9 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_end_time','booking_window_id_start_time','target_date']), api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
-    @ns.doc(params={'client_user_id': 'Client User ID',
-                'staff_user_id' : 'Staff User ID'})
+    @ns.doc(params={'client_user_id': 'Client User ID', 'staff_user_id': 'Staff User ID'})
     def post(self):
         """
         Add client and staff to a TelehealthBookings table.
@@ -618,7 +617,6 @@ class TelehealthBookingsApi(BaseResource):
         #    raise BadRequest('Start time must be before end time.')
         # NOTE commented out this check, the input for booking_window_id_end_time will not be taken into cosideration, 
         # only booking_window_id_start_time and target_date
-        # TODO depricate requiring booking_window_id_end_time as an input
 
         client_user_id = request.args.get('client_user_id', type=int)
         if not client_user_id:
@@ -838,6 +836,9 @@ class TelehealthBookingsApi(BaseResource):
             # and that the payment method chosen is registered under the client_user_id
             if not PaymentMethods.query.filter_by(user_id=booking.client_user_id, idx=payment_id).one_or_none():
                 raise BadRequest('Invalid payment method.')
+            
+            if booking.charged:
+                raise BadRequest('Booking has already been paid for. The payment method cannot be changed.')
 
         new_status = data.get('status')
         if new_status:
@@ -851,11 +852,7 @@ class TelehealthBookingsApi(BaseResource):
                   current_user.user_id != booking.staff_user_id):
                 raise Unauthorized('Only practitioner can update this status.')
 
-            if new_status != 'Canceled':
-                booking.update(data)
-                db.session.commit()
-            
-            else:
+            if new_status == 'Canceled':
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
@@ -863,7 +860,8 @@ class TelehealthBookingsApi(BaseResource):
                 else:
                     cancel_telehealth_appointment(booking, refund=False)                
 
-
+        booking.update(data)
+        db.session.commit()
         return 201
 
     @token_auth.login_required()

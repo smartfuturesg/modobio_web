@@ -79,7 +79,12 @@ class StaffTokenRequestSchema(Schema):
     refresh_token = fields.String()
     access_roles = fields.List(fields.String)
     email_required = fields.Boolean()
-     
+
+
+class StaffCloseAccountSchema(Schema):
+    reason = fields.String(required=True, validate=validate.Length(min=1, max=500))
+
+
 class StaffOperationalTerritoriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffOperationalTerritories

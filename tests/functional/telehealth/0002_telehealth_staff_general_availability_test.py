@@ -62,7 +62,7 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
     
     assert response.status_code == 201
 
-def test_get_3_staff_availability(test_client):
+def test_get_1_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
