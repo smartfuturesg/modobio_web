@@ -1192,10 +1192,11 @@ class MedBloodTest(BaseResource):
                             
                     #some tests only care if the client is 'pregnant', 'not pregnant', or 'postmenopausal'
                     if 'pregnant' in relevant_cycles:
-                        if client_cycle_row.pregnant:
-                            client_cycle = 'pregnant'
-                        elif client_cycle_row.status != 'postmenopausal':
+                        if client_cycle_row == None:
                             client_cycle = 'not pregnant'
+                        else:
+                            if client_cycle_row.status != 'postmenopausal':
+                                client_cycle = client_cycle_row.pregnant
                             
                     if client_cycle in relevant_cycles:
                         cycle_ranges = sex_ranges.filter_by(menstrual_cycle=client_cycle)
