@@ -1,5 +1,6 @@
 import pytest
 
+from flask.json import dumps
 from datetime import datetime, time, timezone, timedelta
 
 from odyssey import db
@@ -76,8 +77,23 @@ payment_refund_data = {
   "refund_reason": "abcdefghijklmnopqrstuvwxyz"
 }
 
+@pytest.fixture(scope='module')
+def test_payment_method(test_client):
+    response = test_client.post(
+        f'/payment/methods/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(payment_methods_data['normal_data']),
+        content_type='application/json')
+    
+    payment_method = PaymentMethods.query.filter_by(idx=response.json['idx']).one_or_none()
+    
+    yield payment_method
+    
+    test_client.db.session.delete(payment_method)
+    test_client.db.session.commit()
+
 @pytest.fixture(scope='function')
-def test_booking(test_client):
+def test_booking(test_client, test_payment_method):
     """
     This function will generate a booking object for a booking that is less than 24 hours away.
     This can be used to test the payment system.
@@ -92,7 +108,7 @@ def test_booking(test_client):
         target_time_id = 284
 
     booking = TelehealthBookings(**{
-        'payment_method_id': PaymentMethods.query.filter_by(user_id=test_client.client_id).first().idx,
+        'payment_method_id': test_payment_method.idx,
         'client_user_id': test_client.client_id,
         'staff_user_id': test_client.staff_id,
         'profession_type': 'medical_doctor',

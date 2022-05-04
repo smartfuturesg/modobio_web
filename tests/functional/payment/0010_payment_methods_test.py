@@ -2,7 +2,7 @@ from flask.json import dumps
 
 from odyssey.api.payment.models import PaymentMethods
 
-from .data import payment_methods_data, test_booking
+from .data import payment_methods_data, test_booking, test_payment_method
 
 def test_payment_methods_post(test_client):
     
@@ -24,6 +24,10 @@ def test_payment_methods_post(test_client):
 
     assert response.status_code == 400
 
+
+    #keep track of added payment methods except the first 2 so we can clean them up at the end
+    methods = []
+    
     #test with valid card details
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
@@ -54,6 +58,7 @@ def test_payment_methods_post(test_client):
         content_type='application/json')
 
     assert response.status_code == 201
+    methods.append(PaymentMethods.query.filter_by(idx=response.json['idx']).one_or_none())
 
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
@@ -62,6 +67,7 @@ def test_payment_methods_post(test_client):
         content_type='application/json')
 
     assert response.status_code == 201
+    methods.append(PaymentMethods.query.filter_by(idx=response.json['idx']).one_or_none())
 
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
@@ -70,6 +76,7 @@ def test_payment_methods_post(test_client):
         content_type='application/json')
 
     assert response.status_code == 201
+    methods.append(PaymentMethods.query.filter_by(idx=response.json['idx']).one_or_none())
 
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
@@ -78,6 +85,10 @@ def test_payment_methods_post(test_client):
         content_type='application/json')
 
     assert response.status_code == 400
+    
+    for method in methods:
+        test_client.db.session.delete(method)
+    test_client.db.session.commit()
 
 def test_payment_methods_get(test_client):
 
@@ -87,7 +98,7 @@ def test_payment_methods_get(test_client):
         content_type='application.json')
 
     assert response.status_code == 200
-    assert len(response.json) == 5
+    assert len(response.json) == 2
     assert response.json[0]['expiration'] == '04/25'
 
 def test_payment_methods_delete(test_client, test_booking):
@@ -112,7 +123,7 @@ def test_payment_methods_delete(test_client, test_booking):
            date deleted)
     """
     response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=5',
+        f'/payment/methods/{test_client.client_id}/?idx=1',
         headers = test_client.client_auth_header,
         content_type='application.json')
 
@@ -124,22 +135,19 @@ def test_payment_methods_delete(test_client, test_booking):
         content_type='application.json')
 
     assert response.status_code == 200
-    assert len(response.json) == 4
+    assert len(response.json) == 2
     
-    deleted = PaymentMethods.query.filter_by(idx=5).one_or_none()
+    deleted = PaymentMethods.query.filter_by(idx=1).one_or_none()
     assert deleted.payment_id == None
     assert deleted.expiration == None
 
     # When there are future bookings involved with the payment method:
     
-    #generate booking and set payment method to one that was added in post test
-    test_booking.payment_method_id = 1
-    
     """
         1) no replacement_id is provided (returns 400 with a message to include a replacement_id)    
     """
     response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=1',
+        f'/payment/methods/{test_client.client_id}/?idx=6',
         headers = test_client.client_auth_header,
         content_type='application.json')
     
@@ -153,9 +161,10 @@ def test_payment_methods_delete(test_client, test_booking):
     #change payment method with idx 2 to belong to a different user
     other_user_method = PaymentMethods.query.filter_by(idx=2).one_or_none()
     other_user_method.user_id = test_client.staff_id
+    test_client.db.session.flush()
     
     response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=1&replacement_id=2',
+        f'/payment/methods/{test_client.client_id}/?idx=6&replacement_id=2',
         headers = test_client.client_auth_header,
         content_type='application.json')
     
@@ -164,7 +173,7 @@ def test_payment_methods_delete(test_client, test_booking):
     #try to use the payment method with idx 5 as the replacement, should fail because this method
     #was deleted in no booking attached test case 2 above
     response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=1&replacement_id=5',
+        f'/payment/methods/{test_client.client_id}/?idx=6&replacement_id=1',
         headers = test_client.client_auth_header,
         content_type='application.json')
     
@@ -175,15 +184,18 @@ def test_payment_methods_delete(test_client, test_booking):
            (returns 204 and all bookings associated with the deleted paymethod method have their payment
            method replaced with the payment method identified by payment_id)
     """
+    other_user_method.user_id = test_client.client_id
+    test_client.db.session.flush()
+    
     response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=1&replacement_id=3',
+        f'/payment/methods/{test_client.client_id}/?idx=6&replacement_id=2',
         headers = test_client.client_auth_header,
         content_type='application.json')
     
     assert response.status_code == 204
-    assert test_booking.payment_method_id == 3
+    assert test_booking.payment_method_id == 2
     
-    deleted = PaymentMethods.query.filter_by(idx=1).one_or_none()
+    deleted = PaymentMethods.query.filter_by(idx=6).one_or_none()
     assert deleted.payment_id == None
     assert deleted.expiration == None
     
@@ -192,13 +204,13 @@ def test_payment_methods_delete(test_client, test_booking):
             payment method are canceled)
     """
     response = test_client.delete(
-        f'/payment/methods/{test_client.client_id}/?idx=3&replacement_id=0',
+        f'/payment/methods/{test_client.client_id}/?idx=2&replacement_id=0',
         headers = test_client.client_auth_header,
         content_type='application.json')
     
     assert response.status_code == 204
     assert test_booking.status == "Canceled"
     
-    deleted = PaymentMethods.query.filter_by(idx=3).one_or_none()
+    deleted = PaymentMethods.query.filter_by(idx=2).one_or_none()
     assert deleted.payment_id == None
     assert deleted.expiration == None
