@@ -741,12 +741,10 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
         client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
-        subject = f'{client_fullname} has just booked an appointment with you on Modo Bio!'
 
         send_email(
-            booking.practitioner.email,
-            subject,
             'appointment-booked-practitioner',
+            booking.practitioner.email,
             practitioner=booking.practitioner.firstname,
             client=client_fullname)
 
@@ -840,9 +838,8 @@ class TelehealthBookingsApi(BaseResource):
 
                     client_fullname = f'{current_user.firstname} {current_user.lastname}'
                     send_email(
-                        booking.practitioner.email,
-                        f'{client_fullname} cancelled an appointment',
                         'appointment-client-cancelled',
+                        booking.practitioner.email,
                         practitioner_firstname=booking.practitioner.firstname,
                         client_fullname=client_fullname)
 

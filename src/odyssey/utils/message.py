@@ -71,28 +71,28 @@ def email_domain_blacklisted(email_address: str):
         raise BadRequest(f'Email adresses from "{parts[1]}" are not allowed.')
 
 def send_email(
-    to: str,
-    subject: str,
     template: str,
+    to: str,
     sender: str='Modo Bio No Reply <no-reply@modobio.com>',
     _internal: str=None,
     **kwargs):
     """ Send an email.
 
-    Send an email using Amazon SES service. The body text is based on an email
-    template in '/templates'. Any optional keyword arguments passed in here are
-    used as replacement values when rendering the template.
+    Send an email using Amazon SES service. The body text is based on 3 email
+    templates in '/templates': template.html for HTML formatted emails,
+    template.txt for plain text formatted emails, and template-subject.txt for
+    the subject line. Any additional keyword arguments passed in here are
+    used as replacement values when rendering the templates.
 
     Parameters
     ----------
-    to : str
-        The email address of the recipient.
-
-    subject : str
-        The subject line of the email.
-
     template : str
         The filename (without extension) of the template to use for the email body.
+        "template.html", "template.txt", and "template-subject.txt" are expected
+        to exist in /templates.
+
+    to : str
+        The email address of the recipient.
 
     sender : str (optional)
         The email address of the sender, no-reply@modobio.com by default.
@@ -117,7 +117,6 @@ def send_email(
             raise BadRequest('Invalid internal address.')
 
         to = f'{_internal}@simulator.amazonses.com'
-        subject = f'AWS SES test email - {_internal}'
 
     domain = to.split('@')
     if len(domain) != 2:
@@ -135,6 +134,7 @@ def send_email(
 
     body_html = render_template(f'{template}.html', **kwargs)
     body_text = render_template(f'{template}.txt', **kwargs)
+    subject = render_template(f'{template}-subject.txt', **kwargs)
 
     destination = {'ToAddresses': [to]}
     message = {
