@@ -52,20 +52,21 @@ from odyssey.api.doctor.schemas import (
     MedicalGeneralInfoInputSchema,
     MedicalAllergiesInfoInputSchema,
     MedicalMedicationsInfoInputSchema,
-    MedicalHistorySchema, 
-    MedicalPhysicalExamSchema, 
+    MedicalHistorySchema,
+    MedicalPhysicalExamSchema,
     MedicalInstitutionsSchema,
     MedicalBloodTestsInputSchema,
     MedicalBloodTestSchema,
     MedicalBloodTestResultsOutputSchema,
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema,
-    MedicalExternalMREntrySchema, 
+    MedicalExternalMREntrySchema,
     MedicalExternalMRSchema,
     MedicalLookUpSTDOutputSchema,
     MedicalLookUpBloodPressureRangesOutputSchema,
     MedicalSocialHistoryOutputSchema,
-    MedicalSurgeriesSchema
+    MedicalSurgeriesSchema,
+    MedicalImagingOutputSchema,
 )
 from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
 from odyssey.api.staff.models import StaffRoles
@@ -1001,21 +1002,26 @@ class MedicalFamilyHist(BaseResource):
         db.session.commit()
         return payload
 
+
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalImagingEndpoint(BaseResource):
     __check_resource__ = False
     
     @token_auth.login_required(resources=('diagnostic_imaging',))
+    @responds(schema=MedicalImagingOutputSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Get all medical images for this user.
 
         Images are returned as URLs to the actual image on AWS S3.
+        Along with the first name, last name, and profile picture as urls of the reporters of images
+        Related by user id
         """
         self.check_user(user_id, user_type='client')
 
         med_images = (db.session.query(
-                MedicalImaging, User.firstname, User.lastname)
+                # Basically a right join, we still get all images for user but now also name and id of reporter
+                MedicalImaging, User.firstname, User.lastname, User.user_id)
             .filter(
                 MedicalImaging.user_id == user_id,
                 MedicalImaging.reporter_id == User.user_id)
@@ -1024,22 +1030,34 @@ class MedicalImagingEndpoint(BaseResource):
         fd = FileDownload(user_id)
 
         images = []
+        reporter_infos = {}
         for row in med_images:
-            med_image, firstname, lastname = row
-            med_image.reporter_firstname = firstname
-            med_image.reporter_lastname = lastname
+            med_image, firstname, lastname, reporter_id = row
             images.append(med_image)
+
+            # still need to check if already added reporter info to not call get_profile_pictures repeatedly
+            if reporter_id not in reporter_infos.keys():
+                their_pic = get_profile_pictures(reporter_id, True if reporter_id != user_id else False)
+                reporter_infos[reporter_id] = {
+                    'firstname': firstname,
+                    'lastname': lastname,
+                    'profile_pictures': their_pic,
+                }
 
         # Serialize here, because we want to replace image_path with URL,
         # but only in the response, not store it in the DB.
-        images = MedicalImagingSchema(many=True).dump(images)
+        images = [item.__dict__ for item in images]
         for img in images:
-            if 'image_path' in img and img['image_path']:
+            if img['image_path']:
                 img['image_path'] = fd.url(img['image_path'])
 
-        return images
+        return {
+            'reporter_infos': reporter_infos,
+            'images': images,
+            'total_images': len(images)
+        }
 
-    #Unable to use @accepts because the input files come in a form-data, not json.
+    # Unable to use @accepts because the input files come in a form-data, not json.
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('diagnostic_imaging',))
     @responds(status_code=201, api=ns)
     def post(self, user_id):

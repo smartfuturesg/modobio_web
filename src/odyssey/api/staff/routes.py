@@ -344,7 +344,7 @@ class StaffCloseAccountEndpoint(BaseResource):
         """
         user, user_login = token_auth.current_user()
         user_login.staff_account_closed = datetime.now()
-        user_login.staff_account_closed_reason = request.json['reason']
+        user_login.staff_account_closed_reason = request.parsed_obj['reason']
         db.session.commit()
         UserLogoutApi().post()
 
