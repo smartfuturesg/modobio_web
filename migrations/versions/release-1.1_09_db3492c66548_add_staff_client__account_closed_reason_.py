@@ -1,7 +1,7 @@
 """Add (staff|client)_account_closed_reason to UserLogin.
 
 Revision ID: db3492c66548
-Revises: f137d07c16ea
+Revises: 6c03f711be26
 Create Date: 2022-04-25 14:31:28.094232
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'db3492c66548'
-down_revision = 'f137d07c16ea'
+down_revision = '6c03f711be26'
 branch_labels = None
 depends_on = None
 
