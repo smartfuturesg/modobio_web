@@ -239,6 +239,19 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, missing=None)
 
+
+class ReporterInfoSchema(Schema):
+    firstname = fields.String()
+    lastname = fields.String()
+    profile_pictures = fields.Dict(keys=fields.String, values=fields.Url())
+
+
+class MedicalImagingOutputSchema(Schema):
+    reporter_infos = fields.Dict(keys=fields.Integer, values=fields.Nested(ReporterInfoSchema()))
+    images = fields.Nested(MedicalImagingSchema(many=True))
+    total_images = fields.Integer()
+
+
 class MedicalBloodTestSchema(Schema):
     test_id = fields.Integer()
     user_id = fields.Integer()

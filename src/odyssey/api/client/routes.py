@@ -1766,10 +1766,6 @@ class ClientMobileSettingsApi(BaseResource):
 
         if request.parsed_obj['notification_type_ids']:
             ntypes = set(request.parsed_obj['notification_type_ids'])
-        else:
-            # TODO: else-branch deprecated
-            ntype_ids = request.parsed_obj['push_notification_type_ids']
-            ntypes = set((n.notification_type_id for n in ntype_ids))
 
         lu_ntypes = set(
             db.session.execute(
@@ -1799,7 +1795,7 @@ class ClientMobileSettingsApi(BaseResource):
         gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
         # TODO: push_notification_types deprecated
-        push_notification_types = ClientNotificationSettings.query.filter_by(user_id=user_id).all()
+        #notification_types = ClientNotificationSettings.query.filter_by(user_id=user_id).all()
 
         notification_types = (
             db.session.execute(
@@ -1811,7 +1807,6 @@ class ClientMobileSettingsApi(BaseResource):
 
         return {
             'general_settings': gen_settings,
-            'push_notification_type_ids': push_notification_types,
             'notification_type_ids': sorted(notification_types)}
 
     @token_auth.login_required(user_type=('client',))
@@ -1831,10 +1826,6 @@ class ClientMobileSettingsApi(BaseResource):
 
         if request.parsed_obj['notification_type_ids']:
             ntypes = set(request.parsed_obj['notification_type_ids'])
-        else:
-            # TODO: else-branch deprecated
-            ntype_ids = request.parsed_obj['push_notification_type_ids']
-            ntypes = set((n.notification_type_id for n in ntype_ids))
 
         lu_ntypes = set(
             db.session.execute(

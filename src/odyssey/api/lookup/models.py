@@ -586,26 +586,6 @@ class LookupNotifications(BaseModel):
     :type: str, max length 50
     """
 
-    background_color = db.Column(db.String(50))
-    """
-    Background color used for this notification type.
-    Color names are from the list of 140 colors supported by all browsers.
-    See: https://htmlcolorcodes.com/color-names/
-
-    :type: str, max length 50
-    """
-
-    symbol_color = db.Column(db.String(50))
-    """
-    Symbol color used for this notification type.
-    Color names are from the list of 140 colors supported by all browsers.
-    `original` means do not apply any color to the svg.
-    See: https://htmlcolorcodes.com/color-names/
-
-    :type: str, max length 50
-    """
-
-
 class LookupClinicalCareTeamResources(BaseModel):
     """
     Stores all the database tables which can be accessed by a clinical care team.
