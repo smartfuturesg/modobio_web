@@ -5,7 +5,7 @@ from odyssey.api.client.models import ClientMobileSettings, ClientNotificationSe
 from tests.functional.client.data import clients_mobile_settings
 
 def test_post_client_mobile_settings(test_client):
-    # Test regular
+    # Test regular POST succeeds
     response = test_client.post(
         f'/client/mobile-settings/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -14,7 +14,7 @@ def test_post_client_mobile_settings(test_client):
 
     assert response.status_code == 201
 
-    # Double POST should fail
+    # Test that double POST fails
     response = test_client.post(
         f'/client/mobile-settings/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -41,7 +41,7 @@ def test_post_client_mobile_settings(test_client):
         test_client.db.session.delete(notif)
     test_client.db.session.commit()
 
-    # Test invalid notification type
+    # Test that invalid notification type id fails
     data = clients_mobile_settings.copy()
     data['notification_type_ids'] = [1, 9999]
 
@@ -53,10 +53,8 @@ def test_post_client_mobile_settings(test_client):
 
     assert response.status_code == 400
 
-    # TODO: deprecated
-    # Test old push_notification_type_ids
+    # New post for next text
     data = clients_mobile_settings.copy()
-    data.pop('notification_type_ids')
 
     response = test_client.post(
         f'/client/mobile-settings/{test_client.client_id}/',
@@ -67,6 +65,7 @@ def test_post_client_mobile_settings(test_client):
     assert response.status_code == 201
 
 def test_get_client_mobile_settings(test_client):
+    # Get mobile settings and test for success and test that notification type ids and date format match
     response = test_client.get(
         f'/client/mobile-settings/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -79,7 +78,7 @@ def test_get_client_mobile_settings(test_client):
             clients_mobile_settings['notification_type_ids'])
 
 def test_put_client_mobile_settings(test_client):
-    # Update settings
+    # Update mobile settings
     data = clients_mobile_settings.copy()
     data['general_settings']['is_right_handed'] = False
     data['notification_type_ids'] = [1, 3, 9]
@@ -92,6 +91,7 @@ def test_put_client_mobile_settings(test_client):
 
     assert response.status_code == 201
 
+    # Get settings and test success and test that is_right_handed and notification type ids match
     response = test_client.get(
         f'/client/mobile-settings/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -101,35 +101,7 @@ def test_put_client_mobile_settings(test_client):
     assert response.json['general_settings']['is_right_handed'] == False
     assert response.json['notification_type_ids'] == [1, 3, 9]
 
-    # Update settings old push_notification_type_ids
-    # TODO: deprecated
-    push_ids = [
-        {'notification_type_id': 2},
-        {'notification_type_id': 4}]
-    data.pop('notification_type_ids')
-    data['push_notification_type_ids'] = push_ids
-
-    response = test_client.put(
-        f'/client/mobile-settings/{test_client.client_id}/',
-        data=dumps(data),
-        headers=test_client.client_auth_header,
-        content_type='application/json')
-
-    assert response.status_code == 201
-
-    response = test_client.get(
-        f'/client/mobile-settings/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        content_type='application/json')
-
-    assert response.status_code == 200
-    assert response.json['notification_type_ids'] == [2, 4]
-    # Round-trip adds user_id
-    for p in push_ids:
-        p['user_id'] = test_client.client_id
-    assert response.json['push_notification_type_ids'] == push_ids
-
-    # Invalid date format should fail
+    # Test that invalid date format fails
     clients_mobile_settings['general_settings']['date_format'] = 'notadateformat'
 
     response = test_client.put(
