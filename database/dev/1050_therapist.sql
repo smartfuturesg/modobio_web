@@ -14,10 +14,10 @@ BEGIN
         biological_sex_male,
         dob)
     VALUES (
-        'pt@modobio.com',
+        'psych@modobio.com',
         'FG86DG4Q3J12',
-        'Physical',
-        'Therapist',
+        'Wendy',
+        'Rhodes',
         true,
 		true,
         false,
@@ -37,6 +37,6 @@ BEGIN
     VALUES (_user_id, '2021-01-01');
 
     INSERT INTO "StaffRoles" (user_id, role)
-    VALUES (_user_id, 'physical_therapist');
+    VALUES (_user_id, 'therapist');
 END;
 $$ LANGUAGE plpgsql;

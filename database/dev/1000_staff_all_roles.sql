@@ -18,8 +18,8 @@ BEGIN
     VALUES (
         'name@modobio.com',
         'XFB1SN3GM512',
-        'Firstname',
-        'Lastname',
+        'First',
+        'Last',
         true,
 		true,
         false,
@@ -44,9 +44,9 @@ BEGIN
         (_user_id, 'staff_admin'),
         (_user_id, 'client_services'),
         (_user_id, 'medical_doctor'),
-        (_user_id, 'nutritionist'),
+        (_user_id, 'therapist'),
         (_user_id, 'trainer'),
-        (_user_id, 'community_manager');
+        (_user_id, 'dietitian');
 
     -- NOTE: StaffOperationalTerritories is obsolete, but will be kept
     -- until we can safely remove it. PractitionerCredentials will take
