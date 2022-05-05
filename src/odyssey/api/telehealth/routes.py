@@ -26,7 +26,7 @@ from odyssey.api.lookup.models import (
     LookupVisitReasons,
 )
 from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupRoles
-from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -153,6 +153,19 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # only practitioners may initiate a call
         if not meeting_room:
             if current_user.user_id == booking.staff_user_id:
+                #check that the booking has been paid for and the payment has not been voided or refunded
+                payment = PaymentHistory.query.filter_by(idx=booking.payment_history_id).one_or_none()
+                if payment:
+                    refund = PaymentRefunds.query.filter_by(payment_id=payment.idx).one_or_none()
+                    if payment.voided or refund:
+                        raise BadRequest('Telehealth call cannot be started because it has not been paid for.')    
+                else:
+                    raise BadRequest('Telehealth call cannot be started because it has not been paid for.')
+                
+                #check that booking has been accepted
+                if booking.status != 'Accepted':
+                    raise BadRequest('Telehealth call cannot be started because its status is not \'accepted\'')
+                
                 meeting_room = TelehealthMeetingRooms(
                     booking_id=booking_id,
                     staff_user_id=booking.staff_user_id,
