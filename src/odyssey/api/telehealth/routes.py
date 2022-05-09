@@ -163,8 +163,8 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                     raise BadRequest('Telehealth call cannot be started because it has not been paid for.')
                 
                 #check that booking has been accepted
-                if booking.status != 'Accepted':
-                    raise BadRequest('Telehealth call cannot be started because its status is not \'accepted\'')
+                if booking.status not in ('Accepted', 'In Progress'):
+                    raise BadRequest('Telehealth call cannot be started because its status is not \'Accepted\' or \'In Progress\'')
                 
                 meeting_room = TelehealthMeetingRooms(
                     booking_id=booking_id,

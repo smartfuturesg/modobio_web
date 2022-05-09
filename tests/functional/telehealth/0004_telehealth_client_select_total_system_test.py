@@ -390,7 +390,7 @@ def test_booking_start_fail(test_client, booking_function_scope):
 
     assert response.status_code == 400
     
-    # change booking status to something other than accepted
+    # change booking status to something other than accepted or in progress
     booking_function_scope.status = 'Pending'
     test_client.db.session.flush()
     
