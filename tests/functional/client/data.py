@@ -163,10 +163,6 @@ clients_mobile_settings = {
         'use_24_hour_clock': True,
         'date_format': '%d-%b-%Y',
         'include_timezone': True},
-    'push_notification_type_ids': [
-        {'notification_type_id': 3},
-        {'notification_type_id': 11},
-        {'notification_type_id': 16}],
     'notification_type_ids': [3, 11, 16]}
 
 clients_transactions = [
