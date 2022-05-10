@@ -14,10 +14,10 @@ BEGIN
         biological_sex_male,
         dob)
     VALUES (
-        'doctor@modobio.com',
+        'doc@modobio.com',
         'KW99TSVWP812',
-        'Doctor',
-        'User',
+        'Jonathan',
+        'Crane',
         true,
 		true,
         false,
