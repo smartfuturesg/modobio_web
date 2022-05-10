@@ -400,7 +400,10 @@ def booking_function_scope(test_client):
     test_client.db.session.delete(booking)
     test_client.db.session.flush()
     
+    
+    test_client.db.session.delete(payment)
     test_client.db.session.delete(pm)
+
     test_client.db.session.commit()
     try:
         twilio.delete_conversation(conversation_sid)
