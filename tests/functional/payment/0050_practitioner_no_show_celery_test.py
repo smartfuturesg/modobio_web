@@ -7,8 +7,6 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.tasks.periodic import detect_practitioner_no_show
 from odyssey.utils.misc import get_time_index
 
-from .data import test_booking, test_payment_method
-
 def test_no_show_scan(test_client, test_booking):
     #set booking to 10 mins ago
     booking_id = test_booking.idx
