@@ -14,10 +14,10 @@ BEGIN
         biological_sex_male,
         dob)
     VALUES (
-        'trainer@modobio.com',
+        'train@modobio.com',
         'QE6RS1875312',
-        'Trainer',
-        'User',
+        'White',
+        'Goodman',
         true,
 		true,
         false,
