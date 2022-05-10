@@ -74,6 +74,7 @@ def test_get_booking_by_order(test_client, booking_function_scope):
     test_client.db.session.add(new_chatroom)
     test_client.db.session.commit()
 
+    # order by date ascending
     response = test_client.get(
         f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&order=date_asc",
         headers=test_client.staff_auth_header,
@@ -81,12 +82,22 @@ def test_get_booking_by_order(test_client, booking_function_scope):
 
     bookings_ascending = [booking['target_date_utc'] for booking in response.json.get('bookings')]
 
+    # order by date descending
     response = test_client.get(
         f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&order=date_desc",
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
     bookings_descending = [booking['target_date_utc'] for booking in response.json.get('bookings')]
+
+
+    # order by most recent booking
+    response = test_client.get(
+        f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&order=date_recent",
+        headers=test_client.staff_auth_header,
+        content_type='application/json')
+    
+    bookings_recent = [booking['target_date_utc'] for booking in response.json.get('bookings')]
     
     # tear down the extra booking
     for status in new_booking.status_history:
