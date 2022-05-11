@@ -109,6 +109,7 @@ def test_get_booking_by_order(test_client, booking_function_scope):
   
     assert response.status_code == 200
     assert bookings_ascending == bookings_descending[::-1]
+    assert bookings_ascending == bookings_recent
 
 
 
