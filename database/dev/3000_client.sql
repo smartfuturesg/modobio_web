@@ -18,8 +18,8 @@ BEGIN
     VALUES (
         'client@modobio.com',
         'TC12JASDFF12',
-        'Test',
-        'Client',
+        'Bernie',
+        'Focker',
         false,
 		false,
         true,

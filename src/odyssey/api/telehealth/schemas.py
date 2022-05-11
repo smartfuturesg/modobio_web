@@ -160,6 +160,13 @@ class TelehealthStaffAvailabilityInputSchema(Schema):
     start_time = fields.Time()
     end_time = fields.Time()
     
+class TelehealthStaffAvailabilityExceptionsPOSTSchema(Schema):
+    is_busy = fields.Boolean()
+    label = fields.String()
+    exception_date = fields.Date()
+    exception_start_time = fields.Time()
+    exception_end_time = fields.Time()
+    
 class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthStaffAvailabilityExceptions
@@ -167,8 +174,8 @@ class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('idx',)
         
     user_id = fields.Integer(dump_only=True)
-    exception_booking_window_id_start_time = fields.Integer()
-    exception_booking_window_id_end_time = fields.Integer()
+    exception_start_time = fields.Time(dump_only=True)
+    exception_end_time = fields.Time(dump_only=True)
         
     @post_load
     def make_object(self, data, **kwargs):

@@ -1,3 +1,4 @@
+from flask_sqlalchemy import Model
 from bson import ObjectId
 from datetime import datetime, time, timedelta
 from dateutil import tz
@@ -7,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import secrets
+import copy
 
 from datetime import datetime, time, timedelta, timezone
 from dateutil import tz
@@ -52,6 +54,7 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilityOutputSchema,
     TelehealthStaffAvailabilityConflictSchema,
     TelehealthStaffAvailabilityExceptionsSchema,
+    TelehealthStaffAvailabilityExceptionsPOSTSchema,  
     TelehealthStaffAvailabilityExceptionsDeleteSchema,
     TelehealthStaffAvailabilityExceptionsOutputSchema,
     TelehealthBookingDetailsSchema,
@@ -1344,7 +1347,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     __check_resource__ = False
     
     @token_auth.login_required(user_type=('staff_self',))
-    @accepts(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns)
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsPOSTSchema(many=True), api=ns)
     @responds(schema=TelehealthStaffAvailabilityExceptionsOutputSchema, api=ns, status_code=201)
     def post(self, user_id):
         """
@@ -1357,19 +1360,35 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         conflicts = []
         exceptions = []
         for exception in request.parsed_obj:
-            if exception.exception_booking_window_id_start_time >= exception.exception_booking_window_id_end_time:
+            if exception['exception_start_time'] >= exception['exception_end_time']:
                 raise BadRequest('Exception start time must be before exception end time.')
-            elif current_date + relativedelta(months=+6) < exception.exception_date:
+            elif current_date + relativedelta(months=+6) < exception['exception_date']:
                 raise BadRequest('Exceptions cannot be set more than 6 months in the future.')
-            elif current_date > exception.exception_date:
+            elif current_date > exception['exception_date']:
                 raise BadRequest('Exceptions cannot be in the past.')
             else:
-                exception.user_id = user_id
-                db.session.add(exception)
+                exception['user_id'] = user_id
+                exception['exception_booking_window_id_start_time'] = LookupBookingTimeIncrements.query \
+                    .filter(
+                        LookupBookingTimeIncrements.start_time <= exception['exception_start_time'],
+                        LookupBookingTimeIncrements.end_time > exception['exception_start_time']
+                ).one_or_none().idx
+                exception['exception_booking_window_id_end_time'] = LookupBookingTimeIncrements.query \
+                    .filter(
+                        LookupBookingTimeIncrements.start_time < exception['exception_end_time'],
+                        LookupBookingTimeIncrements.end_time >= exception['exception_end_time']
+                ).one_or_none().idx
                 exceptions.append(exception)
                 
+                #remove time object that does not get stored, only the fkey to time increments is stored
+                #copy is made so we don't have to recalculate the time when returning exceptions at the end
+                model = copy.deepcopy(exception)
+                del model['exception_start_time']
+                del model['exception_end_time']
+                db.session.add(TelehealthStaffAvailabilityExceptions(**model))
+                
                 #detect if conflicts exist with this exception
-                if exception.is_busy:
+                if exception['is_busy']:
                     bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(
                         or_(
                             TelehealthBookings.status == 'Accepted',
@@ -1378,20 +1397,20 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
                         .filter(
                             or_(
                                 and_(
-                                    TelehealthBookings.booking_window_id_start_time_utc >= exception.exception_booking_window_id_start_time,
-                                    TelehealthBookings.booking_window_id_start_time_utc < exception.exception_booking_window_id_end_time
+                                    TelehealthBookings.booking_window_id_start_time_utc >= exception['exception_booking_window_id_start_time'],
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception['exception_booking_window_id_end_time']
                                 ),
                                 and_(
-                                    TelehealthBookings.booking_window_id_end_time_utc < exception.exception_booking_window_id_start_time,
-                                    TelehealthBookings.booking_window_id_end_time_utc >= exception.exception_booking_window_id_end_time
+                                    TelehealthBookings.booking_window_id_end_time_utc < exception['exception_booking_window_id_start_time'],
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception['exception_booking_window_id_end_time']
                                 ),
                                 and_(
-                                    TelehealthBookings.booking_window_id_start_time_utc <= exception.exception_booking_window_id_start_time,
-                                    TelehealthBookings.booking_window_id_end_time_utc > exception.exception_booking_window_id_start_time
+                                    TelehealthBookings.booking_window_id_start_time_utc <= exception['exception_booking_window_id_start_time'],
+                                    TelehealthBookings.booking_window_id_end_time_utc > exception['exception_booking_window_id_start_time']
                                 ),
                                 and_(
-                                    TelehealthBookings.booking_window_id_start_time_utc < exception.exception_booking_window_id_end_time,
-                                    TelehealthBookings.booking_window_id_end_time_utc >= exception.exception_booking_window_id_end_time
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception['exception_booking_window_id_end_time'],
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception['exception_booking_window_id_end_time']
                                 )
                             )
                         ).all()
@@ -1431,7 +1450,19 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         """
         check_user_existence(user_id, user_type='staff')
         
-        return TelehealthStaffAvailabilityExceptions.query.all()
+        exceptions = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=user_id).all()
+        formatted_exceptions = []
+        for exception in exceptions:
+            #get the real time representation from the id
+            exception = exception.__dict__
+            del exception['_sa_instance_state']
+            exception['exception_start_time'] = LookupBookingTimeIncrements.query \
+                .filter_by(idx=exception['exception_booking_window_id_start_time']).one_or_none().start_time
+            exception['exception_end_time'] = LookupBookingTimeIncrements.query \
+                .filter_by(idx=exception['exception_booking_window_id_end_time']).one_or_none().end_time  
+            formatted_exceptions.append(exception)          
+        
+        return formatted_exceptions
     
     @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=TelehealthStaffAvailabilityExceptionsDeleteSchema(many=True), api=ns)

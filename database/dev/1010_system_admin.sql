@@ -14,10 +14,10 @@ BEGIN
         biological_sex_male,
         dob)
     VALUES (
-        'admin@modobio.com',
+        'sys@modobio.com',
         'VFRGH3YSM412',
-        'System',
-        'Admin',
+        'Neo',
+        'Anderson',
         true,
 		true,
         false,
