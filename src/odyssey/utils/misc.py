@@ -50,7 +50,7 @@ from odyssey.api.user.models import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVER_TIME
 from odyssey.utils.files import FileDownload
-from odyssey.utils.message import send_email, send_email_update_email, send_email_verify_email
+from odyssey.utils.message import send_email
 from odyssey.utils import search
 
 logger = logging.getLogger(__name__)
@@ -654,20 +654,22 @@ class EmailVerification():
         # send email to the user
         if updating:
             #send update email if user already had a verified email
-            link = url_for(
-                'api.user_user_pending_email_verifications_token_api',
-                token=token,
-                _external=True)
-
-            send_email(
-                'email-verify',
-                user.email,
-                name=user.firstname,
-                verification_link=link,
-                verification_code=code)
+            template = 'email-update'
         else:
-            #send time time verify email is user did not have an email on file
-            send_email_verify_email(user, token, code)
+            #send first time verify email if user did not have an email on file
+            template = 'email-verify'
+        
+        link = url_for(
+            'api.user_user_pending_email_verifications_token_api',
+            token=token,
+            _external=True)
+        
+        send_email(
+            template,
+            user.email,
+            name=user.firstname,
+            verification_link=link,
+            verification_code=code)
 
         db.session.commit()
 
