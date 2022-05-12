@@ -245,7 +245,7 @@ class NewStaffUser(BaseResource):
 
         # respond with verification code in dev
         if current_app.config['DEV'] and verify_email:
-            payload['email_verification_code'] = code
+            payload['email_verification_code'] = email_verification_data.get('code')
 
         return payload
 
