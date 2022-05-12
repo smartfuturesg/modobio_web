@@ -17,7 +17,7 @@ from dateutil.relativedelta import relativedelta
 from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select, or_, and_
+from sqlalchemy import select, or_, and_, func, TIMESTAMP, cast
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -78,7 +78,7 @@ from odyssey.utils.constants import (
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE
 )
-from odyssey.utils.message import PushNotification, PushNotificationType
+from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
@@ -408,7 +408,7 @@ class TelehealthBookingsApi(BaseResource):
                 'page': 'pagination index',
                 'per_page': 'results per page',
                 'target_date': 'target date for booking in UTC',
-                'date_ascending': 'order by date and time ascending'})
+                'order': 'Sorting order. default is most recent booking. options: date_asc, date_desc, date_recent '})
     def get(self):
         """
         Returns the list of bookings for clients and/or staff
@@ -422,16 +422,16 @@ class TelehealthBookingsApi(BaseResource):
         per_page = request.args.get('per_page', 20, type=int)
         status = request.args.getlist('status', type=str)
         target_date = request.args.get('target_date', type=str)
-        booking_start_time_id =request.args.get('booking_start_time_id', type=int)
-        date_ascending = request.args.get('date_ascending', False, type=bool)
-
+        booking_start_time_id = request.args.get('booking_start_time_id', type=int)
+        order = request.args.get('order', 'date_recent', type=str) # date_asc, date_desc, date_recent
+        
         ###
         # There are 5 cases to decide what to return based on booking participants and if a booking_id provided:
         # 1. booking_id is provided: other parameters are ignored, only that booking will be returned to the participating client/staff or any cs
         # 2. No parameter provided: an error will be raised
-        # 3. Only staff_user_id provided: all bookings for the staff user will return if loggedin user = staff_user_id or cs
-        # 4. Only client_user_id provided: all bookings for the client user will return if loggedin user = client_user_id or cs
-        # 5. Both client_user_id and staff_user_id provided: all bookings with both participats return if loggedin user = staff_user_id or client_user_id or cs
+        # 3. Only staff_user_id provided: all bookings for the staff user will return if logged-in user = staff_user_id or cs
+        # 4. Only client_user_id provided: all bookings for the client user will return if logged-in user = client_user_id or cs
+        # 5. Both client_user_id and staff_user_id provided: all bookings with both participants return if logged-in user = staff_user_id or client_user_id or cs
         # client_user_id | staff_user_id | booking_id
         #       -        |      -        |      T
         #       F        |      F        |      F
@@ -445,35 +445,38 @@ class TelehealthBookingsApi(BaseResource):
         #    booking start time id
         ###
 
+        query_filter = {}
+
         if not (client_user_id or staff_user_id or booking_id):
             # 2. No parameter provided, raise error
             raise BadRequest('Must include at least "client_user_id", "staff_user_id", '
                              'or "booking_id".')
         elif booking_id:
-            # 1. booking_id provided, any other parameter is ignored, only returns booking to participants or cs
-            query_filter = {'idx': booking_id}
+            # 1. booking_id provided, any other parameter is ignored, only returns booking to participants or client services
+            query_filter.update({'idx': booking_id}) 
 
         elif staff_user_id and not client_user_id:
             # 3. only staff_user_id provided, return all bookings for such user_id if logged-in user is same user or client services
             if not (current_user.user_id == staff_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-            query_filter = {'staff_user_id': staff_user_id}
+            query_filter.update({'staff_user_id': staff_user_id})
         
         elif client_user_id and not staff_user_id:
-            #4. only client_user_id provided, return all bookings for such user_id if loggedin user is same user or cs
+            #4. only client_user_id provided, return all bookings for such user_id if logged-in user is same user or client services
             if not (current_user.user_id == client_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-            query_filter = {'client_user_id': client_user_id}
+        
+            query_filter.update({'client_user_id': client_user_id})        
        
         else:
-            #5. both client and user id's are provided, return bookings where both exist if loggedin is either or cs
+            #5. both client and user id's are provided, return bookings where both exist if logged in is either or client services
             if not (current_user.user_id == client_user_id or
                     current_user.user_id == staff_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-            query_filter = {'staff_user_id': staff_user_id, 'client_user_id': client_user_id}
+            query_filter.update({'staff_user_id': staff_user_id, 'client_user_id': client_user_id})
 
         # apply datetime filters
         if target_date:
@@ -481,15 +484,21 @@ class TelehealthBookingsApi(BaseResource):
         if booking_start_time_id:
             query_filter.update({'booking_window_id_start_time_utc': booking_start_time_id})
 
-        # grab the bookings using the filter generated above
-        if date_ascending:
+        # Order the bookings query
+        if order == 'date_asc':
             bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
                 order_by(TelehealthBookings.target_date_utc.asc(), TelehealthBookings.booking_window_id_start_time_utc.asc())
-        else:
+        elif order == 'date_desc':
             bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
                 order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc())
-        
+        else:
+            # default case is to sort by most recent date (date_recent)
+            bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
+                order_by( func.abs((func.date_part('epoch', cast(TelehealthBookings.target_date_utc, TIMESTAMP)) 
+                            - func.date_part('epoch', cast(func.current_date(), TIMESTAMP) ))).asc())
+
         # apply booking status filter
+        # done here to take advantage of in_ operator
         if status:
             bookings_query = bookings_query.filter(TelehealthBookings.status.in_(status))
 
@@ -518,7 +527,7 @@ class TelehealthBookingsApi(BaseResource):
             # bookings stored in staff timezone
             practitioner['timezone'] = booking.staff_timezone
 
-            # return the practioner profile_picture width=128 if the logged in user is the client involved or client services
+            # return the practitioner profile_picture width=128 if the logged in user is the client involved or client services
             if (current_user.user_id == booking.client_user_id or
                 ('client_services' in [role.role for role in current_user.roles])):
                 practitioner['profile_picture'] = None
@@ -635,6 +644,7 @@ class TelehealthBookingsApi(BaseResource):
         # only booking_window_id_start_time and target_date
 
         client_user_id = request.args.get('client_user_id', type=int)
+        client_scheduled = User.query.filter_by(user_id=client_user_id).one_or_none()
         if not client_user_id:
             raise BadRequest('Missing client ID.')
         # Check client existence
@@ -795,6 +805,14 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
+        client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
+
+        send_email(
+            'appointment-booked-practitioner',
+            booking.practitioner.email,
+            practitioner=booking.practitioner.firstname,
+            client=client_fullname)
+
         payload = {
             'all_bookings': 1,
             'twilio_token': token,
@@ -872,9 +890,10 @@ class TelehealthBookingsApi(BaseResource):
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
-                    cancel_telehealth_appointment(booking, reason="Practitioner Cancellation", refund=True)
-                else:
-                    cancel_telehealth_appointment(booking, refund=False)                
+                    cancel_telehealth_appointment(
+                        booking,
+                        reason="Practitioner Cancellation",
+                        refund=True)
 
         booking.update(data)
         db.session.commit()

@@ -1,0 +1,10 @@
+{% extends "modo-bio-automated-email-template-body.txt" %}
+{% block body %}
+{{ fullname }} is creating a team of health and wellness providers to help them take control of their health. Along with friends and family to help them stay motivated.
+
+They've added you to their team! Being on a team is FREE. 
+
+Download the app at https://apps.apple.com/us/app/modo-bio/id1561021789 and start helping {{ firstname }} achieve their health goals.
+
+-The Modo Bio Team 
+{% endblock %}
