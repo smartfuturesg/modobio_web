@@ -1,0 +1,10 @@
+{% extends "modo-bio-automated-email-template-body.txt" %}
+{% block body %}
+Hello {{ practitioner_firstname }},
+
+{{ client_fullname }} has just cancelled an appointment with you!
+
+Please log on to your Modo Bio account using https://providers.modobio.com to see the details of the canceled appointment.
+
+Please check that this email was sent from no-reply@modobio.com.
+{% endblock %}

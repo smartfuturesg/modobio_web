@@ -78,7 +78,7 @@ from odyssey.utils.constants import (
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE
 )
-from odyssey.utils.message import PushNotification, PushNotificationType
+from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
@@ -644,6 +644,7 @@ class TelehealthBookingsApi(BaseResource):
         # only booking_window_id_start_time and target_date
 
         client_user_id = request.args.get('client_user_id', type=int)
+        client_scheduled = User.query.filter_by(user_id=client_user_id).one_or_none()
         if not client_user_id:
             raise BadRequest('Missing client ID.')
         # Check client existence
@@ -804,6 +805,14 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
+        client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
+
+        send_email(
+            'appointment-booked-practitioner',
+            booking.practitioner.email,
+            practitioner=booking.practitioner.firstname,
+            client=client_fullname)
+
         payload = {
             'all_bookings': 1,
             'twilio_token': token,
@@ -881,9 +890,10 @@ class TelehealthBookingsApi(BaseResource):
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
                 if current_user.user_id == booking.staff_user_id:
-                    cancel_telehealth_appointment(booking, reason="Practitioner Cancellation", refund=True)
-                else:
-                    cancel_telehealth_appointment(booking, refund=False)                
+                    cancel_telehealth_appointment(
+                        booking,
+                        reason="Practitioner Cancellation",
+                        refund=True)
 
         booking.update(data)
         db.session.commit()

@@ -9,14 +9,13 @@ import jwt
 import requests
 import json
 
-from flask import current_app, g, request, redirect
+from flask import current_app, g, request, redirect, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from pytz import utc
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequest, Unauthorized
-
 
 from odyssey import db
 from odyssey.api.client.models import ClientFertility
@@ -59,11 +58,7 @@ from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
 from odyssey.utils import search
 from odyssey import db
-from odyssey.utils.message import (
-    email_domain_blacklisted,
-    send_email_password_reset,
-    send_email_delete_account,
-    send_email_verify_email)
+from odyssey.utils.message import email_domain_blacklisted, send_email
 from odyssey.utils.misc import (
     EmailVerification,
     check_user_existence,
@@ -269,7 +264,10 @@ class NewStaffUser(BaseResource):
                 user.was_staff = True
                 user.update(user_info)
 
-                verify_email = False
+                if user.email_verified:
+                    verify_email = False
+                else:
+                    verify_email = True
         else:
             # user account does not yet exist for this email
             # require password
@@ -308,7 +306,6 @@ class NewStaffUser(BaseResource):
         staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
         db.session.add(staff_profile)
 
-
         # create entries for role assignments 
         for role in staff_info.get('access_roles', []):
             db.session.add(StaffRolesSchema().load(
@@ -327,7 +324,7 @@ class NewStaffUser(BaseResource):
 
         # respond with verification code in dev
         if current_app.config['DEV'] and verify_email:
-            payload['email_verification_code'] = email_verification_data.get('code')
+            payload['email_verification_code'] = code
 
         return payload
 
@@ -425,7 +422,10 @@ class NewClientUser(BaseResource):
                 user.update(user_info)
                 #Create client account for existing staff member
                 user.is_client = True
-                verify_email = False
+                if user.email_verified:
+                    verify_email = False
+                else:
+                    verify_email = True
         else:
             # user account does not yet exist for this email
             password=user_info.get('password', None)
@@ -490,11 +490,11 @@ class NewClientUser(BaseResource):
                 fertility.user_id = user.user_id
                 db.session.add(fertility)
 
-        #Generate access and refresh tokens
+        # Generate access and refresh tokens
         access_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='access')
         refresh_token = UserLogin.generate_token(user_type='client', user_id=user.user_id, token_type='refresh')
         
-        #Add refresh token to db
+        # Add refresh token to db
         db.session.add(UserTokenHistory(user_id=user.user_id, 
                                         refresh_token=refresh_token,
                                         event='login',
@@ -509,6 +509,7 @@ class NewClientUser(BaseResource):
             payload['email_verification_code'] = email_verification_data.get('code')
 
         return payload
+
 
 @ns.route('/password/forgot-password/recovery-link/')
 class PasswordResetEmail(BaseResource):
@@ -579,17 +580,22 @@ class PasswordResetEmail(BaseResource):
         url_scheme = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}'
 
         secret = current_app.config['SECRET_KEY']
-        password_reset_token = jwt.encode({'exp': datetime.utcnow()+timedelta(minutes = 15), 
-                                  'sid': user.user_id}, 
-                                  secret, 
-                                  algorithm='HS256')       
-                
-        send_email_password_reset(user, password_reset_token, url_scheme)
+        token = {
+            'exp': datetime.utcnow() + timedelta(minutes=15),
+            'sid': user.user_id}
+        password_reset_token = jwt.encode(token, secret, algorithm='HS256')
+
+        send_email(
+            'password-reset',
+            user.email,
+            name=user.firstname,
+            email=user.email,
+            reset_password_url=PASSWORD_RESET_URL.format(url_scheme, password_reset_token))
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.config['DEV']:
             res['token'] = password_reset_token
-            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme,password_reset_token)
+            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme, password_reset_token)
 
         return res
         
@@ -688,6 +694,7 @@ class RefreshToken(BaseResource):
 
 @ns.route('/registration-portal/verify')
 @ns.doc(params={'portal_id': "registration portal id"})
+@ns.deprecated
 class VerifyPortalId(BaseResource):
     """
     Verify registration portal id and update user type
@@ -765,6 +772,8 @@ class UserSubscriptionApi(BaseResource):
             check_staff_existence(user_id)
         else:
             check_client_existence(user_id)
+        
+        user, _ = token_auth.current_user()
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -798,6 +807,11 @@ class UserSubscriptionApi(BaseResource):
         else:
             prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
     
+            # if this subscription is following an unsubscribed status: 
+            #   either first time subscription or first subscription ever
+            # Send a Welcome email
+            send_email('subscription-confirm', user.email, firstname=user.firstname)
+
         # make a new subscription entry
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
@@ -920,7 +934,7 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
 
         Verifying an email requires both a valid code that the client retrieved
         from their email and a valid token stored on the modobio side. The token
-        has a short lifetime so the email varification process must happen within
+        has a short lifetime so the email verification process must happen within
         that time. 
 
         Parameters
@@ -953,21 +967,24 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
             raise Unauthorized('Email verification failed.')
 
         # create a new token and code for this user
-        token = UserPendingEmailVerifications.generate_token(user_id)
-        code = UserPendingEmailVerifications.generate_code()
-
-        verification.update(
-            {
-                'token': token,
-                'code': code
-            }
-        )
+        verification.token = UserPendingEmailVerifications.generate_token(user_id)
+        verification.code = UserPendingEmailVerifications.generate_code()
 
         db.session.commit()
 
-        recipient = User.query.filter_by(user_id=user_id).one_or_none()
+        user = User.query.filter_by(user_id=user_id).one_or_none()
 
-        send_email_verify_email(recipient, token, code)
+        link = url_for(
+            '.user_user_pending_email_verifications_token_api',
+            token=verification.token,
+            _external=True)
+
+        send_email(
+            'email-verify',
+            user.email,
+            name=user.firstname,
+            verification_link=link,
+            verification_code=verification.code)
 
         
 @ns.route('/legal-docs/<int:user_id>/')
