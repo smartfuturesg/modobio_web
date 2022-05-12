@@ -4,7 +4,7 @@ from odyssey import db
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentHistory
 
-from .data import payment_refund_data, test_booking
+from .data import payment_refund_data
 
 from odyssey.tasks.periodic import find_chargable_bookings
 from odyssey.tasks.tasks import charge_telehealth_appointment
