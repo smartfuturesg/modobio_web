@@ -1,0 +1,6 @@
+{% extends "modo-bio-automated-email-template-body.html" %}
+{% block body %}
+The the account with email {{ user_email }} has been deleted.
+
+If you have not requested to delete your account, please contact your admin.
+{% endblock %}

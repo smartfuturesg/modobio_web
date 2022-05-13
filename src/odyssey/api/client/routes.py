@@ -64,8 +64,14 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
 from odyssey.api.user.routes import UserLogoutApi
 from odyssey.utils.auth import token_auth, basic_auth
-from odyssey.utils.constants import FERTILITY_STATUSES, TABLE_TO_URI, ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
-from odyssey.utils.message import send_test_email, email_domain_blacklisted
+from odyssey.utils.constants import (
+    FERTILITY_STATUSES,
+    TABLE_TO_URI,
+    ALLOWED_IMAGE_TYPES,
+    IMAGE_MAX_SIZE,
+    IMAGE_DIMENSIONS,
+    DEV_EMAIL_DOMAINS)
+from odyssey.utils.message import send_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
     check_drink_existence
@@ -935,15 +941,33 @@ class TestEmail(BaseResource):
     """
        Send a test email
     """
-    @token_auth.login_required
-    @ns.doc(params={'recipient': 'test email recipient'})
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @ns.doc(params={
+        'email_address': 'Email address to send a test email to. If empty, '
+                         'email is send to an AWS SES internal mailbox that always succeeds.',
+        'internal': 'Use one of the AWS SES internal mailboxes. Value must '
+                    'be one of "success", "bounce", or "complaint". Overrides email address.'})
     def get(self):
-        """send a testing email"""
-        recipient = request.args.get('recipient')
+        """ Send a test email. """
+        email_address = request.args.get('email_address', '')
+        internal = request.args.get('internal')
 
-        send_test_email(recipient=recipient)
-        
-        return {}, 200  
+        if not email_address and not internal:
+            internal = 'success'
+
+        # Temporarily add domain to DEV list, so that email is always send.
+        domain = None
+        parts = email_address.split('@')
+        if len(parts) == 2 and parts[1] not in DEV_EMAIL_DOMAINS:
+            domain = parts[1]
+            DEV_EMAIL_DOMAINS.append(domain)
+
+        try:
+            send_email('test', email_address, _internal=internal)
+        finally:
+            if domain:
+                DEV_EMAIL_DOMAINS.remove(domain)
+
 
 @ns.route('/datastoragetiers/')
 class ClientDataStorageTiers(BaseResource):
@@ -1098,6 +1122,7 @@ class ClinicalCareTeamMembers(BaseResource):
         # enter new team members into client's clinical care team
         # if email is associated with a current user account, add that user's id to 
         #  the database entry
+        emails_to_send = []
         for team_member in data.get("care_team"):
             
             if 'modobio_id' not in team_member and 'team_member_email' not in team_member:
@@ -1117,6 +1142,7 @@ class ClinicalCareTeamMembers(BaseResource):
                 team_member_user = User.query.filter_by(modobio_id=modo_id).one_or_none()
                 if team_member_user:
                     team_member["team_member_user_id"] = team_member_user.user_id
+                    emails_to_send.append(team_member_user.email)
                 else:
                     raise BadRequest(f'Client {modo_id} not found.')
 
@@ -1125,18 +1151,27 @@ class ClinicalCareTeamMembers(BaseResource):
                 team_member_user = User.query.filter_by(email=team_member["team_member_email"].lower()).one_or_none()
                 if team_member_user:
                     team_member["team_member_user_id"] = team_member_user.user_id
+                    emails_to_send.append(team_member_user.email)
                 # email is not in our system. 
                 # create a new, unverified user using the provided email
                 # user is neither staff nor client
                 else:
-                    team_member_user = User(email = team_member['team_member_email'], is_staff=False, is_client=False)
+                    team_member_user = User(
+                        email=team_member['team_member_email'],
+                        is_staff=False,
+                        is_client=False)
+
                     db.session.add(team_member_user)
                     db.session.flush()
-                    team_member["team_member_user_id"] = team_member_user.user_id
-                    
+
+                    team_member['team_member_user_id'] = team_member_user.user_id
+                    emails_to_send.append(team_member_user.email)
+
             # add new team member to the clincial care team
-            db.session.add(ClientClinicalCareTeam(**{"team_member_user_id": team_member["team_member_user_id"],
-                                                    "user_id": user_id})) 
+            db.session.add(
+                ClientClinicalCareTeam(
+                    team_member_user_id=team_member['team_member_user_id'],
+                    user_id=user_id))
 
         db.session.commit()
 
@@ -1212,7 +1247,17 @@ class ClinicalCareTeamMembers(BaseResource):
                 'is_staff': is_staff,
                 'authorizations': authorizations
             })
-        
+
+        # Send an email to all added team members
+        for email_address in emails_to_send:
+            fullname = f'{user.firstname} {user.lastname}'
+            send_email(
+                'team-added',
+                email_address,
+                sender='Modo Bio Team <team@modobio.com>',
+                fullname=fullname,
+                firstname=user.firstname)
+
         response = {"care_team": current_team,
                     "total_items": len(current_team) }
 

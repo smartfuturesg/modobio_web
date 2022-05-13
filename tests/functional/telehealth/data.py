@@ -307,8 +307,8 @@ telehealth_exceptions_post_data = {
     [
       {
       "exception_date": "2022-09-20",
-      "exception_booking_window_id_end_time": 100,
-      "exception_booking_window_id_start_time": 120,
+      "exception_end_time": "08:15:00",
+      "exception_start_time": "10:00:00",
       "is_busy": True,
       "label": "end time before start time"
       }
@@ -317,8 +317,8 @@ telehealth_exceptions_post_data = {
     [
         {
       "exception_date": "2030-01-01",
-      "exception_booking_window_id_end_time": 150,
-      "exception_booking_window_id_start_time": 120,
+      "exception_end_time": "12:30:00",
+      "exception_start_time": "09:55:00",
       "is_busy": True,
       "label": "end date too far in the future"
       }
@@ -327,8 +327,8 @@ telehealth_exceptions_post_data = {
     [
       {
       "exception_date": "2022-09-20",
-      "exception_booking_window_id_end_time": 150,
-      "exception_booking_window_id_start_time": 120,
+      "exception_end_time": "12:30:00",
+      "exception_start_time": "09:55:00",
       "is_busy": True,
       "label": "test good data"
       }

@@ -435,9 +435,6 @@ class ClientMobileSettingsSchema(Schema):
     general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
     notification_type_ids = fields.List(fields.Integer, missing=[])
 
-    # TODO: deprecated
-    push_notification_type_ids = fields.Nested(ClientNotificationSettingsSchema(many=True), missing=[])
-
 
 class ClientAssignedDrinksSchema(BaseSchema):
     class Meta:

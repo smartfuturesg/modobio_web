@@ -4,14 +4,6 @@ from odyssey.api.user.models import UserPendingEmailVerifications
 from flask.json import dumps
 
 def test_get_default_health_metrics(test_client):
-    response = test_client.get(
-        f'/client/default-health-metrics/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        content_type='application/json')
-    assert response.status_code == 200
-    assert response.json['sex'] == 'm'
-    assert response.json['age'] == 30
-
     ###
     # Fetch default metrics for a new client that does not have sex or age info in our system
     ###

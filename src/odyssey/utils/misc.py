@@ -16,7 +16,7 @@ from time import mktime
 
 import flask.json
 
-from flask import current_app, request
+from flask import current_app, request, url_for
 from sqlalchemy import or_, select
 from werkzeug.exceptions import BadRequest, Unauthorized
 
@@ -50,7 +50,7 @@ from odyssey.api.user.models import (
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVER_TIME
 from odyssey.utils.files import FileDownload
-from odyssey.utils.message import send_email_delete_account, send_email_update_email, send_email_verify_email
+from odyssey.utils.message import send_email
 from odyssey.utils import search
 
 logger = logging.getLogger(__name__)
@@ -654,10 +654,22 @@ class EmailVerification():
         # send email to the user
         if updating:
             #send update email if user already had a verified email
-            send_email_update_email(user, token, email)
+            template = 'email-update'
         else:
-            #send time time verify email is user did not have an email on file
-            send_email_verify_email(user, token, code)
+            #send first time verify email if user did not have an email on file
+            template = 'email-verify'
+        
+        link = url_for(
+            'api.user_user_pending_email_verifications_token_api',
+            token=token,
+            _external=True)
+        
+        send_email(
+            template,
+            user.email,
+            name=user.firstname,
+            verification_link=link,
+            verification_code=code)
 
         db.session.commit()
 
@@ -756,7 +768,10 @@ class EmailVerification():
         
         if user.modobio_id == None:
             md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
-            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})        
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})      
+
+            # send welcome email
+            send_email('email-welcome', user.email, firstname=user.firstname)  
 
         #code/token were valid, remove the pending request
         db.session.delete(verification)
@@ -992,11 +1007,11 @@ def delete_user(user_id, requestor_id, delete_type):
             #remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
     db.session.commit()
-    #Send notification email to user being deleted and user requesting deletion
-    #when FLASK_ENV=production
+
+    # Send notification email to user being deleted.
+    # Also send to user requesting deletion when FLASK_ENV=production
     if user_email != requester.email:
-        send_email_delete_account(requester.email, user_email)
-    send_email_delete_account(user_email, user_email)
+        send_email('account-deleted', requester.email, user_email=user_email)
 
 def create_notification(user_id, severity_id, notification_type_id, title, content, persona_type, expires = None):
     #used to create a notification

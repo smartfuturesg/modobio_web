@@ -4,8 +4,6 @@ from odyssey import db
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.payment.models import PaymentHistory
 from odyssey.api.telehealth.models import TelehealthBookingStatus
-
-from .data import test_booking
 """
 This payment tests all InstaMed functions in accordance to InstaMed required test cases.
 

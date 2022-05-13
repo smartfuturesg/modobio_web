@@ -909,7 +909,18 @@ CREDENTIAL_TYPE = {
     'medical_doctor': ('npi','dea','med_lic')
 }
 
-DEV_EMAIL_DOMAINS = ('3pillarglobal.com', 'modobio.com', 'atventurepartners.com', 'atlanticventurepartners.tech')
+DEV_EMAIL_DOMAINS = [
+    '3pillarglobal.com',
+    'modobio.com',
+    'atventurepartners.com',
+    'atlanticventurepartners.tech',
+    'simulator.amazonses.com']
+""" List of email address domain that will receive an email.
+
+In DEV environment, emails are send to success@simulator.amazonses.com to avoid spamming
+innocent email addresses. However, developers do want to receive emails, even in DEV. So
+for email address domains in this list, a real email will be send even in DEV environment.
+"""
 
 # bookings must be made at least this many hours in advance
 TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0 if any((config.TESTING, config.DEV)) else 2

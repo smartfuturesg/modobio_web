@@ -1,0 +1,19 @@
+{% extends "modo-bio-automated-email-template-body.html" %}
+{% block body %}
+<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
+  Hello <b>{{ practitioner_firstname }}</b>,
+</p>
+
+<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
+    {{ client_fullname }} has just cancelled an appointment with you!
+</p>
+
+<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
+  Please log on to your Modo Bio account using <a href="https://providers.modobio.com" style="text-decoration: none; color: #5659e2" >providers.modobio.com</a> to see the details of the canceled appointment.
+</p style="font-family: sans-serif; font-size: 18px; margin: 0; margin-bottom: 15px;">
+
+<hr class="solid">
+<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px; text-align: center">
+    Please check that this email was sent from <a href="mailto:no-reply@modobio.com" style="text-decoration: none; color: #5659e2">no-reply@modobio.com</a>.
+</p>
+{% endblock %}

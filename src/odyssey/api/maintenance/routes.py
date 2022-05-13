@@ -59,10 +59,10 @@ class MaintenanceApi(BaseResource):
                 # If the defined business hours time window goes over midnight...
                 if business_end_hr < business_start_hr:
                     # ...add a day to the business end datetime
-                    business_end = datetime.combine(end + timedelta(days=1), time(hour=business_end_hr)).replace(tzinfo=pytz.timezone('UTC'))
+                    business_end = datetime.combine(end + timedelta(days=1), time(hour=business_end_hr)).replace(tzinfo=zone)
                 else:
                     # Business start and end are the same day
-                    business_end = datetime.combine(end, time(hour=business_end_hr)).replace(tzinfo=pytz.timezone('UTC'))
+                    business_end = datetime.combine(end, time(hour=business_end_hr)).replace(tzinfo=zone)
 
                 # If neither 'start' nor 'end' is in business hours, the requested maintenenace block is allowed
                 if not business_start < start < business_end and not business_start < end < business_end:
@@ -102,14 +102,18 @@ class MaintenanceApi(BaseResource):
         # Set timezone
         zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
 
+        # Set start and end times to the designated timezone for DB storage
+        start = datetime.fromisoformat(request.json["start_time"]).replace(tzinfo=zone).astimezone(zone)
+        end = datetime.fromisoformat(request.json["end_time"]).replace(tzinfo=zone).astimezone(zone)
+
         # Get the current users token auth info
         user, _ = token_auth.current_user()
         user_id = str(user.user_id)
 
         data = {
             'block_id': str(uuid.uuid4()),
-            'start_time': request.json["start_time"],
-            'end_time': request.json["end_time"],
+            'start_time': start.isoformat(),
+            'end_time': end.isoformat(),
             'created_by': user_id,
             'created_at': datetime.now(tz=zone).isoformat(),
             'deleted': "False",

@@ -8,7 +8,7 @@ from tests.utils import login
 @pytest.fixture(scope='module')
 def client_services(test_client):
     """ Log in as a staff member user **with** client_services role. """
-    cs = db.session.query(User).filter_by(email='client_services@modobio.com').one_or_none()
+    cs = db.session.query(User).filter_by(email='cservice@modobio.com').one_or_none()
     cs.auth_header = login(test_client, cs, password='123')
 
     return cs
@@ -20,7 +20,7 @@ def not_client_services(test_client):
     Cannot use ``test_client.staff`` for this purpose, since staff has all roles,
     including the client_services role.
     """
-    sa = db.session.query(User).filter_by(email='admin@modobio.com').one_or_none()
+    sa = db.session.query(User).filter_by(email='staff@modobio.com').one_or_none()
     sa.auth_header = login(test_client, sa, password='123')
 
     return sa

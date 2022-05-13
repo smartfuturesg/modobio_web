@@ -16,8 +16,8 @@ BEGIN
     VALUES (
         'staff@modobio.com',
         'BHBCBZBW4K12',
-        'Staff',
-        'Admin',
+        'Lee',
+        'Ermey',
         true,
 		true,
         false,
