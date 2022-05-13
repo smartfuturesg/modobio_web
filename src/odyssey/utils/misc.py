@@ -1012,6 +1012,8 @@ def delete_user(user_id, requestor_id, delete_type):
     # Also send to user requesting deletion when FLASK_ENV=production
     if user_email != requester.email:
         send_email('account-deleted', requester.email, user_email=user_email)
+        
+    send_email('account-deleted', user_email, user_email=user_email)
 
 def create_notification(user_id, severity_id, notification_type_id, title, content, persona_type, expires = None):
     #used to create a notification
