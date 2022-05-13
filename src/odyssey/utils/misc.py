@@ -998,8 +998,7 @@ def delete_user(user_id, requestor_id, delete_type):
         send_email_delete_account(requester.email, user_email)
     send_email_delete_account(user_email, user_email)
 
-
-def create_notification(user_id, severity_id, notification_type_id, title, content):
+def create_notification(user_id, severity_id, notification_type_id, title, content, persona_type, expires = None):
     #used to create a notification
     
     notification = Notifications(**{
@@ -1007,8 +1006,9 @@ def create_notification(user_id, severity_id, notification_type_id, title, conte
         'title': title,
         'content': content,
         'severity_id': severity_id,
-        'notification_type_id': notification_type_id
+        'notification_type_id': notification_type_id,
+        'persona_type': persona_type,
+        'expires': expires
     })
     
     db.session.add(notification)
-    db.session.commit()

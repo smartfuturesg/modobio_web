@@ -17,6 +17,7 @@ from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRe
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.utils.misc import create_notification
+from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 
 from odyssey import db
 
@@ -51,15 +52,17 @@ class Instamed:
             .filter_by(idx=booking.booking_window_id_start_time).one_or_none().start_time
         payment_last_four = PaymentMethods.query \
             .filter_by(idx=booking.payment_method_id).one_or_none().number
+
         create_notification(booking.client_user_id,
-                                3, 
-                                5, 
+                                NOTIFICATION_SEVERITY_TO_ID.get('Medium'), 
+                                NOTIFICATION_TYPE_TO_ID.get('Payments'), 
                                 "Your Card Could Not Be Charged", 
                                 f"Your telehealth appointment with {booking.practitioner.firstname} \
                                 {booking.practitioner.lastname} at {start_time} on {booking.target_date}, \
                                 unfortunately, had to be canceled as your payment method ending in \
                                 {payment_last_four} could not be charged. Please revise your payment \
-                                method or perhaps speak with your bank to resolve the issue")
+                                method or perhaps speak with your bank to resolve the issue",
+                                "Client")
         return
 
 

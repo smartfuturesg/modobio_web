@@ -31,8 +31,8 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import cancel_telehealth_appointment
 
 from odyssey.config import Config
-from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS
-from odyssey.utils.misc import get_time_index
+from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
+from odyssey.utils.misc import get_time_index, create_notification
 
 logger = get_task_logger(__name__)
 
@@ -184,17 +184,16 @@ def cleanup_temporary_care_team():
     for notification in notifications:
         #create notification that care team member temporary access is expiring
         member = User.query.filter_by(user_id=notification.team_member_user_id).one_or_none()
-        data = {
-            'notification_type_id': 14,
-            'title': f'{member.firstname} {member.lastname}\'s Data Access Is About To Expire',
-            'content': f'Would you like to add {member.firstname} {member.lastname} to your team? Swipe right' + \
-                        'on their entry in your team list to make them a permanent member of your team!',
-            'action': 'Redirect to team member list',
-            'time_to_live': 86400
-        }
-        new_notificiation = NotificationSchema().load(data)
-        new_notificiation.user_id = notification.user_id
-        db.session.add(new_notificiation)
+        
+        create_notification(
+            notifcation.team_member_user_id,
+            NOTIFICATION_SEVERITY_TO_ID.get('High'),
+            NOTIFICATION_TYPE_TO_ID.get('Team'),
+            f'{member.firstname} {member.lastname}\'s Data Access Is About To Expire',
+            f'Would you like to add {member.firstname} {member.lastname} to your team?' \
+            'Swipe right on their entry in your team list to make them a permanent member of your team!',
+            'Provider'
+        )
 
     #find all temporary members that are older than the 180 hour limit
     expired = db.session.execute(
