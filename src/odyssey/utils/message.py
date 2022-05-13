@@ -3,7 +3,6 @@ import logging
 import pathlib
 
 from dataclasses import dataclass
-from site import USER_SITE
 
 import boto3
 import idna
@@ -14,17 +13,13 @@ from flask.json import dumps
 from marshmallow import ValidationError
 from werkzeug.exceptions import BadRequest
 
-from odyssey.api import api
 from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.api.notifications.schemas import (
     ApplePushNotificationAlertSchema,
     ApplePushNotificationBackgroundSchema,
     ApplePushNotificationBadgeSchema,
     ApplePushNotificationVoipSchema)
-from odyssey.api.user.models import User
-from odyssey.utils.constants import (
-    DEV_EMAIL_DOMAINS,
-    REGISTRATION_PORTAL_URL)
+from odyssey.utils.constants import DEV_EMAIL_DOMAINS
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +32,7 @@ def email_domain_blacklisted(email_address: str):
     Loads a list with blacklisted domainnames and checks whether or not the
     provided email address is blacklisted or not. Email address may be
     given in any character set, IDNA (International Domain Names in
-    Appications) is supported.
+    Applications) is supported.
 
     Parameters
     ----------

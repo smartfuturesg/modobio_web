@@ -17,8 +17,6 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 
 from flask import request
-from odyssey.utils.constants import REGISTRATION_PORTAL_URL
-# end deprecated imports
 
 logger = logging.getLogger(__name__)
 
