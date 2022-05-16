@@ -381,7 +381,7 @@ def remove_expired_availability_exceptions():
     Checks for availability exceptions whose exception_date is in the past and removes them.
     """
     
-    current_date = datetime.now(timezone.utc)
+    current_date = datetime.now(timezone.utc).date()
     logger.info('Deploying remove expired exceptions test')
     exceptions = TelehealthStaffAvailabilityExceptions.query.filter(
         TelehealthStaffAvailabilityExceptions.exception_date < current_date
