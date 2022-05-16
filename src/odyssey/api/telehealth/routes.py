@@ -889,11 +889,10 @@ class TelehealthBookingsApi(BaseResource):
             if new_status == 'Canceled':
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
-                if current_user.user_id == booking.staff_user_id:
-                    cancel_telehealth_appointment(
-                        booking,
-                        reason="Practitioner Cancellation",
-                        refund=True)
+                cancel_telehealth_appointment(
+                    booking,
+                    reason="Practitioner Cancellation",
+                    refund=current_user.user_id == booking.staff_user_id)               
 
         booking.update(data)
         db.session.commit()
