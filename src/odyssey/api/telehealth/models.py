@@ -154,7 +154,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     external_booking_id = db.Column(db.String(36), nullable = True)
     """
-    UUID of booking used for external reference. Only used when booking external physicians (wheel).
+    UUID of booking used for external reference.
 
     :type: str
     """
