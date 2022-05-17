@@ -85,20 +85,20 @@ def upcoming_appointment_notification_2hr(booking_id):
     if not existing_staff_notification:
         staff_notification = Notifications(
             user_id=booking.staff_user_id,
-            title="You have a telehealth appointment in 2 hours",
-            content=f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is in 2 hours. Please review your client's medical information before taking the call.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+            title=f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            content=f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please review your client's medical information before taking the call.",
+            expires=expires_at,
+            notification_type_id=3  # Scheduling
         )
         db.session.add(staff_notification)
     
     if not existing_client_notification:
         client_notification = Notifications(
             user_id=booking.client_user_id,
-            title="You have a telehealth appointment in 2 hours",
-            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is in 2 hours. Please ensure your medical information is up to date before taking the call.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+            title=f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please ensure your medical information is up to date before taking the call.",
+            expires=expires_at,
+            notification_type_id=3  # Scheduling
         )
         db.session.add(client_notification)
 
