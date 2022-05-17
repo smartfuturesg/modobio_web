@@ -85,25 +85,25 @@ def upcoming_appointment_notification_2hr(booking_id):
     
     # create the staff and client notification entries
     if not existing_staff_notification:
-        
+
         create_notification(
             booking.staff_user_id, 
-            NOTIFICATION_SEVERITY_TO_ID.get('High'),
+            NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
             NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            "You have a telehealth appointment in 2 hours",
-            f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is in 2 hours. Please review your client's medical information before taking the call.",
+            "You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please review your client's medical information before taking the call.",
             'Provider',
             expires_at
         )
     
     if not existing_client_notification:
-        
+
         create_notification(
             booking.client_user_id, 
-            NOTIFICATION_SEVERITY_TO_ID.get('High'),
+            NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
             NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            "You have a telehealth appointment in 2 hours",
-            f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is in 2 hours. Please ensure your medical information is up to date before taking the call.",
+            "You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please ensure your medical information is up to date before taking the call.",
             'Client',
             expires_at
         )
