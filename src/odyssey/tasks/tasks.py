@@ -27,6 +27,8 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
+from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
+from odyssey.utils.misc import create_notification
 
 logger = logging.getLogger(__name__)
 
@@ -71,36 +73,40 @@ def upcoming_appointment_notification_2hr(booking_id):
         select(Notifications).
         where(Notifications.user_id == staff_user.user_id, 
               Notifications.expires == expires_at, 
-              Notifications.notification_type_id == 3)
+              Notifications.notification_type_id == NOTIFICATION_TYPE_TO_ID.get('Scheduling'))
         ).scalars().one_or_none()
     
     existing_client_notification = db.session.execute(
         select(Notifications).
         where(Notifications.user_id == client_user.user_id, 
               Notifications.expires == expires_at, 
-              Notifications.notification_type_id == 3)
+              Notifications.notification_type_id == NOTIFICATION_TYPE_TO_ID.get('Scheduling'))
         ).scalars().one_or_none()
     
     # create the staff and client notification entries
     if not existing_staff_notification:
-        staff_notification = Notifications(
-            user_id=booking.staff_user_id,
-            title="You have a telehealth appointment in 2 hours",
-            content=f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is in 2 hours. Please review your client's medical information before taking the call.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+        
+        create_notification(
+            booking.staff_user_id, 
+            NOTIFICATION_SEVERITY_TO_ID.get('High'),
+            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+            "You have a telehealth appointment in 2 hours",
+            f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is in 2 hours. Please review your client's medical information before taking the call.",
+            'Provider',
+            expires_at
         )
-        db.session.add(staff_notification)
     
     if not existing_client_notification:
-        client_notification = Notifications(
-            user_id=booking.client_user_id,
-            title="You have a telehealth appointment in 2 hours",
-            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is in 2 hours. Please ensure your medical information is up to date before taking the call.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+        
+        create_notification(
+            booking.client_user_id, 
+            NOTIFICATION_SEVERITY_TO_ID.get('High'),
+            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+            "You have a telehealth appointment in 2 hours",
+            f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is in 2 hours. Please ensure your medical information is up to date before taking the call.",
+            'Client',
+            expires_at
         )
-        db.session.add(client_notification)
 
     db.session.commit()
 
@@ -248,15 +254,16 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
         
         # add notification to client
         expires_at = datetime.utcnow()+timedelta(days=2)
-        client_notification = Notifications(
-            user_id=booking.client_user_id,
-            title="Your telehealth appointment has been canceled",
-            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been canceled. Please reschedule.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+        
+        create_notification(
+            booking.client_user_id, 
+            NOTIFICATION_SEVERITY_TO_ID.get('High'),
+            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+            "Your telehealth appointment has been canceled",
+            f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been canceled. Please reschedule.",
+            'Client',
+            expires_at
         )
-
-        db.session.add(client_notification)
 
         db.session.commit()
 
@@ -298,14 +305,16 @@ def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
             
         # add notification to client
         expires_at = datetime.utcnow()+timedelta(days=2)
-        client_notification = Notifications(
-            user_id=booking.client_user_id,
-            title="Your telehealth appointment has been completed",
-            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been completed.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+        
+        create_notification(
+            booking.client_user_id, 
+            NOTIFICATION_SEVERITY_TO_ID.get('High'),
+            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+            "Your telehealth appointment has been completed",
+            f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been completed.",
+            'Client',
+            expires_at
         )
-        db.session.add(client_notification)
 
         db.session.commit()
     
@@ -329,7 +338,7 @@ def charge_telehealth_appointment(booking_id):
     This task will go through the process of attemping to charge a user for a telehealth booking.
     If the payment is unsuccesful, the booking will be canceled.
     """
-    # TODO: Notify user of the canceled booking via email/notfication
+    # TODO: Notify user of the canceled booking via email? They are already notified via notification
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
     Instamed().charge_telehealth_booking(booking)

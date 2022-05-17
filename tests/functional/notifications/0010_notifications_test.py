@@ -13,7 +13,8 @@ def test_notifications_get(test_client):
             'severity_id': 3,
             'read': False,
             'deleted': False,
-            'notification_type_id': 1
+            'notification_type_id': 1,
+            'persona_type': 'Client'
         }
     
         obj = Notifications(**notification)
@@ -36,6 +37,8 @@ def test_notifications_get(test_client):
         assert notif.get('read') == notification['read']
         assert notif.get('deleted') == notification['deleted']
         assert notif.get('notification_type') == notification_type
+        assert notif.get('persona_type') == notification['persona_type']
+
 
 def test_notifications_put(test_client):
         _notification = Notifications.query.filter_by(user_id = test_client.client_id).first()
@@ -62,7 +65,8 @@ def test_notifications_put(test_client):
         assert notif.get('title') == 'A nice title'
         assert notif.get('content') == 'You have Spam!'
         assert notif.get('notification_type') == notification_type
+        assert notif.get('persona_type') == 'Client'
 
-        # CHanged
+        # Changed
         assert notif.get('read') == notification_update['read']
         assert notif.get('deleted') == notification_update['deleted']
