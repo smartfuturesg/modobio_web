@@ -51,4 +51,4 @@ def test_upcoming_bookings_scan(test_client, upcoming_bookings):
             Notifications.user_id == booking.staff_user_id))
     ).scalars().all()
     
-    assert len(notifications) == len(bookings)*2
+    assert len(notifications) == (len(bookings)*2) + 1
