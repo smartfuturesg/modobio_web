@@ -3,7 +3,6 @@ import logging
 import pathlib
 
 from dataclasses import dataclass
-from site import USER_SITE
 
 import boto3
 import idna
@@ -14,17 +13,13 @@ from flask.json import dumps
 from marshmallow import ValidationError
 from werkzeug.exceptions import BadRequest
 
-from odyssey.api import api
 from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.api.notifications.schemas import (
     ApplePushNotificationAlertSchema,
     ApplePushNotificationBackgroundSchema,
     ApplePushNotificationBadgeSchema,
     ApplePushNotificationVoipSchema)
-from odyssey.api.user.models import User
-from odyssey.utils.constants import (
-    DEV_EMAIL_DOMAINS,
-    REGISTRATION_PORTAL_URL)
+from odyssey.utils.constants import DEV_EMAIL_DOMAINS
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +32,7 @@ def email_domain_blacklisted(email_address: str):
     Loads a list with blacklisted domainnames and checks whether or not the
     provided email address is blacklisted or not. Email address may be
     given in any character set, IDNA (International Domain Names in
-    Appications) is supported.
+    Applications) is supported.
 
     Parameters
     ----------
@@ -162,49 +157,6 @@ def send_email(
         mid = response['MessageId']
         logger.info(f'Email based on template "{template}" sent to "{to}", message ID: {mid}')
 
-# DEPRECATED: 2022-04-26
-# The endpoints which call this function were already deprecated.
-def send_email_user_registration_portal(recipient_email: str, password: str, portal_id: str):
-    """
-    Email for sending users their registration link and login details
-    That were createrd by a client services staff member
-    """
-
-    subject = 'Modo Bio User Registration Portal'
-
-    sender = "Modo Bio no-reply <no-reply@modobio.com>"
-    # TODO consider editing url according to environment being used, and if it will open the web app or mobile app.
-    remote_registration_url = REGISTRATION_PORTAL_URL.format(portal_id)
-
-    # The email body for recipients with non-HTML email clients.
-    body_text = ("Welcome to Modo Bio!\n"
-                "Please visit your unique portal to complete your user registration:\n"
-                f"1) Copy and paste this portal link into your browser {remote_registration_url}\n"
-                "2) Enter your email and password to login:"
-                f"\t email: {recipient_email}\n"
-                f"\t password: {password}\n\n"
-                "If you have any issues, please contact client services."
-                )
-
-    # The HTML body of the email.
-    body_html = f"""<html>
-    <head></head>
-    <body>
-    <h1>Welcome to Modo Bio!</h1>
-    <p>Please visit your unique portal to complete your user registration:
-    <br>1) Click on this link to be directed to your registration portal <a href={remote_registration_url}></a>
-    <br> or copy and paste this portal link into your browser {remote_registration_url}
-    <br>2) Enter your email and password to login:
-    <br>     email: {recipient_email}
-    <br>     password: {password}
-    <br>
-    <br>
-    <br>If you have any issues, please contact client services.
-    </body>
-    </html>
-    """
-
-    send_email(subject=subject, recipient=recipient_email, body_text=body_text, body_html=body_html, sender=sender)
 
 ##############################################################
 #
