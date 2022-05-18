@@ -892,6 +892,8 @@ class TelehealthBookingsApi(BaseResource):
                 #if client initiated, refund should be false
                 booking_time = LookupBookingTimeIncrements.query. \
                     filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                booking_datetime = datetime.combine(booking.target_date, booking_time)
+                expiration_datetime = booking_datetime + timedelta(hours=72)
                 if current_user.user_id == booking.staff_user_id:
                     #cancel appointment with refund and send client notification that meeting was cancelled
                     cancel_telehealth_appointment(
@@ -902,11 +904,12 @@ class TelehealthBookingsApi(BaseResource):
                         booking.client_user_id,
                         2,
                         3,
-                        f"""Your Telehealth Appointment with {booking.practitoner.firstname +
-                        " " + booking.practitioner.lastname} was Cancelled""",
-                        f"""Unfortunately {booking.practitioner.firstname + " " +
-                        booking.practitioner.lastname} has canceled your appointment at
-                        <datetime_utc>{booking_time}<\datetime_utc>. """
+                        f"Your Telehealth Appointment with {booking.practitioner.firstname} " + \
+                            f"{booking.practitioner.lastname} was Canceled",
+                        f"Unfortunately {booking.practitioner.firstname} {booking.practitioner.lastname} " + \
+                        f"has canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
+                        'Client',
+                        expiration_datetime
                     )
                 else:
                     #cancel appointment without refund and send staff notification that meeting was cancelled
@@ -919,11 +922,12 @@ class TelehealthBookingsApi(BaseResource):
                         booking.staff_user_id,
                         2,
                         3,
-                        f"""Your Telehealth Appointment with {booking.client.firstname + 
-                        " " + booking.client.lastname} was Cancelled""",
-                        f"""Unfortunately {booking.practitioner.firstname + " " +
-                        booking.practitioner.lastname} has canceled your appointment at 
-                        <datetime_utc>{booking_time}<\datetime_utc>. """
+                        f"Your Telehealth Appointment with {booking.client.firstname} " + \
+                            f"{booking.client.lastname} was Canceled",
+                        f"Unfortunately {booking.client.firstname} {booking.client.lastname} has " + \
+                            f"canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
+                        'Provider',
+                        expiration_datetime
                     )             
 
         booking.update(data)
