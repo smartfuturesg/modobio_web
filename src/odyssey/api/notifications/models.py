@@ -85,16 +85,6 @@ class Notifications(db.Model):
     :type: int, foreign key(LookupNotificationSeverity.idx)
     """
 
-    time_to_live = db.Column(db.Integer)
-    """
-    The lifetime of the notification in seconds. If None, the notification does not expire.
-    If both :attr:`time_to_live` and :attr:`expires` are set, then :attr:`time_to_live` is
-    ignored.
-
-    :type: int or None
-    :unit: seconds
-    """
-
     expires = db.Column(db.DateTime)
     """
     The time this notification will expire. If :attr:`time_to_live` is set and :attr:`expires`
@@ -117,6 +107,13 @@ class Notifications(db.Model):
     the database, but can be used to hide this notification in a UI.
 
     :type: bool
+    """
+
+    persona_type = db.Column(db.String(10))
+    """
+    Persona type for this notification. User, Client, or Provider
+
+    :type: str
     """
 
     notification_type_id = db.Column(
@@ -143,26 +140,26 @@ class Notifications(db.Model):
     """
 
 
-@db.event.listens_for(Notifications, "after_insert")
-def set_expiry(mapper, connection, target):
-    """ Set expiry timestamp from time_to_live.
+# @db.event.listens_for(Notifications, "after_insert")
+# def set_expiry(mapper, connection, target):
+#     """ Set expiry timestamp from time_to_live.
 
-    Parameters
-    ----------
-    mapper : ???
-        What does this do? Not used.
+#     Parameters
+#     ----------
+#     mapper : ???
+#         What does this do? Not used.
 
-    connection : :class:`sqlalchemy.engine.Connection`
-        Connection to the database engine.
+#     connection : :class:`sqlalchemy.engine.Connection`
+#         Connection to the database engine.
 
-    target : :class:`sqlalchemy.schema.Table`
-        Specifically :class:`Notifications`
-    """
-    if target.time_to_live and not target.expires:
-        expires = datetime.utcnow() + timedelta(seconds=target.time_to_live)
-        connection.execute(
-            Notifications.__table__.update().where(Notifications.notification_id == target.notification_id).values(expires=expires)
-        )
+#     target : :class:`sqlalchemy.schema.Table`
+#         Specifically :class:`Notifications`
+#     """
+#     if target.time_to_live and not target.expires:
+#         expires = datetime.utcnow() + timedelta(seconds=target.time_to_live)
+#         connection.execute(
+#             Notifications.__table__.update().where(Notifications.notification_id == target.notification_id).values(expires=expires)
+#         )
 
 
 class NotificationsPushRegistration(db.Model):

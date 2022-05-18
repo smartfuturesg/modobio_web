@@ -969,3 +969,35 @@ FERTILITY_STATUSES = {
         'postmenopausal'
     ]
 }
+
+NOTIFICATION_TYPE_TO_ID = {
+    'Account': 1,
+    'System Maintenance': 2,
+    'Scheduling': 3,
+    'Action Required': 4,
+    'Payments': 5,
+    'Profile': 6,
+    'Client Services': 7,
+    'Medical Doctor': 8,
+    'Dietitian': 9,
+    'Trainer': 10,
+    'Physical Therapist': 11,
+    'Data Science': 12,
+    'Community': 13,
+    'Team': 14,
+    'Staff': 15,
+    'System Administration': 16,
+    'DoseSpot': 17,
+    'Chef': 18,
+    'Therapist': 19,
+    'Health': 20
+}
+
+NOTIFICATION_SEVERITY_TO_ID = {
+    'Highest': 1,
+    'High': 2,
+    'Medium': 3,
+    'Low': 4,
+    'Lowest': 5
+}
+
