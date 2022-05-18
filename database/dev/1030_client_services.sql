@@ -14,10 +14,10 @@ BEGIN
         biological_sex_male,
         dob)
     VALUES (
-        'client_services@modobio.com',
+        'cservice@modobio.com',
         'BX4NW9897R12',
-        'Client',
-        'Services',
+        'Pam',
+        'Halpert',
         true,
 		true,
         false,

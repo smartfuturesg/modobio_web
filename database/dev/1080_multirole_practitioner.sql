@@ -18,8 +18,8 @@ BEGIN
     VALUES (
         'pro@modobio.com',
         'EXK7322KFN12',
-        'Multirole',
-        'Practitioner',
+        'Jackie',
+        'Moon',
         true,
 		true,
         false,
@@ -41,8 +41,8 @@ BEGIN
     INSERT INTO "StaffRoles" (user_id, role, consult_rate)
     VALUES
         (_user_id, 'medical_doctor', '150.00'),
-        (_user_id, 'physical_therapist', '95.00'),
-        (_user_id, 'nutritionist', '100.00'),
+        (_user_id, 'therapist', '95.00'),
+        (_user_id, 'dietitian', '100.00'),
         (_user_id, 'trainer', '125.00');
 
     -- NOTE: StaffOperationalTerritories is obsolete, but will be kept

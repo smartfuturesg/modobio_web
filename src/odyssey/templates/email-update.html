@@ -1,11 +1,11 @@
 {% extends "modo-bio-automated-email-template-body.html" %}
 {% block body %}
 <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-  Hello <b>{{ data.name }}</b>,
+  Hello <b>{{ name }}</b>,
 </p> 
 
 <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-    We have recieved a request to change the email address associated with your Modo Bio account.
+    We have received a request to change the email address associated with your Modo Bio account.
 </p>
 
 <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
@@ -17,7 +17,7 @@
 </p>
 
 <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-  If you did request an email change, we need to confirm your address for your Modo Bio account. Please <a href="{{ data.verification_link }}" style=" color: #000000">click here to verify your email address</a> via a web link. You can also try the "Resend Email" 
+  If you did request an email change, we need to confirm your address for your Modo Bio account. Please <a href="{{ verification_link }}" style=" color: #000000">click here to verify your email address</a> via a web link. You can also try the "Resend Email" 
   option to generate a new link.
 </p style="font-family: sans-serif; font-size: 18px; margin: 0; margin-bottom: 15px;">
 

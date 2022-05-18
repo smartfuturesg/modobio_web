@@ -53,8 +53,8 @@ def test_post_staff_availability_exception(test_client):
         content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['exceptions'][0]['exception_booking_window_id_start_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_booking_window_id_start_time']
-    assert response.json['exceptions'][0]['exception_booking_window_id_end_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_booking_window_id_end_time']
+    assert response.json['exceptions'][0]['exception_start_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_start_time']
+    assert response.json['exceptions'][0]['exception_end_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_end_time']
     assert response.json['exceptions'][0]['is_busy'] == telehealth_exceptions_post_data["good_data"][0]['is_busy']
     assert response.json['exceptions'][0]['label'] == telehealth_exceptions_post_data["good_data"][0]['label']
     assert response.json['exceptions'][0]['exception_date'] == str(current_date)
@@ -67,8 +67,8 @@ def test_get_staff_availability_exception(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json[0]['exception_booking_window_id_start_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_booking_window_id_start_time']
-    assert response.json[0]['exception_booking_window_id_end_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_booking_window_id_end_time']
+    assert response.json[0]['exception_start_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_start_time']
+    assert response.json[0]['exception_end_time'] == telehealth_exceptions_post_data["good_data"][0]['exception_end_time']
     assert response.json[0]['is_busy'] == telehealth_exceptions_post_data["good_data"][0]['is_busy']
     assert response.json[0]['label'] == telehealth_exceptions_post_data["good_data"][0]['label']
     assert response.json[0]['exception_date'] == str(current_date)

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask.json import dumps
 
-from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability
 from odyssey.tasks.tasks import cleanup_unended_call
 from flask import g
@@ -324,7 +324,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
 
 def test_booking_start_and_complete(test_client, booking_function_scope):
     
-    # start teelehealth call as a staff member
+    # start telehealth call as a staff member
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
         headers=test_client.staff_auth_header)
@@ -343,6 +343,33 @@ def test_booking_start_and_complete(test_client, booking_function_scope):
 
 def test_booking_start_fail(test_client, booking_function_scope):
     
+    # mark the associated payment history row as voided
+    payment = PaymentHistory.query.filter_by(idx=booking_function_scope.payment_history_id).one_or_none()
+    payment.voided = True
+    test_client.db.session.commit()
+  
+    response = test_client.get(
+        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
+        headers=test_client.staff_auth_header)
+    
+    assert response.status_code == 400
+    
+    # revert voided status and instead create a refund for this payment
+    payment.voided = False
+    refund = PaymentRefunds(**{
+        'user_id': test_client.client_id,
+        'reporter_id': test_client.staff_id,
+        'payment_id': booking_function_scope.payment_history_id,
+        'refund_amount': 1,
+    })
+    test_client.db.session.add(refund)
+    test_client.db.session.flush()
+    response = test_client.get(
+        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
+        headers=test_client.staff_auth_header)
+    
+    assert response.status_code == 400   
+    
     # bookings cannot be started by a client, ensure this is the case by making the request below
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
@@ -357,6 +384,16 @@ def test_booking_start_fail(test_client, booking_function_scope):
     test_client.db.session.add(booking_function_scope)
     test_client.db.session.commit()
 
+    response = test_client.get(
+        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
+        headers=test_client.staff_auth_header)
+
+    assert response.status_code == 400
+    
+    # change booking status to something other than accepted or in progress
+    booking_function_scope.status = 'Pending'
+    test_client.db.session.flush()
+    
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
         headers=test_client.staff_auth_header)

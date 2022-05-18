@@ -26,7 +26,7 @@ def test_post_subscription_contract(test_client):
         content_type='application/json')
 
     #wait for pdf generation
-    time.sleep(3)
+    time.sleep(6)
     client_subscription = (
         ClientSubscriptionContract
         .query
