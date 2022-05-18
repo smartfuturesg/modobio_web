@@ -103,10 +103,31 @@ def test_celery_delete_exceptions_task(test_client):
 
     assert response.status_code == 201
     
+    #check that GET now returns 1 exception
+    response = test_client.get(
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200
+    assert len(response.json) == 1
+    
+    #manually run celery task
+    remove_expired_availability_exceptions()
+    
+    #check that exception still exists since it's not after the date yet
+    response = test_client.get(
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
+        headers=test_client.staff_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200
+    assert len(response.json) == 1
+    
     #have to forcibly change the date since past dates can't be submitted
     exception = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=test_client.staff_id).one_or_none()
     
-    exception.exception_date = str(current_date)
+    exception.exception_date = str(current_date - relativedelta(days=1))
     db.session.commit()
     
     #manually run celery task
