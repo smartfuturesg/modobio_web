@@ -74,7 +74,8 @@ from odyssey.utils.constants import (
 from odyssey.utils.message import send_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_drink_existence
+    check_drink_existence,
+    create_notification
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.pdf import to_pdf, merge_pdfs
@@ -1626,6 +1627,19 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
                 authorization.user_id = user_id
                 authorization.status = status
+                if status == 'pending':
+                    #if this is another user requesting data access, create a notification for the client
+                    resource_name = LookupClinicalCareTeamResources.query.filter_by(idx=authorization.resource_id).one_or_none().resource_name
+                    create_notification(
+                        user_id,
+                        4,
+                        20,
+                        f"{current_user.firstname} {current_user.lastname} has requested access " + \
+                            f"to your {resource_name} data",
+                        f"Would you like to grant {current_user.firstname} {current_user.lastname} " + \
+                            f"access to your {resource_name} data?",
+                        'Client'
+                    )
                 db.session.add(authorization)
             else:
                 db.session.rollback()
