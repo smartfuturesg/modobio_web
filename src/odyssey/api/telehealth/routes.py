@@ -76,7 +76,9 @@ from odyssey.utils.constants import (
     DAY_OF_WEEK,
     ALLOWED_AUDIO_TYPES,
     ALLOWED_IMAGE_TYPES,
-    IMAGE_MAX_SIZE
+    IMAGE_MAX_SIZE,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
@@ -902,8 +904,8 @@ class TelehealthBookingsApi(BaseResource):
                         refund=True)
                     create_notification(
                         booking.client_user_id,
-                        2,
-                        3,
+                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
+                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
                         f"Your Telehealth Appointment with {booking.practitioner.firstname} " + \
                             f"{booking.practitioner.lastname} was Canceled",
                         f"Unfortunately {booking.practitioner.firstname} {booking.practitioner.lastname} " + \
@@ -920,8 +922,8 @@ class TelehealthBookingsApi(BaseResource):
                     )  
                     create_notification(
                         booking.staff_user_id,
-                        2,
-                        3,
+                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
+                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
                         f"Your Telehealth Appointment with {booking.client.firstname} " + \
                             f"{booking.client.lastname} was Canceled",
                         f"Unfortunately {booking.client.firstname} {booking.client.lastname} has " + \
