@@ -70,7 +70,9 @@ from odyssey.utils.constants import (
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE,
     IMAGE_DIMENSIONS,
-    DEV_EMAIL_DOMAINS)
+    DEV_EMAIL_DOMAINS,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID)
 from odyssey.utils.message import send_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
@@ -1632,8 +1634,8 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
                     resource_name = LookupClinicalCareTeamResources.query.filter_by(idx=authorization.resource_id).one_or_none().resource_name
                     create_notification(
                         user_id,
-                        4,
-                        20,
+                        NOTIFICATION_SEVERITY_TO_ID.get('Low'),
+                        NOTIFICATION_TYPE_TO_ID.get('Health'),
                         f"{current_user.firstname} {current_user.lastname} has requested access " + \
                             f"to your {resource_name} data",
                         f"Would you like to grant {current_user.firstname} {current_user.lastname} " + \
