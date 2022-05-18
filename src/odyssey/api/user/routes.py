@@ -613,47 +613,6 @@ class RefreshToken(BaseResource):
         return {'access_token': access_token,
                 'refresh_token': new_refresh_token}, 201
 
-@ns.route('/registration-portal/verify')
-@ns.doc(params={'portal_id': "registration portal id"})
-@ns.deprecated
-class VerifyPortalId(BaseResource):
-    """
-    Verify registration portal id and update user type
-    
-    New users registered by client services must first go through this endpoint in 
-    order to access any other resource. This API completes the user's registration
-    so they may then request an API token. 
-    
-    """
-    def put(self):
-        """
-        check token validity
-        bring up user
-        update user type (client or staff)
-        """
-        portal_id = request.args.get("portal_id")
-
-        decoded_token = verify_jwt(portal_id)
-
-        user = User.query.filter_by(user_id=decoded_token['uid']).one_or_none()
-        
-        if not user:
-            raise Unauthorized
-
-        if decoded_token['utype'] == 'client':
-            user.is_client = True
-            client_info = ClientInfoSchema().load({'user_id': user.user_id})
-            db.session.add(client_info)
-        elif decoded_token['utype'] == 'staff':
-            user.is_staff = True
-            user.was_staff = True
-
-        # mark user email as verified        
-        user.email_verified = True
-        db.session.commit()
-        
-        return 200
-
 @ns.route('/subscription/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class UserSubscriptionApi(BaseResource):

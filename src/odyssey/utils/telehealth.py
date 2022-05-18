@@ -1,9 +1,10 @@
 import logging
-import random
 
 from datetime import date, datetime, timedelta, time
-from typing import Any
 
+from boto3.dynamodb.conditions import Attr
+
+import boto3
 from dateutil import tz
 from flask import current_app
 from sqlalchemy import select
@@ -14,24 +15,20 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupTerritoriesOfOperations
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.telehealth.models import(
-    TelehealthBookingDetails,
-    TelehealthChatRooms, 
     TelehealthBookings, 
     TelehealthStaffAvailability, 
     TelehealthBookingStatus,
     TelehealthStaffAvailabilityExceptions
 )
-from odyssey.api.telehealth.schemas import TelehealthBookingStatusSchema
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
-from odyssey.api.payment.models import PaymentHistory
-from odyssey.integrations.wheel import Wheel
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils.constants import (
     DAY_OF_WEEK,
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TELEHEALTH_START_END_BUFFER)
 from odyssey.utils.files import FileDownload
+from odyssey.utils.misc import date_validator
 
 logger = logging.getLogger(__name__)
 
@@ -318,8 +315,6 @@ def verify_availability(
     # Check to see the client and staff still have the requested time slot available
     # - current bookings
     # - staff availability
-    #       - if staff from wheel, query wheel for availability
-    #       - else, check the StaffAvailability table 
     ###
     
     # Bring up the current bookings for the staff and client
@@ -351,34 +346,22 @@ def verify_availability(
                     utc_end_idx < booking.booking_window_id_end_time_utc)):
                 raise BadRequest('There already is a practitioner appointment for this time.')
 
-    ##
-    # ensure staff still has the same availability
-    # if staff is a wheel clinician, query wheel for their current availability
-    ##
-    ########### WHEEL #########
-        # wheel = Wheel()
-        # wheel_clinician_ids = wheel.clinician_ids(key='user_id')
 
-    if False: #staff_user_id in wheel_clinician_ids:
-        has_availability = wheel.openings(
-            target_time_range = (target_start_datetime_utc-timedelta(minutes=5), target_end_datetime_utc+timedelta(minutes=5)), 
-            location_id = client_location_id,
-            clinician_id=wheel_clinician_ids[staff_user_id])[target_start_datetime_utc.date()].get(staff_user_id)
-    else:
-        # TODO consider day overlaps???
-        staff_availability = db.session.execute(
-            select(TelehealthStaffAvailability).
-            filter(
-                TelehealthStaffAvailability.booking_window_id.in_([idx for idx in range (utc_start_idx,utc_end_idx + 1)]),
-                TelehealthStaffAvailability.day_of_week == DAY_OF_WEEK[target_start_datetime_utc.weekday()],
-                TelehealthStaffAvailability.user_id == staff_user_id
-                )
-        ).scalars().all()
-        # Make sure the full range of requested idices are found in staff_availability
-        available_indices = {line.booking_window_id for line in staff_availability}
-        requested_indices = {req_idx for req_idx in range(utc_start_idx, utc_end_idx + 1)}
-        has_availability = requested_indices.issubset(available_indices)
-    
+
+    # TODO consider day overlaps???
+    staff_availability = db.session.execute(
+        select(TelehealthStaffAvailability).
+        filter(
+            TelehealthStaffAvailability.booking_window_id.in_([idx for idx in range (utc_start_idx,utc_end_idx + 1)]),
+            TelehealthStaffAvailability.day_of_week == DAY_OF_WEEK[target_start_datetime_utc.weekday()],
+            TelehealthStaffAvailability.user_id == staff_user_id
+            )
+    ).scalars().all()
+    # Make sure the full range of requested idices are found in staff_availability
+    available_indices = {line.booking_window_id for line in staff_availability}
+    requested_indices = {req_idx for req_idx in range(utc_start_idx, utc_end_idx + 1)}
+    has_availability = requested_indices.issubset(available_indices)
+
     if not has_availability:
         raise BadRequest("Staff does not currently have this time available")
 
@@ -420,10 +403,6 @@ def complete_booking(booking_id: int):
     # complete twilio room if making call over, catch error or raise if not expected error
     twilio = Twilio()
     twilio.complete_telehealth_video_room(booking_id)
-    ##### WHEEL #####        
-    # if booking.external_booking_id:
-    #     wheel = Wheel()
-    #     wheel.complete_consult(booking.external_booking_id)
 
     db.session.commit()
     return 'Booking Completed by System'
@@ -463,3 +442,34 @@ def get_booking_increment_data():
 
     return({'length': booking_time_increment_length,
             'max_idx': booking_max_increment_idx})
+
+
+def scheduled_maintenance_date_times(start_date, end_date):
+    day_when = datetime.now()
+    # beginning is basically the same as the get on /maintenance/schedule/
+    dynamodb = boto3.resource('dynamodb')  # get resource
+    table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])  # changes on defaults.py value
+
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
+    start_date = date_validator(start_date)
+    end_date = date_validator(end_date)
+
+    response = table.scan(
+        FilterExpression=Attr('deleted').eq('False') & (
+            Attr('end_time').between(start_date, end_date) |
+            Attr('start_time').between(start_date, end_date)
+        ))
+    if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+        raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
+
+    blocks = response['Items']  # just need the items
+
+    result = []  # filter out the deleted maintenance blocks
+    for block in blocks:
+        result.append({  # build list of dicts containing what we need
+            'start_time': block['start_time'],
+            'end_time': block['end_time'],
+        })
+
+    return result

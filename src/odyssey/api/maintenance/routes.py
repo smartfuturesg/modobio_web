@@ -9,10 +9,13 @@ from flask_accepts import accepts, responds
 from odyssey.api import api
 from odyssey.api.maintenance.schemas import MaintenanceBlocksDeleteSchema
 from odyssey.api.maintenance.schemas import MaintenanceBlocksCreateSchema
+from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from werkzeug.exceptions import BadRequest
-
+from sqlalchemy import and_, or_, select
+from odyssey.utils.misc import get_time_index
 
 logger = logging.getLogger(__name__)
 
@@ -127,8 +130,51 @@ class MaintenanceApi(BaseResource):
         if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
             raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
 
+        sm_start = request.json["start_time"]
+        sm_end = request.json["end_time"]
+        sm_start = datetime.fromisoformat(sm_start)
+        sm_end = datetime.fromisoformat(sm_end)
+        target_time_window_start = get_time_index(sm_start)
+        target_time_window_end = get_time_index(sm_end)
+
+        # find all accepted bookings who have not been notified yet
+        bookings_to_cancel = TelehealthBookings.query
+        if target_time_window_start > target_time_window_end:
+            # this will happen from 22:00 to 23:55
+            # in this case, we have to query across two dates
+            bookings_to_cancel = \
+                bookings_to_cancel.filter(
+                    or_(
+                        and_(
+                            TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                            TelehealthBookings.target_date_utc == sm_start.date()
+                        ),
+                        and_(
+                            TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                            TelehealthBookings.target_date_utc == sm_end.date()
+                        )
+                    )
+                ).all()
+        else:
+            # otherwise just query for bookings whose start id falls between the target times on for today
+            bookings_to_cancel = \
+                bookings_to_cancel.filter(
+                    and_(
+                        TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                        TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                        TelehealthBookings.target_date_utc == sm_end.date()
+                    )
+                ).all()
+
+        # cancel each of them
+        for booking in bookings_to_cancel:
+            cancel_telehealth_appointment(booking, False, 'Conflicted with newly scheduled server maintenance')
+
+        logger.info(f'Scheduled maintenance for {request.json["start_time"]} to {request.json["end_time"]}')
+
         # If it was successful, return the newly created block
-        # Returning data since it allows the user to see the block_id that was created without having to perform a subsequent scan request on the database
+        # Returning data since it allows the user to see the block_id that was created without having to perform a
+        # subsequent scan request on the database
         return {"block_id": data["block_id"]}
 
     @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
@@ -171,4 +217,7 @@ class MaintenanceApi(BaseResource):
 
         # If the request to DynamoDB wasn't successful, print out the entire response to help diagnose
         if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
+            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}.')
+
+        logger.info(f'Scheduled maintenance with block_id: {request.json["block_id"]} was deleted.')
+        

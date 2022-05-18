@@ -15,7 +15,6 @@ from sqlalchemy import and_, or_, select
 from odyssey import celery, db, mongo
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
-    process_wheel_webhooks, 
     upcoming_appointment_care_team_permissions, 
     upcoming_appointment_notification_2hr, 
     charge_telehealth_appointment, 
@@ -222,9 +221,11 @@ def cleanup_temporary_care_team():
 @celery.task(base=BaseTaskWithRetry)
 def deploy_webhook_tasks(**kwargs):
     """
+    **Deprecated 5.13.22** Leaving this here because it is a pattern we will want to use for future webhook integrations
+
     This is a persistent background task intended to listen for new entries into the webhook database.
     Each entry represents a webhook request from a third party service. When inserts are detected, this task will 
-    deploy a seperate task to handle the webhook request accordingly. 
+    deploy a separate task to handle the webhook request accordingly. 
 
     The following steps are taken to ensure each request is handled:
     1. Scan monogoDB webhooks database for any unprocessed webhooks. These will be entries which are not labeled as acknowledged
@@ -246,26 +247,29 @@ def deploy_webhook_tasks(**kwargs):
     # search for currently unprocessed webhook tasks, handle them accordingly
     # NOTE: each integration is given a colelction in the webhook database. MongoDB allows searching only one collection 
     # at a time. So this step must be done for each integration
-    unprocessed_wheel_wh = mongo.db.wheel.find({ "$or" : [{"modobio_meta.processed":False} , {"modobio_meta.acknowleged" : False}]})
+    # unprocessed_wheel_wh = mongo.db.wheel.find({ "$or" : [{"modobio_meta.processed":False} , {"modobio_meta.acknowleged" : False}]})
 
-    # send wheel payloads for processing
-    for wh_payload in unprocessed_wheel_wh:
-        wh_payload['_id'] = str(wh_payload['_id'])
-        logger.info("deploying task originating from wheel webhook")
-        process_wheel_webhooks.delay(wh_payload)
+    # # send wheel payloads for processing
+    # for wh_payload in unprocessed_wheel_wh:
+    #     wh_payload['_id'] = str(wh_payload['_id'])
+    #     logger.info("deploying task originating from wheel webhook")
+    #     process_wheel_webhooks.delay(wh_payload)
 
-    # open while loop waits for new inserts to the database from any collection
-    while True:
-        wh_payload = stream.try_next()
-        if wh_payload:
-            wh_payload['fullDocument']['_id'] = str(wh_payload['fullDocument']['_id'])
-            logger.info(f"deploying task originating from {wh_payload['ns']['coll']} webhook")
-            # shoot off background task for each integration accordingly 
-            if wh_payload['ns']['coll'] == 'wheel':
-                process_wheel_webhooks.delay(wh_payload['fullDocument'])
+    # # open while loop waits for new inserts to the database from any collection
+    # while True:
+    #     wh_payload = stream.try_next()
+    #     if wh_payload:
+    #         wh_payload['fullDocument']['_id'] = str(wh_payload['fullDocument']['_id'])
+    #         logger.info(f"deploying task originating from {wh_payload['ns']['coll']} webhook")
+    #         # shoot off background task for each integration accordingly 
+    #         if wh_payload['ns']['coll'] == 'wheel':
+    #             process_wheel_webhooks.delay(wh_payload['fullDocument'])
 
-@worker_ready.connect()
+    pass
+
+# @worker_ready.connect()
 def startup_tasks(**kwargs):
+    """ **Deprecated 5.13.22** leave here for future webhook tasks"""
     deploy_webhook_tasks.delay()
 
 @celery.task()
@@ -380,7 +384,7 @@ def remove_expired_availability_exceptions():
     Checks for availability exceptions whose exception_date is in the past and removes them.
     """
     
-    current_date = datetime.now(timezone.utc)
+    current_date = datetime.now(timezone.utc).date()
     logger.info('Deploying remove expired exceptions test')
     exceptions = TelehealthStaffAvailabilityExceptions.query.filter(
         TelehealthStaffAvailabilityExceptions.exception_date < current_date
