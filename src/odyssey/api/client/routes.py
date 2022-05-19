@@ -1631,7 +1631,8 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
                 authorization.status = status
                 if status == 'pending':
                     #if this is another user requesting data access, create a notification for the client
-                    resource_name = LookupClinicalCareTeamResources.query.filter_by(idx=authorization.resource_id).one_or_none().resource_name
+                    resource_name = LookupClinicalCareTeamResources.query.filter_by(resource_id=authorization.resource_id).one_or_none().resource_name
+                    resource_name = resource_name.replace('_', ' ')
                     create_notification(
                         user_id,
                         NOTIFICATION_SEVERITY_TO_ID.get('Low'),
