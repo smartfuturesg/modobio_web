@@ -76,8 +76,8 @@ from odyssey.utils.constants import (
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE,
     NOTIFICATION_SEVERITY_TO_ID,
-    NOTIFICATION_TYPE_TO_ID
-    SCHEDULED_MAINTENANCE_PADDING,
+    NOTIFICATION_TYPE_TO_ID,
+    SCHEDULED_MAINTENANCE_PADDING
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
