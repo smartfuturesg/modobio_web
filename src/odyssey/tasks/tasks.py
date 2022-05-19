@@ -90,7 +90,7 @@ def upcoming_appointment_notification_2hr(booking_id):
             booking.staff_user_id, 
             NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
             NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            "You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
             f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please review your client's medical information before taking the call.",
             'Provider',
             expires_at
@@ -102,7 +102,7 @@ def upcoming_appointment_notification_2hr(booking_id):
             booking.client_user_id, 
             NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
             NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            "You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
             f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please ensure your medical information is up to date before taking the call.",
             'Client',
             expires_at
