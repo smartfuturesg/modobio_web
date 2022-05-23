@@ -1,6 +1,6 @@
 import logging
 
-from odyssey.utils.constants import APPLE_APPSTORE_BASE_URL
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -19,6 +19,7 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.user.models import UserSubscriptions
 from odyssey.api.user.schemas import UserSubscriptionsSchema
+from odyssey.utils.constants import APPLE_APPSTORE_BASE_URLS
 
 
 
@@ -74,11 +75,11 @@ class AppStore:
         # query Apple Storekit for subscription status and details
         #   as per apple recommendation, use the production url first, then try the 
         #   storekit url if the transaction_id is not found: error code 4040005
-        
+
         access_token = self._generate_auth_jwt()
         headers = {'Authorization': f'Bearer {access_token}'}
 
-        for url in APPLE_APPSTORE_BASE_URL:
+        for url in APPLE_APPSTORE_BASE_URLS:
             response = requests.get(url + '/inApps/v1/subscriptions/' + original_transaction_id,
                     headers=headers )
             try:

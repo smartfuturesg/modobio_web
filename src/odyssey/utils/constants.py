@@ -971,4 +971,4 @@ FERTILITY_STATUSES = {
 
 
 
-APPLE_APPSTORE_BASE_URL = ('https://api.storekit.itunes.apple.com', 'https://api.storekit-sandbox.itunes.apple.com')
+APPLE_APPSTORE_BASE_URLS = ('https://api.storekit.itunes.apple.com', 'https://api.storekit-sandbox.itunes.apple.com')
