@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.utils.constants import APPLE_APPSTORE_BASE_URL
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -28,6 +30,7 @@ class AppStore:
         self.private_api_key = current_app.config.get('APPLE_APPSTORE_API_KEY').replace('\\\n', '\n') # additional '\' added when reading in from env var (\\ in DEV)
         self.private_api_key = self.private_api_key.replace('\\n', '\n') # additional '\' added when reading in from env var
         self.api_key_id = current_app.config.get('APPLE_APPSTORE_API_KEY_ID')
+        
 
     def _generate_auth_jwt(self):
         """
@@ -55,7 +58,7 @@ class AppStore:
 
     def latest_transaction(self, original_transaction_id: str):
         """
-        User the appstore API to bring up the client's most recent transaction.
+        Use the appstore API to bring up the client's most recent transaction.
 
         Parameters
         ----------
@@ -68,16 +71,21 @@ class AppStore:
             A tuple containing transaction_info, renewal_info, and status.
         """
 
-        # query Apple Storekit for subscription status and details, update if necessary
+        # query Apple Storekit for subscription status and details
+        #   as per apple recommendation, use the production url first, then try the 
+        #   storekit url if the transaction_id is not found: error code 4040005
+        
         access_token = self._generate_auth_jwt()
         headers = {'Authorization': f'Bearer {access_token}'}
-        response = requests.get(current_app.config['APPLE_APPSTORE_BASE_URL'] + '/inApps/v1/subscriptions/' + original_transaction_id,
-                headers=headers )
-            
-        try:
-            response.raise_for_status()
-        except:
-            raise BadRequest(f'Apple AppStore returned the following error: {response.text}')
+
+        for url in APPLE_APPSTORE_BASE_URL:
+            response = requests.get(url + '/inApps/v1/subscriptions/' + original_transaction_id,
+                    headers=headers )
+            try:
+                response.raise_for_status()
+            except:
+                if response.json().get('errorCode') != 4040005:
+                    raise BadRequest(f'Apple AppStore returned the following error: {response.text}')
 
         payload = response.json()
 
