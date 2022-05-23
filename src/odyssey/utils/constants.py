@@ -970,6 +970,8 @@ FERTILITY_STATUSES = {
     ]
 }
 
+SCHEDULED_MAINTENANCE_PADDING = 30
+
 NOTIFICATION_TYPE_TO_ID = {
     'Account': 1,
     'System Maintenance': 2,

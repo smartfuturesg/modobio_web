@@ -2,7 +2,11 @@ import logging
 
 from datetime import date, datetime, timedelta, time
 
+from boto3.dynamodb.conditions import Attr
+
+import boto3
 from dateutil import tz
+from flask import current_app
 from sqlalchemy import select
 from sqlalchemy.sql.expression import and_, or_
 from werkzeug.exceptions import BadRequest
@@ -24,6 +28,7 @@ from odyssey.utils.constants import (
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TELEHEALTH_START_END_BUFFER)
 from odyssey.utils.files import FileDownload
+from odyssey.utils.misc import date_validator
 
 logger = logging.getLogger(__name__)
 
@@ -437,3 +442,34 @@ def get_booking_increment_data():
 
     return({'length': booking_time_increment_length,
             'max_idx': booking_max_increment_idx})
+
+
+def scheduled_maintenance_date_times(start_date, end_date):
+    day_when = datetime.now()
+    # beginning is basically the same as the get on /maintenance/schedule/
+    dynamodb = boto3.resource('dynamodb')  # get resource
+    table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])  # changes on defaults.py value
+
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
+    start_date = date_validator(start_date)
+    end_date = date_validator(end_date)
+
+    response = table.scan(
+        FilterExpression=Attr('deleted').eq('False') & (
+            Attr('end_time').between(start_date, end_date) |
+            Attr('start_time').between(start_date, end_date)
+        ))
+    if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+        raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
+
+    blocks = response['Items']  # just need the items
+
+    result = []  # filter out the deleted maintenance blocks
+    for block in blocks:
+        result.append({  # build list of dicts containing what we need
+            'start_time': block['start_time'],
+            'end_time': block['end_time'],
+        })
+
+    return result

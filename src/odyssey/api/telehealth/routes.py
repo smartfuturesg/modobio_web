@@ -1,7 +1,5 @@
 from flask_sqlalchemy import Model
 from bson import ObjectId
-from datetime import datetime, time, timedelta
-from dateutil import tz
 from itertools import groupby
 from operator import itemgetter
 import logging
@@ -76,13 +74,17 @@ from odyssey.utils.constants import (
     DAY_OF_WEEK,
     ALLOWED_AUDIO_TYPES,
     ALLOWED_IMAGE_TYPES,
-    IMAGE_MAX_SIZE
+    IMAGE_MAX_SIZE,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID,
+    SCHEDULED_MAINTENANCE_PADDING
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
-    check_user_existence
+    check_user_existence,
+    create_notification
 )
 from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
@@ -237,6 +239,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         return {'twilio_token': token,
                 'conversation_sid': booking.chat_room.conversation_sid}
 
+
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client user ID'})
 class TelehealthClientTimeSelectApi(BaseResource):
@@ -246,12 +249,14 @@ class TelehealthClientTimeSelectApi(BaseResource):
     def get(self, user_id):
         """
         Checks the booking requirements stored in the client queue
-
+        Removes times so that appointments end 0.5 hours before scheduled maintenance
+            and only start 0.5 hours after maintenance is over
         Responds with available booking times localized to the client's timezone
         """
         check_client_existence(user_id)
 
-        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).\
+            order_by(TelehealthQueueClientPool.priority.desc(), TelehealthQueueClientPool.target_date.asc()).first()
         if not client_in_queue:
             raise BadRequest('Client is not in the queue.')
 
@@ -262,7 +267,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
         duration = client_in_queue.duration
         profession_type = client_in_queue.profession_type
 
-        days_out = 0
+        utc_target_datetime, _, _, _ = telehealth_utils.get_utc_start_day_time(local_target_date, client_tz)
+
+        # list of dicts, dicts have two datetime start_time and end_time
+        scheduled_maintenances = telehealth_utils.scheduled_maintenance_date_times(
+            utc_target_datetime-timedelta(days=1), (utc_target_datetime+timedelta(days=15))
+        )  # minus a day and 15 not 14 to be on the safe side of things
+
         # days_available = 
         # {local_target_date(datetime.date):
         #   {start_time_idx_1: 
@@ -275,11 +286,14 @@ class TelehealthClientTimeSelectApi(BaseResource):
         #         'practitioner_ids':  {user_id, user_id (set)}
         #       }
         #   }
-        #}
+        # }
         days_available = {}
+        days_out = 0
         times_available = 0
+        # limit 10 here still but since one pass here can produce as many as 96, it must still be limited to 10 below
         while days_out <= 14 and times_available < 10:
             local_target_date2 = local_target_date + timedelta(days=days_out)
+
             day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc = \
                 telehealth_utils.get_utc_start_day_time(local_target_date2, client_tz)
             
@@ -289,20 +303,49 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 start_time_window_utc.idx, 
                 day_end_utc.weekday(), 
                 end_time_window_utc.idx,
-                duration)
+                duration,
+            )
                 
             # available_times_with_practitioners =
             # {start_time_idx: {'date_start_utc': datetime.date, 'practitioner_ids': {set of available user_ids}}
             # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioner_ids': {10}}
             available_times_with_practitioners = {}
-            practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
+            practitioner_ids_set = set()  # {user_id, user_id} set of user_id of available practitioners
             
             for block in time_blocks:
+                conflict_window_datetime_start_utc = time_blocks[block][0][0]  # get date datetime
+                conflict_window_datetime_start_utc = conflict_window_datetime_start_utc.replace(hour=0, minute=0)
+                # must add to this because datetime is just date and minutes is separate and in 5 minute increments
+                conflict_window_datetime_start_utc = conflict_window_datetime_start_utc + \
+                    timedelta(minutes=((time_blocks[block][0][2] - 1) * 5))  # not zeo indexed so minus one there
+                conflict_window_datetime_end_utc = conflict_window_datetime_start_utc + timedelta(minutes=duration)
+
+                and_continue = False
+                for maintenance in scheduled_maintenances:
+                    # conflicts in descending order of likelihood, short circuits speed this up as much as it can be
+                    # appointment starts during maintenance OR appointment ends during maintenance
+                    # OR maintenance occurs in midst of appointment OR maintenance encapsulates appointment
+                    m_start_time = datetime.fromisoformat(maintenance['start_time'])
+                    m_end_time = datetime.fromisoformat(maintenance['end_time'])
+                    m_start_time = m_start_time - timedelta(minutes=SCHEDULED_MAINTENANCE_PADDING)
+                    m_end_time = m_end_time + timedelta(minutes=SCHEDULED_MAINTENANCE_PADDING)
+
+                    if (m_start_time < conflict_window_datetime_start_utc < m_end_time) or \
+                            (m_start_time < conflict_window_datetime_end_utc < m_end_time) or \
+                            (conflict_window_datetime_start_utc < m_start_time and
+                             conflict_window_datetime_end_utc > m_end_time) or \
+                            (conflict_window_datetime_start_utc > m_start_time and
+                             conflict_window_datetime_end_utc < m_end_time):
+                        and_continue = True
+                        break  # break maintenance for loop
+                if and_continue:
+                    continue  # but continue block for loop
+
                 _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
                 
-                #if the user has a staff + client account, it may be possible for their staff account
-                #to appear as an option when attempting to book a meeting as a client
-                #to prevent this, we check if the given user id is in the list of practitioners and remove it
+                # if the user has a staff + client account, it may be possible for their staff account
+                # to appear as an option when attempting to book a meeting as a client
+                # to prevent this, we check if the given user id is in the list of practitioners and remove it
                 if user_id in _practitioner_ids:
                     _practitioner_ids.remove(token_auth.current_user()[0].user_id)
                     
@@ -326,11 +369,11 @@ class TelehealthClientTimeSelectApi(BaseResource):
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
         practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, profession_type, duration)
 
-        #buffer not taken into consideration here becuase that only matters to practitioner not client
+        #buffer not taken into consideration here because that only matters to practitioner not client
         final_dict = []
         for day in days_available:
             for time in days_available[day]:
-                target_date_utc = days_available[day][time]['date_start_utc']                
+                target_date_utc = days_available[day][time]['date_start_utc']
                 client_window_id_start_time_utc = time
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
 
@@ -339,7 +382,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 datetime_end = datetime_start + timedelta(minutes=duration)
                 localized_window_start = LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()).first().idx
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
-                
+
                 final_dict.append({
                     'practitioners_available_ids': list(days_available[day][time]['practitioner_ids']),
                     'target_date': datetime_start.date(),
@@ -348,9 +391,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
                     'booking_window_id_start_time': localized_window_start,
                     'booking_window_id_end_time': localized_window_end
                 })
-        payload = {'appointment_times': final_dict,
-                   'total_options': len(final_dict),
-                   'practitioners_info': practitioners_info}
+
+        payload = {
+            'appointment_times': final_dict,
+            'total_options': len(final_dict),
+            'practitioners_info': practitioners_info,
+        }
 
         return payload
 
@@ -843,11 +889,45 @@ class TelehealthBookingsApi(BaseResource):
             if new_status == 'Canceled':
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
+                booking_time = LookupBookingTimeIncrements.query. \
+                    filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                booking_datetime = datetime.combine(booking.target_date, booking_time)
+                expiration_datetime = booking_datetime + timedelta(hours=72)
                 if current_user.user_id == booking.staff_user_id:
+                    #cancel appointment with refund and send client notification that meeting was cancelled
                     cancel_telehealth_appointment(
                         booking,
                         reason="Practitioner Cancellation",
                         refund=True)
+                    create_notification(
+                        booking.client_user_id,
+                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
+                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+                        f"Your Telehealth Appointment with {booking.practitioner.firstname} " + \
+                            f"{booking.practitioner.lastname} was Canceled",
+                        f"Unfortunately {booking.practitioner.firstname} {booking.practitioner.lastname} " + \
+                        f"has canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
+                        'Client',
+                        expiration_datetime
+                    )
+                else:
+                    #cancel appointment without refund and send staff notification that meeting was cancelled
+                    cancel_telehealth_appointment(
+                        booking,
+                        reason="Client Cancellation",
+                        refund=False
+                    )  
+                    create_notification(
+                        booking.staff_user_id,
+                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
+                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+                        f"Your Telehealth Appointment with {booking.client.firstname} " + \
+                            f"{booking.client.lastname} was Canceled",
+                        f"Unfortunately {booking.client.firstname} {booking.client.lastname} has " + \
+                            f"canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
+                        'Provider',
+                        expiration_datetime
+                    )             
 
         booking.update(data)
         db.session.commit()
