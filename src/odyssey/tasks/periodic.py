@@ -439,7 +439,7 @@ celery.conf.beat_schedule = {
     },
     #availability
     'remove_expired_availability_exceptions': {
-        'task': 'odyssey.periodic.remove_expired_availability_exceptions',
+        'task': 'odyssey.tasks.periodic.remove_expired_availability_exceptions',
         'schedule': crontab(hour='0', minute='0')
     }
 }
