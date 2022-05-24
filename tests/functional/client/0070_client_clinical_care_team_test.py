@@ -8,6 +8,7 @@ from sqlalchemy import select
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.api.user.models import User
+from odyssey.api.notifications.models import Notifications
 
 from tests.functional.doctor.data import doctor_blood_tests_data
 from tests.utils import login
@@ -313,3 +314,9 @@ def test_clinical_care_team_access(test_client, care_team):
 
     assert response.status_code == 201
     assert response.json['notes'] == doctor_blood_tests_data['notes']
+
+    #clean up notifications that were created from care team requests so they don't impact future tests
+    notifications = Notifications.query.all()
+    for notification in notifications:
+        test_client.db.session.delete(notification)
+    test_client.db.session.commit()

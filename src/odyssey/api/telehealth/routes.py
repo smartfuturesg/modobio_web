@@ -75,13 +75,16 @@ from odyssey.utils.constants import (
     ALLOWED_AUDIO_TYPES,
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE,
-    SCHEDULED_MAINTENANCE_PADDING,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID,
+    SCHEDULED_MAINTENANCE_PADDING
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
-    check_user_existence
+    check_user_existence,
+    create_notification
 )
 from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
@@ -886,11 +889,45 @@ class TelehealthBookingsApi(BaseResource):
             if new_status == 'Canceled':
                 #if staff initiated cancellation, refund should be true
                 #if client initiated, refund should be false
+                booking_time = LookupBookingTimeIncrements.query. \
+                    filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                booking_datetime = datetime.combine(booking.target_date, booking_time)
+                expiration_datetime = booking_datetime + timedelta(hours=72)
                 if current_user.user_id == booking.staff_user_id:
+                    #cancel appointment with refund and send client notification that meeting was cancelled
                     cancel_telehealth_appointment(
                         booking,
                         reason="Practitioner Cancellation",
                         refund=True)
+                    create_notification(
+                        booking.client_user_id,
+                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
+                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+                        f"Your Telehealth Appointment with {booking.practitioner.firstname} " + \
+                            f"{booking.practitioner.lastname} was Canceled",
+                        f"Unfortunately {booking.practitioner.firstname} {booking.practitioner.lastname} " + \
+                        f"has canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
+                        'Client',
+                        expiration_datetime
+                    )
+                else:
+                    #cancel appointment without refund and send staff notification that meeting was cancelled
+                    cancel_telehealth_appointment(
+                        booking,
+                        reason="Client Cancellation",
+                        refund=False
+                    )  
+                    create_notification(
+                        booking.staff_user_id,
+                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
+                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+                        f"Your Telehealth Appointment with {booking.client.firstname} " + \
+                            f"{booking.client.lastname} was Canceled",
+                        f"Unfortunately {booking.client.firstname} {booking.client.lastname} has " + \
+                            f"canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
+                        'Provider',
+                        expiration_datetime
+                    )             
 
         booking.update(data)
         db.session.commit()
