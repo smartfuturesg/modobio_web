@@ -160,56 +160,14 @@ def get_practitioners_available(time_block, q_request):
         exception = False
         
         #detect if day 1 of booking is inside an exception for this practitioner on this date       
-        exception1 = TelehealthStaffAvailabilityExceptions.query \
-            .filter_by(user_id=user_id, exception_date=date1.date(), is_busy=True) \
-            .filter(
-                or_(
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day1_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day1_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day1_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day1_end
-                    )
-                )
-            ).all()
+        exception1 = check_availability_exceptions(user_id, True, date1.date(), day1_start, day1_end)
             
         if len(exception1) > 0:
             exception = True
             
         if day2 and not exception:
             #detect if day 2 of booking is inside an exception for this practitioner on this date       
-            exception2 = TelehealthStaffAvailabilityExceptions.query \
-            .filter_by(user_id=user_id, exception_date=date2.date(), is_busy=True) \
-            .filter(
-                or_(
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day2_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day2_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day2_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day2_end
-                    )
-                )
-            ).all()
+            exception2 = check_availability_exceptions(user_id, True, date1.date(), day1_start, day1_end)
             
             if len(exception2) > 0:
                 exception = True
@@ -337,8 +295,12 @@ def verify_availability(
     available_indices = {line.booking_window_id for line in staff_availability}
     requested_indices = {req_idx for req_idx in range(utc_start_idx, utc_end_idx + 1)}
     has_availability = requested_indices.issubset(available_indices)
-
-    if not has_availability:
+    
+    # check if staff has a busy exception that conflicts with this time
+    exceptions = check_availability_exceptions(staff_user_id, True, target_start_datetime_utc.date(),
+                                               utc_start_idx, utc_end_idx)
+    
+    if not has_availability or len(exceptions) > 0:
         raise BadRequest("Staff does not currently have this time available")
 
     return 
@@ -449,3 +411,39 @@ def scheduled_maintenance_date_times(start_date, end_date):
         })
 
     return result
+
+def check_availability_exceptions(user_id, is_busy, date, start_time_id, end_time_id):
+    """
+    Checks availability exceptions to detect how an exception interacts with a 
+    potential booking.
+
+    Args:
+        user_id (int): user_id of the staff member to check exceptions for
+        is_busy (bool): denotes whether to check for busy or free exceptions
+        date (date): date in question
+        start_time_id (int): booking_id_start_time_utc of the booking in question
+        end_time_id (int): booking_id_end_time_utc of the booking in question
+    """
+    
+    return TelehealthStaffAvailabilityExceptions.query \
+    .filter_by(user_id=user_id, exception_date=date, is_busy=is_busy) \
+    .filter(
+        or_(
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= start_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > start_time_id
+            ),
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < end_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= end_time_id
+            ),
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= start_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < end_time_id
+            ),
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > start_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= end_time_id
+            )
+        )
+    ).all()
