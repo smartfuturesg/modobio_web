@@ -20,7 +20,7 @@ from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupSubscriptions
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
+from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.integrations.twilio import Twilio
@@ -248,46 +248,53 @@ def store_telehealth_transcript(booking_id: int):
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
     
     transcript = twilio.get_booking_transcript(booking.idx)
-
-    # if there is media present in the transcript, store it in an s3 bucket
-    hex_token = secrets.token_hex(4)
-    for message_id, message in enumerate(transcript):
-        if message['media']:
-            for media_id, media in enumerate(message['media']):
-                # download media from twilio 
-                media_content = twilio.get_media(media['sid'])
-
-                fu = FileUpload(
-                    BytesIO(media_content),
-                    booking.client_user_id,
-                    prefix=f'telehealth/booking_{booking_id}/message_{message_id}/')
-                fu.validate()
-                fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
-
-                media['s3_path'] = fu.filename
-                transcript[message_id]['media'][media_id] = media
-
-    payload = {
-        'created_at': datetime.utcnow().isoformat(),
-        'booking_id': booking.idx,
-        'transcript': transcript
-    }
-    # insert transcript into mongo db under the telehealth_transcripts collection
-    if current_app.config['MONGO_URI']:
-        _id = mongo.db.telehealth_transcripts.insert(payload)
-        logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
-    else:
-        logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')
-        _id = None  
-
-    # delete the conversation from twilio if the transcript was successfully stored on mongo
-    if _id:
+    
+    if len(transcript) == 0:
+        #delete from twilio, nothing to store
         twilio.delete_conversation(booking.chat_room.conversation_sid)
         logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
-        booking.chat_room.conversation_sid = None
+        db.session.delete(TelehealthChatRooms.query.filter_by(booking_id=booking.idx))
+        logger.info(f"Booking ID {booking.idx}: Chat Room data deleted from db.")
+    else:
+        # if there is media present in the transcript, store it in an s3 bucket
+        hex_token = secrets.token_hex(4)
+        for message_id, message in enumerate(transcript):
+            if message['media']:
+                for media_id, media in enumerate(message['media']):
+                    # download media from twilio 
+                    media_content = twilio.get_media(media['sid'])
+
+                    fu = FileUpload(
+                        BytesIO(media_content),
+                        booking.client_user_id,
+                        prefix=f'telehealth/booking_{booking_id}/message_{message_id}/')
+                    fu.validate()
+                    fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
+
+                    media['s3_path'] = fu.filename
+                    transcript[message_id]['media'][media_id] = media
+
+        payload = {
+            'created_at': datetime.utcnow().isoformat(),
+            'booking_id': booking.idx,
+            'transcript': transcript
+        }
+        # insert transcript into mongo db under the telehealth_transcripts collection
+        if current_app.config['MONGO_URI']:
+            _id = mongo.db.telehealth_transcripts.insert(payload)
+            logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
+        else:
+            logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')
+            _id = None  
+
+        # delete the conversation from twilio if the transcript was successfully stored on mongo
+        if _id:
+            twilio.delete_conversation(booking.chat_room.conversation_sid)
+            logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
+            booking.chat_room.conversation_sid = None
         
-    # delete the conversation sid entry, add transcript_object_id from mongodb
-    booking.chat_room.transcript_object_id = str(_id)
+        # delete the conversation sid entry, add transcript_object_id from mongodb
+        booking.chat_room.transcript_object_id = str(_id)
 
     db.session.commit()
 
