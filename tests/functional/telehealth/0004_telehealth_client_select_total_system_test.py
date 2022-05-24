@@ -45,7 +45,7 @@ def test_client_time_select(test_client, staff_availabilities):
         headers=test_client.client_auth_header)
 
     assert response.status_code == 200
-    assert response.json['total_options'] == 95
+    assert response.json['total_options'] == 94
 
 
 def test_generate_staff_availability(test_client, telehealth_staff):
