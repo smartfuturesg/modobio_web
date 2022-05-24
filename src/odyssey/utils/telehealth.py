@@ -26,7 +26,7 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.utils.constants import (
     DAY_OF_WEEK,
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
-    TELEHEALTH_START_END_BUFFER)
+)
 from odyssey.utils.files import FileDownload
 from odyssey.utils.misc import date_validator
 
@@ -81,53 +81,30 @@ def get_possible_ranges(
     if weekday_start != weekday_end:
         # range example ( start_idx - end_idx )
         # end includes the buffer + 1 to make the idx inclusive in the for loop
-        for pos_start in range(start_time_idx, last_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER + 1, available_increments):
-            # base case: start_time_idx == 1
-            if pos_start == 1 and TELEHEALTH_START_END_BUFFER > 0:
-                time_blocks[pos_start] = (
-                    (target_date - timedelta(days=1), weekday_start - 1, last_time_idx - TELEHEALTH_START_END_BUFFER + 1, last_time_idx), # 5 min buffer
-                    (target_date, weekday_start, pos_start , pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER)
-                )
-            else:
-                # add day1 times
-                time_blocks[pos_start] = (
-                    (target_date, weekday_start, pos_start - TELEHEALTH_START_END_BUFFER, pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER),
-                )
+        for pos_start in range(start_time_idx, last_time_idx - duration_idx_delta + 1, available_increments):
+            time_blocks[pos_start] = (
+                (target_date, weekday_start, pos_start, pos_start + duration_idx_delta),
+            )
 
         # add overlapping times can be 283(23:30) 286(23:45) or ealier ones depending on duration.
         # last possible start time in a day is 286(23:45)
-        for pos_start in range(last_possibe_start, last_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER - 1, -available_increments):
+        for pos_start in range(last_possibe_start, last_time_idx - duration_idx_delta - 1, -available_increments):
             time_blocks[pos_start] = (
-                (target_date, weekday_start, pos_start - TELEHEALTH_START_END_BUFFER, last_time_idx),
-                (target_date + timedelta(days=1), weekday_end, first_time_idx, TELEHEALTH_START_END_BUFFER + duration_idx_delta - (last_time_idx - pos_start))
+                (target_date, weekday_start, pos_start, last_time_idx),
+                (target_date + timedelta(days=1), weekday_end, first_time_idx, duration_idx_delta - (last_time_idx - pos_start))
             )
 
-        for pos_start in range(first_time_idx, end_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER + 1, available_increments): # +1 to make it inclusive
-            # base case: start_time_idx == 1
-            if pos_start == 1 and TELEHEALTH_START_END_BUFFER > 0:
-                time_blocks[pos_start] = (
-                    (target_date, weekday_end - 1, last_time_idx - TELEHEALTH_START_END_BUFFER + 1, last_time_idx), # 5 min buffer
-                    (target_date + timedelta(days=1), weekday_end, pos_start , pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER)
-                )
-            else:
-                # add day2 times
-                time_blocks[pos_start] = (
-                    (target_date+timedelta(days=1), weekday_end, pos_start - TELEHEALTH_START_END_BUFFER, pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER),
-                )
+        # +1 to make it inclusive
+        for pos_start in range(first_time_idx, end_time_idx - duration_idx_delta + 1, available_increments):
+            time_blocks[pos_start] = (
+                (target_date+timedelta(days=1), weekday_end, pos_start, pos_start + duration_idx_delta),
+            )
     
-    else:
-        for pos_start in range(start_time_idx, end_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER + 1, available_increments): # +1 to make it inclusive
-            # base case: start_time_idx == 1
-            if pos_start == 1 and TELEHEALTH_START_END_BUFFER > 0:
-                time_blocks[pos_start] = (
-                    (target_date-timedelta(days=1), weekday_start - 1, last_time_idx - TELEHEALTH_START_END_BUFFER + 1, last_time_idx), # 5 min buffer
-                    (target_date, weekday_start, pos_start , pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER)
-                )
-            else:
-                # add day1 times
-                time_blocks[pos_start] = (
-                    (target_date, weekday_start, pos_start - TELEHEALTH_START_END_BUFFER, pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER),
-                )
+    else:  # +1 to make it inclusive
+        for pos_start in range(start_time_idx, end_time_idx - duration_idx_delta + 1, available_increments):
+            time_blocks[pos_start] = (
+                (target_date, weekday_start, pos_start, pos_start + duration_idx_delta),
+            )
 
     return time_blocks
 
@@ -257,8 +234,7 @@ def get_practitioners_available(time_block, q_request):
             TelehealthBookings.booking_window_id_start_time_utc.in_(availability_range),
             TelehealthBookings.booking_window_id_end_time_utc.in_(availability_range)))
         
-        if len(available[practitioner_user_id]) == int(duration/5) + (TELEHEALTH_START_END_BUFFER * 2)\
-            and not current_bookings.all():
+        if len(available[practitioner_user_id]) == int(duration/5) and not current_bookings.all():
             #practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioner_ids.add(practitioner_user_id)
     
