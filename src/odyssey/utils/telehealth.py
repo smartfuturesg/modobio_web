@@ -149,9 +149,10 @@ def get_practitioners_available(time_block, q_request):
                             StaffRoles.consult_rate != None)
     else:
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
-            .join(StaffRoles, StaffRoles.role == q_request.profession_type) \
+            .join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id) \
                 .join(User, User.user_id == TelehealthStaffAvailability.user_id) \
-                    .filter(StaffRoles.consult_rate != None)
+                    .filter(StaffRoles.consult_rate != None,
+                    StaffRoles.role == q_request.profession_type)
     
     # if we need to check for gender
     if q_request.medical_gender != 'np':
