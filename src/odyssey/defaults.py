@@ -297,5 +297,3 @@ APPLE_APPSTORE_ISSUER_ID = 'a81919e2-a4c0-4611-b8d0-7b260a6fdd62'
 """ID from appstore conenct account"""
 
 APPLE_APPSTORE_BUNDLE_ID = 'com.modobio.ModoBioClient'
-
-APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'

@@ -968,3 +968,7 @@ FERTILITY_STATUSES = {
         'postmenopausal'
     ]
 }
+
+
+
+APPLE_APPSTORE_BASE_URLS = ('https://api.storekit.itunes.apple.com', 'https://api.storekit-sandbox.itunes.apple.com')
