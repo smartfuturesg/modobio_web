@@ -132,7 +132,8 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 * increment_data['length']
         
         if call_start_offset > 600 or call_start_offset < -60*duration:
-            raise BadRequest('Request to start call occured too soon or after the scheduled call has ended')
+            pass
+            # raise BadRequest('Request to start call occurred too soon or after the scheduled call has ended')
         
         # Create telehealth meeting room entry
         # each telehealth session is given a unique meeting room
@@ -190,7 +191,8 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
         if not current_app.config['TESTING']:
-            cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
+            pass
+            # cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
@@ -206,6 +208,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
             msg['data']['staff_first_name'] = booking.practitioner.firstname
             msg['data']['staff_middle_name'] = booking.practitioner.middlename
             msg['data']['staff_last_name'] = booking.practitioner.lastname
+            msg['data']['booking_uid'] = booking.uid
 
             urls = {}
             fd = FileDownload(booking.staff_user_id)
@@ -216,7 +219,6 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 urls[str(pic.height)] = fd.url(pic.image_path)
 
             msg['data']['staff_profile_picture'] = urls
-
             pn.send(booking.client_user_id, PushNotificationType.voip, msg)
 
         return {'twilio_token': token,
@@ -526,7 +528,7 @@ class TelehealthBookingsApi(BaseResource):
 
             bookings_payload.append({
                 'booking_id': booking.idx,
-                'uid': booking.external_booking_id,
+                'uid': booking.uid,
                 'target_date_utc': booking.target_date_utc,
                 'start_time_utc': start_time_utc.time(),
                 'status': booking.status,
@@ -758,7 +760,7 @@ class TelehealthBookingsApi(BaseResource):
             'bookings':[
                 {
                 'booking_id': booking.idx,
-                'uid': booking.external_booking_id,
+                'uid': booking.uid,
                 'target_date': booking.target_date,
                 'start_time': practitioner['start_time_localized'],
                 'status': booking.status,
