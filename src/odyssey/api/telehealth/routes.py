@@ -132,8 +132,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 * increment_data['length']
         
         if call_start_offset > 600 or call_start_offset < -60*duration:
-            pass
-            # raise BadRequest('Request to start call occurred too soon or after the scheduled call has ended')
+            raise BadRequest('Request to start call occurred too soon or after the scheduled call has ended')
         
         # Create telehealth meeting room entry
         # each telehealth session is given a unique meeting room
@@ -191,8 +190,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
         if not current_app.config['TESTING']:
-            pass
-            # cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
+            cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
