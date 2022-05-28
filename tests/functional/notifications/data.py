@@ -30,4 +30,5 @@ voip = {
             'staff_first_name': 'Test',
             'staff_middle_name': 'O.',
             'staff_last_name': 'Sterone',
-            'staff_profile_picture': {} }}}
+            'staff_profile_picture': {} ,
+            'booking_uid': 'f20ef9bc-c6ea-477e-ae95-13ef845489e2'}}}
