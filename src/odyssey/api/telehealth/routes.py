@@ -700,12 +700,16 @@ class TelehealthBookingsApi(BaseResource):
         # TODO coordinate with FE to stop requiring 'booking_window_id_end_time'
         target_date_end_time = (target_date + timedelta(minutes = duration))
         request.parsed_obj.booking_window_id_end_time = start_time_idx_dict[target_date_end_time.strftime('%H:%M:%S')] - 1
+        if request.parsed_obj.booking_window_id_end_time == 0:
+            request.parsed_obj.booking_window_id_end_time = 288
 
         # Localize the requested booking date and time to UTC
         target_start_datetime_utc = target_date.astimezone(tz.UTC)
         target_end_datetime_utc = target_start_datetime_utc + timedelta(minutes=duration)
         target_start_time_idx_utc = start_time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
         target_end_time_idx_utc = start_time_idx_dict[target_end_datetime_utc.strftime('%H:%M:%S')] - 1
+        if target_end_time_idx_utc == 0:
+            target_end_time_idx_utc = 288
        
         # call on verify_availability, will raise an error if practitioner doens't have availability requested
         telehealth_utils.verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
@@ -761,7 +765,6 @@ class TelehealthBookingsApi(BaseResource):
         
         db.session.add(request.parsed_obj)
         db.session.flush()
-
 
         booking_url = None
         
