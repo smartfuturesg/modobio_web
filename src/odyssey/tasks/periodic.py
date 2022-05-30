@@ -15,12 +15,13 @@ from sqlalchemy import and_, or_, select
 from odyssey import celery, db, mongo
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
-    upcoming_appointment_care_team_permissions, 
-    upcoming_appointment_notification_2hr, 
-    charge_telehealth_appointment, 
+    upcoming_appointment_care_team_permissions,
+    upcoming_appointment_notification_2hr,
+    charge_telehealth_appointment,
     store_telehealth_transcript,
     cancel_noshow_appointment,
-    update_apple_subscription
+    update_apple_subscription,
+    upcoming_booking_payment_notification_2days,
 )
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAvailabilityExceptions, TelehealthChatRooms
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
@@ -185,7 +186,7 @@ def cleanup_temporary_care_team():
         member = User.query.filter_by(user_id=notification.team_member_user_id).one_or_none()
         
         create_notification(
-            notifcation.team_member_user_id,
+            notification.team_member_user_id,
             NOTIFICATION_SEVERITY_TO_ID.get('High'),
             NOTIFICATION_TYPE_TO_ID.get('Team'),
             f'{member.firstname} {member.lastname}\'s Data Access Is About To Expire',
@@ -394,12 +395,74 @@ def remove_expired_availability_exceptions():
         db.session.delete(exception)
     db.session.commit()
     logger.info('Completed remove expired exceptions task')
-    
+
+
 @worker_process_init.connect
 def close_previous_db_connection(**kwargs):
     if db.session:
         db.session.close()
         db.engine.dispose()
+
+
+@celery.task()
+def check_for_upcoming_booking_charges():
+    logger.info('deploying upcoming bookings charges task')
+
+    current_time_utc = datetime.now(timezone.utc)
+    # current_time_utc = current_time_utc + timedelta(days=1)  # unneeded actually because of payment_notified column
+    target_time_utc = current_time_utc + timedelta(days=2, minutes=32)
+    target_time_window_start = get_time_index(current_time_utc)
+    target_time_window_end = get_time_index(target_time_utc)
+
+    logger.info(f'upcoming appointment charges task time window: {target_time_window_start} - {target_time_window_end}')
+
+    # find all accepted bookings who have not been notified yet
+    bookings = TelehealthBookings.query.filter(
+        TelehealthBookings.status == 'Accepted',
+        TelehealthBookings.payment_notified == False
+    )
+    if target_time_window_start > target_time_window_end:
+        # this will happen from 22:00 to 23:55
+        # in this case, we have to query across two dates
+        bookings = \
+            bookings.filter(
+                or_(
+                    and_(
+                        TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                        TelehealthBookings.target_date_utc == current_time_utc.date()
+                    ),
+                    and_(
+                        TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                        TelehealthBookings.target_date_utc == target_time_utc.date()
+                    )
+                )
+            ).all()
+    else:
+        # otherwise just query for bookings whose start id falls between the target times on for today
+        bookings =  \
+            bookings.filter(
+                and_(
+                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.target_date_utc == target_time_utc.date()
+                    )
+            ).all()
+
+    # schedule upcoming appointment charge tasks
+    for booking in bookings:
+        logger.info(f'deploying notification for upcoming booking being charged {booking.idx}')
+        booking.payment_notified = True
+        # create datetime object for scheduling tasks
+        booking_start_time = db.session.execute(
+                select(LookupBookingTimeIncrements.start_time).
+                where(LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time_utc)
+            ).scalars().one_or_none()
+        payment_notification_eta = datetime.combine(booking.target_date_utc, booking_start_time) - timedelta(days=2)
+        # Deploy scheduled task to update notifications table with upcoming booking notification
+        upcoming_booking_payment_notification_2days.apply_async((booking, booking_start_time,), eta=payment_notification_eta)
+    db.session.commit()
+    logger.info('upcoming bookings task completed')
+
 
 celery.conf.beat_schedule = {
     # look for upcoming apppointments:
@@ -441,5 +504,11 @@ celery.conf.beat_schedule = {
     'remove_expired_availability_exceptions': {
         'task': 'odyssey.tasks.periodic.remove_expired_availability_exceptions',
         'schedule': crontab(hour='0', minute='0')
+    },
+    # upcoming booking payment to be charged
+    'check_for_upcoming_booking_charges': {
+        'task': 'odyssey.periodic.check_for_upcoming_booking_charges',
+        'schedule': crontab(minute='*/32')  # if this were just 30 it would be run at the same time as other periodics
+        # off setting this slightly might theoretically smooth out the load on celery
     }
 }
