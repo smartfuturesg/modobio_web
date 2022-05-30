@@ -1,6 +1,7 @@
 import logging
 import secrets
 
+from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 
 from odyssey.integrations.apple import AppStore
@@ -31,6 +32,7 @@ from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TY
 from odyssey.utils.misc import create_notification
 
 logger = logging.getLogger(__name__)
+
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -355,3 +357,19 @@ def update_apple_subscription(user_id: int):
 @celery.task()
 def test_task():
     logger.info("Celery test task succeeded")
+
+
+@celery.task()
+def upcoming_booking_payment_notification_2days(booking, booking_start_time):
+    payment_method = PaymentMethods.query.filter_by(user_id=booking.client_user_id, is_default=True).one_or_none()
+    booking_dt_utc = datetime.combine(booking.target_date_utc, booking_start_time)
+    create_notification(
+        booking.client_user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
+        NOTIFICATION_TYPE_TO_ID.get('Payments'),
+        "Upcoming Telehealth Charge",
+        f"Your payment method ending in {payment_method.number} will be charged for your appointment scheduled on <datetime_utc>{booking_dt_utc}</datetime_utc> in the next 24 hours.",
+        "Client",
+        booking_dt_utc + timedelta(days=1)
+    )
+    db.session.commit()
