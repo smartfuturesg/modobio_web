@@ -409,7 +409,6 @@ def check_for_upcoming_booking_charges():
     logger.info('deploying upcoming bookings charges task')
 
     current_time_utc = datetime.now(timezone.utc)
-    # current_time_utc = current_time_utc + timedelta(days=1)  # unneeded actually because of payment_notified column
     target_time_utc = current_time_utc + timedelta(days=2, minutes=32)
     target_time_window_start = get_time_index(current_time_utc)
     target_time_window_end = get_time_index(target_time_utc)
@@ -507,7 +506,7 @@ celery.conf.beat_schedule = {
     },
     # upcoming booking payment to be charged
     'check_for_upcoming_booking_charges': {
-        'task': 'odyssey.periodic.check_for_upcoming_booking_charges',
+        'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
         'schedule': crontab(minute='*/32')  # if this were just 30 it would be run at the same time as other periodics
         # off setting this slightly might theoretically smooth out the load on celery
     }
