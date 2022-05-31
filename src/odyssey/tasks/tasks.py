@@ -253,8 +253,9 @@ def store_telehealth_transcript(booking_id: int):
         #delete from twilio, nothing to store
         twilio.delete_conversation(booking.chat_room.conversation_sid)
         logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
-        db.session.delete(TelehealthChatRooms.query.filter_by(booking_id=booking.idx))
-        logger.info(f"Booking ID {booking.idx}: Chat Room data deleted from db.")
+        
+        #set conversation sid to none since there is nothing to be stored to mongo
+        booking.chat_room.conversation_sid = None
     else:
         # if there is media present in the transcript, store it in an s3 bucket
         hex_token = secrets.token_hex(4)
