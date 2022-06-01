@@ -373,3 +373,31 @@ def upcoming_booking_payment_notification_2days(booking, booking_start_time):
         booking_dt_utc + timedelta(days=1)
     )
     db.session.commit()
+
+
+@celery.task()
+def notify_client_of_imminent_scheduled_maintenance(user_id, datum):
+    create_notification(
+        user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
+        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
+        "System maintenance scheduled",
+        f"System maintenance has been scheduled between <datetime_utc>{datum['start_time']}</datetime_utc> and <datetime_utc>{datum['end_time']}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to schedule telehealth appointments for that time period.",
+        'Client',
+        datum['end_time']
+    )
+    db.session.commit()
+
+
+@celery.task()
+def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
+    create_notification(
+        user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
+        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
+        "System maintenance scheduled",
+        f"System maintenance has been scheduled between <datetime_utc>{datum['start_time']}</datetime_utc> and <datetime_utc>{datum['end_time']}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to accept telehealth bookings for that time period.",
+        'Provider',
+        datum['end_time']
+    )
+    db.session.commit()
