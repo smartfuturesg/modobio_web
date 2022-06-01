@@ -1,3 +1,4 @@
+import uuid
 from bson import ObjectId
 from datetime import datetime, time, timedelta
 from dateutil import tz
@@ -131,7 +132,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 * increment_data['length']
         
         if call_start_offset > 600 or call_start_offset < -60*duration:
-            raise BadRequest('Request to start call occured too soon or after the scheduled call has ended')
+            raise BadRequest('Request to start call occurred too soon or after the scheduled call has ended')
         
         # Create telehealth meeting room entry
         # each telehealth session is given a unique meeting room
@@ -205,6 +206,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
             msg['data']['staff_first_name'] = booking.practitioner.firstname
             msg['data']['staff_middle_name'] = booking.practitioner.middlename
             msg['data']['staff_last_name'] = booking.practitioner.lastname
+            msg['data']['booking_uid'] = booking.uid
 
             urls = {}
             fd = FileDownload(booking.staff_user_id)
@@ -215,7 +217,6 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 urls[str(pic.height)] = fd.url(pic.image_path)
 
             msg['data']['staff_profile_picture'] = urls
-
             pn.send(booking.client_user_id, PushNotificationType.voip, msg)
 
         return {'twilio_token': token,
@@ -525,6 +526,7 @@ class TelehealthBookingsApi(BaseResource):
 
             bookings_payload.append({
                 'booking_id': booking.idx,
+                'uid': booking.uid,
                 'target_date_utc': booking.target_date_utc,
                 'start_time_utc': start_time_utc.time(),
                 'status': booking.status,
@@ -678,7 +680,7 @@ class TelehealthBookingsApi(BaseResource):
         consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
 
         # Calculate time for display:
-        # consulte_rate is in hours
+        # consult is in hours
         # 30 minutes -> 0.5*consult_rate
         # 60 minutes -> 1*consulte_rate
         # 90 minutes -> 1.5*consulte_rate
@@ -687,9 +689,11 @@ class TelehealthBookingsApi(BaseResource):
         rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
 
+        # booking uuid
+        request.parsed_obj.uid = uuid.uuid4()
+        
         db.session.add(request.parsed_obj)
         db.session.flush()
-
 
         # if the staff memebr is a wheel clinician, make booking request to wheel API
         booking_url = None
@@ -754,6 +758,7 @@ class TelehealthBookingsApi(BaseResource):
             'bookings':[
                 {
                 'booking_id': booking.idx,
+                'uid': booking.uid,
                 'target_date': booking.target_date,
                 'start_time': practitioner['start_time_localized'],
                 'status': booking.status,

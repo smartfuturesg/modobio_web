@@ -41,7 +41,7 @@ def test_send_alert(test_client, register_device):
 def test_send_voip(test_client, register_device):
     voip['content']['data']['staff_id'] = test_client.staff_id
 
-    # Test when the staff memeber doesn't have a profile picture
+    # Test when the staff member doesn't have a profile picture
     response = test_client.post(
         f'/notifications/push/test/voip/{test_client.client_id}/',
         headers=test_client.client_auth_header,
