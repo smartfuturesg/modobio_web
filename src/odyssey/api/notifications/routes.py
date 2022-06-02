@@ -205,18 +205,18 @@ class PushRegistrationEndpoint(BaseResource):
             db.session.commit()
 
 
-# Development-only Namespace, sets up endpoints for testing push notifications.
-ns_dev = Namespace(
+# Development only namespace. Sets up endpoints for testing push notifications.
+ns_dev_push = Namespace(
     'notifications',
     path='/notifications/push/test',
     description='[DEV ONLY] Endpoints for testing sending of push notifications.')
 
-@ns_dev.route('/alert/<int:user_id>/')
+@ns_dev_push.route('/alert/<int:user_id>/')
 class ApplePushNotificationAlertTestEndpoint(BaseResource):
 
     @token_auth.login_required
-    @accepts(schema=ApplePushNotificationAlertTestSchema, api=ns_dev)
-    @responds(schema=ApplePushNotificationAlertTestSchema, status_code=201, api=ns_dev)
+    @accepts(schema=ApplePushNotificationAlertTestSchema, api=ns_dev_push)
+    @responds(schema=ApplePushNotificationAlertTestSchema, status_code=201, api=ns_dev_push)
     def post(self, user_id):
         """ [DEV ONLY] Send an alert notification to the user.
 
@@ -239,12 +239,12 @@ class ApplePushNotificationAlertTestEndpoint(BaseResource):
         return {'message': msg}
 
 
-@ns_dev.route('/background/<int:user_id>/')
+@ns_dev_push.route('/background/<int:user_id>/')
 class ApplePushNotificationBackgroundTestEndpoint(BaseResource):
 
     @token_auth.login_required
-    @accepts(schema=ApplePushNotificationBackgroundTestSchema, api=ns_dev)
-    @responds(schema=ApplePushNotificationBackgroundTestSchema, status_code=201, api=ns_dev)
+    @accepts(schema=ApplePushNotificationBackgroundTestSchema, api=ns_dev_push)
+    @responds(schema=ApplePushNotificationBackgroundTestSchema, status_code=201, api=ns_dev_push)
     def post(self, user_id):
         """ [DEV ONLY] Send a background update notification to the user.
 
@@ -267,12 +267,12 @@ class ApplePushNotificationBackgroundTestEndpoint(BaseResource):
         return {'message': msg}
 
 
-@ns_dev.route('/badge/<int:user_id>/')
+@ns_dev_push.route('/badge/<int:user_id>/')
 class ApplePushNotificationBadgeTestEndpoint(BaseResource):
 
     @token_auth.login_required
-    @accepts(schema=ApplePushNotificationBadgeTestSchema, api=ns_dev)
-    @responds(schema=ApplePushNotificationBadgeTestSchema, status_code=201, api=ns_dev)
+    @accepts(schema=ApplePushNotificationBadgeTestSchema, api=ns_dev_push)
+    @responds(schema=ApplePushNotificationBadgeTestSchema, status_code=201, api=ns_dev_push)
     def post(self, user_id):
         """ [DEV ONLY] Send a badge update notification to the user.
 
@@ -295,12 +295,12 @@ class ApplePushNotificationBadgeTestEndpoint(BaseResource):
         return {'message': msg}
 
 
-@ns_dev.route('/voip/<int:user_id>/')
+@ns_dev_push.route('/voip/<int:user_id>/')
 class ApplePushNotificationVoipTestEndpoint(BaseResource):
 
     @token_auth.login_required
-    @accepts(schema=ApplePushNotificationVoipTestSchema, api=ns_dev)
-    @responds(schema=ApplePushNotificationVoipTestSchema, status_code=201, api=ns_dev)
+    @accepts(schema=ApplePushNotificationVoipTestSchema, api=ns_dev_push)
+    @responds(schema=ApplePushNotificationVoipTestSchema, status_code=201, api=ns_dev_push)
     def post(self, user_id):
         """ [DEV ONLY] Send a voip initiation notification to the user.
 
@@ -326,3 +326,45 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
 
         msg = pn.send(user_id, 'voip', content)
         return {'message': msg}
+
+
+# Development only namespace. Sets up endpoints for testing notifications.
+ns_dev_notif = Namespace(
+    'notifications',
+    path='/notifications/test',
+    description='[DEV ONLY] Endpoints for testing and interacting with notifications directly.')
+
+@ns_dev_notif.route('/<int:notification_id>/')
+@ns_dev_notif.doc(params={'notification_id': 'Notification ID number'})
+class NotificationsTestEndpoint(BaseResource):
+
+    @token_auth.login_required
+    @responds(schema=NotificationSchema, api=ns_dev_notif, status_code=200)
+    def get(self, notification_id):
+        """[DEV ONLY] Returns the notification with the given notification_id. """
+        notification =  (
+                        Notifications.query
+                        .filter_by(notification_id=notification_id)
+                        .one_or_none()
+                        )
+        
+        if not notification:
+            raise BadRequest('No notification with given notification_id.')
+
+        return notification
+    
+    @token_auth.login_required
+    @responds(api=ns_dev_notif, status_code=204)
+    def delete(self, notification_id):
+        """[DEV ONLY] Deletes the notification with the given notification_id. """
+        notification =  (
+                        Notifications.query
+                        .filter_by(notification_id=notification_id)
+                        .one_or_none()
+                        )
+        
+        if not notification:
+            raise BadRequest('No notification with given notification_id.')
+
+        db.session.delete(notification)
+        db.session.commit()
