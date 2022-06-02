@@ -122,7 +122,8 @@ class MaintenanceApi(BaseResource):
             'deleted': "False",
             'updated_by': None,
             'updated_at': None,
-            'comments': request.json['comments']
+            'comments': request.json['comments'],
+            'notified': "False",
         }
 
         response = table.put_item(Item=data)
@@ -220,4 +221,3 @@ class MaintenanceApi(BaseResource):
             raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}.')
 
         logger.info(f'Scheduled maintenance with block_id: {request.json["block_id"]} was deleted.')
-        
