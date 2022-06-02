@@ -2,7 +2,9 @@
 Database tables for supporting lookup tables. These tables should be static tables only used for reference,
 not to be edited at runtime. 
 """
+from cProfile import label
 import logging
+from turtle import position
 logger = logging.getLogger(__name__)
 
 from sqlalchemy.orm import relationship
@@ -1363,4 +1365,45 @@ class LookupVisitReasons(BaseModelWithIdx):
     role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
     """
     Role that the reason would justify a visit with
+    """
+
+class LookupEmotes(BaseModel):
+    """
+    Lookup table of available emotes 
+    """
+
+    position = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    The order that the frontend applications will rely on for ordering the emotes
+
+    :type: integer, primary key, autoincrementing
+    """
+
+    icon_name = db.Column(db.String)
+    """
+    The filename for the icon that will be used as the emote button.
+
+    :type: string
+    """
+
+    label = db.Column(db.String)
+    """
+    Label to be shown below each emote.
+
+    :type: string
+    """
+
+    title_text = db.Column(db.String)
+    """
+    The title on the notification or prompt that will be shown to the user.
+
+    :type: string
+    """
+
+    content_text = db.Column(db.String)
+    """
+    The text in the content section of notification or prompt that will be 
+    shown to the user.
+
+    :type: string
     """

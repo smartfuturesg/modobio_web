@@ -1,4 +1,5 @@
 import logging
+from pyexpat import model
 logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields, post_load, validate
@@ -34,7 +35,8 @@ from odyssey.api.lookup.models import (
     LookupBloodTests,
     LookupBloodTestRanges,
     LookupDevNames,
-    LookupVisitReasons
+    LookupVisitReasons,
+    LookupEmotes
 )
 from odyssey.utils.base.schemas import BaseSchema
 
@@ -377,4 +379,13 @@ class LookupVisitReasonsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupVisitReasonsOutputSchema(Schema):
     items = fields.Nested(LookupVisitReasonsSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class LookupEmotesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupEmotes
+        exclude = ('created_at', 'updated_at')
+
+class LookupEmotesOutputSchema(Schema):
+    items = fields.Nested(LookupEmotesSchema(many=True), missing=[])
     total_items = fields.Integer()
