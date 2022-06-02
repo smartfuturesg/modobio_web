@@ -1367,16 +1367,16 @@ class LookupVisitReasons(BaseModelWithIdx):
     Role that the reason would justify a visit with
     """
 
-class LookupEmotes(BaseModel):
+class LookupEmotes(BaseModelWithIdx):
     """
     Lookup table of available emotes 
     """
 
-    position = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    position = db.Column(db.Integer)
     """
     The order that the frontend applications will rely on for ordering the emotes
 
-    :type: integer, primary key, autoincrementing
+    :type: integer
     """
 
     icon_name = db.Column(db.String)
