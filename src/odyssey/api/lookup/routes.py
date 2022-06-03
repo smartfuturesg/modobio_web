@@ -18,7 +18,6 @@ from odyssey.api.lookup.models import (
      LookupDefaultHealthMetrics,
      LookupDrinks, 
      LookupDrinkIngredients,
-     LookupEmotes,
      LookupGoals, 
      LookupProfessionalAppointmentConfirmationWindow,
      LookupRaces,
