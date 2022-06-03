@@ -1,5 +1,4 @@
 import logging
-from pyexpat import model
 logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields, post_load, validate
