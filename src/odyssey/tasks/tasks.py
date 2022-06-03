@@ -211,7 +211,7 @@ def charge_telehealth_appointment(booking_id):
     # TODO: Notify user of the canceled booking via email? They are already notified via notification
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
-    odyssey.integrations.Instamed().charge_telehealth_booking(booking)
+    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
     
 @celery.task()
 def cancel_noshow_appointment(booking_id):
