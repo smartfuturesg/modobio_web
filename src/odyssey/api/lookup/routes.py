@@ -50,7 +50,6 @@ from odyssey.api.lookup.schemas import (
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema,
     LookupEHRPagesOutputSchema,
-    LookupEmotesOutputSchema, 
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
