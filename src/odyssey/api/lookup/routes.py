@@ -1,6 +1,5 @@
 import logging
 import pathlib
-from turtle import position
 import pytz
 import random
 
