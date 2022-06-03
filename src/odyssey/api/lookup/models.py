@@ -1372,7 +1372,7 @@ class LookupEmotes(BaseModelWithIdx):
     Lookup table of available emotes 
     """
 
-    position = db.Column(db.Integer)
+    position = db.Column(db.Integer, unique=True)
     """
     The order that the frontend applications will rely on for ordering the emotes
 
