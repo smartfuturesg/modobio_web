@@ -23,7 +23,6 @@ from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinica
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
-from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
@@ -31,8 +30,10 @@ from odyssey.utils.telehealth import complete_booking
 from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import create_notification
 
-logger = logging.getLogger(__name__)
+# avoid circular imports by importing entire module
+import odyssey.integrations.instamed
 
+logger = logging.getLogger(__name__)
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -210,7 +211,7 @@ def charge_telehealth_appointment(booking_id):
     # TODO: Notify user of the canceled booking via email? They are already notified via notification
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
-    Instamed().charge_telehealth_booking(booking)
+    odyssey.integrations.Instamed().charge_telehealth_booking(booking)
     
 @celery.task()
 def cancel_noshow_appointment(booking_id):
@@ -220,7 +221,7 @@ def cancel_noshow_appointment(booking_id):
     """
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
     
-    cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+    odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):
@@ -250,6 +251,7 @@ def store_telehealth_transcript(booking_id: int):
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
     
     transcript = twilio.get_booking_transcript(booking.idx)
+    payload = {}
     
     if len(transcript) == 0:
         #delete from twilio, nothing to store

@@ -5,6 +5,7 @@ from odyssey.api.lookup.models import LookupRoles
 from odyssey.api.telehealth.models import TelehealthBookings
 
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
+import odyssey.tasks.tasks
 logger = logging.getLogger(__name__)
 
 import requests
@@ -13,6 +14,7 @@ from werkzeug.exceptions import BadRequest
 from flask import current_app
 
 from werkzeug.exceptions import BadRequest
+from odyssey.config import Config
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents
@@ -20,6 +22,8 @@ from odyssey.utils.misc import create_notification
 from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 
 from odyssey import db
+
+config = Config()
 
 class Instamed:
     """ A class for performing common InstaMed API calls """
@@ -450,6 +454,15 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
     
     # update booking status to canceled
     booking.status = 'Canceled'
+    
+    # run the task to store the chat transcript immediately
+    # imported in this way to get around circular importing issues
+    if config.TESTING:
+        #run task directly if in test env
+        odyssey.tasks.tasks.store_telehealth_transcript(booking.idx)
+    else:
+        #otherwise run with celery
+        odyssey.tasks.tasks.store_telehealth_transcript.delay(booking.idx)
 
     # delete booking from Practitioner's calendar
     staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
