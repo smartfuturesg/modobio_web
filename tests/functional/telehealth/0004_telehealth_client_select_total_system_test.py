@@ -27,27 +27,6 @@ from .client_select_data import (
 )
 
 
-def test_generate_client_queue(test_client, payment_method):
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
-    response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
-
-    assert response.status_code == 201
-
-
-def test_client_time_select(test_client, staff_availabilities):
-
-    response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
-
-    assert response.status_code == 200
-    assert response.json['total_options'] == 94
-
-
 def test_generate_staff_availability(test_client, telehealth_staff):
     """
     fill up the staff availabilities
@@ -72,6 +51,17 @@ def test_generate_staff_availability(test_client, telehealth_staff):
             content_type='application/json')
 
         assert response.status_code == 201
+        
+def test_client_time_select(test_client, payment_method):
+    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    response = test_client.post(
+        f'/telehealth/client/time-select/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(telehealth_queue_client_3_data),
+        content_type='application/json')
+
+    assert response.status_code == 201
+    assert response.json['total_options'] == 47
 
 
 def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, payment_method, staff_availabilities):
@@ -91,7 +81,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         'payment_method_id': payment_method.idx}
 
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(queue_data),
         content_type='application/json')
@@ -120,7 +110,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         'payment_method_id': payment_method.idx}
 
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(queue_data),
         content_type='application/json')
@@ -162,7 +152,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         'payment_method_id': pm.idx}
 
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{client_4.user_id}/',
+        f'/telehealth/client/time-select/{client_4.user_id}/',
         headers=client_4_auth_header,
         data=dumps(queue_data),
         content_type='application/json')
@@ -176,26 +166,6 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         content_type='application/json')
 
     assert response.status_code == 201
-
-
-def test_generate_client_queue(test_client, payment_method):
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
-    response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
-
-    assert response.status_code == 201
-
-
-def test_client_time_select(test_client, staff_availabilities):
-    response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
-        
-    assert response.status_code == 200
-    assert response.json['total_options'] == 95
 
 
 def test_full_system_with_settings(test_client, payment_method, telehealth_staff):
@@ -250,18 +220,15 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
         'payment_method_id': payment_method.idx}
 
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(client_queue),
         content_type='application/json')
     ##
     # 3. Client requests to view availabilities for selected target date
     ##
-    response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json['appointment_times'][0]['start_time'] == '00:00:00'
     assert response.json['appointment_times'][0]['booking_window_id_start_time'] == 1
 

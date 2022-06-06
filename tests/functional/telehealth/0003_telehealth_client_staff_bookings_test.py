@@ -35,7 +35,7 @@ def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehea
 
     
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(queue_data),
         content_type='application/json')
@@ -77,7 +77,7 @@ def test_post_2_client_staff_bookings(test_client, payment_method, telehealth_st
         'payment_method_id': payment_method.idx}
 
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f'/telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(queue_data),
         content_type='application/json')
