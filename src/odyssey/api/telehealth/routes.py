@@ -248,7 +248,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
     @token_auth.login_required
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
-    @responds(schema=TelehealthTimeSelectOutputSchema, api=ns, status_code=200)
+    @responds(schema=TelehealthTimeSelectOutputSchema, api=ns, status_code=201)
     def post(self, user_id):
         """
         Checks the booking requirements stored in the client queue
@@ -289,7 +289,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
         # place client in queue, needed by bookings POST
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
-        db.session.commit()
+        db.session.flush()
         queue = request.parsed_obj
 
         time_inc = LookupBookingTimeIncrements.query.all()
@@ -379,6 +379,9 @@ class TelehealthClientTimeSelectApi(BaseResource):
         
         if not days_available:
             raise BadRequest('No staff available for the upcoming two weeks.')
+
+        # commit queue data once final point of failure is cleared
+        db.session.commit()
 
         # get practitioners details only once
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
@@ -1545,87 +1548,6 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         db.session.commit()       
         
         return ('', 204)
-    
-
-#deprecated in release 1.2 - functionality is now contained within time-select endpoint
-@ns.deprecated
-@ns.route('/queue/client-pool/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID'})
-class TelehealthQueueClientPoolApi(BaseResource):
-    """
-    This API resource is used to get, post, and delete the users in the queue.
-    """
-    # Multiple allowed
-    __check_resource__ = False
-
-    @token_auth.login_required
-    @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
-    def get(self,user_id):
-        """
-        Returns queue details for the given user_id
-        """
-        # grab the whole queue
-        queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).all()
-
-        # sort the queue based on target date and priority
-        payload = {'queue': queue,
-                   'total_queue': len(queue)}
-
-        return payload
-
-    @token_auth.login_required
-    @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
-    @responds(api=ns, status_code=201)
-    def post(self,user_id):
-        """
-        Add a client to the queue
-        """
-        check_client_existence(user_id)
-
-        # Verify target date is client's local today or in the future 
-        client_tz = request.parsed_obj.timezone
-        target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
-        client_local_datetime_now = datetime.now(tz.gettz(client_tz))
-
-        if target_date.date() < client_local_datetime_now.date():
-            raise BadRequest("Invalid target date")
-
-        # Client can only have one appointment on one day:
-        # GOOD: Appointment 1 Day 1, Appointment 2 Day 2
-        # BAD: Appointment 1 Day 1, Appointment 2 Day 1
-        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).one_or_none()
-
-        if appointment_in_queue:
-            db.session.delete(appointment_in_queue)
-            db.session.flush()
-
-        # Verify location_id is valid
-        location_id = request.parsed_obj.location_id
-        location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
-        if not location:
-            raise BadRequest(f'Location {location_id} does not exist.')
-
-        # Verify payment method idx is valid from PaymentMethods
-        # and that the payment method chosen has the user_id
-        payment_id = request.parsed_obj.payment_method_id
-        verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
-        if not verified_payment_method:
-            raise BadRequest('Invalid payment method.')
-
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-    @token_auth.login_required()
-    @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
-    @responds(api=ns, status_code=204)
-    def delete(self, user_id):
-        #Search for user by user_id in User table
-        check_client_existence(user_id)
-        appointment_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id,target_date=request.parsed_obj.target_date,profession_type=request.parsed_obj.profession_type).one_or_none()
-        if appointment_in_queue:
-            db.session.delete(appointment_in_queue)
-            db.session.commit()
 
 
 @ns.route('/bookings/details/<int:booking_id>')
