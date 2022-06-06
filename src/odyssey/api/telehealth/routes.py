@@ -243,10 +243,13 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 @ns.doc(params={'user_id': 'Client user ID'})
 class TelehealthClientTimeSelectApi(BaseResource):
 
+    #in the case of the same client being added to queue twice, the original entry is overwritten
+    __check_resource__ = False
+
     @token_auth.login_required
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
     @responds(schema=TelehealthTimeSelectOutputSchema, api=ns, status_code=200)
-    def get(self, user_id):
+    def post(self, user_id):
         """
         Checks the booking requirements stored in the client queue
         Removes times so that appointments end 0.5 hours before scheduled maintenance
@@ -283,9 +286,10 @@ class TelehealthClientTimeSelectApi(BaseResource):
             db.session.delete(old_queue)
             db.session.flush()
 
-        #place client in queue, needed by bookings POST
+        # place client in queue, needed by bookings POST
+        request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
-        db.session.flush()
+        db.session.commit()
         queue = request.parsed_obj
 
         time_inc = LookupBookingTimeIncrements.query.all()
@@ -378,14 +382,14 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
         # get practitioners details only once
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
-        practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, queue.professional_type, queue.duration)
+        practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, queue.profession_type, queue.duration)
 
         #buffer not taken into consideration here because that only matters to practitioner not client
         final_dict = []
         for day in days_available:
-            for time in days_available[day]:
-                target_date_utc = days_available[day][time]['date_start_utc']
-                client_window_id_start_time_utc = time
+            for time1 in days_available[day]:
+                target_date_utc = days_available[day][time1]['date_start_utc']
+                client_window_id_start_time_utc = time1
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
 
                 # client localize target_date_utc + utc_start_time + timezone
@@ -395,7 +399,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
 
                 final_dict.append({
-                    'practitioners_available_ids': list(days_available[day][time]['practitioner_ids']),
+                    'practitioners_available_ids': list(days_available[day][time1]['practitioner_ids']),
                     'target_date': datetime_start.date(),
                     'start_time': datetime_start.time(),
                     'end_time': datetime_end.time(),
