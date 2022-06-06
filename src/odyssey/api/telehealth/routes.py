@@ -56,7 +56,6 @@ from odyssey.api.telehealth.schemas import (
     TelehealthStaffAvailabilityExceptionsDeleteSchema,
     TelehealthStaffAvailabilityExceptionsOutputSchema,
     TelehealthBookingDetailsSchema,
-    TelehealthBookingDetailsGetSchema,
     TelehealthBookingsPUTSchema,
     TelehealthTranscriptsSchema,
 )
@@ -245,7 +244,8 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 class TelehealthClientTimeSelectApi(BaseResource):
 
     @token_auth.login_required
-    @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=200)
+    @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
+    @responds(schema=TelehealthTimeSelectOutputSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
         Checks the booking requirements stored in the client queue
@@ -254,45 +254,55 @@ class TelehealthClientTimeSelectApi(BaseResource):
         Responds with available booking times localized to the client's timezone
         """
         check_client_existence(user_id)
+        
+        # Verify target date is client's local today or in the future 
+        client_tz = request.parsed_obj.timezone
+        target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz))
 
-        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).\
-            order_by(TelehealthQueueClientPool.priority.desc(), TelehealthQueueClientPool.target_date.asc()).first()
-        if not client_in_queue:
-            raise BadRequest('Client is not in the queue.')
+        if target_date.date() < client_local_datetime_now.date():
+            raise BadRequest("Invalid target date")
+
+        # Verify location_id is valid
+        location_id = request.parsed_obj.location_id
+        location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
+        if not location:
+            raise BadRequest(f'Location {location_id} does not exist.')
+
+        # Verify payment method idx is valid from PaymentMethods
+        # and that the payment method chosen has the user_id
+        payment_id = request.parsed_obj.payment_method_id
+        verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
+        if not verified_payment_method:
+            raise BadRequest('Invalid payment method.')
+        
+        # client can only be in queue once. If they are already queued, delete the entry and replace 
+        # with the new request
+        old_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).one_or_none()
+        if old_queue:
+            db.session.delete(old_queue)
+            db.session.flush()
+
+        #place client in queue, needed by bookings POST
+        db.session.add(request.parsed_obj)
+        db.session.flush()
+        queue = request.parsed_obj
 
         time_inc = LookupBookingTimeIncrements.query.all()
 
-        local_target_date = client_in_queue.target_date
-        client_tz = client_in_queue.timezone
-        duration = client_in_queue.duration
-        profession_type = client_in_queue.profession_type
-
-        utc_target_datetime, _, _, _ = telehealth_utils.get_utc_start_day_time(local_target_date, client_tz)
+        utc_target_datetime, _, _, _ = telehealth_utils.get_utc_start_day_time(queue.target_date, queue.timezone)
 
         # list of dicts, dicts have two datetime start_time and end_time
         scheduled_maintenances = telehealth_utils.scheduled_maintenance_date_times(
             utc_target_datetime-timedelta(days=1), (utc_target_datetime+timedelta(days=15))
         )  # minus a day and 15 not 14 to be on the safe side of things
 
-        # days_available = 
-        # {local_target_date(datetime.date):
-        #   {start_time_idx_1: 
-        #       {'date_start_utc': datetime.date,
-        #         'practitioner_ids': {user_id, user_id (set)}
-        #       }
-        #   },
-        #   {start_time_idx_2: 
-        #       {'date_start_utc': datetime.date,
-        #         'practitioner_ids':  {user_id, user_id (set)}
-        #       }
-        #   }
-        # }
         days_available = {}
         days_out = 0
         times_available = 0
         # limit 10 here still but since one pass here can produce as many as 96, it must still be limited to 10 below
         while days_out <= 14 and times_available < 10:
-            local_target_date2 = local_target_date + timedelta(days=days_out)
+            local_target_date2 = queue.target_date + timedelta(days=days_out)
 
             day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc = \
                 telehealth_utils.get_utc_start_day_time(local_target_date2, client_tz)
@@ -303,7 +313,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 start_time_window_utc.idx, 
                 day_end_utc.weekday(), 
                 end_time_window_utc.idx,
-                duration,
+                queue.duration,
             )
                 
             # available_times_with_practitioners =
@@ -318,7 +328,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 # must add to this because datetime is just date and minutes is separate and in 5 minute increments
                 conflict_window_datetime_start_utc = conflict_window_datetime_start_utc + \
                     timedelta(minutes=((time_blocks[block][0][2] - 1) * 5))  # not zeo indexed so minus one there
-                conflict_window_datetime_end_utc = conflict_window_datetime_start_utc + timedelta(minutes=duration)
+                conflict_window_datetime_end_utc = conflict_window_datetime_start_utc + timedelta(minutes=queue.duration)
 
                 and_continue = False
                 for maintenance in scheduled_maintenances:
@@ -341,7 +351,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 if and_continue:
                     continue  # but continue block for loop
 
-                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                #get a set of professionals who can fulfill the client's requirements
+                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], queue)
                 
                 # if the user has a staff + client account, it may be possible for their staff account
                 # to appear as an option when attempting to book a meeting as a client
@@ -367,7 +378,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
         # get practitioners details only once
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
-        practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, profession_type, duration)
+        practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, queue.professional_type, queue.duration)
 
         #buffer not taken into consideration here because that only matters to practitioner not client
         final_dict = []
@@ -379,7 +390,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
                 # client localize target_date_utc + utc_start_time + timezone
                 datetime_start = datetime.combine(target_date_utc, start_time_utc, tz.UTC).astimezone(tz.gettz(client_tz))
-                datetime_end = datetime_start + timedelta(minutes=duration)
+                datetime_end = datetime_start + timedelta(minutes=queue.duration)
                 localized_window_start = LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()).first().idx
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
 
@@ -1530,28 +1541,10 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         db.session.commit()       
         
         return ('', 204)
+    
 
-
-@ns.route('/queue/client-pool/')
-class TelehealthGetQueueClientPoolApi(BaseResource):
-    """
-    This API resource is used to get all the users in the queue.
-    """
-    @token_auth.login_required
-    @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
-    def get(self):
-        """
-        Returns the list of notifications for the given user_id
-        """
-        # grab the whole queue
-        queue = TelehealthQueueClientPool.query.order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).all()
-
-        # sort the queue based on target date and priority
-        payload = {'queue': queue,
-                   'total_queue': len(queue)}
-
-        return payload
-
+#deprecated in release 1.2 - functionality is now contained within time-select endpoint
+@ns.deprecated
 @ns.route('/queue/client-pool/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID'})
 class TelehealthQueueClientPoolApi(BaseResource):
