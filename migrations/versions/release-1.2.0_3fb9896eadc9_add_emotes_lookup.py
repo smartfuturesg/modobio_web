@@ -1,4 +1,4 @@
-"""empty message
+"""Creates Emotes Lookup table
 
 Revision ID: 3fb9896eadc9
 Revises: 1c0a83fb65e5
