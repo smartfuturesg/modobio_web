@@ -2,8 +2,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 from flask_restx.fields import String
-from sqlalchemy import text, insert
+from sqlalchemy import text, insert, CheckConstraint
 from sqlalchemy.sql.expression import true
+
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
@@ -660,8 +661,12 @@ class TelehealthChatRooms(BaseModel):
 class TelehealthStaffSettings(BaseModel):
     """
     Holds staff preferred settings for Telehealth appointments
-
     """
+    
+    __table_args__ = (
+        CheckConstraint('0 <= availability_horizon <= 52',
+                        name='availability_horizon_range'),
+    )
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
     """
@@ -682,6 +687,14 @@ class TelehealthStaffSettings(BaseModel):
     Staff's timezone setting for the current telehealth availability submisison
 
     :type: str
+    """
+    
+    availability_horizon = db.Column(db.Integer, nullable=False, default=2)
+    """
+    How far out from the current week the practitioner wants to be available to be booked. An integer
+    representing weeks. Must be 0-52. If set to 0, the practitioner cannot be booked.
+    
+    :type: int
     """
 
     availability = db.relationship('TelehealthStaffAvailability', uselist=True, back_populates="settings")
