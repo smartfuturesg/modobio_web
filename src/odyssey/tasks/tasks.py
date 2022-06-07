@@ -6,7 +6,7 @@ from odyssey.api.user.schemas import UserSubscriptionsSchema
 
 from odyssey.integrations.apple import AppStore
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from io import BytesIO
 from typing import Any, Dict
 from PIL import Image
@@ -368,19 +368,29 @@ def test_task():
 
 
 @celery.task()
-def upcoming_booking_payment_notification_2days(booking, booking_start_time):
-    payment_method = PaymentMethods.query.filter_by(user_id=booking.client_user_id, is_default=True).one_or_none()
-    booking_dt_utc = datetime.combine(booking.target_date_utc, booking_start_time)
+def upcoming_booking_payment_notification(
+        client_user_id, target_date_utc, booking_window_id_start_time_utc, booking_id
+):
+    payment_method = PaymentMethods.query.filter_by(user_id=client_user_id, is_default=True).one_or_none()
+    target_date_utc = datetime.strptime(target_date_utc, "%Y-%m-%dT00:00:00")
+    target_date_utc = target_date_utc.date()
+    index = booking_window_id_start_time_utc - 1  # zero the index first
+    hours = index / 12
+    minutes = (index % 12) * 5
+    booking_start_time = time(hour=int(hours), minute=minutes)
+    booking_dt_utc = datetime.combine(target_date_utc, booking_start_time)
     create_notification(
-        booking.client_user_id,
+        client_user_id,
         NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
         NOTIFICATION_TYPE_TO_ID.get('Payments'),
         "Upcoming Telehealth Charge",
         f"Your payment method ending in {payment_method.number} will be charged for your appointment scheduled on <datetime_utc>{booking_dt_utc}</datetime_utc> in the next 24 hours.",
         "Client",
-        booking_dt_utc + timedelta(days=1)
+        booking_dt_utc + timedelta(days=1)  # expiry
     )
-    db.session.commit()
+    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+    booking.payment_notified = True
+    db.session.commit()  # commits notification add and booking payment_notified setting to true
 
 
 @celery.task()
