@@ -1364,3 +1364,44 @@ class LookupVisitReasons(BaseModelWithIdx):
     """
     Role that the reason would justify a visit with
     """
+
+class LookupEmotes(BaseModelWithIdx):
+    """
+    Lookup table of available emotes 
+    """
+
+    position = db.Column(db.Integer, unique=True)
+    """
+    The order that the frontend applications will rely on for ordering the emotes
+
+    :type: integer
+    """
+
+    icon_name = db.Column(db.String)
+    """
+    The filename for the icon that will be used as the emote button.
+
+    :type: string
+    """
+
+    label = db.Column(db.String)
+    """
+    Label to be shown below each emote.
+
+    :type: string
+    """
+
+    title_text = db.Column(db.String)
+    """
+    The title on the notification or prompt that will be shown to the user.
+
+    :type: string
+    """
+
+    content_text = db.Column(db.String)
+    """
+    The text in the content section of notification or prompt that will be 
+    shown to the user.
+
+    :type: string
+    """

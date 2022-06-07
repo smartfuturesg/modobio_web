@@ -38,7 +38,8 @@ from odyssey.api.lookup.models import (
      LookupBloodTests,
      LookupBloodTestRanges,
      LookupDevNames,
-     LookupVisitReasons
+     LookupVisitReasons,
+     LookupEmotes
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
@@ -48,7 +49,7 @@ from odyssey.api.lookup.schemas import (
     LookupDefaultHealthMetricsOutputSchema, 
     LookupDrinksOutputSchema, 
     LookupDrinkIngredientsOutputSchema,
-    LookupEHRPagesOutputSchema, 
+    LookupEHRPagesOutputSchema,
     LookupGoalsOutputSchema,
     LookupRacesOutputSchema,
     LookupSubscriptionsOutputSchema,
@@ -73,7 +74,8 @@ from odyssey.api.lookup.schemas import (
     LookupBloodTestRangesOutputSchema,
     LookupBloodTestRangesAllOutputSchema,
     LookupDevNamesOutputSchema,
-    LookupVisitReasonsOutputSchema
+    LookupVisitReasonsOutputSchema,
+    LookupEmotesOutputSchema
 )
 from odyssey import db
 from odyssey.utils.auth import token_auth
@@ -590,3 +592,15 @@ class LookupVisitReasonsApi(BaseResource):
             reasons = LookupVisitReasons.query.filter_by(role_id=role.idx).all()
 
         return {'total_items': len(reasons), 'items': reasons}
+@ns.route('/emotes/')
+class LookupEmotesApi(BaseResource):
+    """
+    Endpoint that returns all emotes ordered by position number
+    """
+    @token_auth.login_required
+    @responds(schema=LookupEmotesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        emotes = LookupEmotes.query.order_by('position').all()
+        
+        return {'total_items': len(emotes), 'items': emotes}
+        
