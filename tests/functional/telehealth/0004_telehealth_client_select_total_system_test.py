@@ -61,7 +61,7 @@ def test_client_time_select(test_client, payment_method):
         content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['total_options'] == 47
+    assert response.json['total_options'] == 50
 
 
 def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, payment_method, staff_availabilities):
