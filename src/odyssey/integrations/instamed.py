@@ -454,7 +454,7 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
     
     # run the task to store the chat transcript immediately
     # imported in this way to get around circular importing issues
-    if current_app.config.TESTING:
+    if current_app.config['TESTING']:
         #run task directly if in test env
         odyssey.tasks.tasks.store_telehealth_transcript(booking.idx)
     else:
