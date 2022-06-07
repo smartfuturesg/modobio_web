@@ -423,9 +423,13 @@ def close_previous_db_connection(**kwargs):
 def create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance():
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
+
+    now_string = (datetime.utcnow() - timedelta(seconds=10)).strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")
+    one_hour_15min_out_string = (datetime.utcnow() + timedelta(hours=1, minutes=15, seconds=10)).strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")
+
     response = table.scan(  # look for imminent scheduled maintenances
         FilterExpression=Attr('deleted').eq('False') &
-        Attr('start_time').between(datetime.now(), (datetime.now()+timedelta(hours=1, minutes=14))) &
+        Attr('start_time').between(now_string, one_hour_15min_out_string) &
         Attr('notified').eq('False')
     )  # runs every 15 minutes, so reach out an extra 14 minutes
     # better that notifications are generated a bit early rather than late
@@ -552,7 +556,7 @@ celery.conf.beat_schedule = {
     },
     # scheduled maintenances
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
-        'task': 'odyssey.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
+        'task': 'odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
         'schedule': crontab(minute='*/15')
     },
     # upcoming booking payment to be charged
