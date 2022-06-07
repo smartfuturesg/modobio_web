@@ -352,7 +352,9 @@ class LookupRacesApi(BaseResource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/care-team/resources/')
+@ns.deprecated
 class LookupClinicalCareTeamResourcesApi(BaseResource):
     """
     To be replaced by care-team/ehr-resources/
