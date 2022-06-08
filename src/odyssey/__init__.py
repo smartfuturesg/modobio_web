@@ -150,8 +150,9 @@ def create_app():
         from odyssey.api.misc.postman import ns_dev
         api.add_namespace(ns_dev)
 
-        from odyssey.api.notifications.routes import ns_dev
-        api.add_namespace(ns_dev)
+        from odyssey.api.notifications.routes import ns_dev_push, ns_dev_notif
+        api.add_namespace(ns_dev_push)
+        api.add_namespace(ns_dev_notif)
 
         from odyssey.api.payment.routes import ns_dev
         api.add_namespace(ns_dev)
