@@ -26,6 +26,7 @@ from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAva
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
+from odyssey.api.notifications.models import Notifications
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import cancel_telehealth_appointment
 
@@ -394,7 +395,29 @@ def remove_expired_availability_exceptions():
         db.session.delete(exception)
     db.session.commit()
     logger.info('Completed remove expired exceptions task')
-    
+
+@celery.task()
+def remove_past_notifications():
+    """
+    Simple cleanup task for the Notifications table. If the notification has been marked
+    as "deleted" or if the current time past the "expires" time, the notification will
+    be removed from the table.
+    """
+
+    current_time = datetime.now(timezone.utc).date()
+
+    logger.info('Removing past notifications...')
+    notifications = Notifications.query.filter(or_(
+        Notifications.expires < current_time,
+        Notifications.deleted == True
+    )
+    ).all()
+
+    for notification in notifications:
+        db.session.delete(notification)
+    db.session.commit()
+    logger.info('Completed remove past notifications task.')
+
 @worker_process_init.connect
 def close_previous_db_connection(**kwargs):
     if db.session:
@@ -441,5 +464,10 @@ celery.conf.beat_schedule = {
     'remove_expired_availability_exceptions': {
         'task': 'odyssey.periodic.remove_expired_availability_exceptions',
         'schedule': crontab(hour='0', minute='0')
+    },
+    #remove past notifications
+    'remove_past_notifications': {
+        'task': 'odyssey.tasks.periodic.remove_past_notifications',
+        'schedule': crontab(hour=0, minute=42)
     }
 }
