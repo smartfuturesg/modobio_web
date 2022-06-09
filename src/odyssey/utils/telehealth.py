@@ -26,7 +26,7 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.utils.constants import (
     DAY_OF_WEEK,
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
-    TELEHEALTH_START_END_BUFFER)
+)
 from odyssey.utils.files import FileDownload
 from odyssey.utils.misc import date_validator
 
@@ -81,53 +81,30 @@ def get_possible_ranges(
     if weekday_start != weekday_end:
         # range example ( start_idx - end_idx )
         # end includes the buffer + 1 to make the idx inclusive in the for loop
-        for pos_start in range(start_time_idx, last_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER + 1, available_increments):
-            # base case: start_time_idx == 1
-            if pos_start == 1 and TELEHEALTH_START_END_BUFFER > 0:
-                time_blocks[pos_start] = (
-                    (target_date - timedelta(days=1), weekday_start - 1, last_time_idx - TELEHEALTH_START_END_BUFFER + 1, last_time_idx), # 5 min buffer
-                    (target_date, weekday_start, pos_start , pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER)
-                )
-            else:
-                # add day1 times
-                time_blocks[pos_start] = (
-                    (target_date, weekday_start, pos_start - TELEHEALTH_START_END_BUFFER, pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER),
-                )
+        for pos_start in range(start_time_idx, last_time_idx - duration_idx_delta + 1, available_increments):
+            time_blocks[pos_start] = (
+                (target_date, weekday_start, pos_start, pos_start + duration_idx_delta),
+            )
 
         # add overlapping times can be 283(23:30) 286(23:45) or ealier ones depending on duration.
         # last possible start time in a day is 286(23:45)
-        for pos_start in range(last_possibe_start, last_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER - 1, -available_increments):
+        for pos_start in range(last_possibe_start, last_time_idx - duration_idx_delta - 1, -available_increments):
             time_blocks[pos_start] = (
-                (target_date, weekday_start, pos_start - TELEHEALTH_START_END_BUFFER, last_time_idx),
-                (target_date + timedelta(days=1), weekday_end, first_time_idx, TELEHEALTH_START_END_BUFFER + duration_idx_delta - (last_time_idx - pos_start))
+                (target_date, weekday_start, pos_start, last_time_idx),
+                (target_date + timedelta(days=1), weekday_end, first_time_idx, duration_idx_delta - (last_time_idx - pos_start))
             )
 
-        for pos_start in range(first_time_idx, end_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER + 1, available_increments): # +1 to make it inclusive
-            # base case: start_time_idx == 1
-            if pos_start == 1 and TELEHEALTH_START_END_BUFFER > 0:
-                time_blocks[pos_start] = (
-                    (target_date, weekday_end - 1, last_time_idx - TELEHEALTH_START_END_BUFFER + 1, last_time_idx), # 5 min buffer
-                    (target_date + timedelta(days=1), weekday_end, pos_start , pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER)
-                )
-            else:
-                # add day2 times
-                time_blocks[pos_start] = (
-                    (target_date+timedelta(days=1), weekday_end, pos_start - TELEHEALTH_START_END_BUFFER, pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER),
-                )
+        # +1 to make it inclusive
+        for pos_start in range(first_time_idx, end_time_idx - duration_idx_delta + 1, available_increments):
+            time_blocks[pos_start] = (
+                (target_date+timedelta(days=1), weekday_end, pos_start, pos_start + duration_idx_delta),
+            )
     
-    else:
-        for pos_start in range(start_time_idx, end_time_idx - duration_idx_delta - TELEHEALTH_START_END_BUFFER + 1, available_increments): # +1 to make it inclusive
-            # base case: start_time_idx == 1
-            if pos_start == 1 and TELEHEALTH_START_END_BUFFER > 0:
-                time_blocks[pos_start] = (
-                    (target_date-timedelta(days=1), weekday_start - 1, last_time_idx - TELEHEALTH_START_END_BUFFER + 1, last_time_idx), # 5 min buffer
-                    (target_date, weekday_start, pos_start , pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER)
-                )
-            else:
-                # add day1 times
-                time_blocks[pos_start] = (
-                    (target_date, weekday_start, pos_start - TELEHEALTH_START_END_BUFFER, pos_start + duration_idx_delta + TELEHEALTH_START_END_BUFFER),
-                )
+    else:  # +1 to make it inclusive
+        for pos_start in range(start_time_idx, end_time_idx - duration_idx_delta + 1, available_increments):
+            time_blocks[pos_start] = (
+                (target_date, weekday_start, pos_start, pos_start + duration_idx_delta),
+            )
 
     return time_blocks
 
@@ -183,56 +160,14 @@ def get_practitioners_available(time_block, q_request):
         exception = False
         
         #detect if day 1 of booking is inside an exception for this practitioner on this date       
-        exception1 = TelehealthStaffAvailabilityExceptions.query \
-            .filter_by(user_id=user_id, exception_date=date1.date(), is_busy=True) \
-            .filter(
-                or_(
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day1_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day1_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day1_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day1_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day1_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day1_end
-                    )
-                )
-            ).all()
+        exception1 = check_availability_exceptions(user_id, True, date1.date(), day1_start, day1_end)
             
         if len(exception1) > 0:
             exception = True
             
         if day2 and not exception:
             #detect if day 2 of booking is inside an exception for this practitioner on this date       
-            exception2 = TelehealthStaffAvailabilityExceptions.query \
-            .filter_by(user_id=user_id, exception_date=date2.date(), is_busy=True) \
-            .filter(
-                or_(
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= day2_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= day2_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= day2_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < day2_end
-                    ),
-                    and_(
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > day2_start,
-                        TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= day2_end
-                    )
-                )
-            ).all()
+            exception2 = check_availability_exceptions(user_id, True, date1.date(), day1_start, day1_end)
             
             if len(exception2) > 0:
                 exception = True
@@ -257,8 +192,7 @@ def get_practitioners_available(time_block, q_request):
             TelehealthBookings.booking_window_id_start_time_utc.in_(availability_range),
             TelehealthBookings.booking_window_id_end_time_utc.in_(availability_range)))
         
-        if len(available[practitioner_user_id]) == int(duration/5) + (TELEHEALTH_START_END_BUFFER * 2)\
-            and not current_bookings.all():
+        if len(available[practitioner_user_id]) == int(duration/5) and not current_bookings.all():
             #practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioner_ids.add(practitioner_user_id)
     
@@ -361,8 +295,12 @@ def verify_availability(
     available_indices = {line.booking_window_id for line in staff_availability}
     requested_indices = {req_idx for req_idx in range(utc_start_idx, utc_end_idx + 1)}
     has_availability = requested_indices.issubset(available_indices)
-
-    if not has_availability:
+    
+    # check if staff has a busy exception that conflicts with this time
+    exceptions = check_availability_exceptions(staff_user_id, True, target_start_datetime_utc.date(),
+                                               utc_start_idx, utc_end_idx)
+    
+    if not has_availability or len(exceptions) > 0:
         raise BadRequest("Staff does not currently have this time available")
 
     return 
@@ -473,3 +411,39 @@ def scheduled_maintenance_date_times(start_date, end_date):
         })
 
     return result
+
+def check_availability_exceptions(user_id, is_busy, date, start_time_id, end_time_id):
+    """
+    Checks availability exceptions to detect how an exception interacts with a 
+    potential booking.
+
+    Args:
+        user_id (int): user_id of the staff member to check exceptions for
+        is_busy (bool): denotes whether to check for busy or free exceptions
+        date (date): date in question
+        start_time_id (int): booking_id_start_time_utc of the booking in question
+        end_time_id (int): booking_id_end_time_utc of the booking in question
+    """
+    
+    return TelehealthStaffAvailabilityExceptions.query \
+    .filter_by(user_id=user_id, exception_date=date, is_busy=is_busy) \
+    .filter(
+        or_(
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time <= start_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > start_time_id
+            ),
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < end_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time >= end_time_id
+            ),
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time >= start_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time < end_time_id
+            ),
+            and_(
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time > start_time_id,
+                TelehealthStaffAvailabilityExceptions.exception_booking_window_id_end_time <= end_time_id
+            )
+        )
+    ).all()

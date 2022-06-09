@@ -15,6 +15,7 @@ Database models for all things telehealth. These tables will be used to keep tra
 meeting rooms, and other data related to telehealth meetings
 """
 
+
 class TelehealthBookings(BaseModelWithIdx):
     """ 
     Holds all of the client and Staff bookings 
@@ -141,7 +142,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
     Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
     is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
-    by the inital charge task.
+    by the initial charge task.
 
     :type: boolean
     """
@@ -174,7 +175,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: :class: `TelehealthBookingDetails` instance
     """
 
-    medical_gender_preference  = db.Column(db.String)
+    medical_gender_preference = db.Column(db.String)
     """
     preferred gender of the medical professional
 
@@ -202,6 +203,14 @@ class TelehealthBookings(BaseModelWithIdx):
     Duration of the telehealth appointment as scheduled. This is used for charging users based on the hourly rate specified by practitioners. 
 
     :type: int
+    """
+
+    payment_notified = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent the notification for this booking being charged. 
+    Gets set to True when it has been.
+
+    :type: boolean
     """
 
 
@@ -297,7 +306,8 @@ class TelehealthBookingStatus(db.Model):
 
     status = db.Column(db.String(20))
     """
-    status of the booking, should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress' 'Completed', 'Document Review')
+    status of the booking, 
+    should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed')
 
     :type: str, max length 20
     """
