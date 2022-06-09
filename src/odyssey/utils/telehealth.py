@@ -18,7 +18,8 @@ from odyssey.api.telehealth.models import(
     TelehealthChatRooms, 
     TelehealthBookings, 
     TelehealthStaffAvailability, 
-    TelehealthBookingStatus)
+    TelehealthBookingStatus,
+    TelehealthStaffSettings)
 from odyssey.api.telehealth.schemas import TelehealthBookingStatusSchema
 from odyssey.api.user.models import User
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
@@ -177,8 +178,8 @@ def get_practitioners_available(time_block, q_request):
             )
         )
 
-    # practitioner availablilty as per availability input
-    # available = {user_id(practioner): [TelehealthSTaffAvailability objects] }
+    # practitioner availability as per availability input
+    # available = {user_id(practitioner): [TelehealthSTaffAvailability objects] }
     available = {}
     for user_id, avail in query.all():
         if user_id not in available:
@@ -194,7 +195,7 @@ def get_practitioners_available(time_block, q_request):
     for practitioner_user_id in available:
         current_bookings = bookings_base_query.filter_by(staff_user_id=practitioner_user_id)
         
-        availability_range = [avail.booking_window_id for avail in available[practitioner_user_id]] # list of booking indicies
+        availability_range = [avail.booking_window_id for avail in available[practitioner_user_id]] # list of booking indices
 
         current_bookings = current_bookings.filter(or_(
             TelehealthBookings.booking_window_id_start_time_utc.in_(availability_range),
@@ -314,7 +315,7 @@ def verify_availability(
                 TelehealthStaffAvailability.user_id == staff_user_id
                 )
         ).scalars().all()
-        # Make sure the full range of requested idices are found in staff_availability
+        # Make sure the full range of requested indices are found in staff_availability
         available_indices = {line.booking_window_id for line in staff_availability}
         requested_indices = {req_idx for req_idx in range(utc_start_idx, utc_end_idx + 1)}
         has_availability = requested_indices.issubset(available_indices)
@@ -335,7 +336,7 @@ def update_booking_status_history(new_status: str, booking_id: int, reporter_id:
     # save TelehealthBookingStatus object connected to this booking.
     db.session.add(status_history)
 
-def complete_booking(booking_id: int):
+def complete_booking(booking_id: int, ):
     """ Complete a booking.
 
     After booking gets started, make sure it gets completed
@@ -369,9 +370,33 @@ def complete_booking(booking_id: int):
     return 'Booking Completed by System'
 
 def add_booking_to_calendar(
-    booking,
-    booking_start_staff_localized,
-    booking_end_staff_localized):
+    booking: TelehealthBookings,
+    staff_settings: TelehealthStaffSettings,
+    ):
+
+    ##
+    # Populate staff calendar with booking
+    # localize to staff timezone first
+    ##
+
+    start_time = LookupBookingTimeIncrements.query.filter_by(idx = booking.booking_window_id_start_time_utc).one_or_none().start_time
+    end_time = LookupBookingTimeIncrements.query.filter_by(idx = booking.booking_window_id_end_time_utc).one_or_none().end_time
+    # find start datetime in UTC
+    target_start_datetime_utc = datetime.combine(booking.target_date_utc, time(hour=start_time.hour, minute=start_time.minute, tzinfo=tz.UTC))
+    
+    # booking may end on following UTC date
+    target_end_date_utc = (booking.target_date_utc + timedelta(days=1) if  
+                        booking.booking_window_id_end_time_utc < booking.booking_window_id_start_time_utc
+                        else booking.target_date_utc)
+
+    target_end_datetime_utc = datetime.combine(target_end_date_utc, time(hour=end_time.hour, minute=end_time.minute, tzinfo=tz.UTC))
+    if staff_settings.timezone != 'UTC':
+        booking_start_staff_localized = target_start_datetime_utc.astimezone(tz.gettz(staff_settings.timezone))
+        booking_end_staff_localized = target_end_datetime_utc.astimezone(tz.gettz(staff_settings.timezone))
+    else:
+        booking_start_staff_localized = target_start_datetime_utc
+        booking_end_staff_localized = target_end_datetime_utc
+
     add_to_calendar = StaffCalendarEvents(user_id=booking.staff_user_id,
                                         start_date=booking_start_staff_localized.date(),
                                         end_date=booking_end_staff_localized.date(),
@@ -382,9 +407,12 @@ def add_booking_to_calendar(
                                         location='Telehealth_'+str(booking.idx),
                                         description='',
                                         all_day=False,
-                                        timezone = booking_start_staff_localized.astimezone().tzname()
+                                        timezone = staff_settings.timezone
                                         )
     db.session.add(add_to_calendar)
+    db.session.flush()
+
+    return add_to_calendar.idx
 
 def get_booking_increment_data():
     global booking_time_increment_length
@@ -403,3 +431,19 @@ def get_booking_increment_data():
 
     return({'length': booking_time_increment_length,
             'max_idx': booking_max_increment_idx})
+
+
+def accept_booking(booking: TelehealthBookings, staff_settings: TelehealthStaffSettings):
+    """
+    Complete the booking process. This is meant to be run upon setting thet status of a booking to 'Accepted'
+    
+    - Create telehealth chatroom
+    - Add booking to staff calendar
+    """
+
+    twilio_obj = Twilio()
+    # create Twilio conversation and store details in TelehealthChatrooms table
+    conversation_sid = twilio_obj.create_telehealth_chatroom(booking_id = booking.idx)
+
+    # add booking to staff's calendar
+    calendar_idx = add_booking_to_calendar(booking = booking, staff_settings = staff_settings)

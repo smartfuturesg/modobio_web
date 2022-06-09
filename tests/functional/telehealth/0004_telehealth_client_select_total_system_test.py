@@ -182,7 +182,8 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     2. client adds to the queue (America/Phoenix)
     3. client views availabilities and selects an appointment 
     4. Client makes booking
-    5. client and staff view their bookings
+    5. Client confirms the booking
+    6. client and staff view their bookings
 
     The staff availability in UTC should be converted to the client's timezone (America/Phoenix) for display.
     """  
@@ -270,7 +271,20 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     booking_id = response.json['bookings'][0]['booking_id']
 
     ##
-    # 5. Pull up bookings from the client and staff perspectives
+    # 5. Client confirms the booking
+    ##
+    response = test_client.put(
+        f'/telehealth/bookings/?booking_id={ booking_id }',
+        headers=test_client.client_auth_header,
+        data=dumps( {'status': 'Confirmed'}),
+        content_type='application/json')
+
+    booking_status = TelehealthBookings.query.filter_by(idx = booking_id).one_or_none().status
+    
+    assert booking_status == 'Confirmed'
+
+    ##
+    # 6. Pull up bookings from the client and staff perspectives
     ##
     response = test_client.get(
         f'/telehealth/bookings/'
@@ -307,7 +321,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
 
 def test_booking_start_and_complete(test_client, booking_function_scope):
     
-    # start teelehealth call as a staff member
+    # start telehealth call as a staff member
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
         headers=test_client.staff_auth_header)

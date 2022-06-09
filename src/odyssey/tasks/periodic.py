@@ -80,7 +80,7 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
     if not target_date:
         target_date = date.today()
     
-    # compensate for scanning window inbetween days
+    # compensate for scanning window in between days
     if booking_window_id_start > booking_window_id_end:
         # bookings beginning on current day
         bookings_1 = db.session.execute(
@@ -94,7 +94,7 @@ def deploy_upcoming_appointment_tasks(booking_window_id_start, booking_window_id
                 )) 
             ).scalars().all()
 
-        # bookings begining on following day of scanning window
+        # bookings beginning on following day of scanning window
         bookings_2 = db.session.execute(
             select(TelehealthBookings). 
             where(and_(

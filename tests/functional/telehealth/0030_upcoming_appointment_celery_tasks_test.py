@@ -7,6 +7,7 @@ from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms
+from odyssey.integrations.twilio import Twilio
 
 from tests.functional.telehealth.client_select_data import(
     telehealth_staff_full_availability,
@@ -14,7 +15,7 @@ from tests.functional.telehealth.client_select_data import(
     )
 
 from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
-from odyssey.tasks.tasks import upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
+from odyssey.tasks.tasks import abandon_telehealth_booking, upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
 
 def test_upcoming_bookings_scan(test_client, payment_method, telehealth_staff, staff_availabilities):
     global upcoming_bookings_all
@@ -166,6 +167,9 @@ def test_upcoming_bookings_notification(test_client):
     #
     ##
     test_booking = choice(upcoming_bookings_all)
+    test_booking.status = 'Accepted'
+    test_client.db.session.commit()
+    
     upcoming_appointment_care_team_permissions(test_booking.idx)
 
     care_team_permissions = test_client.db.session.execute(select(
@@ -180,3 +184,27 @@ def test_upcoming_bookings_notification(test_client):
     ).where(LookupClinicalCareTeamResources.access_group.in_(['general','medical_doctor']))).scalars().all()
 
     assert len(care_team_permissions) == len(resource_ids_needed)
+
+def test_abandon_booking_task(test_client, booking_function_scope):
+    """
+    Set the status of the booking to Pending and attempt to run the abandon booking task
+    """
+    # remove the chatroom entry first to make the booking similar to the booking
+    # state of Pending status booking
+    twilio = Twilio()
+    twilio.delete_conversation(booking_function_scope.chat_room.conversation_sid)
+    test_client.db.session.delete(booking_function_scope.chat_room)
+
+    # abandon an accepted booking, should not change anything
+    abandon_telehealth_booking(booking_function_scope.idx)
+
+    test_client.db.session.refresh(booking_function_scope)
+
+    assert booking_function_scope
+
+    booking_function_scope.status = 'Pending'
+    test_client.db.session.commit()
+
+    abandon_telehealth_booking(booking_function_scope.idx)
+
+    assert TelehealthBookings.query.filter_by(idx = booking_function_scope.idx).one_or_none() is None
