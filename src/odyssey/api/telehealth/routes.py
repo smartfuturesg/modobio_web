@@ -1200,7 +1200,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
             return
         # return tzone and auto-confirm from TelehealthStaffSettings table
         payload = {
-            'settings': {'timezone': availability[0][0].settings.timezone, 'auto_confirm': availability[0][0].settings.auto_confirm},
+            'settings': {
+                'timezone': availability[0][0].settings.timezone,
+                'auto_confirm': availability[0][0].settings.auto_confirm,
+                'availability_horizon': availability[0][0].settings.availability_horizon},
             'availability': []
         }
         
