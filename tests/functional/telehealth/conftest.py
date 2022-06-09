@@ -142,6 +142,7 @@ def payment_method(test_client):
     # test_client.db.session.delete(pm)
     # test_client.db.session.commit()
 
+
 @pytest.fixture(scope='session')
 def staff_credentials(test_client):
     """ Add staff credentials for telehealth testing. """
@@ -263,7 +264,7 @@ def booking(test_client, payment_method):
         booking_end_idx = abs(time_inc[-1].idx - (booking_start_idx + 3))
     else:
         booking_end_idx = booking_start_idx + 3
-    
+
     bk = TelehealthBookings(
         client_user_id=test_client.client_id,
         staff_user_id=test_client.staff_id,
@@ -284,6 +285,15 @@ def booking(test_client, payment_method):
         consult_rate = 15.00
     )
 
+    if not TelehealthStaffSettings.query.filter_by(user_id = test_client.staff_id).one_or_none():
+        # Add telehealth staff settings for test staff where auto_confirm is True. 
+        staff_telehealth_settings = TelehealthStaffSettings(
+            timezone='UTC',
+            auto_confirm = True,
+            user_id = test_client.staff_id)
+
+        test_client.db.session.add(staff_telehealth_settings)
+
     test_client.db.session.add(bk)
 
     test_client.db.session.flush()
@@ -295,7 +305,6 @@ def booking(test_client, payment_method):
     test_client.db.session.commit()
 
     yield bk
-
     # delete chatroom, booking, and payment method
     chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == bk.idx)).scalars().one_or_none()
     
@@ -334,7 +343,9 @@ def staff_availabilities(test_client, telehealth_staff):
     time_inc = LookupBookingTimeIncrements.query.all()
     availabilities = []
     staff_settings = []
+    staff_ids = []
     for staff in telehealth_staff[:5]:
+        staff_ids.append(staff.user_id)
         # each staff needs telehealth settings
         staff_settings.append(TelehealthStaffSettings(
             user_id = staff.user_id,
@@ -353,6 +364,10 @@ def staff_availabilities(test_client, telehealth_staff):
 
     yield
 
+
     # delete all entries
-    test_client.db.session.query(TelehealthStaffAvailability).delete()
-    test_client.db.session.query(TelehealthStaffSettings).delete()
+    test_client.db.session.query(TelehealthStaffAvailability
+        ).filter(TelehealthStaffAvailability.user_id.in_(staff_ids)).delete()
+    test_client.db.session.query(TelehealthStaffSettings
+        ).filter(TelehealthStaffSettings.user_id.in_(staff_ids)).delete()
+

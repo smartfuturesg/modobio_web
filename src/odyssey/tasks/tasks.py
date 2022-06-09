@@ -112,7 +112,7 @@ def upcoming_appointment_care_team_permissions(booking_id):
     Apply temporary care team access permissions to the staff member involved in the booking
     """
 
-    # bring up resouce_group_ids required for medical doctor visits
+    # bring up resource_group_ids required for medical doctor visits
     # TODO: update this to align with other staff roles 
     resource_ids_needed = db.session.execute(select(
         LookupClinicalCareTeamResources.resource_id, 
@@ -122,7 +122,7 @@ def upcoming_appointment_care_team_permissions(booking_id):
     booking = db.session.execute(select(TelehealthBookings).where(
         TelehealthBookings.idx == booking_id,
         TelehealthBookings.status == 'Accepted')).scalars().one_or_none()
-    
+
     if not booking:
         return 
     
@@ -475,6 +475,23 @@ def update_apple_subscription(user_id: int):
 
     return
 
+
+@celery.task(base=BaseTaskWithRetry)
+def abandon_telehealth_booking(booking_id: int):
+    """
+    To be run in the case a client abandons their appointment without explicitly telling us.
+    The booking would have only ever been in the Pending status. At this point, only the 
+    TelehealthBooking would have been created. No other database entries or resources have been 
+    created for the booking. ONly the booking entry needs to be deleted. 
+
+    """
+
+    booking = TelehealthBookings.query.filter_by(idx = booking_id).one_or_none()
+
+    if booking.status == 'Pending':
+        TelehealthBookingStatus.query.filter_by(booking_id = booking_id).delete()
+        db.session.delete(booking)
+        db.session.commit()
 
 @celery.task()
 def test_task():
