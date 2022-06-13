@@ -1,6 +1,7 @@
 import logging
 import secrets
 
+from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 
 from odyssey.integrations.apple import AppStore
@@ -20,7 +21,7 @@ from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupSubscriptions
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
+from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.integrations.twilio import Twilio
@@ -31,6 +32,7 @@ from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TY
 from odyssey.utils.misc import create_notification
 
 logger = logging.getLogger(__name__)
+
 
 @celery.task()
 def upcoming_appointment_notification_2hr(booking_id):
@@ -90,7 +92,7 @@ def upcoming_appointment_notification_2hr(booking_id):
             booking.staff_user_id, 
             NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
             NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            "You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
             f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please review your client's medical information before taking the call.",
             'Provider',
             expires_at
@@ -102,7 +104,7 @@ def upcoming_appointment_notification_2hr(booking_id):
             booking.client_user_id, 
             NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
             NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            "You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
             f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please ensure your medical information is up to date before taking the call.",
             'Client',
             expires_at
@@ -248,46 +250,54 @@ def store_telehealth_transcript(booking_id: int):
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
     
     transcript = twilio.get_booking_transcript(booking.idx)
-
-    # if there is media present in the transcript, store it in an s3 bucket
-    hex_token = secrets.token_hex(4)
-    for message_id, message in enumerate(transcript):
-        if message['media']:
-            for media_id, media in enumerate(message['media']):
-                # download media from twilio 
-                media_content = twilio.get_media(media['sid'])
-
-                fu = FileUpload(
-                    BytesIO(media_content),
-                    booking.client_user_id,
-                    prefix=f'telehealth/booking_{booking_id}/message_{message_id}/')
-                fu.validate()
-                fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
-
-                media['s3_path'] = fu.filename
-                transcript[message_id]['media'][media_id] = media
-
-    payload = {
-        'created_at': datetime.utcnow().isoformat(),
-        'booking_id': booking.idx,
-        'transcript': transcript
-    }
-    # insert transcript into mongo db under the telehealth_transcripts collection
-    if current_app.config['MONGO_URI']:
-        _id = mongo.db.telehealth_transcripts.insert(payload)
-        logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
-    else:
-        logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')
-        _id = None  
-
-    # delete the conversation from twilio if the transcript was successfully stored on mongo
-    if _id:
+    
+    if len(transcript) == 0:
+        #delete from twilio, nothing to store
         twilio.delete_conversation(booking.chat_room.conversation_sid)
         logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
-        booking.chat_room.conversation_sid = None
         
-    # delete the conversation sid entry, add transcript_object_id from mongodb
-    booking.chat_room.transcript_object_id = str(_id)
+        #set conversation sid to none since there is nothing to be stored to mongo
+        booking.chat_room.conversation_sid = None
+    else:
+        # if there is media present in the transcript, store it in an s3 bucket
+        hex_token = secrets.token_hex(4)
+        for message_id, message in enumerate(transcript):
+            if message['media']:
+                for media_id, media in enumerate(message['media']):
+                    # download media from twilio 
+                    media_content = twilio.get_media(media['sid'])
+
+                    fu = FileUpload(
+                        BytesIO(media_content),
+                        booking.client_user_id,
+                        prefix=f'telehealth/booking_{booking_id}/message_{message_id}/')
+                    fu.validate()
+                    fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
+
+                    media['s3_path'] = fu.filename
+                    transcript[message_id]['media'][media_id] = media
+
+        payload = {
+            'created_at': datetime.utcnow().isoformat(),
+            'booking_id': booking.idx,
+            'transcript': transcript
+        }
+        # insert transcript into mongo db under the telehealth_transcripts collection
+        if current_app.config['MONGO_URI']:
+            _id = mongo.db.telehealth_transcripts.insert(payload)
+            logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
+        else:
+            logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')
+            _id = None  
+
+        # delete the conversation from twilio if the transcript was successfully stored on mongo
+        if _id:
+            twilio.delete_conversation(booking.chat_room.conversation_sid)
+            logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
+            booking.chat_room.conversation_sid = None
+        
+        # delete the conversation sid entry, add transcript_object_id from mongodb
+        booking.chat_room.transcript_object_id = str(_id)
 
     db.session.commit()
 
@@ -355,3 +365,47 @@ def update_apple_subscription(user_id: int):
 @celery.task()
 def test_task():
     logger.info("Celery test task succeeded")
+
+
+@celery.task()
+def upcoming_booking_payment_notification_2days(booking, booking_start_time):
+    payment_method = PaymentMethods.query.filter_by(user_id=booking.client_user_id, is_default=True).one_or_none()
+    booking_dt_utc = datetime.combine(booking.target_date_utc, booking_start_time)
+    create_notification(
+        booking.client_user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
+        NOTIFICATION_TYPE_TO_ID.get('Payments'),
+        "Upcoming Telehealth Charge",
+        f"Your payment method ending in {payment_method.number} will be charged for your appointment scheduled on <datetime_utc>{booking_dt_utc}</datetime_utc> in the next 24 hours.",
+        "Client",
+        booking_dt_utc + timedelta(days=1)
+    )
+    db.session.commit()
+
+
+@celery.task()
+def notify_client_of_imminent_scheduled_maintenance(user_id, datum):
+    create_notification(
+        user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
+        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
+        "System maintenance scheduled",
+        f"System maintenance has been scheduled between <datetime_utc>{datum['start_time']}</datetime_utc> and <datetime_utc>{datum['end_time']}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to schedule telehealth appointments for that time period.",
+        'Client',
+        datum['end_time']
+    )
+    db.session.commit()
+
+
+@celery.task()
+def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
+    create_notification(
+        user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
+        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
+        "System maintenance scheduled",
+        f"System maintenance has been scheduled between <datetime_utc>{datum['start_time']}</datetime_utc> and <datetime_utc>{datum['end_time']}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to accept telehealth bookings for that time period.",
+        'Provider',
+        datum['end_time']
+    )
+    db.session.commit()

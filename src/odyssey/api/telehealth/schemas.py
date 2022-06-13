@@ -197,6 +197,7 @@ class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
 
     auto_confirm = fields.Boolean(required=True, metadata={'description':'auto-confirm appointments based on availability'})
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
+    availability_horizon = fields.Integer(validate=validate.Range(0, 52),metadata={'description':'how many weeks in advance the practitioner can be booked. If 0, the practitioner cannot be booked'})
 
     @post_load
     def make_object(self, data, **kwargs):

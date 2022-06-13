@@ -2,8 +2,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 from flask_restx.fields import String
-from sqlalchemy import text, insert
+from sqlalchemy import text, insert, CheckConstraint
 from sqlalchemy.sql.expression import true
+
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey import db
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
@@ -13,6 +14,7 @@ from odyssey.utils.auth import token_auth
 Database models for all things telehealth. These tables will be used to keep track of bookings,
 meeting rooms, and other data related to telehealth meetings
 """
+
 
 class TelehealthBookings(BaseModelWithIdx):
     """ 
@@ -140,7 +142,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
     Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
     is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
-    by the inital charge task.
+    by the initial charge task.
 
     :type: boolean
     """
@@ -173,7 +175,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: :class: `TelehealthBookingDetails` instance
     """
 
-    medical_gender_preference  = db.Column(db.String)
+    medical_gender_preference = db.Column(db.String)
     """
     preferred gender of the medical professional
 
@@ -201,6 +203,14 @@ class TelehealthBookings(BaseModelWithIdx):
     Duration of the telehealth appointment as scheduled. This is used for charging users based on the hourly rate specified by practitioners. 
 
     :type: int
+    """
+
+    payment_notified = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent the notification for this booking being charged. 
+    Gets set to True when it has been.
+
+    :type: boolean
     """
 
 
@@ -296,7 +306,8 @@ class TelehealthBookingStatus(db.Model):
 
     status = db.Column(db.String(20))
     """
-    status of the booking, should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress' 'Completed', 'Document Review')
+    status of the booking, 
+    should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed')
 
     :type: str, max length 20
     """
@@ -660,8 +671,12 @@ class TelehealthChatRooms(BaseModel):
 class TelehealthStaffSettings(BaseModel):
     """
     Holds staff preferred settings for Telehealth appointments
-
     """
+    
+    __table_args__ = (
+        CheckConstraint('0 <= availability_horizon <= 52',
+                        name='availability_horizon_range'),
+    )
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
     """
@@ -682,6 +697,14 @@ class TelehealthStaffSettings(BaseModel):
     Staff's timezone setting for the current telehealth availability submisison
 
     :type: str
+    """
+    
+    availability_horizon = db.Column(db.Integer, nullable=False, server_default='2')
+    """
+    How far out from the current week the practitioner wants to be available to be booked. An integer
+    representing weeks. Must be 0-52. If set to 0, the practitioner cannot be booked.
+    
+    :type: int
     """
 
     availability = db.relationship('TelehealthStaffAvailability', uselist=True, back_populates="settings")

@@ -35,7 +35,7 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
     telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f'telehealth/client/time-select/{test_client.client_id}/',
         headers=test_client.client_auth_header,
         data=dumps(telehealth_queue_client_pool_8_post_data),
         content_type='application/json')
@@ -47,10 +47,6 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
     # NOTE: Availabilities are returned with this rule
     # At least 10 available time slots unless we have checked a full 2 weeks (14 days) off.
     # Thus, we will receive 9 availabilities, 3 on closest_future_Monday & 3 on closest_future_Monday + week & 3 on closest_future_Monday + 2 weeks
-    response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
-
     assert response.json['total_options'] == 9
 
     # 3_midnight_bug_staff_general_availability
