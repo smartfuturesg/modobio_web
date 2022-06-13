@@ -1,7 +1,10 @@
+import imp
 import logging
 logger = logging.getLogger(__name__)
 
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.sql import text
+from sqlalchemy import event, DDL
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
@@ -31,6 +34,21 @@ class BaseModel(db.Model):
 
     :type: :class:`datetime.datetime`
     """
+
+
+@event.listens_for(BaseModel, "instrument_class", propagate=True)
+def instrument_class(mapper, class_):
+    print(mapper.local_table)
+    if mapper.local_table is not None:
+         trigger_for_update(mapper.local_table)
+
+def trigger_for_update(table):
+    trig_ddl = DDL(f"""
+            CREATE OR REPLACE TRIGGER trig_{table.name}_updated BEFORE UPDATE ON public.{table.name}
+            FOR EACH ROW EXECUTE PROCEDURE public.refresh_updated_at();
+            """)
+    event.listen(table, 'after_create', trig_ddl)
+
 
 class BaseModelWithIdx(BaseModel):
     """
