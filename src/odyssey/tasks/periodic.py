@@ -436,13 +436,6 @@ def remove_past_notifications():
     logger.info('Completed remove past notifications task.')
 
 
-@worker_process_init.connect
-def close_previous_db_connection(**kwargs):
-    if db.session:
-        db.session.close()
-        db.engine.dispose()
-
-
 @celery.task()
 def create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance():
     dynamodb = boto3.resource('dynamodb')
@@ -533,6 +526,13 @@ def check_for_upcoming_booking_charges():
     logger.info('upcoming bookings task completed')
 
 
+@worker_process_init.connect
+def close_previous_db_connection(**kwargs):
+    if db.session:
+        db.session.close()
+        db.engine.dispose()
+
+
 celery.conf.beat_schedule = {
     # look for upcoming appointments:
     'check-for-upcoming-bookings': {
@@ -589,5 +589,5 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
         'schedule': crontab(minute='*/32')  # if this were just 30 it would be run at the same time as other periodics
         # off setting this slightly might theoretically smooth out the load on celery
-    },
+    }
 }
