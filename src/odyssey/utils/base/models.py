@@ -1,4 +1,3 @@
-import imp
 import logging
 logger = logging.getLogger(__name__)
 
