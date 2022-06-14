@@ -25,7 +25,6 @@ from odyssey.api.lookup.models import (
      LookupTelehealthSessionDuration,
      LookupTermsAndConditions,
      LookupTerritoriesOfOperations,
-     LookupTransactionTypes,
      LookupNotifications,
      LookupEmergencyNumbers,
      LookupRoles,
@@ -55,7 +54,6 @@ from odyssey.api.lookup.schemas import (
     LookupSubscriptionsOutputSchema,
     LookupTerritoriesOfOperationsOutputSchema,
     LookupTermsAndConditionsOutputSchema,
-    LookupTransactionTypesOutputSchema,
     LookupNotificationsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
     LookupTimezones,
@@ -157,24 +155,6 @@ class LookupTimezones(BaseResource):
         varArr = pytz.country_timezones['us']
         payload = {'items': varArr,
                    'total_items': len(varArr) }
-        return payload
-
-@ns.route('/business/transaction-types/')
-class LookupTransactionTypesResource(BaseResource):
-    """ Returns stored transaction types in database by GET request.
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @responds(schema=LookupTransactionTypesOutputSchema,status_code=200, api=ns)
-    def get(self):
-                
-        transaction_types = LookupTransactionTypes.query.all()
-        
-        payload = {'items': transaction_types,
-                   'total_items': len(transaction_types)}
-
         return payload
 
 

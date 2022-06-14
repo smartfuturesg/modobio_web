@@ -1048,53 +1048,7 @@ class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: str
     """
-    
-class ClientTransactionHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
-    Stores history of client transactions
-    """
 
-    date = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Date of this transaction.
-
-    :type: :class:'datetime.datetime'
-    """
-
-    category = db.Column(db.String)
-    """
-    Transaction category, comes from LookupTransactionTypes table.
-
-    :type: string
-    """
-
-    name = db.Column(db.String)
-    """
-    Transaction name, comes from LookupTransactionTypes table.
-
-    :type: string
-    """
-
-    price = db.Column(db.Float)
-    """
-    Price of this transaction, comes from LookupTransactionTypes table.
-
-    :type: float
-    """
-
-    currency = db.Column(db.String)
-    """
-    Name of the currency used for this transaction.
-
-    :type: string
-    """
-
-    payment_method = db.Column(db.String)
-    """
-    Method that the client used to pay for this transaction. Card type (Visa, Mastercard etc.) and last 4 digits.
-
-    :type: string
-    """
 
 class ClientNotificationSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """

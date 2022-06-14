@@ -1,4 +1,4 @@
-"""empty message
+"""add payment_notified boolean column to telehealth booking
 
 Revision ID: 1882fcff5c14
 Revises: 1c0a83fb65e5
