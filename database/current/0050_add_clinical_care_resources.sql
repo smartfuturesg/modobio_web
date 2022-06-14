@@ -1,0 +1,22 @@
+INSERT INTO "LookupClinicalCareTeamResources" (resource_name, display_name, resource_group, access_group)
+VALUES 
+('team', 'Team', NULL ,'general'),
+('fitness_goals', 'Fitness Goals', 'trainer' ,'medical_doctor'),
+('medical_doctor_appointments', 'Medical Doctor Appointments', 'appointments' ,'telehealth'),
+('dietitian_appointments', 'Dietitian Appointments', 'appointments' ,'telehealth'),
+('nutritionist_appointments', 'Nutritionist Appointments', 'appointments' ,'telehealth'),
+('physical_therapist_appointments', 'Physical Therapist Appointments', 'appointments' ,'telehealth'),
+('therapist_appointments', 'Therapist Appointments', 'appointments' ,'telehealth'),
+('trainer_appointments', 'Trainer Appointments', 'appointments' ,'telehealth'),
+('beautician_appointments', 'Beautician Appointments', 'appointments' ,'telehealth'),
+('chef_appointments', 'Chef Appointments', 'appointments' ,'telehealth'),
+('nurse_appointments', 'Nurse Appointments', 'appointments' ,'telehealth'),
+('medical_doctor_history', 'Medical Doctor History', 'history' ,'telehealth'),
+('dietitian_history', 'Dietitian History', 'history' ,'telehealth'),
+('nutritionist_history', 'Nutritionist History', 'history' ,'telehealth'),
+('physical_therapist_history', 'Physical Therapist History', 'history' ,'telehealth'),
+('therapist_history', 'Therapist History', 'history' ,'telehealth'),
+('trainer_history', 'Trainer History', 'history' ,'telehealth'),
+('beautician_history', 'Beautician History', 'history' ,'telehealth'),
+('chef_history', 'Chef History', 'history' ,'telehealth'),
+('nurse_history', 'Nurse History', 'history' ,'telehealth');
