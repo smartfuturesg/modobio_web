@@ -5,7 +5,7 @@ CREATE OR REPLACE function refresh_updated_at()
 RETURNS trigger 
 LANGUAGE plpgsql AS $$
 BEGIN
-  NEW.updated_at := now();
+  NEW.updated_at := clock_timestamp();
   return NEW;
 END;
 $$;
