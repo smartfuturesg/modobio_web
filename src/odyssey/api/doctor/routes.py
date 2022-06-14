@@ -11,66 +11,20 @@ from sqlalchemy import select, and_, or_
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
-from odyssey.api.doctor.models import (
-    MedicalLookUpBloodPressureRange,
-    MedicalLookUpSTD,
-    MedicalFamilyHistory,
-    MedicalConditions,
-    MedicalPhysicalExam,
-    MedicalGeneralInfo,
-    MedicalGeneralInfoMedications,
-    MedicalGeneralInfoMedicationAllergy,
-    MedicalHistory,
-    MedicalBloodPressures,
-    MedicalBloodTests,
-    MedicalBloodTestResults,
-    MedicalBloodTestResultTypes, 
-    MedicalImaging,
-    MedicalExternalMR,
-    MedicalSocialHistory,
-    MedicalSTDHistory,
-    MedicalSurgeries
-)
+from odyssey.api.doctor.models import *
 from odyssey.api.facility.models import MedicalInstitutions
-from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
-from odyssey.api.user.models import User, UserProfilePictures
+from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces, LookupSTDs
+from odyssey.api.user.models import User
+from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
+from odyssey.api.staff.models import StaffRoles
+from odyssey.api.practitioner.models import PractitionerCredentials
+
+from odyssey.api.doctor.schemas import *
+
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
 from odyssey.utils.files import FileDownload, FileUpload, ImageUpload, get_profile_pictures
 from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
-from odyssey.api.doctor.schemas import (
-    AllMedicalBloodTestSchema,
-    CheckBoxArrayDeleteSchema,
-    MedicalBloodPressuresSchema,
-    MedicalBloodPressuresOutputSchema,
-    MedicalCredentialsSchema,
-    MedicalCredentialsInputSchema,
-    MedicalFamilyHistInputSchema,
-    MedicalFamilyHistOutputSchema,
-    MedicalConditionsOutputSchema,
-    MedicalGeneralInfoSchema,
-    MedicalGeneralInfoInputSchema,
-    MedicalAllergiesInfoInputSchema,
-    MedicalMedicationsInfoInputSchema,
-    MedicalHistorySchema,
-    MedicalPhysicalExamSchema,
-    MedicalInstitutionsSchema,
-    MedicalBloodTestsInputSchema,
-    MedicalBloodTestSchema,
-    MedicalBloodTestResultsOutputSchema,
-    MedicalBloodTestResultTypesSchema,
-    MedicalImagingSchema,
-    MedicalExternalMREntrySchema,
-    MedicalExternalMRSchema,
-    MedicalLookUpSTDOutputSchema,
-    MedicalLookUpBloodPressureRangesOutputSchema,
-    MedicalSocialHistoryOutputSchema,
-    MedicalSurgeriesSchema,
-    MedicalImagingOutputSchema,
-)
-from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
-from odyssey.api.staff.models import StaffRoles
-from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.utils.base.resources import BaseResource
 
 logger = logging.getLogger(__name__)
@@ -305,23 +259,6 @@ class MedBloodPressures(BaseResource):
         else:
             raise BadRequest('idx must be an integer.')
 
-@ns.route('/lookupbloodpressureranges/')
-class MedicalLookUpBloodPressureResource(BaseResource):
-    """ Returns blood pressure ranges stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=MedicalLookUpBloodPressureRangesOutputSchema,status_code=200, api=ns)
-    def get(self):
-        bp_ranges = MedicalLookUpBloodPressureRange.query.all()
-        payload = {'items': bp_ranges,
-                   'total_items': len(bp_ranges)}
-
-        return payload
 
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -757,24 +694,6 @@ class MedicalAllergiesInformation(BaseResource):
         db.session.commit()
         return 
 
-@ns.route('/lookupstd/')
-class MedicalLookUpSTDResource(BaseResource):
-    """ Returns STD list stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=MedicalLookUpSTDOutputSchema,status_code=200, api=ns)
-    def get(self):
-        std_types = MedicalLookUpSTD.query.all()
-        payload = {'items': std_types,
-                   'total_items': len(std_types)}
-
-        return payload
-
 
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -895,7 +814,7 @@ class MedicalSocialHist(BaseResource):
              'sexual_history' in care_team_resources)):
 
             stds_current = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
-            possible_stds = db.session.execute(select(MedicalLookUpSTD.std_id)).scalars().all()
+            possible_stds = db.session.execute(select(LookupSTDs.std_id)).scalars().all()
 
             # Maps std_ids to instances, for both existing and requested
             existing = {s.std_id: s for s in stds_current}
@@ -918,19 +837,7 @@ class MedicalSocialHist(BaseResource):
         db.session.commit()
 
 
-@ns.route('/medicalconditions/')
-class MedicalCondition(BaseResource):
-    """
-    Returns the medical conditions currently documented in the DB
-    """
-    @token_auth.login_required
-    @responds(schema=MedicalConditionsOutputSchema,status_code=200, api=ns)
-    def get(self):
-        medcon_types = MedicalConditions.query.all()
-        payload = {'items': medcon_types,
-                   'total_items': len(medcon_types)}
 
-        return payload
 
 @ns.route('/familyhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -1486,7 +1393,7 @@ class MedBloodTestResults(BaseResource):
         Returns details of the test denoted by test_id as well as 
         the actual results submitted.
         """
-        #query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes table
+        #query for join of MedicalBloodTestResults and LookupBloodTestResultTypes table
 
         results =  db.session.query(
                 MedicalBloodTests, MedicalBloodTestResults, LookupBloodTests, User
@@ -1619,18 +1526,6 @@ class AllMedBloodTestResults(BaseResource):
         payload['user_id'] = user_id
         return payload
 
-@ns.deprecated
-@ns.route('/bloodtest/result-types/')
-class MedBloodTestResultTypes(BaseResource):
-    """
-    Returns the types of tests currently documented in the DB
-    """
-    @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultTypesSchema, api=ns)
-    def get(self):
-        bt_types = MedicalBloodTestResultTypes.query.all()
-        payload = {'items' : bt_types, 'total' : len(bt_types)}
-        return payload
 
 @ns.route('/medicalhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

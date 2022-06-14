@@ -4,39 +4,7 @@ logger = logging.getLogger(__name__)
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.lookup.models import (
-    LookupActivityTrackers,
-    LookupBloodTests, 
-    LookupBookingTimeIncrements,
-    LookupClinicalCareTeamResources,
-    LookupClientBookingWindow,
-    LookupCountriesOfOperations,
-    LookupDefaultHealthMetrics,
-    LookupDrinks, 
-    LookupDrinkIngredients,
-    LookupGoals, 
-    LookupProfessionalAppointmentConfirmationWindow,
-    LookupRaces,
-    LookupSubscriptions,
-    LookupTelehealthSessionDuration,
-    LookupTermsAndConditions,
-    LookupTerritoriesOfOperations,
-    LookupTransactionTypes,
-    LookupNotifications,
-    LookupEmergencyNumbers,
-    LookupRoles,
-    LookupMacroGoals,
-    LookupLegalDocs,
-    LookupMedicalSymptoms,
-    LookupOrganizations,
-    LookupCurrencies,
-    LookupNotificationSeverity,
-    LookupBloodTests,
-    LookupBloodTestRanges,
-    LookupDevNames,
-    LookupVisitReasons,
-    LookupEmotes
-)
+from odyssey.api.lookup.models import *
 from odyssey.utils.base.schemas import BaseSchema
 
 class LookupNotificationSeveritySchema(ma.SQLAlchemyAutoSchema):
@@ -387,4 +355,15 @@ class LookupEmotesSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupEmotesOutputSchema(Schema):
     items = fields.Nested(LookupEmotesSchema(many=True), missing=[])
+    total_items = fields.Integer()
+    
+    
+class LookupMedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupMedicalConditions
+    
+    subcategory = fields.String(missing=None)
+
+class LookupMedicalConditionsOutputSchema(Schema):
+    items = fields.Nested(LookupMedicalConditionsSchema(many=True), missing = [])
     total_items = fields.Integer()

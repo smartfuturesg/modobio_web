@@ -1,6 +1,6 @@
 def test_get_medical_conditions(test_client):
     response = test_client.get(
-        '/doctor/medicalconditions/',
+        '/lookup/medicalconditions/',
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 200
