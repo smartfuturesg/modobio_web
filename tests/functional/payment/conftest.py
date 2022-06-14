@@ -2,11 +2,14 @@ import pytest
 
 from flask.json import dumps
 from datetime import datetime, timezone, timedelta
+from sqlalchemy import select
 
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings, TelehealthChatRooms
 
 from odyssey.utils.misc import get_time_index
+
+from odyssey.integrations.twilio import Twilio
 
 from .data import payment_methods_data
 
@@ -60,14 +63,22 @@ def test_booking(test_client, test_payment_method):
         'consult_rate': 99.00,
         'scheduled_duration_mins': 20
     })
-
+ 
     test_client.db.session.add(booking)
     test_client.db.session.flush()
+
+    # add booking transcript
+    twilio = Twilio()
+    twilio.create_telehealth_chatroom(booking.idx)
 
     yield booking
 
     statuses = TelehealthBookingStatus.query.filter_by(booking_id=booking.idx).all()
     for status in statuses:
         test_client.db.session.delete(status)
+        
+    chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == booking.idx)).scalars().one_or_none()
+    test_client.db.session.delete(chat_room)
+    
     test_client.db.session.delete(booking)
     test_client.db.session.commit()
