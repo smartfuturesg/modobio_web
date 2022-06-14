@@ -33,8 +33,7 @@ from odyssey.api.client.models import (
     ClientHeight,
     ClientWeight,
     ClientWaistSize,
-    ClientTransactionHistory,
-    ClientRaceAndEthnicity
+    ClientRaceAndEthnicity,
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 from odyssey.utils.base.schemas import BaseSchema
@@ -487,18 +486,6 @@ class ClientTokenRequestSchema(Schema):
 class ClientCloseAccountSchema(Schema):
     reason = fields.String(required=False, missing=None, validate=validate.Length(max=500))
 
-
-class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = ClientTransactionHistory
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('idx')
-
-    user_id = fields.Integer(dump_only=True)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientTransactionHistory(**data)
 
 class ClientFertilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
