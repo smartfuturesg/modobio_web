@@ -555,3 +555,32 @@ class LookupMedicalConditionsApi(BaseResource):
                    'total_items': len(medcon_types)}
 
         return payload
+    
+@ns.route('/stds/')
+class LookupSTDsApi(BaseResource):
+    """
+    Returns the STDs currently documented in the db
+    """
+    @token_auth.login_required
+    @responds(schema=LookupSTDsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        stds = LookupSTDs.query.all()
+        return {
+            'items': stds,
+            'total_items': len(stds)
+        }
+        
+
+@ns.route('/bloodpressureranges/')
+class LookupBloodPressureRangesApi(BaseResource):
+    """
+    Returns the blood pressure ranges currently documented in the db
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodPressureRangesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        press = LookupBloodPressureRanges.query.all()
+        return {
+            'items': press,
+            'total_items': len(press)
+        }
