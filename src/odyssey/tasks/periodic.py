@@ -32,6 +32,7 @@ from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAva
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
+from odyssey.api.notifications.models import Notifications
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.config import Config
@@ -412,11 +413,27 @@ def remove_expired_availability_exceptions():
     logger.info('Completed remove expired exceptions task')
 
 
-@worker_process_init.connect
-def close_previous_db_connection(**kwargs):
-    if db.session:
-        db.session.close()
-        db.engine.dispose()
+@celery.task()
+def remove_past_notifications():
+    """
+    Simple cleanup task for the Notifications table. If the notification has been marked
+    as "deleted" or if the current time past the "expires" time, the notification will
+    be removed from the table.
+    """
+
+    current_time = datetime.now(timezone.utc).date()
+
+    logger.info('Removing past notifications...')
+    notifications = Notifications.query.filter(or_(
+        Notifications.expires < current_time,
+        Notifications.deleted == True
+    )
+    ).all()
+
+    for notification in notifications:
+        db.session.delete(notification)
+    db.session.commit()
+    logger.info('Completed remove past notifications task.')
 
 
 @celery.task()
@@ -509,6 +526,13 @@ def check_for_upcoming_booking_charges():
     logger.info('upcoming bookings task completed')
 
 
+@worker_process_init.connect
+def close_previous_db_connection(**kwargs):
+    if db.session:
+        db.session.close()
+        db.engine.dispose()
+
+
 celery.conf.beat_schedule = {
     # look for upcoming appointments:
     'check-for-upcoming-bookings': {
@@ -550,6 +574,11 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.remove_expired_availability_exceptions',
         'schedule': crontab(hour='0', minute='0')
     },
+    #remove past notifications
+    'remove_past_notifications': {
+        'task': 'odyssey.tasks.periodic.remove_past_notifications',
+        'schedule': crontab(hour=0, minute=42)
+    },
     # scheduled maintenances
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
         'task': 'odyssey.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
@@ -560,5 +589,5 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
         'schedule': crontab(minute='*/32')  # if this were just 30 it would be run at the same time as other periodics
         # off setting this slightly might theoretically smooth out the load on celery
-    },
+    }
 }
