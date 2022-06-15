@@ -4,7 +4,7 @@ import secrets
 from datetime import datetime, date
 
 from dateutil.relativedelta import relativedelta
-from flask import g, request, current_app
+from flask import g, request, current_app, redirect
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from sqlalchemy import select, and_, or_
@@ -1719,3 +1719,27 @@ class MedicalSurgeriesAPI(BaseResource):
 
         return MedicalSurgeries.query.filter_by(user_id=user_id).all()
 
+
+#The below endpoints have been moved to the lookup namespace. They were deprecated in release 1.2.0
+@ns.route('/lookupstd/')
+class MedicalLookupSTDsApi(BaseResource):
+    
+    @token_auth.login_required
+    def get(self):
+        return redirect('/lookup/stds/', 301)
+    
+    
+@ns.route('/lookupbloodpressureranges/')
+class MedicalLookupBloodPressureRangesApi(BaseResource):
+    
+    @token_auth.login_required
+    def get(self):
+        return redirect('/lookup/bloodpressureranges/', 301)
+    
+    
+@ns.route('/medicalconditions/')
+class MedicalMedicalConditionsApi(BaseResource):
+    
+    @token_auth.login_required
+    def get(self):
+        return redirect('/lookup/medicalconditions/', 301)
