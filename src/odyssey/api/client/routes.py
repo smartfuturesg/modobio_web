@@ -33,8 +33,7 @@ from odyssey.api.client.models import (
     ClientHeight,
     ClientWeight,
     ClientWaistSize,
-    ClientTransactionHistory,
-    ClientRaceAndEthnicity
+    ClientRaceAndEthnicity,
 )
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory,
@@ -70,11 +69,14 @@ from odyssey.utils.constants import (
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE,
     IMAGE_DIMENSIONS,
-    DEV_EMAIL_DOMAINS)
+    DEV_EMAIL_DOMAINS,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID)
 from odyssey.utils.message import send_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_drink_existence
+    check_drink_existence,
+    create_notification
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.pdf import to_pdf, merge_pdfs
@@ -108,7 +110,6 @@ from odyssey.api.client.schemas import(
     ClinicalCareTeamMemberOfSchema,
     SignAndDateSchema,
     SignedDocumentsSchema,
-    ClientTransactionHistorySchema,
     ClientSearchItemsSchema,
     ClientRaceAndEthnicitySchema,
     ClientRaceAndEthnicityEditSchema,
@@ -1626,6 +1627,19 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
                 authorization.user_id = user_id
                 authorization.status = status
+                if status == 'pending':
+                    #if this is another user requesting data access, create a notification for the client
+                    resource_name = LookupClinicalCareTeamResources.query.filter_by(resource_id=authorization.resource_id).one_or_none().display_name
+                    create_notification(
+                        user_id,
+                        NOTIFICATION_SEVERITY_TO_ID.get('Low'),
+                        NOTIFICATION_TYPE_TO_ID.get('Health'),
+                        f"{current_user.firstname} {current_user.lastname} has requested access " + \
+                            f"to your {resource_name} data",
+                        f"Would you like to grant {current_user.firstname} {current_user.lastname} " + \
+                            f"access to your {resource_name} data?",
+                        'Client'
+                    )
                 db.session.add(authorization)
             else:
                 db.session.rollback()
@@ -2107,75 +2121,6 @@ class ClientWeightEndpoint(BaseResource):
 
         return ClientFertility.query.filter_by(user_id=user_id).all()
 
-
-@ns.route('/transaction/history/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClientTransactionHistoryApi(BaseResource):
-    """
-    Endpoints related to viewing a client's transaction history.
-    """
-    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
-    @responds(schema=ClientTransactionHistorySchema(many=True), api=ns, status_code=200)
-    def get(self, user_id):
-        """
-        Returns a list of all transactions for the given user_id.
-        """
-        self.check_user(user_id, user_type='client')
-
-        return ClientTransactionHistory.query.filter_by(user_id=user_id).all()
-
-@ns.route('/transaction/<int:transaction_id>/')
-@ns.doc(params={'transaction_id': 'Transaction ID number'})
-class ClientTransactionApi(BaseResource):
-    """
-    Viewing and editing transactions
-    """
-
-    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
-    def get(self, transaction_id):
-        """
-        Returns information about the transaction identified by transaction_id.
-        """
-        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
-        return transaction
-
-
-    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
-    @accepts(schema=ClientTransactionHistorySchema, api=ns)
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
-    def put(self, transaction_id):
-        """
-        Updates the transaction identified by transaction_id.
-        """
-        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
-
-        transaction.update(request.json)
-        db.session.commit()
-
-        return request.parsed_obj
-
-
-@ns.route('/transaction/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClientTransactionPutApi(BaseResource):
-    """
-    Viewing and editing transactions
-    """
-    @token_auth.login_required(user_type=('client','staff'), staff_role=('client_services',))
-    @accepts(schema=ClientTransactionHistorySchema, api=ns)
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
-    def post(self, user_id):
-        """
-        Submits a transaction for the client identified by user_id.
-        """
-        self.check_user(user_id, user_type='client')
-
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-        return request.parsed_obj
 
 @ns.route('/default-health-metrics/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

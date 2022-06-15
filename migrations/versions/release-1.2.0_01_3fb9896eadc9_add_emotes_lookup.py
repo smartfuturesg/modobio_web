@@ -1,7 +1,7 @@
 """Creates Emotes Lookup table
 
 Revision ID: 3fb9896eadc9
-Revises: 1c0a83fb65e5
+Revises: 1882fcff5c14
 Create Date: 2022-06-03 15:15:54.588199
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '3fb9896eadc9'
-down_revision = '1c0a83fb65e5'
+down_revision = '1882fcff5c14'
 branch_labels = None
 depends_on = None
 

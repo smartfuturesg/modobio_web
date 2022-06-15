@@ -165,23 +165,6 @@ clients_mobile_settings = {
         'include_timezone': True},
     'notification_type_ids': [3, 11, 16]}
 
-clients_transactions = [
-    {
-        "category": "Telehealth",
-        "payment_method": "Visa 0123",
-        "name": "Doctor call",
-        "price": 49.99,
-        "currency": "USD"
-    },
-    {
-        "category": "Telehealth",
-        "payment_method": "Visa 0123",
-        "name": "Diagnosis",
-        "price": 89.99,
-        "currency": "USD"
-    }
-]
-
 clients_race_and_ethnicities = {
     'normal data':
     {

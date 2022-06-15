@@ -868,7 +868,7 @@ DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday
 
 TWILIO_ACCESS_KEY_TTL = 14400
 
-BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed', 'Document Review')
+BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed')
 
 # profile and other image types allowed for upload
 ALLOWED_IMAGE_TYPES = ('png', 'jpg')
@@ -921,10 +921,6 @@ for email address domains in this list, a real email will be send even in DEV en
 
 # bookings must be made at least this many hours in advance
 TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0 if any((config.TESTING, config.DEV)) else 2
-
-# allow a pre and post buffer for each telehealth appointment
-# 1 because one index is the same as 5 minutes
-TELEHEALTH_START_END_BUFFER = 0
 
 # clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
 TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 336

@@ -68,36 +68,8 @@ class LookupProfessionalAppointmentConfirmationWindow(BaseModelWithIdx):
     from 1 hour to 24 hours in 30 minute increments
     
     :type: float
-    """    
-
-class LookupTransactionTypes(BaseModelWithIdx):
-    """ Stored transaction types in database. 
     """
 
-    category = db.Column(db.String)
-    """
-    Category
-    The overall category of the transaction type.
-    
-    :type: str
-    """
-
-    name = db.Column(db.String)
-    """
-    Name
-    The name or subcategory further describing the 
-    transaction type if any.
-    
-    :type: str
-    """
-
-    icon = db.Column(db.String)
-    """
-    icon
-    Referenced image name for the FE to use
-
-    :type: str
-    """        
 
 class LookupCountriesOfOperations(BaseModelWithIdx):
     """ Stored countries of operations in database. 
@@ -619,7 +591,7 @@ class LookupClinicalCareTeamResources(BaseModel):
     access_group = db.Column(db.String)
     """
     Grouping as it relates to practitioner and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
-    should have access to) and 'medical_doctor' (resources specific to the medical_doctor role).
+    should have access to), 'medical_doctor' (resources specific to the medical_doctor role), 'telehealth' (for telehealth related resources).
 
     :type: string
     """

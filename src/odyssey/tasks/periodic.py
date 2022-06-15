@@ -1,5 +1,7 @@
 import logging
-
+from flask import current_app
+import boto3
+from boto3.dynamodb.conditions import Attr
 from odyssey.api.dosespot.models import DoseSpotPractitionerID
 from odyssey.integrations.dosespot import DoseSpot
 logger = logging.getLogger(__name__)
@@ -15,20 +17,24 @@ from sqlalchemy import and_, or_, select
 from odyssey import celery, db, mongo
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
-    upcoming_appointment_care_team_permissions, 
-    upcoming_appointment_notification_2hr, 
-    charge_telehealth_appointment, 
+    upcoming_appointment_care_team_permissions,
+    upcoming_appointment_notification_2hr,
+    charge_telehealth_appointment,
     store_telehealth_transcript,
     cancel_noshow_appointment,
-    update_apple_subscription
+    update_apple_subscription,
+    upcoming_booking_payment_notification_2days,
+    update_apple_subscription,
+    notify_client_of_imminent_scheduled_maintenance,
+    notify_staff_of_imminent_scheduled_maintenance,
 )
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffAvailabilityExceptions, TelehealthChatRooms
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, ClientDataStorage, ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
+from odyssey.api.notifications.models import Notifications
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.instamed import cancel_telehealth_appointment
-
 from odyssey.config import Config
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import get_time_index, create_notification
@@ -37,6 +43,7 @@ logger = get_task_logger(__name__)
 
 # access to the config while running tasks
 config = Config()
+
 
 @celery.task()
 def refresh_client_data_storage():
@@ -54,6 +61,7 @@ def refresh_client_data_storage():
     db.session.commit()
 
     return
+
 
 @celery.task()
 def deploy_upcoming_appointment_tasks():
@@ -124,6 +132,7 @@ def deploy_upcoming_appointment_tasks():
     db.session.commit()
     logger.info('upcoming bookings task completed')
 
+
 @celery.task()
 def deploy_appointment_transcript_store_tasks(target_date=None):
     """
@@ -159,6 +168,7 @@ def deploy_appointment_transcript_store_tasks(target_date=None):
 
     return 
 
+
 @celery.task()
 def cleanup_temporary_care_team():
     """
@@ -185,7 +195,7 @@ def cleanup_temporary_care_team():
         member = User.query.filter_by(user_id=notification.team_member_user_id).one_or_none()
         
         create_notification(
-            notifcation.team_member_user_id,
+            notification.team_member_user_id,
             NOTIFICATION_SEVERITY_TO_ID.get('High'),
             NOTIFICATION_TYPE_TO_ID.get('Team'),
             f'{member.firstname} {member.lastname}\'s Data Access Is About To Expire',
@@ -217,6 +227,7 @@ def cleanup_temporary_care_team():
         db.session.delete(item)
     
     db.session.commit()
+
 
 @celery.task(base=BaseTaskWithRetry)
 def deploy_webhook_tasks(**kwargs):
@@ -267,10 +278,12 @@ def deploy_webhook_tasks(**kwargs):
 
     pass
 
+
 # @worker_ready.connect()
 def startup_tasks(**kwargs):
     """ **Deprecated 5.13.22** leave here for future webhook tasks"""
     deploy_webhook_tasks.delay()
+
 
 @celery.task()
 def find_chargable_bookings():
@@ -301,7 +314,8 @@ def find_chargable_bookings():
         db.session.commit()
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('charge booking task completed')
-        
+
+
 @celery.task()
 def detect_practitioner_no_show():
     """
@@ -332,6 +346,7 @@ def detect_practitioner_no_show():
             cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('no show task completed')
 
+
 @celery.task()
 def get_dosespot_notifications():
     """
@@ -345,6 +360,7 @@ def get_dosespot_notifications():
         ds = DoseSpot()
         ds.practitioner_ds_id = practitioner.ds_user_id
         ds.notifications(practitioner.user_id) 
+
 
 @celery.task()
 def deploy_subscription_update_tasks(interval:int):
@@ -378,6 +394,7 @@ def deploy_subscription_update_tasks(interval:int):
     
     return 
 
+
 @celery.task()
 def remove_expired_availability_exceptions():
     """
@@ -394,25 +411,140 @@ def remove_expired_availability_exceptions():
         db.session.delete(exception)
     db.session.commit()
     logger.info('Completed remove expired exceptions task')
-    
+
+
+@celery.task()
+def remove_past_notifications():
+    """
+    Simple cleanup task for the Notifications table. If the notification has been marked
+    as "deleted" or if the current time past the "expires" time, the notification will
+    be removed from the table.
+    """
+
+    current_time = datetime.now(timezone.utc).date()
+
+    logger.info('Removing past notifications...')
+    notifications = Notifications.query.filter(or_(
+        Notifications.expires < current_time,
+        Notifications.deleted == True
+    )
+    ).all()
+
+    for notification in notifications:
+        db.session.delete(notification)
+    db.session.commit()
+    logger.info('Completed remove past notifications task.')
+
+
+@celery.task()
+def create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance():
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
+    response = table.scan(  # look for imminent scheduled maintenances
+        FilterExpression=Attr('deleted').eq('False') &
+        Attr('start_time').between(datetime.now(), (datetime.now()+timedelta(hours=1, minutes=14))) &
+        Attr('notified').eq('False')
+    )  # runs every 15 minutes, so reach out an extra 14 minutes
+    # better that notifications are generated a bit early rather than late
+    data = response['Items']
+    # if data is empty, this for loop will not run
+    for datum in data:  # should only ever be one, but just in case
+        # create tasks to alert client users of the imminent maintenance
+        for client in User.query.filter_by(is_client=True, deleted=False).all():
+            notify_client_of_imminent_scheduled_maintenance.delay(client.user_id, datum)
+        # create tasks to alert staff users of the imminent maintenance
+        for staff in User.query.filter_by(is_staff=True, deleted=False).all():
+            notify_staff_of_imminent_scheduled_maintenance.delay(staff.user_id, datum)
+        # must now set notified attr of scheduled maintenance(s) to be True, was set to False on posting
+        table.update_item(
+            Key={'block_id': datum['block_id']},
+            UpdateExpression="set #notified = :notified",
+            ExpressionAttributeNames={'#notified': 'notified'},
+            ExpressionAttributeValues={':notified': "True"},
+            ReturnValues="UPDATED_NEW"
+        )
+        logger.info(f'Maintenance with block_id:{datum["block_id"]} had notifications for it sent to client and staff.')
+
+
+
+@celery.task()
+def check_for_upcoming_booking_charges():
+    logger.info('deploying upcoming bookings charges task')
+
+    current_time_utc = datetime.now(timezone.utc)
+    target_time_utc = current_time_utc + timedelta(days=2, minutes=32)
+    target_time_window_start = get_time_index(current_time_utc)
+    target_time_window_end = get_time_index(target_time_utc)
+
+    logger.info(f'upcoming appointment charges task time window: {target_time_window_start} - {target_time_window_end}')
+
+    # find all accepted bookings who have not been notified yet
+    bookings = TelehealthBookings.query.filter(
+        TelehealthBookings.status == 'Accepted',
+        TelehealthBookings.payment_notified == False
+    )
+    if target_time_window_start > target_time_window_end:
+        # this will happen from 22:00 to 23:55
+        # in this case, we have to query across two dates
+        bookings = \
+            bookings.filter(
+                or_(
+                    and_(
+                        TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                        TelehealthBookings.target_date_utc == current_time_utc.date()
+                    ),
+                    and_(
+                        TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                        TelehealthBookings.target_date_utc == target_time_utc.date()
+                    )
+                )
+            ).all()
+    else:
+        # otherwise just query for bookings whose start id falls between the target times on for today
+        bookings =  \
+            bookings.filter(
+                and_(
+                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.target_date_utc == target_time_utc.date()
+                    )
+            ).all()
+
+    # schedule upcoming appointment charge tasks
+    for booking in bookings:
+        logger.info(f'deploying notification for upcoming booking being charged {booking.idx}')
+        booking.payment_notified = True
+        # create datetime object for scheduling tasks
+        booking_start_time = db.session.execute(
+                select(LookupBookingTimeIncrements.start_time).
+                where(LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time_utc)
+            ).scalars().one_or_none()
+        payment_notification_eta = datetime.combine(booking.target_date_utc, booking_start_time) - timedelta(days=2)
+        # Deploy scheduled task to update notifications table with upcoming booking notification
+        upcoming_booking_payment_notification_2days.apply_async((booking, booking_start_time,), eta=payment_notification_eta)
+    db.session.commit()
+    logger.info('upcoming bookings task completed')
+
+
 @worker_process_init.connect
 def close_previous_db_connection(**kwargs):
     if db.session:
         db.session.close()
         db.engine.dispose()
 
+
 celery.conf.beat_schedule = {
-    # look for upcoming apppointments:
+    # look for upcoming appointments:
     'check-for-upcoming-bookings': {
         'task': 'odyssey.tasks.periodic.deploy_upcoming_appointment_tasks',
         'schedule': crontab(minute='*/10')
     },
-    #temporary member cleanup
+    # temporary member cleanup
     'cleanup_temporary_care_team': {
         'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
         'schedule': crontab(minute='0', hour='*/1')
     },
-    #telehealth appointment charging
+    # telehealth appointment charging
     'find_chargable_bookings': {
         'task': 'odyssey.tasks.periodic.find_chargable_bookings',
         'schedule': crontab(minute='*/5')
@@ -422,12 +554,12 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
         'schedule': crontab(hour=0, minute=10)
     },
-    #practitioner no show
+    # practitioner no show
     'detect_practitioner_no_show': {
         'task': 'odyssey.tasks.periodic.detect_practitioner_no_show',
         'schedule': crontab(minute='*/5')
     },
-    #dosespot notifications
+    # dosespot notifications
     'get_dosespot_notifications': {
         'task': 'odyssey.tasks.periodic.get_dosespot_notifications',
         'schedule': crontab(hour=1, minute=0)
@@ -437,9 +569,25 @@ celery.conf.beat_schedule = {
         'args': (60,),
         'schedule': crontab(minute='*/60')
     },
-    #availability
+    # availability
     'remove_expired_availability_exceptions': {
-        'task': 'odyssey.periodic.remove_expired_availability_exceptions',
+        'task': 'odyssey.tasks.periodic.remove_expired_availability_exceptions',
         'schedule': crontab(hour='0', minute='0')
+    },
+    #remove past notifications
+    'remove_past_notifications': {
+        'task': 'odyssey.tasks.periodic.remove_past_notifications',
+        'schedule': crontab(hour=0, minute=42)
+    },
+    # scheduled maintenances
+    'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
+        'task': 'odyssey.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
+        'schedule': crontab(minute='*/15')
+    },
+    # upcoming booking payment to be charged
+    'check_for_upcoming_booking_charges': {
+        'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
+        'schedule': crontab(minute='*/32')  # if this were just 30 it would be run at the same time as other periodics
+        # off setting this slightly might theoretically smooth out the load on celery
     }
 }

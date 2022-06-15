@@ -94,24 +94,6 @@ class LookupTimezones(BaseResource):
                    'total_items': len(varArr) }
         return payload
 
-@ns.route('/business/transaction-types/')
-class LookupTransactionTypesResource(BaseResource):
-    """ Returns stored transaction types in database by GET request.
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @responds(schema=LookupTransactionTypesOutputSchema,status_code=200, api=ns)
-    def get(self):
-                
-        transaction_types = LookupTransactionTypes.query.all()
-        
-        payload = {'items': transaction_types,
-                   'total_items': len(transaction_types)}
-
-        return payload
-
 
 @ns.route('/business/countries-of-operations/')
 class LookupCountryOfOperationResource(BaseResource):
@@ -289,7 +271,9 @@ class LookupRacesApi(BaseResource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/care-team/resources/')
+@ns.deprecated
 class LookupClinicalCareTeamResourcesApi(BaseResource):
     """
     To be replaced by care-team/ehr-resources/
