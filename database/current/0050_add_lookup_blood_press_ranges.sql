@@ -7,13 +7,13 @@
 -- Further changes to this table will be done through the API
 -----------------------------
 
-DELETE FROM "MedicalLookUpBloodPressureRange"
+DELETE FROM "LookupBloodPressureRanges"
     WHERE idx >= 1;
 
-ALTER SEQUENCE "MedicalLookUpBloodPressureRange_idx_seq"
+ALTER SEQUENCE "LookupBloodPressureRanges_idx_seq"
 		RESTART WITH 1;
 
-INSERT INTO "MedicalLookUpBloodPressureRange" ("category","systolic", "and_or","diastolic") 
+INSERT INTO "LookupBloodPressureRanges" ("category","systolic", "and_or","diastolic") 
 VALUES 
 ('normal','less than 120','and','less than 80'),
 ('elevated','120-129','and','less than 80'),

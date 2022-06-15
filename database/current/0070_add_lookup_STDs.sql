@@ -8,13 +8,13 @@
 -----------------------------
 
 
-delete from "MedicalLookUpSTD" 
+delete from "LookupSTDs" 
 	where std_id >= 1;
 
-alter sequence "MedicalLookUpSTD_std_id_seq"
+alter sequence "LookupSTDs_std_id_seq"
 			restart with 1;
 
-INSERT INTO "MedicalLookUpSTD" ("std_id","std") 
+INSERT INTO "LookupSTDs" ("std_id","std") 
 VALUES 
 (1,'Chancroid'),
 (2,'Chlamydia'),
