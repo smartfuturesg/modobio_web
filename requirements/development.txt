@@ -1,5 +1,6 @@
 boto3
 celery
+celery-redbeat
 cryptography
 elasticsearch
 filetype

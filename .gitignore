@@ -42,7 +42,7 @@ venv/
 pytestdebug.log
 
 # celery
-celerybeat-schedule.*
+celerybeat-schedule*
 celerybeat.pid
 
 # aws certificate
