@@ -29,7 +29,7 @@ from odyssey.api.client.models import (
     ClientFacilities,
     ClientMobileSettings,
     ClientNotificationSettings,
-    ClientAssignedDrinks,
+    # ClientAssignedDrinks,
     ClientHeight,
     ClientWeight,
     ClientWaistSize,
@@ -49,7 +49,7 @@ from odyssey.api.lookup.models import (
     LookupCountriesOfOperations,
     LookupDefaultHealthMetrics,
     LookupGoals, 
-    LookupDrinks,
+    # LookupDrinks,
     LookupMacroGoals, 
     LookupRaces,
     LookupNotifications,
@@ -75,7 +75,7 @@ from odyssey.utils.constants import (
 from odyssey.utils.message import send_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_drink_existence,
+    # check_drink_existence,
     create_notification
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
@@ -83,8 +83,8 @@ from odyssey.utils.pdf import to_pdf, merge_pdfs
 
 from odyssey.api.client.schemas import(
     AllClientsDataTier,
-    ClientAssignedDrinksSchema,
-    ClientAssignedDrinksDeleteSchema,
+    # ClientAssignedDrinksSchema,
+    # ClientAssignedDrinksDeleteSchema,
     ClientClinicalCareTeamDeleteSchema,
     ClientConsentSchema,
     ClientConsultContractSchema,
@@ -364,31 +364,31 @@ class Client(BaseResource):
         if not client_data or not user_data:
             raise BadRequest(f'Client {user_id} not found.')
         
-        #validate primary_macro_goal_id
+        # validate primary_macro_goal_id
         if 'primary_macro_goal_id' in request.parsed_obj['client_info'].keys():
             primary_macro_goal_id = request.parsed_obj['client_info']['primary_macro_goal_id']
             macro_goal = LookupMacroGoals.query.filter_by(goal_id=primary_macro_goal_id).one_or_none()
             if not macro_goal:
                 raise BadRequest(f'Primary macro goal {primary_macro_goal_id} not found.')
         
-        #validate primary_goal_id if supplied and automatically create drink recommendation
+        # validate primary_goal_id if supplied
         if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
             primary_goal_id = request.parsed_obj['client_info']['primary_goal_id']
             goal = LookupGoals.query.filter_by(goal_id=primary_goal_id).one_or_none()
             if not goal:
                 raise BadRequest(f'Primary goal {primary_goal_id} not found.')
 
-            #make automatic drink recommendation
-            drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
-            recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
-            recommendation.user_id = user_id
-            db.session.add(recommendation)
+            # # make automatic drink recommendation
+            # drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
+            # recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
+            # recommendation.user_id = user_id
+            # db.session.add(recommendation)
 
-        #update both tables with request data
+        # update both tables with request data
         client_info = request.parsed_obj['client_info']
         if client_info:
             if 'race_information' in client_info:
-                #send race_information through race-and-ethnicity endpoint
+                # send race_information through race-and-ethnicity endpoint
                 if client_info['race_information']['mother']:
                     mother = client_info['race_information']['mother']
                 else:
@@ -1753,55 +1753,55 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         db.session.commit()
 
 
-@ns.route('/drinks/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClientDrinksApi(BaseResource):
-    """
-    Endpoints related to nutritional beverages that are assigned to clients.
-    """
-    # Multiple drinks per user, allow multiple POSTs
-    __check_resource__ = False
-
-    @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
-    @accepts(schema=ClientAssignedDrinksSchema, api=ns)
-    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
-    def post(self, user_id):
-        """
-        Add an assigned drink to the client designated by user_id.
-        """
-        self.check_user(user_id, user_type='client')
-        check_drink_existence(request.parsed_obj.drink_id)
-
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-        return request.parsed_obj
-
-    @token_auth.login_required
-    @responds(schema=ClientAssignedDrinksSchema(many=True), api=ns, status_code=200)
-    def get(self, user_id):
-        """
-        Returns the list of drinks assigned to the user designated by user_id.
-        """
-        self.check_user(user_id, user_type='client')
-
-        return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
-    
-    @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
-    @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
-    def delete(self, user_id):
-        """
-        Delete a drink assignemnt for a user with user_id and drink_id
-        """
-        self.check_user(user_id, user_type='client')
-
-        for drink_id in request.parsed_obj['drink_ids']:
-            drinks = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).all()
-            for drink in drinks:
-                db.session.delete(drink)
-
-        db.session.commit()
+# @ns.route('/drinks/<int:user_id>/')
+# @ns.doc(params={'user_id': 'User ID number'})
+# class ClientDrinksApi(BaseResource):
+#     """
+#     Endpoints related to nutritional beverages that are assigned to clients.
+#     """
+#     # Multiple drinks per user, allow multiple POSTs
+#     __check_resource__ = False
+#
+#     @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
+#     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
+#     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
+#     def post(self, user_id):
+#         """
+#         Add an assigned drink to the client designated by user_id.
+#         """
+#         self.check_user(user_id, user_type='client')
+#         check_drink_existence(request.parsed_obj.drink_id)
+#
+#         request.parsed_obj.user_id = user_id
+#         db.session.add(request.parsed_obj)
+#         db.session.commit()
+#
+#         return request.parsed_obj
+#
+#     @token_auth.login_required
+#     @responds(schema=ClientAssignedDrinksSchema(many=True), api=ns, status_code=200)
+#     def get(self, user_id):
+#         """
+#         Returns the list of drinks assigned to the user designated by user_id.
+#         """
+#         self.check_user(user_id, user_type='client')
+#
+#         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
+#
+#     @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
+#     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
+#     def delete(self, user_id):
+#         """
+#         Delete a drink assignemnt for a user with user_id and drink_id
+#         """
+#         self.check_user(user_id, user_type='client')
+#
+#         for drink_id in request.parsed_obj['drink_ids']:
+#             drinks = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).all()
+#             for drink in drinks:
+#                 db.session.delete(drink)
+#
+#         db.session.commit()
 
 @ns.route('/mobile-settings/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

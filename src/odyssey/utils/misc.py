@@ -36,7 +36,8 @@ from odyssey.api.doctor.models import (
     MedicalImaging,
     MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.lookup.models import LookupDrinks, LookupBookingTimeIncrements
+# from odyssey.api.lookup.models import LookupDrinks
+from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -158,10 +159,11 @@ def check_medical_condition_existence(medcon_id):
     if not medcon:
         raise BadRequest(f'Medical condition {medcon_id} not found.')
 
-def check_drink_existence(drink_id):
-    drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
-    if not drink:
-        raise BadRequest(f'Drink {drink_id} not found.')
+
+# def check_drink_existence(drink_id):
+#     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
+#     if not drink:
+#         raise BadRequest(f'Drink {drink_id} not found.')
         
 def check_std_existence(std_id):
     std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()

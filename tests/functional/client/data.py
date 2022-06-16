@@ -144,14 +144,14 @@ clients_individual_data = {
     'doctor': True,
     'pt': True,
     'data': False,
-    'drinks': True,
+    # 'drinks': True,
     'signdate': "2020-04-05",
     'signature': signature
 }
 
-clients_assigned_drinks = {
-    "drink_id": 1
-}
+# clients_assigned_drinks = {
+#     "drink_id": 1
+# }
 
 clients_mobile_settings = {
     'general_settings': {

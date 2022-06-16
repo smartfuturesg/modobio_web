@@ -29,7 +29,7 @@ from odyssey.api.client.models import (
     ClientFacilities,
     ClientMobileSettings,
     ClientNotificationSettings,
-    ClientAssignedDrinks,
+    # ClientAssignedDrinks,
     ClientHeight,
     ClientWeight,
     ClientWaistSize,
@@ -435,19 +435,19 @@ class ClientMobileSettingsSchema(Schema):
     notification_type_ids = fields.List(fields.Integer, missing=[])
 
 
-class ClientAssignedDrinksSchema(BaseSchema):
-    class Meta:
-        model = ClientAssignedDrinks
-
-    user_id = fields.Integer(dump_only=True)
-    drink_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientAssignedDrinks(**data)
-
-class ClientAssignedDrinksDeleteSchema(Schema):
-    drink_ids = fields.List(fields.Integer)
+# class ClientAssignedDrinksSchema(BaseSchema):
+#     class Meta:
+#         model = ClientAssignedDrinks
+#
+#     user_id = fields.Integer(dump_only=True)
+#     drink_id = fields.Integer()
+#
+#     @post_load
+#     def make_object(self, data, **kwargs):
+#         return ClientAssignedDrinks(**data)
+#
+# class ClientAssignedDrinksDeleteSchema(Schema):
+#     drink_ids = fields.List(fields.Integer)
 
 class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
