@@ -12,8 +12,8 @@ from odyssey.api.lookup.models import (
     LookupClientBookingWindow,
     LookupCountriesOfOperations,
     LookupDefaultHealthMetrics,
-    LookupDrinks, 
-    LookupDrinkIngredients,
+    # LookupDrinks,
+    # LookupDrinkIngredients,
     LookupGoals, 
     LookupProfessionalAppointmentConfirmationWindow,
     LookupRaces,
@@ -120,33 +120,33 @@ class LookupActivityTrackersOutputSchema(Schema):
     items = fields.Nested(LookupActivityTrackersSchema(many=True),missing=[])
     total_items = fields.Integer()
 
-class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = LookupDrinks
-        exclude = ('created_at', 'updated_at')
-
-    primary_ingredient = fields.String()
-    goal = fields.String()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return LookupDrinks(**data)
-
-class LookupDrinksOutputSchema(Schema):
-    items = fields.Nested(LookupDrinksSchema(many=True), missing = [])
-    total_items = fields.Integer()
-
-class LookupDrinkIngredientsSchema(BaseSchema):
-    class Meta:
-        model = LookupDrinkIngredients
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return LookupDrinkIngredients(**data)
-
-class LookupDrinkIngredientsOutputSchema(Schema):
-    items = fields.Nested(LookupDrinkIngredientsSchema(many=True), missing = [])
-    total_items = fields.Integer()
+# class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
+#     class Meta:
+#         model = LookupDrinks
+#         exclude = ('created_at', 'updated_at')
+#
+#     primary_ingredient = fields.String()
+#     goal = fields.String()
+#
+#     @post_load
+#     def make_object(self, data, **kwargs):
+#         return LookupDrinks(**data)
+#
+# class LookupDrinksOutputSchema(Schema):
+#     items = fields.Nested(LookupDrinksSchema(many=True), missing = [])
+#     total_items = fields.Integer()
+#
+# class LookupDrinkIngredientsSchema(BaseSchema):
+#     class Meta:
+#         model = LookupDrinkIngredients
+#
+#     @post_load
+#     def make_object(self, data, **kwargs):
+#         return LookupDrinkIngredients(**data)
+#
+# class LookupDrinkIngredientsOutputSchema(Schema):
+#     items = fields.Nested(LookupDrinkIngredientsSchema(many=True), missing = [])
+#     total_items = fields.Integer()
 
 class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

@@ -85,4 +85,4 @@ class ClientIndividualContractForm(ClientSignForm):
     doctor_consult = BooleanField()
     pt_consult = BooleanField()
     data_monitoring = BooleanField()
-    drinks = BooleanField()
+    # drinks = BooleanField()

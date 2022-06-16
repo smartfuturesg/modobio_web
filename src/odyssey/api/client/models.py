@@ -737,12 +737,12 @@ class ClientIndividualContract(BaseModelWithIdx, UserIdFkeyMixin):
     :type: bool
     """
 
-    drinks = db.Column(db.Boolean, default=False)
-    """
-    Indicates whether or not client wants to buy nutritional supplements.
-
-    :type: bool
-    """
+    # drinks = db.Column(db.Boolean, default=False)
+    # """
+    # Indicates whether or not client wants to buy nutritional supplements.
+    #
+    # :type: bool
+    # """
 
     signdate = db.Column(db.Date)
     """
@@ -947,20 +947,20 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     :type: boolean
     """
     
-class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores information about what nutrional beverages a client has been assigned.
-    Clients will only see drinks that have been assigned to them when viewing
-    the selection of nutritional beverages. Drinks can be assigned to a client
-    either automatically based on their goals or manually by staff members.
-    """
-
-    drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id', ondelete="CASCADE"), nullable=False)
-    """
-    Id of the drink for this assignment.
-
-    :type: int, foreign key('LookupDrinks.drink_id)
-    """
+# class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
+#     """
+#     Stores information about what nutrional beverages a client has been assigned.
+#     Clients will only see drinks that have been assigned to them when viewing
+#     the selection of nutritional beverages. Drinks can be assigned to a client
+#     either automatically based on their goals or manually by staff members.
+#     """
+#
+#     drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id', ondelete="CASCADE"), nullable=False)
+#     """
+#     Id of the drink for this assignment.
+#
+#     :type: int, foreign key('LookupDrinks.drink_id)
+#     """
 
 class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
     """ Stores height measurements of clients. """
