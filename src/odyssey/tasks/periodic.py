@@ -484,9 +484,7 @@ def check_for_upcoming_booking_charges():
 
     for booking in bookings:
         logger.info(f'Upcoming booking that will be charge in about 24 hours detected with id {booking.idx}')
-        upcoming_booking_payment_notification.delay(
-            booking.client_user_id, booking.target_date_utc, booking.booking_window_id_start_time_utc, booking.idx
-        )
+        upcoming_booking_payment_notification.delay(booking.idx)
 
     logger.info(f'upcoming booking charges periodic task for {time_now} completed')
 

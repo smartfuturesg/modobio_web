@@ -370,19 +370,16 @@ def test_task():
 
 
 @celery.task()
-def upcoming_booking_payment_notification(
-        client_user_id, target_date_utc, booking_window_id_start_time_utc, booking_id
-):
-    payment_method = PaymentMethods.query.filter_by(user_id=client_user_id, is_default=True).one_or_none()
-    target_date_utc = datetime.strptime(target_date_utc, "%Y-%m-%dT00:00:00")
-    target_date_utc = target_date_utc.date()
-    index = booking_window_id_start_time_utc - 1  # zero the index first
+def upcoming_booking_payment_notification(booking_id):
+    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+    payment_method = PaymentMethods.query.filter_by(user_id=booking.client_user_id, is_default=True).one_or_none()
+    index = booking.booking_window_id_start_time_utc - 1  # zero the index first
     hours = index / 12
     minutes = (index % 12) * 5
     booking_start_time = time(hour=int(hours), minute=minutes)
-    booking_dt_utc = datetime.combine(target_date_utc, booking_start_time)
+    booking_dt_utc = datetime.combine(booking.target_date_utc, booking_start_time)
     create_notification(
-        client_user_id,
+        booking.client_user_id,
         NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
         NOTIFICATION_TYPE_TO_ID.get('Payments'),
         "Upcoming Telehealth Charge",
@@ -397,12 +394,16 @@ def upcoming_booking_payment_notification(
 
 @celery.task()
 def notify_client_of_imminent_scheduled_maintenance(user_id, datum):
+    reformed_start = datum['start_time'].replace("T", " ")
+    reformed_start = reformed_start[0:19]
+    reformed_end = datum['end_time'].replace("T", " ")
+    reformed_end = reformed_end[0:19]
     create_notification(
         user_id,
         NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
         NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
         "System maintenance scheduled",
-        f"System maintenance has been scheduled between <datetime_utc>{datum['start_time']}</datetime_utc> and <datetime_utc>{datum['end_time']}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to schedule telehealth appointments for that time period.",
+        f"System maintenance has been scheduled between <datetime_utc>{reformed_start}</datetime_utc> and <datetime_utc>{reformed_end}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to schedule telehealth appointments for that time period.",
         'Client',
         datum['end_time']
     )
@@ -411,12 +412,16 @@ def notify_client_of_imminent_scheduled_maintenance(user_id, datum):
 
 @celery.task()
 def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
+    reformed_start = datum['start_time'].replace("T", " ")
+    reformed_start = reformed_start[0:19]
+    reformed_end = datum['end_time'].replace("T", " ")
+    reformed_end = reformed_end[0:19]
     create_notification(
         user_id,
         NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
         NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
         "System maintenance scheduled",
-        f"System maintenance has been scheduled between <datetime_utc>{datum['start_time']}</datetime_utc> and <datetime_utc>{datum['end_time']}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to accept telehealth bookings for that time period.",
+        f"System maintenance has been scheduled between <datetime_utc>{reformed_start}</datetime_utc> and <datetime_utc>{reformed_end}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to accept telehealth bookings for that time period.",
         'Provider',
         datum['end_time']
     )
