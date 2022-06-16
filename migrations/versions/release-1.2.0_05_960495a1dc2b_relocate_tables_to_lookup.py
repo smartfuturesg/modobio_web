@@ -1,7 +1,7 @@
 """relocate tables to lookup
 
 Revision ID: 960495a1dc2b
-Revises: 3fb9896eadc9
+Revises: 1f5fc0ac6048
 Create Date: 2022-06-13 15:53:59.347652
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '960495a1dc2b'
-down_revision = '3fb9896eadc9'
+down_revision = '1f5fc0ac6048'
 branch_labels = None
 depends_on = None
 
