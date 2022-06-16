@@ -155,10 +155,11 @@ def check_medical_condition_existence(medcon_id):
     if not medcon:
         raise BadRequest(f'Medical condition {medcon_id} not found.')
 
-def check_drink_existence(drink_id):
-    drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
-    if not drink:
-        raise BadRequest(f'Drink {drink_id} not found.')
+
+# def check_drink_existence(drink_id):
+#     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
+#     if not drink:
+#         raise BadRequest(f'Drink {drink_id} not found.')
         
 def check_std_existence(std_id):
     std = LookupSTDs.query.filter_by(std_id=std_id).one_or_none()

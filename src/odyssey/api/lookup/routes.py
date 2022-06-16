@@ -15,7 +15,7 @@ from odyssey.api.lookup.schemas import *
 from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.misc import check_drink_existence
+# from odyssey.utils.misc import check_drink_existence
 
 logger = logging.getLogger(__name__)
 
@@ -214,32 +214,32 @@ class WearablesLookUpAllActivityTrackersResource(BaseResource):
 
         return payload
 
-@ns.route('/drinks/')
-class LookupDrinksApi(BaseResource):
-    
-    @token_auth.login_required
-    @responds(schema=LookupDrinksOutputSchema, api=ns)
-    def get(self):
-        """get contents of drinks lookup table"""
-        res = []
-        for drink in LookupDrinks.query.all():
-            drink.primary_ingredient = LookupDrinkIngredients.query.filter_by(drink_id=drink.drink_id).filter_by(is_primary_ingredient=True).first().ingredient_name
-            drink.goal = LookupGoals.query.filter_by(goal_id=drink.primary_goal_id).first().goal_name
-            res.append(drink)
-        return {'total_items': len(res), 'items': res}
-
-@ns.route('/drinks/ingredients/<int:drink_id>/')
-@ns.doc('Id of the desired drink')
-class LookupDrinkIngredientsApi(BaseResource):
-
-    @token_auth.login_required
-    @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
-    def get(self, drink_id):
-        """get recipe of the drink denoted by drink_id"""
-        check_drink_existence(drink_id)
-
-        res = LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
-        return {'total_items': len(res), 'items': res}
+# @ns.route('/drinks/')
+# class LookupDrinksApi(BaseResource):
+#
+#     @token_auth.login_required
+#     @responds(schema=LookupDrinksOutputSchema, api=ns)
+#     def get(self):
+#         """get contents of drinks lookup table"""
+#         res = []
+#         for drink in LookupDrinks.query.all():
+#             drink.primary_ingredient = LookupDrinkIngredients.query.filter_by(drink_id=drink.drink_id).filter_by(is_primary_ingredient=True).first().ingredient_name
+#             drink.goal = LookupGoals.query.filter_by(goal_id=drink.primary_goal_id).first().goal_name
+#             res.append(drink)
+#         return {'total_items': len(res), 'items': res}
+#
+# @ns.route('/drinks/ingredients/<int:drink_id>/')
+# @ns.doc('Id of the desired drink')
+# class LookupDrinkIngredientsApi(BaseResource):
+#
+#     @token_auth.login_required
+#     @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
+#     def get(self, drink_id):
+#         """get recipe of the drink denoted by drink_id"""
+#         check_drink_existence(drink_id)
+#
+#         res = LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
+#         return {'total_items': len(res), 'items': res}
 
 @ns.route('/goals/')
 class LookupGoalsApi(BaseResource):

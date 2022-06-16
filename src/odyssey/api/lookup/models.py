@@ -353,76 +353,76 @@ class LookupActivityTrackers(BaseModelWithIdx):
     :type: bool
     """
 
-class LookupDrinks(BaseModel):
-    """ Static list of drinks that a client can purchase or be recommended. 
-    """
-
-    drink_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Id of this drink.
-
-    :type: integer, primary key, autoincrementing
-    """
-
-    primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'), nullable=False)
-    """
-    Id of the primary goal that is aided by this drink.
-
-    :type: string
-    """
-
-    color = db.Column(db.String)
-    """
-    Color of this drink.
-
-    :type: string
-    """
-
-class LookupDrinkIngredients(BaseModelWithIdx):
-    """ List of ingredients that a drink is made up of. 
-    """
-
-    drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id'), nullable=False)
-    """
-    Id of the drink this ingredient belongs to.
-
-    :type: int, foreign key(LookupDrinks.drink_id)
-    """
-
-    is_primary_ingredient = db.Column(db.Boolean)
-    """
-    Denotes if this ingredient is they primary ingredient in the drink.
-
-    :type: boolean
-    """
-
-    is_key_additive = db.Column(db.Boolean)
-    """
-    Denotes if this ingredient is a key additive in the drink.
-
-    :type: boolean
-    """
-
-    ingredient_name = db.Column(db.String)
-    """
-    Name of the ingredient.
-
-    :type: string
-    """
-
-    amount = db.Column(db.Float)
-    """
-    Numerical value of the measurement.
-
-    :type: float
-    """
-
-    unit = db.Column(db.String)
-    """
-    Unit of the measurement.
-
-    :type: string
-    """
+# class LookupDrinks(BaseModel):
+#     """ Static list of drinks that a client can purchase or be recommended.
+#     """
+#
+#     drink_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     """
+#     Id of this drink.
+#
+#     :type: integer, primary key, autoincrementing
+#     """
+#
+#     primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'), nullable=False)
+#     """
+#     Id of the primary goal that is aided by this drink.
+#
+#     :type: string
+#     """
+#
+#     color = db.Column(db.String)
+#     """
+#     Color of this drink.
+#
+#     :type: string
+#     """
+#
+# class LookupDrinkIngredients(BaseModelWithIdx):
+#     """ List of ingredients that a drink is made up of.
+#     """
+#
+#     drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id'), nullable=False)
+#     """
+#     Id of the drink this ingredient belongs to.
+#
+#     :type: int, foreign key(LookupDrinks.drink_id)
+#     """
+#
+#     is_primary_ingredient = db.Column(db.Boolean)
+#     """
+#     Denotes if this ingredient is they primary ingredient in the drink.
+#
+#     :type: boolean
+#     """
+#
+#     is_key_additive = db.Column(db.Boolean)
+#     """
+#     Denotes if this ingredient is a key additive in the drink.
+#
+#     :type: boolean
+#     """
+#
+#     ingredient_name = db.Column(db.String)
+#     """
+#     Name of the ingredient.
+#
+#     :type: string
+#     """
+#
+#     amount = db.Column(db.Float)
+#     """
+#     Numerical value of the measurement.
+#
+#     :type: float
+#     """
+#
+#     unit = db.Column(db.String)
+#     """
+#     Unit of the measurement.
+#
+#     :type: string
+#     """
 
 class LookupGoals(BaseModel):
     """ Static list of goals that a client can choose from. 
