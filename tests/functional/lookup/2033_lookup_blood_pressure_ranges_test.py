@@ -1,7 +1,7 @@
 # Test blood pressure look up
 def test_get_blood_pressure_ranges(test_client):
     response = test_client.get(
-        '/doctor/lookupbloodpressureranges/',
+        '/lookup/bloodpressureranges/',
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 200

@@ -7,14 +7,6 @@ from .data import (
     doctor_all_socialhistory_break_post_1_data,
     doctor_all_socialhistory_break_post_2_data)
 
-def test_get_std_conditions(test_client):
-    response = test_client.get(
-        '/doctor/lookupstd/',
-        headers=test_client.client_auth_header)
-
-    assert response.status_code == 200
-    assert response.json['total_items'] == 22
-    assert len(response.json['items']) == 22
 
 def test_post_1_social_history(test_client):
     payload = doctor_all_socialhistory_post_1_data

@@ -1,20 +1,4 @@
-
------------------------------
--- Empty table and reset index. 
--- Rather than altering the table, this script inserts data 
--- So to avoid duplicates, we empty the table and reindex.
--- This is a solution that should be run only once on 
--- persistent databases. 
--- Further changes to this table will be done through the API
------------------------------
-
-DELETE FROM "MedicalConditions"
-    WHERE medical_condition_id >= 1;
-
-ALTER SEQUENCE "MedicalConditions_medical_condition_id_seq"
-		RESTART WITH 1;
-
-INSERT INTO "MedicalConditions" ("category", "subcategory", "condition") 
+INSERT INTO "LookupMedicalConditions" ("category", "subcategory", "condition") 
 VALUES 
 ('Autoimmune',null,'Diabetes type 1'),
 ('Autoimmune',null,'Diabetes type 2'),
@@ -175,7 +159,7 @@ VALUES
 ('Musculoskeletal','History of fractures','Oblique'),
 ('Musculoskeletal','History of fractures','Greenstick'),
 ('Musculoskeletal','History of fractures','Open/compound'),
-('Musculoskeletal',null,'Closed'),
+('Musculoskeletal','History of fractures','Closed'),
 ('Musculoskeletal',null,'Dislocation'),
 ('Musculoskeletal',null,'Torn ligament/meniscus/tendon'),
 ('Musculoskeletal',null,'Torn muscle'),

@@ -31,13 +31,9 @@ from odyssey.api.client.models import (
     ClientSubscriptionContract)
 from odyssey.api.doctor.models import (
     MedicalBloodTests,
-    MedicalBloodTestResultTypes,
-    MedicalConditions,
-    MedicalImaging,
-    MedicalLookUpSTD)
+    MedicalImaging)
 from odyssey.api.facility.models import RegisteredFacilities
-# from odyssey.api.lookup.models import LookupDrinks
-from odyssey.api.lookup.models import LookupBookingTimeIncrements
+from odyssey.api.lookup.models import *
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -139,7 +135,7 @@ def check_blood_test_existence(test_id):
 
 def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
-    result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
+    result = LookupBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
     if not result:
         raise BadRequest(f'Blood test result {result_name} not found.')
 
@@ -155,7 +151,7 @@ def check_client_facility_relation_existence(user_id, facility_id):
         raise BadRequest(f'Client already associated with facility {facility_id}.')
 
 def check_medical_condition_existence(medcon_id):
-    medcon = MedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
+    medcon = LookupMedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
     if not medcon:
         raise BadRequest(f'Medical condition {medcon_id} not found.')
 
@@ -166,7 +162,7 @@ def check_medical_condition_existence(medcon_id):
 #         raise BadRequest(f'Drink {drink_id} not found.')
         
 def check_std_existence(std_id):
-    std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
+    std = LookupSTDs.query.filter_by(std_id=std_id).one_or_none()
     if not std:
         raise BadRequest(f'STD {std_id} not found.')
 

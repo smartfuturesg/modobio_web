@@ -5,29 +5,10 @@ from marshmallow import Schema, fields, post_load, validate, pre_dump, validates
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 
 from odyssey import ma
-from odyssey.api.doctor.models import ( 
-    MedicalBloodPressures,
-    MedicalLookUpBloodPressureRange,
-    MedicalLookUpSTD,
-    MedicalGeneralInfo,
-    MedicalGeneralInfoMedications,
-    MedicalGeneralInfoMedicationAllergy,
-    MedicalFamilyHistory,
-    MedicalConditions,
-    MedicalHistory,
-    MedicalPhysicalExam,
-    MedicalImaging,
-    MedicalBloodTests,
-    MedicalBloodTestResults,
-    MedicalBloodTestResultTypes,
-    MedicalExternalMR,
-    MedicalSocialHistory,
-    MedicalSTDHistory,
-    MedicalSurgeries
-)
-from odyssey.api.user.models import User
+from odyssey.api.doctor.models import *
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.facility.models import MedicalInstitutions
+
 from odyssey.utils.constants import CREDENTIAL_TYPE, MEDICAL_CONDITIONS, USSTATES_2
 from odyssey.utils.base.schemas import BaseSchema
 
@@ -80,25 +61,15 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
 class MedicalBloodPressuresOutputSchema(Schema):
     items = fields.Nested(MedicalBloodPressuresSchema(many=True), missing=[])
     total_items = fields.Integer()
-
-
-class MedicalLookUpBloodPressureRangesSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = MedicalLookUpBloodPressureRange
-
-class MedicalLookUpBloodPressureRangesOutputSchema(Schema):
-    items = fields.Nested(MedicalLookUpBloodPressureRangesSchema(many=True),missing=[])
-    total_items = fields.Integer()
+    
 
 class CheckBoxDeleteSchema(Schema):
     idx = fields.Integer()
+    
 
 class CheckBoxArrayDeleteSchema(Schema):
     delete_ids = fields.Nested(CheckBoxDeleteSchema(many=True))
-
-class MedicalLookUpSTDSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = MedicalLookUpSTD
+    
 
 class MedicalSTDHistorySchema(BaseSchema):
     class Meta:
@@ -106,13 +77,11 @@ class MedicalSTDHistorySchema(BaseSchema):
         exclude = ('user_id',)
         include_fk = True
         load_instance = True
+        
 
 class MedicalSTDHistoryInputSchema(Schema):
     stds = fields.Nested(MedicalSTDHistorySchema(many=True))
 
-class MedicalLookUpSTDOutputSchema(Schema):
-    items = fields.Nested(MedicalLookUpSTDSchema(many=True),missing=[])
-    total_items = fields.Integer()
  
 class MedicalSocialHistorySchema(Schema):
     ever_smoked = fields.Boolean(missing=None, allow_none=True)
@@ -198,15 +167,6 @@ class MedicalMedicationsInfoInputSchema(Schema):
 class MedicalAllergiesInfoInputSchema(Schema):
     allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing = [])
 
-class MedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = MedicalConditions
-    
-    subcategory = fields.String(missing=None)
-
-class MedicalConditionsOutputSchema(Schema):
-    items = fields.Nested(MedicalConditionsSchema(many=True), missing = [])
-    total_items = fields.Integer()
 
 class MedicalFamilyHistSchema(BaseSchema):
     class Meta:
@@ -328,23 +288,6 @@ class MedicalBloodTestResultsSchema(Schema):
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResults(**data)
 
-class MedicalBloodTestResultTypesSchema(Schema):
-    result_id = fields.Integer()
-    result_name = fields.String()
-
-class MedicalBloodTestTypes(ma.SQLAlchemyAutoSchema):
-    class Meta():
-        model = MedicalBloodTestResultTypes
-        exclude = ('created_at', 'result_id')
-
-class MedicalBloodTestResultTypesSchema(Schema):
-    
-    items = fields.Nested(MedicalBloodTestTypes(many=True)) 
-    total = fields.Integer()
-    
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodTestResultTypes(**data)
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:

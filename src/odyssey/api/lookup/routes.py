@@ -9,72 +9,9 @@ from flask_restx import Namespace
 
 from werkzeug.exceptions import BadRequest
 
-from odyssey.api.lookup.models import (
-     LookupActivityTrackers,
-     LookupBookingTimeIncrements,
-     LookupClientBookingWindow,
-     LookupClinicalCareTeamResources,
-     LookupCountriesOfOperations,
-     LookupDefaultHealthMetrics,
-     # LookupDrinks,
-     # LookupDrinkIngredients,
-     LookupGoals, 
-     LookupProfessionalAppointmentConfirmationWindow,
-     LookupRaces,
-     LookupSubscriptions,
-     LookupTelehealthSessionDuration,
-     LookupTermsAndConditions,
-     LookupTerritoriesOfOperations,
-     LookupNotifications,
-     LookupEmergencyNumbers,
-     LookupRoles,
-     LookupMacroGoals,
-     LookupLegalDocs,
-     LookupMedicalSymptoms,
-     LookupOrganizations,
-     LookupCurrencies,
-     LookupNotificationSeverity,
-     LookupBloodTests,
-     LookupBloodTestRanges,
-     LookupDevNames,
-     LookupVisitReasons,
-     LookupEmotes
-     )
-from odyssey.api.lookup.schemas import (
-    LookupActivityTrackersOutputSchema,
-    LookupBookingTimeIncrementsOutputSchema,
-    LookupCareTeamResourcesOutputSchema,
-    LookupCountriesOfOperationsOutputSchema,
-    LookupDefaultHealthMetricsOutputSchema, 
-    # LookupDrinksOutputSchema,
-    # LookupDrinkIngredientsOutputSchema,
-    LookupEHRPagesOutputSchema,
-    LookupGoalsOutputSchema,
-    LookupRacesOutputSchema,
-    LookupSubscriptionsOutputSchema,
-    LookupTerritoriesOfOperationsOutputSchema,
-    LookupTermsAndConditionsOutputSchema,
-    LookupNotificationsOutputSchema,
-    LookupCareTeamResourcesOutputSchema,
-    LookupTimezones,
-    LookupTelehealthSettingsSchema,
-    LookupEmergencyNumbersOutputSchema,
-    LookupRolesOutputSchema,
-    LookupMacroGoalsOutputSchema,
-    LookupLegalDocsOutputSchema,
-    LookupNotificationsOutputSchema,
-    LookupMedicalSymptomsOutputSchema,
-    LookupOrganizationsOutputSchema,
-    LookupCurrenciesOutputSchema,
-    LookupUSStatesOutputSchema,
-    LookupNotificationSeverityOutputSchema,
-    LookupBloodTestsOutputSchema,
-    LookupBloodTestRangesOutputSchema,
-    LookupBloodTestRangesAllOutputSchema,
-    LookupDevNamesOutputSchema,
-    LookupVisitReasonsOutputSchema,
-    LookupEmotesOutputSchema
-)
+from odyssey.api.lookup.models import *
+from odyssey.api.lookup.schemas import *
+
 from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -574,6 +511,8 @@ class LookupVisitReasonsApi(BaseResource):
             reasons = LookupVisitReasons.query.filter_by(role_id=role.idx).all()
 
         return {'total_items': len(reasons), 'items': reasons}
+    
+    
 @ns.route('/emotes/')
 class LookupEmotesApi(BaseResource):
     """
@@ -586,3 +525,46 @@ class LookupEmotesApi(BaseResource):
         
         return {'total_items': len(emotes), 'items': emotes}
         
+
+@ns.route('/medicalconditions/')
+class LookupMedicalConditionsApi(BaseResource):
+    """
+    Returns the medical conditions currently documented in the DB
+    """
+    @token_auth.login_required
+    @responds(schema=LookupMedicalConditionsOutputSchema,status_code=200, api=ns)
+    def get(self):
+        medcon_types = LookupMedicalConditions.query.all()
+        payload = {'items': medcon_types,
+                   'total_items': len(medcon_types)}
+
+        return payload
+    
+@ns.route('/stds/')
+class LookupSTDsApi(BaseResource):
+    """
+    Returns the STDs currently documented in the db
+    """
+    @token_auth.login_required
+    @responds(schema=LookupSTDsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        stds = LookupSTDs.query.all()
+        return {
+            'items': stds,
+            'total_items': len(stds)
+        }
+        
+
+@ns.route('/bloodpressureranges/')
+class LookupBloodPressureRangesApi(BaseResource):
+    """
+    Returns the blood pressure ranges currently documented in the db
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodPressureRangesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        press = LookupBloodPressureRanges.query.all()
+        return {
+            'items': press,
+            'total_items': len(press)
+        }

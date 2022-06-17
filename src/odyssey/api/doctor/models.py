@@ -38,65 +38,6 @@ class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMix
     :type: :class: str
     """
 
-class MedicalLookUpBloodPressureRange(BaseModelWithIdx):
-    """ Medical Look Up Blood Pressure Ranges
-
-    This table will store the blood pressure categories
-    and ranges.
-
-    Chart found from heart.org/bplevels
-    """
-
-    category = db.Column(db.String)
-    """
-    Blood Pressure Category
-
-    :type: str
-    """
-    
-    systolic = db.Column(db.String)
-    """
-    Systolic mmHg is the upper number for the range
-
-    :type: str
-    """
-
-    and_or = db.Column(db.String)
-    """
-    and_or represents the union between systolic and diastolic
-    numbers
-
-    :type: str
-    """
-
-    diastolic = db.Column(db.String)
-    """
-    Diastolic mmHg is the lower number for the range
-
-    :type: str
-    """
-
-
-class MedicalLookUpSTD(BaseModel):
-    """ Medical Look Up STD
-
-    This table will store the sexual transmitted diseases
-    that ModoBio works with
-    """
-
-    std_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Unique ID number identifying the results.
-
-    :type: int, primary key, autoincrement
-    """
-
-    std = db.Column(db.String)
-    """
-    Sexual Transmitted Disease
-
-    :type: str
-    """
 
 class MedicalSTDHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """ Medical STD History
@@ -104,11 +45,11 @@ class MedicalSTDHistory(BaseModelWithIdx, UserIdFkeyMixin):
     This table stores the client's STD history
     """
 
-    std_id = db.Column(db.Integer, db.ForeignKey('MedicalLookUpSTD.std_id',ondelete="CASCADE"), nullable=False)
+    std_id = db.Column(db.Integer, db.ForeignKey('LookupSTDs.std_id',ondelete="CASCADE"), nullable=False)
     """
     Disease ID
 
-    :type: int, foreign key to :attr: MedicalLookUpSTD.std_id
+    :type: int, foreign key to :attr: LookupSTDs.std_id
     """
 
 class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
@@ -220,11 +161,11 @@ class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
 
     displayname = 'Medical General Info - Family History'
 
-    medical_condition_id = db.Column(db.Integer, db.ForeignKey('MedicalConditions.medical_condition_id',ondelete="CASCADE"), nullable=False)
+    medical_condition_id = db.Column(db.Integer, db.ForeignKey('LookupMedicalConditions.medical_condition_id',ondelete="CASCADE"), nullable=False)
     """
     Disease ID
 
-    :type: int, foreign key to :attr: MedicalConditions.medical_condition_id
+    :type: int, foreign key to :attr: LookupMedicalConditions.medical_condition_id
     """
 
     myself = db.Column(db.Boolean)
@@ -262,63 +203,6 @@ class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: bool
     """
 
-class MedicalConditions(BaseModel):
-    """ Medical Conditions Table
-
-    This table will store the medical conditions
-    """
-
-    medical_condition_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Unique ID number identifying the results.
-
-    :type: int, primary key, autoincrement
-    """
-
-    category = db.Column(db.String)
-    """
-    Category for the medical condition.
-
-    **Example**
-
-    * Autoimmune
-    * Cancer
-    * Cardiovascular
-
-    :type: str
-    """
-
-    subcategory = db.Column(db.String)
-    """
-    Sub category for medical conditions
-
-    **Example**
-
-    * Cardiovascular
-
-        * Bleeding disorder
-        * Anemia
-        * Chest pain
-
-    :type: str
-    """
-
-    condition = db.Column(db.String)
-    """
-    The medical condition.
-
-    **Example**
-
-    * Cardiovascular
-
-            * Heart murmur
-
-        * Anemia
-
-            * Sickle cell
-
-    :type: str
-    """
 
 class MedicalGeneralInfoMedicationAllergy(BaseModelWithIdx, UserIdFkeyMixin):
     """ General Medical Information.
@@ -874,72 +758,6 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """
 
 
-class MedicalBloodTestResultTypes(BaseModel):
-    """ Blood test evaluation limits.
-
-    Blood test values can be evaluated as lying in "normal" or "optimal"
-    ranges. What constitutes as a normal or optimal range depends on gender
-    and possibly other factors. The range limits are calculated for each
-    client and stored in this table.
-    """
-
-    result_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Unique ID number identifying the results.
-
-    :type: int, primary key, autoincrement
-    """
-
-    result_name = db.Column(db.String)
-    """
-    ??? What name? Panel? Client? Any random name made up by doctor?
-
-    :type: str
-    """
-
-    normal_min = db.Column(db.Float)
-    """
-    Minimum of normal range for blood test.
-
-    :type: float
-    """
-
-    normal_max = db.Column(db.Float)
-    """
-    Maximum of normal range for blood test.
-
-    :type: float
-    """
-
-    optimal_min = db.Column(db.Float)
-    """
-    Minimum of optimal range for blood test.
-
-    :type: float
-    """
-
-    optimal_max = db.Column(db.Float)
-    """
-    Maximum of optimal range for blood test.
-
-    :type: float
-    """
-
-    unit = db.Column(db.String)
-    """
-    Measurement unit of the blood test.
-
-    :type: str
-    """
-
-    panel = db.Column(db.String)
-    """
-    Which panel does result belong to. ``None`` if not one of the standard tests.
-
-    :type: str
-    """
-
-
 class MedicalBloodTestResults(BaseModelWithIdx):
     """ Blood test result data.
 
@@ -993,13 +811,13 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     :type: bool
     """
 
-    result_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTestResultTypes.result_id', ondelete="SET NULL"), nullable=True)
+    result_id = db.Column(db.Integer, db.ForeignKey('LookupBloodTestResultTypes.result_id', ondelete="SET NULL"), nullable=True)
     """
     Deprecated field that was used to track result types before modobio_test_id was developed
     
     Unique result ID number.
 
-    :type: int, foreign key to :attr:`MedicalBloodTestResultTypes.resultid`
+    :type: int, foreign key to :attr:`LookupBloodTestResultTypes.resultid`
     """
 
     result_value = db.Column(db.Float)
