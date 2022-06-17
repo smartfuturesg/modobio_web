@@ -24,9 +24,10 @@ app.conf.imports = app.conf.imports + ("odyssey.tasks.periodic","odyssey.tasks.t
 
 app.conf.task_routes = {"odyssey.tasks.periodic.deploy_webhook_tasks": {'queue': 'webhook_listener'}}
 
-app.conf.beat_max_loop_interval = 60 # max time between beat ticks
+app.conf.beat_max_loop_interval = 120 # max time between beat ticks
 app.conf.redbeat_lock_timeout = app.conf.beat_max_loop_interval * 5
 app.conf.redbeat_redis_url = conf.redbeat_redis_url
+app.conf.mongodb_backend_settings = {'database': 'modobio-dev' if any((conf.DEV, conf.TESTING)) else 'modobio_prd' } # if results BE is mongodb, use these settings. Otherwise will be ignored
 
 # force celery app to verify tasks
 app.finalize()

@@ -215,7 +215,7 @@ This variable will be converted to ``broker_url`` (lower case) to work with
 Celery's new config system.
 """
 
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_RESULT_BACKEND = ''
 """ Celery default backend to store results.
 
 The backend used to store task results (tombstones).

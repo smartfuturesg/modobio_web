@@ -541,4 +541,9 @@ celery.conf.beat_schedule = {
         'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
         # off setting this slightly might theoretically smooth out the load on celery
     },
+    'test': {
+        'task': 'odyssey.tasks.tasks.test_task',
+        'schedule': crontab(minute='*/1')  # if this were just 30 it would be run at the same time as other periodics
+        # off setting this slightly might theoretically smooth out the load on celery
+    },
 }
