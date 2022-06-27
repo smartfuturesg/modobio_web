@@ -478,6 +478,12 @@ doctor_blood_tests_data = {
     'notes': 'test2'
 }
 
+img_file = pathlib.Path(__file__).parent / 'test_pdf_image.pdf'
+
+doctor_blood_tests_image_data = {
+  'image': (img_file.open(mode='rb'), img_file.as_posix())
+}
+
 img_file = pathlib.Path(__file__).parent / 'test_jpg_image.jpg'
 
 doctor_medical_imaging_data = {

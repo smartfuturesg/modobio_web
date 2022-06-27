@@ -16,7 +16,7 @@ from time import mktime
 
 import flask.json
 
-from flask import current_app, request
+from flask import current_app, request, url_for
 from sqlalchemy import or_, select
 from werkzeug.exceptions import BadRequest, Unauthorized
 
@@ -41,10 +41,14 @@ from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
     TelehealthChatRooms)
-from odyssey.api.user.models import User, UserTokenHistory
-from odyssey.api.user.models import UserRemovalRequests, UserProfilePictures
+from odyssey.api.user.models import (
+    User,
+    UserTokenHistory,
+    UserRemovalRequests,
+    UserProfilePictures,
+    UserPendingEmailVerifications)
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import ALPHANUMERIC
+from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVER_TIME
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
 from odyssey.utils import search
@@ -569,6 +573,212 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.start_time <= target_time.time(),
             LookupBookingTimeIncrements.end_time > target_time.time()
         ).one_or_none().idx
+
+class EmailVerification():
+    """
+    Class for handling email verification routines
+    """
+
+    def __init__(self) -> None:
+        self.secret = current_app.config['SECRET_KEY']
+
+    @staticmethod
+    def generate_token(user_id: int) -> str:
+        """
+        Generate a JWT with the appropriate user type and user_id
+        """
+        
+        secret = current_app.config['SECRET_KEY']
+        
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=EMAIL_TOKEN_LIFETIME),
+                            'uid': user_id,
+                            'ttype': 'email_verification'
+                            }, 
+                            secret, 
+                            algorithm='HS256')
+
+    @staticmethod
+    def generate_code() -> str:
+        """
+        Generate a 4 digit code
+        """
+        return str(random.randrange(1000, 9999))
+
+    def begin_email_verification(self, user: User, updating: bool, email: str = None) -> dict:
+        """
+        Email verification process creates an entry into the UserPendingEmailVerification table which stores
+        the code and token used to verify new emails. If a user is updating their email address, the new email 
+        is temporarily stored in this table until the email is verified.
+
+        Params
+        ------
+        user : User
+        updating : bool
+            denotes if the user is updating their email (true) or the email is being provided
+            for the first time (false)
+        email : str
+            if provided, this email is stored in the UserPendingEmailVerifications entry
+        
+        Returns
+        ------
+        dict: email verification code, token, email, and user_id
+        """
+        # Check if email is already in use
+        if email:
+            if User.query.filter_by(email = email).one_or_none():
+                raise BadRequest("Email in use")
+            
+        # check if there is already a Pending email verification entry
+        pending_verification = UserPendingEmailVerifications.query.filter_by(user_id = user.user_id).one_or_none()
+
+        # if there is a pending verification, remove it and create a new one
+        if pending_verification:
+            db.session.delete(pending_verification)
+            db.session.flush()
+
+        # generate token and code for email verification
+        token = self.generate_token(user.user_id)
+        code = self.generate_code()
+
+        # create pending email verification in db
+        email_verification_data = {
+            'user_id': user.user_id,
+            'token': token,
+            'code': code,
+            'email': email
+        }
+        
+        verification = UserPendingEmailVerifications(**email_verification_data)
+        db.session.add(verification)
+
+        # send email to the user
+        if updating:
+            #send update email if user already had a verified email
+            template = 'email-update'
+        else:
+            #send first time verify email if user did not have an email on file
+            template = 'email-verify'
+        
+        link = url_for(
+            'api.user_user_pending_email_verifications_token_api',
+            token=token,
+            _external=True)
+        
+        send_email(
+            template,
+            user.email,
+            name=user.firstname,
+            verification_link=link,
+            verification_code=code)
+
+        db.session.commit()
+
+        return email_verification_data
+
+    def check_token(self, token: str) ->  UserPendingEmailVerifications:
+        """
+        checks email verification token (JWT) 
+
+        Params
+        ------
+        token : str
+            JWT for email verification session
+        
+        Returns
+        ------
+        UserPendingEmailVerifications
+        """
+        try:
+            jwt.decode(token, self.secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise Unauthorized('Email verification token expired.')
+
+        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
+
+        if not verification:
+            raise Unauthorized('Email verification token not found.')
+
+        return  verification
+
+    def check_code(self, user_id: int, code: str) ->  UserPendingEmailVerifications:
+        """
+        checks provided email verification code and then validates token stored in UserPendingEmailVerifications
+        
+        Params
+        ------
+        user_id: int
+        code : str
+            code provided to user by email
+        
+        Returns
+        ------
+        UserPendingEmailVerifications
+        """
+
+        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+
+        if not verification or verification.code != code:
+            raise Unauthorized('Email verification failed.')
+
+        # Decode and validate token. Code should expire the same time the token does.
+        try:
+            jwt.decode(verification.token, self.secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            raise Unauthorized('Email verification token expired.')
+
+        return verification
+
+
+    def complete_email_verification(self, token : str = None, code : str = None, user_id : int = None) -> None:
+        """
+        Check the provided token or code to validate new emails. If the account is new, a modobio_id is generated and 
+        User.email_verified is set to True. 
+
+        Verification occurs through one of two methods
+        1. Token is provided. This token is emailed to the user as part of the email verification url. Using just the token validates the
+        email, the user's identity, and checks that the user has completed this step within the time allotted. 
+        2.Verification using the provided code. Users will also revieve a code in their email to verify their emails. We use this code
+        and the user's user_id to verify they are the owner of the email. We then check the token (stored in UserPendingEmailVerifications)
+        to ensure the process is completed within the token's TTL
+
+        Params
+        ------
+        token : str
+            JWT encoding the TTL of the email verification routine and the identity of the user.  
+        code:
+            Short code provided to the user's email. This code, the user's id, and the TTL on the token provide the verification
+        user_id:
+            required only if verifying email using the provided code
+        """
+
+        if token:
+            verification = self.check_token(token)
+        elif code and user_id:
+            verification = self.check_code(user_id = user_id, code = code)
+        else:
+            raise BadRequest('Code or token not provided')
+
+        user = User.query.filter_by(user_id=verification.user_id).one_or_none()
+
+        # If account is new, update modobio_id, membersince, and set User.email_verified=True
+        if user.email_verified == False: 
+            user.update({'email_verified': True})
+        elif verification.email:
+            user.update({'email': verification.email})
+        
+        if user.modobio_id == None:
+            md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
+            user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})      
+
+            # send welcome email
+            send_email('email-welcome', user.email, firstname=user.firstname)  
+
+        #code/token were valid, remove the pending request
+        db.session.delete(verification)
+        db.session.commit()
+        return
+
+
         
 def delete_staff_data(user_id):
     """ Delete staff specific data.
@@ -802,10 +1012,10 @@ def delete_user(user_id, requestor_id, delete_type):
     # Also send to user requesting deletion when FLASK_ENV=production
     if user_email != requester.email:
         send_email('account-deleted', requester.email, user_email=user_email)
-
+        
     send_email('account-deleted', user_email, user_email=user_email)
 
-def create_notification(user_id, severity_id, notification_type_id, title, content):
+def create_notification(user_id, severity_id, notification_type_id, title, content, persona_type, expires = None):
     #used to create a notification
     
     notification = Notifications(**{
@@ -813,8 +1023,9 @@ def create_notification(user_id, severity_id, notification_type_id, title, conte
         'title': title,
         'content': content,
         'severity_id': severity_id,
-        'notification_type_id': notification_type_id
+        'notification_type_id': notification_type_id,
+        'persona_type': persona_type,
+        'expires': expires
     })
     
     db.session.add(notification)
-    db.session.commit()

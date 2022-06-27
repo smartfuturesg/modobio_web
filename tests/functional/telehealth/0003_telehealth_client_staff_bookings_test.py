@@ -6,6 +6,8 @@ from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBo
 from odyssey.api.staff.models import StaffCalendarEvents
 from tests.utils import login
 
+import pytest
+
 from .data import (
     telehealth_client_staff_bookings_post_1_data,
     telehealth_client_staff_bookings_post_2_data,
@@ -28,7 +30,8 @@ def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehea
         'priority': False,
         'medical_gender': 'np',
         'location_id': 1,
-        'payment_method_id': payment_method.idx}
+        'payment_method_id': payment_method.idx,
+        'duration': 30}
 
     
     response = test_client.post(
@@ -143,14 +146,20 @@ def test_get_3_staff_client_bookings(test_client, telehealth_staff):
 
     assert response.status_code == 200
     assert response.json['bookings'][0]['status'] == 'Accepted'
-
-def test_put_cancel_client_staff_booking(test_client, booking):
+    
+#@pytest.mark.skip('randomly failing on pipeline but not locally')
+def test_put_1_client_staff_bookings(test_client, booking):
+    
+    chat = TelehealthChatRooms.query.filter_by(booking_id=booking.idx).one_or_none()
+    assert chat.conversation_sid != None
     
     response = test_client.put(
         f'/telehealth/bookings/?booking_id={booking.idx}',
         headers=test_client.staff_auth_header,
         data=dumps(telehealth_client_staff_bookings_put_1_data),
         content_type='application/json')
+    
+    assert chat.conversation_sid == None
 
     assert response.status_code == 201
 

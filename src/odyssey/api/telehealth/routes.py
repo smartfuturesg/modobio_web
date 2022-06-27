@@ -1,31 +1,32 @@
 import uuid
 from bson import ObjectId
-from datetime import datetime, time, timedelta
-from dateutil import tz
 from itertools import groupby
 from operator import itemgetter
 import logging
 logger = logging.getLogger(__name__)
 
 import secrets
+import copy
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 from dateutil import tz
+from dateutil.relativedelta import relativedelta
 
 from flask import request, current_app, g, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Resource, Namespace
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, and_, func, TIMESTAMP, cast
 from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant, ChatGrant
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db, mongo
 from odyssey.api.lookup.models import (
-    LookupBookingTimeIncrements
+    LookupBookingTimeIncrements,
+    LookupVisitReasons,
 )
-from odyssey.api.lookup.models import LookupTerritoriesOfOperations
-from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations, LookupRoles
+from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import (
     TelehealthBookings,
@@ -34,25 +35,10 @@ from odyssey.api.telehealth.models import (
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
     TelehealthBookingDetails,
+    TelehealthStaffAvailabilityExceptions,
     TelehealthStaffSettings
 )
-from odyssey.api.telehealth.schemas import (
-    TelehealthBookingsSchema,
-    TelehealthBookingsOutputSchema,
-    TelehealthBookingMeetingRoomsTokensSchema,
-    TelehealthChatRoomAccessSchema,
-    TelehealthConversationsNestedSchema,
-    TelehealthMeetingRoomSchema,
-    TelehealthQueueClientPoolSchema,
-    TelehealthQueueClientPoolOutputSchema,
-    TelehealthStaffAvailabilitySchema,
-    TelehealthTimeSelectOutputSchema,
-    TelehealthStaffAvailabilityOutputSchema,
-    TelehealthStaffAvailabilityConflictSchema,
-    TelehealthBookingDetailsGetSchema,
-    TelehealthBookingsPUTSchema,
-    TelehealthTranscriptsSchema,
-)
+from odyssey.api.telehealth.schemas import *
 from odyssey.api.user.models import User
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
@@ -65,11 +51,19 @@ from odyssey.utils.constants import (
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TWILIO_ACCESS_KEY_TTL,
     DAY_OF_WEEK,
+    ALLOWED_AUDIO_TYPES,
+    ALLOWED_IMAGE_TYPES,
+    IMAGE_MAX_SIZE,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID,
+    SCHEDULED_MAINTENANCE_PADDING
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_staff_existence
+    check_staff_existence,
+    check_user_existence,
+    create_notification
 )
 from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
@@ -143,6 +137,19 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # only practitioners may initiate a call
         if not meeting_room:
             if current_user.user_id == booking.staff_user_id:
+                #check that the booking has been paid for and the payment has not been voided or refunded
+                payment = PaymentHistory.query.filter_by(idx=booking.payment_history_id).one_or_none()
+                if payment:
+                    refund = PaymentRefunds.query.filter_by(payment_id=payment.idx).one_or_none()
+                    if payment.voided or refund:
+                        raise BadRequest('Telehealth call cannot be started because it has not been paid for.')    
+                else:
+                    raise BadRequest('Telehealth call cannot be started because it has not been paid for.')
+                
+                #check that booking has been accepted
+                if booking.status not in ('Accepted', 'In Progress'):
+                    raise BadRequest('Telehealth call cannot be started because its status is not \'Accepted\' or \'In Progress\'')
+                
                 meeting_room = TelehealthMeetingRooms(
                     booking_id=booking_id,
                     staff_user_id=booking.staff_user_id,
@@ -163,13 +170,6 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         if g.user_type == 'staff':
             meeting_room.staff_access_token = token
 
-            ##
-            # If the booking is with a wheel practitioner
-            # send a consult start request to wheel
-            ##
-            # if booking.external_booking_id and False:
-            #     wheel = Wheel()
-            #     wheel.start_consult(booking.external_booking_id)
 
         elif g.user_type == 'client':
             meeting_room.client_access_token = token
@@ -218,6 +218,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         return {'twilio_token': token,
                 'conversation_sid': booking.chat_room.conversation_sid}
 
+
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client user ID'})
 class TelehealthClientTimeSelectApi(BaseResource):
@@ -227,12 +228,14 @@ class TelehealthClientTimeSelectApi(BaseResource):
     def get(self, user_id):
         """
         Checks the booking requirements stored in the client queue
-
+        Removes times so that appointments end 0.5 hours before scheduled maintenance
+            and only start 0.5 hours after maintenance is over
         Responds with available booking times localized to the client's timezone
         """
         check_client_existence(user_id)
 
-        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(TelehealthQueueClientPool.priority.desc(),TelehealthQueueClientPool.target_date.asc()).first()
+        client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).\
+            order_by(TelehealthQueueClientPool.priority.desc(), TelehealthQueueClientPool.target_date.asc()).first()
         if not client_in_queue:
             raise BadRequest('Client is not in the queue.')
 
@@ -243,7 +246,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
         duration = client_in_queue.duration
         profession_type = client_in_queue.profession_type
 
-        days_out = 0
+        utc_target_datetime, _, _, _ = telehealth_utils.get_utc_start_day_time(local_target_date, client_tz)
+
+        # list of dicts, dicts have two datetime start_time and end_time
+        scheduled_maintenances = telehealth_utils.scheduled_maintenance_date_times(
+            utc_target_datetime-timedelta(days=1), (utc_target_datetime+timedelta(days=15))
+        )  # minus a day and 15 not 14 to be on the safe side of things
+
         # days_available = 
         # {local_target_date(datetime.date):
         #   {start_time_idx_1: 
@@ -256,11 +265,14 @@ class TelehealthClientTimeSelectApi(BaseResource):
         #         'practitioner_ids':  {user_id, user_id (set)}
         #       }
         #   }
-        #}
+        # }
         days_available = {}
+        days_out = 0
         times_available = 0
+        # limit 10 here still but since one pass here can produce as many as 96, it must still be limited to 10 below
         while days_out <= 14 and times_available < 10:
             local_target_date2 = local_target_date + timedelta(days=days_out)
+
             day_start_utc, start_time_window_utc, day_end_utc, end_time_window_utc = \
                 telehealth_utils.get_utc_start_day_time(local_target_date2, client_tz)
             
@@ -270,19 +282,49 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 start_time_window_utc.idx, 
                 day_end_utc.weekday(), 
                 end_time_window_utc.idx,
-                duration)
+                duration,
+            )
                 
             # available_times_with_practitioners =
             # {start_time_idx: {'date_start_utc': datetime.date, 'practitioner_ids': {set of available user_ids}}
             # sample -> {1: {'date_start_utc': datetime.date(2021, 10, 27), 'practitioner_ids': {10}}
             available_times_with_practitioners = {}
-            practitioner_ids_set = set() # {user_id, user_id} set of user_id of available practitioners
+            practitioner_ids_set = set()  # {user_id, user_id} set of user_id of available practitioners
+            
             for block in time_blocks:
+                conflict_window_datetime_start_utc = time_blocks[block][0][0]  # get date datetime
+                conflict_window_datetime_start_utc = conflict_window_datetime_start_utc.replace(hour=0, minute=0)
+                # must add to this because datetime is just date and minutes is separate and in 5 minute increments
+                conflict_window_datetime_start_utc = conflict_window_datetime_start_utc + \
+                    timedelta(minutes=((time_blocks[block][0][2] - 1) * 5))  # not zeo indexed so minus one there
+                conflict_window_datetime_end_utc = conflict_window_datetime_start_utc + timedelta(minutes=duration)
+
+                and_continue = False
+                for maintenance in scheduled_maintenances:
+                    # conflicts in descending order of likelihood, short circuits speed this up as much as it can be
+                    # appointment starts during maintenance OR appointment ends during maintenance
+                    # OR maintenance occurs in midst of appointment OR maintenance encapsulates appointment
+                    m_start_time = datetime.fromisoformat(maintenance['start_time'])
+                    m_end_time = datetime.fromisoformat(maintenance['end_time'])
+                    m_start_time = m_start_time - timedelta(minutes=SCHEDULED_MAINTENANCE_PADDING)
+                    m_end_time = m_end_time + timedelta(minutes=SCHEDULED_MAINTENANCE_PADDING)
+
+                    if (m_start_time < conflict_window_datetime_start_utc < m_end_time) or \
+                            (m_start_time < conflict_window_datetime_end_utc < m_end_time) or \
+                            (conflict_window_datetime_start_utc < m_start_time and
+                             conflict_window_datetime_end_utc > m_end_time) or \
+                            (conflict_window_datetime_start_utc > m_start_time and
+                             conflict_window_datetime_end_utc < m_end_time):
+                        and_continue = True
+                        break  # break maintenance for loop
+                if and_continue:
+                    continue  # but continue block for loop
+
                 _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
                 
-                #if the user has a staff + client account, it may be possible for their staff account
-                #to appear as an option when attempting to book a meeting as a client
-                #to prevent this, we check if the given user id is in the list of practitioners and remove it
+                # if the user has a staff + client account, it may be possible for their staff account
+                # to appear as an option when attempting to book a meeting as a client
+                # to prevent this, we check if the given user id is in the list of practitioners and remove it
                 if user_id in _practitioner_ids:
                     _practitioner_ids.remove(token_auth.current_user()[0].user_id)
                     
@@ -306,43 +348,11 @@ class TelehealthClientTimeSelectApi(BaseResource):
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
         practitioners_info = telehealth_utils.get_practitioner_details(practitioner_ids_set, profession_type, duration)
 
-        ##
-        #  Wheel availability request
-        ##
-        # wheel = Wheel() 
-        #########################
-
-      
-            ######### WHEEL ###########
-            # # Query wheel for available practitioners on target date in client's tzone
-            # # TODO: when wheel is ready, add sex to this availability check
-            
-            # wheel_practitioner_availabilities = wheel.openings(
-            #     target_time_range = (target_start_datetime_utc, target_end_datetime_utc), 
-            #     location_id=client_in_queue.location_id)
-
-            # allow wheel request during testing but, do not add clinician availabilities to response.
-            # We only have one wheel sandbox which can get very messy if we include booking wheel test clinicians
-            # as part of our test routines.  
-            # if current_app.config['TESTING']:
-            #     available = {}
-            #     staff_availability_timezone = {}
-            # else:    
-            #     available = wheel_practitioner_availabilities  # availability dictionary {date: {user_id : [booking time idxs]}
-            #     staff_availability_timezone =  {_user_id: 'UTC' for _user_id in wheel_practitioner_availabilities} # current tz info for each staff we bring up for this target date
-            ######### WHEEL ###########
-
-        #times.sort(key=lambda t: t['start_time'])    
-        #times.sort(key=lambda t: t['target_date'])
-
-        #payload = {'appointment_times': times,
-        #           'total_options': len(times)}
-
-        #buffer not taken into consideration here becuase that only matters to practitioner not client
+        #buffer not taken into consideration here because that only matters to practitioner not client
         final_dict = []
         for day in days_available:
             for time in days_available[day]:
-                target_date_utc = days_available[day][time]['date_start_utc']                
+                target_date_utc = days_available[day][time]['date_start_utc']
                 client_window_id_start_time_utc = time
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
 
@@ -351,7 +361,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 datetime_end = datetime_start + timedelta(minutes=duration)
                 localized_window_start = LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()).first().idx
                 localized_window_end = LookupBookingTimeIncrements.query.filter_by(end_time=datetime_end.time()).first().idx
-                
+
                 final_dict.append({
                     'practitioners_available_ids': list(days_available[day][time]['practitioner_ids']),
                     'target_date': datetime_start.date(),
@@ -360,9 +370,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
                     'booking_window_id_start_time': localized_window_start,
                     'booking_window_id_end_time': localized_window_end
                 })
-        payload = {'appointment_times': final_dict,
-                   'total_options': len(final_dict),
-                   'practitioners_info': practitioners_info}
+
+        payload = {
+            'appointment_times': final_dict,
+            'total_options': len(final_dict),
+            'practitioners_info': practitioners_info,
+        }
 
         return payload
 
@@ -377,8 +390,11 @@ class TelehealthBookingsApi(BaseResource):
     @ns.doc(params={'client_user_id': 'Client User ID',
                 'staff_user_id' : 'Staff User ID',
                 'booking_id': 'booking_id',
+                'status': 'list of booking status options',
                 'page': 'pagination index',
-                'per_page': 'results per page'})
+                'per_page': 'results per page',
+                'target_date': 'target date for booking in UTC',
+                'order': 'Sorting order. default is most recent booking. options: date_asc, date_desc, date_recent '})
     def get(self):
         """
         Returns the list of bookings for clients and/or staff
@@ -390,57 +406,91 @@ class TelehealthBookingsApi(BaseResource):
         booking_id = request.args.get('booking_id', type=int)
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
-
+        status = request.args.getlist('status', type=str)
+        target_date = request.args.get('target_date', type=str)
+        booking_start_time_id = request.args.get('booking_start_time_id', type=int)
+        order = request.args.get('order', 'date_recent', type=str) # date_asc, date_desc, date_recent
+        
         ###
-        # There are 5 cases to decide what to return:
+        # There are 5 cases to decide what to return based on booking participants and if a booking_id provided:
         # 1. booking_id is provided: other parameters are ignored, only that booking will be returned to the participating client/staff or any cs
         # 2. No parameter provided: an error will be raised
-        # 3. Only staff_user_id provided: all bookings for the staff user will return if loggedin user = staff_user_id or cs
-        # 4. Only client_user_id provided: all bookings for the client user will return if loggedin user = client_user_id or cs
-        # 5. Both client_user_id and staff_user_id provided: all bookings with both participats return if loggedin user = staff_user_id or client_user_id or cs
+        # 3. Only staff_user_id provided: all bookings for the staff user will return if logged-in user = staff_user_id or cs
+        # 4. Only client_user_id provided: all bookings for the client user will return if logged-in user = client_user_id or cs
+        # 5. Both client_user_id and staff_user_id provided: all bookings with both participants return if logged-in user = staff_user_id or client_user_id or cs
         # client_user_id | staff_user_id | booking_id
         #       -        |      -        |      T
         #       F        |      F        |      F
         #       F        |      T        |      F
         #       T        |      F        |      F
         #       T        |      T        |      F
+        # 
+        # Bookings maybe further filtered by:
+        #    booking status ('Accepted', 'Canceled' ect.)
+        #    Target date
+        #    booking start time id
         ###
+
+        query_filter = {}
 
         if not (client_user_id or staff_user_id or booking_id):
             # 2. No parameter provided, raise error
             raise BadRequest('Must include at least "client_user_id", "staff_user_id", '
                              'or "booking_id".')
         elif booking_id:
-            # 1. booking_id provided, any other parameter is ignored, only returns booking to participants or cs
-            query_filter = {'idx': booking_id}
+            # 1. booking_id provided, any other parameter is ignored, only returns booking to participants or client services
+            query_filter.update({'idx': booking_id}) 
 
         elif staff_user_id and not client_user_id:
             # 3. only staff_user_id provided, return all bookings for such user_id if logged-in user is same user or client services
             if not (current_user.user_id == staff_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-            query_filter = {'staff_user_id': staff_user_id}
+            query_filter.update({'staff_user_id': staff_user_id})
         
         elif client_user_id and not staff_user_id:
-            #4. only client_user_id provided, return all bookings for such user_id if loggedin user is same user or cs
+            #4. only client_user_id provided, return all bookings for such user_id if logged-in user is same user or client services
             if not (current_user.user_id == client_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-            query_filter = {'client_user_id': client_user_id}
+        
+            query_filter.update({'client_user_id': client_user_id})        
        
         else:
-            #5. both client and user id's are provided, return bookings where both exist if loggedin is either or cs
+            #5. both client and user id's are provided, return bookings where both exist if logged in is either or client services
             if not (current_user.user_id == client_user_id or
                     current_user.user_id == staff_user_id or
                     'client_services' in [role.role for role in current_user.roles]):
                 raise Unauthorized('You must be a participant in this booking.')
-            query_filter = {'staff_user_id': staff_user_id, 'client_user_id': client_user_id}
-            
-        # grab the bookings using the filter generated above
-        bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
-            order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc()).paginate(page,per_page,error_out=False)
-        bookings = bookings_query.items
+            query_filter.update({'staff_user_id': staff_user_id, 'client_user_id': client_user_id})
 
+        # apply datetime filters
+        if target_date:
+            query_filter.update({'target_date_utc': target_date})
+        if booking_start_time_id:
+            query_filter.update({'booking_window_id_start_time_utc': booking_start_time_id})
+
+        # Order the bookings query
+        if order == 'date_asc':
+            bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
+                order_by(TelehealthBookings.target_date_utc.asc(), TelehealthBookings.booking_window_id_start_time_utc.asc())
+        elif order == 'date_desc':
+            bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
+                order_by(TelehealthBookings.target_date_utc.desc(), TelehealthBookings.booking_window_id_start_time_utc.desc())
+        else:
+            # default case is to sort by most recent date (date_recent)
+            bookings_query = TelehealthBookings.query.filter_by(**query_filter).\
+                order_by( func.abs((func.date_part('epoch', cast(TelehealthBookings.target_date_utc, TIMESTAMP)) 
+                            - func.date_part('epoch', cast(func.current_date(), TIMESTAMP) ))).asc())
+
+        # apply booking status filter
+        # done here to take advantage of in_ operator
+        if status:
+            bookings_query = bookings_query.filter(TelehealthBookings.status.in_(status))
+
+        bookings_query = bookings_query.paginate(page,per_page,error_out=False)
+        bookings = bookings_query.items
+        
         # ensure requested booking_id is allowed
         if booking_id and len(bookings) == 1:
             if not (current_user.user_id == bookings[0].client_user_id or
@@ -519,10 +569,17 @@ class TelehealthBookingsApi(BaseResource):
                 # chatroom has not yet been created
                 booking_chat_details = None
 
-            # check if a booking description has been added to the meeting
-            booking_details = None
+            # Check for booking description and reason in booking details.
+            # This is a request by the frontend to reduce the
+            # number of API calls needed to display bookings.
+            description = None
+            reason = None
             if booking.booking_details:
-                booking_details = booking.booking_details.details
+                description = booking.booking_details.details
+
+                reason = db.session.get(LookupVisitReasons, booking.booking_details.reason_id)
+                if reason:
+                    reason = reason.reason
 
             bookings_payload.append({
                 'booking_id': booking.idx,
@@ -539,13 +596,10 @@ class TelehealthBookingsApi(BaseResource):
                 'practitioner': practitioner,
                 'consult_rate': booking.consult_rate,
                 'charged': booking.charged,
-                'description': booking_details 
+                'description': description,
+                'reason': reason
             })
 
-        # Sort bookings by time then sort by date
-        bookings_payload.sort(key=lambda t: t['start_time_utc'])
-        bookings_payload.sort(key=lambda t: t['target_date_utc'])
-        
         twilio = Twilio()
         # create twilio access token with chat grant 
         token, _ = twilio.create_twilio_access_token(current_user.modobio_id)
@@ -562,10 +616,9 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_end_time','booking_window_id_start_time','target_date']), api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
-    @ns.doc(params={'client_user_id': 'Client User ID',
-                'staff_user_id' : 'Staff User ID'})
+    @ns.doc(params={'client_user_id': 'Client User ID', 'staff_user_id': 'Staff User ID'})
     def post(self):
         """
         Add client and staff to a TelehealthBookings table.
@@ -580,7 +633,6 @@ class TelehealthBookingsApi(BaseResource):
         #    raise BadRequest('Start time must be before end time.')
         # NOTE commented out this check, the input for booking_window_id_end_time will not be taken into cosideration, 
         # only booking_window_id_start_time and target_date
-        # TODO deprecate requiring booking_window_id_end_time as an input
 
         client_user_id = request.args.get('client_user_id', type=int)
         client_scheduled = User.query.filter_by(user_id=client_user_id).one_or_none()
@@ -632,12 +684,16 @@ class TelehealthBookingsApi(BaseResource):
         # TODO coordinate with FE to stop requiring 'booking_window_id_end_time'
         target_date_end_time = (target_date + timedelta(minutes = duration))
         request.parsed_obj.booking_window_id_end_time = start_time_idx_dict[target_date_end_time.strftime('%H:%M:%S')] - 1
+        if request.parsed_obj.booking_window_id_end_time == 0:
+            request.parsed_obj.booking_window_id_end_time = 288
 
         # Localize the requested booking date and time to UTC
         target_start_datetime_utc = target_date.astimezone(tz.UTC)
         target_end_datetime_utc = target_start_datetime_utc + timedelta(minutes=duration)
         target_start_time_idx_utc = start_time_idx_dict[target_start_datetime_utc.strftime('%H:%M:%S')]
         target_end_time_idx_utc = start_time_idx_dict[target_end_datetime_utc.strftime('%H:%M:%S')] - 1
+        if target_end_time_idx_utc == 0:
+            target_end_time_idx_utc = 288
        
         # call on verify_availability, will raise an error if practitioner doens't have availability requested
         telehealth_utils.verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
@@ -685,18 +741,12 @@ class TelehealthBookingsApi(BaseResource):
 
         # booking uuid
         request.parsed_obj.uid = uuid.uuid4()
+        request.parsed_obj.scheduled_duration_mins = client_in_queue.duration
         
         db.session.add(request.parsed_obj)
         db.session.flush()
 
-        # if the staff memebr is a wheel clinician, make booking request to wheel API
         booking_url = None
-        ######### WHEEL ##########
-        #wheel = Wheel()
-        #wheel_clinician_ids = wheel.clinician_ids(key='user_id')
-        #if staff_user_id in wheel_clinician_ids:
-        #    external_booking_id, booking_url = wheel.make_booking_request(staff_user_id, client_user_id, client_in_queue.location_id, request.parsed_obj.idx, target_start_datetime_utc)
-        #    request.parsed_obj.external_booking_id = external_booking_id
         
         
         # Once the booking has been successful, delete the client from the queue
@@ -806,6 +856,9 @@ class TelehealthBookingsApi(BaseResource):
             # and that the payment method chosen is registered under the client_user_id
             if not PaymentMethods.query.filter_by(user_id=booking.client_user_id, idx=payment_id).one_or_none():
                 raise BadRequest('Invalid payment method.')
+            
+            if booking.charged:
+                raise BadRequest('Booking has already been paid for. The payment method cannot be changed.')
 
 
         new_status = data.get('status')
@@ -830,14 +883,29 @@ class TelehealthBookingsApi(BaseResource):
                 # both client and practitioner can change status to canceled 
                 # If staff initiated cancellation, refund should be true.
                 # If client initiated, refund should be false.
+                booking_time = LookupBookingTimeIncrements.query. \
+                    filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                booking_datetime = datetime.combine(booking.target_date, booking_time)
+                expiration_datetime = booking_datetime + timedelta(hours=72)
                 if current_user.user_id == booking.staff_user_id:
+                    #cancel appointment with refund and send client notification that meeting was cancelled
                     cancel_telehealth_appointment(
                         booking,
                         reason="Practitioner Cancellation",
                         refund=True)
-
-                    # TODO: send an email to client when practitioner cancels
+                    create_notification(
+                        booking.client_user_id,
+                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
+                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+                        f"Your Telehealth Appointment with {booking.practitioner.firstname} " + \
+                            f"{booking.practitioner.lastname} was Canceled",
+                        f"Unfortunately {booking.practitioner.firstname} {booking.practitioner.lastname} " + \
+                        f"has canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
+                        'Client',
+                        expiration_datetime
+                    )
                 else:
+                    #cancel appointment without refund and send staff notification that meeting was cancelled
                     cancel_telehealth_appointment(
                         booking,
                         refund=False)
@@ -1041,7 +1109,6 @@ class MeetingRoomStatusAPI(BaseResource):
         For status callback directly from twilio
 
         TODO:
-
         - authorize access to this API from twilio automated callback
         - check callback reason (we just want the status updated)
         - update meeting status
@@ -1178,13 +1245,6 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         """
         # Detect if the staff exists
         check_staff_existence(user_id)
-
-        ######### WHEEL #########
-        # prevent wheel clinicians from submitting telehealth availability
-        # wheel = Wheel()
-        # wheel_clinician_ids = wheel.clinician_ids(key='user_id')
-        # if user_id in wheel_clinician_ids and request.parsed_obj['availability']:
-        #     raise BadRequest('You can only edit your telehealth settings, not availability.')
 
         # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
@@ -1338,6 +1398,151 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         db.session.commit()
         return {'conflicts': conflicts}
 
+@ns.route('/settings/staff/availability/exceptions/<int:user_id>/')
+@ns.doc(params={'user_id': 'User ID for a staff'})
+class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
+    """
+    This API resource is used to view and interact with temporary availability exceptions.
+    """
+    __check_resource__ = False
+    
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsPOSTSchema(many=True), api=ns)
+    @responds(schema=TelehealthStaffAvailabilityExceptionsOutputSchema, api=ns, status_code=201)
+    def post(self, user_id):
+        """
+        Add new availability exception. Start and end window_ids should be in reference to UTC.
+        To determine the correct window_ids, please see /lookup/telehealth/booking-increments/.
+        """
+        check_user_existence(user_id, user_type='staff')
+        current_date = datetime.now(timezone.utc).date()
+
+        conflicts = []
+        exceptions = []
+        for exception in request.parsed_obj:
+            if exception['exception_start_time'] >= exception['exception_end_time']:
+                raise BadRequest('Exception start time must be before exception end time.')
+            elif current_date + relativedelta(months=+6) < exception['exception_date']:
+                raise BadRequest('Exceptions cannot be set more than 6 months in the future.')
+            elif current_date > exception['exception_date']:
+                raise BadRequest('Exceptions cannot be in the past.')
+            else:
+                exception['user_id'] = user_id
+                exception['exception_booking_window_id_start_time'] = LookupBookingTimeIncrements.query \
+                    .filter(
+                        LookupBookingTimeIncrements.start_time <= exception['exception_start_time'],
+                        LookupBookingTimeIncrements.end_time > exception['exception_start_time']
+                ).one_or_none().idx
+                exception['exception_booking_window_id_end_time'] = LookupBookingTimeIncrements.query \
+                    .filter(
+                        LookupBookingTimeIncrements.start_time < exception['exception_end_time'],
+                        LookupBookingTimeIncrements.end_time >= exception['exception_end_time']
+                ).one_or_none().idx
+                exceptions.append(exception)
+                
+                #remove time object that does not get stored, only the fkey to time increments is stored
+                #copy is made so we don't have to recalculate the time when returning exceptions at the end
+                model = copy.deepcopy(exception)
+                del model['exception_start_time']
+                del model['exception_end_time']
+                db.session.add(TelehealthStaffAvailabilityExceptions(**model))
+                
+                #detect if conflicts exist with this exception
+                if exception['is_busy']:
+                    bookings = TelehealthBookings.query.filter_by(staff_user_id=user_id).filter(
+                        or_(
+                            TelehealthBookings.status == 'Accepted',
+                            TelehealthBookings.status == 'Pending'
+                        )) \
+                        .filter(
+                            or_(
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time_utc >= exception['exception_booking_window_id_start_time'],
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception['exception_booking_window_id_end_time']
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_end_time_utc < exception['exception_booking_window_id_start_time'],
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception['exception_booking_window_id_end_time']
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time_utc <= exception['exception_booking_window_id_start_time'],
+                                    TelehealthBookings.booking_window_id_end_time_utc > exception['exception_booking_window_id_start_time']
+                                ),
+                                and_(
+                                    TelehealthBookings.booking_window_id_start_time_utc < exception['exception_booking_window_id_end_time'],
+                                    TelehealthBookings.booking_window_id_end_time_utc >= exception['exception_booking_window_id_end_time']
+                                )
+                            )
+                        ).all()
+                    
+                    for booking in bookings:
+                            client = {**booking.client.__dict__}
+                            start_time_utc = LookupBookingTimeIncrements.query \
+                                .filter_by(idx=booking.booking_window_id_end_time_utc).one_or_none().start_time
+                            
+                            conflicts.append({
+                                'booking_id': booking.idx,
+                                'target_date_utc': booking.target_date_utc,
+                                'start_time_utc': start_time_utc,
+                                'status': booking.status,
+                                'profession_type': booking.profession_type,
+                                'client_location_id': booking.client_location_id,
+                                'payment_method_id': booking.payment_method_id,
+                                'status_history': booking.status_history,
+                                'client': client,
+                                'consult_rate': booking.consult_rate,
+                                'charged': booking.charged
+                            })
+                
+        db.session.commit()
+        
+        return {
+            'exceptions': exceptions,
+            'conflicts': conflicts
+        }
+    
+    @token_auth.login_required(user_type=('staff',))
+    @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
+    def get(self, user_id):
+        """
+        View availability exceptions. start and end window_ids are in reference to UTC.
+        To convert window_ids to real time please see /lookup/telehealth/booking-increments/.
+        """
+        check_user_existence(user_id, user_type='staff')
+        
+        exceptions = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=user_id).all()
+        formatted_exceptions = []
+        for exception in exceptions:
+            #get the real time representation from the id
+            exception = exception.__dict__
+            del exception['_sa_instance_state']
+            exception['exception_start_time'] = LookupBookingTimeIncrements.query \
+                .filter_by(idx=exception['exception_booking_window_id_start_time']).one_or_none().start_time
+            exception['exception_end_time'] = LookupBookingTimeIncrements.query \
+                .filter_by(idx=exception['exception_booking_window_id_end_time']).one_or_none().end_time  
+            formatted_exceptions.append(exception)          
+        
+        return formatted_exceptions
+    
+    @token_auth.login_required(user_type=('staff_self',))
+    @accepts(schema=TelehealthStaffAvailabilityExceptionsDeleteSchema(many=True), api=ns)
+    def delete(self, user_id):
+        """
+        Remove availability exceptions.
+        """
+        exception_ids = []
+        for exception in request.parsed_obj:
+            exception_ids.append(exception['exception_id'])
+        
+        TelehealthStaffAvailabilityExceptions.query.filter(
+            TelehealthStaffAvailabilityExceptions.user_id == user_id,
+            TelehealthStaffAvailabilityExceptions.idx.in_(exception_ids)
+        ).delete()
+        db.session.commit()       
+        
+        return ('', 204)
+
+
 @ns.route('/queue/client-pool/')
 class TelehealthGetQueueClientPoolApi(BaseResource):
     """
@@ -1395,6 +1600,7 @@ class TelehealthQueueClientPoolApi(BaseResource):
         client_tz = request.parsed_obj.timezone
         target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
         client_local_datetime_now = datetime.now(tz.gettz(client_tz))
+
         if target_date.date() < client_local_datetime_now.date():
             raise BadRequest("Invalid target date")
 
@@ -1448,7 +1654,7 @@ class TelehealthBookingDetailsApi(BaseResource):
     __check_resource__ = False
 
     @token_auth.login_required
-    @responds(schema=TelehealthBookingDetailsGetSchema, api=ns, status_code=200)
+    @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
     def get(self, booking_id):
         """
         Returns a list of details about the specified booking_id
@@ -1465,7 +1671,7 @@ class TelehealthBookingDetailsApi(BaseResource):
                 booking.staff_user_id == current_user.user_id):
             raise Unauthorized('Only booking participants can view the details.')
 
-        res = {'details': None, 'images': [], 'voice': None}
+        res = {'details': None, 'images': [], 'voice': None, 'visit_reason': None}
 
         # if there aren't any details saved for the booking_id, GET will return empty
         booking_details = TelehealthBookingDetails.query.filter_by(booking_id=booking_id).first()
@@ -1486,6 +1692,14 @@ class TelehealthBookingDetailsApi(BaseResource):
         if booking_details.voice:
             res['voice'] = fd.url(booking_details.voice)
 
+        reason = (db.session
+            .query(LookupVisitReasons)
+            .filter_by(
+                idx=booking_details.reason_id)
+            .one_or_none())
+        if reason:
+            res['visit_reason'] = reason.reason
+
         return res
 
     @token_auth.login_required
@@ -1505,6 +1719,8 @@ class TelehealthBookingDetailsApi(BaseResource):
             Audio file, only 1 can be send.
         details : str (optional)
             Further details.
+        reason_id : int (optional)
+            Reason for visit
         """
         # verify the editor of details is the client or staff from schedulded booking
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1520,7 +1736,42 @@ class TelehealthBookingDetailsApi(BaseResource):
             raise BadRequest('Booking details you are trying to edit not found.')
 
         if 'details' in request.form and request.form['details']:
-            booking_details.details = request.form.get('details')
+            booking_details.details = str(request.form.get('details'))
+
+        if 'reason_id' in request.form:
+            reason_id = request.form.get('reason_id')
+
+            if reason_id == '':
+                reason_id = None
+
+            if reason_id is not None:
+                try:
+                    reason_id = int(reason_id)
+                except (TypeError, ValueError):
+                    raise BadRequest('reason_id must be a number.')
+
+                # Check if reason_id is valid and if role_id matches staff
+                # linked in booking. LookupVisitReason has role_id, but
+                # StaffRoles is linked to LookupRoles by role_name, which
+                # makes looking up roles complicated.
+                match_role = (db.session
+                    .query(LookupRoles, StaffRoles, LookupVisitReasons)
+                    .join(
+                        StaffRoles,
+                        LookupRoles.role_name == StaffRoles.role)
+                    .join(
+                        LookupVisitReasons,
+                        LookupRoles.idx == LookupVisitReasons.role_id)
+                    .filter(
+                        StaffRoles.user_id == booking.staff_user_id,
+                        LookupVisitReasons.idx == reason_id)
+                    .one_or_none())
+
+                if not match_role:
+                    raise BadRequest(
+                        f"The reason for visit does not match the practitioner's qualifications.")
+
+            booking_details.reason_id = reason_id
 
         if request.files:
             prefix = f'meeting_files/booking{booking_id:05d}'
@@ -1645,6 +1896,7 @@ class TelehealthBookingDetailsApi(BaseResource):
             images : file(s) list of image files, up to 4
             voice : file
             details : str
+            reason_id : int
         """
         # Check booking_id exists
         booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -1661,7 +1913,42 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         booking_details = TelehealthBookingDetails(booking_id=booking_id)
 
-        booking_details.details = request.form.get('details')
+        booking_details.details = str(request.form.get('details'))
+
+        if 'reason_id' in request.form:
+            reason_id = request.form.get('reason_id')
+
+            if reason_id == '':
+                reason_id = None
+
+            if reason_id is not None:
+                try:
+                    reason_id = int(reason_id)
+                except (TypeError, ValueError):
+                    raise BadRequest('reason_id must be a number.')
+
+                # Check if reason_id is valid and if role_id matches staff
+                # linked in booking. LookupVisitReason has role_id, but
+                # StaffRoles is linked to LookupRoles by role_name, which
+                # makes looking up roles complicated.
+                match_role = (db.session
+                    .query(LookupRoles, StaffRoles, LookupVisitReasons)
+                    .join(
+                        StaffRoles,
+                        LookupRoles.role_name == StaffRoles.role)
+                    .join(
+                        LookupVisitReasons,
+                        LookupRoles.idx == LookupVisitReasons.role_id)
+                    .filter(
+                        StaffRoles.user_id == booking.staff_user_id,
+                        LookupVisitReasons.idx == reason_id)
+                    .one_or_none())
+
+                if not match_role:
+                    raise BadRequest(
+                        f"The reason for visit does not match the practitioner's qualifications.")
+
+            booking_details.reason_id = reason_id
 
         if request.files:
             prefix = f'meeting_files/booking{booking_id:05d}'
@@ -1874,7 +2161,6 @@ class TelehealthBookingsCompletionApi(BaseResource):
     def put(self, booking_id):
         """
         Complete the booking by:
-        - send booking complete request to wheel
         - update booking status in TelehealthBookings
         - update twilio
         """
@@ -1889,11 +2175,6 @@ class TelehealthBookingsCompletionApi(BaseResource):
         # make sure the requester is one of the participants
         if current_user.user_id not in [booking.staff_user_id, booking.client_user_id]:
             raise Unauthorized('You must be a participant in this booking.')
-
-        ##### WHEEL #####        
-        # if booking.external_booking_id:
-        #     wheel = Wheel()
-        #     wheel.complete_consult(booking.external_booking_id)
 
         telehealth_utils.complete_booking(booking_id = booking.idx)
 

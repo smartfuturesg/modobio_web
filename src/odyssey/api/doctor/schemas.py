@@ -239,15 +239,29 @@ class MedicalImagingSchema(ma.SQLAlchemyAutoSchema):
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, missing=None)
 
+
+class ReporterInfoSchema(Schema):
+    firstname = fields.String()
+    lastname = fields.String()
+    profile_pictures = fields.Dict(keys=fields.String, values=fields.Url())
+
+
+class MedicalImagingOutputSchema(Schema):
+    reporter_infos = fields.Dict(keys=fields.Integer, values=fields.Nested(ReporterInfoSchema()))
+    images = fields.Nested(MedicalImagingSchema(many=True))
+    total_images = fields.Integer()
+
+
 class MedicalBloodTestSchema(Schema):
     test_id = fields.Integer()
     user_id = fields.Integer()
     date = fields.Date(required=True)
-    modobio_test_code = fields.String(required=True)
     notes = fields.String(required=False)
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'})
+    reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
+    image = fields.String(dump_only=True)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -273,7 +287,7 @@ class MedicalBloodTestResultsSchema(ma.SQLAlchemyAutoSchema):
 class MedicalBloodTestsInputSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodTests
-        dump_only = ('reporter_id', 'test_id', 'panel_type')
+        dump_only = ('reporter_id', 'test_id', 'panel_type', 'image_path')
         exclude = ('created_at', 'updated_at')
     user_id = fields.Integer(dump_only=True)
     results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
@@ -288,9 +302,11 @@ class BloodTestsByTestID(Schema):
     results = fields.Nested(MedicalBloodTestResultsSchema(many=True))
     notes = fields.String()
     date = fields.Date(format="iso")
+    image = fields.String()
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, dump_only=True)
+    reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     """

@@ -1,10 +1,9 @@
 from flask.json import dumps, loads
 
 from odyssey import db
+from odyssey.api.notifications.models import Notifications
 from odyssey.api.payment.models import PaymentHistory
 from odyssey.api.telehealth.models import TelehealthBookingStatus
-
-from .data import test_booking
 """
 This payment tests all InstaMed functions in accordance to InstaMed required test cases.
 
@@ -20,7 +19,7 @@ Refund after full amount has been refunded (should fail)
 def test_sale_success(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -35,13 +34,18 @@ def test_sale_deny(test_client, test_booking):
     #charge booking using test endpoint ($99.05)
     test_booking.consult_rate = 99.05
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
 
-    #should fail, check that booking is cancelled
+    # bring up client's notifications
+    notifications = Notifications.query.filter_by(user_id = test_booking.client_user_id, notification_type_id=5
+        ).order_by(Notifications.notification_id.desc()).all()
+    
+    # should fail, check that booking is cancelled
     res = loads(response.data)
+    assert len(notifications) == 1 # payment failed notification
     assert res['TransactionStatus'] == "D"
     assert test_booking.status == 'Canceled'
     assert not test_booking.charged 
@@ -55,11 +59,16 @@ def test_sale_partial(test_client, test_booking):
     #charge booking using test endpoint ($99.10)
     test_booking.consult_rate = 99.10
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
 
+    # bring up client's notifications
+    notifications = Notifications.query.filter_by(user_id = test_booking.client_user_id, notification_type_id=5
+        ).order_by(Notifications.notification_id.desc()).all()
+        
+    assert len(notifications) == 2 # includes notification from test_sale_deny
     #should fail, check that booking is canceled and partial payment is voided
     assert response.status_code == 400
     assert test_booking.status == 'Canceled'
@@ -73,7 +82,7 @@ def test_sale_partial(test_client, test_booking):
 def test_void(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -102,7 +111,7 @@ def test_void(test_client, test_booking):
 def test_refund(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -116,7 +125,7 @@ def test_refund(test_client, test_booking):
     #refund payment for full amount
     data1 = {
         'refund_amount': "99.00",
-        'payment_id': PaymentHistory.query.filter_by(booking_id=test_booking.idx).one_or_none().idx,
+        'payment_id': PaymentHistory.query.filter_by(idx=test_booking.payment_history_id).one_or_none().idx,
         'refund_reason': "Test refund functionality"
     }
 
@@ -147,7 +156,7 @@ def test_refund(test_client, test_booking):
 def test_refund_too_much(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': test_booking.idx}),
         content_type='application/json')
@@ -158,7 +167,7 @@ def test_refund_too_much(test_client, test_booking):
     #refund for more than full amount using test endpoint ($100.00)
     data2 = {
         'refund_amount': "100.00",
-        'payment_id': PaymentHistory.query.filter_by(booking_id=test_booking.idx).one_or_none().idx,
+        'payment_id': PaymentHistory.query.filter_by(idx=test_booking.payment_history_id).one_or_none().idx,
         'refund_reason': "Test refund functionality"
     }
 
@@ -175,3 +184,19 @@ def test_refund_too_much(test_client, test_booking):
     for status in statuses:
         db.session.delete(status)
     db.session.commit()
+
+
+def test_payment_history(test_client):
+    """
+    Test the response to payment/transaction-history (GET)
+    
+    Relies on the transactions previously made with test_client.client_id
+    """
+
+    response = test_client.get(
+        f'/payment/transaction-history/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200
+    assert response.json['items'][0]['transaction_descriptor'] == 'Telehealth-MedicalDoctor-20mins'

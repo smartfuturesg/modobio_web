@@ -4,7 +4,7 @@ from odyssey import db
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentHistory
 
-from .data import payment_refund_data, test_booking
+from .data import payment_refund_data
 
 from odyssey.tasks.periodic import find_chargable_bookings
 from odyssey.tasks.tasks import charge_telehealth_appointment
@@ -34,7 +34,7 @@ def test_bookings_payment(test_client, test_booking):
 
     assert history.transaction_amount == test_booking.consult_rate
     assert history.transaction_id
-
+    assert history.transaction_descriptor == 'Telehealth-MedicalDoctor-20mins'
     #process refunds for the payment
     response = test_client.post(
         f'/payment/refunds/{test_client.client_id}/',

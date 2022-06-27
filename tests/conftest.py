@@ -22,7 +22,7 @@ from werkzeug.exceptions import BadRequest
 from odyssey import create_app, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
-from odyssey.api.payment.models import PaymentMethods
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory
 from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
@@ -370,6 +370,19 @@ def booking_function_scope(test_client):
     conversation_sid = twilio.create_telehealth_chatroom(booking.idx)
 
     test_client.db.session.commit()
+    
+    # add payment history for the booking. Necessary for tests that need to try to start a call
+    payment = PaymentHistory(**{
+        'user_id': test_client.client_id,
+        'payment_method_id': booking.payment_method_id,
+        'transaction_amount': 1
+    })
+    
+    test_client.db.session.add(payment)
+    test_client.db.session.flush()
+    
+    booking.payment_history_id = payment.idx
+    test_client.db.session.commit()
 
     booking_id = booking.idx
 
@@ -401,7 +414,9 @@ def booking_function_scope(test_client):
 
     if booking:            
         test_client.db.session.delete(booking)
-        test_client.db.session.flush()
-        
+        test_client.db.session.flush() 
+    
+    test_client.db.session.delete(payment)
     test_client.db.session.delete(pm)
+
     test_client.db.session.commit()

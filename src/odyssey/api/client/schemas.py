@@ -324,7 +324,7 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     team_member_user_id = fields.Integer(metadata={'description': 'user_id for clinical care team member'}, dump_only=True)
     firstname = fields.String(dump_only=True, missing=None)
     lastname = fields.String(dump_only=True, missing=None)
-    profile_picture = fields.String(dump_only=True, missing=None)
+    profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
     staff_roles = fields.List(fields.String, missing=[], dump_only=True)
     is_temporary = fields.Boolean(missing=False, dump_only=True)
     hours_remaining = fields.Integer(required=False, dump_only=True)
@@ -344,7 +344,7 @@ class UserClinicalCareTeamSchema(Schema):
     client_email = fields.String()
     authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
     client_added_date = fields.Date(dump_only=True, required=False)
-    client_profile_picture = fields.String(dump_only=True, missing=None, required = False)
+    client_profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
     
 class ClinicalCareTeamMemberOfSchema(Schema):
     """
@@ -435,9 +435,6 @@ class ClientMobileSettingsSchema(Schema):
     general_settings = fields.Nested(ClientGeneralMobileSettingsSchema)
     notification_type_ids = fields.List(fields.Integer, missing=[])
 
-    # TODO: deprecated
-    push_notification_type_ids = fields.Nested(ClientNotificationSettingsSchema(many=True), missing=[])
-
 
 class ClientAssignedDrinksSchema(BaseSchema):
     class Meta:
@@ -485,6 +482,11 @@ class ClientTokenRequestSchema(Schema):
     token = fields.String()
     refresh_token = fields.String()
     email_verified = fields.Boolean()
+
+
+class ClientCloseAccountSchema(Schema):
+    reason = fields.String(required=False, missing=None, validate=validate.Length(max=500))
+
 
 class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:

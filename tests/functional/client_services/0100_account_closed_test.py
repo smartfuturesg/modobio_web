@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
+from flask.json import dumps
 from tests.utils import login
 
 def test_get_client_account_status(test_client, client_services):
@@ -18,9 +19,12 @@ def test_get_client_account_status(test_client, client_services):
 
 def test_close_client_account(test_client, client_services):
     # Close account
+    data = {'reason': 'developers smell like old socks'}
     response = test_client.post(
         f'/client/account/close/',
-        headers=test_client.client_auth_header)
+        headers=test_client.client_auth_header,
+        data=dumps(data),
+        content_type='application/json')
 
     assert response.status_code == 201
 
@@ -31,6 +35,7 @@ def test_close_client_account(test_client, client_services):
 
     assert response.status_code == 200
     assert response.json['client_account_closed'] is not None
+    assert response.json['client_account_closed_reason'] == data['reason']
 
     # Check that account_closed was set to now, within a small window.
     now = datetime.now()
@@ -59,6 +64,7 @@ def test_reopen_client_account(test_client, client_services):
 
     assert response.status_code == 200
     assert response.json['client_account_closed'] is None
+    assert response.json['client_account_closed_reason'] is None
 
     # Try to do something as client.
     response = test_client.get(
@@ -80,9 +86,12 @@ def test_get_staff_account_status(test_client, client_services, not_client_servi
 
 def test_close_staff_account(test_client, client_services, not_client_services):
     # Close account
+    data = {'reason': 'clients taste like pudding'}
     response = test_client.post(
         f'/staff/account/{not_client_services.user_id}/close/',
-        headers=not_client_services.auth_header)
+        headers=not_client_services.auth_header,
+        data=dumps(data),
+        content_type='application/json')
 
     assert response.status_code == 201
 
@@ -93,6 +102,7 @@ def test_close_staff_account(test_client, client_services, not_client_services):
 
     assert response.status_code == 200
     assert response.json['staff_account_closed'] is not None
+    assert response.json['staff_account_closed_reason'] == data['reason']
 
     # Check that account_closed was set to now, within a small window.
     now = datetime.now()
@@ -121,6 +131,7 @@ def test_reopen_client_account(test_client, client_services, not_client_services
 
     assert response.status_code == 200
     assert response.json['staff_account_closed'] is None
+    assert response.json['staff_account_closed_reason'] is None
 
     # Try to do something as client.
     response = test_client.get(

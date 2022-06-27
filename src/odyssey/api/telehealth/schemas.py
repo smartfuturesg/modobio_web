@@ -1,4 +1,7 @@
 import logging
+
+from odyssey.api.lookup.schemas import LookupVisitReasonsSchema
+
 logger = logging.getLogger(__name__)
 
 from marshmallow import (
@@ -19,13 +22,14 @@ from odyssey.api.telehealth.models import (
     TelehealthBookings,
     TelehealthQueueClientPool,
     TelehealthStaffAvailability,
+    TelehealthStaffAvailabilityExceptions,
     TelehealthMeetingRooms,
     TelehealthQueueClientPool,
     TelehealthBookingDetails,
-    TelehealthStaffSettings
+    TelehealthStaffSettings,  
 )
 from odyssey.api.user.models import User
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, USSTATES_2
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, TELEHEALTH_BOOKING_DURATION, USSTATES_2
 
 class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()
@@ -118,6 +122,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     start_time_utc = fields.Time()
     booking_url = fields.String()
     consult_rate = fields.Number(missing=None)
+    reason = fields.String()
     description = fields.String()
 
     @post_load
@@ -154,6 +159,34 @@ class TelehealthStaffAvailabilityInputSchema(Schema):
     day_of_week = fields.String(validate=validate.OneOf(DAY_OF_WEEK))
     start_time = fields.Time()
     end_time = fields.Time()
+    
+class TelehealthStaffAvailabilityExceptionsPOSTSchema(Schema):
+    is_busy = fields.Boolean()
+    label = fields.String()
+    exception_date = fields.Date()
+    exception_start_time = fields.Time()
+    exception_end_time = fields.Time()
+    
+class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TelehealthStaffAvailabilityExceptions
+        exclude = ('created_at', 'updated_at')
+        dump_only = ('idx',)
+        
+    user_id = fields.Integer(dump_only=True)
+    exception_start_time = fields.Time(dump_only=True)
+    exception_end_time = fields.Time(dump_only=True)
+        
+    @post_load
+    def make_object(self, data, **kwargs):
+        return TelehealthStaffAvailabilityExceptions(**data)
+    
+class TelehealthStaffAvailabilityExceptionsOutputSchema(Schema):
+    exceptions = fields.Nested(TelehealthStaffAvailabilityExceptionsSchema(many=True), missing=[])
+    conflicts = fields.Nested(TelehealthBookingsSchema(many=True), missing=[])
+        
+class TelehealthStaffAvailabilityExceptionsDeleteSchema(Schema):
+    exception_id = fields.Integer()
  
 class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -193,7 +226,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at')
         dump_only = ('idx', 'user_id', 'location_name')
     
-    duration = fields.Integer(missing=30)
+    duration = fields.Integer(missing=TELEHEALTH_BOOKING_DURATION)
     medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
     location_name = fields.String()
@@ -214,6 +247,8 @@ class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
         model = TelehealthBookingDetails
         exclude = ('created_at', 'updated_at')
         include_fk = True
+
+    visit_reason = fields.String()
 
 
 class TelehealthChatRoomAccessSchema(Schema):

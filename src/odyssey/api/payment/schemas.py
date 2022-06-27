@@ -10,7 +10,8 @@ from odyssey.utils.base.schemas import BaseSchema
 class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PaymentMethods
-        dump_only = ('created_at', 'updated_at', 'idx', 'payment_id', 'payment_type', 'number')
+        dump_only = ('idx', 'payment_id', 'payment_type', 'number')
+        exclude = ('created_at', 'updated_at')
 
     token = fields.String(load_only=True, required=True)
     expiration = fields.String(required=True)
@@ -36,12 +37,24 @@ class PaymentStatusOutputSchema(Schema):
 class PaymentHistorySchema(BaseSchema):
     class Meta:
         model = PaymentHistory
+        exclude = ('created_at', 'updated_at' )
+
 
     transaction_amount = fields.String()
+    transaction_descriptor = fields.String()
+    transaction_date = fields.DateTime()
+    transaction_updated = fields.DateTime()
+    currency = fields.String()
+    payment_method = fields.Nested(PaymentMethodsSchema)
 
     @post_load
     def make_object(self, data, **kwargs):
         return PaymentHistory(**data)
+
+class TransactionHistorySchema(Schema):
+    items = fields.Nested(PaymentHistorySchema(many=True))
+    total_items = fields.Integer()
+
 
 class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

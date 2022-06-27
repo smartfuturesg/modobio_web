@@ -4,7 +4,7 @@ type Mutation {
 		date: AWSDate!,
 		wearable: WearableDevice!,
 		data: AWSJSON!
-	): Int
+	): WearablesData
 
 	insert_WearablesDataList(
         items: [in_WearablesData!]!

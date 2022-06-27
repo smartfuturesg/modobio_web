@@ -70,11 +70,14 @@ from odyssey.utils.constants import (
     ALLOWED_IMAGE_TYPES,
     IMAGE_MAX_SIZE,
     IMAGE_DIMENSIONS,
-    DEV_EMAIL_DOMAINS)
+    DEV_EMAIL_DOMAINS,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID)
 from odyssey.utils.message import send_email, email_domain_blacklisted
 from odyssey.utils.misc import (
     check_client_existence, 
-    check_drink_existence
+    check_drink_existence,
+    create_notification
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.pdf import to_pdf, merge_pdfs
@@ -103,6 +106,7 @@ from odyssey.api.client.schemas import(
     ClientWeightSchema,
     ClientWaistSizeSchema,
     ClientTokenRequestSchema,
+    ClientCloseAccountSchema,
     ClinicalCareTeamAuthorizationNestedSchema,
     ClinicalCareTeamMemberOfSchema,
     SignAndDateSchema,
@@ -1014,6 +1018,7 @@ class ClientToken(BaseResource):
         # deletion limit, the account will be reopened and not deleted.
         if user_login.client_account_closed:
             user_login.client_account_closed = None
+            user_login.client_account_closed_reason = None
 
         db.session.commit()
 
@@ -1041,6 +1046,7 @@ class ClientCloseAccountEndpoint(BaseResource):
     """ Close client account. """
 
     @token_auth.login_required(user_type=('client',))
+    @accepts(schema=ClientCloseAccountSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self):
         """ Close client portion of an account.
@@ -1053,6 +1059,7 @@ class ClientCloseAccountEndpoint(BaseResource):
         """
         user, user_login = token_auth.current_user()
         user_login.client_account_closed = datetime.now()
+        user_login.client_account_closed_reason = request.parsed_obj['reason']
         db.session.commit()
         UserLogoutApi().post()
 
@@ -1192,12 +1199,8 @@ class ClinicalCareTeamMembers(BaseResource):
 
             if staff_profile:
                 membersince = staff_profile.membersince
-
-                for pic in staff_profile.profile_pictures:
-                    if pic.width == 64:
-                        fd = FileDownload(staff_profile.user_id)
-                        profile_pic = fd.url(pic.image_path)
-                        break
+                profile_pic = get_profile_pictures(staff_profile.user_id, True)
+                        
 
                 staff_roles = (db.session.execute(
                     select(StaffRoles.role)
@@ -1219,12 +1222,7 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 if client_profile:
                     membersince = client_profile.membersince
-
-                    for pic in client_profile.profile_pictures:
-                        if pic.width == 64:
-                            fd = FileDownload(client_profile.user_id)
-                            profile_pic = fd.url(pic.image_path)
-                            break
+                    profile_pic = get_profile_pictures(client_profile.user_id, False)
 
             #bring up the authorizations this care team member has for the client
             team_member_authorizations = db.session.execute(
@@ -1341,12 +1339,7 @@ class ClinicalCareTeamMembers(BaseResource):
 
             if staff_profile:
                 membersince = staff_profile.membersince
-
-                for pic in staff_profile.profile_pictures:
-                    if pic.width == 64:
-                        fd = FileDownload(staff_profile.user_id)
-                        profile_pic = fd.url(pic.image_path)
-                        break
+                profile_pic = get_profile_pictures(staff_profile.user_id, True)
 
                 staff_roles = (db.session.execute(
                     select(StaffRoles.role)
@@ -1368,12 +1361,7 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 if client_profile:
                     membersince = client_profile.membersince
-
-                    for pic in client_profile.profile_pictures:
-                        if pic.width == 64:
-                            fd = FileDownload(client_profile.user_id)
-                            profile_pic = fd.url(pic.image_path)
-                            break
+                    profile_pic = get_profile_pictures(client_profile.user_id, False)
 
             #bring up the authorizations this care team member has for the client
             team_member_authorizations = (db.session.execute(
@@ -1539,21 +1527,9 @@ class UserClinicalCareTeamApi(BaseResource):
                     ClientClinicalCareTeamAuthorizations.user_id == client.user_id,
                     ClientClinicalCareTeamAuthorizations.resource_id == LookupClinicalCareTeamResources.resource_id)
                 .all())
-
-            profile_pic_path = (db.session.execute(
-                select(
-                    UserProfilePictures.image_path)
-                .where(
-                    UserProfilePictures.client_user_id == client_user.user_id,
-                    UserProfilePictures.width == 64))
-                .scalars()
-                .one_or_none())
-
-            profile_pic = None
-            if profile_pic_path:
-                fd = FileDownload(client_user.user_id)
-                profile_pic = fd.url(profile_pic_path)
-
+            
+            profile_pic = get_profile_pictures(client_user.user_id, False)
+            
             res.append({
                 'client_user_id': client_user.user_id,
                 'client_name': ' '.join(
@@ -1653,6 +1629,19 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
                 authorization.user_id = user_id
                 authorization.status = status
+                if status == 'pending':
+                    #if this is another user requesting data access, create a notification for the client
+                    resource_name = LookupClinicalCareTeamResources.query.filter_by(resource_id=authorization.resource_id).one_or_none().display_name
+                    create_notification(
+                        user_id,
+                        NOTIFICATION_SEVERITY_TO_ID.get('Low'),
+                        NOTIFICATION_TYPE_TO_ID.get('Health'),
+                        f"{current_user.firstname} {current_user.lastname} has requested access " + \
+                            f"to your {resource_name} data",
+                        f"Would you like to grant {current_user.firstname} {current_user.lastname} " + \
+                            f"access to your {resource_name} data?",
+                        'Client'
+                    )
                 db.session.add(authorization)
             else:
                 db.session.rollback()
@@ -1838,10 +1827,6 @@ class ClientMobileSettingsApi(BaseResource):
 
         if request.parsed_obj['notification_type_ids']:
             ntypes = set(request.parsed_obj['notification_type_ids'])
-        else:
-            # TODO: else-branch deprecated
-            ntype_ids = request.parsed_obj['push_notification_type_ids']
-            ntypes = set((n.notification_type_id for n in ntype_ids))
 
         lu_ntypes = set(
             db.session.execute(
@@ -1871,7 +1856,7 @@ class ClientMobileSettingsApi(BaseResource):
         gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
         # TODO: push_notification_types deprecated
-        push_notification_types = ClientNotificationSettings.query.filter_by(user_id=user_id).all()
+        #notification_types = ClientNotificationSettings.query.filter_by(user_id=user_id).all()
 
         notification_types = (
             db.session.execute(
@@ -1883,7 +1868,6 @@ class ClientMobileSettingsApi(BaseResource):
 
         return {
             'general_settings': gen_settings,
-            'push_notification_type_ids': push_notification_types,
             'notification_type_ids': sorted(notification_types)}
 
     @token_auth.login_required(user_type=('client',))
@@ -1903,10 +1887,6 @@ class ClientMobileSettingsApi(BaseResource):
 
         if request.parsed_obj['notification_type_ids']:
             ntypes = set(request.parsed_obj['notification_type_ids'])
-        else:
-            # TODO: else-branch deprecated
-            ntype_ids = request.parsed_obj['push_notification_type_ids']
-            ntypes = set((n.notification_type_id for n in ntype_ids))
 
         lu_ntypes = set(
             db.session.execute(

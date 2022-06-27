@@ -1,4 +1,4 @@
-notification_type = 'Account Management'
+notification_type = 'Account'
 
 notification_update = {
     'read': True,

@@ -165,13 +165,13 @@ class DoseSpotEnrollmentStatus(BaseResource):
 
 @ns.route('/select/pharmacies/<int:user_id>/')
 @ns.doc(params = {'zipcode': '(optional) overrides user\'s zipcode', 
-            'state_id': '(optional) overrides user\'s state'})
+            'territory_id': '(optional) overrides user\'s state'})
 class DoseSpotSelectPharmacies(BaseResource):
     @token_auth.login_required(user_type=('client',))
     def get(self,user_id):
         """
         Queries DoseSpot for a list of available pharmacies. By default this endpoint uses the client's address
-        to locate pharmacies. Optionally a user may submit a zipcode and state_id 
+        to locate pharmacies. Optionally a user may submit a zipcode and territory_id 
 
         Parameters
         ----------
@@ -181,8 +181,8 @@ class DoseSpotSelectPharmacies(BaseResource):
         zipcode : str
             Optional zipcode for pharmacy search
 
-        state_id : int
-            Optional state_id from LookupTerritoriesOfOperations
+        territory_id : int
+            Optional territory_id from LookupTerritoriesOfOperations
 
         Returns
         -------
@@ -190,17 +190,17 @@ class DoseSpotSelectPharmacies(BaseResource):
             list of pharmacies
         """
         zipcode = request.args.get('zipcode', None)
-        state_id = request.args.get('state_id', None)
+        territory_id = request.args.get('territory_id', None)
 
-        # if no zopcode not state specified, use client's address detail by default
-        if not zipcode and not state_id:
+        # if no zipcode not state specified, use client's address detail by default
+        if not zipcode and not territory_id:
             user = User.query.filter_by(user_id = user_id).one_or_none()
             zipcode = user.client_info.zipcode
-            state_id = user.client_info.territory_id
+            territory_id = user.client_info.territory_id
         
         ds = DoseSpot()
 
-        pharmacies = ds.pharmacy_search(state_id = state_id, zipcode = zipcode)
+        pharmacies = ds.pharmacy_search(territory_id = territory_id, zipcode = zipcode)
         
         return pharmacies['Items']
 

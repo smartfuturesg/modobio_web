@@ -13,6 +13,8 @@ from sqlalchemy import select
 from odyssey import db
 from odyssey.api.notifications.models import Notifications
 from odyssey.utils.constants import ALPHANUMERIC
+from odyssey.utils.constants import NOTIFICATION_TYPE_TO_ID, NOTIFICATION_SEVERITY_TO_ID
+from odyssey.utils.misc import create_notification
 from odyssey.api.dosespot.models import DoseSpotPatientID, DoseSpotPractitionerID
 from odyssey.api.dosespot.schemas import (
     DoseSpotCreatePractitionerSchema,
@@ -224,26 +226,24 @@ class DoseSpot:
             if key != 'Result':
                 notification_count += res_json[key]
 
-        ds_notification_type = 17 # DoseSpot Notification ID
         url = self._generate_sso()
         # create new or update dosespot notification entry
         # this is done so we do not repeat the same dosespot notification over again, 
         # instead we update the sso url and the notification count
         if notification_count > 0:
-            ds_notification = Notifications.query.filter_by(user_id=user_id, notification_type_id=ds_notification_type).one_or_none()
+            ds_notification = Notifications.query.filter_by(user_id=user_id, notification_type_id=NOTIFICATION_TYPE_TO_ID.get('DoseSpot')).one_or_none()
             if not ds_notification:
-                ds_notification = Notifications(
-                    notification_type_id = ds_notification_type, # DoseSpot Notification
-                    user_id=user_id,
-                    title=f"You have {notification_count} DoseSpot Notifications.",
-                    content="Click this notification to be brought to the DoseSpot platform to view notifications.",
-                    severity_id=1,
-                    time_to_live = 0 
+                create_notification(
+                    user_id,
+                    NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
+                    NOTIFICATION_TYPE_TO_ID.get('DoseSpot'), # DoseSpot Notification
+                    f"You have {notification_count} DoseSpot Notifications.",
+                    "Click this notification to be brought to the DoseSpot platform to view notifications.",
+                    "Provider"
                 )
-                db.session.add(ds_notification)
             else:
                 ds_notification.update({'title': f"You have {notification_count} DoseSpot Notifications."})
-
+                
             db.session.commit()
 
         return url
@@ -531,7 +531,7 @@ class DoseSpot:
 
         return status
 
-    def pharmacy_search(self, zipcode = None, state_id = None):
+    def pharmacy_search(self, zipcode = None, territory_id = None):
         """
         Returns the pharmacies near the provied address details
 
@@ -540,7 +540,7 @@ class DoseSpot:
         zipcode : str
             Zipcode where client is located
 
-        state_id: int
+        territory_id: int
             Numerical ID of the state.
 
         Returns
@@ -554,7 +554,7 @@ class DoseSpot:
 
         headers = {'Authorization': f'Bearer {access_token}'}
             
-        state = LookupTerritoriesOfOperations.query.filter_by(idx=state_id).one_or_none()
+        state = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id).one_or_none()
 
         if zipcode and state:
             params = {'zip': zipcode ,'state' : state.sub_territory_abbreviation}

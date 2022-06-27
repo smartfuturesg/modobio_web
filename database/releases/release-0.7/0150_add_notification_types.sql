@@ -3,22 +3,22 @@ delete from "LookupNotifications"
 alter sequence "LookupNotifications_notification_type_id_seq"
   restart with 1;
 
-INSERT INTO "LookupNotifications" ("notification_type","icon","background_color","symbol_color") 
+INSERT INTO "LookupNotifications" ("notification_type","icon") 
 VALUES
-('Account Management', 'person.svg', 'gray', 'white'),
-('System', 'build.svg', 'orange', 'white'),
-('Scheduling', 'clock.svg', 'navy', 'white'),
-('Action Required', 'siren.svg', 'white', 'original'),
-('Payments', 'money.svg', 'green', 'white'),
-('Profile', 'client-profile.svg', 'white', 'black'),
-('Client Services', 'client-services.svg', 'white', 'green'),
-('Medical', 'doctor.svg', 'white', 'red'),
-('Nutrition', 'nutritionist.svg', 'white', 'orange'),
-('Training', 'physical-training.svg', 'white', 'purple'),
-('Physiotherapy', 'physiotherapy.svg', 'white', 'lightBlue'),
-('Data Science', 'analytics.svg', 'white', 'navy'),
-('Community', 'people.svg', 'pink', 'red'),
-('Clinical Care Team', 'family.svg', 'white', 'pink'),
-('Staff Administration', 'social-history.svg', 'black', 'white'),
-('System Administration', 'setting.svg', 'black', 'white'),
-('DoseSpot', 'doctor.svg', 'white', 'red');
+('Account Management', 'person.svg'),
+('System', 'build.svg'),
+('Scheduling', 'clock.svg'),
+('Action Required', 'siren.svg'),
+('Payments', 'money.svg'),
+('Profile', 'client-profile.svg'),
+('Client Services', 'client-services.svg'),
+('Medical', 'doctor.svg'),
+('Nutrition', 'nutritionist.svg'),
+('Training', 'physical-training.svg'),
+('Physiotherapy', 'physiotherapy.svg'),
+('Data Science', 'analytics.svg'),
+('Community', 'people.svg'),
+('Clinical Care Team', 'family.svg'),
+('Staff Administration', 'social-history.svg'),
+('System Administration', 'setting.svg'),
+('DoseSpot', 'doctor.svg');

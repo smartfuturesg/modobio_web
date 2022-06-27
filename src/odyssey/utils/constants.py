@@ -441,6 +441,7 @@ fit under.
 :type: tuple
 """
 ACCESS_ROLES = (
+    'beautician',
     'chef',
     'data_scientist',
     'dietitian',
@@ -450,7 +451,6 @@ ACCESS_ROLES = (
     'physical_therapist',
     'therapist',
     'trainer',
-    'beautician',
     'client_services',
     'community_manager',
     'staff_admin',
@@ -860,10 +860,7 @@ Email verifications token lifetime in hours.
 :type: int
 """
 
-#base url in prod would be www.modobio.com/, left blank to accomodate to different app branches (dev,prod,demo...)
-REGISTRATION_PORTAL_URL = "www.modobio.com/user/registration-portal?portal_id={}"
-
-#base url in prod would be www.modobio.com/, left blank to accomodate to different app branches (dev,prod,demo...)
+#base url in prod would be www.modobio.com/, left blank to accommodate to different app branches (dev,prod,demo...)
 #{FRONT_END_DOMAIN_NAME: modobio.com, dev...}, {reset token}
 PASSWORD_RESET_URL = "{}/resetPassword?reset_token={}"
 
@@ -923,14 +920,14 @@ for email address domains in this list, a real email will be send even in DEV en
 """
 
 # bookings must be made at least this many hours in advance
-TELEHEALTH_BOOKING_LEAD_TIME_HRS = 2
-
-# allow a pre and post buffer for each telehealth appointment
-# 1 because one index is the same as 5 minutes
-TELEHEALTH_START_END_BUFFER = 0
+TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0 if any((config.TESTING, config.DEV)) else 2
 
 # clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
 TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 336
+
+
+# Default telehealth booking duration in minutes
+TELEHEALTH_BOOKING_DURATION = 30
 
 MODOBIO_ADDRESS = {
     "firstname": "Modo",
@@ -972,3 +969,36 @@ FERTILITY_STATUSES = {
 
 
 APPLE_APPSTORE_BASE_URLS = ('https://api.storekit.itunes.apple.com', 'https://api.storekit-sandbox.itunes.apple.com')
+SCHEDULED_MAINTENANCE_PADDING = 30
+
+NOTIFICATION_TYPE_TO_ID = {
+    'Account': 1,
+    'System Maintenance': 2,
+    'Scheduling': 3,
+    'Action Required': 4,
+    'Payments': 5,
+    'Profile': 6,
+    'Client Services': 7,
+    'Medical Doctor': 8,
+    'Dietitian': 9,
+    'Trainer': 10,
+    'Physical Therapist': 11,
+    'Data Science': 12,
+    'Community': 13,
+    'Team': 14,
+    'Staff': 15,
+    'System Administration': 16,
+    'DoseSpot': 17,
+    'Chef': 18,
+    'Therapist': 19,
+    'Health': 20
+}
+
+NOTIFICATION_SEVERITY_TO_ID = {
+    'Highest': 1,
+    'High': 2,
+    'Medium': 3,
+    'Low': 4,
+    'Lowest': 5
+}
+

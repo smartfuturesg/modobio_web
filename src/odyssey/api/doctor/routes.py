@@ -33,11 +33,11 @@ from odyssey.api.doctor.models import (
 )
 from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserProfilePictures
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import check_medical_condition_existence
-from odyssey.utils.files import FileDownload, ImageUpload
-from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES
+from odyssey.utils.files import FileDownload, FileUpload, ImageUpload, get_profile_pictures
+from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
     CheckBoxArrayDeleteSchema,
@@ -52,20 +52,21 @@ from odyssey.api.doctor.schemas import (
     MedicalGeneralInfoInputSchema,
     MedicalAllergiesInfoInputSchema,
     MedicalMedicationsInfoInputSchema,
-    MedicalHistorySchema, 
-    MedicalPhysicalExamSchema, 
+    MedicalHistorySchema,
+    MedicalPhysicalExamSchema,
     MedicalInstitutionsSchema,
     MedicalBloodTestsInputSchema,
     MedicalBloodTestSchema,
     MedicalBloodTestResultsOutputSchema,
     MedicalBloodTestResultTypesSchema,
     MedicalImagingSchema,
-    MedicalExternalMREntrySchema, 
+    MedicalExternalMREntrySchema,
     MedicalExternalMRSchema,
     MedicalLookUpSTDOutputSchema,
     MedicalLookUpBloodPressureRangesOutputSchema,
     MedicalSocialHistoryOutputSchema,
-    MedicalSurgeriesSchema
+    MedicalSurgeriesSchema,
+    MedicalImagingOutputSchema,
 )
 from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
 from odyssey.api.staff.models import StaffRoles
@@ -1001,21 +1002,26 @@ class MedicalFamilyHist(BaseResource):
         db.session.commit()
         return payload
 
+
 @ns.route('/images/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalImagingEndpoint(BaseResource):
     __check_resource__ = False
     
     @token_auth.login_required(resources=('diagnostic_imaging',))
+    @responds(schema=MedicalImagingOutputSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Get all medical images for this user.
 
         Images are returned as URLs to the actual image on AWS S3.
+        Along with the first name, last name, and profile picture as urls of the reporters of images
+        Related by user id
         """
         self.check_user(user_id, user_type='client')
 
         med_images = (db.session.query(
-                MedicalImaging, User.firstname, User.lastname)
+                # Basically a right join, we still get all images for user but now also name and id of reporter
+                MedicalImaging, User.firstname, User.lastname, User.user_id)
             .filter(
                 MedicalImaging.user_id == user_id,
                 MedicalImaging.reporter_id == User.user_id)
@@ -1024,22 +1030,34 @@ class MedicalImagingEndpoint(BaseResource):
         fd = FileDownload(user_id)
 
         images = []
+        reporter_infos = {}
         for row in med_images:
-            med_image, firstname, lastname = row
-            med_image.reporter_firstname = firstname
-            med_image.reporter_lastname = lastname
+            med_image, firstname, lastname, reporter_id = row
             images.append(med_image)
+
+            # still need to check if already added reporter info to not call get_profile_pictures repeatedly
+            if reporter_id not in reporter_infos.keys():
+                their_pic = get_profile_pictures(reporter_id, True if reporter_id != user_id else False)
+                reporter_infos[reporter_id] = {
+                    'firstname': firstname,
+                    'lastname': lastname,
+                    'profile_pictures': their_pic,
+                }
 
         # Serialize here, because we want to replace image_path with URL,
         # but only in the response, not store it in the DB.
-        images = MedicalImagingSchema(many=True).dump(images)
+        images = [item.__dict__ for item in images]
         for img in images:
-            if 'image_path' in img and img['image_path']:
+            if img['image_path']:
                 img['image_path'] = fd.url(img['image_path'])
 
-        return images
+        return {
+            'reporter_infos': reporter_infos,
+            'images': images,
+            'total_images': len(images)
+        }
 
-    #Unable to use @accepts because the input files come in a form-data, not json.
+    # Unable to use @accepts because the input files come in a form-data, not json.
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('diagnostic_imaging',))
     @responds(status_code=201, api=ns)
     def post(self, user_id):
@@ -1069,6 +1087,7 @@ class MedicalImagingEndpoint(BaseResource):
 
             img = ImageUpload(img.stream, user_id, prefix='medical_images')
             img.allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
+            img.max_size = MEDICAL_IMAGE_MAX_SIZE
             img.validate()
             img.save(f'{mi_data.image_type}_{mi_data.image_date}_{hex_token}_{i}.{img.extension}')
             mi_data.image_path = img.filename
@@ -1170,18 +1189,33 @@ class MedBloodTest(BaseResource):
                 sex_ranges = age_ranges.filter(
                     or_(LookupBloodTestRanges.biological_sex_male == client.biological_sex_male,
                         LookupBloodTestRanges.biological_sex_male == None))
-                
+
                 #if biological sex filtering narrowed results, record client sex as a determining factor
                 if age_ranges.count() > sex_ranges.count():
                     result['biological_sex_male'] = client.biological_sex_male
 
                 #filter results by menstrual cycle if client bioligocal sex is female
                 if not client.biological_sex_male:
-                    client_cycle = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
+                    client_cycle_row = ClientFertility.query.filter_by(user_id=user_id).order_by(ClientFertility.created_at.desc()).first()
+                    if client_cycle_row == None or client_cycle_row.status == 'unknown':
+                        #default if client has not submitted any fertility information
+                        client_cycle = 'follicular phase'
+                    else:
+                        client_cycle = client_cycle_row.status
+                        
                     relevant_cycles = []
-                    for cycle in sex_ranges:
+                    for cycle in sex_ranges.all():
                         if cycle.menstrual_cycle:
                             relevant_cycles.append(cycle.menstrual_cycle)
+                            
+                    #some tests only care if the client is 'pregnant', 'not pregnant', or 'postmenopausal'
+                    if 'pregnant' in relevant_cycles:
+                        if client_cycle_row == None:
+                            client_cycle = 'not pregnant'
+                        else:
+                            if client_cycle_row.status != 'postmenopausal':
+                                client_cycle = client_cycle_row.pregnant
+                            
                     if client_cycle in relevant_cycles:
                         cycle_ranges = sex_ranges.filter_by(menstrual_cycle=client_cycle)
                     else:
@@ -1190,14 +1224,15 @@ class MedBloodTest(BaseResource):
                         cycle_ranges = sex_ranges.filter_by(menstrual_cycle=None)
                 else:
                     cycle_ranges = sex_ranges
-                        
+
                 #if menstrual cycle filtering narrowed results, record client cycle as a determining factor
                 if sex_ranges.count() > cycle_ranges.count():
                     result['menstrual_cycle'] = client_cycle
 
                 client_races = {}
                 for id, name in db.session.query(ClientRaceAndEthnicity.race_id, LookupRaces.race_name) \
-                    .filter(ClientRaceAndEthnicity.race_id == LookupRaces.race_id).all():
+                    .filter(ClientRaceAndEthnicity.race_id == LookupRaces.race_id,
+                            ClientRaceAndEthnicity.user_id == user_id).all():
                     client_races[id] = name
         
                 #prune remaining ranges by races relevant to the client
@@ -1311,7 +1346,69 @@ class MedBloodTest(BaseResource):
             db.session.delete(result)
             db.session.commit()
         else:
-            raise BadRequest("test_id must be an integer.")     
+            raise BadRequest("test_id must be an integer.")
+        
+@ns.route('/bloodtest/image/<int:user_id>/')
+@ns.doc(params={'test_id': 'Test ID number'})
+class MedBloodTestImage(BaseResource):
+    
+    @token_auth.login_required(staff_role=('medical_doctor',), resources=('blood_chemistry',))
+    @responds(schema=MedicalBloodTestSchema, api=ns, status_code=200)
+    def patch(self, user_id):
+        """
+        This resource can be used to add an image to submitted blood test results.
+
+        Args:
+            image ([file]): image file to be added to test results (only .pdf files are supported, max size 20MB)
+        """
+        if not ('image' in request.files and request.files['image']):  
+            raise BadRequest('No file selected.')
+        
+        test_id = request.args.get('test_id', type=int)
+        test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
+        if not test:
+            raise BadRequest(f'No test exists with test id {test_id} for the user with user_id {user_id}.')
+
+        prev_image = test.image_path
+
+        # add file to S3
+        hex_token = secrets.token_hex(4)
+        img = FileUpload(request.files['image'].stream, test.user_id, prefix='bloodtest')
+        img.allowed_types = ('pdf',)
+        img.max_size = MEDICAL_IMAGE_MAX_SIZE
+        img.validate()
+        img.save(f'test{test.test_id:05d}_{hex_token}.{img.extension}')
+        
+        # store file path in db
+        test.image_path = img.filename
+        db.session.commit()
+
+        # Upload successful, delete previous
+        if prev_image:
+            fd = FileDownload(test.user_id)
+            fd.delete(prev_image)
+
+
+        reporter = User.query.filter_by(user_id=test.reporter_id).one_or_none()
+
+        if test.reporter_id != user_id:
+            reporter_pic = get_profile_pictures(test.reporter_id, True)            
+        else:
+            reporter_pic = get_profile_pictures(user_id, False)
+        
+        res = {
+            'test_id': test.test_id,
+            'user_id': test.user_id,
+            'date': test.date,
+            'notes': test.notes,
+            'reporter_firstname': reporter.firstname,
+            'reporter_lastname': reporter.lastname,
+            'reporter_id': test.reporter_id,
+            'reporter_profile_pictures': reporter_pic,
+            'image': img.url() 
+        }
+        
+        return res
 
 @ns.route('/bloodtest/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
@@ -1346,9 +1443,25 @@ class MedBloodTestAll(BaseResource):
 
         # prepare response items with reporter name from User table
         response = []
+        fd = FileDownload(user_id)
+            
         for test in blood_tests:
+            if test[0].image_path:
+                image_path = fd.url(test[0].image_path)
+            else:
+                image_path = None
+            
+            if test[0].reporter_id != user_id:
+                reporter_pic = get_profile_pictures(test[0].reporter_id, True)            
+            else:
+                reporter_pic = get_profile_pictures(user_id, False)
+                    
             data = test[0].__dict__
-            data.update({'reporter_firstname': test[1], 'reporter_lastname': test[2]})
+            data.update(
+                {'reporter_firstname': test[1],
+                 'reporter_lastname': test[2],
+                 'reporter_profile_pictures': reporter_pic,
+                 'image': image_path})
             response.append(data)
         payload = {}
         payload['items'] = response
@@ -1391,13 +1504,27 @@ class MedBloodTestResults(BaseResource):
         if not results:
             return
 
+        fd = FileDownload(results[0][0].user_id)
+        if results[0][0].image_path:
+            image_path = fd.url(results[0][0].image_path)
+        else:
+            image_path = None
+            
+            
+        if results[0][0].reporter_id != results[0][0].user_id:
+            reporter_pic = get_profile_pictures(results[0][0].reporter_id, True)            
+        else:
+            reporter_pic = get_profile_pictures(results[0][0].user_id, False)
+                
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,
                           'notes' : results[0][0].notes,
+                          'image': image_path,
                           'reporter_id': results[0][0].reporter_id,
                           'reporter_firstname': results[0][3].firstname,
                           'reporter_lastname': results[0][3].lastname,
+                          'reporter_profile_pictures': reporter_pic,
                           'results': []} 
         
         # loop through results in order to nest results in their respective test
@@ -1449,11 +1576,12 @@ class AllMedBloodTestResults(BaseResource):
                             MedicalBloodTests.reporter_id == User.user_id
                         ).all()
 
-        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname) for x in results])
-        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname, x[0].image_path) for x in results])
+        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'image': x[4], 'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
+        fd = FileDownload(user_id)
         for test_info, test_result, result_type, _ in results:
             for test in nested_results:
                 # add rest result to appropriate test entry instance (test_id)
@@ -1472,6 +1600,18 @@ class AllMedBloodTestResults(BaseResource):
                     if not test.get('date', False):
                         test['date'] = test_info.date
                         test['notes'] = test_info.notes
+                        # get presigned s3 link if present
+                        image_path = test.get('image')
+                        if image_path:
+                            test['image'] = fd.url(image_path)
+
+                #retrieve reporter profile pic
+                if test['reporter_id'] != user_id:
+                    reporter_pic = get_profile_pictures(test['reporter_id'], True)            
+                else:
+                    reporter_pic = get_profile_pictures(user_id, False)
+                test['reporter_profile_pictures'] = reporter_pic
+                                
         payload = {}
         payload['items'] = nested_results
         payload['tests'] = len(test_ids)

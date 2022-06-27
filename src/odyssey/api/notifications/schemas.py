@@ -22,7 +22,7 @@ class NotificationSchema(ma.SQLAlchemyAutoSchema):
         model = Notifications
         include_fk = True
         load_instance = True
-        exclude = ('created_at', 'updated_at')
+        exclude = ('updated_at',)
         dump_only = ('notification_id', 'user_id')
 
     # Remove these if not needed by frontend. I don't think they use this information at all.

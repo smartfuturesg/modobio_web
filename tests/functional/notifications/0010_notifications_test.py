@@ -5,7 +5,7 @@ from odyssey.api.notifications.models import Notifications
 
 from .data import notification_type, notification_update
 
-def test_notifications_get(test_client):
+def test_notifications_get_by_client_id(test_client):
         notification = {
             'user_id': test_client.client_id,
             'title': 'A nice title',
@@ -13,7 +13,8 @@ def test_notifications_get(test_client):
             'severity_id': 3,
             'read': False,
             'deleted': False,
-            'notification_type_id': 1
+            'notification_type_id': 1,
+            'persona_type': 'Client'
         }
     
         obj = Notifications(**notification)
@@ -36,6 +37,19 @@ def test_notifications_get(test_client):
         assert notif.get('read') == notification['read']
         assert notif.get('deleted') == notification['deleted']
         assert notif.get('notification_type') == notification_type
+        assert notif.get('persona_type') == notification['persona_type']
+
+def test_notifications_get_by_notification_id(test_client):
+    _notification = Notifications.query.filter_by(user_id = test_client.client_id).first()
+
+    response = test_client.get(
+            f'/notifications/test/{_notification.notification_id}/',
+            headers=test_client.client_auth_header,
+            content_type='application/json')
+
+    assert response.status_code == 200
+    assert type(response.json) == dict
+
 
 def test_notifications_put(test_client):
         _notification = Notifications.query.filter_by(user_id = test_client.client_id).first()
@@ -62,7 +76,20 @@ def test_notifications_put(test_client):
         assert notif.get('title') == 'A nice title'
         assert notif.get('content') == 'You have Spam!'
         assert notif.get('notification_type') == notification_type
+        assert notif.get('persona_type') == 'Client'
 
-        # CHanged
+        # Changed
         assert notif.get('read') == notification_update['read']
         assert notif.get('deleted') == notification_update['deleted']
+
+
+def test_notifications_delete(test_client):
+    _notification = Notifications.query.filter_by(user_id = test_client.client_id).first()
+
+    response = test_client.delete(
+            f'/notifications/test/{_notification.notification_id}/',
+            headers=test_client.client_auth_header,
+            content_type='application/json')
+
+    assert response.status_code == 204
+

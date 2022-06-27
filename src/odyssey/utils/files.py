@@ -713,23 +713,22 @@ class ImageUpload(FileUpload):
 class MedicalImageUpload(ImageUpload, FileUpload):
     """ Utilities to upload medical images to an AWS S3 bucket.
 
-    This class is similar to :class:`.ImageUpload` except that it includes PDF
-    files and DICOM images as allowed images types. The maximum file size is
-    also larger that regular images.
+    This class is similar to :class:`.ImageUpload` except that it includes
+    PDF files and DICOM images as allowed images types. The maximum file
+    size is also larger that regular images.
     """
     max_size = MEDICAL_IMAGE_MAX_SIZE
     allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
 
-    def __init__(self, file, user_id: int, prefix: str = ''):
+    def __init__(self, file, user_id: int, prefix: str=''):
         """ Instantiate the :class:`.MedicalImageUpload` class.
 
         .. see:: :meth:`.ImageUpload.__init__`
         """
         # Create set of matchers, unique and remove None.
-        matchers = {filetype.get_type(t) for t in ALLOWED_MEDICAL_IMAGE_TYPES}
-        matchers = matchers - {None}
+        matchers = {filetype.get_type(t) for t in ALLOWED_MEDICAL_IMAGE_TYPES} - {None}
 
-        ft = filetype.match(self.file, matchers=matchers)
+        ft = filetype.match(self.file, matchers=m)
         self.extension = ft.extension
         self.mime = ft.mime
 

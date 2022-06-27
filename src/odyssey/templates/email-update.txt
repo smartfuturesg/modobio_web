@@ -1,0 +1,14 @@
+{% extends "modo-bio-automated-email-template-body.txt" %}
+{% block body %}
+Hello {{ name }},
+
+We have received a request to change the email address associated with your Modo Bio account.
+
+If you did not request an email change we suggest that you change the password for your account via Settings (cog wheel) > Account Settings > Manage Account > Change Password.
+
+Email Verification
+
+If you did request an email change, we need to confirm your address for your Modo Bio account. Please visit {{ verification_link }} to verify your email address via a web link. You can also try the "Resend Email" option to generate a new link.
+
+Please check that this email was sent from verify@modobio.com
+{% endblock %}

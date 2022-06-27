@@ -1,11 +1,12 @@
 import logging
 import secrets
 
+from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 
 from odyssey.integrations.apple import AppStore
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from io import BytesIO
 from typing import Any, Dict
 from PIL import Image
@@ -20,13 +21,17 @@ from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupSubscriptions
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings
+from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
-from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
+from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
+from odyssey.utils.misc import create_notification
+
+# avoid circular imports by importing entire module
+import odyssey.integrations.instamed
 
 logger = logging.getLogger(__name__)
 
@@ -71,36 +76,40 @@ def upcoming_appointment_notification_2hr(booking_id):
         select(Notifications).
         where(Notifications.user_id == staff_user.user_id, 
               Notifications.expires == expires_at, 
-              Notifications.notification_type_id == 3)
+              Notifications.notification_type_id == NOTIFICATION_TYPE_TO_ID.get('Scheduling'))
         ).scalars().one_or_none()
     
     existing_client_notification = db.session.execute(
         select(Notifications).
         where(Notifications.user_id == client_user.user_id, 
               Notifications.expires == expires_at, 
-              Notifications.notification_type_id == 3)
+              Notifications.notification_type_id == NOTIFICATION_TYPE_TO_ID.get('Scheduling'))
         ).scalars().one_or_none()
     
     # create the staff and client notification entries
     if not existing_staff_notification:
-        staff_notification = Notifications(
-            user_id=booking.staff_user_id,
-            title="You have a telehealth appointment in 2 hours",
-            content=f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is in 2 hours. Please review your client's medical information before taking the call.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+
+        create_notification(
+            booking.staff_user_id, 
+            NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
+            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+            f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"Your telehealth appointment with {client_user.firstname+' '+client_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please review your client's medical information before taking the call.",
+            'Provider',
+            expires_at
         )
-        db.session.add(staff_notification)
     
     if not existing_client_notification:
-        client_notification = Notifications(
-            user_id=booking.client_user_id,
-            title="You have a telehealth appointment in 2 hours",
-            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is in 2 hours. Please ensure your medical information is up to date before taking the call.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
+
+        create_notification(
+            booking.client_user_id, 
+            NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
+            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+            f"You have a telehealth appointment at <datetime_utc>{start_dt}</datetime_utc>",
+            f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} is at <datetime_utc>{start_dt}</datetime_utc>. Please ensure your medical information is up to date before taking the call.",
+            'Client',
+            expires_at
         )
-        db.session.add(client_notification)
 
     db.session.commit()
 
@@ -192,136 +201,6 @@ def upcoming_appointment_care_team_permissions(booking_id):
 
     return
 
-@celery.task()
-def process_wheel_webhooks(webhook_payload: Dict[str, Any]):
-    """    
-    Update the database entry with acknowledgement that the task has been completed
-    """
-    # TODO: Perform the necessary action depending on the `event` field of the payload
-    # bring up the booking in the request
-    # if booking does not exist and env != production, skip
-    # note, dev mongo db is shared between devlopers, dev environment, and testing environment
-    booking = db.session.execute(select(TelehealthBookings
-            ).where(TelehealthBookings.external_booking_id == webhook_payload['consult_id'] )).scalars().one_or_none()
-    if not booking:
-        # possible the request came from another dev instance since our db is not persistent
-        if current_app.config['DEV'] or current_app.config['TESTING']:
-            mongo.db.wheel.find_one_and_update(
-            {"_id": ObjectId(webhook_payload['_id'])}, 
-            {"$set":{"modobio_meta.processed":False, "modobio_meta.acknowledged" : True}})
-            return
-        else:
-            # booking somehow was lost in the prod environment, not good
-            #TODO: log errors when logger is ready
-            return
-
-    ##
-    # Handle the webhook request depending on the event field in the payload
-    #
-    ##
-
-    # sent when clinician recieves notification of the consultation 2-24hrs inadvance. no action
-    if webhook_payload['event'] == 'consult.assigned':
-        pass
-
-    # consult.unassigned:  consult is canceled on wheel's end, must enact cancellation proceedure
-    # clinician.unavailable: the practitioner is no longer available for the booking. treat as a cancellation
-    # clinician.no_show: clinician does not enter booking within 10 minutes of their scheduled start time 
-    # consult.voided: Sent in rare occasions when wheel clinicians cannot complete the consultation 
-    elif webhook_payload['event'] in ('consult.unassigned',  'clinician.no_show', 'clinician.unavailable', 'consult.voided'):
-        
-        # update booking status to canceled
-        booking.status = 'Canceled'
-
-        # create an entry into the TelehealthBookingStatus table
-        status_history = TelehealthBookingStatus(
-                booking_id = booking.idx,
-                reporter_id = booking.staff_user_id,
-                reporter_role = 'Practitioner',
-                status = 'Canceled'
-            )
-        db.session.add(status_history)
-        
-        staff_user = db.session.execute(
-            select(User
-            ).where(User.user_id == booking.staff_user_id)).scalars().one_or_none()
-        
-        # add notification to client
-        expires_at = datetime.utcnow()+timedelta(days=2)
-        client_notification = Notifications(
-            user_id=booking.client_user_id,
-            title="Your telehealth appointment has been canceled",
-            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been canceled. Please reschedule.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
-        )
-
-        db.session.add(client_notification)
-
-        db.session.commit()
-
-    # the practitioner opened the deeplink to the booking and is now reviewing documents
-    elif webhook_payload['event'] == 'assignment.accepted':
-
-        # create an entry into the TelehealthBookingStatus table
-        status_history = TelehealthBookingStatus(
-                booking_id = booking.idx,
-                reporter_id = booking.staff_user_id,
-                reporter_role = 'Practitioner',
-                status = 'Document Review'
-            )
-        db.session.add(status_history)
-
-        # update booking status to canceled
-        booking.status = 'Document Review'
-
-        db.session.commit()
-    
-    # patient.no_show: patient did not enter booking within 10 minutes of their scheduled start time 
-    elif webhook_payload['event'] == 'patient.no_show':
-
-        # update booking status to completed
-        booking.status = 'Completed'
-
-        # create an entry into the TelehealthBookingStatus table
-        status_history = TelehealthBookingStatus(
-                booking_id = booking.idx,
-                reporter_id = booking.staff_user_id,
-                reporter_role = 'Client',
-                status = 'Completed'
-            )
-        db.session.add(status_history)
-        
-        staff_user = db.session.execute(
-            select(User
-            ).where(User.user_id == booking.staff_user_id)).scalars().one_or_none()
-            
-        # add notification to client
-        expires_at = datetime.utcnow()+timedelta(days=2)
-        client_notification = Notifications(
-            user_id=booking.client_user_id,
-            title="Your telehealth appointment has been completed",
-            content=f"Your telehealth appointment with {staff_user.firstname+' '+staff_user.lastname} has been completed.",
-            expires = expires_at,
-            notification_type_id = 3 #Scheduling
-        )
-        db.session.add(client_notification)
-
-        db.session.commit()
-    
-    # no event field recognized, should be logged. 
-    else:
-        return
-
-    # finally, set webhook entry to processed
-    if current_app.config['TESTING']:
-        return
-    else:
-        mongo.db.wheel.find_one_and_update(
-            {"_id": ObjectId(webhook_payload['_id'])}, 
-            {"$set":{"modobio_meta.processed":True, "modobio_meta.acknowledged" :True}})
-         
-    return
 
 @celery.task()
 def charge_telehealth_appointment(booking_id):
@@ -329,10 +208,10 @@ def charge_telehealth_appointment(booking_id):
     This task will go through the process of attemping to charge a user for a telehealth booking.
     If the payment is unsuccesful, the booking will be canceled.
     """
-    # TODO: Notify user of the canceled booking via email/notfication
+    # TODO: Notify user of the canceled booking via email? They are already notified via notification
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
-    Instamed().charge_user(booking)
+    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
     
 @celery.task()
 def cancel_noshow_appointment(booking_id):
@@ -342,7 +221,7 @@ def cancel_noshow_appointment(booking_id):
     """
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
     
-    cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+    odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):
@@ -372,46 +251,55 @@ def store_telehealth_transcript(booking_id: int):
         ).where(TelehealthBookings.idx == booking_id)).scalars().one_or_none()
     
     transcript = twilio.get_booking_transcript(booking.idx)
-
-    # if there is media present in the transcript, store it in an s3 bucket
-    hex_token = secrets.token_hex(4)
-    for message_id, message in enumerate(transcript):
-        if message['media']:
-            for media_id, media in enumerate(message['media']):
-                # download media from twilio 
-                media_content = twilio.get_media(media['sid'])
-
-                fu = FileUpload(
-                    BytesIO(media_content),
-                    booking.client_user_id,
-                    prefix=f'telehealth/booking_{booking_id}/message_{message_id}/')
-                fu.validate()
-                fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
-
-                media['s3_path'] = fu.filename
-                transcript[message_id]['media'][media_id] = media
-
-    payload = {
-        'created_at': datetime.utcnow().isoformat(),
-        'booking_id': booking.idx,
-        'transcript': transcript
-    }
-    # insert transcript into mongo db under the telehealth_transcripts collection
-    if current_app.config['MONGO_URI']:
-        _id = mongo.db.telehealth_transcripts.insert(payload)
-        logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
-    else:
-        logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')
-        _id = None  
-
-    # delete the conversation from twilio if the transcript was successfully stored on mongo
-    if _id:
+    payload = {}
+    
+    if len(transcript) == 0:
+        #delete from twilio, nothing to store
         twilio.delete_conversation(booking.chat_room.conversation_sid)
         logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
-        booking.chat_room.conversation_sid = None
         
-    # delete the conversation sid entry, add transcript_object_id from mongodb
-    booking.chat_room.transcript_object_id = str(_id)
+        #set conversation sid to none since there is nothing to be stored to mongo
+        booking.chat_room.conversation_sid = None
+    else:
+        # if there is media present in the transcript, store it in an s3 bucket
+        hex_token = secrets.token_hex(4)
+        for message_id, message in enumerate(transcript):
+            if message['media']:
+                for media_id, media in enumerate(message['media']):
+                    # download media from twilio 
+                    media_content = twilio.get_media(media['sid'])
+
+                    fu = FileUpload(
+                        BytesIO(media_content),
+                        booking.client_user_id,
+                        prefix=f'telehealth/booking_{booking_id}/message_{message_id}/')
+                    fu.validate()
+                    fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
+
+                    media['s3_path'] = fu.filename
+                    transcript[message_id]['media'][media_id] = media
+
+        payload = {
+            'created_at': datetime.utcnow().isoformat(),
+            'booking_id': booking.idx,
+            'transcript': transcript
+        }
+        # insert transcript into mongo db under the telehealth_transcripts collection
+        if current_app.config['MONGO_URI']:
+            _id = mongo.db.telehealth_transcripts.insert(payload)
+            logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
+        else:
+            logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')
+            _id = None  
+
+        # delete the conversation from twilio if the transcript was successfully stored on mongo
+        if _id:
+            twilio.delete_conversation(booking.chat_room.conversation_sid)
+            logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
+            booking.chat_room.conversation_sid = None
+        
+        # delete the conversation sid entry, add transcript_object_id from mongodb
+        booking.chat_room.transcript_object_id = str(_id)
 
     db.session.commit()
 
@@ -496,3 +384,62 @@ def abandon_telehealth_booking(booking_id: int):
 @celery.task()
 def test_task():
     logger.info("Celery test task succeeded")
+
+
+@celery.task()
+def upcoming_booking_payment_notification(booking_id):
+    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+    payment_method = PaymentMethods.query.filter_by(user_id=booking.client_user_id, is_default=True).one_or_none()
+    index = booking.booking_window_id_start_time_utc - 1  # zero the index first
+    hours = index / 12
+    minutes = (index % 12) * 5
+    booking_start_time = time(hour=int(hours), minute=minutes)
+    booking_dt_utc = datetime.combine(booking.target_date_utc, booking_start_time)
+    create_notification(
+        booking.client_user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
+        NOTIFICATION_TYPE_TO_ID.get('Payments'),
+        "Upcoming Telehealth Charge",
+        f"Your payment method ending in {payment_method.number} will be charged for your appointment scheduled on <datetime_utc>{booking_dt_utc}</datetime_utc> in the next 24 hours.",
+        "Client",
+        booking_dt_utc + timedelta(days=1)  # expiry
+    )
+    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+    booking.payment_notified = True
+    db.session.commit()  # commits notification add and booking payment_notified setting to true
+
+
+@celery.task()
+def notify_client_of_imminent_scheduled_maintenance(user_id, datum):
+    reformed_start = datum['start_time'].replace("T", " ")
+    reformed_start = reformed_start[0:19]
+    reformed_end = datum['end_time'].replace("T", " ")
+    reformed_end = reformed_end[0:19]
+    create_notification(
+        user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
+        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
+        "System maintenance scheduled",
+        f"System maintenance has been scheduled between <datetime_utc>{reformed_start}</datetime_utc> and <datetime_utc>{reformed_end}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to schedule telehealth appointments for that time period.",
+        'Client',
+        datum['end_time']
+    )
+    db.session.commit()
+
+
+@celery.task()
+def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
+    reformed_start = datum['start_time'].replace("T", " ")
+    reformed_start = reformed_start[0:19]
+    reformed_end = datum['end_time'].replace("T", " ")
+    reformed_end = reformed_end[0:19]
+    create_notification(
+        user_id,
+        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
+        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
+        "System maintenance scheduled",
+        f"System maintenance has been scheduled between <datetime_utc>{reformed_start}</datetime_utc> and <datetime_utc>{reformed_end}</datetime_utc>. This means the system will be inaccessible and that it will not be possible to accept telehealth bookings for that time period.",
+        'Provider',
+        datum['end_time']
+    )
+    db.session.commit()

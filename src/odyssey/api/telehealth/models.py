@@ -14,6 +14,7 @@ Database models for all things telehealth. These tables will be used to keep tra
 meeting rooms, and other data related to telehealth meetings
 """
 
+
 class TelehealthBookings(BaseModelWithIdx):
     """ 
     Holds all of the client and Staff bookings 
@@ -76,7 +77,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     status_history = db.relationship('TelehealthBookingStatus', uselist=True, back_populates='booking')
     """
-    One-to-Many relationship with TelehealthBookingStatus, hitory of all statuses the booking has gone through.
+    One-to-Many relationship with TelehealthBookingStatus, history of all statuses the booking has gone through.
 
     :type: :class:`TelehealthBookingStatus` instance list
     """
@@ -147,8 +148,15 @@ class TelehealthBookings(BaseModelWithIdx):
     """
     Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
     is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
-    by the inital charge task.
+    by the initial charge task.
 
+    :type: boolean
+    """
+    
+    notified = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent the notifications and ehr permissions for this booking.
+    
     :type: boolean
     """
 
@@ -180,7 +188,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: :class: `StaffCalendarEvents` instance
     """
 
-    medical_gender_preference  = db.Column(db.String)
+    medical_gender_preference = db.Column(db.String)
     """
     preferred gender of the medical professional
 
@@ -191,10 +199,33 @@ class TelehealthBookings(BaseModelWithIdx):
 
     consult_rate = db.Column(db.Numeric(10,2))
     """
-    HOURLY practitioner consultation rate
+    Amount to be charged to the client. Based on the practitioner's hourly consult rate and the scheduled duration of the call.
 
     :type: Numeric
     """
+
+    payment_history_id = db.Column(db.Integer, db.ForeignKey('PaymentHistory.idx'), nullable = True)
+    """
+    Foreign key to the PaymentHistory entry for this booking
+
+    :type: int, foreignkey(PaymentHistory.idx)
+    """
+
+    scheduled_duration_mins = db.Column(db.Integer)
+    """
+    Duration of the telehealth appointment as scheduled. This is used for charging users based on the hourly rate specified by practitioners. 
+
+    :type: int
+    """
+
+    payment_notified = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent the notification for this booking being charged. 
+    Gets set to True when it has been.
+
+    :type: boolean
+    """
+
 
 @db.event.listens_for(TelehealthBookings, "after_insert")
 def add_booking_status_history(mapper, connection, target):
@@ -288,7 +319,8 @@ class TelehealthBookingStatus(db.Model):
 
     status = db.Column(db.String(20))
     """
-    status of the booking, should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress' 'Completed', 'Document Review')
+    status of the booking, 
+    should be one of constant BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed')
 
     :type: str, max length 20
     """
@@ -406,6 +438,47 @@ class TelehealthStaffAvailability(BaseModelWithIdx):
 
     :type: :class:`TelehealthStaffSettings` instance
     """
+    
+class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
+    """
+    Holds information for temporary availability exceptions
+    """
+    
+    exception_date = db.Column(db.Date, nullable=False)
+    """
+    Date of this exception.
+    
+    :type: Datetime
+    """
+    
+    exception_booking_window_id_start_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """
+    Exception start time as a booking window id in refernce to UTC time.
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+    
+    exception_booking_window_id_end_time = db.Column(db.Integer, db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete="CASCADE"), nullable=False)
+    """
+    Exception end time as a booking window id in reference to UTC time.
+
+    :type: int, foreign key('LookupBookingTimeIncrements.idx')
+    """
+    
+    is_busy = db.Column(db.Boolean, nullable=False)
+    """
+    Denotes the types of exception. Exceptions can be 'busy' (true) meaning they remove blocks from
+    normal availability or 'free' (false) meaning that add blocks to normal availability.
+    
+    :type: bool
+    """
+    
+    label = db.Column(db.String(100))
+    """
+    An optional label placed on this exception to explain what the exception is for.
+    
+    :type: string(100)
+    """
 
 
 class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
@@ -510,13 +583,20 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     :type: str
     """
 
+    reason_id = db.Column(db.Integer, db.ForeignKey('LookupVisitReasons.idx'), nullable = True)
+    """
+    Foreign key to idx of VisitReasons, nullable
+
+    :type: int, foreignkey(LookupVisitReasons.idx)
+    """
+
     booking = db.relationship('TelehealthBookings', uselist=False, back_populates='booking_details')
     """
     One-to-One relationship with TelehealthBookings
 
     :type: :class:`TelehealthBookings` instance
     """
-    
+
 
 class TelehealthChatRooms(BaseModel):
     """ 

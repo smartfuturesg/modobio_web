@@ -7,11 +7,9 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.tasks.periodic import detect_practitioner_no_show
 from odyssey.utils.misc import get_time_index
 
-from tests.functional.telehealth.conftest import booking, payment_method
-
-def test_no_show_scan(test_client, booking):
+def test_no_show_scan(test_client, test_booking):
     #set booking to 10 mins ago
-    booking_id = booking.idx
+    booking_id = test_booking.idx
     target_time = datetime.now(timezone.utc)
     target_time_window = get_time_index(target_time)
     if target_time_window <= 2:
@@ -20,12 +18,12 @@ def test_no_show_scan(test_client, booking):
         target_time_window = 288 + target_time_window
     
     target_time_window -= 2
-    booking.booking_window_id_start_time_utc = target_time_window
-    booking.target_date_utc = target_time.date()
+    test_booking.booking_window_id_start_time_utc = target_time_window
+    test_booking.target_date_utc = target_time.date()
 
     #charge the booking
     response = test_client.post(
-        '/payment/test/charge/',
+        '/payment/test/telehealth-charge/',
         headers=test_client.staff_auth_header,
         data=dumps({'booking_id': booking_id}),
         content_type='application/json')
@@ -34,10 +32,10 @@ def test_no_show_scan(test_client, booking):
     res = loads(response.data)
     assert response.status_code == 200
     assert res['TransactionStatus'] == "C"
-    assert booking.charged
+    assert test_booking.charged
     
     #deploy task and make sure task booking is canceled
-    assert booking.status == 'Accepted'
+    assert test_booking.status == 'Accepted'
     
     detect_practitioner_no_show()
     
@@ -45,6 +43,6 @@ def test_no_show_scan(test_client, booking):
     assert booking.status == 'Canceled'
     
     #check that client was refunded
-    payment = PaymentHistory.query.filter_by(booking_id=booking_id).one_or_none()
+    payment = PaymentHistory.query.filter_by(idx=booking.payment_history_id).one_or_none()
     assert payment.voided == True
     assert payment.void_reason == 'Practitioner No Show'

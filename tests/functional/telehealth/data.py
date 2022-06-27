@@ -221,37 +221,31 @@ telehealth_staff_general_availability_bad_7_post_data = {
 telehealth_client_staff_bookings_post_1_data = {
   'target_date': str(target_date_next_monday.date()),
   'booking_window_id_start_time': 100,
-  'booking_window_id_end_time': 103
 }
 
 telehealth_client_staff_bookings_post_2_data = {
   'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 157,
-  'booking_window_id_end_time': 160
 }
 #client already has appointment at this time
 telehealth_client_staff_bookings_post_3_data = {
   'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 157,
-  'booking_window_id_end_time': 160
 }
 # This should break
 telehealth_client_staff_bookings_post_4_data = {
   'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 105,
-  'booking_window_id_end_time': 107
 }
 # This should break
 telehealth_client_staff_bookings_post_5_data = {
   'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 80,
-  'booking_window_id_end_time': 97
 }
 # This should break
 telehealth_client_staff_bookings_post_6_data = {
   'target_date': (target_date_next_monday + timedelta(weeks=1)).date().isoformat(),
   'booking_window_id_start_time': 90,
-  'booking_window_id_end_time': 85
 }
 
 telehealth_client_staff_bookings_put_1_data = {
@@ -267,7 +261,15 @@ img_file = pathlib.Path(__file__).parent / 'test_img_weirdmole.jpg'
 telehealth_post_booking_details = {
     'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
     'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
-    'details': 'Testing booking details'}
+    'details': 'Testing booking details',
+    }
+
+telehealth_post_booking_details_with_visit_reason = {
+    'images': (img_file.as_posix(), img_file.name, 'image/jpeg'),
+    'voice': (rec_file.as_posix(), rec_file.name, 'audio/mp4'),
+    'details': 'Testing booking details',
+    'reason_id': 51,
+    }
 
 telehealth_put_booking_details = {
     'remove_img_rec': {
@@ -285,3 +287,50 @@ telehealth_put_booking_details = {
         'images': None,
         'voice': None,
         'details': ''}}
+
+telehealth_put_booking_details_2 = {
+        'images': None,
+        'voice': None,
+        'details': 'Change visit reason',
+        'reason_id': 52,
+}
+
+telehealth_put_booking_details_3 = {
+        'images': None,
+        'voice': None,
+        'details': 'remove visit reason',
+        'reason_id': '',
+}
+
+telehealth_exceptions_post_data = {
+  "bad_data_1":
+    [
+      {
+      "exception_date": "2022-09-20",
+      "exception_end_time": "08:15:00",
+      "exception_start_time": "10:00:00",
+      "is_busy": True,
+      "label": "end time before start time"
+      }
+    ],
+  "bad_data_2": 
+    [
+        {
+      "exception_date": "2030-01-01",
+      "exception_end_time": "12:30:00",
+      "exception_start_time": "09:55:00",
+      "is_busy": True,
+      "label": "end date too far in the future"
+      }
+    ],
+  "good_data":
+    [
+      {
+      "exception_date": "2022-09-20",
+      "exception_end_time": "12:30:00",
+      "exception_start_time": "09:55:00",
+      "is_busy": True,
+      "label": "test good data"
+      }
+  ]
+}

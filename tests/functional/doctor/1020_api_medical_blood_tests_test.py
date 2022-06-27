@@ -4,7 +4,7 @@ from flask.json import dumps
 from sqlalchemy import delete, select
 
 from odyssey.api.doctor.models import MedicalBloodTests, MedicalBloodTestResults
-from .data import doctor_blood_tests_data
+from .data import doctor_blood_tests_data, doctor_blood_tests_image_data
 from tests.functional.user.data import users_staff_member_data
 
 def test_post_medical_blood_test(test_client, care_team):
@@ -98,6 +98,24 @@ def test_get_blood_test_results(test_client):
     assert response.json['items'][0]['results'][3]['evaluation'] == 'abnormal'
     assert response.json['items'][0]['results'][4]['evaluation'] == 'critical'
     assert response.json['items'][0]['reporter_id'] == test_client.staff_id
+    
+def teset_patch_blood_test_image(test_client):
+    response = test_client.patch(
+        f'/doctor/bloodtest/image/{test_client.client_id}/?test_id={test_id_client_submit}/',
+        headers=test_client.client_auth_header,
+        data=dumps(doctor_blood_tests_image_data),
+        content_type='application/json'
+    )
+    
+    assert response.status_code == 200
+    
+    response = test_client.get(
+        f'/doctor/bloodtest/image/{test_client.client_id}/?test_id={test_id_client_submit}/',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+    
+    assert response.status_code == 200
+    assert response.json['image'] != None
 
 def test_delete_blood_test(test_client):
     # send delete request where the user attempting to delete is not the reporter, should raise 401
