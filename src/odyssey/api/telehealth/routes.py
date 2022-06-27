@@ -1415,7 +1415,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         To determine the correct window_ids, please see /lookup/telehealth/booking-increments/.
         """
         check_user_existence(user_id, user_type='staff')
-        current_date = datetime.now(timezone.utc).date()
+        current_date = datetime.now(tz.utc).date()
 
         conflicts = []
         exceptions = []
