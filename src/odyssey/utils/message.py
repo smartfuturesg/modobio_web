@@ -545,7 +545,8 @@ class PushNotification:
             'staff_first_name': None,
             'staff_middle_name': None,
             'staff_last_name': None,
-            'staff_profile_picture': None}}
+            'staff_profile_picture': None,
+            'booking_uid': None }}
 
     def __init__(self):
         """ Initiate the push notification system.

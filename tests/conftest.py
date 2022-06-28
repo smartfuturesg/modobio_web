@@ -22,8 +22,8 @@ from werkzeug.exceptions import BadRequest
 from odyssey import create_app, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
-from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentRefunds
-from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory
+from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils import search
@@ -357,7 +357,7 @@ def booking_function_scope(test_client):
         booking_window_id_end_time_utc = booking_end_idx,
         client_location_id = 1,  # TODO: make this not hardcoded
         payment_method_id = pm.idx,
-        external_booking_id = uuid.uuid4(),
+        uid = uuid.uuid4(),
         status = 'Accepted',
         consult_rate=15
     )
@@ -384,28 +384,39 @@ def booking_function_scope(test_client):
     booking.payment_history_id = payment.idx
     test_client.db.session.commit()
 
+    booking_id = booking.idx
+
     yield booking
 
-    # delete chatroom, booking, and payment method
-    chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == booking.idx)).scalars().one_or_none()
-    
-    # remove transcript from mongo db
-    if chat_room.transcript_object_id:
-        test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
+    booking = TelehealthBookings.query.filter_by(idx = booking_id).one_or_none()
 
-    for status in booking.status_history:
-        test_client.db.session.delete(status)
+    chat_room = TelehealthChatRooms.query.filter_by(booking_id = booking_id).one_or_none()
+
+    booking_status = TelehealthBookingStatus.query.filter_by(booking_id = booking_id).all()
+    if chat_room:
+        # delete chatroom, booking, and payment method
+        chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == booking.idx)).scalars().one_or_none()
         
-    test_client.db.session.delete(chat_room)
-    test_client.db.session.delete(booking)
-    test_client.db.session.flush()    
+        # remove transcript from mongo db
+        if chat_room.transcript_object_id:
+            test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
+        test_client.db.session.delete(chat_room)
+
+        try:
+            twilio.delete_conversation(conversation_sid)
+        except TwilioRestException:
+            # conversation was already removed as part of a test
+            pass
+
+    if len(booking_status) > 0 :
+        for status in booking_status:
+            test_client.db.session.delete(status)
+
+    if booking:            
+        test_client.db.session.delete(booking)
+        test_client.db.session.flush() 
     
     test_client.db.session.delete(payment)
     test_client.db.session.delete(pm)
 
     test_client.db.session.commit()
-    try:
-        twilio.delete_conversation(conversation_sid)
-    except TwilioRestException:
-        # conversation was already removed as part of a test
-        pass

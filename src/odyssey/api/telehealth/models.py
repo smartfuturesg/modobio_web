@@ -137,6 +137,13 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key(PaymentMethods.idx)
     """
 
+    staff_calendar_id = db.Column(db.Integer, db.ForeignKey('StaffCalendarEvents.idx'), nullable=True)
+    """
+    Idx for the StaffCalendarEvents entry related to this booking.
+
+    :type: int, foreign key(StaffCalendarEvents.idx)
+    """
+
     charged = db.Column(db.Boolean, default=False)
     """
     Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
@@ -153,7 +160,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: boolean
     """
 
-    external_booking_id = db.Column(db.String(36), nullable = True)
+    uid = db.Column(db.String(36), nullable = True)
     """
     UUID of booking used for external reference.
 
@@ -172,6 +179,13 @@ class TelehealthBookings(BaseModelWithIdx):
     One-to_One relationship with TelehealthBookingDetails
 
     :type: :class: `TelehealthBookingDetails` instance
+    """
+
+    staff_calendar = db.relationship('StaffCalendarEvents', uselist=False)
+    """
+    One-to_One relationship with StaffCalendarEvents
+
+    :type: :class: `StaffCalendarEvents` instance
     """
 
     medical_gender_preference = db.Column(db.String)

@@ -462,7 +462,7 @@ def cancel_telehealth_appointment(booking, refund=False, reason='Failed Payment'
         odyssey.tasks.tasks.store_telehealth_transcript.delay(booking.idx)
 
     # delete booking from Practitioner's calendar
-    staff_event = StaffCalendarEvents.query.filter_by(location='Telehealth_{}'.format(booking.idx)).one_or_none()
+    staff_event = StaffCalendarEvents.query.filter_by(idx = booking.staff_calendar_id).one_or_none()
     if staff_event:
         db.session.delete(staff_event)
 

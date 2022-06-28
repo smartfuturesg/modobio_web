@@ -868,7 +868,7 @@ DAY_OF_WEEK = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday
 
 TWILIO_ACCESS_KEY_TTL = 14400
 
-BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed')
+BOOKINGS_STATUS = ('Pending', 'Accepted', 'Canceled', 'In Progress', 'Completed', 'Document Review', 'Confirmed', 'Abandoned' )
 
 # profile and other image types allowed for upload
 ALLOWED_IMAGE_TYPES = ('png', 'jpg')
@@ -966,6 +966,9 @@ FERTILITY_STATUSES = {
     ]
 }
 
+
+
+APPLE_APPSTORE_BASE_URLS = ('https://api.storekit.itunes.apple.com', 'https://api.storekit-sandbox.itunes.apple.com')
 SCHEDULED_MAINTENANCE_PADDING = 30
 
 NOTIFICATION_TYPE_TO_ID = {

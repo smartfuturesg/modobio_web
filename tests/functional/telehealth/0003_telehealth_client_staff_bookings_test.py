@@ -48,9 +48,21 @@ def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehea
         data=dumps(telehealth_client_staff_bookings_post_1_data),
         content_type='application/json')
 
+    
     assert response.status_code == 201
+    assert response.json.get('bookings')[0].get('status') == 'Pending'
+
+    booking_id = response.json['bookings'][0]['booking_id']
+
+    # confirm the booking. Will add the booking to the practitioner's calendar
+    response = test_client.put(
+        f'/telehealth/bookings/?booking_id={booking_id}',
+        headers=test_client.client_auth_header,
+        data=dumps( {'status': 'Confirmed'}),
+        content_type='application/json')
+
     # Bring up conversation to ensure it was created for this booking
-    conversation = TelehealthChatRooms.query.filter_by(booking_id=response.json['bookings'][0]['booking_id']).one_or_none()
+    conversation = TelehealthChatRooms.query.filter_by(booking_id=booking_id).one_or_none()
     
     assert conversation.staff_user_id == telehealth_staff[0].user_id
     assert conversation.client_user_id == test_client.client_id
@@ -91,6 +103,7 @@ def test_post_2_client_staff_bookings(test_client, payment_method, telehealth_st
         content_type='application/json')
 
     assert response.status_code == 201
+    assert response.json.get('bookings')[0].get('status') == 'Pending'
 
 def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_availabilities):
     response = test_client.post(
@@ -150,11 +163,27 @@ def test_put_1_client_staff_bookings(test_client, booking):
 
     assert response.status_code == 201
 
-    staff_events = (test_client.db.session.execute(
-        select(StaffCalendarEvents)
-        .where(
-            StaffCalendarEvents.location == f'Telehealth_{booking.idx}'))
-        .one_or_none())
+
+def test_put_confirm_client_staff_booking(test_client, booking):
+    """confirm the booking from the staff and client ends. 
+    Staff cannot confirm the booking
+    Client will not be able to confirm booking.Booking already Confirmed"""
+
+    response = test_client.put(
+        f'/telehealth/bookings/?booking_id={booking.idx}',
+        headers=test_client.staff_auth_header,
+        data=dumps( {'status': 'Confirmed'}),
+        content_type='application/json')
+
+    assert response.status_code == 401
+
+    response = test_client.put(
+        f'/telehealth/bookings/?booking_id={booking.idx}',
+        headers=test_client.client_auth_header,
+        data=dumps( {'status': 'Confirmed'}),
+        content_type='application/json')
+
+    assert response.status_code == 400
 
 
 def test_put_2_client_staff_bookings(test_client, booking_function_scope):
