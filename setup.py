@@ -22,6 +22,7 @@ setup(
     install_requires=[
         'boto3',
         'celery',
+        'celery-redbeat',
         'elasticsearch',
         'filetype',
         'Flask',

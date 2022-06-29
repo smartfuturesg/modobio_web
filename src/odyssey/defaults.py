@@ -215,12 +215,19 @@ This variable will be converted to ``broker_url`` (lower case) to work with
 Celery's new config system.
 """
 
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_RESULT_BACKEND = ''
 """ Celery default backend to store results.
 
 The backend used to store task results (tombstones).
 
 This variable will be converted to ``result_backend`` (lower case) to work with
+Celery's new config system.
+"""
+
+CELERY_REDBEAT_REDIS_URL = CELERY_BROKER_URL
+""" Celery-redbeat will use redis to store a persistent celerybeat schedule
+
+This variable will be converted to ``redbeat_redis_url`` (lower case) to work with
 Celery's new config system.
 """
 
