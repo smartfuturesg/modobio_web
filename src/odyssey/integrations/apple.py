@@ -1,4 +1,6 @@
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -17,6 +19,7 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.user.models import UserSubscriptions
 from odyssey.api.user.schemas import UserSubscriptionsSchema
+from odyssey.utils.constants import APPLE_APPSTORE_BASE_URLS
 
 
 
@@ -28,6 +31,7 @@ class AppStore:
         self.private_api_key = current_app.config.get('APPLE_APPSTORE_API_KEY').replace('\\\n', '\n') # additional '\' added when reading in from env var (\\ in DEV)
         self.private_api_key = self.private_api_key.replace('\\n', '\n') # additional '\' added when reading in from env var
         self.api_key_id = current_app.config.get('APPLE_APPSTORE_API_KEY_ID')
+        
 
     def _generate_auth_jwt(self):
         """
@@ -55,7 +59,7 @@ class AppStore:
 
     def latest_transaction(self, original_transaction_id: str):
         """
-        User the appstore API to bring up the client's most recent transaction.
+        Use the appstore API to bring up the client's most recent transaction.
 
         Parameters
         ----------
@@ -68,16 +72,31 @@ class AppStore:
             A tuple containing transaction_info, renewal_info, and status.
         """
 
-        # query Apple Storekit for subscription status and details, update if necessary
+        # query Apple Storekit for subscription status and details
+        #   as per apple recommendation, use the production url first, then try the 
+        #   storekit url if the transaction_id is not found: error code 4040005
+
         access_token = self._generate_auth_jwt()
         headers = {'Authorization': f'Bearer {access_token}'}
-        response = requests.get(current_app.config['APPLE_APPSTORE_BASE_URL'] + '/inApps/v1/subscriptions/' + original_transaction_id,
-                headers=headers )
-            
-        try:
-            response.raise_for_status()
-        except:
-            raise BadRequest(f'Apple AppStore returned the following error: {response.text}')
+
+        for url in APPLE_APPSTORE_BASE_URLS:
+            response = requests.get(url + '/inApps/v1/subscriptions/' + original_transaction_id,
+                    headers=headers )
+            try:
+                response.raise_for_status()
+            except:
+                # continue if transaction_id not found in production appstore or for any errors when using sandbox 
+                if response.json().get('errorCode') != 4040005 or url == APPLE_APPSTORE_BASE_URLS[-1]:
+                    raise BadRequest(f'Apple AppStore returned the following error: {response.text}')
+                else:
+                    continue
+
+            # in some cases bad transaction_ids don't return anything but a successful request
+            if response.json().get('data') == []:
+                raise BadRequest(f"Something went wrong while trying to verify Apple AppStore subscription for transaction_id: {original_transaction_id} ")
+
+            break # validation was successful
+
 
         payload = response.json()
 

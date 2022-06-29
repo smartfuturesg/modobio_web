@@ -1,4 +1,4 @@
-from flask_sqlalchemy import Model
+import uuid
 from bson import ObjectId
 from itertools import groupby
 from operator import itemgetter
@@ -38,28 +38,7 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffAvailabilityExceptions,
     TelehealthStaffSettings
 )
-from odyssey.api.telehealth.schemas import (
-    TelehealthBookingsSchema,
-    TelehealthBookingsOutputSchema,
-    TelehealthBookingMeetingRoomsTokensSchema,
-    TelehealthChatRoomAccessSchema,
-    TelehealthConversationsNestedSchema,
-    TelehealthMeetingRoomSchema,
-    TelehealthQueueClientPoolSchema,
-    TelehealthQueueClientPoolOutputSchema,
-    TelehealthStaffAvailabilitySchema,
-    TelehealthTimeSelectOutputSchema,
-    TelehealthStaffAvailabilityOutputSchema,
-    TelehealthStaffAvailabilityConflictSchema,
-    TelehealthStaffAvailabilityExceptionsSchema,
-    TelehealthStaffAvailabilityExceptionsPOSTSchema,  
-    TelehealthStaffAvailabilityExceptionsDeleteSchema,
-    TelehealthStaffAvailabilityExceptionsOutputSchema,
-    TelehealthBookingDetailsSchema,
-    TelehealthBookingDetailsGetSchema,
-    TelehealthBookingsPUTSchema,
-    TelehealthTranscriptsSchema,
-)
+from odyssey.api.telehealth.schemas import *
 from odyssey.api.user.models import User
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations
@@ -90,7 +69,7 @@ from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
 from odyssey.utils.files import AudioUpload, ImageUpload, FileDownload
 from odyssey.utils.base.resources import BaseResource
-from odyssey.tasks.tasks import cleanup_unended_call, store_telehealth_transcript
+from odyssey.tasks.tasks import abandon_telehealth_booking, cleanup_unended_call, store_telehealth_transcript
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
@@ -143,7 +122,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 * increment_data['length']
         
         if call_start_offset > 600 or call_start_offset < -60*duration:
-            raise BadRequest('Request to start call occured too soon or after the scheduled call has ended')
+            raise BadRequest('Request to start call occurred too soon or after the scheduled call has ended')
         
         # Create telehealth meeting room entry
         # each telehealth session is given a unique meeting room
@@ -223,6 +202,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
             msg['data']['staff_first_name'] = booking.practitioner.firstname
             msg['data']['staff_middle_name'] = booking.practitioner.middlename
             msg['data']['staff_last_name'] = booking.practitioner.lastname
+            msg['data']['booking_uid'] = booking.uid
 
             urls = {}
             fd = FileDownload(booking.staff_user_id)
@@ -233,7 +213,6 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                 urls[str(pic.height)] = fd.url(pic.image_path)
 
             msg['data']['staff_profile_picture'] = urls
-
             pn.send(booking.client_user_id, PushNotificationType.voip, msg)
 
         return {'twilio_token': token,
@@ -569,7 +548,7 @@ class TelehealthBookingsApi(BaseResource):
             client['start_date_localized'] = start_time_utc.astimezone(tz.gettz(booking.client_timezone)).date()
             client['start_time_localized'] = start_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
             client['end_time_localized'] = end_time_utc.astimezone(tz.gettz(booking.client_timezone)).time()
-            # return the client profile_picture wdith=128 if the logged in user is the practitioner involved
+            # return the client profile_picture width=128 if the logged in user is the practitioner involved
             if current_user.user_id == booking.staff_user_id:
                 client['profile_picture'] = None
                 fd = FileDownload(booking.client_user_id)
@@ -579,12 +558,16 @@ class TelehealthBookingsApi(BaseResource):
             
             # if the associated chat room has an id for the mongo db entry of the transcript, generate a link to retrieve the 
             # transcript messages
-            if booking.chat_room.transcript_object_id:
-                transcript_url = request.url_root[:-1] + url_for('api.telehealth_telehealth_transcripts', booking_id = booking.idx)
-                booking_chat_details = booking.chat_room.__dict__
-                booking_chat_details['transcript_url'] = transcript_url
-            else: 
-                booking_chat_details = booking.chat_room.__dict__
+            if booking.chat_room:
+                if booking.chat_room.transcript_object_id:
+                    transcript_url = url_for('api.telehealth_telehealth_transcripts', booking_id = booking.idx, _external = True)
+                    booking_chat_details = booking.chat_room.__dict__
+                    booking_chat_details['transcript_url'] = transcript_url
+                else: 
+                    booking_chat_details = booking.chat_room.__dict__
+            else:
+                # chatroom has not yet been created
+                booking_chat_details = None
 
             # Check for booking description and reason in booking details.
             # This is a request by the frontend to reduce the
@@ -600,6 +583,7 @@ class TelehealthBookingsApi(BaseResource):
 
             bookings_payload.append({
                 'booking_id': booking.idx,
+                'uid': booking.uid,
                 'target_date_utc': booking.target_date_utc,
                 'start_time_utc': start_time_utc.time(),
                 'status': booking.status,
@@ -641,7 +625,7 @@ class TelehealthBookingsApi(BaseResource):
 
         Request body includes date and time localized to the client
 
-        Responds with successful booking and conversation_id
+        Responds with booking details. The booking will be in the 'Pending' state until the client confirms
         """
         current_user, _ = token_auth.current_user()
         # Do not allow bookings between days
@@ -696,7 +680,7 @@ class TelehealthBookingsApi(BaseResource):
             raise BadRequest("Invalid target date or time")
         
         # update parsed_obj with client localized end 
-        # NOTE currently ignorign the incoming 'booking_window_id_end_time' input
+        # NOTE currently ignoring the incoming 'booking_window_id_end_time' input
         # TODO coordinate with FE to stop requiring 'booking_window_id_end_time'
         target_date_end_time = (target_date + timedelta(minutes = duration))
         request.parsed_obj.booking_window_id_end_time = start_time_idx_dict[target_date_end_time.strftime('%H:%M:%S')] - 1
@@ -725,7 +709,7 @@ class TelehealthBookingsApi(BaseResource):
 
         # TODO: set a notification for the staff member so they know to update their settings
         if not staff_settings:
-            staff_settings = TelehealthStaffSettings(timezone='UTC', auto_confirm = False, user_id = staff_user_id)
+            staff_settings = TelehealthStaffSettings(timezone='UTC', auto_confirm = True, user_id = staff_user_id)
             db.session.add(staff_settings)
 
         request.parsed_obj.staff_timezone = staff_settings.timezone
@@ -735,13 +719,7 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.profession_type = client_in_queue.profession_type
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
 
-        # check the practitioner's auto accept setting.
-        if staff_settings.auto_confirm:
-            request.parsed_obj.status = 'Accepted'
-        else:
-            request.parsed_obj.status = 'Pending'
-            # TODO: here, we need to send some sort of notification to the staff member letting
-            # them know they have a booking request.
+        request.parsed_obj.status = 'Pending'
 
         # save target date and booking window ids in UTC
         request.parsed_obj.booking_window_id_start_time_utc = target_start_time_idx_utc
@@ -752,15 +730,17 @@ class TelehealthBookingsApi(BaseResource):
         consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
 
         # Calculate time for display:
-        # consulte_rate is in hours
+        # consult is in hours
         # 30 minutes -> 0.5*consult_rate
-        # 60 minutes -> 1*consulte_rate
-        # 90 minutes -> 1.5*consulte_rate
+        # 60 minutes -> 1*consult_rate
+        # 90 minutes -> 1.5*consult_rate
         if not consult_rate:
             raise BadRequest('Practitioner has not set a consult rate')
         rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
 
+        # booking uuid
+        request.parsed_obj.uid = uuid.uuid4()
         request.parsed_obj.scheduled_duration_mins = client_in_queue.duration
         
         db.session.add(request.parsed_obj)
@@ -768,21 +748,13 @@ class TelehealthBookingsApi(BaseResource):
 
         booking_url = None
         
-        twilio_obj = Twilio()
-        # create Twilio conversation and store details in TelehealthChatrooms table
-        conversation_sid = twilio_obj.create_telehealth_chatroom(booking_id = request.parsed_obj.idx)
-
-        # create access token with chat grant for newly provisioned room
-        token, _ = twilio_obj.create_twilio_access_token(current_user.modobio_id)
-
+        
         # Once the booking has been successful, delete the client from the queue
         if client_in_queue:
             db.session.delete(client_in_queue)
             db.session.flush()
-        ##
-        # Populate staff calendar with booking
-        # localize to staff timezone first
-        ##
+        
+        # localize to staff timezone 
         if staff_settings.timezone != 'UTC':
             booking_start_staff_localized = target_start_datetime_utc.astimezone(tz.gettz(staff_settings.timezone))
             booking_end_staff_localized = target_end_datetime_utc.astimezone(tz.gettz(staff_settings.timezone))
@@ -790,9 +762,6 @@ class TelehealthBookingsApi(BaseResource):
             booking_start_staff_localized = target_start_datetime_utc
             booking_end_staff_localized = target_end_datetime_utc
 
-        telehealth_utils.add_booking_to_calendar(request.parsed_obj, 
-                            booking_start_staff_localized, 
-                            booking_end_staff_localized)
         db.session.commit()
 
         # create response payload
@@ -816,12 +785,17 @@ class TelehealthBookingsApi(BaseResource):
             practitioner=booking.practitioner.firstname,
             client=client_fullname)
 
+        # schedule task to abandon booking in 30-minutes if not confirmed
+        if not current_app.config['TESTING']:
+            abandon_telehealth_booking.apply_async((booking.idx,), eta=datetime.utcnow() + timedelta(minutes=30))
+
         payload = {
             'all_bookings': 1,
-            'twilio_token': token,
+            'twilio_token': None,
             'bookings':[
                 {
                 'booking_id': booking.idx,
+                'uid': booking.uid,
                 'target_date': booking.target_date,
                 'start_time': practitioner['start_time_localized'],
                 'status': booking.status,
@@ -845,7 +819,16 @@ class TelehealthBookingsApi(BaseResource):
     @ns.doc(params={'booking_id': 'booking_id'})
     def put(self):
         """
-        PUT request can be used to update the booking STATUS and payment_method
+        Update the status or payment method of an upcoming booking. 
+
+        All status options are set in the utils/constants.BOOKINGS_STATUS attribute
+        
+        This endpoint will allow the user to set the following booking status options
+            - Confirmed: client agreed to pay for the booking. Comes after booking is in Pending status
+            - Accepted: Staff accepts the booking 
+            - Canceled: Staff or Client can cancel the booking
+            - In Progress, Completed: not allowed to be set in this endpoint
+        
         """
         current_user, _ = token_auth.current_user()
         booking_id = request.args.get('booking_id', type=int)
@@ -877,21 +860,29 @@ class TelehealthBookingsApi(BaseResource):
             if booking.charged:
                 raise BadRequest('Booking has already been paid for. The payment method cannot be changed.')
 
+
         new_status = data.get('status')
         if new_status:
-            # Can't update status to 'In Progress' through this endpoint
-            # only practitioner can change status from pending to accepted
-            # both client and practitioner can change status to canceled and completed
             if new_status in ('In Progress', 'Completed'):
+                # Can't update status to 'In Progress' through this endpoint
                 raise BadRequest('This status can only be updated at the start or end of a call.')
 
-            elif (new_status in ('Pending', 'Accepted') and
-                  current_user.user_id != booking.staff_user_id):
-                raise Unauthorized('Only practitioner can update this status.')
+            elif new_status == 'Accepted': 
+                 # only practitioner can change status from pending to accepted
+                if current_user.user_id != booking.staff_user_id:
+                    raise Unauthorized('Only practitioner can update this status.')
+                # Booking can only be moved to accepted from Confirmed status
+                elif booking.status != 'Confirmed':
+                    raise BadRequest("Cannot accept booking")
 
-            if new_status == 'Canceled':
-                #if staff initiated cancellation, refund should be true
-                #if client initiated, refund should be false
+                staff_settings = TelehealthStaffSettings.query.filter_by(user_id = booking.staff_user_id).one_or_none()
+                calendar_idx = telehealth_utils.accept_booking(booking = booking, staff_settings = staff_settings)
+                booking.staff_calendar_id = calendar_idx
+
+            elif new_status == 'Canceled':
+                # both client and practitioner can change status to canceled 
+                # If staff initiated cancellation, refund should be true.
+                # If client initiated, refund should be false.
                 booking_time = LookupBookingTimeIncrements.query. \
                     filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
                 booking_datetime = datetime.combine(booking.target_date, booking_time)
@@ -917,23 +908,43 @@ class TelehealthBookingsApi(BaseResource):
                     #cancel appointment without refund and send staff notification that meeting was cancelled
                     cancel_telehealth_appointment(
                         booking,
-                        reason="Client Cancellation",
-                        refund=False
-                    )  
-                    create_notification(
-                        booking.staff_user_id,
-                        NOTIFICATION_SEVERITY_TO_ID.get('High'),
-                        NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-                        f"Your Telehealth Appointment with {booking.client.firstname} " + \
-                            f"{booking.client.lastname} was Canceled",
-                        f"Unfortunately {booking.client.firstname} {booking.client.lastname} has " + \
-                            f"canceled your appointment at <datetime_utc>{booking_datetime}</datetime_utc>.",
-                        'Provider',
-                        expiration_datetime
-                    )             
+                        refund=False)
 
+                    client_fullname = f'{current_user.firstname} {current_user.lastname}'
+                    send_email(
+                        'appointment-client-cancelled',
+                        booking.practitioner.email,
+                        practitioner_firstname=booking.practitioner.firstname,
+                        client_fullname=client_fullname)
+            
+            elif new_status == 'Confirmed':
+                # only the client may set the status to Confirmed
+                if current_user.user_id != booking.client_user_id:
+                    raise Unauthorized("Cannot change booking status to Confirmed")
+                # booking must only be changed to Confirmed from the Pending status
+                elif booking.status != 'Pending':
+                    raise BadRequest("Cannot change booking status to Confirmed")
+
+                staff_settings = TelehealthStaffSettings.query.filter_by(user_id = booking.staff_user_id).one_or_none()
+               
+                # if the staff has the auto_confirm setting set to True, immediately set the status to Accepted
+                # add the booking to the Staff's calendar of events
+                if staff_settings.auto_confirm:
+                    data['status'] = 'Accepted'
+                    calendar_idx = telehealth_utils.accept_booking(booking = booking, staff_settings = staff_settings)
+                    booking.staff_calendar_id = calendar_idx
+
+            elif new_status == 'Abandoned':
+                # only client can abandon booking
+                # Booking can only be abandoned from Pending status
+                if booking.status != 'Pending' or current_user.user_id != booking.client_user_id:
+                    raise BadRequest("Cannot accept booking")
+
+                # delete the telehealth entry. Nothing else should have been created at this point
+                TelehealthBookings.query.filter_by(idx = booking_id).delete()
         booking.update(data)
         db.session.commit()
+               
         return 201
 
     @token_auth.login_required()
@@ -1404,7 +1415,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         To determine the correct window_ids, please see /lookup/telehealth/booking-increments/.
         """
         check_user_existence(user_id, user_type='staff')
-        current_date = datetime.now(timezone.utc).date()
+        current_date = datetime.now(tz.UTC).date()
 
         conflicts = []
         exceptions = []

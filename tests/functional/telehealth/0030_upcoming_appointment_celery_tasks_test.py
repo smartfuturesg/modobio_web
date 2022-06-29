@@ -2,9 +2,11 @@ from sqlalchemy import or_, select
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
+from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.integrations.twilio import Twilio
 
 from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
-from odyssey.tasks.tasks import upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
+from odyssey.tasks.tasks import abandon_telehealth_booking, upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
 
 def test_upcoming_bookings_scan(test_client, upcoming_bookings):
     """
