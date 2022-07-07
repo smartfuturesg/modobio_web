@@ -21,7 +21,7 @@ DECLARE
 BEGIN
     FOR t IN 
         SELECT * FROM information_schema.columns
-        WHERE column_name = 'updated_at'
+        WHERE column_name = 'updated_at' and table_schema = 'public'
     LOOP
         EXECUTE format('CREATE TRIGGER updated_at_trigger
                         BEFORE UPDATE ON %I.%I
