@@ -21,9 +21,9 @@ DECLARE
 BEGIN
     FOR t IN 
         SELECT * FROM information_schema.columns
-        WHERE column_name = 'updated_at'
+        WHERE column_name = 'updated_at' and table_schema = 'public'
     LOOP
-        EXECUTE format('CREATE OR REPLACE TRIGGER updated_at_trigger
+        EXECUTE format('CREATE TRIGGER updated_at_trigger
                         BEFORE UPDATE ON %I.%I
                         FOR EACH ROW EXECUTE FUNCTION %I.refresh_updated_at()',
                         t.table_schema, t.table_name, t.table_schema);
@@ -44,9 +44,9 @@ BEGIN
         r record;
 	    BEGIN
 	        FOR r IN SELECT * FROM pg_event_trigger_ddl_commands() pg 
-                     WHERE pg.object_type = 'table'
+                     WHERE pg.object_type = 'table' and pg.schema_name = 'public'
 	        loop
-	            EXECUTE format('CREATE OR REPLACE TRIGGER updated_at_trigger
+	            EXECUTE format('CREATE TRIGGER updated_at_trigger
 	                            BEFORE UPDATE ON %I
 	                            FOR EACH ROW EXECUTE FUNCTION public.refresh_updated_at()',
 	                           (parse_ident(r.object_identity))[2]);
