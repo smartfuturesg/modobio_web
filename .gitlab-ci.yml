@@ -15,7 +15,7 @@ test:
   script:
     - echo "Creating test database and elasticsearch instance..."
     - sudo docker run --name postgres_$CI_BUILD_ID --network modobio -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=modobio_test -d postgres
-    - sudo docker run --name elasticsearch_$CI_BUILD_ID --network modobio -e discovery.type=single-node --rm -d docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    - sudo docker run --name elasticsearch_$CI_BUILD_ID --network modobio -e discovery.type=single-node -e xpack.security.enabled=false --rm -d docker.elastic.co/elasticsearch/elasticsearch:8.3.1
     - echo "Creating redis instance..."
     - sudo docker run --name redis_$CI_BUILD_ID --network modobio -d redis
     - echo "Running tests..."
