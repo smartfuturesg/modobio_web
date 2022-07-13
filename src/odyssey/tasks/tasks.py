@@ -286,7 +286,7 @@ def store_telehealth_transcript(booking_id: int):
         }
         # insert transcript into mongo db under the telehealth_transcripts collection
         if current_app.config['MONGO_URI']:
-            _id = mongo.db.telehealth_transcripts.insert(payload)
+            _id = mongo.db.telehealth_transcripts.insert_one(payload).inserted_id
             logger.info(f"Booking ID {booking.idx}: Conversation stored on MongoDB with idx {str(_id)}")
         else:
             logger.warning('Mongo db has not been setup. Twilio conversation will not be deleted.')

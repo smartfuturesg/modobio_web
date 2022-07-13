@@ -26,15 +26,19 @@ Keep a list of dependencies here with date and reason why we need it. This will 
  -------------------------------|------------|------------------------------------------------
 | boto3                         | 2020-05-19 | Amazon AWS SDK                                 |
 | celery                        | 2021-04-30 | Concurrent task server                         |
+| celery-redbeat                | 2022-06-16 | Handle multiple instances of celery            |
 | cryptography                  | 2022-02-02 | Signing JWTs with ECDSA for Apple Store API    |
 | elasticsearch                 | 2021-02-25 | Full text search                               |
+| filetype                      | 2022-03-15 | Recognize uploaded filetypes                   |
 | Flask                         | 2020-03-16 | Main WSGI server                               |
 | flask-accepts                 | 2020-07-27 | Simplifies use of flask-restx decorators       |
 | Flask-Cors                    | 2020-06-18 | Flask plugin for Cross-Origin Resource Sharing |
 | flask-marshmallow             | 2020-07-27 | (De)serialize at start of request              |
 | Flask-Migrate                 | 2020-06-04 | Use alembic db versioning with Flask           |
+| Flask-PyMongo                 | 2021-10-06 | Connect to MongoDB for Twilio storage          |
 | flask-restx                   | 2020-06-17 | Turns Flask server into REST API               |
 | Flask-SQLAlchemy              | 2020-05-19 | Integrate SQLAlchemy with Flask                |
+| idna                          | 2021-10-27 | Handle international domain names in email     |
 | marshmallow                   | 2020-07-27 | (De)serialization and validation of JSON       |
 | marshmallow-sqlalchemy        | 2020-07-27 | Generate marshmallow schemas from DB models    |
 | psycopg2                      | 2020-07-29 | Python PostgreSQL driver                       |
