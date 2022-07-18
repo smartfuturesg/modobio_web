@@ -362,7 +362,10 @@ class FileUpload(FileDownload):
 
         self.file = file
         self.file.seek(0)
-        ft = filetype.guess(self.file)
+        # Work around change in filetypes 1.1.0 where
+        # guess() and match() no longer accepts a filehandle.
+        self._probe = self.file.read(filetype.utils._NUM_SIGNATURE_BYTES)
+        ft = filetype.guess(self._probe)
         self.extension = ft.extension
         self.mime = ft.mime
         self.size = self.file.seek(0, 2)
@@ -584,7 +587,7 @@ class AudioUpload(FileUpload):
         super().__init__(file, user_id, prefix=prefix)
 
         # Force audio type on extension guessing.
-        ft = filetype.audio_match(self.file)
+        ft = filetype.audio_match(self._probe)
         self.extension = ft.extension
         self.mime = ft.mime
 
@@ -610,7 +613,7 @@ class ImageUpload(FileUpload):
         self._prefix = prefix
 
         # Force image type on extension guessing
-        ft = filetype.image_match(self.file)
+        ft = filetype.image_match(self._probe)
         self.extension = ft.extension
         self.mime = ft.mime
 
