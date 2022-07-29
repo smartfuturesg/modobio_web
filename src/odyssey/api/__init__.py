@@ -1,6 +1,14 @@
 import logging
 logger = logging.getLogger(__name__)
 
+# Temporary workaround
+# Flask 2.1 updated dependency werkzeug to 2.2. But flask-restx 0.5.1 uses a
+# function from werkzeug 2.1 which was moved (it was internal anyway
+# and should never have been used). Remove on next update of flask-restx.
+import werkzeug.routing
+if not hasattr(werkzeug.routing, 'parse_rule'):
+    werkzeug.routing.parse_rule = werkzeug.routing.Rule._parse_rule
+
 from flask import Blueprint
 from flask_restx import Api
 
