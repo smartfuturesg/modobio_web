@@ -80,7 +80,7 @@ cors = CORS()
 ma = Marshmallow()
 mongo = PyMongo()
 
-celery = Celery(__name__, broker=Config().broker_url, backend=Config().result_backend)
+celery = Celery(__name__, broker=conf.broker_url, backend=conf.result_backend)
 
 def create_app():
     """ Initialize an instance of the Flask app.

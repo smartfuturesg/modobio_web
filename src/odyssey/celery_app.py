@@ -11,11 +11,7 @@ Possible configuration options here: https://docs.celeryproject.org/en/stable/us
 import logging
 logger = logging.getLogger(__name__)
 
-from odyssey import init_celery
-
-
-from odyssey.config import Config
-conf = Config()
+from odyssey import init_celery, conf
 
 app = init_celery()
 
