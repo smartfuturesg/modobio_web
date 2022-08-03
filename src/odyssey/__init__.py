@@ -20,11 +20,6 @@ from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import class_mapper
 from werkzeug.exceptions import HTTPException
 
-# Temporary fix
-from flask.scaffold import _endpoint_from_view_func
-import flask.helpers
-flask.helpers._endpoint_from_view_func = _endpoint_from_view_func
-
 from odyssey.utils.logging import JsonFormatter
 from odyssey.utils.errors import exception_handler, http_exception_handler
 
@@ -85,7 +80,7 @@ cors = CORS()
 ma = Marshmallow()
 mongo = PyMongo()
 
-celery = Celery(__name__, broker=Config().broker_url, backend=Config().result_backend)
+celery = Celery(__name__, broker=conf.broker_url, backend=conf.result_backend)
 
 def create_app():
     """ Initialize an instance of the Flask app.
