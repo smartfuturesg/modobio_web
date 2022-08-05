@@ -424,7 +424,7 @@ class LookupTerritoriesOfOperationsApi(BaseResource):
     @responds(schema=LookupTerritoriesOfOperationsOutputSchema, status_code=200, api=ns)
     def get(self):
         """get contents of operational territories lookup table"""
-        res = LookupTerritoriesOfOperations.query.all()
+        res = LookupTerritoriesOfOperations.query.order_by(LookupTerritoriesOfOperations.sub_territory.asc()).all()
         return {'total_items': len(res), 'items': res}
 
 @ns.route('/emergency-numbers/')
