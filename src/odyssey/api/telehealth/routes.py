@@ -1420,7 +1420,9 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         conflicts = []
         exceptions = []
         for exception in request.parsed_obj:
-            if exception['exception_start_time'] >= exception['exception_end_time']:
+            #temporarily allowed start time to be equal to end time to fix a tricky FE bug
+            #will be completely reworked in 2.0.0 so this will no longer matter
+            if exception['exception_start_time'] > exception['exception_end_time']:
                 raise BadRequest('Exception start time must be before exception end time.')
             elif current_date + relativedelta(months=+6) < exception['exception_date']:
                 raise BadRequest('Exceptions cannot be set more than 6 months in the future.')
