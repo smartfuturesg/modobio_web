@@ -33,7 +33,8 @@ def test_get_patient_ds_pharmacies(test_client):
     assert response.status_code == 200 
     assert len(response.json) == 2  
 
-def test_post_patient_prescription(test_client):
+#prescribe temporarily disabled
+"""def test_post_patient_prescription(test_client):
     response = test_client.post(f'/dosespot/prescribe/{test_client.client_id}/',
                                 headers=test_client.staff_auth_header)
     assert response.status_code == 201
@@ -42,7 +43,7 @@ def test_get_patient_ds_prescriptions(test_client):
     response = test_client.get(f'/dosespot/prescribe/{test_client.client_id}/',
                                 headers=test_client.client_auth_header)
 
-    assert response.status_code == 200 
+    assert response.status_code == 200 """
 
 
 def test_ds_notifications_task(test_client):

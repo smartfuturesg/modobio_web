@@ -123,7 +123,8 @@ def test_post_2_ds_practitioner_create(test_client):
     # This user should already be in the DS system
     assert response.status_code == 400
 
-def test_post_1_ds_patient_prescribe(test_client):
+#prescribe temporarily disabled
+"""def test_post_1_ds_patient_prescribe(test_client):
     payload = {}
     response = test_client.post(
         f'/dosespot/prescribe/{test_client.client_id}/',
@@ -145,7 +146,7 @@ def test_post_2_ds_patient_prescribe(test_client):
         content_type='application/json')
     assert response.status_code == 201
     # encrypted clinic_id is randomly generated. URLs will be different for each run
-    assert response.json['url'] != patient_sso
+    assert response.json['url'] != patient_sso"""
 
 def test_get_1_ds_practitioner_notification_sso(test_client):
     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
