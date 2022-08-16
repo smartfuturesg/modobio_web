@@ -105,8 +105,7 @@ def test_authorize_clinical_care_team(test_client, care_team):
         headers=test_client.client_auth_header,
         data=dumps(payload),
         content_type='application/json')
-    breakpoint()
-    print(response.data)
+
     assert response.status_code == 201
 
     #####
@@ -292,7 +291,7 @@ def test_clinical_care_team_access(test_client, care_team):
 
     assert response.status_code == 200
 
-    # try adding a blood test for this client
+    # try adding a blood treakest for this client
     response = test_client.post(
         f'/doctor/bloodtest/{test_client.client_id}/',
         headers=client_care_team_auth_header,
