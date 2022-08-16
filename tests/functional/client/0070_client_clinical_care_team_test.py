@@ -105,7 +105,8 @@ def test_authorize_clinical_care_team(test_client, care_team):
         headers=test_client.client_auth_header,
         data=dumps(payload),
         content_type='application/json')
-
+    breakpoint()
+    print(response.data)
     assert response.status_code == 201
 
     #####
@@ -126,10 +127,16 @@ def test_authorize_clinical_care_team(test_client, care_team):
         test_client.db.session.delete(cct_auth)
     test_client.db.session.commit()
 
-    auths = [{
-        'team_member_user_id': care_team['staff_id'],
-        'resource_id': num}
-        for num in range(1, total_resources)]
+    auths = []
+    for num in range(1, total_resources + 2):
+        #must be length + 2 because id 4 was removed from the middle, making the count 1 less than the
+        #highest index number
+        #skip when num is 4 since that is the removed medications resource
+        if num != 4:
+            auths.append({
+                'team_member_user_id': care_team['client_id'],
+                'resource_id': num
+            })
     payload = {'clinical_care_team_authorization': auths}
 
     response = test_client.post(
