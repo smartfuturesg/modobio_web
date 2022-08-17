@@ -66,6 +66,7 @@ def test_account_delete_client_and_staff(test_client):
         headers=client_auth_header,
         content_type='application/json')
 
+    total_resources = LookupClinicalCareTeamResources.query.count()
     auths = []
     for num in range(1, total_resources + 2):
         #must be length + 2 because id 4 was removed from the middle, making the count 1 less than the
