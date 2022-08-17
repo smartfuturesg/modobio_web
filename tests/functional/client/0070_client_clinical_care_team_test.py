@@ -133,7 +133,7 @@ def test_authorize_clinical_care_team(test_client, care_team):
         #skip when num is 4 since that is the removed medications resource
         if num != 4:
             auths.append({
-                'team_member_user_id': care_team['client_id'],
+                'team_member_user_id': care_team['staff_id'],
                 'resource_id': num
             })
     payload = {'clinical_care_team_authorization': auths}
@@ -143,7 +143,8 @@ def test_authorize_clinical_care_team(test_client, care_team):
         headers=test_client.client_auth_header,
         data=dumps(payload),
         content_type='application/json')
-
+    breakpoint()
+    print(response.data)
     assert response.status_code == 201
 
     #####
