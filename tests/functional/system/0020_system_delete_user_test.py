@@ -74,7 +74,7 @@ def test_account_delete_client_and_staff(test_client):
         #skip when num is 4 since that is the removed medications resource
         if num != 4:
             auths.append({
-                'team_member_user_id': care_team['client_id'],
+                'team_member_user_id': staff_client_id,
                 'resource_id': num
             })
 
