@@ -970,10 +970,11 @@ class MedicalFamilyHist(BaseResource):
 
             result.user_id = user_id
             db.session.add(result)
-        payload = {'items': request.parsed_obj['conditions'],
-                   'total_items': len(request.parsed_obj['conditions'])}
-        # insert results into the result table
+            
         db.session.commit()
+        updated_history = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
+        payload = {'items': updated_history,
+                   'total_items': len(updated_history)}        
         return payload
 
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('personal_medical_history',))
@@ -996,10 +997,11 @@ class MedicalFamilyHist(BaseResource):
             else:
                 result.user_id = user_id
                 db.session.add(result)
-        payload = {'items': request.parsed_obj['conditions'],
-                   'total_items': len(request.parsed_obj['conditions'])}        
-        # insert results into the result table
+        
         db.session.commit()
+        updated_history = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
+        payload = {'items': updated_history,
+                   'total_items': len(updated_history)}        
         return payload
 
 
