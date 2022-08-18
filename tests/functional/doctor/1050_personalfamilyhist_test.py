@@ -42,8 +42,8 @@ def test_put_personalfamily_medical_history(test_client):
         content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['total_items'] == 2
-    assert len(response.json['items']) == 2
+    assert response.json['total_items'] == 3
+    assert len(response.json['items']) == 3
 
     test = (MedicalFamilyHistory
         .query
