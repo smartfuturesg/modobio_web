@@ -993,7 +993,15 @@ class MedicalFamilyHist(BaseResource):
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             if user_and_medcon:
-                user_and_medcon.update(request.json['conditions'][idx])
+                if request.json['conditions'][idx]['myself'] or \
+                    request.json['conditions'][idx]['father'] or \
+                    request.json['conditions'][idx]['brother'] or \
+                    request.json['conditions'][idx]['mother'] or \
+                    request.json['conditions'][idx]['sister']:
+                        user_and_medcon.update(request.json['conditions'][idx])
+                else:
+                    #all conditions set to false, remove this row
+                    db.session.delete(user_and_medcon)
             else:
                 result.user_id = user_id
                 db.session.add(result)
