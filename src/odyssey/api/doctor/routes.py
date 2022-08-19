@@ -967,9 +967,15 @@ class MedicalFamilyHist(BaseResource):
             if user_and_medcon:
                 raise BadRequest(f'Medical condition {result.medical_condition_id} '
                                  f'already exists for user {user_id}.')
-
-            result.user_id = user_id
-            db.session.add(result)
+            else:
+                if result.myself or \
+                    result.father or \
+                    result.brother or \
+                    result.mother or \
+                    result.sister:
+                    #only add if at least 1 value is true
+                        result.user_id = user_id
+                        db.session.add(result)
             
         db.session.commit()
         updated_history = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()

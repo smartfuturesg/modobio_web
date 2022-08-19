@@ -52,7 +52,8 @@ def test_put_personalfamily_medical_history(test_client):
             medical_condition_id=1)
         .one_or_none())
 
-    assert test.myself == False
+    assert test.myself == True
+    assert test.father == False
 
 def test_get_personalfamily_medical_history(test_client):
     response = test_client.get(
