@@ -907,11 +907,11 @@ CREDENTIAL_TYPE = {
 }
 
 DEV_EMAIL_DOMAINS = [
-    '3pillarglobal.com',
     'modobio.com',
-    'atventurepartners.com',
+    'atventurepartners.tech',
     'atlanticventurepartners.tech',
-    'simulator.amazonses.com']
+    'simulator.amazonses.com',
+]
 """ List of email address domain that will receive an email.
 
 In DEV environment, emails are send to success@simulator.amazonses.com to avoid spamming
