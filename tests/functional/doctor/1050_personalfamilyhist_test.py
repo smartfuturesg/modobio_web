@@ -42,8 +42,8 @@ def test_put_personalfamily_medical_history(test_client):
         content_type='application/json')
 
     assert response.status_code == 201
-    assert response.json['total_items'] == 3
-    assert len(response.json['items']) == 3
+    assert response.json['total_items'] == 2
+    assert len(response.json['items']) == 2
 
     test = (MedicalFamilyHistory
         .query
@@ -52,7 +52,8 @@ def test_put_personalfamily_medical_history(test_client):
             medical_condition_id=1)
         .one_or_none())
 
-    assert test.myself == False
+    assert test.myself == True
+    assert test.father == False
 
 def test_get_personalfamily_medical_history(test_client):
     response = test_client.get(
@@ -61,5 +62,5 @@ def test_get_personalfamily_medical_history(test_client):
         content_type='application/json')
 
     assert response.status_code == 200
-    assert response.json['total_items'] == 3
-    assert len(response.json['items']) == 3
+    assert response.json['total_items'] == 2
+    assert len(response.json['items']) == 2
