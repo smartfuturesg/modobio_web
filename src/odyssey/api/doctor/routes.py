@@ -967,13 +967,20 @@ class MedicalFamilyHist(BaseResource):
             if user_and_medcon:
                 raise BadRequest(f'Medical condition {result.medical_condition_id} '
                                  f'already exists for user {user_id}.')
-
-            result.user_id = user_id
-            db.session.add(result)
-        payload = {'items': request.parsed_obj['conditions'],
-                   'total_items': len(request.parsed_obj['conditions'])}
-        # insert results into the result table
+            else:
+                if result.myself or \
+                    result.father or \
+                    result.brother or \
+                    result.mother or \
+                    result.sister:
+                    #only add if at least 1 value is true
+                        result.user_id = user_id
+                        db.session.add(result)
+            
         db.session.commit()
+        updated_history = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
+        payload = {'items': updated_history,
+                   'total_items': len(updated_history)}        
         return payload
 
     @token_auth.login_required(staff_role=('medical_doctor',), resources=('personal_medical_history',))
@@ -992,14 +999,23 @@ class MedicalFamilyHist(BaseResource):
             check_medical_condition_existence(result.medical_condition_id)
             user_and_medcon = MedicalFamilyHistory.query.filter_by(user_id=user_id).filter_by(medical_condition_id=result.medical_condition_id).one_or_none()
             if user_and_medcon:
-                user_and_medcon.update(request.json['conditions'][idx])
+                if request.json['conditions'][idx]['myself'] or \
+                    request.json['conditions'][idx]['father'] or \
+                    request.json['conditions'][idx]['brother'] or \
+                    request.json['conditions'][idx]['mother'] or \
+                    request.json['conditions'][idx]['sister']:
+                        user_and_medcon.update(request.json['conditions'][idx])
+                else:
+                    #all conditions set to false, remove this row
+                    db.session.delete(user_and_medcon)
             else:
                 result.user_id = user_id
                 db.session.add(result)
-        payload = {'items': request.parsed_obj['conditions'],
-                   'total_items': len(request.parsed_obj['conditions'])}        
-        # insert results into the result table
+        
         db.session.commit()
+        updated_history = MedicalFamilyHistory.query.filter_by(user_id=user_id).all()
+        payload = {'items': updated_history,
+                   'total_items': len(updated_history)}        
         return payload
 
 
