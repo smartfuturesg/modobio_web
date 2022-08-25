@@ -515,71 +515,36 @@ doctor_credentials_post_1_data = {
 
 doctor_credentials_post_2_data = {
   'items': [
-    {'credential_type':'npi', 'country_id':1,'credentials': '98714234'},
-    {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '43218470'},
+    {'credential_type':'npi', 'country_id':1,'state': 'CA','credentials': '98714234'},
+    {'credential_type':'npi', 'country_id':1,'state': 'CA','credentials': '43218470'},
     {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '21323512'}, 
   ]
 }
 
+doctor_credentials_post_3_data = {
+  'items': [
+    {'credential_type':'npi', 'country_id':1,'state': 'CA','credentials': '98714234'},
+    {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '43218470'},
+    {'credential_type':'med_lic', 'country_id':1,'state': 'FL'}, 
+  ]
+}
+
 doctor_credentials_put_1_data = {
-    'idx':17,'status':'Verified'
+    "idx": None, #idx will be set in test
+    "want_to_practice": True,
+    "state": "AZ",
+    "country_id": 1,
+    "credential_type": "npi"
 }
 
 doctor_credentials_put_2_data = {
-    'idx': 18,'status':'Verified' 
+    "idx": None, #idx will be set in test
+    "want_to_practice": True,
+    "state": "TX",
+    "country_id": 1,
+    "credential_type": "npi"
 }
-
-doctor_credentials_put_3_data = {
-    'idx': 19,'status':'Verified' 
-}
-
-# Posting with Verified data already
-# Verified - NPI 123456789
-# Verified - DEA 183451435
-# Verified - Medical License 523746512
-doctor_credentials_post_3_data = {
-  'items': [
-    {'credential_type':'npi', 'country_id':1,'credentials': '123456789'},
-    {'credential_type':'dea', 'country_id':1,'state': 'FL','credentials': '183451435'}, 
-    {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '4312079463'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '523746512'}, 
-    {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '85423903'}
-  ]
-}
-
-# Posting with Verified data already
-# UNverified - NPI 987654321 
-# Verified - DEA 183451435
-# Verified - Medical License 523746512
-doctor_credentials_post_4_data = {
-  'items': [
-    {'credential_type':'npi', 'country_id':1,'credentials': '987654321'},
-    {'credential_type':'dea', 'country_id':1,'state': 'FL','credentials': '183451435'}, 
-    {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '4312079463'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '523746512'}, 
-    {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '85423903'}
-  ]
-}
-
-# Posting with Verified data already
-# UNverified - NPI 987654321 
-# UNverified - DEA 740329857
-# Verified - Medical License 523746512
-doctor_credentials_post_5_data = {
-  'items': [
-    {'credential_type':'npi', 'country_id':1,'credentials': '1296336567'},
-    {'credential_type':'dea', 'country_id':1,'state': 'FL','credentials': '740329857'}, 
-    {'credential_type':'dea', 'country_id':1,'state': 'CA','credentials': '4312079463'},
-    {'credential_type':'med_lic', 'country_id':1,'state': 'FL','credentials': '523746512'}, 
-    {'credential_type':'med_lic', 'country_id':1,'state': 'CA','credentials': '85423903'}
-  ]
-}
-
 
 doctor_credentials_delete_1_data = {
-    'idx': 18
-}
-
-doctor_credentials_put_4_data = {
-    'idx': 17,'status':'Verified' 
+    'idx': None #idx will be set in test
 }

@@ -906,6 +906,8 @@ CREDENTIAL_TYPE = {
     'medical_doctor': ('npi','dea','med_lic')
 }
 
+CREDENTIAL_STATUS = ('Pending Verification','Verified','Rejected','Expired')
+
 DEV_EMAIL_DOMAINS = [
     '3pillarglobal.com',
     'modobio.com',

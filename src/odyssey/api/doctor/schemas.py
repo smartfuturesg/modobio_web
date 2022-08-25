@@ -28,7 +28,7 @@ from odyssey.api.doctor.models import (
 from odyssey.api.user.models import User
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.facility.models import MedicalInstitutions
-from odyssey.utils.constants import CREDENTIAL_TYPE, MEDICAL_CONDITIONS, USSTATES_2
+from odyssey.utils.constants import CREDENTIAL_TYPE, MEDICAL_CONDITIONS, USSTATES_2, CREDENTIAL_STATUS
 from odyssey.utils.base.schemas import BaseSchema
 
 """
@@ -45,7 +45,7 @@ class MedicalCredentialsSchema(ma.SQLAlchemyAutoSchema):
     
     idx = fields.Integer(required=False)
     state = fields.String(validate=validate.OneOf(USSTATES_2))
-    status = fields.String(missing='Pending Verification')
+    status = fields.String(validate=validate.OneOf(CREDENTIAL_STATUS) ,missing='Pending Verification')
     credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPE['medical_doctor']))
     want_to_practice = fields.Boolean(required=False,missing=True)
 

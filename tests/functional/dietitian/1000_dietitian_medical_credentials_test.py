@@ -12,7 +12,7 @@ from .data import (
 
 def test_post_1_credentials(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/dietitian/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_1_data),
         content_type='application/json')
@@ -26,7 +26,7 @@ def test_post_1_credentials(test_client):
 
 def test_get_1_credentials(test_client):
     response = test_client.get(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/dietitian/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
@@ -44,7 +44,7 @@ def test_put_1_credentials(test_client):
     doctor_credentials_put_1_data["idx"] = credentials.idx
 
     response = test_client.put(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/dietitian/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_put_1_data),
         content_type='application/json')
@@ -58,7 +58,7 @@ def test_put_1_credentials(test_client):
 
 def test_post_2_credentials_bad_payload_with_same_state(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/dietitian/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_2_data),
         content_type='application/json')
@@ -67,7 +67,7 @@ def test_post_2_credentials_bad_payload_with_same_state(test_client):
 
 def test_post_2_credentials_bad_payload_with_state_missing_credential_number(test_client):
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/dietitian/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_post_3_data),
         content_type='application/json')
@@ -82,7 +82,7 @@ def test_put_2_credentials_invalid_status(test_client):
     doctor_credentials_put_2_data["idx"] = credentials.idx
 
     response = test_client.put(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/dietitian/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_put_1_data),
         content_type='application/json')
@@ -96,7 +96,7 @@ def test_delete_1_credentials(test_client):
     doctor_credentials_delete_1_data["idx"] = credentials.idx
 
     response = test_client.delete(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/dietitian/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(doctor_credentials_delete_1_data),
         content_type='application/json')
