@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 ns = Namespace('dietitian', description='Operations related to dietitian')
 
 @ns.route('/credentials/<int:user_id>/')
-class MedCredentials(BaseResource):
+class DietitianMedicalCredentialsEndpoint(BaseResource):
     @token_auth.login_required(user_type=('staff',),staff_role=('dietitian',))
     @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
     def get(self, user_id):
