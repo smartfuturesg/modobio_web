@@ -399,7 +399,7 @@ doctor_personalfamilyhist_post_data = {
     },
     {
       'medical_condition_id': 2,
-      'myself': False,
+      'myself': True,
       'father': False,
       'mother': False,
       'sister': False,
@@ -412,6 +412,14 @@ doctor_personalfamilyhist_put_data = {
   'conditions':[
     {
       'medical_condition_id': 1,
+      'myself': True,
+      'father': False,
+      'mother': False,
+      'sister': False,
+      'brother': False
+    },
+    {
+      'medical_condition_id': 2,
       'myself': False,
       'father': False,
       'mother': False,
@@ -421,7 +429,7 @@ doctor_personalfamilyhist_put_data = {
     {
       'medical_condition_id': 3,
       'myself': False,
-      'father': False,
+      'father': True,
       'mother': False,
       'sister': False,
       'brother': False
