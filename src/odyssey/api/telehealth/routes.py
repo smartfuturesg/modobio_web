@@ -220,7 +220,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
 
 @ns.route('/client/time-select/<int:user_id>/')
-@ns.doc(params={'user_id': 'Client user ID'})
+@ns.doc(params={'user_id': 'Client user ID', 'staff_id': 'Practitioner ID'})
 class TelehealthClientTimeSelectApi(BaseResource):
 
     @token_auth.login_required
@@ -320,7 +320,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 if and_continue:
                     continue  # but continue block for loop
 
-                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                staff_id = request.args.get('staff_id') if request.args.get('staff_id') else None
+                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue, staff_id)
                 
                 # if the user has a staff + client account, it may be possible for their staff account
                 # to appear as an option when attempting to book a meeting as a client
