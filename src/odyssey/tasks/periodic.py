@@ -20,7 +20,6 @@ from odyssey.tasks.tasks import (
     store_telehealth_transcript,
     cancel_noshow_appointment,
     update_apple_subscription,
-    update_apple_subscription,
     notify_client_of_imminent_scheduled_maintenance,
     notify_staff_of_imminent_scheduled_maintenance,
     upcoming_booking_payment_notification,

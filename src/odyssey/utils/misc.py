@@ -11,8 +11,8 @@ import textwrap
 import typing as t
 import uuid
 
-from datetime import datetime, date, time, timedelta, timezone
-from time import mktime
+from datetime import datetime, date, time, timedelta
+from pytz import utc
 
 import flask.json
 
@@ -29,6 +29,7 @@ from odyssey.api.client.models import (
     ClientPolicies,
     ClientRelease,
     ClientSubscriptionContract)
+from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 from odyssey.api.doctor.models import (
     MedicalBloodTests,
     MedicalBloodTestResultTypes,
@@ -36,17 +37,18 @@ from odyssey.api.doctor.models import (
     MedicalImaging,
     MedicalLookUpSTD)
 from odyssey.api.facility.models import RegisteredFacilities
-from odyssey.api.lookup.models import LookupDrinks, LookupBookingTimeIncrements
+from odyssey.api.lookup.models import LookupDrinks, LookupBookingTimeIncrements, LookupSubscriptions
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.telehealth.models import (
-    TelehealthBookings,
-    TelehealthChatRooms)
+from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import (
     User,
+    UserSubscriptions,
     UserTokenHistory,
     UserRemovalRequests,
     UserProfilePictures,
     UserPendingEmailVerifications)
+from odyssey.api.user.schemas import UserSubscriptionsSchema
+from odyssey.integrations.apple import AppStore
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVER_TIME
 from odyssey.utils.files import FileDownload
@@ -1029,3 +1031,113 @@ def create_notification(user_id, severity_id, notification_type_id, title, conte
     })
     
     db.session.add(notification)
+
+
+def update_client_subscription(user_id: int, latest_subscription: UserSubscriptions = None, apple_original_transaction_id: str = None):
+    """
+    Handles logic around updating a user's subscription.
+
+    Subscriptions may originate from the app store or have been granted to the user by a community manager. We
+    need to check both sources of subscriptions when updating a client subscription status. If both subscriptions
+    exist, we take the app store subscription first before activating a subscription grant. Grants will remain in the 
+    CommunityManagerSubscriptionGrants table indefinitely and can be activated at any time by inserting a row into the
+    UserSubscriptions table referring the subscription grant entry (UserSubscriptions.sponsorship_id).
+
+    When updating a user's subscription status, we first bring up the latest subscription. Here are the possible cases:
+    
+    1. User is currently unsubscribed or their subscription has just expired. 
+        Create new subscription entry using details from the app store or internal subscription grants. If there are no 
+        subscriptions available then create and entry into the UserSubscriptions table with a status of 'unsubscribed'.
+    2. User currently subscribed
+        Check the app store to see if the subscription has been revoked. 
+
+    """
+
+    if not latest_subscription:
+        latest_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
+
+    new_sub_data = None
+    utc_time_now = datetime.utcnow()
+    
+    if latest_subscription.subscription_status == 'subscribed' and latest_subscription.expire_date < utc_time_now:
+        # update current subscription to unsubscribed
+        latest_subscription.update({
+                'end_date': utc_time_now.isoformat(),
+                'subscription_status': 'unsubscribed', 
+                'last_checked_date': utc_time_now.isoformat()})
+        # new subscription entry for unsubscribed status. 
+        # Can be overwritten if a subscription is found in the app store or subscription grants
+        new_sub_data = {
+                'subscription_status': 'unsubscribed',
+                'is_staff': False,
+                'start_date':  utc_time_now.isoformat()
+            }
+
+    # check appstore first
+    if apple_original_transaction_id or latest_subscription.apple_original_transaction_id:
+        appstore  = AppStore()
+        # use transaction_id provided if exists else the transaction_id used previously
+        transaction_info, renewal_info, status = appstore.latest_transaction(apple_original_transaction_id if apple_original_transaction_id else request.parsed_obj.apple_original_transaction_id)
+        # Status options from https://developer.apple.com/documentation/appstoreserverapi/status    
+        # 1 The auto-renewable subscription is active. -- subscription has either been renewed or unchanged
+        # 2 The auto-renewable subscription is expired. -- subscription has been expired. Add new unsubscribed entry to UserSubscriptions
+        # 3 The auto-renewable subscription is in a billing retry period. -- do nothing. 
+        # 4 The auto-renewable subscription is in a billing grace period. -- do nothing.
+        # 5 The auto-renewable subscription is revoked. -- Add new unsubscribed entry to UserSubscriptions
+        if status == 1:
+            if latest_subscription.subscription_status == 'subscribed':
+                # subscription is active and hasn't expired yet
+                latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
+            else: 
+                new_sub_data = {
+                    'subscription_status': 'subscribed',
+                    'subscription_type_id': LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id,
+                    'is_staff': False,
+                    'apple_original_transaction_id': apple_original_transaction_id if apple_original_transaction_id else request.parsed_obj.apple_original_transaction_id,
+                    'last_checked_date': utc_time_now.isoformat(),
+                    'expire_date': datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None).isoformat(),
+                    'start_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None).isoformat()
+                }
+        
+        elif status == 5 and latest_subscription.subscription_status == 'subscribed':
+            # update current subscription to unsubscribed
+            latest_subscription.update({
+                    'end_date': utc_time_now.isoformat(),
+                    'subscription_status': 'unsubscribed', 
+                    'last_checked_date': utc_time_now.isoformat()})
+            # subscription has been revoked. Add new unsubscribed entry to UserSubscriptions
+            new_sub_data = {
+                'subscription_status': 'unsubscribed',
+                'is_staff': False,
+                'start_date':  datetime.utcnow().isoformat()
+            }
+        
+    elif latest_subscription.subscription_status == 'unsubscribed':
+        # check if the user has a subscription granted to them
+        #  - bring up earliest unused subscription grant 
+        #  - if an unused sponsorship is found and the user is unsubscribed, add new subscription entry to UserSubscriptions
+        #  - if an unused sponsorship is found and the user is subscribed, do nothing.
+        subscription_grant = CommunityManagerSubscriptionGrants.query.filter_by(
+            subscription_grantee_user_id = user_id, activated = False).order_by(CommunityManagerSubscriptionGrants.idx.asc()).first()
+        if subscription_grant:
+            subscription_grant.activated = True
+            new_sub_data = {
+                'sponsorship_id': subscription_grant.idx,
+                'subscription_status': 'subscribed',
+                'subscription_type_id': subscription_grant.subscription_type_id,
+                'is_staff': False,
+                'last_checked_date': utc_time_now.isoformat(),
+                'expire_date': (utc_time_now + timedelta(days= 31 if subscription_grant.frequency == 'Month' else 365)).isoformat(),
+                'start_date': utc_time_now.isoformat()
+            }
+    else:
+        # user is subscribed and hasn't expired yet
+        latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
+
+
+    if new_sub_data:
+        new_sub = UserSubscriptionsSchema().load(new_sub_data)
+        new_sub.user_id = user_id
+        db.session.add(new_sub) 
+
+        

@@ -46,7 +46,7 @@ BEGIN
         (_user_id, 'medical_doctor'),
         (_user_id, 'therapist'),
         (_user_id, 'trainer'),
-        (_user_id, 'dietitian')
+        (_user_id, 'dietitian'),
         (_user_id, 'community_manager');
 
     -- NOTE: StaffOperationalTerritories is obsolete, but will be kept
