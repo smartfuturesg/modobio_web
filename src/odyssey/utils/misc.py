@@ -1127,7 +1127,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 'subscription_type_id': subscription_grant.subscription_type_id,
                 'is_staff': False,
                 'last_checked_date': utc_time_now.isoformat(),
-                'expire_date': (utc_time_now + timedelta(days= 31 if subscription_grant.frequency == 'Month' else 365)).isoformat(),
+                'expire_date': (utc_time_now + timedelta(days= 31 if subscription_grant.subscription_type_information.frequency == 'Month' else 365)).isoformat(),
                 'start_date': utc_time_now.isoformat()
             }
     else:

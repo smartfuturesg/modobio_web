@@ -520,18 +520,19 @@ class UserSubscriptions(db.Model):
 
     :type: datetime
     """
-
-    subscription_type_information = db.relationship("LookupSubscriptions")
-    """
-    Relationship lookup subscriptions
-    """
-
+    
     sponsorship_id = db.Column(db.Integer, db.ForeignKey('CommunityManagerSubscriptionGrants.idx'), nullable=True)
     """
     Subscription sponsorship id. 
 
     :type: str
     """
+
+    subscription_type_information = db.relationship("LookupSubscriptions")
+    """
+    Relationship lookup subscriptions
+    """
+
    
     sponsorship = db.relationship('CommunityManagerSubscriptionGrants')
     """
