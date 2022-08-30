@@ -6,21 +6,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-import pytz
-
-from sqlalchemy import UniqueConstraint
-from sqlalchemy.orm.query import Query
-from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin, BaseModel
+from odyssey.utils.base.models import  BaseModel
 from odyssey import db
 
-phx_tz = pytz.timezone("America/Phoenix")
-
-
-class CommunityManagerSubscriptionGrants(BaseModelWithIdx):
+class CommunityManagerSubscriptionGrants(BaseModel):
     """Community Manager Subscription Grants. Stores details related to subscription grant requests"""
 
     __tablename__ = "CommunityManagerSubscriptionGrants"
+
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True, unique = True)
 
     user_id = db.Column(
         db.Integer,
@@ -61,7 +55,7 @@ class CommunityManagerSubscriptionGrants(BaseModelWithIdx):
     :type: str    
     """
 
-    activated = db.Column(db.Boolean, default=False)
+    activated = db.Column(db.Boolean, default=False, nullable=False)
     """
     Whether or not this subscription grant has been activated.
     :type: bool
