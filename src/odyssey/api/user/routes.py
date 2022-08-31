@@ -650,6 +650,11 @@ class UserSubscriptionApi(BaseResource):
         Also sets the end date to the previously active subscription.
         """
         
+        if request.parsed_obj.is_staff:
+            check_staff_existence(user_id)
+        else:
+            check_client_existence(user_id)
+
         user, _ = token_auth.current_user()
 
         if request.parsed_obj.apple_original_transaction_id:

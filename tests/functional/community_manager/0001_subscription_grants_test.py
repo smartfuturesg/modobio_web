@@ -1,6 +1,7 @@
 from flask.json import dumps
 
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
+from odyssey.api.user.models import UserSubscriptions
 
 
 def test_post_subscription_grant(test_client):
@@ -23,6 +24,12 @@ def test_post_subscription_grant(test_client):
         user_id=test_client.staff_id
     ).all()
 
+    
+    # teardown, delete subscription
+    new_sub = UserSubscriptions.query.filter_by(user_id = test_client.client_id).order_by(UserSubscriptions.idx.desc()).first()
+    test_client.db.session.delete(new_sub)
+    test_client.db.session.commit()
+
     assert response.status_code == 200
     assert len(grants) == 2
 
@@ -41,7 +48,7 @@ def test_post_subscription_grant_bad_modo_id(test_client):
         data=dumps(data),
         content_type="application/json",
     )
-
+    
     assert response.status_code == 400
 
 
@@ -52,6 +59,5 @@ def test_get_subscriptions_granted(test_client, subscription_grants):
         content_type="application/json",
     )
 
-    # bring up grants
 
     assert response.status_code == 200
