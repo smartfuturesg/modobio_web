@@ -1,12 +1,6 @@
-from bdb import Breakpoint
 import pytest
 
-from odyssey import db
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
-from odyssey.api.user.models import User
-
-from tests.utils import login
-
 
 @pytest.fixture(scope="function")
 def subscription_grants(test_client):

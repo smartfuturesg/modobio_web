@@ -2,27 +2,19 @@ import logging
 import secrets
 
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.user.schemas import UserSubscriptionsSchema
-
-from odyssey.integrations.apple import AppStore
 
 from datetime import datetime, timedelta, time
 from io import BytesIO
-from typing import Any, Dict
-from PIL import Image
-from pytz import utc
 
-from bson import ObjectId
 from flask_migrate import current_app
 from sqlalchemy import select
-from werkzeug.datastructures import FileStorage
 
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupSubscriptions
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import *
-from odyssey.api.user.models import User, UserSubscriptions
+from odyssey.api.user.models import User
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
