@@ -11,6 +11,7 @@ from odyssey.api.community_manager.schemas import PostSubscriptionGrantSchema, S
 from odyssey.api.lookup.models import LookupSubscriptions
 
 from odyssey.api.user.models import User
+from odyssey.tasks.tasks import update_client_subscription_task
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import update_client_subscription
@@ -127,9 +128,7 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
 
         # update user subscriptions
         for user_id in user_ids:
-            # TODO use celery to update user subscriptions
-            update_client_subscription(user_id)
-        
+            update_client_subscription_task.delay(user_id)
         
         db.session.commit()
 
