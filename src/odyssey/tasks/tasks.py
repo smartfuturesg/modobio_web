@@ -28,7 +28,7 @@ from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
 from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
-from odyssey.utils.misc import create_notification
+from odyssey.utils.misc import create_notification, update_client_subscription
 
 # avoid circular imports by importing entire module
 import odyssey.integrations.instamed
@@ -309,7 +309,7 @@ def store_telehealth_transcript(booking_id: int):
     return
 
 @celery.task(base=BaseTaskWithRetry)
-def update_apple_subscription(user_id: int):
+def update_client_subscription_task(user_id: int):
     """
     Updates the user's subscription by checking the subscription status with apple. 
     This task is intended to be scheduled right after the current subscription expires.
@@ -320,47 +320,9 @@ def update_apple_subscription(user_id: int):
         used to grab the latest subscription
     """
     
-    prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
+    update_client_subscription(user_id = user_id)
 
-    # only update the most recent subscription
-    if prev_sub.apple_original_transaction_id:
-        # if the subscription does not need to be updated, skip update
-        if datetime.utcnow() < prev_sub.expire_date:
-            return 
-        # grab the latest subscription details from Apple
-        appstore  = AppStore()
-        transaction_info, renewal_info, status = appstore.latest_transaction(prev_sub.apple_original_transaction_id)
-
-        prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 
-                        'subscription_status': 'unsubscribed', 
-                        'last_checked_date': datetime.utcnow().isoformat()})
-        if status not in (1, 3, 4):
-            # create entry for unsubscribed status
-            new_sub_data = {
-                'subscription_status': 'unsubscribed',
-                'is_staff': False,
-                'start_date':  datetime.utcnow().isoformat()
-            }
-        else:
-            new_sub_data = {
-                'subscription_status': 'subscribed',
-                'subscription_type_id': LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id,
-                'is_staff': False,
-                'apple_original_transaction_id': prev_sub.apple_original_transaction_id,
-                'last_checked_date': datetime.utcnow().isoformat(),
-                'expire_date': datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None).isoformat(),
-                'start_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None).isoformat()
-            }
-        
-        new_sub = UserSubscriptionsSchema().load(new_sub_data)
-        new_sub.user_id = user_id
-
-        db.session.add(new_sub)
-
-        db.session.commit()
-
-        logger.info(f"Apple subscription updated for user_id: {user_id}")
-
+    db.session.commit()
     return
 
 

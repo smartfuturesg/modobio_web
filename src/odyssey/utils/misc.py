@@ -1081,7 +1081,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
     if apple_original_transaction_id or latest_subscription.apple_original_transaction_id:
         appstore  = AppStore()
         # use transaction_id provided if exists else the transaction_id used previously
-        transaction_info, renewal_info, status = appstore.latest_transaction(apple_original_transaction_id if apple_original_transaction_id else request.parsed_obj.apple_original_transaction_id)
+        transaction_info, renewal_info, status = appstore.latest_transaction(apple_original_transaction_id if apple_original_transaction_id else latest_subscription.apple_original_transaction_id)
         # Status options from https://developer.apple.com/documentation/appstoreserverapi/status    
         # 1 The auto-renewable subscription is active. -- subscription has either been renewed or unchanged
         # 2 The auto-renewable subscription is expired. -- subscription has been expired. Add new unsubscribed entry to UserSubscriptions
@@ -1115,6 +1115,8 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 'is_staff': False,
                 'start_date':  datetime.utcnow().isoformat()
             }
+
+        logger.info(f"Apple subscription updated for user_id: {user_id}")
         
     if latest_subscription.subscription_status == 'unsubscribed' and not new_sub_data:
         # check if the user has a subscription granted to them

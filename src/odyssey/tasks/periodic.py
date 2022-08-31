@@ -19,7 +19,7 @@ from odyssey.tasks.tasks import (
     charge_telehealth_appointment,
     store_telehealth_transcript,
     cancel_noshow_appointment,
-    update_apple_subscription,
+    update_client_subscription_task,
     notify_client_of_imminent_scheduled_maintenance,
     notify_staff_of_imminent_scheduled_maintenance,
     upcoming_booking_payment_notification,
@@ -379,9 +379,9 @@ def deploy_subscription_update_tasks(interval:int):
         # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
         task_eta = subscription.expire_date 
         if task_eta < datetime.utcnow():
-            update_apple_subscription.delay(subscription.user_id)
+            update_client_subscription_task.delay(subscription.user_id)
         else:
-            update_apple_subscription.apply_async((subscription.user_id,),eta=task_eta)
+            update_client_subscription_task.apply_async((subscription.user_id,),eta=task_eta)
     
     return 
 
