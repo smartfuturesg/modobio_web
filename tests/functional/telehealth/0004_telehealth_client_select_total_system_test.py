@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from flask.json import dumps
 
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
+from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability
 from odyssey.tasks.tasks import cleanup_unended_call
@@ -200,10 +201,11 @@ def test_client_time_select(test_client, staff_availabilities):
 
 def test_client_time_select_specific_provider(test_client, staff_availabilities):
     #Get staff_id of staff user with role medical_doctor with availability
-    staff_role_id = test_client.db.session.query(StaffRoles.user_id)\
-            .join(TelehealthStaffAvailability, TelehealthStaffAvailability.user_id == StaffRoles.user_id) \
-                    .filter(StaffRoles.role == 'medical_doctor').first()
-
+    staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
+            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
+                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
+                            StaffRoles.consult_rate != None).first()
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/?staff_id={staff_role_id[0]}',
         headers=test_client.client_auth_header)
