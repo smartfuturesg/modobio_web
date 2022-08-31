@@ -199,13 +199,20 @@ def test_client_time_select(test_client, staff_availabilities):
 
 def test_client_time_select_specific_provider(test_client, staff_availabilities):
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/?staff_id=28',
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_id=40',
         headers=test_client.client_auth_header)
     
     assert response.status_code == 200
 
     for staff_id in response.json['practitioners_info']:
-        assert staff_id == '28'
+        assert staff_id == '40'
+
+def test_client_time_select_specific_provider_no_availability(test_client, staff_availabilities):
+    response = test_client.get(
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_id=28',
+        headers=test_client.client_auth_header)
+    
+    assert response.status_code == 400
     
 def test_full_system_with_settings(test_client, payment_method, telehealth_staff):
     """
