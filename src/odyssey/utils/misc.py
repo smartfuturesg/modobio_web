@@ -1116,7 +1116,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 'start_date':  datetime.utcnow().isoformat()
             }
         
-    elif latest_subscription.subscription_status == 'unsubscribed':
+    if latest_subscription.subscription_status == 'unsubscribed' and not new_sub_data:
         # check if the user has a subscription granted to them
         #  - bring up earliest unused subscription grant 
         #  - if an unused sponsorship is found and the user is unsubscribed, add new subscription entry to UserSubscriptions
@@ -1138,7 +1138,6 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
         # user is subscribed and hasn't expired yet
         latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
 
-
     if new_sub_data:
         new_sub = UserSubscriptionsSchema().load(new_sub_data)
         new_sub.user_id = user_id
@@ -1146,7 +1145,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
 
     if welcome_email:
         # send welcome email for new subscriptions
-        user = User.query.filter_by(id=user_id).one_or_none()
+        user = User.query.filter_by(user_id=user_id).one_or_none()
         send_email('subscription-confirm', user.email, firstname=user.firstname)
 
         
