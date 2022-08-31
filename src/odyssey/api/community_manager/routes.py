@@ -113,7 +113,6 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
                 user_ids.append(subscription_user.user_id)
         user_ids = list(set(user_ids))
 
-        subscription_grants = []
         for user_id in user_ids:
             db.session.add(
                 CommunityManagerSubscriptionGrants(
@@ -128,6 +127,7 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
 
         # update user subscriptions
         for user_id in user_ids:
+            # TODO use celery to update user subscriptions
             update_client_subscription(user_id)
         
         

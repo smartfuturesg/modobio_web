@@ -1058,6 +1058,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
 
     new_sub_data = None
     utc_time_now = datetime.utcnow()
+    welcome_email = False
     
     if latest_subscription.subscription_status == 'subscribed' and latest_subscription.expire_date < utc_time_now:
         # update current subscription to unsubscribed
@@ -1072,6 +1073,9 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 'is_staff': False,
                 'start_date':  utc_time_now.isoformat()
             }
+
+    elif latest_subscription.subscription_status == 'unsubscribed':
+        welcome_email = True
 
     # check appstore first
     if apple_original_transaction_id or latest_subscription.apple_original_transaction_id:
@@ -1139,5 +1143,10 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
         new_sub = UserSubscriptionsSchema().load(new_sub_data)
         new_sub.user_id = user_id
         db.session.add(new_sub) 
+
+    if welcome_email:
+        # send welcome email for new subscriptions
+        user = User.query.filter_by(id=user_id).one_or_none()
+        send_email('subscription-confirm', user.email, firstname=user.firstname)
 
         
