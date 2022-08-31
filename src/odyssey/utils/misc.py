@@ -1056,7 +1056,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
     if not latest_subscription:
         latest_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
 
-    new_sub_data = None
+    new_sub_data = {}
     utc_time_now = datetime.utcnow()
     welcome_email = False
     
@@ -1102,6 +1102,9 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                     'expire_date': datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None).isoformat(),
                     'start_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None).isoformat()
                 }
+                latest_subscription.update({
+                    'end_date': utc_time_now.isoformat(),
+                    'last_checked_date': utc_time_now.isoformat()})
         
         elif status == 5 and latest_subscription.subscription_status == 'subscribed':
             # update current subscription to unsubscribed
@@ -1118,7 +1121,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
 
         logger.info(f"Apple subscription updated for user_id: {user_id}")
         
-    if latest_subscription.subscription_status == 'unsubscribed' and not new_sub_data:
+    if latest_subscription.subscription_status == 'unsubscribed' and new_sub_data.get("subscription_status") == 'unsubscribed':
         # check if the user has a subscription granted to them
         #  - bring up earliest unused subscription grant 
         #  - if an unused sponsorship is found and the user is unsubscribed, add new subscription entry to UserSubscriptions
@@ -1136,6 +1139,9 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 'expire_date': (utc_time_now + timedelta(days= 31 if subscription_grant.subscription_type_information.frequency == 'Month' else 365)).isoformat(),
                 'start_date': utc_time_now.isoformat()
             }
+            latest_subscription.update({
+                    'end_date': utc_time_now.isoformat(),
+                    'last_checked_date': utc_time_now.isoformat()})
     else:
         # user is subscribed and hasn't expired yet
         latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})

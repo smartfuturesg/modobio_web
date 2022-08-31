@@ -1,6 +1,6 @@
 import logging
 
-from flask import request
+from flask import current_app, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest
@@ -60,6 +60,7 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
         return payload
 
     @accepts(api=ns, schema=PostSubscriptionGrantSchema)
+    @responds(api = ns, status_code=200)
     @token_auth.login_required(user_type=("staff",), staff_role=("community_manager",))
     def post(self):
         """Grants subscriptions to a list of users by either modobio_id or email
@@ -128,7 +129,10 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
 
         # update user subscriptions
         for user_id in user_ids:
-            update_client_subscription_task.delay(user_id)
+            if current_app.config['TESTING']:
+                update_client_subscription(user_id)
+            else:
+                update_client_subscription_task.delay(user_id)
         
         db.session.commit()
 

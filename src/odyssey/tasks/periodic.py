@@ -518,7 +518,7 @@ celery.conf.beat_schedule = {
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
         'args': (60,),
-        'schedule': crontab(minute='*/60')
+        'schedule': crontab(minute='*/1')
     },
     # availability
     'remove_expired_availability_exceptions': {
