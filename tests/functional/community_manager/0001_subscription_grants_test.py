@@ -26,7 +26,7 @@ def test_post_subscription_grant(test_client):
 
     
     # teardown, delete subscription
-    new_sub = UserSubscriptions.query.filter_by(user_id = test_client.client_id).order_by(UserSubscriptions.idx.desc()).first()
+    new_sub = UserSubscriptions.query.filter_by(user_id = test_client.client_id, subscription_status = 'subscribed').order_by(UserSubscriptions.idx.desc()).first()
     test_client.db.session.delete(new_sub)
     test_client.db.session.commit()
 

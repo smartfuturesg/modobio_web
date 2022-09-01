@@ -1076,7 +1076,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
 
     elif latest_subscription.subscription_status == 'unsubscribed':
         welcome_email = True
-
+        
     # check appstore first
     if apple_original_transaction_id or latest_subscription.apple_original_transaction_id:
         appstore  = AppStore()
@@ -1121,7 +1121,7 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
 
         logger.info(f"Apple subscription updated for user_id: {user_id}")
         
-    if latest_subscription.subscription_status == 'unsubscribed' and new_sub_data.get("subscription_status") == 'unsubscribed':
+    if latest_subscription.subscription_status == 'unsubscribed' and new_sub_data.get("subscription_status") != 'subscribed':
         # check if the user has a subscription granted to them
         #  - bring up earliest unused subscription grant 
         #  - if an unused sponsorship is found and the user is unsubscribed, add new subscription entry to UserSubscriptions
