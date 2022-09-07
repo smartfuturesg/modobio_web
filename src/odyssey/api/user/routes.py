@@ -305,6 +305,7 @@ class NewClientUser(BaseResource):
         email = user_info['email'] = email.lower()
 
         user = db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
+        subscription_update = False
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
@@ -345,7 +346,10 @@ class NewClientUser(BaseResource):
                 #Create client account for existing staff member
                 user.is_client = True
                 if user.email_verified:
+                    # email already verified, no need to send verification email
+                    # update client subscription status if necessary
                     verify_email = False
+                    subscription_update = True
                 else:
                     verify_email = True
         else:
@@ -423,6 +427,10 @@ class NewClientUser(BaseResource):
                                         ua_string = request.headers.get('User-Agent')))
 
         db.session.commit()
+
+        if subscription_update:
+            # checks for any existing subscriptions and updates the client subscription status
+            update_client_subscription(user_id=user.user_id)
 
         payload = {'user_info': user, 'token':access_token, 'refresh_token':refresh_token}
 
