@@ -201,7 +201,16 @@ def test_client_time_select(test_client, staff_availabilities):
     assert response.status_code == 200
     assert response.json['total_options'] == 95
 
-def test_client_time_select_specific_provider_client_in_queue(test_client, staff_availabilities):
+def test_client_time_select_specific_provider_client_in_queue(test_client, payment_method, staff_availabilities):
+
+    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    response = test_client.post(
+        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(telehealth_queue_client_3_data),
+        content_type='application/json')
+
+    assert response.status_code == 201
 
     location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
