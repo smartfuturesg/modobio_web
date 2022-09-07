@@ -201,17 +201,9 @@ def test_client_time_select(test_client, staff_availabilities):
     assert response.status_code == 200
     assert response.json['total_options'] == 95
 
-def test_client_time_select_specific_provider_client_in_queue(test_client, payment_method, staff_availabilities):
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
-    response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
-        headers=test_client.client_auth_header,
-        data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
+def test_client_time_select_specific_provider_client_in_queue(test_client, staff_availabilities):
 
-    assert response.status_code == 201
-    
-    location = LookupTerritoriesOfOperations.query.filter_by(idx=1).one_or_none().sub_territory_abbreviation
+    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
             .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                     .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
@@ -230,10 +222,10 @@ def test_client_time_select_specific_provider_client_in_queue(test_client, payme
 def test_client_time_select_specific_provider_client_not_in_queue_with_query_params(test_client, staff_availabilities):
 
     #Delete all clients in queue.  
-    TelehealthQueueClientPool.query.delete()
+    test_client.db.session.query(TelehealthQueueClientPool).delete()
 
     #Get staff_id of staff user with role medical_doctor with availability
-    location = LookupTerritoriesOfOperations.query.filter_by(idx=1).one_or_none().sub_territory_abbreviation
+    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
             .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                     .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
@@ -241,7 +233,7 @@ def test_client_time_select_specific_provider_client_not_in_queue_with_query_par
                             PractitionerCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
 
-    # Request with the valid query parameters should create a new client in the queue
+    # Request with the valid query parameters which should add client to the queue
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/?staff_id={staff_role_id[0]}&profession_type=medical_doctor&location_id=1',
         headers=test_client.client_auth_header)
@@ -251,17 +243,20 @@ def test_client_time_select_specific_provider_client_not_in_queue_with_query_par
         assert staff_id == f'{staff_role_id[0]}'
 
 def test_client_time_select_specific_provider_client_not_in_queue_without_required_query_params(test_client, staff_availabilities):
+
     #Delete all clients in queue.  
-    TelehealthQueueClientPool.query.delete()
+    test_client.db.session.query(TelehealthQueueClientPool).delete()
 
     #Get staff_id of staff user with role medical_doctor with availability
-    location = LookupTerritoriesOfOperations.query.filter_by(idx=1).one_or_none().sub_territory_abbreviation
+    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
             .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                     .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
                             .filter(PractitionerCredentials.role.has(role='medical_doctor'),
                             PractitionerCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
+
+    # Request without required query parameters add a new client in the queue
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/?staff_id={staff_role_id[0]}',
         headers=test_client.client_auth_header)
