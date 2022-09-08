@@ -784,7 +784,8 @@ class EmailVerification():
 
         # update subscription status
         # at this point, pending subscription grants will be applied to the user using their user_id
-        update_client_subscription(user.user_id)
+        if user.is_client:
+            update_client_subscription(user.user_id)
 
         #code/token were valid, remove the pending request
         db.session.delete(verification)
