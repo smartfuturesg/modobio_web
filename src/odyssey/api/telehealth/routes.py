@@ -764,7 +764,6 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.client_location_id = client_in_queue.location_id
         request.parsed_obj.profession_type = client_in_queue.profession_type
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
-        request.parsed_obj.payment_method_id = payment_method_id
 
         request.parsed_obj.status = 'Pending'
 
