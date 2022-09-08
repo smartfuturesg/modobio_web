@@ -100,6 +100,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_booking_data_1['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -129,6 +130,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_booking_data_2['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -171,6 +173,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_booking_data_3['payment_method_id'] = pm.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={client_4.user_id}'
@@ -221,7 +224,7 @@ def test_client_time_select_specific_provider_client_in_queue(test_client, payme
                             StaffRoles.consult_rate != None).first()
 
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/?staff_id={staff_role_id[0]}',
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}',
         headers=test_client.client_auth_header)
     
     assert response.status_code == 200
@@ -244,7 +247,7 @@ def test_client_time_select_specific_provider_client_not_in_queue_with_query_par
 
     # Request with the valid query parameters which should add client to the queue
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/?staff_id={staff_role_id[0]}&profession_type=medical_doctor&location_id=1',
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}&profession_type=medical_doctor&location_id=1',
         headers=test_client.client_auth_header)
     
     assert response.status_code == 200
@@ -267,7 +270,7 @@ def test_client_time_select_specific_provider_client_not_in_queue_without_requir
 
     # Request without required query parameters add a new client in the queue
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/?staff_id={staff_role_id[0]}',
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}',
         headers=test_client.client_auth_header)
     
     assert response.status_code == 400
@@ -351,6 +354,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     client_booking = {
         'target_date': target_date_next_monday.date().isoformat(),
         'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
+        'payment_method_id': payment_method.idx
     }
 
     response = test_client.post(

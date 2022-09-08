@@ -222,7 +222,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 @ns.route('/client/time-select/<int:user_id>/')
 @ns.doc(params={
     'user_id': 'Client user ID', 
-    'staff_id': 'Practitioner ID',
+    'staff_user_id': 'Practitioner ID',
     'target_date': 'Target date to be seen',
     'timezone': 'Timezone',
     'profession_type': 'Profession Role', 
@@ -359,8 +359,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 if and_continue:
                     continue  # but continue block for loop
 
-                staff_id = request.args.get('staff_id') if request.args.get('staff_id') else None
-                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue, staff_id)
+                staff_user_id = request.args.get('staff_user_id') if request.args.get('staff_user_id') else None
+                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue, staff_user_id)
                 
                 # if the user has a staff + client account, it may be possible for their staff account
                 # to appear as an option when attempting to book a meeting as a client
@@ -702,6 +702,13 @@ class TelehealthBookingsApi(BaseResource):
         if not client_in_queue:
             raise BadRequest('Client not in queue.')
         
+        payment_method_id = request.parsed_obj.payment_method_id
+        if not payment_method_id:
+            raise BadRequest("Payment Method ID not provided")
+
+        if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
+            raise BadRequest('Payment ID does not exist for user.')
+
         # requested duration in minutes
         duration = client_in_queue.duration
 
@@ -757,8 +764,7 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.client_location_id = client_in_queue.location_id
         request.parsed_obj.profession_type = client_in_queue.profession_type
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
-        request.parsed_obj.payment_method_id = request.parsed_obj.payment_method_id if request.parsed_obj.payment_method_id \
-             else client_in_queue.payment_method_id 
+        request.parsed_obj.payment_method_id = payment_method_id
 
         request.parsed_obj.status = 'Pending'
 
