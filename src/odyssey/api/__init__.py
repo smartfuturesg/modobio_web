@@ -150,9 +150,3 @@ api.add_namespace(ns)
 
 from odyssey.api.wearables.routes import ns
 api.add_namespace(ns)
-
-from odyssey.api.dietitian.routes import ns
-api.add_namespace(ns)
-
-from odyssey.api.therapist.routes import ns
-api.add_namespace(ns)

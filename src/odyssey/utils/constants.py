@@ -906,6 +906,8 @@ CREDENTIAL_TYPE = {
     'medical_doctor': ('npi','dea','med_lic')
 }
 
+CREDENTIAL_ROLES = ('medical_doctor', 'therapist', 'dietitian')
+
 CREDENTIAL_STATUS = ('Pending Verification','Verified','Rejected','Expired')
 
 DEV_EMAIL_DOMAINS = [
