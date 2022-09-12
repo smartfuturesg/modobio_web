@@ -700,6 +700,17 @@ class UserSubscriptionHistoryApi(BaseResource):
         check_user_existence(user_id)
 
         client_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+        for i, client_subscription in enumerate(client_history):
+            if client_subscription.sponsorship:
+                sponsoring_user = User.query.filter_by(user_id=client_subscription.sponsorship.user_id).one_or_none()
+                client_subscription.__dict__["sponsorship"] = {
+                    "sponsor": client_subscription.sponsorship.sponsor, 
+                    "first_name": sponsoring_user.firstname, 
+                    "last_name": sponsoring_user.lastname, 
+                    "modobio_id": sponsoring_user.modobio_id
+                }
+                client_history[i] = client_subscription
+                
         staff_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
 
         res = {}
