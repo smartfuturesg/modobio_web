@@ -320,3 +320,11 @@ BUSINESS_HRS_END=6
 MAINT_SHORT_NOTICE = 2
 
 MAINT_STD_NOTICE = 14
+
+
+SERVER_NAME = '127.0.0.1:5000'
+"""
+Name and port number of the server. This setting allows for
+url generation outside of the Flask request context. This is useful for
+creating urls as part of celery tasks. 
+"""

@@ -19,6 +19,7 @@ from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.staff.models import StaffProfile
+from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 
 class User(db.Model):
     """ 
@@ -450,7 +451,7 @@ class UserSubscriptions(db.Model):
     """
     table index
 
-    :type: integer, primary key, autoincrementing
+    :type: integer, primary key, auto incrementing
     """
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
@@ -519,11 +520,27 @@ class UserSubscriptions(db.Model):
 
     :type: datetime
     """
+    
+    sponsorship_id = db.Column(db.Integer, db.ForeignKey('CommunityManagerSubscriptionGrants.idx'), nullable=True)
+    """
+    Subscription sponsorship id. 
+
+    :type: str
+    """
 
     subscription_type_information = db.relationship("LookupSubscriptions")
     """
     Relationship lookup subscriptions
     """
+
+   
+    sponsorship = db.relationship('CommunityManagerSubscriptionGrants')
+    """
+    One to one relationship with CommunityManagerSubscriptionGrants
+
+    :type: :class:`CommunityManagerSubscriptionGrants` instance
+    """
+
 
     
 class UserTokensBlacklist(db.Model):

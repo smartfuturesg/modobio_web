@@ -64,6 +64,7 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
+    update_client_subscription,
     verify_jwt)
 
 ns = Namespace('user', description='Endpoints for user accounts.')
@@ -640,7 +641,7 @@ class UserSubscriptionApi(BaseResource):
 
         return current_subscription
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff-self', 'client'))
     @accepts(schema=UserSubscriptionsSchema, api=ns)
     @responds(schema=UserSubscriptionsSchema, api=ns, status_code=201)
     def put(self, user_id):
@@ -648,71 +649,25 @@ class UserSubscriptionApi(BaseResource):
         Updates the currently active subscription for the given user_id. 
         Also sets the end date to the previously active subscription.
         """
+        
         if request.parsed_obj.is_staff:
             check_staff_existence(user_id)
         else:
             check_client_existence(user_id)
-        
+
         user, _ = token_auth.current_user()
 
-        #update end_date for user's previous subscription
-        #NOTE: users always have a subscription, even a brand new account will have an entry
-        #      in this table as an 'unsubscribed' subscription
-        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
-
         if request.parsed_obj.apple_original_transaction_id:
-            # Verify subscription through apple
-            appstore  = AppStore()
-            transaction_info, renewal_info, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
-            if status != 1:
-                raise BadRequest('Appstore subscription status does not match request')
-
-            # NOTE: We check the app store and use the subscription type from apple. This potentially overrides request from FE. 
-            request.parsed_obj.subscription_type_id = LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id
+           update_client_subscription(user_id = user_id, apple_original_transaction_id =  request.parsed_obj.apple_original_transaction_id)
         
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
 
-        # Update the previous subscription if necessary
-        if prev_sub.subscription_status == 'subscribed':
-            if prev_sub.expire_date:
-                if prev_sub.expire_date < datetime.utcnow() or transaction_info.get('productId') != prev_sub.subscription_type_information.ios_product_id:
-                    prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
-                else:
-                    # new subscription entry not required return the current subscription
-                    prev_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
-                    prev_sub.update({'last_checked_date': datetime.utcnow().isoformat()})
-                    db.session.commit()
-                    return prev_sub
-        else:
-            prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
-    
-            # if this subscription is following an unsubscribed status: 
-            #   either first time subscription or first subscription ever
-            # Send a Welcome email
-            send_email('subscription-confirm', user.email, firstname=user.firstname)
-
-        # make a new subscription entry
-        new_data = {
-            'subscription_status': request.parsed_obj.subscription_status,
-            'subscription_type_id': request.parsed_obj.subscription_type_id,
-            'is_staff': request.parsed_obj.is_staff,
-            'apple_original_transaction_id': request.parsed_obj.apple_original_transaction_id,
-            'last_checked_date': datetime.utcnow().isoformat()
-        }
-
-        new_sub = UserSubscriptionsSchema().load(new_data)
-        new_sub.user_id = user_id
-
-        if request.parsed_obj.apple_original_transaction_id:
-            new_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
-            new_sub.expire_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None)
-            new_sub.start_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None)
-        
-        db.session.add(new_sub)
         db.session.commit()
 
-        return new_sub
+        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
+
+        return current_subscription
 
 
 @ns.route('/subscription/history/<int:user_id>/')

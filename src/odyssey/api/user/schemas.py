@@ -144,6 +144,7 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     auto_renew_status = fields.Boolean(dump_only = True, metadata={'description': 'If True the subscription is set to be renewed automatically.'})
     apple_original_transaction_id = fields.String(load_only=True, missing=None)
     subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
+    sponsorship_id = fields.Integer(load_only=True)
     
     @post_load
     def make_object(self, data, **kwargs):
