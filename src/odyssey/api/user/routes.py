@@ -647,6 +647,14 @@ class UserSubscriptionApi(BaseResource):
         if renewal_info:
             current_subscription.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
 
+        if current_subscription.sponsorship:
+            sponsoring_user = User.query.filter_by(user_id=current_subscription.sponsorship.user_id).one_or_none()
+            current_subscription.__dict__["sponsorship"] = {
+                "sponsor": current_subscription.sponsorship.sponsor, 
+                "first_name": sponsoring_user.firstname, 
+                "last_name": sponsoring_user.lastname, 
+                "modobio_id": sponsoring_user.modobio_id
+            }
         return current_subscription
 
     @token_auth.login_required(user_type=('staff-self', 'client'))
