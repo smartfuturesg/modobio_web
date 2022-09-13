@@ -220,7 +220,18 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
 
 @ns.route('/client/time-select/<int:user_id>/')
-@ns.doc(params={'user_id': 'Client user ID'})
+@ns.doc(params={
+    'user_id': 'Client user ID', 
+    'staff_user_id': 'Practitioner ID',
+    'target_date': 'Target date to be seen',
+    'timezone': 'Timezone',
+    'profession_type': 'Profession Role', 
+    'location_id': 'Location ID',
+    'priority': 'Priority',
+    'medical_gender': 'Medical gender preference',
+    'duration': 'Duration of appointment',
+    'payment_method_id': 'Payment method ID'
+}) # Add all other required params 
 class TelehealthClientTimeSelectApi(BaseResource):
 
     @token_auth.login_required
@@ -236,8 +247,36 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).\
             order_by(TelehealthQueueClientPool.priority.desc(), TelehealthQueueClientPool.target_date.asc()).first()
+
+        #Create queue entry with request params     
         if not client_in_queue:
-            raise BadRequest('Client is not in the queue.')
+            if not request.args.get('profession_type'):
+                raise BadRequest('Profession role not provided.')
+            elif not request.args.get('location_id'):
+                raise BadRequest('Location id not provided.')
+
+            location_id = request.args.get('location_id')
+            profession_type = request.args.get('profession_type')
+            target_date = request.args.get('target_date') if request.args.get('target_date') else datetime.today()
+            timezone = request.args.get('timezone') if request.args.get('timezone') else 'UTC'
+            priority = request.args.get('priority') if request.args.get('priority') else False
+            medical_gender = request.args.get('medical_gender') if request.args.get('medical_gender') else 'np'
+            duration = request.args.get('duration') if request.args.get('duration') else TELEHEALTH_BOOKING_DURATION
+            payment_method_id = request.args.get('payment_method_id') if request.args.get('payment_method_id') else None
+
+            client_in_queue = TelehealthQueueClientPool(
+                user_id=user_id, 
+                profession_type=profession_type, 
+                target_date=target_date, 
+                timezone=timezone, 
+                duration=duration,
+                medical_gender=medical_gender,
+                location_id=location_id, 
+                payment_method_id=payment_method_id,
+                priority=priority
+            )
+            db.session.add(client_in_queue)
+            db.session.commit()
 
         time_inc = LookupBookingTimeIncrements.query.all()
 
@@ -320,7 +359,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 if and_continue:
                     continue  # but continue block for loop
 
-                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                staff_user_id = request.args.get('staff_user_id') if request.args.get('staff_user_id') else None
+                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue, staff_user_id)
                 
                 # if the user has a staff + client account, it may be possible for their staff account
                 # to appear as an option when attempting to book a meeting as a client
@@ -616,7 +656,7 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date']), api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date', 'payment_method_id']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     @ns.doc(params={'client_user_id': 'Client User ID', 'staff_user_id': 'Staff User ID'})
     def post(self):
@@ -662,6 +702,13 @@ class TelehealthBookingsApi(BaseResource):
         if not client_in_queue:
             raise BadRequest('Client not in queue.')
         
+        payment_method_id = request.parsed_obj.payment_method_id
+        if not payment_method_id:
+            raise BadRequest("Payment Method ID not provided")
+
+        if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
+            raise BadRequest('Payment ID does not exist for user.')
+
         # requested duration in minutes
         duration = client_in_queue.duration
 
@@ -715,7 +762,6 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.staff_timezone = staff_settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
         request.parsed_obj.client_location_id = client_in_queue.location_id
-        request.parsed_obj.payment_method_id = client_in_queue.payment_method_id
         request.parsed_obj.profession_type = client_in_queue.profession_type
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
 

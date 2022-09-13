@@ -2,9 +2,13 @@
 from datetime import datetime, timedelta
 
 from flask.json import dumps
+from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
-from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability
+from odyssey.api.user.models import User
+from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.staff.models import StaffRoles
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthQueueClientPool
 from odyssey.tasks.tasks import cleanup_unended_call
 from flask import g
 
@@ -96,6 +100,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_booking_data_1['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -125,6 +130,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_booking_data_2['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -167,6 +173,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_booking_data_3['payment_method_id'] = pm.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={client_4.user_id}'
@@ -197,6 +204,76 @@ def test_client_time_select(test_client, staff_availabilities):
     assert response.status_code == 200
     assert response.json['total_options'] == 95
 
+def test_client_time_select_specific_provider_client_in_queue(test_client, payment_method, staff_availabilities):
+
+    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    response = test_client.post(
+        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(telehealth_queue_client_3_data),
+        content_type='application/json')
+
+    assert response.status_code == 201
+
+    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
+    staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
+            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
+                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
+                            PractitionerCredentials.state == location,
+                            StaffRoles.consult_rate != None).first()
+
+    response = test_client.get(
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}',
+        headers=test_client.client_auth_header)
+    
+    assert response.status_code == 200
+    for staff_id in response.json['practitioners_info']:
+        assert staff_id == f'{staff_role_id[0]}'
+    
+def test_client_time_select_specific_provider_client_not_in_queue_with_query_params(test_client, staff_availabilities):
+
+    #Delete all clients in queue.  
+    test_client.db.session.query(TelehealthQueueClientPool).delete()
+
+    #Get staff_id of staff user with role medical_doctor with availability
+    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
+    staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
+            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
+                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
+                            PractitionerCredentials.state == location,
+                            StaffRoles.consult_rate != None).first()
+
+    # Request with the valid query parameters which should add client to the queue
+    response = test_client.get(
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}&profession_type=medical_doctor&location_id=1',
+        headers=test_client.client_auth_header)
+    
+    assert response.status_code == 200
+    for staff_id in response.json['practitioners_info']:
+        assert staff_id == f'{staff_role_id[0]}'
+
+def test_client_time_select_specific_provider_client_not_in_queue_without_required_query_params(test_client, staff_availabilities):
+
+    #Delete all clients in queue.  
+    test_client.db.session.query(TelehealthQueueClientPool).delete()
+
+    #Get staff_id of staff user with role medical_doctor with availability
+    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
+    staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
+            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
+                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
+                            PractitionerCredentials.state == location,
+                            StaffRoles.consult_rate != None).first()
+
+    # Request without required query parameters add a new client in the queue
+    response = test_client.get(
+        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}',
+        headers=test_client.client_auth_header)
+    
+    assert response.status_code == 400
 
 def test_full_system_with_settings(test_client, payment_method, telehealth_staff):
     """
@@ -277,6 +354,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     client_booking = {
         'target_date': target_date_next_monday.date().isoformat(),
         'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
+        'payment_method_id': payment_method.idx
     }
 
     response = test_client.post(

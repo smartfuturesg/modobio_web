@@ -130,7 +130,7 @@ class TelehealthBookings(BaseModelWithIdx):
         :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=True)
     """
     client payment method selected from PaymentMethods previously set up
 
@@ -538,7 +538,7 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=True)
     """
     client payment method selected from PaymentMethods previously set up
 
