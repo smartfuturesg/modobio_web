@@ -390,7 +390,7 @@ class Instamed:
         ------
         dict : instamed response
         """
-        if booking.status != 'Confirmed':
+        if booking.status != 'Accepted':
             raise BadRequest('Booking must be confirmed to charge user')
             
         professional_role = LookupRoles.query.filter_by(role_name = booking.profession_type).one_or_none().display_name
