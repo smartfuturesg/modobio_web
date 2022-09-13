@@ -283,13 +283,13 @@ def find_chargable_bookings():
     are less than 24 hours away. It will then charge the user for the appointment using the 
     payment method saved to the booking.
     """
-    #get all bookings that are sheduled <24 hours away and have not been charged yet
+    #get all bookings that are scheduled <24 hours away and have not been charged yet
     logger.info('deploying charge booking task')
     target_time = datetime.now(timezone.utc) + timedelta(hours=24)
     target_time_window = get_time_index(target_time)
     logger.info(f'charge bookings task time window: {target_time_window}')
     
-    bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False, TelehealthBookings.status == 'Accepted') \
+    bookings = TelehealthBookings.query.filter(TelehealthBookings.charged == False, TelehealthBookings.status == 'Confirmed') \
         .filter(or_(
             and_(TelehealthBookings.booking_window_id_start_time_utc >= target_time_window, TelehealthBookings.target_date_utc == datetime.now(timezone.utc).date()),
             and_(TelehealthBookings.booking_window_id_start_time_utc <= target_time_window, TelehealthBookings.target_date_utc == target_time.date())

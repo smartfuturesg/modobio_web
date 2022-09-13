@@ -197,8 +197,8 @@ def upcoming_appointment_care_team_permissions(booking_id):
 @celery.task()
 def charge_telehealth_appointment(booking_id):
     """
-    This task will go through the process of attemping to charge a user for a telehealth booking.
-    If the payment is unsuccesful, the booking will be canceled.
+    This task will go through the process of attempting to charge a user for a telehealth booking.
+    If the payment is unsuccessful, the booking will be canceled.
     """
     # TODO: Notify user of the canceled booking via email? They are already notified via notification
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
