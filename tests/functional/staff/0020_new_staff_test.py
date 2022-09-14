@@ -278,7 +278,7 @@ def test_delete_staff_operational_territories(test_client, new_staff, new_staff_
 def test_custom_refresh_token_lifetime(test_client, new_staff):
     VALID_LIFETIME = 5
     INVALID_LIFETIME = 12345
-    
+
     uid = new_staff['user_id']
     email = users_staff_new_user_data['user_info']['email']
     passw = users_staff_new_user_data['user_info']['password']
@@ -302,3 +302,11 @@ def test_custom_refresh_token_lifetime(test_client, new_staff):
         content_type='application/json')
     
     assert response.status_code == 400
+
+    # Test default lifetime
+    response = test_client.post(
+        '/staff/token/',
+        headers=headers,
+        content_type='application/json')
+    
+    assert response.status_code == 201
