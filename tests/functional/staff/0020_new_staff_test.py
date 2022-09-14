@@ -274,3 +274,31 @@ def test_delete_staff_operational_territories(test_client, new_staff, new_staff_
     # some simple checks for validity
     assert response.status_code == 204
     assert len(staff_territories_refresh) == len(staff_territories) - len(delete_territories)
+
+def test_custom_refresh_token_lifetime(test_client, new_staff):
+    VALID_LIFETIME = 5
+    INVALID_LIFETIME = 12345
+    
+    uid = new_staff['user_id']
+    email = users_staff_new_user_data['user_info']['email']
+    passw = users_staff_new_user_data['user_info']['password']
+    creds = base64.b64encode(f'{email}:{passw}'.encode('utf-8')).decode('utf-8')
+    headers = {'Authorization': f'Basic {creds}'}
+
+    # Test a custom refresh token lifetime within the allowed range.
+    response = test_client.post(
+        '/staff/token/',
+        query_string={'refresh_token_lifetime': VALID_LIFETIME},
+        headers=headers,
+        content_type='application/json')
+    
+    assert response.status_code == 201
+
+    # Test a custom refresh token lifetime outside of the allowed range.
+    response = test_client.post(
+        '/staff/token/',
+        query_string={'refresh_token_lifetime': INVALID_LIFETIME},
+        headers=headers,
+        content_type='application/json')
+    
+    assert response.status_code == 400

@@ -846,6 +846,20 @@ Refresh token lifetime in hours.
 :type: int
 """
 
+MIN_CUSTOM_REFRESH_TOKEN_LIFETIME =  1
+"""
+Minimum custom refresh token lifetime in hours. 
+
+:type: int
+"""
+
+MAX_CUSTOM_REFRESH_TOKEN_LIFETIME =  30
+"""
+Maximum refresh token lifetime in hours. 
+
+:type: int
+"""
+
 ORG_TOKEN_LIFETIME = 4380
 """
 Org token lifetime in hours.

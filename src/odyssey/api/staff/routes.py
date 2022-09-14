@@ -48,7 +48,7 @@ from odyssey.api.user.routes import UserLogoutApi
 from odyssey.api.user.schemas import UserSchema
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
+from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS, MIN_CUSTOM_REFRESH_TOKEN_LIFETIME, MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
 from odyssey.utils.misc import check_staff_existence
 
 logger = logging.getLogger(__name__)
@@ -271,7 +271,7 @@ class RecentClients(BaseResource):
 @ns.route('/token/')
 class StaffToken(BaseResource):
     """create and revoke tokens"""
-    @ns.doc(security='password')
+    @ns.doc(security='password', params={'refresh_token_lifetime': 'Lifetime for staff refresh token'})
     @basic_auth.login_required(user_type=('staff',), email_required=False)
     @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
@@ -288,8 +288,19 @@ class StaffToken(BaseResource):
                                 StaffRoles.user_id==user.user_id
                             ).all()
 
+        refresh_token_lifetime = request.args.get('refresh_token_lifetime', type=int)
+
+        # Handle refresh token lifetime param
+        if refresh_token_lifetime:
+            # Convert lifetime from days to hours
+            if MIN_CUSTOM_REFRESH_TOKEN_LIFETIME <= refresh_token_lifetime <= MAX_CUSTOM_REFRESH_TOKEN_LIFETIME:
+                refresh_token_lifetime *= 24
+            # Else lifetime is not in acceptable range
+            else:
+                raise BadRequest('Custom refresh token lifetime must be between 1 and 30 days.')
+
         access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
-        refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh')
+        refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh', refresh_token_lifetime=refresh_token_lifetime)
 
         db.session.add(UserTokenHistory(user_id=user.user_id, 
                                         refresh_token=refresh_token,
