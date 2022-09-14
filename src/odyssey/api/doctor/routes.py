@@ -1005,7 +1005,8 @@ class MedBloodTest(BaseResource):
             'user_id': user_id,
             'reporter_id': token_auth.current_user()[0].user_id,
             'date': request.parsed_obj['date'],
-            'notes': request.parsed_obj['notes']
+            'notes': request.parsed_obj['notes'],
+            'was_fasted': request.parsed_obj['was_fasted']
         })
         
         db.session.add(client_bt)

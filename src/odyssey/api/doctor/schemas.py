@@ -238,6 +238,7 @@ class MedicalBloodTestSchema(Schema):
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'})
     reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
     image = fields.String(dump_only=True)
+    was_fasted = fields.Boolean()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -267,6 +268,7 @@ class MedicalBloodTestsInputSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at')
     user_id = fields.Integer(dump_only=True)
     results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
+    was_fasted = fields.Boolean(required = False, missing = None)
 
 class BloodTestsByTestID(Schema):
     """
