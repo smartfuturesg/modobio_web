@@ -285,6 +285,7 @@ class BloodTestsByTestID(Schema):
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, dump_only=True)
     reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
+    was_fasted = fields.Boolean()
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     """
