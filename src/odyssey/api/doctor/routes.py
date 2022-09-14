@@ -991,7 +991,7 @@ class MedBloodTest(BaseResource):
         Resource to submit a new blood test instance for the specified client.
 
         Test submissions are given a test_id which can be used to reference back
-        to the results related to this submisison. Each submission may have 
+        to the results related to this submission. Each submission may have 
         multiple results (e.g. in a panel)
         """
         
@@ -1467,18 +1467,6 @@ class AllMedBloodTestResults(BaseResource):
         payload['user_id'] = user_id
         return payload
 
-@ns.deprecated
-@ns.route('/bloodtest/result-types/')
-class MedBloodTestResultTypes(BaseResource):
-    """
-    Returns the types of tests currently documented in the DB
-    """
-    @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultTypesSchema, api=ns)
-    def get(self):
-        bt_types = MedicalBloodTestResultTypes.query.all()
-        payload = {'items' : bt_types, 'total' : len(bt_types)}
-        return payload
 
 @ns.route('/medicalhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

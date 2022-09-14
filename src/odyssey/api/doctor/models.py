@@ -849,16 +849,6 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     :type: :class:`datetime.date`
     """
 
-    panel_type = db.Column(db.String)
-    """
-    Deprecated field - it's job is now covered by the information in LookupBloodTests when paired with
-    the modobio_test_code field in MedicalBloodTestResults
-    
-    Which panel does test belong to. ``None`` if not one of the standard tests.
-
-    :type: str
-    """
-
     notes = db.Column(db.String)
     """
     Notes regarding blood test.
@@ -871,6 +861,13 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     Optional image uploaded alongside blood test results.
     
     :type: str
+    """
+
+    was_fasted = db.Column(db.Boolean)
+    """
+    Whether the client was fasted before and during the test.
+
+    :type: bool
     """
 
 
