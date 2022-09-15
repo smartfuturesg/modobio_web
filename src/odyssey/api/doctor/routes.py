@@ -35,7 +35,7 @@ from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
 from odyssey.api.user.models import User, UserProfilePictures
 from odyssey.utils.auth import token_auth
-from odyssey.utils.misc import check_medical_condition_existence
+from odyssey.utils.misc import check_medical_condition_existence, date_validator
 from odyssey.utils.files import FileDownload, FileUpload, ImageUpload, get_profile_pictures
 from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
@@ -1318,15 +1318,17 @@ class MedBloodTestAll(BaseResource):
         payload['user_id'] = user_id
         return payload
 
-
 @ns.route('/bloodtest/results/<int:test_id>/')
 @ns.doc(params={'test_id': 'Test ID number'})
+@ns.deprecated
 class MedBloodTestResults(BaseResource):
     """
     Resource for working with a single blood test 
     entry instance, test_id.
 
     Each test instance may have multiple test results. 
+
+    DEPRECATED 9.15.22
     """
     @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
@@ -1396,6 +1398,101 @@ class MedBloodTestResults(BaseResource):
         payload['test_results'] = len( nested_results['results'])
         payload['user_id'] = results[0][0].user_id
         return payload
+
+
+@ns.route('/bloodtest/results/<int:user_id>/')
+@ns.doc(params={
+    'test_id': 'Test ID number', 
+    'start_date':   'Start date for date range', 
+    'end_date': 'End date for date range',
+    'modobio_test_code': 'Modobio test code'})
+class MedBloodTestResultsSearch(BaseResource):
+    """
+    Resource for working with a single blood test 
+    entry instance, test_id.
+
+    Each test instance may have multiple test results. 
+    """
+    @token_auth.login_required(resources=('blood_chemistry',))
+    @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
+    def get(self, user_id):
+        """
+        Returns details of the test denoted by test_id as well as 
+        the actual results submitted.
+        """
+        modobio_test_code = request.args.get('modobio_test_code', type=str)
+        test_id = request.args.get('test_id', type=int)
+        start_date = request.args.get('start_date', type=date_validator)
+        end_date =  request.args.get('end_date', type=date_validator)
+
+        query =  db.session.query(
+                MedicalBloodTests, MedicalBloodTestResults, LookupBloodTests, User
+                ).filter(
+                    LookupBloodTests.modobio_test_code == MedicalBloodTestResults.modobio_test_code,
+                    MedicalBloodTestResults.test_id == MedicalBloodTests.test_id,
+                    User.user_id == MedicalBloodTests.reporter_id,
+                    MedicalBloodTests.user_id==user_id
+                )
+        
+        if test_id:
+            query = query.filter(MedicalBloodTests.test_id==test_id)
+        if modobio_test_code:
+            query = query.filter(MedicalBloodTestResults.modobio_test_code==modobio_test_code)
+        if start_date:
+            query = query.filter(MedicalBloodTests.date >= start_date)
+        if end_date:
+            query = query.filter(MedicalBloodTests.date <= end_date)
+
+        results = query.all()
+
+        if not results:
+            return
+
+        fd = FileDownload(results[0][0].user_id)
+        if results[0][0].image_path:
+            image_path = fd.url(results[0][0].image_path)
+        else:
+            image_path = None
+            
+            
+        if results[0][0].reporter_id != results[0][0].user_id:
+            reporter_pic = get_profile_pictures(results[0][0].reporter_id, True)            
+        else:
+            reporter_pic = get_profile_pictures(results[0][0].user_id, False)
+                
+        # prepare response with test details   
+        nested_results = {'test_id': test_id, 
+                          'date' : results[0][0].date,
+                          'notes' : results[0][0].notes,
+                          'image': image_path,
+                          'reporter_id': results[0][0].reporter_id,
+                          'reporter_firstname': results[0][3].firstname,
+                          'reporter_lastname': results[0][3].lastname,
+                          'reporter_profile_pictures': reporter_pic,
+                          'results': []} 
+        
+        # loop through results in order to nest results in their respective test
+        # entry instances (test_id)
+        for _, test_result, result_type, _ in results:
+                res = {
+                    'modobio_test_code': result_type.modobio_test_code, 
+                    'result_value': test_result.result_value,
+                    'evaluation': test_result.evaluation,
+                    'age': test_result.age,
+                    'biological_sex_male': test_result.biological_sex_male,
+                    'race': test_result.race,
+                    'menstrual_cycle': test_result.menstrual_cycle
+                }
+                nested_results['results'].append(res)
+
+        payload = {}
+        payload['items'] = [nested_results]
+        payload['tests'] = 1
+        payload['test_results'] = len( nested_results['results'])
+        payload['user_id'] = results[0][0].user_id
+        return payload
+
+
 
 @ns.route('/bloodtest/results/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
