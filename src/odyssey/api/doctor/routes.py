@@ -1400,10 +1400,10 @@ class MedBloodTestResults(BaseResource):
         return payload
 
 
-@ns.route('/bloodtest/results/<int:user_id>/')
+@ns.route('/bloodtest/results/search/<int:user_id>/')
 @ns.doc(params={
     'test_id': 'Test ID number', 
-    'start_date':   'Start date for date range', 
+    'start_date': 'Start date for date range', 
     'end_date': 'End date for date range',
     'modobio_test_code': 'Modobio test code'})
 class MedBloodTestResultsSearch(BaseResource):
@@ -1426,9 +1426,8 @@ class MedBloodTestResultsSearch(BaseResource):
         end_date =  request.args.get('end_date', type=date_validator)
 
         query =  db.session.query(
-                MedicalBloodTests, MedicalBloodTestResults, LookupBloodTests, User
+                MedicalBloodTests, MedicalBloodTestResults, User
                 ).filter(
-                    LookupBloodTests.modobio_test_code == MedicalBloodTestResults.modobio_test_code,
                     MedicalBloodTestResults.test_id == MedicalBloodTests.test_id,
                     User.user_id == MedicalBloodTests.reporter_id,
                     MedicalBloodTests.user_id==user_id
@@ -1444,9 +1443,16 @@ class MedBloodTestResultsSearch(BaseResource):
             query = query.filter(MedicalBloodTests.date <= end_date)
 
         results = query.all()
-
+        breakpoint()
         if not results:
             return
+
+        test_results = {} # key is test_id, value is list of results
+        for test, test_result,   in results:
+            # group results by test_id
+            test_id = test_result[0].test_id
+            if test_id not in test_results:
+                test_results[test_id] = []
 
         fd = FileDownload(results[0][0].user_id)
         if results[0][0].image_path:
@@ -1460,6 +1466,8 @@ class MedBloodTestResultsSearch(BaseResource):
         else:
             reporter_pic = get_profile_pictures(results[0][0].user_id, False)
                 
+
+        
         # prepare response with test details   
         nested_results = {'test_id': test_id, 
                           'date' : results[0][0].date,

@@ -1019,6 +1019,9 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     :type: str
     """
 
+    # 1-1 relationship with LookupBloodTests
+    test_type = db.relationship("LookupBloodTests")
+
 class MedicalSurgeries(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """ 
     History of client surgeries.
