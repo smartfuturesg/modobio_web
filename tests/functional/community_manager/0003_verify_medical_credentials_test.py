@@ -1,4 +1,3 @@
-from urllib import response
 from flask.json import dumps
 from odyssey.api.practitioner.models import PractitionerCredentials
 
@@ -38,6 +37,7 @@ def test_verify_credentials_bad_status(test_client):
     #assert credentails object has been updated
     assert cred.status == 'Pending Verification'
 
+    #status is invalid
     data = {
         "user_id": test_client.staff.user_id,
         "status": "invalid_status",

@@ -181,9 +181,9 @@ class CMProviderLicensingEndpoint(BaseResource):
         query = db.session.query(PractitionerCredentials, User)\
             .join(User, User.user_id == PractitionerCredentials.user_id)
 
+        #Filter and order by status
         if status:
             query = query.filter(PractitionerCredentials.status == status)
-
             if status == 'Pending Verification':
                 query = query.order_by(PractitionerCredentials.created_at.asc())
             if status == 'Verified':
@@ -192,7 +192,8 @@ class CMProviderLicensingEndpoint(BaseResource):
                 query = query.order_by(PractitionerCredentials.created_at.asc())
             if status == 'Expired':
                 query = query.order_by(PractitionerCredentials.expiration_date.asc())
-
+                
+        #Filter by provider id 
         if email:
             query = query.filter(User.email == email)
         if modobio_id:
@@ -203,10 +204,10 @@ class CMProviderLicensingEndpoint(BaseResource):
             start_date = datetime.strptime(start_date, '%Y-%m-%d')
             if start_date > datetime.utcnow():
                 raise BadRequest('Start date can not be in the future.')
-
         if end_date:
             end_date = datetime.strptime(end_date, '%Y-%m-%d')
-
+        
+        #Filter query results by provided date ranges (Limited to 90 days)
         if start_date and end_date:
             if (end_date - start_date).days > 90:
                 raise BadRequest('Date Range Limited to 90 Days.')
@@ -218,8 +219,11 @@ class CMProviderLicensingEndpoint(BaseResource):
             start_date = end_date - timedelta(days=90)
             query = query.filter(PractitionerCredentials.created_at.between(start_date, end_date))
 
+        #Create Pagination Object
         pagination_query = query.paginate(page, per_page, error_out=False)
         items = pagination_query.items
+        
+        #Structure response
         result = []
         for cred, user in items:
             cred.firstname = user.firstname
