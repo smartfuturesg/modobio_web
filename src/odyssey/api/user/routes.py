@@ -305,6 +305,7 @@ class NewClientUser(BaseResource):
         email = user_info['email'] = email.lower()
 
         user = db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
+        subscription_update = False
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
@@ -345,7 +346,10 @@ class NewClientUser(BaseResource):
                 #Create client account for existing staff member
                 user.is_client = True
                 if user.email_verified:
+                    # email already verified, no need to send verification email
+                    # update client subscription status if necessary
                     verify_email = False
+                    subscription_update = True
                 else:
                     verify_email = True
         else:
@@ -423,6 +427,10 @@ class NewClientUser(BaseResource):
                                         ua_string = request.headers.get('User-Agent')))
 
         db.session.commit()
+
+        if subscription_update:
+            # checks for any existing subscriptions and updates the client subscription status
+            update_client_subscription(user_id=user.user_id)
 
         payload = {'user_info': user, 'token':access_token, 'refresh_token':refresh_token}
 
@@ -640,6 +648,14 @@ class UserSubscriptionApi(BaseResource):
         if renewal_info:
             current_subscription.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
 
+        if current_subscription.sponsorship:
+            sponsoring_user = User.query.filter_by(user_id=current_subscription.sponsorship.user_id).one_or_none()
+            current_subscription.__dict__["sponsorship"] = {
+                "sponsor": current_subscription.sponsorship.sponsor, 
+                "first_name": sponsoring_user.firstname, 
+                "last_name": sponsoring_user.lastname, 
+                "modobio_id": sponsoring_user.modobio_id
+            }
         return current_subscription
 
     @token_auth.login_required(user_type=('staff-self', 'client'))
@@ -685,6 +701,17 @@ class UserSubscriptionHistoryApi(BaseResource):
         check_user_existence(user_id)
 
         client_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+        for i, client_subscription in enumerate(client_history):
+            if client_subscription.sponsorship:
+                sponsoring_user = User.query.filter_by(user_id=client_subscription.sponsorship.user_id).one_or_none()
+                client_subscription.__dict__["sponsorship"] = {
+                    "sponsor": client_subscription.sponsorship.sponsor, 
+                    "first_name": sponsoring_user.firstname, 
+                    "last_name": sponsoring_user.lastname, 
+                    "modobio_id": sponsoring_user.modobio_id
+                }
+                client_history[i] = client_subscription
+                
         staff_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
 
         res = {}

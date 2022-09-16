@@ -1083,7 +1083,7 @@ class ClinicalCareTeamMembers(BaseResource):
         the user's id is stored in the ClientClinicalCareTeam table. Otherwise, just the 
         email address is registered. 
 
-        What if a client adds someone not currently a modobio user:    
+        What if a client adds someone not currently a modobio user?    
             If a user is NOT yet a modobio member, we will use the provided email to create a new user and link
             the current authorization request to that new user. The account will be in an unverified state until that 
             email is used as part of the account creation routine. 
