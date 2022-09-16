@@ -45,7 +45,7 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
 
     status = db.Column(db.String)
     """
-    Verifcation Status <Pending Verification, Verified, Rejected>
+    Verifcation Status <Pending Verification, Verified, Rejected, Expired>
 
     :type: str
     """

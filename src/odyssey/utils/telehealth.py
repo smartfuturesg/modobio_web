@@ -108,7 +108,7 @@ def get_possible_ranges(
 
     return time_blocks
 
-def get_practitioners_available(time_block, q_request):
+def get_practitioners_available(time_block, q_request, staff_user_id):
     gender = True if q_request.medical_gender == 'm' else False
     date1, day1, day1_start, day1_end = time_block[0]
     date2, day2, day2_start, day2_end = time_block[1] if len(time_block) > 1 else (None,None,None,None)
@@ -133,6 +133,10 @@ def get_practitioners_available(time_block, q_request):
     # if we need to check for gender
     if q_request.medical_gender != 'np':
         query = query.filter(User.biological_sex_male == gender)
+
+    # filter by practitioner id
+    if staff_user_id:
+        query = query.filter(User.user_id == staff_user_id)
     
     # if there are no overlaps on time block
     if not day2:    

@@ -584,7 +584,7 @@ class ChangePassword(BaseResource):
 @ns.route('/token/refresh')
 @ns.doc(params={'refresh_token': "token from password reset endpoint"})
 class RefreshToken(BaseResource):
-    """User refesh token to issue a new token with a 1 hr TTL"""
+    """User refresh token to issue a new token with a 1 hr TTL"""
     def post(self):
         """
         Issues new API access token if refrsh_token is still valid
@@ -606,7 +606,8 @@ class RefreshToken(BaseResource):
         
         # if valid, create a new access token, return it in the payload
         access_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')
-        new_refresh_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='refresh')  
+        #pass new lifetime here
+        new_refresh_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='refresh', refresh_token_lifetime=decoded_token['ttl'])  
         
         # add refresh details to UserTokenHistory table
         db.session.add(UserTokenHistory(user_id=decoded_token['uid'], 
