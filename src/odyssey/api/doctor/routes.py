@@ -1443,61 +1443,82 @@ class MedBloodTestResultsSearch(BaseResource):
             query = query.filter(MedicalBloodTests.date <= end_date)
 
         results = query.all()
-        breakpoint()
+
         if not results:
             return
 
-        test_results = {} # key is test_id, value is list of results
-        for test, test_result,   in results:
+        test_results = {} # key is test_id, value is list of test results
+        reporter_pics = {} # key is reporter_id, value is list of profile pictures
+        for test, test_result, reporter  in results:
             # group results by test_id
-            test_id = test_result[0].test_id
-            if test_id not in test_results:
-                test_results[test_id] = []
-
-        fd = FileDownload(results[0][0].user_id)
-        if results[0][0].image_path:
-            image_path = fd.url(results[0][0].image_path)
-        else:
-            image_path = None
-            
-            
-        if results[0][0].reporter_id != results[0][0].user_id:
-            reporter_pic = get_profile_pictures(results[0][0].reporter_id, True)            
-        else:
-            reporter_pic = get_profile_pictures(results[0][0].user_id, False)
-                
-
-        
-        # prepare response with test details   
-        nested_results = {'test_id': test_id, 
-                          'date' : results[0][0].date,
-                          'notes' : results[0][0].notes,
-                          'image': image_path,
-                          'reporter_id': results[0][0].reporter_id,
-                          'reporter_firstname': results[0][3].firstname,
-                          'reporter_lastname': results[0][3].lastname,
-                          'reporter_profile_pictures': reporter_pic,
-                          'results': []} 
-        
-        # loop through results in order to nest results in their respective test
-        # entry instances (test_id)
-        for _, test_result, result_type, _ in results:
-                res = {
-                    'modobio_test_code': result_type.modobio_test_code, 
+            test_id = test.test_id
+            if test_id in test_results:
+                test_results[test_id]['results'].append( {
+                    'modobio_test_code': test_result.test_type.modobio_test_code, 
                     'result_value': test_result.result_value,
                     'evaluation': test_result.evaluation,
                     'age': test_result.age,
                     'biological_sex_male': test_result.biological_sex_male,
                     'race': test_result.race,
                     'menstrual_cycle': test_result.menstrual_cycle
-                }
-                nested_results['results'].append(res)
+                })
+            else:
+                # bring up test image
+                fd = FileDownload(test.user_id)
+                if test.image_path:
+                    image_path = fd.url(test_result.image_path)
+                else:
+                    image_path = None
+            
+                if test.reporter_id != user_id:
+                    reporter_id = test.reporter_id
+                    if test.reporter_id not in reporter_pics:
+                        reporter_pics[reporter_id] = get_profile_pictures(reporter_id, True)
+                else:
+                    reporter_id = user_id
+                    if reporter_id not in reporter_pics:
+                        reporter_pics[test.user_id] = get_profile_pictures(reporter_id, False)
+                        
+                test_results[test_id] = {
+                    'test_id': test_id, 
+                    'date' : test.date,
+                    'notes' : test.notes,
+                    'results': [{
+                                    'modobio_test_code': test_result.test_type.modobio_test_code, 
+                                    'result_value': test_result.result_value,
+                                    'evaluation': test_result.evaluation,
+                                    'age': test_result.age,
+                                    'biological_sex_male': test_result.biological_sex_male,
+                                    'race': test_result.race,
+                                    'menstrual_cycle': test_result.menstrual_cycle
+                                }], 
+                    'image': image_path,
+                    'reporter_id': test.reporter_id,
+                    'reporter_firstname': reporter.firstname,
+                    'reporter_lastname': reporter.lastname,
+                    'reporter_profile_pictures': reporter_pics[reporter_id],
+                    'was_fasted': test.was_fasted}
+
+        
+        # loop through results in order to nest results in their respective test
+        # entry instances (test_id)
+        # for _, test_result, result_type, _ in results:
+        #         res = {
+        #             'modobio_test_code': result_type.modobio_test_code, 
+        #             'result_value': test_result.result_value,
+        #             'evaluation': test_result.evaluation,
+        #             'age': test_result.age,
+        #             'biological_sex_male': test_result.biological_sex_male,
+        #             'race': test_result.race,
+        #             'menstrual_cycle': test_result.menstrual_cycle
+        #         }
+        #         nested_results['results'].append(res)
 
         payload = {}
-        payload['items'] = [nested_results]
+        payload['items'] = list(test_results.values())
         payload['tests'] = 1
-        payload['test_results'] = len( nested_results['results'])
-        payload['user_id'] = results[0][0].user_id
+        payload['test_results'] = len( results)
+        payload['user_id'] = user_id
         return payload
 
 
