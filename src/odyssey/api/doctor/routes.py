@@ -8,7 +8,7 @@ from flask import g, request, current_app
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from sqlalchemy import select, and_, or_
-from werkzeug.exceptions import BadRequest, Unauthorized
+from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.doctor.models import (
@@ -43,8 +43,6 @@ from odyssey.api.doctor.schemas import (
     CheckBoxArrayDeleteSchema,
     MedicalBloodPressuresSchema,
     MedicalBloodPressuresOutputSchema,
-    MedicalCredentialsSchema,
-    MedicalCredentialsInputSchema,
     MedicalFamilyHistInputSchema,
     MedicalFamilyHistOutputSchema,
     MedicalConditionsOutputSchema,
@@ -69,177 +67,11 @@ from odyssey.api.doctor.schemas import (
     MedicalImagingOutputSchema,
 )
 from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
-from odyssey.api.staff.models import StaffRoles
-from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.utils.base.resources import BaseResource
 
 logger = logging.getLogger(__name__)
 
 ns = Namespace('doctor', description='Operations related to doctor')
-
-@ns.route('/credentials/<int:user_id>/')
-class MedCredentials(BaseResource):
-    @token_auth.login_required(user_type=('modobio',))
-    @responds(schema=MedicalCredentialsInputSchema,status_code=200,api=ns)
-    def get(self, user_id):
-        """
-        GET Request for Pulling Medical Credentials for a practitioner
-
-        User should be Staff Self and community manager
-        """
-
-        #user_id = request.args.get('user_id',type=int)
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-
-        current_user, _ = token_auth.current_user()
-
-        if current_user.is_staff:
-            staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
-            staff_user_roles = [x[0] for x in staff_user_roles]            
-            if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
-                raise Unauthorized()
-
-        query = db.session.execute(
-            select(PractitionerCredentials).
-            where(
-                PractitionerCredentials.user_id == user_id
-                )
-        ).scalars().all()
-        return {'items': query}
-
-    @token_auth.login_required(user_type=('staff',),staff_role=('medical_doctor',))
-    @accepts(schema=MedicalCredentialsInputSchema, api=ns)
-    @responds(status_code=201,api=ns)
-    def post(self, user_id):
-        """
-        POST Request for submitting Medical Credentials for a practitioner
-
-        User should be Staff Self
-        """
-
-        #user_id = request.args.get('user_id',type=int)
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-        
-
-        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id).all()     
-        verified_cred = []
-        if curr_credentials:
-            for curr_cred in curr_credentials:
-                if curr_cred.status != 'Verified':
-                    db.session.delete(curr_cred)
-                else:
-                    verified_cred.append(curr_cred)
-        
-        payload = request.parsed_obj
-        curr_role = StaffRoles.query.filter_by(user_id=user_id,role='medical_doctor').one_or_none()
-        state_check = {}
-        for cred in payload['items']:
-
-            # This takes care of only allowing 1 state input per credential type
-            # Example:
-            # (Good) DEA - AZ, CA
-            # (Bad)  DEA - AZ, AZ
-            if cred.credential_type not in state_check:
-                state_check[cred.credential_type]=[]
-                state_check[cred.credential_type].append(cred.state)
-            else:
-                if cred.state in state_check[cred.credential_type]:
-                    # Rollback is necessary because we applied database changes above
-                    db.session.rollback()
-                    raise BadRequest(f'Multiple {cred.state} submissions for {cred.credential_type}. '
-                                     f'Only one credential per state is allowed')
-                else:
-                    state_check[cred.credential_type].append(cred.state)
-
-            # These are already verified, however if for SOME reason
-            # A Medical Doctor wants to update their credentials,
-            # We will update that credential and reset the status from Verified to Pending Verification
-            if verified_cred:
-                for curr_cred in verified_cred:
-                    cred_exists = False
-                    if cred.credential_type == curr_cred.credential_type:
-                        if cred.country_id == curr_cred.country_id and \
-                            cred.state == curr_cred.state:
-                                if cred.credentials != curr_cred.credentials:
-                                    # We update the medical doctor's credentials
-                                    # and we reset the status from Verified -> Pending Verification
-                                    curr_cred.update({'credentials': cred.credentials,'status':'Pending Verification'})
-                                cred_exists = True
-                                break
-                if not cred_exists:
-                    cred.status = 'Pending Verification'
-                    cred.role_id = curr_role.idx
-                    cred.user_id = user_id
-                    db.session.add(cred)
-            else:
-                cred.status = 'Pending Verification' if not any([current_app.config['DEV'],current_app.config['TESTING']]) else 'Verified'
-                cred.role_id = curr_role.idx
-                cred.user_id = user_id
-                db.session.add(cred)
-        db.session.commit()
-        return 
-
-    @token_auth.login_required(staff_role=('community_manager',))
-    @accepts(schema=MedicalCredentialsSchema(only=['idx','status']),api=ns)
-    @responds(status_code=201,api=ns)
-    def put(self, user_id):
-        """
-        PUT Request for updating the status for medical credentials
-
-        User for this request should be the Staff Admin
-        """
-
-        payload = request.json
-        #user_id = request.args.get('user_id',type=int)
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-        
-        status = ['Verified','Pending Verification', 'Rejected']
-        if payload['status'] not in status:
-            raise BadRequest('Status must be one of {}.'.format(', '.join(status)))
-
-        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
-
-        if curr_credentials:
-            curr_credentials.update(payload)
-            db.session.commit()
-        else:
-            raise BadRequest('Credentials not found.')
-        return
-
-    @token_auth.login_required(staff_role=('medical_doctor','community_manager'))
-    @accepts(schema=MedicalCredentialsSchema(exclude=('status','credential_type','expiration_date','state','want_to_practice','credentials','country_id')),api=ns)
-    @responds(status_code=201,api=ns)
-    def delete(self, user_id):
-        """
-        DELETE Request for deleting medical credentials
-
-        User for this request should be the Staff Self and Staff Admin
-        """
-        #user_id = request.args.get('user_id',type=int)
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-                
-        current_user, _ = token_auth.current_user()
-        staff_user_roles = db.session.query(StaffRoles.role).filter(StaffRoles.user_id==current_user.user_id).all()
-        staff_user_roles = [x[0] for x in staff_user_roles]
-        
-        if current_user.user_id != user_id and 'community_manager' not in staff_user_roles:
-            raise Unauthorized
-
-        payload = request.json
-
-        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
-
-        if curr_credentials:
-            db.session.delete(curr_credentials)
-            db.session.commit()
-        else:
-            raise BadRequest('Credentials not found.')
-        return
-
 @ns.route('/bloodpressure/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedBloodPressures(BaseResource):
@@ -513,7 +345,7 @@ class MedicalGeneralInformation(BaseResource):
         if generalInfo:
             # del generalInfo.__dict__['_sa_instance_state']
             if generalInfo.get('primary_doctor_contact_name'):
-                # If the client has a primary care doctor, we need either the 
+                # If the client has a primary care doctor, we need either the
                 # phone number or email
                 if not generalInfo.get('primary_doctor_contact_phone') and \
                     not generalInfo.get('primary_doctor_contact_email'):

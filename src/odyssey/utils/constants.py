@@ -846,6 +846,20 @@ Refresh token lifetime in hours.
 :type: int
 """
 
+MIN_CUSTOM_REFRESH_TOKEN_LIFETIME =  1
+"""
+Minimum custom refresh token lifetime in hours. 
+
+:type: int
+"""
+
+MAX_CUSTOM_REFRESH_TOKEN_LIFETIME =  30
+"""
+Maximum refresh token lifetime in hours. 
+
+:type: int
+"""
+
 ORG_TOKEN_LIFETIME = 4380
 """
 Org token lifetime in hours.
@@ -905,6 +919,10 @@ RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
 CREDENTIAL_TYPE = {
     'medical_doctor': ('npi','dea','med_lic')
 }
+
+CREDENTIAL_ROLES = ('medical_doctor', 'therapist', 'dietitian')
+
+CREDENTIAL_STATUS = ('Pending Verification','Verified','Rejected','Expired')
 
 DEV_EMAIL_DOMAINS = [
     'modobio.com',

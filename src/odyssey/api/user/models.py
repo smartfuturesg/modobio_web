@@ -350,7 +350,7 @@ class UserLogin(db.Model):
         self.password_created_at = DB_SERVER_TIME
 
     @staticmethod
-    def generate_token(user_type, user_id, token_type):
+    def generate_token(user_type, user_id, token_type, refresh_token_lifetime=None):
         """
         Generate a JWT with the appropriate user type and user_id
         """
@@ -358,8 +358,18 @@ class UserLogin(db.Model):
             raise ValueError
         
         secret = current_app.config['SECRET_KEY']
+
+        # Handle token lifetime based on token type and params
+        if token_type == 'access':
+            lifetime = TOKEN_LIFETIME
+        elif token_type == 'refresh' and refresh_token_lifetime == None:
+            lifetime = REFRESH_TOKEN_LIFETIME
+        else:
+            lifetime = refresh_token_lifetime
+
         
-        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=lifetime), 
+                            'ttl': lifetime,
                             'uid': user_id,
                             'utype': user_type,
                             'x-hasura-allowed-roles': [user_type],

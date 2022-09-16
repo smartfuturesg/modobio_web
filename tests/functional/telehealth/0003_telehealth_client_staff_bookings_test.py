@@ -40,6 +40,7 @@ def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehea
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_client_staff_bookings_post_1_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -94,6 +95,7 @@ def test_post_2_client_staff_bookings(test_client, payment_method, telehealth_st
         data=dumps(queue_data),
         content_type='application/json')
 
+    telehealth_client_staff_bookings_post_2_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -105,7 +107,8 @@ def test_post_2_client_staff_bookings(test_client, payment_method, telehealth_st
     assert response.status_code == 201
     assert response.json.get('bookings')[0].get('status') == 'Pending'
 
-def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_availabilities):
+def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_availabilities, payment_method):
+    telehealth_client_staff_bookings_post_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'

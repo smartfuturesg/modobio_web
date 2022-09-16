@@ -12,14 +12,14 @@ from .data import (
     telehealth_staff_general_availability_bad_7_post_data,
     telehealth_queue_client_pool_8_post_data
 )
-from tests.functional.doctor.data import doctor_credentials_post_1_data
+from tests.functional.practitioner.data import practitioner_credentials_post_1_data
 
 def test_post_1_staff_general_availability(test_client, payment_method, staff_territory, staff_credentials, staff_consult_rate):
     # DEPENDENCY - add practitioner credentials
     response = test_client.post(
-        f'/doctor/credentials/{test_client.staff_id}/',
+        f'/practitioner/credentials/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
-        data=dumps(doctor_credentials_post_1_data),
+        data=dumps(practitioner_credentials_post_1_data),
         content_type='application/json')
     
     assert response.status_code == 201

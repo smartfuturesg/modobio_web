@@ -1,6 +1,8 @@
 """ Schemas for user accounts. """
 
 import logging
+
+from odyssey.api.community_manager.schemas import SubscriptionGrantSchema
 logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields, post_load, validate
@@ -130,6 +132,11 @@ class UserSubscriptionTypeSchema(Schema):
     cost = fields.Float()
     frequency = fields.String()
     
+class SubscriptionSponsorSchema(Schema):
+    first_name = fields.String()
+    last_name = fields.String()
+    modobio_id = fields.String()
+    sponsor = fields.String()
 
 class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -145,6 +152,7 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     apple_original_transaction_id = fields.String(load_only=True, missing=None)
     subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
     sponsorship_id = fields.Integer(load_only=True)
+    sponsorship = fields.Nested(SubscriptionSponsorSchema, dump_only=True)
     
     @post_load
     def make_object(self, data, **kwargs):

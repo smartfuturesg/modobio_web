@@ -227,7 +227,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('idx', 'user_id', 'location_name')
     
     duration = fields.Integer(missing=TELEHEALTH_BOOKING_DURATION)
-    medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'})
+    medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'}, missing='np', required=False)
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
     location_name = fields.String()
     location_id = fields.Integer(required=True)
