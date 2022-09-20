@@ -7,7 +7,7 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
-from odyssey.api.community_manager.schemas import PostSubscriptionGrantSchema, SubscriptionGrantSchema, SubscriptionGrantsAllSchema
+from odyssey.api.community_manager.schemas import PostSubscriptionGrantSchema, SubscriptionGrantsAllSchema
 from odyssey.api.lookup.models import LookupSubscriptions
 
 from odyssey.api.user.models import User
@@ -83,9 +83,10 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
             raise BadRequest("Invalid subscription type")
 
         user_ids = []
+        unverified_user_ids = []
         non_users = []  # emails that don't exist in the system
-
-        # bring up all user's that match the given email or modobio_id
+        
+        # bring up all users that match the given email or modobio_id
         for modobio_id in data["modobio_ids"]:
             subscription_user = User.query.filter_by(
                 modobio_id=modobio_id
@@ -94,7 +95,10 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
                 raise BadRequest(
                     "User with modobio_id {} does not exist".format(modobio_id)
                 )
-            user_ids.append(subscription_user.user_id)
+            else:
+                user_ids.append(subscription_user.user_id)
+                if not subscription_user.email_verified:
+                    unverified_user_ids.append(subscription_user.user_id)
 
         # bring up users by email
         # if email not associated with an account, store the email in another list
@@ -113,6 +117,8 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
                 )
             else:
                 user_ids.append(subscription_user.user_id)
+                if not subscription_user.email_verified:
+                    unverified_user_ids.append(subscription_user.user_id)
         user_ids = list(set(user_ids))
 
         for user_id in user_ids:
@@ -128,6 +134,8 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
         db.session.commit()
 
         # update user subscriptions
+        # only update subscriptions for users with a verified email
+        user_ids = [uid for uid in user_ids if uid not in unverified_user_ids]
         for user_id in user_ids:
             if current_app.config['TESTING']:
                 update_client_subscription(user_id)
