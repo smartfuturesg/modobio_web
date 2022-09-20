@@ -33,7 +33,10 @@ from odyssey.utils.base.schemas import BaseSchema
     Schemas for the doctor's API
 """
 
-    
+class PaginationLinks(Schema):
+    _next = fields.String()
+    _prev = fields.String()
+
 class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodPressures
@@ -296,6 +299,7 @@ class MedicalBloodTestResultsOutputSchema(Schema):
     test_results = fields.Integer(metadata={'description': '# of test results'})
     items = fields.Nested(BloodTestsByTestID(many=True), missing = [])
     clientid = fields.Integer()
+    _links = fields.Nested(PaginationLinks)
 
 class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()

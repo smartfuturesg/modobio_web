@@ -4,7 +4,7 @@ import secrets
 from datetime import datetime, date
 
 from dateutil.relativedelta import relativedelta
-from flask import g, request, current_app
+from flask import g, request, current_app, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from sqlalchemy import select, and_, or_
@@ -1405,7 +1405,9 @@ class MedBloodTestResults(BaseResource):
     'test_id': 'Test ID number', 
     'start_date': 'Start date for date range', 
     'end_date': 'End date for date range',
-    'modobio_test_code': 'Modobio test code'})
+    'modobio_test_code': 'Modobio test code',
+    'page': 'page of paginated results',
+    'per_page': 'results per page'})
 class MedBloodTestResultsSearch(BaseResource):
     """
     Resource for working with a single blood test 
@@ -1424,7 +1426,9 @@ class MedBloodTestResultsSearch(BaseResource):
         test_id = request.args.get('test_id', type=int)
         start_date = request.args.get('start_date', type=date_validator)
         end_date =  request.args.get('end_date', type=date_validator)
-
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 100, type=int)
+        
         query =  db.session.query(
                 MedicalBloodTests, MedicalBloodTestResults, User
                 ).filter(
@@ -1442,14 +1446,16 @@ class MedBloodTestResultsSearch(BaseResource):
         if end_date:
             query = query.filter(MedicalBloodTests.date <= end_date)
 
-        results = query.all()
+        # results = query.all()
 
+        results = query.paginate(page, per_page, error_out=False)
+        
         if not results:
             return
 
         test_results = {} # key is test_id, value is list of test results
         reporter_pics = {} # key is reporter_id, value is list of profile pictures
-        for test, test_result, reporter  in results:
+        for test, test_result, reporter in results.items:
             # group results by test_id
             test_id = test.test_id
             if test_id in test_results:
@@ -1485,7 +1491,7 @@ class MedBloodTestResultsSearch(BaseResource):
                     'notes' : test.notes,
                     'results': [{
                                     'modobio_test_code': test_result.test_type.modobio_test_code, 
-                                    'result_value': test_result.result_value,
+                                    're+sult_value': test_result.result_value,
                                     'evaluation': test_result.evaluation,
                                     'age': test_result.age,
                                     'biological_sex_male': test_result.biological_sex_male,
@@ -1500,25 +1506,19 @@ class MedBloodTestResultsSearch(BaseResource):
                     'was_fasted': test.was_fasted}
 
         
-        # loop through results in order to nest results in their respective test
-        # entry instances (test_id)
-        # for _, test_result, result_type, _ in results:
-        #         res = {
-        #             'modobio_test_code': result_type.modobio_test_code, 
-        #             'result_value': test_result.result_value,
-        #             'evaluation': test_result.evaluation,
-        #             'age': test_result.age,
-        #             'biological_sex_male': test_result.biological_sex_male,
-        #             'race': test_result.race,
-        #             'menstrual_cycle': test_result.menstrual_cycle
-        #         }
-        #         nested_results['results'].append(res)
-
+        # remove page from query parameters so as to not conflict with pagination links
+        _args = request.args.to_dict()
+        _args.pop('page', None)
+        
         payload = {}
         payload['items'] = list(test_results.values())
-        payload['tests'] = 1
-        payload['test_results'] = len( results)
+        payload['tests'] = len(test_results)
+        payload['test_results'] = len(results.items)
         payload['user_id'] = user_id
+        payload["_links"] =   {
+            '_prev': url_for('api.doctor_med_blood_test_results_search', user_id = user_id, page=results.prev_num,**_args, _external = True) if results.has_prev else None,
+            '_next': url_for('api.doctor_med_blood_test_results_search', user_id = user_id, page=results.next_num,**_args, _external = True) if results.has_next else None,
+        }
         return payload
 
 
