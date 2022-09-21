@@ -823,14 +823,6 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
-        client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
-
-        send_email(
-            'appointment-booked-practitioner',
-            booking.practitioner.email,
-            practitioner=booking.practitioner.firstname,
-            client=client_fullname)
-
         # schedule task to abandon booking in 30-minutes if not confirmed
         if not current_app.config['TESTING']:
             abandon_telehealth_booking.apply_async((booking.idx,), eta=datetime.utcnow() + timedelta(minutes=30))
@@ -920,7 +912,6 @@ class TelehealthBookingsApi(BaseResource):
                 # Booking can only be moved to accepted from Confirmed status
                 elif booking.status != 'Confirmed':
                     raise BadRequest("Cannot accept booking")
-
                 staff_settings = TelehealthStaffSettings.query.filter_by(user_id = booking.staff_user_id).one_or_none()
                 calendar_idx = telehealth_utils.accept_booking(booking = booking, staff_settings = staff_settings)
                 booking.staff_calendar_id = calendar_idx
@@ -972,7 +963,14 @@ class TelehealthBookingsApi(BaseResource):
                     raise BadRequest("Cannot change booking status to Confirmed")
 
                 staff_settings = TelehealthStaffSettings.query.filter_by(user_id = booking.staff_user_id).one_or_none()
-               
+                client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
+                
+                send_email(
+                    'appointment-booked-practitioner',
+                    booking.practitioner.email,
+                    practitioner=booking.practitioner.firstname,
+                    client=client_fullname)
+                
                 # if the staff has the auto_confirm setting set to True, immediately set the status to Accepted
                 # add the booking to the Staff's calendar of events
                 if staff_settings.auto_confirm:
@@ -988,6 +986,10 @@ class TelehealthBookingsApi(BaseResource):
 
                 # delete the telehealth entry. Nothing else should have been created at this point
                 TelehealthBookings.query.filter_by(idx = booking_id).delete()
+
+            else:
+                raise BadRequest('Invalid status.')
+
         booking.update(data)
         db.session.commit()
                

@@ -17,7 +17,7 @@ from pytz import utc
 import flask.json
 
 from flask import current_app, request, url_for
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
@@ -775,6 +775,18 @@ class EmailVerification():
             # send welcome email
             send_email('email-welcome', user.email, firstname=user.firstname)  
 
+        # check for pending subscription grants on this email
+        subscription_grants = CommunityManagerSubscriptionGrants.query.filter_by(email = user.email.lower()).all()
+        for grant in subscription_grants:
+            grant.subscription_grantee_user_id = user.user_id
+        
+        db.session.commit()
+
+        # update subscription status
+        # at this point, pending subscription grants will be applied to the user using their user_id
+        if user.is_client:
+            update_client_subscription(user.user_id)
+
         #code/token were valid, remove the pending request
         db.session.delete(verification)
         db.session.commit()
@@ -1052,6 +1064,13 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
         Check the app store to see if the subscription has been revoked. 
 
     """
+
+    # verify the user is a client and has a verified email
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+    if not user.is_client:
+        raise BadRequest('User is not a client.')
+    if not user.email_verified:
+        raise BadRequest('User email is not verified.')
 
     if not latest_subscription:
         latest_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
