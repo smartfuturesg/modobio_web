@@ -230,13 +230,21 @@ class CMProviderLicensingEndpoint(BaseResource):
             cred.lastname = user.lastname
             cred.modobio_id = user.modobio_id
             result.append(cred)
-
+        
+        #Remove per_page and page params from request when passing request args to links for param conflictions 
+        request_args = request.args.to_dict() 
+        request_args.pop('page', None)
+        request_args.pop('per_page', None)
         return {
             'provider_licenses': result, 
             'total_items': pagination_query.total,
             '_links': {
-                '_prev': url_for('api.community-manager_cm_provider_licensing_endpoint', page=pagination_query.prev_num, per_page = per_page) if pagination_query.has_prev else None,
-                '_next': url_for('api.community-manager_cm_provider_licensing_endpoint', page=pagination_query.next_num, per_page = per_page) if pagination_query.has_next else None,
+                '_prev': url_for('api.community-manager_cm_provider_licensing_endpoint', 
+                    page=pagination_query.prev_num, per_page = per_page, **request_args, _external=True
+                    ) if pagination_query.has_prev else None,
+                '_next': url_for('api.community-manager_cm_provider_licensing_endpoint', 
+                    page=pagination_query.next_num, per_page = per_page, **request_args, _external=True
+                    ) if pagination_query.has_next else None,
                 }
             }
 
