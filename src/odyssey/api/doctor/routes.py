@@ -1446,8 +1446,9 @@ class MedBloodTestResultsSearch(BaseResource):
         if end_date:
             query = query.filter(MedicalBloodTests.date <= end_date)
 
-        # results = query.all()
-
+        # order the query by date descending
+        query = query.order_by(MedicalBloodTests.date.desc())
+        
         results = query.paginate(page, per_page, error_out=False)
         
         if not results:
@@ -1509,7 +1510,7 @@ class MedBloodTestResultsSearch(BaseResource):
         # remove page from query parameters so as to not conflict with pagination links
         _args = request.args.to_dict()
         _args.pop('page', None)
-        
+
         payload = {}
         payload['items'] = list(test_results.values())
         payload['tests'] = len(test_results)
