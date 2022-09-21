@@ -101,21 +101,17 @@ def test_get_blood_test_results(test_client):
     
 def test_patch_blood_test_image(test_client):
     response = test_client.patch(
-        f'/doctor/bloodtest/image/{test_client.client_id}/?test_id={test_id_client_submit}/',
+        f'/doctor/bloodtest/image/{test_client.client_id}/?test_id={test_id_client_submit}',
         headers=test_client.client_auth_header,
-        data=dumps(doctor_blood_tests_image_data),
-        content_type='application/json'
+        data = doctor_blood_tests_image_data,
     )
     
     assert response.status_code == 200
     
-    response = test_client.get(
-        f'/doctor/bloodtest/image/{test_client.client_id}/?test_id={test_id_client_submit}/',
-        headers=test_client.client_auth_header,
-        content_type='application/json')
-    
-    assert response.status_code == 200
-    assert response.json['image'] != None
+    # bring up the bloodtest
+    bt = MedicalBloodTests.query.filter_by(test_id=test_id_client_submit).first()
+
+    assert bt.image_path != None
 
 def test_delete_blood_test(test_client):
     # send delete request where the user attempting to delete is not the reporter, should raise 401

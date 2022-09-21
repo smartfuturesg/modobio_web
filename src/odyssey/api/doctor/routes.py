@@ -1212,7 +1212,7 @@ class MedBloodTestImage(BaseResource):
         """
         if not ('image' in request.files and request.files['image']):  
             raise BadRequest('No file selected.')
-        
+            
         test_id = request.args.get('test_id', type=int)
         test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
         if not test:
