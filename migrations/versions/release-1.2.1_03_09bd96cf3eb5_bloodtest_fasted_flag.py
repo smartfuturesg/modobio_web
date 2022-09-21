@@ -1,4 +1,4 @@
-"""empty message
+"""was_fasted flag added to MedicalBloodTests
 
 Revision ID: 09bd96cf3eb5
 Revises: c3cfeb49a26e

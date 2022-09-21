@@ -1410,10 +1410,9 @@ class MedBloodTestResults(BaseResource):
     'per_page': 'results per page'})
 class MedBloodTestResultsSearch(BaseResource):
     """
-    Resource for working with a single blood test 
-    entry instance, test_id.
+    Search for blood test results by test_id, date range, or modobio_test_code.
 
-    Each test instance may have multiple test results. 
+    This allows users to search for individual test results, batch entries, or both
     """
     @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
@@ -1448,7 +1447,7 @@ class MedBloodTestResultsSearch(BaseResource):
 
         # order the query by date descending
         query = query.order_by(MedicalBloodTests.date.desc())
-        
+
         results = query.paginate(page, per_page, error_out=False)
         
         if not results:
