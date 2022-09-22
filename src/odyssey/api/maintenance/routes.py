@@ -3,6 +3,7 @@ import time
 import pytz
 import uuid
 import boto3
+from boto3.dynamodb.conditions import Key
 from datetime import datetime, timedelta, time
 from flask import current_app, request
 from flask_accepts import accepts, responds
@@ -101,13 +102,19 @@ class MaintenanceApi(BaseResource):
 
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
+        reasons_table = dynamodb.Table(current_app.config['MAINTENANCE_REASONS_TABLE'])
 
         # Set timezone
         zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
 
         # Set start and end times to the designated timezone for DB storage
-        start = datetime.fromisoformat(request.json["start_time"]).replace(tzinfo=zone).astimezone(zone)
-        end = datetime.fromisoformat(request.json["end_time"]).replace(tzinfo=zone).astimezone(zone)
+        start = datetime.fromisoformat(request.json['start_time']).replace(tzinfo=zone).astimezone(zone)
+        end = datetime.fromisoformat(request.json['end_time']).replace(tzinfo=zone).astimezone(zone)
+
+        # Check if reason_id exists
+        reason_response = reasons_table.query(KeyConditionExpression=Key('id').eq(request.json['reason_id']))
+        if not reason_response['Items']:
+            raise BadRequest(f"Reason ID {request.json['reason_id']} does not exist.")
 
         # Get the current users token auth info
         user, _ = token_auth.current_user()
@@ -123,6 +130,7 @@ class MaintenanceApi(BaseResource):
             'updated_by': None,
             'updated_at': None,
             'comments': request.json['comments'],
+            'reason_id': request.json['reason_id'],
             'notified': "False",
         }
 
