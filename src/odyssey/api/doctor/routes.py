@@ -87,10 +87,18 @@ class MedBloodPressures(BaseResource):
         self.check_user(user_id, user_type='client')
         bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
         
+        reporter_pics = {} # key = user_id, value =  dict of pic links
         for data in bp_info:
             reporter = User.query.filter_by(user_id=data.reporter_id).one_or_none()
             data.reporter_firstname = reporter.firstname
             data.reporter_lastname = reporter.lastname
+
+            if data.reporter_id != user_id and data.reporter_id not in reporter_pics:
+                reporter_pics[data.reporter_id] = get_profile_pictures(data.reporter_id, True)            
+            elif data.reporter_id not in reporter_pics:
+                reporter_pics[data.reporter_id] = get_profile_pictures(user_id, False)
+            
+            data.reporter_profile_pictures = reporter_pics[data.reporter_id] 
 
         payload = {'items': bp_info,
                    'total_items': len(bp_info)}
