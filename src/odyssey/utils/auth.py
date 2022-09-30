@@ -247,7 +247,7 @@ class BasicAuth(object):
             user is the same as the user being requested in the request argument
             (user_id or staff_user_id)
 
-        3.  Staff is accessing client's resouces. There are several possibilities.
+        3.  Staff is accessing client's resources. There are several possibilities.
 
             a.  There are no role or resource checks specified. Just being a staff
                 member grants access to endpoint.
@@ -267,7 +267,7 @@ class BasicAuth(object):
         staff_user_roles = [x[0] for x in staff_user_roles]
 
         requested_user_id =  request.view_args.get('user_id', request.view_args.get('client_user_id'))
-       
+        
         # staff accessing their own resources
         # request args will either contain user_id or staff_user_id which must match the logged-in user
         # if logged-in staff is not the user being requested and no role nor resource requirements are provided, raise unauthorized
