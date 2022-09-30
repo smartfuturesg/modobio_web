@@ -309,6 +309,8 @@ APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'
 
 MAINTENANCE_DYNAMO_TABLE='dev_maintenance_v02'
 
+MAINTENANCE_REASONS_TABLE='prod_maintenance_reasons'
+
 MAINTENANCE_TIMEZONE='UTC'
 
 # Maintenance Business Hours Time Window In UTC
