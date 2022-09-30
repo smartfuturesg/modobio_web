@@ -1328,7 +1328,7 @@ class MedBloodTestResults(BaseResource):
 
     Each test instance may have multiple test results. 
 
-    DEPRECATED 9.15.22
+    DEPRECATED 9.15.22 v1.2.1
     """
     @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
