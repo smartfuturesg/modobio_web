@@ -275,9 +275,9 @@ class DoseSpot:
         # 1 - Male
         # 2 - Female
         # 3 - Other
-        if user.client_info.gender == 'm':
+        if user.gender == 'm':
             gender = 1
-        elif user.client_info.gender == 'f':
+        elif user.gender == 'f':
             gender = 2
         else:
             gender = 3
