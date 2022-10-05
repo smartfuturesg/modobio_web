@@ -2214,9 +2214,9 @@ class ClientDefaultHealthMetricApi(BaseResource):
         # get user sex and age info
         if user_info.biological_sex_male != None:
             sex = ('m' if user_info.biological_sex_male else 'f')
-        elif client_info.gender in ('m', 'f'): # use gender instead of biological sex
-            sex = client_info.gender
-        else: # default to female
+        elif user_info.gender in ('m', 'f'): # use gender instead of biological sex
+            sex = user_info.gender
+        else:  # default to female
             sex = 'f'
         
         if client_info.user_info.dob:

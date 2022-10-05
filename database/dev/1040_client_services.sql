@@ -12,18 +12,20 @@ BEGIN
         is_client,
         email_verified,
         biological_sex_male,
+        gender,
         dob)
     VALUES (
-        'psych@modobio.com',
-        'FG86DG4Q3J12',
-        'Wendy',
-        'Rhodes',
+        'cservice@modobio.com',
+        'BX4NW9897R12',
+        'Pam',
+        'Halpert',
         true,
 		true,
         false,
         true,
-        false,
-        '1990-06-01')
+        true,
+        'f',
+        '1981-02-08')
     RETURNING user_id INTO _user_id;
 
     INSERT INTO "UserLogin" (
@@ -37,6 +39,7 @@ BEGIN
     VALUES (_user_id, '2021-01-01');
 
     INSERT INTO "StaffRoles" (user_id, role)
-    VALUES (_user_id, 'therapist');
+    VALUES (_user_id, 'client_services');
+
 END;
 $$ LANGUAGE plpgsql;
