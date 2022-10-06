@@ -849,3 +849,51 @@ class UserProfilePictures(BaseModelWithIdx):
 
     :type: bool
     """
+
+class UserActiveCampaign(BaseModelWithIdx):
+    "Stores the data related to Active Campaign"
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    email = db.Column(db.String)
+    """
+    User email address saved in Active Campaign 
+
+    :type: string
+    """ 
+    
+    active_campaign_id = db.Column(db.Integer)
+    """
+    Contact ID from Active Campaign associated with the user
+
+    :type: : int
+    """
+
+class UserActiveCampaignTags(BaseModelWithIdx):
+    "Stores the tags the user is tagged with on Active Campaign"
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    tag_id = db.Column(db.Integer, nullable=True)
+    """
+    User tag association ID returned from Active Campaign
+
+    :type: int
+    """
+
+    tag_name = db.Column(db.String)
+    """
+    Tag name 
+
+    :type: string
+    """
