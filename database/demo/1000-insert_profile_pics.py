@@ -33,7 +33,7 @@ END;
 $$ LANGUAGE plpgsql;
 """
 
-sql_insert_tmpl = f"""
+sql_insert_tmpl = """
 INSERT INTO "UserProfilePictures" (
     image_path,
     width,
@@ -90,7 +90,8 @@ for user_id in staff_users:
         user_id=user_id,
         user_type='staff',
         client_user_id='null',
-        staff_user_id=user_id)
+        staff_user_id=user_id,
+    )
     sql_parts.append(sql_insert)
 
 for user_id in client_users:
@@ -99,7 +100,8 @@ for user_id in client_users:
         user_id=user_id,
         user_type='client',
         client_user_id=user_id,
-        staff_user_id='null')
+        staff_user_id='null',
+    )
     sql_parts.append(sql_insert)
 
 # This variable is loaded and executed as SQL on the database by the script_runner.
