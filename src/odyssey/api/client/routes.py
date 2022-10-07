@@ -235,7 +235,7 @@ class ClientProfilePicture(BaseResource):
         original = ImageUpload(
             request.files['profile_picture'].stream,
             user_id,
-            prefix='client_profile_pictures')
+            prefix='client_profile_picture')
         original.validate()
         original.save(f'original_{hex_token}.{original.extension}')
 
