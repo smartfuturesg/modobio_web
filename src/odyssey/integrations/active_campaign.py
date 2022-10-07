@@ -1,6 +1,5 @@
 import requests
 import json
-from sqlalchemy import true
 
 from werkzeug.exceptions import BadRequest
 
@@ -8,7 +7,6 @@ from flask import current_app
 from urllib.parse import urlencode
 from odyssey import db
 from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags
-
 
 class ActiveCampaign:
     """ Active Campaign integration class"""
@@ -32,10 +30,13 @@ class ActiveCampaign:
 
         for list in data['lists']:
             if list['stringid'] == ac_list:
-                return list['id'] 
+                return list['id']   
+    
+    def check_contact_existence(self, user_id) -> bool:
+        # check if user already exsists in active campaign system. 
+        # Also checks to see if user is already in the active campaign list
 
-    def check_contact_existence(self, email) -> bool:
-        #check if email exsists in active campaign
+        email = User.query.filter_by(user_id=user_id).one_or_none().email
         query = { 'email': email }
         url = self.url + 'contacts/?' + urlencode(query)
 
@@ -44,21 +45,42 @@ class ActiveCampaign:
 
         #contact exists, check if there is an db entry in UserActiveCampaign
         if data['meta']['total'] == '1':
-            ac_contact = UserActiveCampaign.query.filter_by(email=email).one_or_none()
+            contact_id = data['contacts'][0]['id']
+            ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+
             #if None, create entry
             if not ac_contact:
-                user_id = User.query.filter_by(email=email).one_or_none().user_id
                 ac_contact = UserActiveCampaign(
                     user_id=user_id, 
-                    active_campaign_id=data['contacts'][0]['id'], 
-                    email=email
+                    active_campaign_id=contact_id
                 )
                 db.session.add(ac_contact)
                 db.session.commit()
 
+            #Check if contact is in list. 
+            url = f"{self.url}/contacts/{contact_id}/contactLists"
+            response = requests.get(url, headers=self.request_header)
+            data = json.loads(response.text)
+
+            in_list = False
+            if len(data['contactLists']) > 0:
+                for list in data['contactLists']:
+                    if list['list'] == self.list_id:
+                        in_list = True
+            if not in_list:
+                #add contact to list
+                url = f'{self.url}/contactLists'
+                payload = {
+                    "contactList": {
+                        "list": self.list_id,
+                        "contact": contact_id,
+                        "status": 1    # '1': Set active to list, '2': unsubscribe from list
+                    }
+                }
+                response = requests.post(url, json=payload, headers=self.request_header)
             return True
         else:
-            # Contact not in Active Campaign
+            # Contact not in Active Campaigns
             return False
 
     def create_contact(self, email, first_name, last_name):
@@ -80,7 +102,6 @@ class ActiveCampaign:
         ac_contact = UserActiveCampaign(
             user_id=user_id, 
             active_campaign_id=contact_id, 
-            email=email
         )
         db.session.add(ac_contact)
         db.session.commit()
@@ -96,7 +117,6 @@ class ActiveCampaign:
         }
         response = requests.post(url, json=payload, headers=self.request_header)
 
-    
     def add_tag(self, user_id, tag_name):  
         #Get tag id from tag name
         query = { 'search': tag_name }

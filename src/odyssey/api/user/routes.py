@@ -65,6 +65,7 @@ from odyssey.utils.misc import (
     check_client_existence,
     check_staff_existence,
     verify_jwt)
+from odyssey.integrations.active_campaign import ActiveCampaign
 
 ns = Namespace('user', description='Endpoints for user accounts.')
 
@@ -826,6 +827,17 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             email verification code provided during client creation
         """
         EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
+        
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        
+        #Add to Active Campaign after email_verification
+        ac = ActiveCampaign()    
+        if not ac.check_contact_existence(user_id):
+            ac.create_contact(user.email, user.firstname, user.lastname)
+        if user.is_client:
+            ac.add_tag(user_id, 'Persona - Client')
+        if user.is_staff:
+            ac.add_tag(user_id, 'Persona - Provider')
 
         return
 

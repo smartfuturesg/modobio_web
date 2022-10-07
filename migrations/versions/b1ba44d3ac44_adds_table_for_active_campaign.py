@@ -1,8 +1,8 @@
 """Adds Table for active campaign
 
-Revision ID: 0f63c3be1418
+Revision ID: b1ba44d3ac44
 Revises: 1882fcff5c14
-Create Date: 2022-10-06 15:15:48.131591
+Create Date: 2022-10-06 16:15:02.348540
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0f63c3be1418'
+revision = 'b1ba44d3ac44'
 down_revision = '1882fcff5c14'
 branch_labels = None
 depends_on = None
@@ -23,7 +23,6 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('email', sa.String(), nullable=True),
     sa.Column('active_campaign_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('idx')

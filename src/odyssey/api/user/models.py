@@ -859,13 +859,6 @@ class UserActiveCampaign(BaseModelWithIdx):
 
     :type: int, foreign key
     """
-
-    email = db.Column(db.String)
-    """
-    User email address saved in Active Campaign 
-
-    :type: string
-    """ 
     
     active_campaign_id = db.Column(db.Integer)
     """
