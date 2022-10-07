@@ -270,7 +270,7 @@ class ClientInfo(BaseModel):
         :class:`flask_sqlalchemy.Pagination`
             An object holding the paginated search results from the SQLAlchemy query.
         """
-        resources = query.paginate(page=page, perg_page=per_page, error_out=False)
+        resources = query.paginate(page=page, per_page=per_page, error_out=False)
         data = {
             'items': [item.client_info_search_dict() for item in resources.items],
             '_meta': {
