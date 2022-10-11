@@ -93,8 +93,8 @@ class ActiveCampaign:
                 'lastName': last_name
             }
         }
-        response = requests.post(url, json=payload, headers=self.request_header)
-        data = json.loads(response.text)
+        contant_response = requests.post(url, json=payload, headers=self.request_header)
+        data = json.loads(contant_response.text)
         contact_id = data['contact']['id']
 
         user_id = User.query.filter_by(email=email).one_or_none().user_id
@@ -115,7 +115,9 @@ class ActiveCampaign:
                 "status": 1    # '1': Set active to list, '2': unsubscribe from list
             }
         }
-        response = requests.post(url, json=payload, headers=self.request_header)
+        list_response = requests.post(url, json=payload, headers=self.request_header)
+        
+        return contant_response, list_response
 
     def add_tag(self, user_id, tag_name):  
         #Get tag id from tag name
@@ -153,6 +155,8 @@ class ActiveCampaign:
             tag = UserActiveCampaignTags(user_id=user_id, tag_id=tag_id, tag_name=tag_name)
             db.session.add(tag)
             db.session.commit()
+        
+        return response
 
     def remove_tag(self, user_id, tag_name):
         #Get tag from db
@@ -166,6 +170,8 @@ class ActiveCampaign:
         
         db.session.delete(tag)
         db.session.commit()
+
+        return response
 
     def update_ac_contact_name(self, user_id, first_name, last_name):
         #Get active campaign contact id
@@ -183,6 +189,8 @@ class ActiveCampaign:
         }
         response = requests.put(url, json=payload, headers=self.request_header)
 
+        return response
+
     def update_ac_email_contact(self, user_id, email):
         #Get active campaign contact id
         ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
@@ -197,3 +205,19 @@ class ActiveCampaign:
             }
         }
         response = requests.put(url, json=payload, headers=self.request_header)
+
+        return response
+
+    def delete_contact(self, user_id):
+        ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+        if not ac_id:
+            raise BadRequest('No active campaign contact found with provided user ID.')
+
+        #Delete contact info
+        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
+        response = requests.delete(url, headers=self.request_header)
+
+        db.session.delete(ac_id)
+        db.session.commit()
+
+        return response
