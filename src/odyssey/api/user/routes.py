@@ -190,8 +190,6 @@ class NewStaffUser(BaseResource):
 
                 if user.email_verified:
                     verify_email = False
-                    # User is already added to Active Campaign as client need to give staff tag
-                    ac.add_tag(user.user_id, 'Persona - Provider')
                 else:
                     verify_email = True
         else:
@@ -351,9 +349,6 @@ class NewClientUser(BaseResource):
                 user.is_client = True
                 if user.email_verified:
                     verify_email = False
-
-                    # User is already added to Active Campaign tagged as staff, need to give client tag
-                    ac.add_tag(user.user_id, 'Persona - Client')
                 else:
                     verify_email = True
         else:
@@ -390,9 +385,6 @@ class NewClientUser(BaseResource):
         })
         client_sub.user_id = user.user_id
         db.session.add(client_sub)
-
-        # Add active campaign subscription tag
-        ac.add_tag(user.user_id, 'Subscription - None')
 
         # add default client mobile settings
         client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
@@ -860,6 +852,8 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             ac.add_tag(user_id, 'Persona - Client')
         if user.is_staff:
             ac.add_tag(user_id, 'Persona - Provider')
+
+        ac.add_tag(user_id, 'Subscription - None')
 
         return
 
