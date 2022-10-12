@@ -28,6 +28,7 @@ from odyssey.api.staff.models import StaffRoles
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
+    UserActiveCampaignTags,
     UserLogin,
     UserRemovalRequests,
     UserSubscriptions,
@@ -150,6 +151,7 @@ class NewStaffUser(BaseResource):
         staff_info = request.json.get('staff_info')
 
         user = User.query.filter(User.email.ilike(email)).first()
+        ac = ActiveCampaign()
         if user:
             if user.is_staff:
                 # user account already exists for this email and is already a staff account
@@ -188,6 +190,8 @@ class NewStaffUser(BaseResource):
 
                 if user.email_verified:
                     verify_email = False
+                    # User is already added to Active Campaign as client need to give staff tag
+                    ac.add_tag(user.user_id, 'Persona - Provider')
                 else:
                     verify_email = True
         else:
@@ -305,6 +309,7 @@ class NewClientUser(BaseResource):
         email = user_info['email'] = email.lower()
 
         user = db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
+        ac = ActiveCampaign()
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
@@ -346,6 +351,9 @@ class NewClientUser(BaseResource):
                 user.is_client = True
                 if user.email_verified:
                     verify_email = False
+
+                    # User is already added to Active Campaign tagged as staff, need to give client tag
+                    ac.add_tag(user.user_id, 'Persona - Client')
                 else:
                     verify_email = True
         else:
@@ -382,6 +390,9 @@ class NewClientUser(BaseResource):
         })
         client_sub.user_id = user.user_id
         db.session.add(client_sub)
+
+        # Add active campaign subscription tag
+        ac.add_tag(user.user_id, 'Subscription - None')
 
         # add default client mobile settings
         client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
@@ -655,6 +666,7 @@ class UserSubscriptionApi(BaseResource):
             check_client_existence(user_id)
         
         user, _ = token_auth.current_user()
+        ac = ActiveCampaign()
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -693,6 +705,16 @@ class UserSubscriptionApi(BaseResource):
             # Send a Welcome email
             send_email('subscription-confirm', user.email, firstname=user.firstname)
 
+            #Add active campaign tag for type of subscription. 
+            if request.parsed_obj.subscription_type_id == 2:      #Monthly Subscription ID from LookupTable
+                ac.add_tag(user_id, 'Subscription - Month')
+            elif request.parsed_obj.subscription_type_id == 3:   #Yearly Subscrioption ID from LookupTable
+                ac.add_tag(user_id, 'Subscription - Annual')
+            #Remove old subscription tag
+            sub_tag = UserActiveCampaignTags.query.filter_by(user_id=user_id, tag_name='Subscription - None').one_or_none()
+            if sub_tag:
+                ac.remove_tag(user_id, 'Subscription - None')
+                
         # make a new subscription entry
         new_data = {
             'subscription_status': request.parsed_obj.subscription_status,
