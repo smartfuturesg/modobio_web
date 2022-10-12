@@ -151,7 +151,6 @@ class NewStaffUser(BaseResource):
         staff_info = request.json.get('staff_info')
 
         user = User.query.filter(User.email.ilike(email)).first()
-        ac = ActiveCampaign()
         if user:
             if user.is_staff:
                 # user account already exists for this email and is already a staff account
@@ -307,7 +306,6 @@ class NewClientUser(BaseResource):
         email = user_info['email'] = email.lower()
 
         user = db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
-        ac = ActiveCampaign()
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
