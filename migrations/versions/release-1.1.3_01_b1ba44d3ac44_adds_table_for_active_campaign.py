@@ -1,7 +1,7 @@
 """Adds Table for active campaign
 
 Revision ID: b1ba44d3ac44
-Revises: 1882fcff5c14
+Revises: 6be0e73cb0cc
 Create Date: 2022-10-06 16:15:02.348540
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'b1ba44d3ac44'
-down_revision = '1882fcff5c14'
+down_revision = '6be0e73cb0cc'
 branch_labels = None
 depends_on = None
 
