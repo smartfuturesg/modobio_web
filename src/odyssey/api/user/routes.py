@@ -111,16 +111,20 @@ class ApiUser(BaseResource):
             if any((current_app.config['DEV'], current_app.config['TESTING'])) :
                 payload['email_verification_code'] = email_verification_data.get('code')
 
-            ac.update_ac_contact_info(user_id, email=email)
+            #Only run active campaign operations in prod
+            if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                ac.update_ac_contact_info(user_id, email=email)
         
         user.update(user_info)
         db.session.commit()
 
-        #update active campaign contact name if name sent with request
-        first_name = user_info.get('firstname', None)
-        last_name = user_info.get('lastname', None)
-        if first_name or last_name:
-            ac.update_ac_contact_info(first_name=first_name, last_name=last_name)
+        #Only run active campaign operations in prod
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            #update active campaign contact name if name sent with request
+            first_name = user_info.get('firstname', None)
+            last_name = user_info.get('lastname', None)
+            if first_name or last_name:
+                ac.update_ac_contact_info(first_name=first_name, last_name=last_name)
 
         return payload
 
@@ -705,15 +709,17 @@ class UserSubscriptionApi(BaseResource):
             # Send a Welcome email
             send_email('subscription-confirm', user.email, firstname=user.firstname)
 
-            #Add active campaign tag for type of subscription. 
-            if request.parsed_obj.subscription_type_id == 2:      #Monthly Subscription ID from LookupTable
-                ac.add_tag(user_id, 'Subscription - Month')
-            elif request.parsed_obj.subscription_type_id == 3:   #Yearly Subscrioption ID from LookupTable
-                ac.add_tag(user_id, 'Subscription - Annual')
-            #Remove old subscription tag
-            sub_tag = UserActiveCampaignTags.query.filter_by(user_id=user_id, tag_name='Subscription - None').one_or_none()
-            if sub_tag:
-                ac.remove_tag(user_id, 'Subscription - None')
+            #Only run active campaign operations in prod
+            if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                #Add active campaign tag for type of subscription. 
+                if request.parsed_obj.subscription_type_id == 2:      #Monthly Subscription ID from LookupTable
+                    ac.add_tag(user_id, 'Subscription - Month')
+                elif request.parsed_obj.subscription_type_id == 3:   #Yearly Subscrioption ID from LookupTable
+                    ac.add_tag(user_id, 'Subscription - Annual')
+                #Remove old subscription tag
+                sub_tag = UserActiveCampaignTags.query.filter_by(user_id=user_id, tag_name='Subscription - None').one_or_none()
+                if sub_tag:
+                    ac.remove_tag(user_id, 'Subscription - None')
                 
         # make a new subscription entry
         new_data = {
@@ -852,16 +858,18 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         
         user = User.query.filter_by(user_id=user_id).one_or_none()
         
-        #Add to Active Campaign after email_verification
-        ac = ActiveCampaign()    
-        if not ac.check_contact_existence(user_id):
-            ac.create_contact(user.email, user.firstname, user.lastname)
-        if user.is_client:
-            ac.add_tag(user_id, 'Persona - Client')
-        if user.is_staff:
-            ac.add_tag(user_id, 'Persona - Provider')
+        #Only run active campaign operations in prod
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            #Add to Active Campaign after email_verification
+            ac = ActiveCampaign()    
+            if not ac.check_contact_existence(user_id):
+                ac.create_contact(user.email, user.firstname, user.lastname)
+            if user.is_client:
+                ac.add_tag(user_id, 'Persona - Client')
+            if user.is_staff:
+                ac.add_tag(user_id, 'Persona - Provider')
 
-        ac.add_tag(user_id, 'Subscription - None')
+            ac.add_tag(user_id, 'Subscription - None')
 
         return
 
