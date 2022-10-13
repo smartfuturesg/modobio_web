@@ -59,23 +59,14 @@ def test_update_contact_name(test_client):
 
     #update name
     user =  User.query.filter_by(user_id=test_client.staff_id).one_or_none()
-    response = ac.update_ac_contact_name(user.user_id, 'Update', 'Name')
+    response = ac.update_ac_contact_info(user.user_id, 'Update', 'Name', 'updated@email.com')
     data = json.loads(response.text) 
 
     assert response.status_code == 200
     assert data['contact']['firstName'] == 'Update'
     assert data['contact']['lastName'] == 'Name'
-
-def test_update_contact_email(test_client):
-    ac = ActiveCampaign()
-    
-    #update email
-    user =  User.query.filter_by(user_id=test_client.staff_id).one_or_none()
-    response = ac.update_ac_email_contact(user.user_id, 'updated@email.com')
-    data = json.loads(response.text) 
-
-    assert response.status_code == 200
     assert data['contact']['email'] == 'updated@email.com'
+
 
 def test_delete_contact(test_client):
     ac = ActiveCampaign()

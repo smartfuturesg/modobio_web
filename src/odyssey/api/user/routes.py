@@ -100,6 +100,8 @@ class ApiUser(BaseResource):
         email = user_info.get('email')
 
         payload = {}
+        ac = ActiveCampaign()
+
         #if email is part of payload, use email update routine
         if email:
             email_domain_blacklisted(email)
@@ -108,9 +110,17 @@ class ApiUser(BaseResource):
             # respond with verification code in dev/testing
             if any((current_app.config['DEV'], current_app.config['TESTING'])) :
                 payload['email_verification_code'] = email_verification_data.get('code')
+
+            ac.update_ac_contact_info(user_id, email=email)
         
         user.update(user_info)
         db.session.commit()
+
+        #update active campaign contact name if name sent with request
+        first_name = user_info.get('firstname', None)
+        last_name = user_info.get('lastname', None)
+        if first_name or last_name:
+            ac.update_ac_contact_info(first_name=first_name, last_name=last_name)
 
         return payload
 

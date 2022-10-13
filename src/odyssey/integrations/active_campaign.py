@@ -173,37 +173,24 @@ class ActiveCampaign:
 
         return response
 
-    def update_ac_contact_name(self, user_id, first_name, last_name):
+    def update_ac_contact_info(self, user_id, first_name=None, last_name=None, email=None):
         #Get active campaign contact id
         ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
         if not ac_id:
             raise BadRequest('No active campaign contact found with provided user ID.')
 
+        payload = {'contact': {}}
+
+        if first_name:
+            payload['contact']['firstName'] = first_name
+        if last_name:
+            payload['contact']['lastName'] = last_name
+        if email:
+            payload['contact']['email'] = email
+        
         #Update contact info
         url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
-        payload = {
-            "contact": {
-                "firstName": first_name,
-                "lastName": last_name
-            }
-        }
-        response = requests.put(url, json=payload, headers=self.request_header)
-
-        return response
-
-    def update_ac_email_contact(self, user_id, email):
-        #Get active campaign contact id
-        ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
-        if not ac_id:
-            raise BadRequest('No active campaign contact found with provided user ID.')
-
-        #Update email address
-        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
-        payload = {
-            "contact": {
-                "email": email,
-            }
-        }
+        
         response = requests.put(url, json=payload, headers=self.request_header)
 
         return response
