@@ -20,11 +20,12 @@ from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.staff.models import StaffProfile
 
+
 class User(db.Model):
     """ 
     Stores details to relating to user account not related to the login system
     """
-    __searchable__ = ['modobio_id', 'email', 'phone_number', 'firstname', 'lastname', 'user_id','dob']
+    __searchable__ = ['modobio_id', 'email', 'phone_number', 'firstname', 'lastname', 'user_id', 'dob']
 
     __tablename__ = 'User'
 
@@ -100,7 +101,7 @@ class User(db.Model):
     :type: str, max length 50
     """
 
-    biological_sex_male =  db.Column(db.Boolean, server_default='false')
+    biological_sex_male = db.Column(db.Boolean, server_default='false')
     """
     Client biological sex, true for male, false for female.
 
@@ -121,7 +122,6 @@ class User(db.Model):
 
     :type: boolean
     """
-
 
     staff_profile = db.relationship('StaffProfile', uselist=False, back_populates='user_info')
     """
@@ -172,13 +172,21 @@ class User(db.Model):
 
     :type: boolean
     """
-    
+
     dob = db.Column(db.Date)
     """
     User date of birth.
 
     :type: :class:`datetime.date`
     """
+
+    gender = db.Column(db.String(1))
+    """
+    Client gender.
+
+    :type: str, max length 1
+    """
+
 
 @db.event.listens_for(User, "after_update")
 def update_ES_index(mapper, connection, target):
@@ -198,6 +206,7 @@ def update_ES_index(mapper, connection, target):
         'dob': target.dob
     }
     update_index(user, False)
+
 
 class UserLogin(db.Model):
     """ 
