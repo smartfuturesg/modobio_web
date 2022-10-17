@@ -227,11 +227,11 @@ class CMProviderLicensingEndpoint(BaseResource):
             start_date = end_date - timedelta(days=90)
             query = query.filter(PractitionerCredentials.created_at.between(start_date, end_date))
 
-        #Create Pagination Object
-        pagination_query = query.paginate(page, per_page, error_out=False)
+        # Create Pagination Object
+        pagination_query = query.paginate(page=page, per_page=per_page, error_out=False)
         items = pagination_query.items
         
-        #Structure response
+        # Structure response
         result = []
         for cred, user in items:
             cred.firstname = user.firstname
