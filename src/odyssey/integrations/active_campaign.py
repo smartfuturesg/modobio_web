@@ -254,15 +254,10 @@ class ActiveCampaign:
             User.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Prospect')).all()
         if prospect_tags:
             prospect_provider = False
-            prospect_client = False
             for tag in prospect_tags:
                 if tag.tag_name == 'Prospect - Provider':
                     prospect_provider = True
-                if tag.tag_name == 'Prospect - Client':
-                    prospect_client = True
                     
         if not prospect_provider and user.is_client:
             return self.add_tag(user_id, 'Converted - Client')
-        if not prospect_client and user.is_staff:
-            return self.add_tag(user_id, 'Converted - Provider')
 
