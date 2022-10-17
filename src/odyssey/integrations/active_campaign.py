@@ -1,3 +1,4 @@
+from datetime import date
 import requests
 import json
 
@@ -6,7 +7,7 @@ from werkzeug.exceptions import BadRequest
 from flask import current_app
 from urllib.parse import urlencode
 from odyssey import db
-from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags
+from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags, UserSubscriptions
 
 class ActiveCampaign:
     """ Active Campaign integration class"""
@@ -35,6 +36,7 @@ class ActiveCampaign:
     def check_contact_existence(self, user_id) -> bool:
         # check if user already exsists in active campaign system. 
         # Also checks to see if user is already in the active campaign list
+        # Returns True if contact exists and False if not
 
         email = User.query.filter_by(user_id=user_id).one_or_none().email
         query = { 'email': email }
@@ -48,7 +50,7 @@ class ActiveCampaign:
             contact_id = data['contacts'][0]['id']
             ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
 
-            #if None, create entry
+            #if None, create db entry
             if not ac_contact:
                 ac_contact = UserActiveCampaign(
                     user_id=user_id, 
@@ -57,16 +59,20 @@ class ActiveCampaign:
                 db.session.add(ac_contact)
                 db.session.commit()
 
-            #Check if contact is in list. 
+            #Check if contact is in active campaign list. 
             url = f"{self.url}/contacts/{contact_id}/contactLists"
             response = requests.get(url, headers=self.request_header)
             data = json.loads(response.text)
 
             in_list = False
             if len(data['contactLists']) > 0:
-                for list in data['contactLists']:
-                    if list['list'] == self.list_id:
+                for x in data['contactLists']:
+                    if x['list'] == self.list_id:    #Contact is already created and in list
                         in_list = True
+                        # User is already in active campaign list, check to see if they have been marked as a prospect. 
+                        # If so change this adds a tag of "Converted-Clients".
+                        self.convert_prosect(user_id)   
+                        return True
             if not in_list:
                 #add contact to list
                 url = f'{self.url}/contactLists'
@@ -80,7 +86,7 @@ class ActiveCampaign:
                 response = requests.post(url, json=payload, headers=self.request_header)
             return True
         else:
-            # Contact not in Active Campaigns
+            # Returns false if contact not in Active Campaigns
             return False
 
     def create_contact(self, email, first_name, last_name):
@@ -190,12 +196,12 @@ class ActiveCampaign:
         
         #Update contact info
         url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
-        
         response = requests.put(url, json=payload, headers=self.request_header)
 
         return response
 
     def delete_contact(self, user_id):
+        #Delete contact from active campaign
         ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
         if not ac_id:
             raise BadRequest('No active campaign contact found with provided user ID.')
@@ -208,3 +214,55 @@ class ActiveCampaign:
         db.session.commit()
 
         return response
+
+    def add_age_group_tag(self, user_id):
+        #Gets users age and adds to age group
+        dob = User.query.filter_by(user_id=user_id).one_or_none().dob 
+        today = date.today()
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+        if age < 25:
+            return self.add_tag(user_id, 'Age 25 -')
+        elif age >= 25 and age < 45:
+            return self.add_tag(user_id, 'Age 25-44')
+        elif age >= 45 and age < 64:
+            return self.add_tag(user_id, 'Age 45-64')
+        elif age >= 64:
+            return self.add_tag(user_id, 'Age 64+')
+    
+    def add_user_subscription_type(self, user_id):
+        #Remove old subscription tags if any
+        subscription_tags = UserActiveCampaignTags.query.filter(
+            User.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Subscription')).all()
+        if subscription_tags:
+            for tag in subscription_tags:
+                self.remove_tag(user_id, tag.tag_name)
+
+        #Get subscription type and add tag based off subsctipyon type
+        user_sub = UserSubscriptions.query.filter_by(user_id=user_id).one_or_none()
+        if user_sub.subscription_status == 'unsubscribed':   #Unsubscribed
+            return self.add_tag(user_id, 'Subscription - None')
+        elif user_sub.subscription_type_id == 2:             #Monthly Subscription ID from LookupTable
+            return self.add_tag(user_id, 'Subscription - Month')
+        elif user_sub.subscription_type_id == 3:             #Yearly Subscrioption ID from LookupTable
+            return self.add_tag(user_id, 'Subscription - Annual')
+
+    def convert_prosect(self, user_id):
+        #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        prospect_tags = UserActiveCampaignTags.query.filter(
+            User.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Prospect')).all()
+        if prospect_tags:
+            prospect_provider = False
+            prospect_client = False
+            for tag in prospect_tags:
+                if tag.tag_name == 'Prospect - Provider':
+                    prospect_provider = True
+                if tag.tag_name == 'Prospect - Client':
+                    prospect_client = True
+                    
+        if not prospect_provider and user.is_client:
+            return self.add_tag(user_id, 'Converted - Client')
+        if not prospect_client and user.is_staff:
+            return self.add_tag(user_id, 'Converted - Provider')
+

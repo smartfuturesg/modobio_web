@@ -203,6 +203,16 @@ class NewStaffUser(BaseResource):
 
                 if user.email_verified:
                     verify_email = False
+
+                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        #User already exists and email is verified.
+                        #Check if contact exists in Active Campaign, if not create contact. 
+                        ac = ActiveCampaign()
+                        if not ac.check_contact_existence(user.user_id):
+                            ac.create_contact(user.email, user.firstname, user.lastname)
+                            ac.add_age_group_tag(user.user_id)
+                            ac.add_user_subscription_type(user.user_id)
+                        ac.add_tag(user.user_id, 'Persona - Provider')
                 else:
                     verify_email = True
         else:
@@ -361,6 +371,16 @@ class NewClientUser(BaseResource):
                 user.is_client = True
                 if user.email_verified:
                     verify_email = False
+
+                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        #User already exists and email is verified.
+                        #Check if contact exists in Active Campaign, if not create contact. 
+                        ac = ActiveCampaign()
+                        if not ac.check_contact_existence(user.user_id):
+                            ac.create_contact(user.email, user.firstname, user.lastname)
+                            ac.add_age_group_tag(user.user_id)
+                            ac.add_user_subscription_type(user.user_id)
+                        ac.add_tag(user.user_id, 'Persona - Client')
                 else:
                     verify_email = True
         else:
@@ -670,7 +690,6 @@ class UserSubscriptionApi(BaseResource):
             check_client_existence(user_id)
         
         user, _ = token_auth.current_user()
-        ac = ActiveCampaign()
 
         #update end_date for user's previous subscription
         #NOTE: users always have a subscription, even a brand new account will have an entry
@@ -709,17 +728,10 @@ class UserSubscriptionApi(BaseResource):
             # Send a Welcome email
             send_email('subscription-confirm', user.email, firstname=user.firstname)
 
-            #Only run active campaign operations in prod
-            if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-                #Add active campaign tag for type of subscription. 
-                if request.parsed_obj.subscription_type_id == 2:      #Monthly Subscription ID from LookupTable
-                    ac.add_tag(user_id, 'Subscription - Month')
-                elif request.parsed_obj.subscription_type_id == 3:   #Yearly Subscrioption ID from LookupTable
-                    ac.add_tag(user_id, 'Subscription - Annual')
-                #Remove old subscription tag
-                sub_tag = UserActiveCampaignTags.query.filter_by(user_id=user_id, tag_name='Subscription - None').one_or_none()
-                if sub_tag:
-                    ac.remove_tag(user_id, 'Subscription - None')
+        #Update active campaign tag for type of subscription. 
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            ac = ActiveCampaign()
+            ac.add_user_subscription_type(user_id)
                 
         # make a new subscription entry
         new_data = {
@@ -864,13 +876,15 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             ac = ActiveCampaign()    
             if not ac.check_contact_existence(user_id):
                 ac.create_contact(user.email, user.firstname, user.lastname)
+            #Add user type tag
             if user.is_client:
                 ac.add_tag(user_id, 'Persona - Client')
             if user.is_staff:
                 ac.add_tag(user_id, 'Persona - Provider')
-
-            ac.add_tag(user_id, 'Subscription - None')
-
+            #Add subcription tag
+            ac.add_user_subscription_type(user_id)
+            #Add age group tag
+            ac.add_age_group_tag(user_id)
         return
 
 @ns.route('/email-verification/resend/<int:user_id>/')
