@@ -554,8 +554,12 @@ class ResetPassword(BaseResource):
         pswd = request.parsed_obj['password']
 
         user = UserLogin.query.filter_by(user_id=decoded_token['sid']).first()
-        user.set_password(pswd)
 
+        # Make sure user does not enter the previous password as the new password
+        if check_password_hash(user.password, pswd):
+            raise BadRequest('You must enter a password that you have not used previously.')
+
+        user.set_password(pswd)
         db.session.commit()
 
         return 200
@@ -574,12 +578,18 @@ class ChangePassword(BaseResource):
         # bring up the staff member and reset their password
         _, user_login = token_auth.current_user()
 
+        # Make sure user does not enter the previous password as the new password
+        if check_password_hash(user_login.password, request.parsed_obj['new_password']):
+            raise BadRequest('You must enter a password that you have not used previously.')
+
         if check_password_hash(user_login.password, request.parsed_obj['current_password']):
             user_login.set_password(request.parsed_obj['new_password'])
         else:
             raise Unauthorized
 
         db.session.commit()
+
+        return 200
 
 @ns.route('/token/refresh')
 @ns.doc(params={'refresh_token': "token from password reset endpoint"})
