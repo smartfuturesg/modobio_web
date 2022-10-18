@@ -557,7 +557,7 @@ class ResetPassword(BaseResource):
 
         # Make sure user does not enter the previous password as the new password
         if check_password_hash(user.password, pswd):
-            raise BadRequest('You must enter a password that you have not used previously.')
+            raise BadRequest('New password must be different than the old password.')
 
         user.set_password(pswd)
         db.session.commit()
@@ -580,7 +580,7 @@ class ChangePassword(BaseResource):
 
         # Make sure user does not enter the previous password as the new password
         if check_password_hash(user_login.password, request.parsed_obj['new_password']):
-            raise BadRequest('You must enter a password that you have not used previously.')
+            raise BadRequest('New password must be different than the old password.')
 
         if check_password_hash(user_login.password, request.parsed_obj['current_password']):
             user_login.set_password(request.parsed_obj['new_password'])
