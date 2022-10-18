@@ -1644,7 +1644,6 @@ class TelehealthQueueClientPoolApi(BaseResource):
         """
         Add a client to the queue
         """
-        check_client_existence(user_id)
 
         # Verify target date is client's local today or in the future 
         client_tz = request.parsed_obj.timezone
@@ -1665,16 +1664,19 @@ class TelehealthQueueClientPoolApi(BaseResource):
 
         # Verify location_id is valid
         location_id = request.parsed_obj.location_id
-        location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
-        if not location:
-            raise BadRequest(f'Location {location_id} does not exist.')
+        
+        if location_id:
+            location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
+            if not location:
+                raise BadRequest(f'Location {location_id} does not exist.')
 
         # Verify payment method idx is valid from PaymentMethods
         # and that the payment method chosen has the user_id
         payment_id = request.parsed_obj.payment_method_id
-        verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
-        if not verified_payment_method:
-            raise BadRequest('Invalid payment method.')
+        if payment_id:
+            verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
+            if not verified_payment_method:
+                raise BadRequest('Invalid payment method.')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
