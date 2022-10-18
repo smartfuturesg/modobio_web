@@ -112,7 +112,7 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
     gender = True if q_request.medical_gender == 'm' else False
     date1, day1, day1_start, day1_end = time_block[0]
     date2, day2, day2_start, day2_end = time_block[1] if len(time_block) > 1 else (None,None,None,None)
-    location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation
+    location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation if q_request.location_id else None
     duration = q_request.duration
     
     if q_request.profession_type == 'medical_doctor':
@@ -121,8 +121,9 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
                     .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
                         .join(User, User.user_id == TelehealthStaffAvailability.user_id) \
                             .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
-                            PractitionerCredentials.state == location,
                             StaffRoles.consult_rate != None)
+        if location:
+            query = query.filter(PractitionerCredentials.state == location)
     else:
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
             .join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id) \

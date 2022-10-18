@@ -252,8 +252,6 @@ class TelehealthClientTimeSelectApi(BaseResource):
         if not client_in_queue:
             if not request.args.get('profession_type'):
                 raise BadRequest('Profession role not provided.')
-            elif not request.args.get('location_id'):
-                raise BadRequest('Location id not provided.')
 
             location_id = request.args.get('location_id')
             profession_type = request.args.get('profession_type')
@@ -263,7 +261,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             medical_gender = request.args.get('medical_gender') if request.args.get('medical_gender') else 'np'
             duration = request.args.get('duration') if request.args.get('duration') else TELEHEALTH_BOOKING_DURATION
             payment_method_id = request.args.get('payment_method_id') if request.args.get('payment_method_id') else None
-
+            
             client_in_queue = TelehealthQueueClientPool(
                 user_id=user_id, 
                 profession_type=profession_type, 
