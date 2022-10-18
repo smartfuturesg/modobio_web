@@ -4,7 +4,7 @@ import secrets
 from datetime import datetime, date
 
 from dateutil.relativedelta import relativedelta
-from flask import g, request, current_app
+from flask import g, request, current_app, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from sqlalchemy import select, and_, or_
@@ -35,7 +35,7 @@ from odyssey.api.facility.models import MedicalInstitutions
 from odyssey.api.lookup.models import LookupBloodTests, LookupBloodTestRanges, LookupRaces
 from odyssey.api.user.models import User, UserProfilePictures
 from odyssey.utils.auth import token_auth
-from odyssey.utils.misc import check_medical_condition_existence
+from odyssey.utils.misc import check_medical_condition_existence, date_validator
 from odyssey.utils.files import FileDownload, FileUpload, ImageUpload, get_profile_pictures
 from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
@@ -87,10 +87,18 @@ class MedBloodPressures(BaseResource):
         self.check_user(user_id, user_type='client')
         bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
         
+        reporter_pics = {} # key = user_id, value =  dict of pic links
         for data in bp_info:
             reporter = User.query.filter_by(user_id=data.reporter_id).one_or_none()
             data.reporter_firstname = reporter.firstname
             data.reporter_lastname = reporter.lastname
+
+            if data.reporter_id != user_id and data.reporter_id not in reporter_pics:
+                reporter_pics[data.reporter_id] = get_profile_pictures(data.reporter_id, True)            
+            elif data.reporter_id not in reporter_pics:
+                reporter_pics[data.reporter_id] = get_profile_pictures(user_id, False)
+            
+            data.reporter_profile_pictures = reporter_pics[data.reporter_id] 
 
         payload = {'items': bp_info,
                    'total_items': len(bp_info)}
@@ -991,7 +999,7 @@ class MedBloodTest(BaseResource):
         Resource to submit a new blood test instance for the specified client.
 
         Test submissions are given a test_id which can be used to reference back
-        to the results related to this submisison. Each submission may have 
+        to the results related to this submission. Each submission may have 
         multiple results (e.g. in a panel)
         """
         
@@ -1005,7 +1013,8 @@ class MedBloodTest(BaseResource):
             'user_id': user_id,
             'reporter_id': token_auth.current_user()[0].user_id,
             'date': request.parsed_obj['date'],
-            'notes': request.parsed_obj['notes']
+            'notes': request.parsed_obj['notes'],
+            'was_fasted': request.parsed_obj['was_fasted']
         })
         
         db.session.add(client_bt)
@@ -1211,7 +1220,7 @@ class MedBloodTestImage(BaseResource):
         """
         if not ('image' in request.files and request.files['image']):  
             raise BadRequest('No file selected.')
-        
+            
         test_id = request.args.get('test_id', type=int)
         test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
         if not test:
@@ -1317,15 +1326,17 @@ class MedBloodTestAll(BaseResource):
         payload['user_id'] = user_id
         return payload
 
-
 @ns.route('/bloodtest/results/<int:test_id>/')
 @ns.doc(params={'test_id': 'Test ID number'})
+@ns.deprecated
 class MedBloodTestResults(BaseResource):
     """
     Resource for working with a single blood test 
     entry instance, test_id.
 
     Each test instance may have multiple test results. 
+
+    DEPRECATED 9.15.22 v1.2.1
     """
     @token_auth.login_required(resources=('blood_chemistry',))
     @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
@@ -1396,6 +1407,130 @@ class MedBloodTestResults(BaseResource):
         payload['user_id'] = results[0][0].user_id
         return payload
 
+
+@ns.route('/bloodtest/results/search/<int:user_id>/')
+@ns.doc(params={
+    'test_id': 'Test ID number', 
+    'start_date': 'Start date for date range', 
+    'end_date': 'End date for date range',
+    'modobio_test_code': 'Modobio test code',
+    'page': 'page of paginated results',
+    'per_page': 'results per page'})
+class MedBloodTestResultsSearch(BaseResource):
+    """
+    Search for blood test results by test_id, date range, or modobio_test_code.
+
+    This allows users to search for individual test results, batch entries, or both
+    """
+    @token_auth.login_required(resources=('blood_chemistry',))
+    @responds(schema=MedicalBloodTestResultsOutputSchema, api=ns)
+    def get(self, user_id):
+        """
+        Returns details of the test denoted by test_id as well as 
+        the actual results submitted.
+        """
+        modobio_test_code = request.args.get('modobio_test_code', type=str)
+        test_id = request.args.get('test_id', type=int)
+        start_date = request.args.get('start_date', type=date_validator)
+        end_date =  request.args.get('end_date', type=date_validator)
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 100, type=int)
+        
+        query =  db.session.query(
+                MedicalBloodTests, MedicalBloodTestResults, User
+                ).filter(
+                    MedicalBloodTestResults.test_id == MedicalBloodTests.test_id,
+                    User.user_id == MedicalBloodTests.reporter_id,
+                    MedicalBloodTests.user_id==user_id
+                )
+        
+        if test_id:
+            query = query.filter(MedicalBloodTests.test_id==test_id)
+        if modobio_test_code:
+            query = query.filter(MedicalBloodTestResults.modobio_test_code==modobio_test_code)
+        if start_date:
+            query = query.filter(MedicalBloodTests.date >= start_date)
+        if end_date:
+            query = query.filter(MedicalBloodTests.date <= end_date)
+
+        # order the query by date descending
+        query = query.order_by(MedicalBloodTests.date.desc())
+
+        results = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        if not results:
+            return
+
+        test_results = {} # key is test_id, value is list of test results
+        reporter_pics = {} # key is reporter_id, value is list of profile pictures
+        for test, test_result, reporter in results.items:
+            # group results by test_id
+            test_id = test.test_id
+            if test_id in test_results:
+                test_results[test_id]['results'].append( {
+                    'modobio_test_code': test_result.test_type.modobio_test_code, 
+                    'result_value': test_result.result_value,
+                    'evaluation': test_result.evaluation,
+                    'age': test_result.age,
+                    'biological_sex_male': test_result.biological_sex_male,
+                    'race': test_result.race,
+                    'menstrual_cycle': test_result.menstrual_cycle
+                })
+            else:
+                # bring up test image
+                fd = FileDownload(test.user_id)
+                if test.image_path:
+                    image_path = fd.url(test_result.image_path)
+                else:
+                    image_path = None
+            
+                if test.reporter_id != user_id:
+                    reporter_id = test.reporter_id
+                    if test.reporter_id not in reporter_pics:
+                        reporter_pics[reporter_id] = get_profile_pictures(reporter_id, True)
+                else:
+                    reporter_id = user_id
+                    if reporter_id not in reporter_pics:
+                        reporter_pics[test.user_id] = get_profile_pictures(reporter_id, False)
+                        
+                test_results[test_id] = {
+                    'test_id': test_id, 
+                    'date' : test.date,
+                    'notes' : test.notes,
+                    'results': [{
+                                    'modobio_test_code': test_result.test_type.modobio_test_code, 
+                                    're+sult_value': test_result.result_value,
+                                    'evaluation': test_result.evaluation,
+                                    'age': test_result.age,
+                                    'biological_sex_male': test_result.biological_sex_male,
+                                    'race': test_result.race,
+                                    'menstrual_cycle': test_result.menstrual_cycle
+                                }], 
+                    'image': image_path,
+                    'reporter_id': test.reporter_id,
+                    'reporter_firstname': reporter.firstname,
+                    'reporter_lastname': reporter.lastname,
+                    'reporter_profile_pictures': reporter_pics[reporter_id],
+                    'was_fasted': test.was_fasted}
+
+        
+        # remove page from query parameters so as to not conflict with pagination links
+        _args = request.args.to_dict()
+        _args.pop('page', None)
+
+        payload = {}
+        payload['items'] = list(test_results.values())
+        payload['tests'] = len(test_results)
+        payload['test_results'] = len(results.items)
+        payload['user_id'] = user_id
+        payload["_links"] =   {
+            '_prev': url_for('api.doctor_med_blood_test_results_search', user_id = user_id, page=results.prev_num,**_args, _external = True) if results.has_prev else None,
+            '_next': url_for('api.doctor_med_blood_test_results_search', user_id = user_id, page=results.next_num,**_args, _external = True) if results.has_next else None,
+        }
+        return payload
+
+
+
 @ns.route('/bloodtest/results/all/<int:user_id>/')
 @ns.doc(params={'user_id': 'Client ID number'})
 class AllMedBloodTestResults(BaseResource):
@@ -1424,8 +1559,16 @@ class AllMedBloodTestResults(BaseResource):
                             MedicalBloodTests.reporter_id == User.user_id
                         ).all()
 
-        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname, x[0].image_path) for x in results])
-        nested_results = [{'test_id': x[0], 'reporter_id': x[1], 'reporter_firstname': x[2], 'reporter_lastname': x[3], 'image': x[4], 'results': []} for x in test_ids ]
+        test_ids = set([(x[0].test_id, x[0].reporter_id, x[3].firstname, x[3].lastname, x[0].image_path, x[0].was_fasted) for x in results])
+        nested_results = [
+            {
+                'test_id': x[0], 
+                'was_fasted': x[5],
+                'reporter_id': x[1], 
+                'reporter_firstname': x[2], 
+                'reporter_lastname': x[3], 
+                'image': x[4], 
+                'results': []} for x in test_ids ]
         
         # loop through results in order to nest results in their respective test
         # entry instances (test_id)
@@ -1467,18 +1610,6 @@ class AllMedBloodTestResults(BaseResource):
         payload['user_id'] = user_id
         return payload
 
-@ns.deprecated
-@ns.route('/bloodtest/result-types/')
-class MedBloodTestResultTypes(BaseResource):
-    """
-    Returns the types of tests currently documented in the DB
-    """
-    @token_auth.login_required
-    @responds(schema=MedicalBloodTestResultTypesSchema, api=ns)
-    def get(self):
-        bt_types = MedicalBloodTestResultTypes.query.all()
-        payload = {'items' : bt_types, 'total' : len(bt_types)}
-        return payload
 
 @ns.route('/medicalhistory/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})

@@ -33,11 +33,14 @@ from odyssey.utils.base.schemas import BaseSchema
     Schemas for the doctor's API
 """
 
-    
+class PaginationLinks(Schema):
+    _next = fields.String()
+    _prev = fields.String()
+
 class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = MedicalBloodPressures
-        exclude = ('created_at',)
+        exclude = ('created_at', 'updated_at')
         dump_only = ('timestamp','idx', 'reporter_id', 'user_id')
         include_fk = True
         
@@ -47,6 +50,7 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     datetime_taken = fields.String(metadata={'description':'Date and time the blood pressure was taken'}, required=True)
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
+    reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
     
 
     @post_load
@@ -101,6 +105,7 @@ class MedicalSocialHistorySchema(Schema):
     sexual_preference = fields.String(missing=None, allow_none=True)
     last_smoke_date = fields.Date(missing=None, allow_none=True, dump_only=True)
     last_smoke = fields.Integer(missing=None, allow_none=True)
+    
     num_years_smoked = fields.Integer(missing=None, allow_none=True)
     plan_to_stop = fields.Boolean(missing=None, allow_none=True)
 
@@ -238,6 +243,7 @@ class MedicalBloodTestSchema(Schema):
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'})
     reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
     image = fields.String(dump_only=True)
+    was_fasted = fields.Boolean()
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -267,6 +273,7 @@ class MedicalBloodTestsInputSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('created_at', 'updated_at')
     user_id = fields.Integer(dump_only=True)
     results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
+    was_fasted = fields.Boolean(required = False, missing = None)
 
 class BloodTestsByTestID(Schema):
     """
@@ -283,6 +290,7 @@ class BloodTestsByTestID(Schema):
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_id = fields.Integer(metadata={'description': 'id of reporting physician'}, dump_only=True)
     reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
+    was_fasted = fields.Boolean()
 
 class MedicalBloodTestResultsOutputSchema(Schema):
     """
@@ -293,6 +301,7 @@ class MedicalBloodTestResultsOutputSchema(Schema):
     test_results = fields.Integer(metadata={'description': '# of test results'})
     items = fields.Nested(BloodTestsByTestID(many=True), missing = [])
     clientid = fields.Integer()
+    _links = fields.Nested(PaginationLinks)
 
 class MedicalBloodTestResultsSchema(Schema):
     idx = fields.Integer()
