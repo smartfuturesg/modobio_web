@@ -22,9 +22,6 @@ from odyssey.utils.telehealth import complete_booking
 from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import create_notification, update_client_subscription
 
-# avoid circular imports by importing entire module
-import odyssey.integrations.instamed
-
 logger = logging.getLogger(__name__)
 
 @celery.task()
@@ -194,16 +191,16 @@ def upcoming_appointment_care_team_permissions(booking_id):
     return
 
 
-@celery.task()
-def charge_telehealth_appointment(booking_id):
-    """
-    This task will go through the process of attempting to charge a user for a telehealth booking.
-    If the payment is unsuccessful, the booking will be canceled.
-    """
-    # TODO: Notify user of the canceled booking via email? They are already notified via notification
-    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-
-    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
+#@celery.task()
+#def charge_telehealth_appointment(booking_id):
+#    """
+#    This task will go through the process of attempting to charge a user for a telehealth booking.
+#    If the payment is unsuccessful, the booking will be canceled.
+#    """
+#    # TODO: Notify user of the canceled booking via email? They are already notified via notification
+#    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+#
+#    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
     
 @celery.task()
 def cancel_noshow_appointment(booking_id):
@@ -212,8 +209,23 @@ def cancel_noshow_appointment(booking_id):
     the start time. It will then refund the user.
     """
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-    
-    odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+    booking.status = "Canceled"
+
+    # run the task to store the chat transcript immediately
+    if current_app.config['TESTING']:
+        #run task directly if in test env
+        store_telehealth_transcript(booking.idx)
+    else:
+        #otherwise run with celery
+        store_telehealth_transcript.delay(booking.idx)
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(idx = booking.staff_calendar_id).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    db.session.commit()
+    #odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):

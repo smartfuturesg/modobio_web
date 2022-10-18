@@ -496,10 +496,10 @@ celery.conf.beat_schedule = {
         'schedule': crontab(minute='0', hour='*/1')
     },
     # telehealth appointment charging
-    'find_chargable_bookings': {
-        'task': 'odyssey.tasks.periodic.find_chargable_bookings',
-        'schedule': crontab(minute='*/5')
-    },
+    #'find_chargable_bookings': {
+    #    'task': 'odyssey.tasks.periodic.find_chargable_bookings',
+    #    'schedule': crontab(minute='*/5')
+    #},
     # search for telehealth transcripts that need to be stored, deploy those storage tasks
     'appointment_transcript_store_scheduler': {
         'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
@@ -529,11 +529,11 @@ celery.conf.beat_schedule = {
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
         'task': 'odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
         'schedule': crontab(minute='*/15')
-    },
-    # upcoming booking payment to be charged
-    'check_for_upcoming_booking_charges': {
-        'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
-        'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
-        # off setting this slightly might theoretically smooth out the load on celery
     }
+    # upcoming booking payment to be charged
+    #'check_for_upcoming_booking_charges': {
+    #    'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
+    #    'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
+    #    # off setting this slightly might theoretically smooth out the load on celery
+    #}
 }
