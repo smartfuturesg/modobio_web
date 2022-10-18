@@ -532,7 +532,7 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=True)
     """
     client location id for this booking request
     :type: int, foreign key(LookupTerritoriesOfOperations.idx)
