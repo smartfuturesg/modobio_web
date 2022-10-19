@@ -261,7 +261,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             medical_gender = request.args.get('medical_gender') if request.args.get('medical_gender') else 'np'
             duration = request.args.get('duration') if request.args.get('duration') else TELEHEALTH_BOOKING_DURATION
             payment_method_id = request.args.get('payment_method_id') if request.args.get('payment_method_id') else None
-            
+
             client_in_queue = TelehealthQueueClientPool(
                 user_id=user_id, 
                 profession_type=profession_type, 
@@ -673,7 +673,6 @@ class TelehealthBookingsApi(BaseResource):
         # only booking_window_id_start_time and target_date
 
         client_user_id = request.args.get('client_user_id', type=int)
-        client_scheduled = User.query.filter_by(user_id=client_user_id).one_or_none()
         if not client_user_id:
             raise BadRequest('Missing client ID.')
         # Check client existence
@@ -700,12 +699,12 @@ class TelehealthBookingsApi(BaseResource):
         if not client_in_queue:
             raise BadRequest('Client not in queue.')
         
+        # validate payment method if provided
         payment_method_id = request.parsed_obj.payment_method_id
-        if not payment_method_id:
-            raise BadRequest("Payment Method ID not provided")
-
-        if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
-            raise BadRequest('Payment ID does not exist for user.')
+        
+        if payment_method_id:
+            if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
+                raise BadRequest('Payment ID does not exist for user.')
 
         # requested duration in minutes
         duration = client_in_queue.duration
@@ -714,7 +713,7 @@ class TelehealthBookingsApi(BaseResource):
         client_tz = client_in_queue.timezone
         start_idx = request.parsed_obj.booking_window_id_start_time
         if (start_idx - 1) % 3 > 0:
-            # verify time idx-1 is mulitple of 3. Only allowed start times are: X:00, X:15, X:30, X:45
+            # verify time idx-1 is multiple of 3. Only allowed start times are: X:00, X:15, X:30, X:45
             raise BadRequest("Invalid start time")
 
         start_time = time_inc[start_idx-1].start_time
@@ -742,7 +741,7 @@ class TelehealthBookingsApi(BaseResource):
        
         # call on verify_availability, will raise an error if practitioner doens't have availability requested
         telehealth_utils.verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
-            target_end_time_idx_utc, target_start_datetime_utc, target_end_datetime_utc,client_in_queue.location_id)      
+            target_end_time_idx_utc, target_start_datetime_utc)      
 
         # staff and client may proceed with scheduling the booking, 
         # create the booking object
@@ -772,14 +771,24 @@ class TelehealthBookingsApi(BaseResource):
 
         # consultation rate to booking
         consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
-
+        
         # Calculate time for display:
         # consult is in hours
         # 30 minutes -> 0.5*consult_rate
         # 60 minutes -> 1*consult_rate
         # 90 minutes -> 1.5*consult_rate
-        if not consult_rate:
+        if consult_rate == None:
             raise BadRequest('Practitioner has not set a consult rate')
+
+        # If provider has a consult rate of 0, assume that they will be handling
+        # payment outside of the modobio platform
+        # otherwise, the client must have provided a payment method
+        if consult_rate == 0:
+            request.parsed_obj.charged = True
+            request.parsed_obj.payment_notified = True
+        elif consult_rate != 0 and not payment_method_id:
+            raise BadRequest('Payment method required')
+
         rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
 

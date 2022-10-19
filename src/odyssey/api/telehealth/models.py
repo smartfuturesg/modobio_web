@@ -124,7 +124,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
-    client_location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=False)
+    client_location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=True)
     """
     client location id for this booking
         :type: int, foreign key(LookupTerritoriesOfOperations.idx)

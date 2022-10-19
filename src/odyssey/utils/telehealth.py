@@ -114,7 +114,7 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
     date2, day2, day2_start, day2_end = time_block[1] if len(time_block) > 1 else (None,None,None,None)
     location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation if q_request.location_id else None
     duration = q_request.duration
-    
+
     if q_request.profession_type == 'medical_doctor':
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
             .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
@@ -249,8 +249,7 @@ def verify_availability(
     utc_start_idx,
     utc_end_idx,
     target_start_datetime_utc,
-    target_end_datetime_utc,
-    client_location_id):
+    ):
     ###
     # Check to see the client and staff still have the requested time slot available
     # - current bookings
@@ -295,7 +294,7 @@ def verify_availability(
             TelehealthStaffAvailability.user_id == staff_user_id
             )
     ).scalars().all()
-    # Make sure the full range of requested idices are found in staff_availability
+    # Make sure the full range of requested indices are found in staff_availability
     available_indices = {line.booking_window_id for line in staff_availability}
     requested_indices = {req_idx for req_idx in range(utc_start_idx, utc_end_idx + 1)}
     has_availability = requested_indices.issubset(available_indices)
