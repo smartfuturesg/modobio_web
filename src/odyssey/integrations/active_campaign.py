@@ -258,6 +258,6 @@ class ActiveCampaign:
                 if tag.tag_name == 'Prospect - Provider':
                     prospect_provider = True
                     
-        if not prospect_provider and user.is_client:
-            return self.add_tag(user_id, 'Converted - Client')
+            if not prospect_provider and user.is_client:
+                return self.add_tag(user_id, 'Converted - Client')
 
