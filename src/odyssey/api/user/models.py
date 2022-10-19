@@ -207,6 +207,18 @@ def update_ES_index(mapper, connection, target):
     }
     update_index(user, False)
 
+@db.event.listens_for(User, "after_update")
+def update_active_campaign_contact(mapper, connection, target):
+
+    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+        from odyssey.integrations.active_campaign import ActiveCampaign
+        from odyssey.api.user.models import UserActiveCampaign
+        
+        ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
+        if ac_contact:
+            ac = ActiveCampaign()
+            ac.update_ac_contact_info(
+            target.user_id, first_name=target.firstname, last_name=target.lastname, email=target.email)
 
 class UserLogin(db.Model):
     """ 
@@ -538,9 +550,12 @@ class UserSubscriptions(db.Model):
 def add_active_campaign_sub_tag(mapper, connection, target):
     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
         from odyssey.integrations.active_campaign import ActiveCampaign
+        from odyssey.api.user.models import UserActiveCampaign
         
-        ac = ActiveCampaign()
-        ac.add_user_subscription_type(target.user_id)
+        ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
+        if ac_contact:
+            ac = ActiveCampaign()
+            ac.add_user_subscription_type(target.user_id)
     
 class UserTokensBlacklist(db.Model):
     """ 
