@@ -1,6 +1,7 @@
 import json
 from odyssey.integrations.active_campaign import ActiveCampaign
-from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags
+from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags, UserSubscriptions
+import pytest
 
 # Test Active Campaign operations on staff client.
 # Operations: 
@@ -11,14 +12,13 @@ from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaign
     # Update contact email
     # Delete Contact
 
-def test_create_contact(test_client):
+
+def test_create_contact(test_client, create_contact):
     ac = ActiveCampaign()
 
-    #create contact
-    user =  User.query.filter_by(user_id=test_client.client_id).one_or_none()
-    contact_response, list_response = ac.create_contact(user.email, user.firstname, user.lastname)
+    contact_response = create_contact[0]
+    list_response = create_contact[1]
     data = json.loads(contact_response.text)
-    
     #assert contact was added to Active Campaign and stored in db
     assert contact_response.status_code == 201
     ac_contact = UserActiveCampaign.query.filter_by(user_id=test_client.client_id).one_or_none()
@@ -30,7 +30,7 @@ def test_create_contact(test_client):
     assert list_response.status_code == 201
     assert data['contactList']['list'] == ac.list_id
 
-def test_create_tag(test_client):
+def test_create_tag(test_client, create_contact):
     ac = ActiveCampaign()
 
     #create tag
@@ -41,7 +41,7 @@ def test_create_tag(test_client):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Persona - Client').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_remove_tag(test_client):
+def test_remove_tag(test_client, create_contact):
     ac = ActiveCampaign()
 
     #remove tag
@@ -52,7 +52,7 @@ def test_remove_tag(test_client):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Persona - Client').one_or_none()
     assert ac_tag == None
 
-def test_update_contact_name(test_client):
+def test_update_contact_name(test_client, create_contact):
     ac = ActiveCampaign()
 
     #update name
@@ -64,7 +64,7 @@ def test_update_contact_name(test_client):
     assert data['contact']['lastName'] == 'Name'
     assert data['contact']['email'] == 'updated@email.com'
 
-def test_add_age_tag(test_client):
+def test_add_age_tag(test_client, create_contact):
     #Test adding age group tag
     ac = ActiveCampaign()
 
@@ -75,7 +75,7 @@ def test_add_age_tag(test_client):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Age 45-64').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_add_user_subscription_tag(test_client):
+def test_add_user_subscription_tag(test_client, create_contact):
     #Tests adding subscription tag
     ac = ActiveCampaign()
     response = ac.add_user_subscription_type(test_client.client_id)
@@ -85,7 +85,7 @@ def test_add_user_subscription_tag(test_client):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Subscription - Annual').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_convert_prospect(test_client):
+def test_convert_prospect(test_client, create_contact):
     #Tests adding subscription tag
     ac = ActiveCampaign()
 
@@ -100,15 +100,3 @@ def test_convert_prospect(test_client):
     assert response.status_code == 201
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Converted - Client').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
-
-def test_delete_contact(test_client):
-    ac = ActiveCampaign()
-    
-    #delete contact
-    ac_contact = UserActiveCampaign.query.filter_by(user_id=test_client.client_id).one_or_none()
-    response = ac.delete_contact(ac_contact.user_id)
-
-    #assert Contact was deleted and removed from db
-    assert response.status_code == 200
-    ac_contact = UserActiveCampaign.query.filter_by(user_id=test_client.client_id).one_or_none()
-    assert ac_contact == None

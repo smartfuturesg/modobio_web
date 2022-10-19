@@ -727,11 +727,6 @@ class UserSubscriptionApi(BaseResource):
             #   either first time subscription or first subscription ever
             # Send a Welcome email
             send_email('subscription-confirm', user.email, firstname=user.firstname)
-
-        #Update active campaign tag for type of subscription. 
-        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-            ac = ActiveCampaign()
-            ac.add_user_subscription_type(user_id)
                 
         # make a new subscription entry
         new_data = {

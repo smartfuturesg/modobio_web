@@ -534,6 +534,13 @@ class UserSubscriptions(db.Model):
     Relationship lookup subscriptions
     """
 
+@db.event.listens_for(UserSubscriptions, "after_update")
+def add_active_campaign_sub_tag(mapper, connection, target):
+    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+        from odyssey.integrations.active_campaign import ActiveCampaign
+        
+        ac = ActiveCampaign()
+        ac.add_user_subscription_type(target.user_id)
     
 class UserTokensBlacklist(db.Model):
     """ 

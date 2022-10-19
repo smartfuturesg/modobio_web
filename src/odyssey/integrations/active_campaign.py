@@ -233,7 +233,7 @@ class ActiveCampaign:
     def add_user_subscription_type(self, user_id):
         #Remove old subscription tags if any
         subscription_tags = UserActiveCampaignTags.query.filter(
-            User.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Subscription')).all()
+            UserActiveCampaignTags.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Subscription')).all()
         if subscription_tags:
             for tag in subscription_tags:
                 self.remove_tag(user_id, tag.tag_name)
@@ -251,7 +251,7 @@ class ActiveCampaign:
         #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
         user = User.query.filter_by(user_id=user_id).one_or_none()
         prospect_tags = UserActiveCampaignTags.query.filter(
-            User.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Prospect')).all()
+            UserActiveCampaignTags.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Prospect')).all()
         if prospect_tags:
             prospect_provider = False
             for tag in prospect_tags:
