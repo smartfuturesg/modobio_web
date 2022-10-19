@@ -700,7 +700,7 @@ class TelehealthBookingsApi(BaseResource):
             raise BadRequest('Client not in queue.')
         
         # validate payment method if provided
-        payment_method_id = request.parsed_obj.payment_method_id
+        payment_method_id = request.parsed_obj.payment_method_id if request.parsed_obj.payment_method_id else client_in_queue.payment_method_id
         
         if payment_method_id:
             if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
