@@ -1,3 +1,4 @@
+import pytest
 from .data import staff_office_data
 from flask.json import dumps
 
@@ -147,6 +148,8 @@ def test_post_2_ds_patient_prescribe(test_client):
     # encrypted clinic_id is randomly generated. URLs will be different for each run
     assert response.json['url'] != patient_sso
 
+
+@pytest.mark.skip(reason="dosespot is in the midst of deprecation")
 def test_get_1_ds_practitioner_notification_sso(test_client):
     response = test_client.get(f'/dosespot/notifications/{test_client.staff_id}/',
                                 headers=test_client.staff_auth_header)
