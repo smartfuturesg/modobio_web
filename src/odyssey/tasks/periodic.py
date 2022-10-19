@@ -29,9 +29,8 @@ from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, Clie
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.user.models import User, UserSubscriptions
-from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
-from odyssey.utils.misc import get_time_index, create_notification
+from odyssey.utils.misc import get_time_index, create_notification, cancel_telehealth_appointment
 
 logger = get_task_logger(__name__)
 
@@ -324,7 +323,7 @@ def detect_practitioner_no_show():
     logger.info(f'no show task time window: {target_time_window}')
 
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
-                                               TelehealthBookings.charged == True,
+                                               #TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
                                                TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2).all()
     for booking in bookings:
@@ -332,7 +331,7 @@ def detect_practitioner_no_show():
         #change booking status to canceled and refund client
         if current_app.config['TESTING']:
             #cancel_noshow_appointment(booking.idx)
-            cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+            cancel_telehealth_appointment(booking, reason='Practitioner No Show')
         else:
             cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('no show task completed')
