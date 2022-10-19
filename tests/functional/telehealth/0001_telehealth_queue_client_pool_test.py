@@ -12,8 +12,8 @@ from .data import (
     telehealth_queue_client_pool_7_post_data
 )
 
-def test_post_1_client_appointment(test_client, payment_method):
-    telehealth_queue_client_pool_1_post_data['payment_method_id'] = payment_method.idx
+def test_post_1_client_appointment(test_client):
+    #telehealth_queue_client_pool_1_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -23,8 +23,8 @@ def test_post_1_client_appointment(test_client, payment_method):
 
     assert response.status_code == 201
 
-def test_post_2_client_appointment(test_client, payment_method):
-    telehealth_queue_client_pool_2_post_data['payment_method_id'] = payment_method.idx
+def test_post_2_client_appointment(test_client):
+    #telehealth_queue_client_pool_2_post_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -33,8 +33,8 @@ def test_post_2_client_appointment(test_client, payment_method):
 
     assert response.status_code == 201
 
-def test_post_3_client_appointment(test_client, payment_method):
-    telehealth_queue_client_pool_3_post_data['payment_method_id'] = payment_method.idx
+def test_post_3_client_appointment(test_client):
+    #telehealth_queue_client_pool_3_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -44,8 +44,8 @@ def test_post_3_client_appointment(test_client, payment_method):
 
     assert response.status_code == 201
 
-def test_post_4_client_appointment(test_client, payment_method):
-    telehealth_queue_client_pool_4_post_data['payment_method_id'] = payment_method.idx
+def test_post_4_client_appointment(test_client):
+    #telehealth_queue_client_pool_4_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -55,8 +55,8 @@ def test_post_4_client_appointment(test_client, payment_method):
 
     assert response.status_code == 201
 
-def test_post_5_client_appointment(test_client, payment_method):
-    telehealth_queue_client_pool_5_post_data['payment_method_id'] = payment_method.idx
+def test_post_5_client_appointment(test_client):
+    #telehealth_queue_client_pool_5_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -66,7 +66,7 @@ def test_post_5_client_appointment(test_client, payment_method):
 
     assert response.status_code == 201
 
-def test_get_1_client_appointment_queue(test_client, payment_method):
+def test_get_1_client_appointment_queue(test_client):
     for header in (test_client.staff_auth_header, test_client.client_auth_header):
         response = test_client.get(
             '/telehealth/queue/client-pool/',
@@ -78,8 +78,8 @@ def test_get_1_client_appointment_queue(test_client, payment_method):
                 response.json['queue'][0]['priority']] == [telehealth_queue_client_pool_5_post_data['target_date'], False]
         assert response.json['total_queue'] == 1
 
-def test_post_6_client_appointment(test_client, payment_method):
-    telehealth_queue_client_pool_6_post_data['payment_method_id'] = payment_method.idx
+def test_post_6_client_appointment(test_client):
+    #telehealth_queue_client_pool_6_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -114,8 +114,8 @@ def test_delete_1_client_appointment_queue(test_client):
 
     assert response.status_code == 204
 
-def test_post_8_client_appointment(test_client, payment_method):
-    telehealth_queue_client_pool_7_post_data['payment_method_id'] = payment_method.idx
+def test_post_8_client_appointment(test_client):
+    #telehealth_queue_client_pool_7_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -180,9 +180,9 @@ def test_get_1_specific_client_appointment_queue(test_client):
         assert response.json['queue'][0]['duration'] == 30
         assert response.json['total_queue'] == 1
 
-def test_delete_7_client_appointment(test_client, payment_method):
+def test_delete_7_client_appointment(test_client):
     # Delete remaining
-    telehealth_queue_client_pool_7_post_data['payment_method_id'] = payment_method.idx
+    #telehealth_queue_client_pool_7_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.delete(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
