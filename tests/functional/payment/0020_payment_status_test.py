@@ -2,6 +2,7 @@ from flask.json import dumps
 
 from .data import payment_status_data, payment_status_auth_header
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_post_payment_status(test_client):
     payment_status_data['valid_data']['user_id'] = test_client.client_id
 
@@ -31,6 +32,7 @@ def test_post_payment_status(test_client):
     assert response.status_code == 200
     assert response.get_json()['original_transaction_id'] == "HASDYF7SDFYAF"
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_get_payment_status(test_client):
     response = test_client.get(
         f'/payment/status/{test_client.client_id}/',

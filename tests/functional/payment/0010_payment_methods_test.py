@@ -4,6 +4,7 @@ from odyssey.api.payment.models import PaymentMethods
 
 from .data import payment_methods_data
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_payment_methods_post(test_client):
     
     #test with invalid card #, should raise 400
@@ -90,6 +91,7 @@ def test_payment_methods_post(test_client):
         test_client.db.session.delete(method)
     test_client.db.session.commit()
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_payment_methods_get(test_client):
 
     response = test_client.get(
@@ -101,6 +103,7 @@ def test_payment_methods_get(test_client):
     assert len(response.json) == 2
     assert response.json[0]['expiration'] == '04/25'
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_payment_methods_delete(test_client, test_booking):
     """
         deleting payment methods has some complex cases, see comments below

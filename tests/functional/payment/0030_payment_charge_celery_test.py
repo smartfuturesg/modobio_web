@@ -19,6 +19,7 @@ Check that the payment was triggered through the payment history table
 Refund the payment
 Check that the refund was successful
 """
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_bookings_payment(test_client, test_booking):
     #run celery tasks to find and charge bookings
     bookings = find_chargable_bookings()
