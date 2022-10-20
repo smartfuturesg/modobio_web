@@ -16,7 +16,6 @@ from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
     upcoming_appointment_care_team_permissions,
     upcoming_appointment_notification_2hr,
-    charge_telehealth_appointment,
     store_telehealth_transcript,
     cancel_noshow_appointment,
     update_client_subscription_task,
