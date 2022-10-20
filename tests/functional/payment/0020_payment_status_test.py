@@ -1,3 +1,4 @@
+import pytest
 from flask.json import dumps
 
 from .data import payment_status_data, payment_status_auth_header

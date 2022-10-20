@@ -1,3 +1,4 @@
+import pytest
 from flask.json import dumps, loads
 
 from odyssey import db

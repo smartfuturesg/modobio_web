@@ -1,3 +1,4 @@
+import pytest
 from flask.json import dumps
 
 from odyssey.api.payment.models import PaymentMethods
