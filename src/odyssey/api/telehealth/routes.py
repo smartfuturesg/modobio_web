@@ -528,7 +528,7 @@ class TelehealthBookingsApi(BaseResource):
         if status:
             bookings_query = bookings_query.filter(TelehealthBookings.status.in_(status))
 
-        bookings_query = bookings_query.paginate(page,per_page,error_out=False)
+        bookings_query = bookings_query.paginate(page=page, per_page=per_page, error_out=False)
         bookings = bookings_query.items
         
         # ensure requested booking_id is allowed

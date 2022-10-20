@@ -1456,7 +1456,7 @@ class MedBloodTestResultsSearch(BaseResource):
         # order the query by date descending
         query = query.order_by(MedicalBloodTests.date.desc())
 
-        results = query.paginate(page, per_page, error_out=False)
+        results = query.paginate(page=page, per_page=per_page, error_out=False)
         
         if not results:
             return
