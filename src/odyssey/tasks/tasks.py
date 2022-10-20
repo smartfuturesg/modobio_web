@@ -8,11 +8,13 @@ from io import BytesIO
 
 from flask_migrate import current_app
 from sqlalchemy import select
+from werkzeug.exceptions import BadRequest
 
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
+from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User
 from odyssey.integrations.twilio import Twilio
@@ -409,3 +411,50 @@ def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
         datum['end_time']
     )
     db.session.commit()
+
+@celery.task()
+def cancel_telehealth_appointment(booking, reason='Failed Payment'):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    and from bookings PUT to cancel a booking
+
+    args:
+    booking: a booking object for the telehealth appointment to be canceled
+    reason: reason for the cancellation, either (Practitioner Cancellation, Practitioner No-Show, or Failed Payment)
+    reporter_id: user_id of the user that initiated the cancellation, null if system automated
+    reporter_role: role of the user that initiated the cancellation(staff or client), System if system automated
+    """
+
+    # ensure that cancellation request does not occur during or after the scheduled meeting time
+    booking_start_time = datetime.combine(
+            date=booking.target_date_utc,
+            time = LookupBookingTimeIncrements.query.filter_by(idx = booking.booking_window_id_start_time_utc).one_or_none().start_time)
+
+    current_time_utc = datetime.utcnow()
+    
+    # prevent bookings that have already started from being cancelled. 
+    # exception: practitioner no show triggered by background process
+    if current_time_utc > booking_start_time and reason != 'Practitioner No Show':
+        raise BadRequest('Unable to cancel booking. Schedueld meeting has already begun')
+    
+    # update booking status to canceled
+    booking.status = 'Canceled'
+    
+    # run the task to store the chat transcript immediately
+    # imported in this way to get around circular importing issues
+    if current_app.config['TESTING']:
+        #run task directly if in test env
+        store_telehealth_transcript(booking.idx)
+    else:
+        #otherwise run with celery
+        store_telehealth_transcript.delay(booking.idx)
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(idx = booking.staff_calendar_id).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    #TODO: Create notification/send email(?) to user that their appointment 
+
+    db.session.commit()
+    return

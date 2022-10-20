@@ -15,7 +15,8 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import and_, or_, select
-from odyssey.utils.misc import get_time_index, cancel_telehealth_appointment
+from odyssey.utils.misc import get_time_index
+from odyssey.tasks.tasks import cancel_telehealth_appointment
 
 logger = logging.getLogger(__name__)
 

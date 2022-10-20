@@ -62,14 +62,13 @@ from odyssey.utils.misc import (
     check_client_existence, 
     check_staff_existence,
     check_user_existence,
-    create_notification,
-    cancel_telehealth_appointment
+    create_notification
 )
 from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
 from odyssey.utils.files import AudioUpload, ImageUpload, FileDownload
 from odyssey.utils.base.resources import BaseResource
-from odyssey.tasks.tasks import abandon_telehealth_booking, cleanup_unended_call, store_telehealth_transcript
+from odyssey.tasks.tasks import abandon_telehealth_booking, cleanup_unended_call, store_telehealth_transcript, cancel_telehealth_appointment
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
