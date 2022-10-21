@@ -16,21 +16,21 @@ def test_get_telehealth_activation(test_client):
 def test_update_telehealth_activation(test_client):
     user = User.query.filter_by(user_id=test_client.staff_id).one_or_none()
 
-    current_telehealth_access_flag = user.provider_telehealth_access
+    previous_telehealth_access_flag = user.provider_telehealth_access
 
     #switch telehealth flag
-    data = {"provider_telehealth_access" : not current_telehealth_access_flag}
+    data = {"provider_telehealth_access" : not previous_telehealth_access_flag}
     response = test_client.put(
         f'/practitioner/telehealth-activation/{test_client.staff_id}/',
         headers=test_client.staff_auth_header,
         data=dumps(data),
         content_type='application/json')
     assert response.status_code == 200
-    assert response.json['provider_telehealth_access'] !=  current_telehealth_access_flag
+    assert response.json['provider_telehealth_access'] !=  previous_telehealth_access_flag
 
     #Restore flag
-    user.provider_telehealth_access = current_telehealth_access_flag
+    user.provider_telehealth_access = previous_telehealth_access_flag
     test_client.db.session.commit()
-    assert user.provider_telehealth_access == current_telehealth_access_flag
+    assert user.provider_telehealth_access == previous_telehealth_access_flag
 
  
