@@ -578,11 +578,12 @@ class ChangePassword(BaseResource):
         # bring up the staff member and reset their password
         _, user_login = token_auth.current_user()
 
-        # Make sure user does not enter the previous password as the new password
-        if check_password_hash(user_login.password, request.parsed_obj['new_password']):
-            raise BadRequest('New password must be different than the old password.')
-
+        # Check that the user entered the correct current password
         if check_password_hash(user_login.password, request.parsed_obj['current_password']):
+            # Make sure user does not enter the previous password as the new password
+            if check_password_hash(user_login.password, request.parsed_obj['new_password']):
+                raise BadRequest('New password must be different than the old password.')
+
             user_login.set_password(request.parsed_obj['new_password'])
         else:
             raise Unauthorized
