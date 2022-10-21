@@ -26,7 +26,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, email_required=True, resources = (), dev_only=False):
+    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, email_required=True, resources = (), dev_only=False, check_staff_telehealth_access=False):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -99,6 +99,10 @@ class BasicAuth(object):
 
                 if user in (False, None):
                     raise Unauthorized
+
+                if check_staff_telehealth_access:
+                    if user.is_staff and not user.provider_telehealth_access:
+                        raise Unauthorized('Provider does not have telehealth access')
 
                 if email_required and not user.email_verified:
                     raise BadRequest('Please verify your email address.')

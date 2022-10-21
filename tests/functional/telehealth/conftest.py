@@ -78,6 +78,7 @@ def telehealth_staff(test_client):
         staff_profile = StaffProfile(user_id = staff.user_id)
         test_client.db.session.add(staff_profile)
         test_client.db.session.commit()
+        
         if i < 5:
             staff_role = StaffRoles(
                 user_id=staff.user_id,

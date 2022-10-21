@@ -83,7 +83,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
     Call start
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema, api=ns, status_code=200)
     def get(self, booking_id):
         current_user, _ = token_auth.current_user()
@@ -234,7 +234,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 }) # Add all other required params 
 class TelehealthClientTimeSelectApi(BaseResource):
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=200)
     def get(self, user_id):
         """
@@ -425,7 +425,7 @@ class TelehealthBookingsApi(BaseResource):
     """
     This API resource is used to get and post client and staff bookings.
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=200)
     @ns.doc(params={'client_user_id': 'Client User ID',
                 'staff_user_id' : 'Staff User ID',
@@ -655,7 +655,7 @@ class TelehealthBookingsApi(BaseResource):
         }
         return payload
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client',), check_staff_telehealth_access=True)
     @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date', 'payment_method_id']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     @ns.doc(params={'client_user_id': 'Client User ID', 'staff_user_id': 'Staff User ID'})
@@ -851,7 +851,7 @@ class TelehealthBookingsApi(BaseResource):
         }
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthBookingsPUTSchema(only=['status', 'payment_method_id']), api=ns)
     @responds(status_code=201,api=ns)
     @ns.doc(params={'booking_id': 'booking_id'})
@@ -995,7 +995,7 @@ class TelehealthBookingsApi(BaseResource):
                
         return 201
 
-    @token_auth.login_required()
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthBookingsSchema, api=ns)
     @responds(status_code=201,api=ns)
     @ns.deprecated
@@ -1165,7 +1165,7 @@ class MeetingRoomStatusAPI(BaseResource):
         - use TelehealthMeetingRooms table
         """
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema = TelehealthMeetingRoomSchema, status_code=200, api=ns)
     def get(self, room_id):
         """
@@ -1182,7 +1182,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
     """
     This API resource is used to get, post the staff's general availability
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
     def get(self,user_id):
         """
@@ -1263,7 +1263,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
     @responds(schema=TelehealthStaffAvailabilityConflictSchema, api=ns, status_code=201)
     def post(self,user_id):
@@ -1454,7 +1454,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     """
     __check_resource__ = False
     
-    @token_auth.login_required(user_type=('staff_self',))
+    @token_auth.login_required(user_type=('staff_self',), check_staff_telehealth_access=True)
     @accepts(schema=TelehealthStaffAvailabilityExceptionsPOSTSchema(many=True), api=ns)
     @responds(schema=TelehealthStaffAvailabilityExceptionsOutputSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1551,7 +1551,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
             'conflicts': conflicts
         }
     
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff',), check_staff_telehealth_access=True)
     @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
@@ -1574,7 +1574,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         
         return formatted_exceptions
     
-    @token_auth.login_required(user_type=('staff_self',))
+    @token_auth.login_required(user_type=('staff_self',), check_staff_telehealth_access=True)
     @accepts(schema=TelehealthStaffAvailabilityExceptionsDeleteSchema(many=True), api=ns)
     def delete(self, user_id):
         """
@@ -1598,7 +1598,7 @@ class TelehealthGetQueueClientPoolApi(BaseResource):
     """
     This API resource is used to get all the users in the queue.
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
     def get(self):
         """
@@ -1622,7 +1622,7 @@ class TelehealthQueueClientPoolApi(BaseResource):
     # Multiple allowed
     __check_resource__ = False
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
     def get(self,user_id):
         """
@@ -1637,7 +1637,7 @@ class TelehealthQueueClientPoolApi(BaseResource):
 
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self,user_id):
@@ -1680,7 +1680,7 @@ class TelehealthQueueClientPoolApi(BaseResource):
         db.session.add(request.parsed_obj)
         db.session.commit()
 
-    @token_auth.login_required()
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
     @responds(api=ns, status_code=204)
     def delete(self, user_id):
@@ -1703,7 +1703,7 @@ class TelehealthBookingDetailsApi(BaseResource):
     # because files are being send.
     __check_resource__ = False
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
     def get(self, booking_id):
         """
@@ -1752,7 +1752,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         return res
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(api=ns, status_code=200)
     def put(self, booking_id):
         """
@@ -1935,7 +1935,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(api=ns, status_code=201)
     def post(self, booking_id):
         """
@@ -2035,7 +2035,7 @@ class TelehealthBookingDetailsApi(BaseResource):
         db.session.add(booking_details)
         db.session.commit()
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(status_code=204)
     def delete(self, booking_id):
         """
@@ -2206,7 +2206,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
     """
     API for completing bookings
     """
-    @token_auth.login_required(user_type=('staff','client'))
+    @token_auth.login_required(user_type=('staff','client'), check_staff_telehealth_access=True)
     @responds(api=ns, status_code=200)
     def put(self, booking_id):
         """
@@ -2235,7 +2235,7 @@ class TelehealthTranscripts(Resource):
     """
     Operations related to stored telehealth transcripts
     """
-    @token_auth.login_required()
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(api=ns, schema = TelehealthTranscriptsSchema, status_code=200)
     @ns.doc(params={'page': 'pagination index',
                 'per_page': 'results per page'})

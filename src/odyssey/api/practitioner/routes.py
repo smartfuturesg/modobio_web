@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.api.user.models import User
 logger = logging.getLogger(__name__)
 
 from flask import request, current_app, Response
@@ -15,6 +17,7 @@ from odyssey.api.practitioner.schemas import (
     PractitionerCredentialsSchema,
     PractitionerDeleteCredentialsSchema
 )
+from odyssey.api.user.schemas import UserSchema
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.lookup.models import LookupCurrencies, LookupOrganizations
 from odyssey.utils.misc import check_staff_existence
@@ -305,3 +308,28 @@ class PractitionerOganizationAffiliationAPI(BaseResource):
         for org in organizations:
             org.org_info = org.org_info
         return organizations
+
+
+@ns.route('/telehealth-activation/<int:user_id>/')
+class PractitionerTelehealthActivationEndpoint(BaseResource):
+    """
+    Activate or deactivate telehealth for providers.
+    """
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(schema=UserSchema(only=['provider_telehealth_access']),status_code=200)
+    def get(self, user_id):
+        
+        return User.query.filter_by(user_id=user_id).one_or_none()
+        
+    @token_auth.login_required(user_type=('staff',), staff_role=('community_manager',))
+    @accepts(schema=UserSchema(only=['provider_telehealth_access']))
+    @responds(schema=UserSchema(only=['provider_telehealth_access']), status_code=200)
+    def put(self, user_id):
+        user = self.check_user(user_id)
+
+        #update telehealth access flag
+        telehalth_access = request.json.get('provider_telehealth_access')
+        user.provider_telehealth_access = telehalth_access
+        db.session.commit()
+
+        return user

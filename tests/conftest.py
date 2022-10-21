@@ -150,11 +150,12 @@ def test_client():
             tc.client_pass = '123'
             tc.client_auth_header = login(tc, client, password='123')
 
+            staff.provider_telehealth_access = True
             tc.staff = staff
             tc.staff_id = staff.user_id
             tc.staff_pass = '123'
             tc.staff_auth_header = login(tc, staff, password='123')
-
+            
             yield tc
             
             # Cleanup functions also need a live app.
