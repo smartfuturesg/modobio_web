@@ -44,6 +44,14 @@ def test_full_password_recovery_routine(test_client):
     assert response.status_code == 200
     assert check_password_hash(user_login.password, payload_password_reset['password'])
 
+    # Test re-use previous password. Should throw a 400
+    response = test_client.put(
+        f'/user/password/forgot-password/reset?reset_token={pswd_rest_token}',
+        data=dumps(payload_password_reset),
+        content_type='application/json')
+
+    assert response.status_code == 400
+
 def test_password_update(test_client):
     ###
     # Update Password with the correct current password and a
@@ -74,6 +82,10 @@ def test_password_update(test_client):
     # valid new password
     ###
 
+    payload = {
+        'current_password': users_staff_passwords_data['password'],
+        'new_password': 'wownewpass'}
+
     response = test_client.post(
         '/user/password/update/',
         headers=test_client.staff_auth_header,
@@ -81,3 +93,20 @@ def test_password_update(test_client):
         content_type='application/json')
 
     assert response.status_code == 401
+
+    ###
+    # Update Password with the correct current password
+    # but re-use previous password as new
+    ###
+
+    payload = {
+        'current_password': users_staff_passwords_data['new_password'],
+        'new_password': users_staff_passwords_data['new_password']}
+
+    response = test_client.post(
+        '/user/password/update/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 400
