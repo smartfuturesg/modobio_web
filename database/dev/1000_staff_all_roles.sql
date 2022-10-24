@@ -1,8 +1,6 @@
 DO $$
 DECLARE
     _user_id INTEGER;
-    _role_id INTEGER;
-    _country_id INTEGER;
 BEGIN
     INSERT INTO "User" (
         email,
