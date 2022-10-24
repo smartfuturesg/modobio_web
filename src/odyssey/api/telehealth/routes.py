@@ -780,14 +780,15 @@ class TelehealthBookingsApi(BaseResource):
         if consult_rate == None:
             raise BadRequest('Practitioner has not set a consult rate')
 
+        # Payments paused on 10.24.22
         # If provider has a consult rate of 0, assume that they will be handling
         # payment outside of the modobio platform
         # otherwise, the client must have provided a payment method
-        if consult_rate == 0:
-            request.parsed_obj.charged = True
-            request.parsed_obj.payment_notified = True
-        elif consult_rate != 0 and not payment_method_id:
-            raise BadRequest('Payment method required')
+        # if consult_rate == 0:
+        #     request.parsed_obj.charged = True
+        #     request.parsed_obj.payment_notified = True
+        # elif consult_rate != 0 and not payment_method_id:
+        #     raise BadRequest('Payment method required')
 
         rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
