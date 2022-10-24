@@ -11,12 +11,12 @@ from odyssey.api import api
 from odyssey.api.maintenance.schemas import MaintenanceBlocksDeleteSchema
 from odyssey.api.maintenance.schemas import MaintenanceBlocksCreateSchema
 from odyssey.api.telehealth.models import TelehealthBookings
-from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import and_, or_, select
 from odyssey.utils.misc import get_time_index
+from odyssey.tasks.tasks import cancel_telehealth_appointment
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +177,7 @@ class MaintenanceApi(BaseResource):
 
         # cancel each of them
         for booking in bookings_to_cancel:
-            cancel_telehealth_appointment(booking, False, 'Conflicted with newly scheduled server maintenance')
+            cancel_telehealth_appointment(booking, 'Conflicted with newly scheduled server maintenance')
 
         logger.info(f'Scheduled maintenance for {request.json["start_time"]} to {request.json["end_time"]}')
 

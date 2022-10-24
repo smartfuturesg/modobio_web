@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentRefunds, PaymentHistory
+from odyssey.api.payment.models import PaymentMethods, PaymentRefunds, PaymentHistory
 from odyssey.utils.base.schemas import BaseSchema
 
 class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
@@ -17,22 +17,6 @@ class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
     expiration = fields.String(required=True)
     cardholder_name = fields.String(required=True)
 
-class PaymentStatusSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = PaymentStatus
-        dump_only = ('created_at',)
-        exclude = ('updated_at','idx',)
-
-    request_amount = fields.Float()
-    user_id = fields.Integer(required=True)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return PaymentStatus(**data)
-
-class PaymentStatusOutputSchema(Schema):
-
-    payment_statuses = fields.Nested(PaymentStatusSchema(many=True))
 
 class PaymentHistorySchema(BaseSchema):
     class Meta:

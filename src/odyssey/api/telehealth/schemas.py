@@ -72,7 +72,7 @@ class TelehealthBookingsPUTSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
 
-    payment_method_id = fields.Integer(required=False)    
+    #payment_method_id = fields.Integer(required=False)    
     status = fields.String(required=False,validate=validate.OneOf(BOOKINGS_STATUS))
 
 class TelehealthChatRoomsSchema(ma.SQLAlchemyAutoSchema):
@@ -117,7 +117,7 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     chat_room = fields.Nested(TelehealthChatRoomsSchema(only=['conversation_sid', 'room_name', 'room_status', 'transcript_url', 'write_access_timeout']), dump_only=True)
     client = fields.Nested(TelehealthUserSchema, dump_only=True)
     practitioner = fields.Nested(TelehealthUserSchema, dump_only=True)
-    payment_method_id = fields.Integer(required=False)
+    #payment_method_id = fields.Integer(required=False)
     client_location_id = fields.Integer(required=False)
     start_time_utc = fields.Time()
     booking_url = fields.String()
@@ -231,7 +231,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
     location_name = fields.String()
     location_id = fields.Integer(required=True)
-    payment_method_id = fields.Integer(required=True, metadata={'description': 'idx from PaymentMethods selected'})
+    #payment_method_id = fields.Integer(required=True, metadata={'description': 'idx from PaymentMethods selected'})
     profession_type = fields.String(validate=validate.OneOf(ACCESS_ROLES), required=True)
 
     @post_load

@@ -46,7 +46,6 @@ from odyssey.api.lookup.models import (
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.constants import (
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TWILIO_ACCESS_KEY_TTL,
@@ -69,7 +68,7 @@ from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
 from odyssey.utils.files import AudioUpload, ImageUpload, FileDownload
 from odyssey.utils.base.resources import BaseResource
-from odyssey.tasks.tasks import abandon_telehealth_booking, cleanup_unended_call, store_telehealth_transcript
+from odyssey.tasks.tasks import abandon_telehealth_booking, cleanup_unended_call, store_telehealth_transcript, cancel_telehealth_appointment
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
@@ -137,7 +136,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # only practitioners may initiate a call
         if not meeting_room:
             if current_user.user_id == booking.staff_user_id:
-                #check that the booking has been paid for and the payment has not been voided or refunded
+                """#check that the booking has been paid for and the payment has not been voided or refunded
                 payment = PaymentHistory.query.filter_by(idx=booking.payment_history_id).one_or_none()
                 if payment:
                     refund = PaymentRefunds.query.filter_by(payment_id=payment.idx).one_or_none()
@@ -145,7 +144,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                         raise BadRequest('Telehealth call cannot be started because it has not been paid for.')    
                 else:
                     raise BadRequest('Telehealth call cannot be started because it has not been paid for.')
-                
+                """
                 #check that booking has been accepted
                 if booking.status not in ('Accepted', 'In Progress'):
                     raise BadRequest('Telehealth call cannot be started because its status is not \'Accepted\' or \'In Progress\'')
@@ -229,8 +228,8 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
     'location_id': 'Location ID',
     'priority': 'Priority',
     'medical_gender': 'Medical gender preference',
-    'duration': 'Duration of appointment',
-    'payment_method_id': 'Payment method ID'
+    'duration': 'Duration of appointment'
+    #'payment_method_id': 'Payment method ID'
 }) # Add all other required params 
 class TelehealthClientTimeSelectApi(BaseResource):
 
@@ -656,7 +655,7 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required(user_type=('client',))
-    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date', 'payment_method_id']), api=ns)
+    @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     @ns.doc(params={'client_user_id': 'Client User ID', 'staff_user_id': 'Staff User ID'})
     def post(self):
@@ -702,12 +701,12 @@ class TelehealthBookingsApi(BaseResource):
         if not client_in_queue:
             raise BadRequest('Client not in queue.')
         
-        payment_method_id = request.parsed_obj.payment_method_id
+        """payment_method_id = request.parsed_obj.payment_method_id
         if not payment_method_id:
             raise BadRequest("Payment Method ID not provided")
 
         if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
-            raise BadRequest('Payment ID does not exist for user.')
+            raise BadRequest('Payment ID does not exist for user.')"""
 
         # requested duration in minutes
         duration = client_in_queue.duration
@@ -840,7 +839,7 @@ class TelehealthBookingsApi(BaseResource):
                 'profession_type': booking.profession_type,
                 'chat_room': booking.chat_room,
                 'client_location_id': booking.client_location_id,
-                'payment_method_id': booking.payment_method_id,
+                #'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
@@ -852,7 +851,7 @@ class TelehealthBookingsApi(BaseResource):
         return payload
 
     @token_auth.login_required
-    @accepts(schema=TelehealthBookingsPUTSchema(only=['status', 'payment_method_id']), api=ns)
+    @accepts(schema=TelehealthBookingsPUTSchema(only=['status']), api=ns)
     @responds(status_code=201,api=ns)
     @ns.doc(params={'booking_id': 'booking_id'})
     def put(self):
@@ -883,7 +882,7 @@ class TelehealthBookingsApi(BaseResource):
 
         data = request.get_json()
 
-        payment_id = data.get('payment_method_id')
+        """payment_id = data.get('payment_method_id')
         # If user wants to change the payment method for booking
         if payment_id:
             # Verify it's the client that's trying to change the payment method
@@ -897,7 +896,7 @@ class TelehealthBookingsApi(BaseResource):
             
             if booking.charged:
                 raise BadRequest('Booking has already been paid for. The payment method cannot be changed.')
-
+        """
 
         new_status = data.get('status')
         if new_status:
@@ -928,8 +927,7 @@ class TelehealthBookingsApi(BaseResource):
                     #cancel appointment with refund and send client notification that meeting was cancelled
                     cancel_telehealth_appointment(
                         booking,
-                        reason="Practitioner Cancellation",
-                        refund=True)
+                        reason="Practitioner Cancellation")
                     create_notification(
                         booking.client_user_id,
                         NOTIFICATION_SEVERITY_TO_ID.get('High'),
@@ -943,9 +941,7 @@ class TelehealthBookingsApi(BaseResource):
                     )
                 else:
                     #cancel appointment without refund and send staff notification that meeting was cancelled
-                    cancel_telehealth_appointment(
-                        booking,
-                        refund=False)
+                    cancel_telehealth_appointment(booking)
 
                     client_fullname = f'{current_user.firstname} {current_user.lastname}'
                     send_email(
@@ -1669,12 +1665,12 @@ class TelehealthQueueClientPoolApi(BaseResource):
         if not location:
             raise BadRequest(f'Location {location_id} does not exist.')
 
-        # Verify payment method idx is valid from PaymentMethods
+        """# Verify payment method idx is valid from PaymentMethods
         # and that the payment method chosen has the user_id
         payment_id = request.parsed_obj.payment_method_id
         verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
         if not verified_payment_method:
-            raise BadRequest('Invalid payment method.')
+            raise BadRequest('Invalid payment method.')"""
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)

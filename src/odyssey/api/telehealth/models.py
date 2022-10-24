@@ -144,11 +144,12 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key(StaffCalendarEvents.idx)
     """
 
-    charged = db.Column(db.Boolean, default=False)
+    charged = db.Column(db.Boolean, default=True)
     """
     Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
     is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
-    by the initial charge task.
+    by the initial charge task. Defaults to true until a new payment system is implemented at which 
+    point it will default to false.
 
     :type: boolean
     """
