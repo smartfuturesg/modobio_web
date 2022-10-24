@@ -155,22 +155,22 @@ def create_app():
     app.register_blueprint(bp)
 
     # Elasticsearch setup.
-    app.elasticsearch = None
-    if app.config['ELASTICSEARCH_URL']:
-        app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
-        if not app.config['TESTING']:
-            with app.app_context():
-                # action.destructive_requires_namesetting defaults to true in v8,
-                # which disallows use of wildcards or _all.
-                app.elasticsearch.indices.delete(index='clients,staff', ignore_unavailable=True)
-                from odyssey.utils import search
-                try:
-                    search.build_ES_indices()
-                except ProgrammingError as err:
-                    # ProgrammingError wraps lower level errors, in this case a
-                    # psycopg2.errors.UndefinedTable error. Ignore UndefinedTable error.
-                    if 'UndefinedTable' not in str(err):
-                        raise err
+    # app.elasticsearch = None
+    # if app.config['ELASTICSEARCH_URL']:
+    #     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
+    #     if not app.config['TESTING']:
+    #         with app.app_context():
+    #             # action.destructive_requires_namesetting defaults to true in v8,
+    #             # which disallows use of wildcards or _all.
+    #             app.elasticsearch.indices.delete(index='clients,staff', ignore_unavailable=True)
+    #             from odyssey.utils import search
+    #             try:
+    #                 search.build_ES_indices()
+    #             except ProgrammingError as err:
+    #                 # ProgrammingError wraps lower level errors, in this case a
+    #                 # psycopg2.errors.UndefinedTable error. Ignore UndefinedTable error.
+    #                 if 'UndefinedTable' not in str(err):
+    #                     raise err
     # mongo db
     if app.config['MONGO_URI']:
         mongo.init_app(app)
