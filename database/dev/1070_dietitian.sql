@@ -10,6 +10,7 @@ BEGIN
         is_staff,
 		was_staff,
         is_client,
+        is_provider,
         email_verified,
         biological_sex_male,
         dob)
@@ -21,6 +22,7 @@ BEGIN
         true,
 		true,
         false,
+        true,
         true,
         true,
         '1990-06-01')
