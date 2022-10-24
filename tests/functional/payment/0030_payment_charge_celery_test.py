@@ -1,3 +1,4 @@
+import pytest
 from flask.json import dumps
 
 from odyssey import db
@@ -5,9 +6,6 @@ from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.payment.models import PaymentHistory
 
 from .data import payment_refund_data
-
-from odyssey.tasks.periodic import find_chargable_bookings
-from odyssey.tasks.tasks import charge_telehealth_appointment
 
 """
 This test intends to test the full payment system. In order to accomplish this, we must:
@@ -19,6 +17,7 @@ Check that the payment was triggered through the payment history table
 Refund the payment
 Check that the refund was successful
 """
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_bookings_payment(test_client, test_booking):
     #run celery tasks to find and charge bookings
     bookings = find_chargable_bookings()

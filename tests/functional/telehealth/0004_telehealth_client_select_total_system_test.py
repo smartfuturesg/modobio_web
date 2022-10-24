@@ -1,4 +1,5 @@
 
+import pytest
 from datetime import datetime, timedelta
 
 from flask.json import dumps
@@ -31,8 +32,8 @@ from .client_select_data import (
 )
 
 
-def test_generate_client_queue(test_client, payment_method):
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+def test_generate_client_queue(test_client):
+    #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -78,7 +79,7 @@ def test_generate_staff_availability(test_client, telehealth_staff):
         assert response.status_code == 201
 
 
-def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, payment_method, staff_availabilities):
+def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, staff_availabilities):
 
     ##
     # Create booking 1
@@ -91,8 +92,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
                 telehealth_booking_data_1.get('target_date'), '%Y-%m-%d').isoformat(),
         'priority': False,
         'medical_gender': 'np',
-        'location_id': 1,
-        'payment_method_id': payment_method.idx}
+        'location_id': 1}
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -100,7 +100,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
-    telehealth_booking_data_1['payment_method_id'] = payment_method.idx
+    #telehealth_booking_data_1['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -121,8 +121,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
                 telehealth_booking_data_2.get('target_date'), '%Y-%m-%d').isoformat(),
         'priority': False,
         'medical_gender': 'np',
-        'location_id': 1,
-        'payment_method_id': payment_method.idx}
+        'location_id': 1}
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -130,7 +129,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
-    telehealth_booking_data_2['payment_method_id'] = payment_method.idx
+    #telehealth_booking_data_2['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -149,13 +148,13 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
     client_4_auth_header = login(test_client, client_4)
 
     # add payment method to db
-    response = test_client.post(
+    """response = test_client.post(
         f'/payment/methods/{client_4.user_id}/',
         headers=client_4_auth_header,
         data=dumps(payment_method_data),
         content_type='application/json')
 
-    pm = PaymentMethods.query.filter_by(user_id=client_4.user_id).first()
+    pm = PaymentMethods.query.filter_by(user_id=client_4.user_id).first()"""
 
     # add client to queue first
     queue_data = {
@@ -164,8 +163,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
                 telehealth_booking_data_3.get('target_date'), '%Y-%m-%d').isoformat(),
         'priority': False,
         'medical_gender': 'np',
-        'location_id': 1,
-        'payment_method_id': pm.idx}
+        'location_id': 1}
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{client_4.user_id}/',
@@ -173,7 +171,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
         data=dumps(queue_data),
         content_type='application/json')
 
-    telehealth_booking_data_3['payment_method_id'] = pm.idx
+    #telehealth_booking_data_3['payment_method_id'] = pm.idx
     response = test_client.post(
         f'/telehealth/bookings/'
         f'?client_user_id={client_4.user_id}'
@@ -185,8 +183,8 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, pa
     assert response.status_code == 201
 
 
-def test_generate_client_queue(test_client, payment_method):
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+def test_generate_client_queue(test_client):
+    #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -204,9 +202,9 @@ def test_client_time_select(test_client, staff_availabilities):
     assert response.status_code == 200
     assert response.json['total_options'] == 95
 
-def test_client_time_select_specific_provider_client_in_queue(test_client, payment_method, staff_availabilities):
+def test_client_time_select_specific_provider_client_in_queue(test_client, staff_availabilities):
 
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -275,7 +273,7 @@ def test_client_time_select_specific_provider_client_not_in_queue_without_requir
     
     assert response.status_code == 400
 
-def test_full_system_with_settings(test_client, payment_method, telehealth_staff):
+def test_full_system_with_settings(test_client, telehealth_staff):
     """
     Testing the full telehealth system:
 
@@ -324,8 +322,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
         "medical_gender": "np",
         "target_date": (target_date_next_monday + timedelta(weeks=1)).isoformat(),
         "timezone": "America/Phoenix",
-        'location_id': 1,
-        'payment_method_id': payment_method.idx}
+        'location_id': 1}
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',
@@ -353,8 +350,7 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     # select the booking that is at 4:30 Phx time/ 11:30 UTC
     client_booking = {
         'target_date': target_date_next_monday.date().isoformat(),
-        'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time'],
-        'payment_method_id': payment_method.idx
+        'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time']
     }
 
     response = test_client.post(
@@ -368,7 +364,6 @@ def test_full_system_with_settings(test_client, payment_method, telehealth_staff
     assert response.json['bookings'][0]['client']['timezone'] == 'America/Phoenix'
     assert response.json['bookings'][0]['practitioner']['timezone'] == 'UTC'
     assert response.json['bookings'][0]['status'] == 'Pending'
-    assert response.json['bookings'][0]['payment_method_id'] == payment_method.idx
 
     booking_id = response.json['bookings'][0]['booking_id']
 
@@ -439,7 +434,7 @@ def test_booking_start_and_complete(test_client, booking_function_scope):
 
     assert response.status_code == 200
 
-
+@pytest.mark.skip('Disabled until an alternative to InstaMed is implemented')
 def test_booking_start_fail(test_client, booking_function_scope):
     
     # mark the associated payment history row as voided
