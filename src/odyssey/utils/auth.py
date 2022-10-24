@@ -26,7 +26,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client'), staff_role=None, internal_required=False, email_required=True, resources = (), dev_only=False):
+    def login_required(self, f=None, user_type=('staff','client', 'provider'), staff_role=None, internal_required=False, email_required=True, resources = (), dev_only=False):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -70,7 +70,7 @@ class BasicAuth(object):
                 Steps to authentication and authorization
                 1. Pull auth details from headers (basic or bearer token)
                 2. Authenticate credentials and bring up the user and user login details
-                    -user_context either 'basic_auth' (loggin in) or 
+                    -user_context either 'basic_auth' (logging in) or 
                      pulled from token: 'client' or 'staff' 
                 3. Verify that user meets authorization requirements for the endpoint. These include
                     - user_type: 
@@ -96,7 +96,7 @@ class BasicAuth(object):
 
                 # Authenticate and load user and user login details
                 user, user_login, user_context = self.authenticate(auth)
-
+                
                 if user in (False, None):
                     raise Unauthorized
 
@@ -133,7 +133,7 @@ class BasicAuth(object):
         ''' user_role_check is to determine if the user accessing the API
             is a Staff member or Client '''
         # user is logged in as a modobio user, they may access the endpoint
-        if user_context in ('staff', 'client') and 'modobio' in user_type:
+        if 'modobio' in user_type:
             return
 
         # User is logged in, claims staff in token (user_context),
@@ -171,6 +171,11 @@ class BasicAuth(object):
             elif user_type == ('client',) and user.is_client:
                 if user_login.client_account_blocked:
                     raise Unauthorized('Your client account has been blocked. Please contact '
+                                       'client_services@modobio.com to resolve the issue.')
+            # /provider/token/ endpoint and user is registered client
+            elif user_type == ('provider',) and user.is_provider:
+                if user_login.staff_account_blocked:
+                    raise Unauthorized('Your provider account has been blocked. Please contact '
                                        'client_services@modobio.com to resolve the issue.')
             else:
                 raise Unauthorized

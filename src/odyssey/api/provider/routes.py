@@ -45,58 +45,58 @@ logger = logging.getLogger(__name__)
 
 ns = Namespace('provider', description='Operations related to providers')
 
-# @ns.route('/token/')
-# class StaffToken(BaseResource):
-#     """create and revoke tokens"""
-#     @ns.doc(security='password', params={'refresh_token_lifetime': 'Lifetime for staff refresh token'})
-#     @basic_auth.login_required(user_type=('provider',), email_required=False)
-#     @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
-#     def post(self):
-#         """generates a token for the 'current_user' immediately after password authentication"""
-#         user, user_login = basic_auth.current_user()
+@ns.route('/token/')
+class ProviderToken(BaseResource):
+    """create and revoke tokens"""
+    @ns.doc(security='password', params={'refresh_token_lifetime': 'Lifetime for staff refresh token'})
+    @basic_auth.login_required(user_type=('provider',), email_required=False)
+    @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
+    def post(self):
+        """generates a token for the 'current_user' immediately after password authentication"""
+        user, user_login = basic_auth.current_user()
 
-#         if not user:
-#             raise Unauthorized
+        if not user:
+            raise Unauthorized
 
-#         # bring up list of staff roles
-#         access_roles = db.session.query(
-#                                 StaffRoles.role
-#                             ).filter(
-#                                 StaffRoles.user_id==user.user_id
-#                             ).all()
+        # bring up list of staff roles
+        access_roles = db.session.query(
+                                StaffRoles.role
+                            ).filter(
+                                StaffRoles.user_id==user.user_id
+                            ).all()
 
-#         refresh_token_lifetime = request.args.get('refresh_token_lifetime', type=int)
+        refresh_token_lifetime = request.args.get('refresh_token_lifetime', type=int)
 
-#         # Handle refresh token lifetime param
-#         if refresh_token_lifetime:
-#             # Convert lifetime from days to hours
-#             if MIN_CUSTOM_REFRESH_TOKEN_LIFETIME <= refresh_token_lifetime <= MAX_CUSTOM_REFRESH_TOKEN_LIFETIME:
-#                 refresh_token_lifetime *= 24
-#             # Else lifetime is not in acceptable range
-#             else:
-#                 raise BadRequest('Custom refresh token lifetime must be between 1 and 30 days.')
+        # Handle refresh token lifetime param
+        if refresh_token_lifetime:
+            # Convert lifetime from days to hours
+            if MIN_CUSTOM_REFRESH_TOKEN_LIFETIME <= refresh_token_lifetime <= MAX_CUSTOM_REFRESH_TOKEN_LIFETIME:
+                refresh_token_lifetime *= 24
+            # Else lifetime is not in acceptable range
+            else:
+                raise BadRequest('Custom refresh token lifetime must be between 1 and 30 days.')
 
-#         access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
-#         refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh', refresh_token_lifetime=refresh_token_lifetime)
+        access_token = UserLogin.generate_token(user_type='provider', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='provider', user_id=user.user_id, token_type='refresh', refresh_token_lifetime=refresh_token_lifetime)
 
-#         db.session.add(UserTokenHistory(user_id=user.user_id, 
-#                                         refresh_token=refresh_token,
-#                                         event='login',
-#                                         ua_string = request.headers.get('User-Agent')))
+        db.session.add(UserTokenHistory(user_id=user.user_id, 
+                                        refresh_token=refresh_token,
+                                        event='login',
+                                        ua_string = request.headers.get('User-Agent')))
 
-#         # If a user logs in after closing the account, but within the account
-#         # deletion limit, the account will be reopened and not deleted.
-#         if user_login.staff_account_closed:
-#             user_login.staff_account_closed = None
-#             user_login.staff_account_closed_reason = None
+        # If a user logs in after closing the account, but within the account
+        # deletion limit, the account will be reopened and not deleted.
+        if user_login.staff_account_closed:
+            user_login.staff_account_closed = None
+            user_login.staff_account_closed_reason = None
 
-#         db.session.commit()
+        db.session.commit()
 
-#         return {'email': user.email, 
-#                 'firstname': user.firstname, 
-#                 'lastname': user.lastname, 
-#                 'token': access_token,
-#                 'refresh_token': refresh_token,
-#                 'user_id': user.user_id,
-#                 'access_roles': [item[0] for item in access_roles],
-#                 'email_verified': user.email_verified}
+        return {'email': user.email, 
+                'firstname': user.firstname, 
+                'lastname': user.lastname, 
+                'token': access_token,
+                'refresh_token': refresh_token,
+                'user_id': user.user_id,
+                'access_roles': [item[0] for item in access_roles],
+                'email_verified': user.email_verified}
