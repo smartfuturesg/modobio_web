@@ -115,7 +115,7 @@ class ApiUser(BaseResource):
 
 @ns.route('/staff/')
 class NewStaffUser(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin', 'system_admin', 'client_services'))
     @accepts(schema=NewStaffUserSchema, api=ns)
     @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
     def post(self):
