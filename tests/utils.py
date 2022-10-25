@@ -27,6 +27,8 @@ def login(test_client, user, password='password') -> dict:
     url = 'client'
     if user.is_staff:
         url = 'staff'
+    elif user.is_provider:
+        url = 'provider'
 
     response = test_client.post(
         f'/{url}/token/',

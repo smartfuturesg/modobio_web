@@ -36,6 +36,7 @@ from .utils import login
 # See database/1000_staff_all_roles.sql and database/3000_client.sql
 STAFF_EMAIL = 'name@modobio.com'
 CLIENT_EMAIL = 'client@modobio.com'
+PROVIDER_EMAIL = 'pro@modobio.com'
 
 # For care team fixture
 USER_TM = 'test_team_member_user@modobio.com'
@@ -138,6 +139,7 @@ def test_client():
             # Load the main users for testing
             client = db.session.query(User).filter_by(email=CLIENT_EMAIL).one_or_none()
             staff = db.session.query(User).filter_by(email=STAFF_EMAIL).one_or_none()
+            provider = db.session.query(User).filter_by(email=STAFF_EMAIL).one_or_none()
 
             # Add everything we want to pass to tests
             # into the test_client instance as parameters.
@@ -155,6 +157,11 @@ def test_client():
             tc.staff_pass = '123'
             tc.staff_auth_header = login(tc, staff, password='123')
 
+            tc.provider = provider
+            tc.provider_id = provider.user_id
+            tc.provider_pass = '123'
+            tc.provider_auth_header = login(tc, provider, password='123')
+            
             yield tc
             
             # Cleanup functions also need a live app.

@@ -19,7 +19,7 @@ BEGIN
         'QE6RS1875312',
         'White',
         'Goodman',
-        true,
+        false,
 		true,
         false,
         true,
