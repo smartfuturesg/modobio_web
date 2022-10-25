@@ -8,11 +8,13 @@ from io import BytesIO
 
 from flask_migrate import current_app
 from sqlalchemy import select
+from werkzeug.exceptions import BadRequest
 
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
+from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User
 from odyssey.integrations.twilio import Twilio
@@ -21,9 +23,6 @@ from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
 from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import create_notification, update_client_subscription
-
-# avoid circular imports by importing entire module
-import odyssey.integrations.instamed
 
 logger = logging.getLogger(__name__)
 
@@ -194,16 +193,16 @@ def upcoming_appointment_care_team_permissions(booking_id):
     return
 
 
-@celery.task()
-def charge_telehealth_appointment(booking_id):
-    """
-    This task will go through the process of attempting to charge a user for a telehealth booking.
-    If the payment is unsuccessful, the booking will be canceled.
-    """
-    # TODO: Notify user of the canceled booking via email? They are already notified via notification
-    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-
-    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
+#@celery.task()
+#def charge_telehealth_appointment(booking_id):
+#    """
+#    This task will go through the process of attempting to charge a user for a telehealth booking.
+#    If the payment is unsuccessful, the booking will be canceled.
+#    """
+#    # TODO: Notify user of the canceled booking via email? They are already notified via notification
+#    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+#
+#    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
     
 @celery.task()
 def cancel_noshow_appointment(booking_id):
@@ -212,8 +211,23 @@ def cancel_noshow_appointment(booking_id):
     the start time. It will then refund the user.
     """
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-    
-    odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+    booking.status = "Canceled"
+
+    # run the task to store the chat transcript immediately
+    if current_app.config['TESTING']:
+        #run task directly if in test env
+        store_telehealth_transcript(booking.idx)
+    else:
+        #otherwise run with celery
+        store_telehealth_transcript.delay(booking.idx)
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(idx = booking.staff_calendar_id).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    db.session.commit()
+    #odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):
@@ -397,3 +411,50 @@ def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
         datum['end_time']
     )
     db.session.commit()
+
+@celery.task()
+def cancel_telehealth_appointment(booking, reason='Failed Payment'):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    and from bookings PUT to cancel a booking
+
+    args:
+    booking: a booking object for the telehealth appointment to be canceled
+    reason: reason for the cancellation, either (Practitioner Cancellation, Practitioner No-Show, or Failed Payment)
+    reporter_id: user_id of the user that initiated the cancellation, null if system automated
+    reporter_role: role of the user that initiated the cancellation(staff or client), System if system automated
+    """
+
+    # ensure that cancellation request does not occur during or after the scheduled meeting time
+    booking_start_time = datetime.combine(
+            date=booking.target_date_utc,
+            time = LookupBookingTimeIncrements.query.filter_by(idx = booking.booking_window_id_start_time_utc).one_or_none().start_time)
+
+    current_time_utc = datetime.utcnow()
+    
+    # prevent bookings that have already started from being cancelled. 
+    # exception: practitioner no show triggered by background process
+    if current_time_utc > booking_start_time and reason != 'Practitioner No Show':
+        raise BadRequest('Unable to cancel booking. Schedueld meeting has already begun')
+    
+    # update booking status to canceled
+    booking.status = 'Canceled'
+    
+    # run the task to store the chat transcript immediately
+    # imported in this way to get around circular importing issues
+    if current_app.config['TESTING']:
+        #run task directly if in test env
+        store_telehealth_transcript(booking.idx)
+    else:
+        #otherwise run with celery
+        store_telehealth_transcript.delay(booking.idx)
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(idx = booking.staff_calendar_id).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    #TODO: Create notification/send email(?) to user that their appointment 
+
+    db.session.commit()
+    return

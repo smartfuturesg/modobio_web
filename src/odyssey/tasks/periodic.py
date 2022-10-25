@@ -16,7 +16,6 @@ from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
     upcoming_appointment_care_team_permissions,
     upcoming_appointment_notification_2hr,
-    charge_telehealth_appointment,
     store_telehealth_transcript,
     cancel_noshow_appointment,
     update_client_subscription_task,
@@ -29,9 +28,9 @@ from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, Clie
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.user.models import User, UserSubscriptions
-from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import get_time_index, create_notification
+from odyssey.tasks.tasks import cancel_telehealth_appointment
 
 logger = get_task_logger(__name__)
 
@@ -324,7 +323,7 @@ def detect_practitioner_no_show():
     logger.info(f'no show task time window: {target_time_window}')
 
     bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', 
-                                               TelehealthBookings.charged == True,
+                                               #TelehealthBookings.charged == True,
                                                TelehealthBookings.target_date_utc == target_time.date(),
                                                TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2).all()
     for booking in bookings:
@@ -332,7 +331,7 @@ def detect_practitioner_no_show():
         #change booking status to canceled and refund client
         if current_app.config['TESTING']:
             #cancel_noshow_appointment(booking.idx)
-            cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+            cancel_telehealth_appointment(booking, reason='Practitioner No Show')
         else:
             cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('no show task completed')
@@ -496,10 +495,10 @@ celery.conf.beat_schedule = {
         'schedule': crontab(minute='0', hour='*/1')
     },
     # telehealth appointment charging
-    'find_chargable_bookings': {
-        'task': 'odyssey.tasks.periodic.find_chargable_bookings',
-        'schedule': crontab(minute='*/5')
-    },
+    #'find_chargable_bookings': {
+    #    'task': 'odyssey.tasks.periodic.find_chargable_bookings',
+    #    'schedule': crontab(minute='*/5')
+    #},
     # search for telehealth transcripts that need to be stored, deploy those storage tasks
     'appointment_transcript_store_scheduler': {
         'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
@@ -529,11 +528,11 @@ celery.conf.beat_schedule = {
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
         'task': 'odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
         'schedule': crontab(minute='*/15')
-    },
-    # upcoming booking payment to be charged
-    'check_for_upcoming_booking_charges': {
-        'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
-        'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
-        # off setting this slightly might theoretically smooth out the load on celery
     }
+    # upcoming booking payment to be charged
+    #'check_for_upcoming_booking_charges': {
+    #    'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
+    #    'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
+    #    # off setting this slightly might theoretically smooth out the load on celery
+    #}
 }

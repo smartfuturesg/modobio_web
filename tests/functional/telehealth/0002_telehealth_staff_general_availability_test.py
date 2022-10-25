@@ -14,7 +14,7 @@ from .data import (
 )
 from tests.functional.practitioner.data import practitioner_credentials_post_1_data
 
-def test_post_1_staff_general_availability(test_client, payment_method, staff_territory, staff_credentials, staff_consult_rate):
+def test_post_1_staff_general_availability(test_client, staff_territory, staff_credentials, staff_consult_rate):
     # DEPENDENCY - add practitioner credentials
     response = test_client.post(
         f'/practitioner/credentials/{test_client.staff_id}/',
@@ -32,7 +32,7 @@ def test_post_1_staff_general_availability(test_client, payment_method, staff_te
     
     assert response.status_code == 201
 
-    telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
+    #telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
         f'/telehealth/queue/client-pool/{test_client.client_id}/',

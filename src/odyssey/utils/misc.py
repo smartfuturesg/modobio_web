@@ -1175,4 +1175,3 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
         user = User.query.filter_by(user_id=user_id).one_or_none()
         send_email('subscription-confirm', user.email, firstname=user.firstname)
 
-        

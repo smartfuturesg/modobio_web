@@ -310,7 +310,6 @@ def booking_function_scope(test_client):
     """
     # prepare a payment method to be used
     pm = PaymentMethods(
-        payment_id = '123456789',
         payment_type = 'VISA',
         number = 123,
         expiration = '05/26',

@@ -1,3 +1,4 @@
+import pytest
 from flask.json import dumps, loads
 
 from odyssey import db
@@ -16,6 +17,7 @@ Refund full amount
 Refund more than full amount (should fail)
 Refund after full amount has been refunded (should fail)
 """
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_sale_success(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
@@ -30,6 +32,7 @@ def test_sale_success(test_client, test_booking):
     assert res['TransactionStatus'] == "C"
     assert test_booking.charged
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_sale_deny(test_client, test_booking):
     #charge booking using test endpoint ($99.05)
     test_booking.consult_rate = 99.05
@@ -55,6 +58,7 @@ def test_sale_deny(test_client, test_booking):
         db.session.delete(status)
     db.session.commit()
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_sale_partial(test_client, test_booking):
     #charge booking using test endpoint ($99.10)
     test_booking.consult_rate = 99.10
@@ -79,6 +83,7 @@ def test_sale_partial(test_client, test_booking):
         db.session.delete(status)
     db.session.commit()
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_void(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
@@ -108,6 +113,7 @@ def test_void(test_client, test_booking):
         db.session.delete(status)
     db.session.commit()
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_refund(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
@@ -153,6 +159,7 @@ def test_refund(test_client, test_booking):
         db.session.delete(status)
     db.session.commit()
 
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_refund_too_much(test_client, test_booking):
     #charge booking using test endpoint ($99.00)
     response = test_client.post(
@@ -185,7 +192,7 @@ def test_refund_too_much(test_client, test_booking):
         db.session.delete(status)
     db.session.commit()
 
-
+@pytest.mark.skip('payment disabled until instamed is replaced')
 def test_payment_history(test_client):
     """
     Test the response to payment/transaction-history (GET)
