@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import jwt
 import random
 from sqlalchemy.orm import relation
+from sqlalchemy.orm.attributes import get_history
 from werkzeug.security import generate_password_hash
 
 from flask import current_app
@@ -207,6 +208,31 @@ def update_ES_index(mapper, connection, target):
     }
     update_index(user, False)
 
+@db.event.listens_for(User, "after_update")
+def update_active_campaign_contact(mapper, connection, target):
+    """
+    Listens for updates on User table
+    """
+    modded_fname = get_history(target, 'firstname').added
+    modded_lname = get_history(target, 'lastname').added
+    modded_email = get_history(target, 'email').added
+
+    #Check if there were any changes to fields
+    if any(len(mod) > 0 for mod in [modded_fname, modded_lname, modded_email]):
+        firstname = target.firstname if len(modded_fname) > 0 else None
+        lastname = target.lastname if len(modded_lname) > 0 else None
+        email = target.email if len(modded_email) > 0 else None
+
+        #Run active campatign operations in prod
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            from odyssey.integrations.active_campaign import ActiveCampaign
+            from odyssey.api.user.models import UserActiveCampaign
+            
+            ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
+            if ac_contact:
+                ac = ActiveCampaign()
+                ac.update_ac_contact_info(
+                target.user_id, first_name=firstname, last_name=lastname, email=email)
 
 class UserLogin(db.Model):
     """ 
@@ -534,6 +560,43 @@ class UserSubscriptions(db.Model):
     Relationship lookup subscriptions
     """
 
+@db.event.listens_for(UserSubscriptions, "after_insert")
+def add_active_campaign_sub_tag(mapper, connection, target):
+    """
+    Listens for inserts on subscription table 
+    """
+    modded_sub_status = get_history(target, 'subscription_status').added
+    modded_sub_type = get_history(target, 'subscription_type_id').added
+
+    #Check if there were any changes to relevant fields
+    if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            from odyssey.integrations.active_campaign import ActiveCampaign
+            from odyssey.api.user.models import UserActiveCampaign
+            
+            ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
+            if ac_contact:
+                ac = ActiveCampaign()
+                ac.add_user_subscription_type(target.user_id)
+
+@db.event.listens_for(UserSubscriptions, "after_update")
+def update_active_campaign_sub_tag(mapper, connection, target):
+    """
+    Listens for updates on subscription table 
+    """
+    modded_sub_status = get_history(target, 'subscription_status').added
+    modded_sub_type = get_history(target, 'subscription_type_id').added
+
+    #Check if there were any changes to relevant fields
+    if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            from odyssey.integrations.active_campaign import ActiveCampaign
+            from odyssey.api.user.models import UserActiveCampaign
+            
+            ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
+            if ac_contact:
+                ac = ActiveCampaign()
+                ac.add_user_subscription_type(target.user_id)
     
 class UserTokensBlacklist(db.Model):
     """ 
@@ -857,4 +920,45 @@ class UserProfilePictures(BaseModelWithIdx):
     Boolean determining if the image is the original or not, false by default
 
     :type: bool
+    """
+
+class UserActiveCampaign(BaseModelWithIdx):
+    "Stores the data related to Active Campaign"
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+    
+    active_campaign_id = db.Column(db.Integer)
+    """
+    Contact ID from Active Campaign associated with the user
+
+    :type: : int
+    """
+
+class UserActiveCampaignTags(BaseModelWithIdx):
+    "Stores the tags the user is tagged with on Active Campaign"
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+    """
+    User ID number, foreign key to User.user_id
+
+    :type: int, foreign key
+    """
+
+    tag_id = db.Column(db.Integer, nullable=True)
+    """
+    User tag association ID returned from Active Campaign
+
+    :type: int
+    """
+
+    tag_name = db.Column(db.String)
+    """
+    Tag name 
+
+    :type: string
     """
