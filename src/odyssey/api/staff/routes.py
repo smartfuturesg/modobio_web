@@ -325,16 +325,6 @@ class StaffToken(BaseResource):
                 'email_verified': user.email_verified}
 
 
-    @ns.doc(security='password')
-    @ns.deprecated
-    @token_auth.login_required(user_type=('staff',))
-    def delete(self):
-        """
-        Deprecated 11.23.20..does nothing now
-        """
-        return '', 200
-
-
 # user_id in path is not necessary here, except that
 # staff_access_check() relies on it to check staff_self.
 @ns.route('/account/<int:user_id>/close/')
