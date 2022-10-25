@@ -65,7 +65,8 @@ def telehealth_staff(test_client):
             was_staff=True,
             is_client=False,
             email_verified=True,
-            modobio_id=f'ZW99TSVWP88{i}')
+            modobio_id=f'ZW99TSVWP88{i}',
+            provider_telehealth_access=True)
 
         test_client.db.session.add(staff)
         test_client.db.session.commit()
@@ -121,9 +122,9 @@ def telehealth_staff(test_client):
 
     return staffs
 
-"""@pytest.fixture(scope='session')
+@pytest.fixture(scope='session')
 def payment_method(test_client):
-    Generate a payment method, needed in telehealth testing. 
+    """ Generate a payment method, needed in telehealth testing. """
     response = test_client.post(
         f'/payment/methods/{test_client.client_id}/',
         headers=test_client.client_auth_header,
@@ -140,7 +141,7 @@ def payment_method(test_client):
     # TelehealthBookingStatus, chat room and more. Cascading is not working.
     # Disable clean up for now.
     # test_client.db.session.delete(pm)
-    # test_client.db.session.commit()"""
+    # test_client.db.session.commit()
 
 
 @pytest.fixture(scope='session')
@@ -235,7 +236,7 @@ def register_device(test_client):
     test_client.db.session.commit()
 
 @pytest.fixture(scope='module')
-def booking(test_client):
+def booking(test_client, payment_method):
     """ Create a telehealth booking, needed for testing.
 
     This bookings fixture is used in the Telehealth section of testing.
@@ -280,7 +281,7 @@ def booking(test_client):
         staff_timezone='UTC',
         charged=False,
         status='Accepted',
-        payment_method_id = None,
+        payment_method_id = payment_method.idx,
         uid = uuid.uuid4(),
         consult_rate = 15.00
     )
@@ -375,7 +376,7 @@ def staff_availabilities(test_client, telehealth_staff):
     test_client.db.session.query(TelehealthStaffSettings).delete()
 
 @pytest.fixture(scope='module')
-def upcoming_bookings(test_client):
+def upcoming_bookings(test_client, payment_method):
     """ Create a set of telehealth booking for the upcoming bookings task.
 
     This bookings fixture is used in the upcoming appointment celery section of testing.
@@ -421,7 +422,7 @@ def upcoming_bookings(test_client):
             staff_timezone='UTC',
             charged=False,
             status='Accepted',
-            payment_method_id = None,
+            payment_method_id = payment_method.idx,
             uid = uuid.uuid4(),
             consult_rate = 15.00
         )
