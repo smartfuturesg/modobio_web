@@ -273,8 +273,8 @@ def care_team(test_client):
 
     # Return user_ids and modobio_ids
     yield {
-        'staff_id': test_client.staff_id,
-        'staff_modobio_id': test_client.staff.modobio_id,
+        'staff_id': test_client.provider_id,
+        'staff_modobio_id': test_client.provider.modobio_id,
         'client_id': tm_client.user_id,
         'client_modobio_id': tm_client.modobio_id,
         'non_user_id': tm_non_user.user_id,
