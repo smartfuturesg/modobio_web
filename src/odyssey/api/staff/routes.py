@@ -272,10 +272,15 @@ class RecentClients(BaseResource):
 class StaffToken(BaseResource):
     """create and revoke tokens"""
     @ns.doc(security='password', params={'refresh_token_lifetime': 'Lifetime for staff refresh token'})
-    @basic_auth.login_required(user_type=('staff',), email_required=False)
+    @basic_auth.login_required(user_type=('staff', 'provider'), email_required=False)
     @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
-        """generates a token for the 'current_user' immediately after password authentication"""
+        """
+        generates a token for the 'current_user' immediately after password authentication
+        
+        Responds with either a provider token or staff token. Provider is the default if the user is a provider.
+        
+        """
         user, user_login = basic_auth.current_user()
 
         if not user:
@@ -299,8 +304,10 @@ class StaffToken(BaseResource):
             else:
                 raise BadRequest('Custom refresh token lifetime must be between 1 and 30 days.')
 
-        access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
-        refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh', refresh_token_lifetime=refresh_token_lifetime)
+        utype = 'provider' if user.is_provider else 'staff'
+
+        access_token = UserLogin.generate_token(user_type=utype, user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type=utype, user_id=user.user_id, token_type='refresh', refresh_token_lifetime=refresh_token_lifetime)
 
         db.session.add(UserTokenHistory(user_id=user.user_id, 
                                         refresh_token=refresh_token,

@@ -175,7 +175,7 @@ class BasicAuth(object):
         # User is logging in
         elif user_context == 'basic_auth':
             # /staff/token/ endpoint and user is registered staff member
-            if self.user_type == ('staff',) and user.is_staff:
+            if 'staff' in self.user_type and user.is_staff:
                 if user_login.staff_account_blocked:
                     raise Unauthorized('Your staff account has been blocked. Please contact '
                                        'client_services@modobio.com to resolve the issue.')
@@ -185,7 +185,7 @@ class BasicAuth(object):
                     raise Unauthorized('Your client account has been blocked. Please contact '
                                        'client_services@modobio.com to resolve the issue.')
             # /provider/token/ endpoint and user is registered client
-            elif self.user_type == ('provider',) and user.is_provider:
+            elif 'provider' in self.user_type and user.is_provider:
                 if user_login.staff_account_blocked:
                     raise Unauthorized('Your provider account has been blocked. Please contact '
                                        'client_services@modobio.com to resolve the issue.')
