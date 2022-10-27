@@ -71,7 +71,7 @@ class ClientChessboard(BaseResource):
     note that clients will have multiple entries as they progress through the program
     Trainers may update some or all fields. The backend will store every update as a new row
     fields left blank will be left as null"""
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('provider','client'))
     @responds(schema=ChessboardSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all chessboard entries for the specified client"""
@@ -82,7 +82,7 @@ class ClientChessboard(BaseResource):
         return all_entries
 
     @accepts(schema=ChessboardSchema, api=ns)
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('provider','client'))
     @responds(schema=ChessboardSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create new chessboard entry"""

@@ -24,8 +24,10 @@ from odyssey.utils.base.resources import BaseResource
 ns = Namespace('practitioner', description='Operations related to practitioners')
 
 @ns.route('/credentials/<int:user_id>/')
+@ns.deprecated
 class PractionerCredentialsEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('staff',))
+    """Endpoints for getting and updating credentials. Reroutes to provider/credentials"""
+    @token_auth.login_required(user_type=('staff_self',))
     @responds(schema=PractitionerCredentialsInputSchema,status_code=200,api=ns)
     def get(self, user_id):
         """
@@ -49,7 +51,7 @@ class PractionerCredentialsEndpoint(BaseResource):
         ).scalars().all()
         return {'items': query}
 
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=PractitionerCredentialsInputSchema, api=ns)
     @responds(status_code=201,api=ns)
     def post(self, user_id):
@@ -100,7 +102,7 @@ class PractionerCredentialsEndpoint(BaseResource):
         db.session.commit()
         return
 
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=PractitionerCredentialsSchema, api=ns)
     @responds(status_code=201,api=ns)
     def put(self, user_id):
@@ -134,7 +136,7 @@ class PractionerCredentialsEndpoint(BaseResource):
             raise BadRequest('Credentials not found.')
         return
 
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=PractitionerDeleteCredentialsSchema,api=ns)
     @responds(status_code=201,api=ns)
     def delete(self, user_id):
@@ -167,12 +169,12 @@ class PractitionerConsultationRates(BaseResource):
     """
     Endpoint for practitioners to GET and SET their own HOURLY rates.
     """
-    @token_auth.login_required()
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(api=ns)
     @responds(schema=PractitionerConsultationRateInputSchema,status_code=200)
     def get(self,user_id):
         """
-        GET - Request to get the practitioners
+        Responds with all roles and consultation rates for provider
         """
         staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
 
@@ -187,7 +189,7 @@ class PractitionerConsultationRates(BaseResource):
     @responds(status_code=201)
     def post(self,user_id):
         """
-        POST - Practitioner inputs their consultation rate
+        Provider submits consultation rates for each role
         """
         # grab all of the roles the practitioner may have
         staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
@@ -224,7 +226,7 @@ class PractitionerOganizationAffiliationAPI(BaseResource):
     # Multiple origanizations per practitioner possible
     __check_resource__ = False
 
-    @token_auth.login_required(user_type = ('staff',), staff_role = ('staff_admin',))
+    @token_auth.login_required(user_type = ('staff', 'staff_self'), staff_role = ('staff_admin',))
     @responds(schema=PractitionerOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
         """
