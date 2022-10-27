@@ -97,7 +97,7 @@ def test_get_blood_test_results(test_client):
     assert response.json['items'][0]['results'][2]['evaluation'] == 'normal'
     assert response.json['items'][0]['results'][3]['evaluation'] == 'abnormal'
     assert response.json['items'][0]['results'][4]['evaluation'] == 'critical'
-    assert response.json['items'][0]['reporter_id'] == test_client.staff_id
+    assert response.json['items'][0]['reporter_id'] == test_client.provider_id
     
 def test_patch_blood_test_image(test_client):
     response = test_client.patch(

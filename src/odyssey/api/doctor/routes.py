@@ -122,7 +122,7 @@ class MedBloodPressures(BaseResource):
 
         return request.parsed_obj
 
-    @token_auth.login_required(user_type=('client', 'provider'), user_type=('client', 'provider'), staff_role=('medical_doctor',), resources=('blood_pressure',))
+    @token_auth.login_required(user_type=('client', 'provider'), staff_role=('medical_doctor',), resources=('blood_pressure',))
     @ns.doc(params={'idx': 'int',})
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
