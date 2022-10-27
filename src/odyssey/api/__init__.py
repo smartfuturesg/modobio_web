@@ -1,5 +1,6 @@
+import importlib
 import logging
-logger = logging.getLogger(__name__)
+import pathlib
 
 # Temporary workaround
 # Flask 2.1 updated dependency werkzeug to 2.2. But flask-restx 0.5.1 uses a
@@ -24,7 +25,7 @@ if not hasattr(werkzeug.routing, 'parse_rule'):
         re.VERBOSE,
     )
 
-    def _parse_rule(rule: str):
+    def _parse_ruleZZ(rule: str):
         """Parse a rule and return it as generator. Each iteration yields tuples
         in the form ``(converter, arguments, variable)``. If the converter is
         `None` it's a static url part, otherwise it's a dynamic one.
@@ -54,10 +55,12 @@ if not hasattr(werkzeug.routing, 'parse_rule'):
                 raise ValueError(f"malformed url rule: {rule!r}")
             yield None, None, remaining
 
-    werkzeug.routing.parse_rule = _parse_rule
+    werkzeug.routing.parse_rule = _parse_ruleZZ
 
 from flask import Blueprint
 from flask_restx import Api
+
+logger = logging.getLogger(__name__)
 
 # To use authentication in Swagger:
 # 1. Click Authenticate button at top of the page
@@ -153,3 +156,21 @@ api.add_namespace(ns)
 
 from odyssey.api.community_manager.routes import ns
 api.add_namespace(ns)
+
+# V2 of the API, only wearables for now, expand for release 2.0.0.
+# Loading mechanism backported from release 2.0.0.
+
+bp_v2 = Blueprint('api_v2', __name__)
+api_v2 = Api(bp_v2, authorizations=authorizations, security='apikey')
+
+here = pathlib.Path(__file__).parent
+namespaces = here.glob('**/routes.py')
+
+for namespace in namespaces:
+    loader = importlib.machinery.SourceFileLoader('routes', namespace.as_posix())
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    if hasattr(module, 'ns_v2'):
+        api_v2.add_namespace(module.ns_v2)

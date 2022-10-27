@@ -123,7 +123,7 @@ def create_app():
     db.Model.update = _update
 
     # Load the API.
-    from odyssey.api import bp, api
+    from odyssey.api import bp, api, bp_v2, api_v2
 
     # Register error handlers
     #
@@ -133,12 +133,15 @@ def create_app():
     # but this is essentially what the @api.errorhandler decorator does.
     app.register_error_handler(Exception, exception_handler)
     api.error_handlers[HTTPException] = http_exception_handler
+    api_v2.error_handlers[HTTPException] = http_exception_handler
 
     # api._doc or Api(doc=...) is not True/False,
     # it is 'path' (default '/') or False to disable.
     if not app.config['SWAGGER_DOC']:
         api._doc = False
+        api_v2._doc = False
     api.version = app.config['API_VERSION']
+    api_v2.version = app.config['API_VERSION']
 
     # Register development-only endpoints.
     if app.config['DEV']:
@@ -153,6 +156,7 @@ def create_app():
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)
+    app.register_blueprint(bp_v2, url_prefix='/v2')
 
     # Elasticsearch setup.
     app.elasticsearch = None
