@@ -139,7 +139,7 @@ def test_client():
             # Load the main users for testing
             client = db.session.query(User).filter_by(email=CLIENT_EMAIL).one_or_none()
             staff = db.session.query(User).filter_by(email=STAFF_EMAIL).one_or_none()
-            provider = db.session.query(User).filter_by(email=STAFF_EMAIL).one_or_none()
+            provider = db.session.query(User).filter_by(email=PROVIDER_EMAIL).one_or_none()
 
             # Add everything we want to pass to tests
             # into the test_client instance as parameters.
@@ -214,8 +214,8 @@ def care_team(test_client):
     ------
     dict
         Dictionary containing a user_id and modobio_id for each of the newly
-        addded team members:
-        - staff_id (for name@modobio.com)
+        added team members:
+        - staff_id (for pro@modobio.com)
         - staff_modobio_id
         - client_id
         - client_modobio_id
@@ -273,8 +273,8 @@ def care_team(test_client):
 
     # Return user_ids and modobio_ids
     yield {
-        'staff_id': test_client.provider_id,
-        'staff_modobio_id': test_client.provider.modobio_id,
+        'provider_id': test_client.provider_id,
+        'provider_modobio_id': test_client.provider.modobio_id,
         'client_id': tm_client.user_id,
         'client_modobio_id': tm_client.modobio_id,
         'non_user_id': tm_non_user.user_id,

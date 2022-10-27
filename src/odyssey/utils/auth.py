@@ -370,7 +370,6 @@ class BasicAuth(object):
 
         if len(staff_user_roles) == 0:
             raise Unauthorized("Provider does not have any roles")
-        
         # provider accessing their own resources
         # request args will either contain uid or staff_uid which must match the logged-in user
         # if logged-in staff is not the user being requested and no role nor resource requirements are provided, raise unauthorized

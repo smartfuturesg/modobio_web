@@ -1557,13 +1557,13 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
     There are 2 contexts which this API can be accessed:
         - client (self): client is editing and viewing their own care team settings
             -POST,GET,PUT,DELETE access
-        - staff: staff user is requesting to have resource access
+        - provider: provider user is requesting to have resource access
             -POST, limited access
 
     Client users not accessing their own resource authorization are not allowed to use this endpoint.
 
-    More on staff access:
-        Staff may request resource authorization though the POST method. Resource request is logged but not yet verified until the 
+    More on provider access:
+        provider may request resource authorization though the POST method. Resource request is logged but not yet verified until the 
         client themselves makes a PUT request to verify the resource access. 
         
     Adding current modobio users to the care team:
@@ -1573,7 +1573,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
 
     Care team resources are added by resource_id.    
-    The available options can be foundby using the /lookup/care-team/ehr-resources/ (GET) API. 
+    The available options can be found by using the /lookup/care-team/ehr-resources/ (GET) API. 
     """
     @token_auth.login_required(user_type=('client', 'provider'))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
@@ -1757,6 +1757,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
 @ns.route('/drinks/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
+@ns.deprecated
 class ClientDrinksApi(BaseResource):
     """
     Endpoints related to nutritional beverages that are assigned to clients.
@@ -1790,7 +1791,7 @@ class ClientDrinksApi(BaseResource):
 
         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
     
-    @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
+    @token_auth.login_required(user_type=('provider',), staff_role=('medical_doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
     def delete(self, user_id):
         """
@@ -2232,7 +2233,7 @@ class ClientRaceAndEthnicityApi(BaseResource):
     Endpoint for returning viewing and editing information about a client's race and ethnicity
     information.
     """
-    @token_auth.login_required(user_type=('client'))
+    @token_auth.login_required(user_type=('client','provider'))
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
 
@@ -2242,7 +2243,7 @@ class ClientRaceAndEthnicityApi(BaseResource):
         
         return res
 
-    @token_auth.login_required()
+    @token_auth.login_required(user_type = ('client',))
     @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
     def put(self, user_id):
