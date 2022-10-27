@@ -1,6 +1,7 @@
 """ Utility functions for the odyssey package. """
 
 import ast
+import functools
 import inspect
 import jwt
 import logging
@@ -1175,3 +1176,52 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
         user = User.query.filter_by(user_id=user_id).one_or_none()
         send_email('subscription-confirm', user.email, firstname=user.firstname)
 
+def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
+    """Least-recently used cache with time-to-live (ttl) limit.
+
+    This cache works just like :func:`functools.lru_cache`, but enhances it
+    with a time-to-live (ttl) parameter. An item in the cache is updated only
+    if it is older than ``ttl``. Any item that is not requested but it older
+    than ``ttl`` is deleted from the cache. This only happens at the moment
+    the cache is accessed, though.
+
+    Use as a decorator::
+
+        @lru_cache_with_ttl(ttl=20)
+        def expensive_function():
+            return something
+
+    Parameters
+    ----------
+    maxsize : int, default = 128
+        Maximum number of items in the cache. See :func:`functools.lru_cache`.
+
+    typed : bool, default = False
+        Decides whether arguments of different type are equivalent. See
+        :func:`functools.lru_cache`.
+
+    ttl : int, default = 60
+        Time-to-live, in seconds, after which an item in the cache is considered
+        expired.
+    """
+    # Idea from https://stackoverflow.com/a/71634221
+    # Replaced Result class with a dict. Creation is ~4x faster
+    # and both read from and assign to are ~20% faster.
+    def decorator(func):
+        @functools.lru_cache(maxsize=maxsize, typed=typed)
+        def cached_func(*args, **kwargs):
+            value = func(*args, **kwargs)
+            expire = time.monotonic() + ttl
+            return {'value': value, 'expire': expire}
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            result = cached_func(*args, **kwargs)
+            if result['expire'] < time.monotonic():
+                result['value'] = func(*args, **kwargs)
+                result['expire'] = time.monotonic() + ttl
+            return result['value']
+
+        wrapper.cache_clear = cached_func.cache_clear
+        return wrapper
+    return decorator
