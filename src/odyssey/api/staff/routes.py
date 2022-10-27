@@ -86,7 +86,7 @@ class StaffMembers(BaseResource):
             raise BadRequest('Email {email} already in use.')
 
         ## TODO: rework Role suppression
-        # system_admin: permisison to create staff admin.
+        # system_admin: permission to create staff admin.
         # staff_admin:  can create all other roles except staff/systemadmin
         # if data.get('is_system_admin'):
         #     raise Unauthorized(f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
@@ -154,7 +154,7 @@ class UpdateRoles(BaseResource):
         db.session.commit()
         return StaffRoles.query.filter_by(user_id=user_id).all()
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff','staff_self'), staff_role=('staff_admin',))
     @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)   
     def get(self, user_id):
         """
@@ -261,7 +261,7 @@ class OperationalTerritories(BaseResource):
 class RecentClients(BaseResource):
     """endpoint related to the staff recent client feature"""
     
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff_self',))
     @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
     def get(self):
         """get the 10 most recent clients a staff member has loaded"""

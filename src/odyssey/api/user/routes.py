@@ -55,7 +55,7 @@ from odyssey.integrations.apple import AppStore
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME, PROVIDER_ROLES, STAFF_ROLES
 from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import email_domain_blacklisted, send_email
@@ -149,6 +149,10 @@ class NewStaffUser(BaseResource):
 
         staff_info = request.json.get('staff_info')
 
+        # validate requested roles. Assign user as staff, provider or both
+        is_provider = True if any(role in PROVIDER_ROLES for role in staff_info.get('access_roles', [])) else False
+        is_staff = True if any(role in STAFF_ROLES for role in staff_info.get('access_roles', [])) else False
+
         user = User.query.filter(User.email.ilike(email)).first()
         if user:
             if user.is_staff:
@@ -168,7 +172,8 @@ class NewStaffUser(BaseResource):
                 
                 del user_info['password']
                 user_info['is_client'] = False
-                user_info['is_staff'] = True
+                user_info['is_staff'] = is_staff
+                user_info['is_provider'] = is_provider
                 user_info['was_staff'] = True
                 user.update(user_info)
                 
@@ -181,7 +186,7 @@ class NewStaffUser(BaseResource):
                 db.session.flush()
                 verify_email = True
             else:
-                #user account exists but only the client portion of the account is defined
+                # user account exists but only the client portion of the account is defined
                 user.is_staff = True
                 user.was_staff = True
                 user.update(user_info)
@@ -200,7 +205,8 @@ class NewStaffUser(BaseResource):
             del user_info['password']
             
             user_info["is_client"] = False
-            user_info["is_staff"] = True
+            user_info['is_staff'] = is_staff
+            user_info['is_provider'] = is_provider
             user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables
