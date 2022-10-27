@@ -111,137 +111,6 @@ class WearablesEndpoint(BaseResource):
         db.session.commit()
 
 
-###########################################################
-#
-# Oura Ring
-#
-###########################################################
-
-@ns.route('/oura-old/auth/<int:user_id>/')
-@ns.deprecated
-@ns.doc(params={'user_id': 'User ID number'})
-class WearablesOuraOldAuthEndpoint(BaseResource):
-    @token_auth.login_required
-    @responds(schema=WearablesOuraAuthSchema, status_code=200, api=ns)
-    def get(self, user_id):
-        """ [DEPRECATED] Oura Ring OAuth2 parameters to initialize the access grant process.
-
-        Note
-        ----
-
-        This endpoint was designed for the web-based staff app. The new endpoint should
-        work with both web-based and mobile apps. Keeping this endpoint around until staff app
-        has been updated.
-
-        Parameters
-        ----------
-        user_id : int
-            User ID number.
-
-        Returns
-        -------
-        dict
-            JSON encoded dict containing:
-            - oura_client_id
-            - oauth_state
-        """
-        wearables = (
-            Wearables.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
-
-        oura_id = current_app.config['OURA_CLIENT_ID']
-        state = secrets.token_urlsafe(24)
-
-        # Store state in database
-        oura = (
-            WearablesOura.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
-
-        if not oura:
-            oura = WearablesOura(user_id=user_id, oauth_state=state)
-            db.session.add(oura)
-        else:
-            oura.oauth_state = state
-        db.session.commit()
-
-        return {'oura_client_id': oura_id, 'oauth_state': state}
-
-
-@ns.route('/oura-old/callback/<int:user_id>/')
-@ns.deprecated
-@ns.doc(params={
-    'user_id': 'User ID number',
-    'state': 'OAuth2 state token',
-    'code': 'OAuth2 access grant code',
-    'redirect_uri': 'OAuth2 redirect URI',
-    'scope': 'The accepted scope of information: email, personal, and/or daily'
-})
-class WearablesOuraCallbackEndpoint(BaseResource):
-    @token_auth.login_required
-    @responds(status_code=200, api=ns)
-    def get(self, user_id):
-        """ [DEPRECATED] Oura Ring OAuth2 callback URL
-
-        Note
-        ----
-
-        This endpoint was designed for the web-based staff app. The new endpoint should
-        work with both web-based and mobile apps. Keeping this endpoint around until staff app
-        has been updated.
-        """
-        check_client_existence(user_id)
-
-        oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
-        if not oura:
-            raise BadRequest(
-                f'user_id {user_id} not found in WearablesOura table. '
-                f'Connect to /wearables/oura/auth first.')
-
-        oauth_state = request.args.get('state')
-        oauth_grant_code = request.args.get('code')
-        redirect_uri = request.args.get('redirect_uri')
-        scope = request.args.get('scope')
-
-        if oauth_state != oura.oauth_state:
-            raise BadRequest('OAuth state changed between requests.')
-
-        if not scope or 'daily' not in scope:
-            raise BadRequest('You must agree to share at least the sleep and activity data.')
-
-        # Exchange access grant code for access token
-        oura_id = current_app.config['OURA_CLIENT_ID']
-        oura_secret = current_app.config['OURA_CLIENT_SECRET']
-        token_url = current_app.config['OURA_TOKEN_URL']
-
-        oauth_session = OAuth2Session(
-            oura_id,
-            state=oauth_state,
-            redirect_uri=redirect_uri)
-        try:
-            oauth_reply = oauth_session.fetch_token(
-                token_url,
-                code=oauth_grant_code,
-                include_client_id=True,
-                client_secret=oura_secret)
-        except Exception as e:
-            raise BadRequest(f'Error while exchanging grant code for access token: {e}')
-
-        # Everything was successful
-        oura.access_token = oauth_reply['access_token']
-        oura.refresh_token = oauth_reply['refresh_token']
-        oura.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
-        oura.oauth_state = None
-
-        # TODO: disable this until frontend has a way of setting wearable devices.
-        # wearables = Wearables.query.filter_by(user_id=oura.user_id).first()
-        # wearables.registered_oura = True
-
-        db.session.commit()
-
-############### V2
-
 @ns.route('/oura/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesOuraAuthEndpoint(BaseResource):
@@ -397,12 +266,6 @@ class WearablesOuraAuthEndpoint(BaseResource):
             oura.wearable.registered_oura = False
             db.session.commit()
 
-
-###########################################################
-#
-# Fitbit
-#
-###########################################################
 
 @ns.route('/fitbit/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -567,12 +430,6 @@ class WearablesFitbitAuthEndpoint(BaseResource):
             fitbit.wearable.registered_fitbit = False
             db.session.commit()
 
-
-###########################################################
-#
-# FreeStyle Libre CGM
-#
-###########################################################
 
 @ns.route('/freestyle/activate/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
