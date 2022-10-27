@@ -330,3 +330,27 @@ Name and port number of the server. This setting allows for
 url generation outside of the Flask request context. This is useful for
 creating urls as part of celery tasks. 
 """
+
+TERRA_API_KEY = 'ussv5SAQ53a1nNTxsMr9G41zj2KUhYMk5eDU1hjG'
+"""
+Key for Terra API.
+
+Default value is taken from their API reference examples.
+https://docs.tryterra.co/reference/authenticate-user
+"""
+
+TERRA_DEV_ID = 'testingTerra'
+"""
+Developer ID for Terra API.
+
+Default value is taken from their API reference examples.
+https://docs.tryterra.co/reference/authenticate-user
+"""
+
+TERRA_API_SECRET = ''
+"""
+Secret password for Terra API.
+
+Default value is taken from their API reference examples.
+https://docs.tryterra.co/reference/authenticate-user
+"""
