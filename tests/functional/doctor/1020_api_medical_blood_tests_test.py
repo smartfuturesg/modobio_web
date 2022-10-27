@@ -38,7 +38,7 @@ def test_post_medical_blood_test(test_client, care_team):
     ##
     response = test_client.post(
         f'/doctor/bloodtest/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(doctor_blood_tests_data),
         content_type='application/json')
 
@@ -124,14 +124,14 @@ def test_delete_blood_test(test_client):
     # send delete request for client blood test as the staff who did not submit the test
     response = test_client.delete(
         f'/doctor/bloodtest/{test_client.client_id}/?test_id={test_id_client_submit}',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 401
 
     # send delete request where the user attempting to delete is reporter
     response = test_client.delete(
         f'/doctor/bloodtest/{test_client.client_id}/?test_id={test_id_staff_submit}',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 204
 
