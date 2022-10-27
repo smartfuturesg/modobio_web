@@ -21,6 +21,7 @@ pytz
 redis
 requests
 requests-oauthlib
+terra-python
 twilio
 PyJWT
 weasyprint
