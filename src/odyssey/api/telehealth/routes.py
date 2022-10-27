@@ -251,8 +251,6 @@ class TelehealthClientTimeSelectApi(BaseResource):
         if not client_in_queue:
             if not request.args.get('profession_type'):
                 raise BadRequest('Profession role not provided.')
-            elif not request.args.get('location_id'):
-                raise BadRequest('Location id not provided.')
 
             location_id = request.args.get('location_id')
             profession_type = request.args.get('profession_type')
@@ -674,7 +672,6 @@ class TelehealthBookingsApi(BaseResource):
         # only booking_window_id_start_time and target_date
 
         client_user_id = request.args.get('client_user_id', type=int)
-        client_scheduled = User.query.filter_by(user_id=client_user_id).one_or_none()
         if not client_user_id:
             raise BadRequest('Missing client ID.')
         # Check client existence
@@ -701,12 +698,13 @@ class TelehealthBookingsApi(BaseResource):
         if not client_in_queue:
             raise BadRequest('Client not in queue.')
         
-        """payment_method_id = request.parsed_obj.payment_method_id
-        if not payment_method_id:
-            raise BadRequest("Payment Method ID not provided")
-
-        if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
-            raise BadRequest('Payment ID does not exist for user.')"""
+        # validate payment method if provided
+        # Payments paused 10.24.22
+        # payment_method_id = request.parsed_obj.payment_method_id if request.parsed_obj.payment_method_id else client_in_queue.payment_method_id
+        
+        # if payment_method_id:
+        #     if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
+        #         raise BadRequest('Payment ID does not exist for user.')
 
         # requested duration in minutes
         duration = client_in_queue.duration
@@ -715,7 +713,7 @@ class TelehealthBookingsApi(BaseResource):
         client_tz = client_in_queue.timezone
         start_idx = request.parsed_obj.booking_window_id_start_time
         if (start_idx - 1) % 3 > 0:
-            # verify time idx-1 is mulitple of 3. Only allowed start times are: X:00, X:15, X:30, X:45
+            # verify time idx-1 is multiple of 3. Only allowed start times are: X:00, X:15, X:30, X:45
             raise BadRequest("Invalid start time")
 
         start_time = time_inc[start_idx-1].start_time
@@ -743,7 +741,7 @@ class TelehealthBookingsApi(BaseResource):
        
         # call on verify_availability, will raise an error if practitioner doens't have availability requested
         telehealth_utils.verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
-            target_end_time_idx_utc, target_start_datetime_utc, target_end_datetime_utc,client_in_queue.location_id)      
+            target_end_time_idx_utc, target_start_datetime_utc)      
 
         # staff and client may proceed with scheduling the booking, 
         # create the booking object
@@ -773,14 +771,25 @@ class TelehealthBookingsApi(BaseResource):
 
         # consultation rate to booking
         consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
-
+        
         # Calculate time for display:
         # consult is in hours
         # 30 minutes -> 0.5*consult_rate
         # 60 minutes -> 1*consult_rate
         # 90 minutes -> 1.5*consult_rate
-        if not consult_rate:
+        if consult_rate == None:
             raise BadRequest('Practitioner has not set a consult rate')
+
+        # Payments paused on 10.24.22
+        # If provider has a consult rate of 0, assume that they will be handling
+        # payment outside of the modobio platform
+        # otherwise, the client must have provided a payment method
+        # if consult_rate == 0:
+        #     request.parsed_obj.charged = True
+        #     request.parsed_obj.payment_notified = True
+        # elif consult_rate != 0 and not payment_method_id:
+        #     raise BadRequest('Payment method required')
+
         rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
 
@@ -1640,7 +1649,6 @@ class TelehealthQueueClientPoolApi(BaseResource):
         """
         Add a client to the queue
         """
-        check_client_existence(user_id)
 
         # Verify target date is client's local today or in the future 
         client_tz = request.parsed_obj.timezone
@@ -1661,16 +1669,20 @@ class TelehealthQueueClientPoolApi(BaseResource):
 
         # Verify location_id is valid
         location_id = request.parsed_obj.location_id
-        location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
-        if not location:
-            raise BadRequest(f'Location {location_id} does not exist.')
+        
+        if location_id:
+            location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
+            if not location:
+                raise BadRequest(f'Location {location_id} does not exist.')
 
-        """# Verify payment method idx is valid from PaymentMethods
+        # payments paused 10.24.22
+        # Verify payment method idx is valid from PaymentMethods
         # and that the payment method chosen has the user_id
-        payment_id = request.parsed_obj.payment_method_id
-        verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
-        if not verified_payment_method:
-            raise BadRequest('Invalid payment method.')"""
+        # payment_id = request.parsed_obj.payment_method_id
+        # if payment_id:
+        #     verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
+        #     if not verified_payment_method:
+        #         raise BadRequest('Invalid payment method.')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
