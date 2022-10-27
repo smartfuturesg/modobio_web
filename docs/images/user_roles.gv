@@ -32,9 +32,9 @@ digraph {
 
         user -> client [label = "mobile app"];
         user -> professional [label = "web portal"];
-        client -> {self, "care\nteam"};
-        professional -> {practitioner, staff};
-        practitioner -> {
+        client -> {self, team};
+        professional -> {provider, staff};
+        provider -> {
             dietitian,
             doctor,
             "health\ncoach",
@@ -49,10 +49,10 @@ digraph {
             "staff\nadmin",
             "community\nmanager",
             "client\nservices",
-            "data\n scientist"};
+            "data\nscientist"};
 
         {rank = same; client, professional};
-        {rank = same; self, "care\nteam", "system\nadmin", doctor};
+        {rank = same; self, team, "system\nadmin", doctor};
     }
 
     subgraph labels_r {
