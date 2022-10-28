@@ -1,4 +1,5 @@
-
+{% extends "modo-bio-automated-email-template-body.html" %}
+{% block body %}
 Hi {{firstname}},  
 
 Your telehealth appointment with {{provider_firstname}} is in 6 hours.  
@@ -8,3 +9,4 @@ Reminder: Your provider reserves the right to charge you for the appointment if 
 Thanks,   
 
 - Modo Bio Team  
+{% endblock %}
