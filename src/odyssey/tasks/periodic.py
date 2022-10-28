@@ -485,10 +485,12 @@ def check_for_upcoming_booking_charges():
 
 @celery.task()
 def send_appointment_reminder_email():
-    target_datetime = datetime.now() + timedelta(hours=6)
+    logger.info(f'Finding bookings to send pre appointment reminder.')
+
+    current_time = datetime.now(timezone.utc)
+    target_datetime = current_time + timedelta(hours=6)
     target_date = target_datetime.date()
-    target_time = target_date.time()
-    target_time_idx = get_time_index(target_time)
+    target_time_idx = get_time_index(target_datetime)
     
     #find all target bookings 
     bookings = TelehealthBookings.query.filter_by(
@@ -496,6 +498,7 @@ def send_appointment_reminder_email():
     ).all()
 
     for booking in bookings:
+        logger.info(f'Sending pre appointment reminder to {booking.client.email}')
         send_email(
             'pre-appointment-reminder',
             booking.client.email,
@@ -503,7 +506,6 @@ def send_appointment_reminder_email():
             provider_firstname=booking.practitioner.firstname
         )
     
-
 celery.conf.beat_schedule = {
     # look for upcoming appointments:
     'check-for-upcoming-bookings': {
