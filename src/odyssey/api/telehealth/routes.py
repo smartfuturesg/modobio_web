@@ -1,3 +1,4 @@
+from http import client
 import uuid
 from bson import ObjectId
 from itertools import groupby
@@ -981,7 +982,7 @@ class TelehealthBookingsApi(BaseResource):
 
                     send_email(
                         'pre-appointment-confirmation',
-                        'Samson.Bankole@atlanticventurepartners.tech',
+                        booking.client.email,
                         firstname=booking.client.firstname,
                         provider_firstname=booking.practitioner.firstname,
                         booking_date=booking_date,
