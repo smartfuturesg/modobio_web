@@ -1,0 +1,10 @@
+
+Hi {{firstname}},  
+
+Your telehealth appointment with {{provider_firstname}} is in 6 hours.  
+
+Reminder: Your provider reserves the right to charge you for the appointment if it is cancelled within 24 hours of the scheduled start time.   
+
+Thanks,   
+
+- Modo Bio Team  
