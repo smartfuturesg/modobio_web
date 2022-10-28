@@ -976,12 +976,12 @@ class TelehealthBookingsApi(BaseResource):
 
                     booking_time = LookupBookingTimeIncrements.query. \
                     filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
-                    booking_time = datetime.strftime(booking_time, '%I:%M %p')
-                    booking_date = datetime.strftime(booking.target_date, '%d-%b-%Y')
+                    booking_time = booking_time.strftime('%I:%M %p')
+                    booking_date = booking.target_date.strftime('%d-%b-%Y')
 
                     send_email(
                         'pre-appointment-confirmation',
-                        booking.client.email,
+                        'Samson.Bankole@atlanticventurepartners.tech',
                         firstname=booking.client.firstname,
                         provider_firstname=booking.practitioner.firstname,
                         booking_date=booking_date,
