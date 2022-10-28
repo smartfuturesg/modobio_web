@@ -1,0 +1,16 @@
+{% extends "modo-bio-automated-email-template-body.html" %}
+{% block body %}
+
+Hi {{firstname}}, 
+
+You've booked a telehealth appointment with {{provider_firstname}} on {{booking_date}} at {{booking_time}}.  
+
+You can manage this appointment from within the app on the Connect Tab.
+
+Reminder: Your provider reserves the right to charge you for the appointment if it is cancelled within 24 hours of the scheduled start time.  
+
+Thanks,  
+
+- Modo Bio Team 
+
+{% endblock %}
