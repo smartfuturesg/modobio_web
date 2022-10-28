@@ -152,11 +152,11 @@ class NewStaffUser(BaseResource):
         # validate requested roles. Assign user as staff, provider or both
         is_provider = True if any(role in PROVIDER_ROLES for role in staff_info.get('access_roles', [])) else False
         is_staff = True if any(role in STAFF_ROLES for role in staff_info.get('access_roles', [])) else False
-
+        
         user = User.query.filter(User.email.ilike(email)).first()
         if user:
-            if user.is_staff:
-                # user account already exists for this email and is already a staff account
+            if user.is_staff or user.is_provider:
+                # user account already exists for this email and is already a staff/provider account
                 raise BadRequest('Email address {email} already exists.')
 
             elif user.is_client == False and user.is_staff == False:

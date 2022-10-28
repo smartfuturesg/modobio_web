@@ -3,7 +3,7 @@ import logging
 
 from datetime import time, datetime, timedelta
 
-from flask import request
+from flask import current_app, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest, Unauthorized
@@ -13,7 +13,9 @@ from odyssey import db
 from odyssey.api.lookup.models import (
     LookupTerritoriesOfOperations,
     LookupCountriesOfOperations,
-    LookupRoles)
+    LookupRoles,
+    LookupOrganizations,
+    LookupCurrencies)
 from odyssey.api.provider.schemas import *
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
@@ -182,7 +184,7 @@ class ProviderCredentialsEndpoint(BaseResource):
         return
 
     @token_auth.login_required(user_type=('staff_self',))
-    @accepts(schema=PractitionerCredentialsSchema, api=ns)
+    @accepts(schema=ProviderCredentialsSchema, api=ns)
     @responds(status_code=201,api=ns)
     def put(self, user_id):
         """
@@ -264,7 +266,7 @@ class ProviderConsultationRates(BaseResource):
         return {'items': items}
     
     @token_auth.login_required(user_type = ('staff_self',))
-    @accepts(schema=PractitionerConsultationRateInputSchema,api=ns)
+    @accepts(schema=ProviderConsultationRateInputSchema,api=ns)
     @responds(status_code=201)
     def post(self,user_id):
         """
@@ -302,11 +304,11 @@ class PractitionerOganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
     """
-    # Multiple origanizations per practitioner possible
+    # Multiple organizations per practitioner possible
     __check_resource__ = False
 
     @token_auth.login_required(user_type = ('staff', 'staff_self'), staff_role = ('staff_admin',))
-    @responds(schema=PractitionerOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
+    @responds(schema=ProviderOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
         """
         Request to see the list of organizations the user_id is affiliated with

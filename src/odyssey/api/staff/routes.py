@@ -144,7 +144,7 @@ class UpdateRoles(BaseResource):
 
                 if '@modobio.com' not in user.email or not user.email_verified:
                     raise BadRequest(
-                        'Non-practitioner roles can only be granted to users '
+                        'Non-provider roles can only be granted to users '
                         'with a verified @modobio.com address.')
                 else:
                     db.session.add(StaffRolesSchema().load({'user_id': user_id, 
