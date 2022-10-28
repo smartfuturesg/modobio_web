@@ -60,6 +60,19 @@ class UserIdFkeyMixin:
         :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
         """
 
+class UserIdFkeyPKMixin:
+    """
+    Same as :class:`UserIdFkeyMixin` but with column `user_id` set as primary key.
+    """
+    @declared_attr
+    def user_id(cls):
+        return db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+        """
+        User ID number, primary key and foreign key to User.user_id
+
+        :type: int, primary key, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
+        """
+
 class ReporterIdFkeyMixin:
     """
     Mixin for tables that require a reporter_id (user that reported the data) foreign key

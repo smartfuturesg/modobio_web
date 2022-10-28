@@ -67,6 +67,7 @@ s3transfer==0.6.0
 six==1.16.0
 SQLAlchemy==1.4.39
 tenacity==8.0.1
+terra-python==0.0.5
 tinycss2==1.1.1
 twilio==7.12.0
 typing_extensions==4.3.0

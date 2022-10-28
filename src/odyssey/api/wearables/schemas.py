@@ -9,6 +9,12 @@ from odyssey.api.user.models import User
 from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
 
+#######################################################################################
+#
+# V1 of the Wearables tables.
+#
+# TODO: deprecated in V2 of the API. Remove when V1 of the API is no longer supported.
+
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Wearables
@@ -49,3 +55,32 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
         model = WearablesFreeStyle
         load_instance = True
         fields = ('activation_timestamp',)
+
+#######################################################################################
+#
+# V2 of the Wearables schemas.
+#
+
+import marshmallow_dataclass
+
+from terra.models.v2.activity import Activity
+from terra.models.v2.athlete import Athlete
+from terra.models.v2.body import Body
+from terra.models.v2.daily import Daily
+from terra.models.v2.menstruation import Menstruation
+from terra.models.v2.nutrition import Nutrition
+from terra.models.v2.sleep import Sleep
+from terra.models.user import User
+
+WearablesTerraActivitySchema = marshmallow_dataclass.class_schema(Activity)
+WearablesTerraAthleteSchema = marshmallow_dataclass.class_schema(Athlete)
+WearablesTerraBodySchema = marshmallow_dataclass.class_schema(Body)
+WearablesTerraDailySchema = marshmallow_dataclass.class_schema(Daily)
+WearablesTerraMenstruationSchema = marshmallow_dataclass.class_schema(Menstruation)
+WearablesTerraNutritionSchema = marshmallow_dataclass.class_schema(Nutrition)
+WearablesTerraSleepSchema = marshmallow_dataclass.class_schema(Sleep)
+WearablesTerraUserSchema = marshmallow_dataclass.class_schema(User)
+
+class WearablesV2RegisterSchema(Schema):
+    auth_success_redirect_url = fields.Url(default='')
+    auth_failure_redirect_url = fields.Url(default='')
