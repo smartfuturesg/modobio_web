@@ -574,7 +574,7 @@ def add_active_campaign_sub_tag(mapper, connection, target):
             from odyssey.integrations.active_campaign import ActiveCampaign
             from odyssey.api.user.models import UserActiveCampaign
 
-            db.event.listens_for(db.session, "after_flush", once=True)
+            @db.event.listens_for(db.session, "after_flush", once=True)
             def receive_after_flush(session, context):
                 ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
                 if ac_contact:
