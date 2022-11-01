@@ -2,15 +2,15 @@ from flask.json import dumps
 from odyssey.api.practitioner.models import PractitionerCredentials
 
 def test_verify_credentials(test_client):
-    cred = PractitionerCredentials.query.filter_by(user_id=test_client.staff.user_id).first()
+    cred = PractitionerCredentials.query.filter_by(user_id=test_client.provider.user_id).first()
     cred.status = 'Pending Verification'
     test_client.db.session.commit()
 
-    #assert credentails object has been updated
+    #assert credentials object has been updated
     assert cred.status == 'Pending Verification'
 
     data = {
-        "user_id": test_client.staff.user_id,
+        "user_id": test_client.provider.user_id,
         "status": "Verified",
         "idx": cred.idx
     }
@@ -30,16 +30,16 @@ def test_verify_credentials(test_client):
 
 
 def test_verify_credentials_bad_status(test_client):
-    cred = PractitionerCredentials.query.filter_by(user_id=test_client.staff.user_id).first()
+    cred = PractitionerCredentials.query.filter_by(user_id=test_client.provider.user_id).first()
     cred.status = 'Pending Verification'
     test_client.db.session.commit()
 
-    #assert credentails object has been updated
+    #assert credentials object has been updated
     assert cred.status == 'Pending Verification'
 
     #status is invalid
     data = {
-        "user_id": test_client.staff.user_id,
+        "user_id": test_client.provider.user_id,
         "status": "invalid_status",
         "idx": cred.idx
     }

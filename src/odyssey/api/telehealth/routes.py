@@ -59,7 +59,8 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
-    check_client_existence, 
+    check_client_existence,
+    check_provider_existence, 
     check_staff_existence,
     check_user_existence,
     create_notification
@@ -1212,7 +1213,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
         """
         # grab staff availability
-        check_staff_existence(user_id)
+        check_provider_existence(user_id)
         # Grab the staff's availability and sorted by booking_window_id AND day_of_week
         # Both of the sorts are necessary for this conversion
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
@@ -1268,7 +1269,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
     @responds(schema=TelehealthStaffAvailabilityConflictSchema, api=ns, status_code=201)
     def post(self,user_id):
@@ -1296,8 +1297,6 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         1, 'Monday', 11
         1, 'Monday', 12
         """
-        # Detect if the staff exists
-        check_staff_existence(user_id)
 
         # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()

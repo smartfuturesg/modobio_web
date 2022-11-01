@@ -116,6 +116,13 @@ def check_staff_existence(user_id):
         raise Unauthorized
     return staff
 
+def check_provider_existence(user_id):
+    """Check that the user is in the database and is a staff member"""
+    staff = User.query.filter_by(user_id=user_id, is_provider=True, deleted=False).one_or_none()
+    if not staff:
+        raise Unauthorized
+    return staff
+
 def check_user_existence(user_id, user_type=None):
     """Check that the user is in the database
     If user_type is 'client', check if user_id exists in ClientInfo table.

@@ -17,16 +17,16 @@ from tests.functional.practitioner.data import practitioner_credentials_post_1_d
 def test_post_1_staff_general_availability(test_client, staff_territory, staff_credentials, staff_consult_rate):
     # DEPENDENCY - add practitioner credentials
     response = test_client.post(
-        f'/practitioner/credentials/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/practitioner/credentials/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(practitioner_credentials_post_1_data),
         content_type='application/json')
     
     assert response.status_code == 201
     # DEPENDENCCY - add practitioner availability
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_1_post_data),
         content_type='application/json')
     
@@ -55,8 +55,8 @@ def test_post_1_staff_general_availability(test_client, staff_territory, staff_c
 
     # 3_midnight_bug_staff_general_availability
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_3_post_data),
         content_type='application/json')
     
@@ -64,8 +64,8 @@ def test_post_1_staff_general_availability(test_client, staff_territory, staff_c
 
 def test_get_1_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -75,16 +75,16 @@ def test_get_1_staff_availability(test_client):
         response.json['availability'][0]['end_time']] == ['Monday', '00:00:00', '12:00:00']
 
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
 
 def test_post_2_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_2_post_data),
         content_type='application/json')
 
@@ -92,8 +92,8 @@ def test_post_2_staff_general_availability(test_client):
 
 def test_get_2_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -128,8 +128,8 @@ def test_get_2_staff_availability(test_client):
 
 def test_invalid_post_3_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_3_post_data),
         content_type='application/json')
 
@@ -137,8 +137,8 @@ def test_invalid_post_3_staff_general_availability(test_client):
 
 def test_get_3_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -173,8 +173,8 @@ def test_get_3_staff_availability(test_client):
 
 def test_invalid_post_4_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_4_post_data),
         content_type='application/json')
     assert response.status_code == 400
@@ -182,8 +182,8 @@ def test_invalid_post_4_staff_general_availability(test_client):
 
 def test_get_4_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -218,8 +218,8 @@ def test_get_4_staff_availability(test_client):
 
 def test_invalid_post_5_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_5_post_data),
         content_type='application/json')
 
@@ -227,8 +227,8 @@ def test_invalid_post_5_staff_general_availability(test_client):
 
 def test_get_5_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -263,8 +263,8 @@ def test_get_5_staff_availability(test_client):
 
 def test_invalid_post_6_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_6_post_data),
         content_type='application/json')
 
@@ -273,8 +273,8 @@ def test_invalid_post_6_staff_general_availability(test_client):
 
 def test_get_6_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -309,8 +309,8 @@ def test_get_6_staff_availability(test_client):
 
 def test_invalid_post_7_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_7_post_data),
         content_type='application/json')
 
@@ -318,8 +318,8 @@ def test_invalid_post_7_staff_general_availability(test_client):
 
 def test_get_7_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -365,8 +365,8 @@ def test_update_availability_conflicts(test_client, booking):
     data = copy.deepcopy(telehealth_staff_general_availability_2_post_data)
     data['availability'] = data['availability'][1:]
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(data),
         content_type='application/json')
     
@@ -376,8 +376,8 @@ def test_update_availability_conflicts(test_client, booking):
     
     #return availability to normal for future tests
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_2_post_data),
         content_type='application/json')
     

@@ -219,7 +219,7 @@ class PractitionerConsultationRates(BaseResource):
         return
 
 @ns.route('/affiliations/<int:user_id>/')
-class PractitionerOganizationAffiliationAPI(BaseResource):
+class PractitionerOrganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
     """
