@@ -573,11 +573,13 @@ def add_active_campaign_sub_tag(mapper, connection, target):
         if not any((current_app.config['DEV'], current_app.config['TESTING'])):
             from odyssey.integrations.active_campaign import ActiveCampaign
             from odyssey.api.user.models import UserActiveCampaign
-            
-            ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
-            if ac_contact:
-                ac = ActiveCampaign()
-                ac.add_user_subscription_type(target.user_id)
+
+            db.event.listens_for(db.session, "after_flush", once=True)
+            def receive_after_flush(session, context):
+                ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
+                if ac_contact:
+                    ac = ActiveCampaign()
+                    ac.add_user_subscription_type(target.user_id)
 
 @db.event.listens_for(UserSubscriptions, "after_update")
 def update_active_campaign_sub_tag(mapper, connection, target):

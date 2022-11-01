@@ -201,7 +201,6 @@ class NewStaffUser(BaseResource):
                         if not ac.check_contact_existence(user.user_id):
                             ac.create_contact(user.email, user.firstname, user.lastname)
                             ac.add_age_group_tag(user.user_id)
-                            ac.add_user_subscription_type(user.user_id)
                         ac.add_tag(user.user_id, 'Persona - Provider')
                 else:
                     verify_email = True

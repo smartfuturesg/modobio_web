@@ -239,13 +239,14 @@ class ActiveCampaign:
                 self.remove_tag(user_id, tag.tag_name)
 
         #Get subscription type and add tag based off subsctipyon type
-        user_sub = UserSubscriptions.query.filter_by(user_id=user_id).one_or_none()
-        if user_sub.subscription_status == 'unsubscribed':   #Unsubscribed
-            return self.add_tag(user_id, 'Subscription - None')
-        elif user_sub.subscription_type_id == 2:             #Monthly Subscription ID from LookupTable
-            return self.add_tag(user_id, 'Subscription - Month')
-        elif user_sub.subscription_type_id == 3:             #Yearly Subscrioption ID from LookupTable
-            return self.add_tag(user_id, 'Subscription - Annual')
+        client_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
+        if client_sub:
+            if client_sub.subscription_status == 'unsubscribed':   #Unsubscribed
+                return self.add_tag(user_id, 'Subscription - None')
+            elif client_sub.subscription_type_id == 2:             #Monthly Subscription ID from LookupTable
+                return self.add_tag(user_id, 'Subscription - Month')
+            elif client_sub.subscription_type_id == 3:             #Yearly Subscrioption ID from LookupTable
+                return self.add_tag(user_id, 'Subscription - Annual')
 
     def convert_prosect(self, user_id):
         #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
