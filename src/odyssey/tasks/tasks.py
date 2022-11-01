@@ -443,3 +443,13 @@ def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
         datum['end_time']
     )
     db.session.commit()
+
+@celery.task()
+def add_subscription_tag(user_id):
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    from odyssey.api.user.models import UserActiveCampaign
+    
+    ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+    if ac_contact:
+        ac = ActiveCampaign()
+        ac.add_user_subscription_type(user_id)
