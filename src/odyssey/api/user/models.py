@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
 import jwt
-import random
 from sqlalchemy.orm import relation
 from sqlalchemy.orm.attributes import get_history
 from werkzeug.security import generate_password_hash
@@ -571,13 +570,8 @@ def add_active_campaign_sub_tag(mapper, connection, target):
     #Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
         if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-            from odyssey.integrations.active_campaign import ActiveCampaign
-            from odyssey.api.user.models import UserActiveCampaign
-            
-            ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
-            if ac_contact:
-                ac = ActiveCampaign()
-                ac.add_user_subscription_type(target.user_id)
+            from odyssey.tasks.tasks import add_subscription_tag
+            add_subscription_tag.delay(target.user_id)
 
 @db.event.listens_for(UserSubscriptions, "after_update")
 def update_active_campaign_sub_tag(mapper, connection, target):
@@ -590,14 +584,9 @@ def update_active_campaign_sub_tag(mapper, connection, target):
     #Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
         if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-            from odyssey.integrations.active_campaign import ActiveCampaign
-            from odyssey.api.user.models import UserActiveCampaign
-            
-            ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
-            if ac_contact:
-                ac = ActiveCampaign()
-                ac.add_user_subscription_type(target.user_id)
-    
+            from odyssey.tasks.tasks import add_subscription_tag
+            add_subscription_tag.delay(target.user_id)
+
 class UserTokensBlacklist(db.Model):
     """ 
     API tokens for either refresh or access which have been revoked either by the 
