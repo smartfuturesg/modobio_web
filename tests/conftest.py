@@ -327,7 +327,7 @@ def booking_function_scope(test_client):
     test_client.db.session.flush()
 
     # simulates logged-in user accepting a booking. Necessary to satisfy background process: telehealth.models.add_booking_status_history
-    g.flask_httpauth_user = (test_client.staff, UserLogin.query.filter_by(user_id = test_client.staff_id).one_or_none())
+    g.flask_httpauth_user = (test_client.provider, UserLogin.query.filter_by(user_id = test_client.provider_id).one_or_none())
 
     # make a telehealth booking by direct db call
     # booking is made less than 10 minutes out from the current time
@@ -353,7 +353,7 @@ def booking_function_scope(test_client):
         booking_end_idx = booking_start_idx + 3
 
     booking = TelehealthBookings(
-        staff_user_id = test_client.staff_id,
+        staff_user_id = test_client.provider_id,
         client_user_id = test_client.client_id,
         target_date = target_datetime.date(),
         target_date_utc = target_datetime.date(),
