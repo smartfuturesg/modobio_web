@@ -16,12 +16,15 @@ class ActiveCampaign:
 
     def __init__(self):
         self.url = current_app.config.get('ACTIVE_CAMPAIGN_BASE_URL')
+        logger.info(f'ACTIVE_CAMPAIGN_BASE_URL: {self.url}')
         self.api_key = current_app.config.get('ACTIVE_CAMPAIGN_API_KEY')
+        logger.info(f'ACTIVE_CAMPAIGN_API_KEY: {self.url[-4:]}')
         self.request_header = {
             "accept": "application/json",
             "Api-Token": self.api_key
         }
         ac_list = current_app.config.get('ACTIVE_CAMPAIGN_LIST')
+        logger.info(f'ACTIVE_CAMPAIGN_LIST {ac_list}')
         self.list_id = self.get_list_id(ac_list)
         logger.info('Active Campaign initialization complete.')
 
