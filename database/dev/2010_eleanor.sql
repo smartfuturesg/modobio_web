@@ -1,7 +1,9 @@
 DO $$
 DECLARE
     _user_id INTEGER;
+
 BEGIN
+
     INSERT INTO "User" (
         email,
         modobio_id,
@@ -12,18 +14,20 @@ BEGIN
         is_client,
         email_verified,
         biological_sex_male,
+        gender,
         dob)
     VALUES (
-        'train@modobio.com',
-        'QE6RS1875312',
-        'White',
-        'Goodman',
+        'eleanor.heenan@modobio.com',
+        'LC12KASDFG17',
+        'Eleanor',
+        'Heenan',
         true,
 		true,
         false,
         true,
-        true,
-        '1990-06-01')
+        false,
+        'f',
+        '1968-08-10')
     RETURNING user_id INTO _user_id;
 
     INSERT INTO "UserLogin" (
@@ -33,10 +37,25 @@ BEGIN
         _user_id,
         'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
-    INSERT INTO "StaffProfile" (user_id, membersince)
-    VALUES (_user_id, '2021-01-01');
+    INSERT INTO "StaffProfile"
+        (
+         user_id,
+         membersince
+         )
+    VALUES
+        (
+         _user_id,
+         '2021-01-01'
+         );
 
-    INSERT INTO "StaffRoles" (user_id, role)
-    VALUES (_user_id, 'trainer');
+    INSERT INTO "StaffRoles"
+        (
+         user_id,
+         role
+         )
+    VALUES
+        (_user_id, 'therapist');
+
 END;
+
 $$ LANGUAGE plpgsql;

@@ -1,0 +1,264 @@
+from datetime import date
+import requests
+import json
+
+from werkzeug.exceptions import BadRequest
+
+from flask import current_app
+from urllib.parse import urlencode
+from odyssey import db
+from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags, UserSubscriptions
+
+class ActiveCampaign:
+    """ Active Campaign integration class"""
+
+    def __init__(self):
+        self.url = current_app.config.get('ACTIVE_CAMPAIGN_BASE_URL')
+        self.api_key = current_app.config.get('ACTIVE_CAMPAIGN_API_KEY')
+        self.request_header = {
+            "accept": "application/json",
+            "Api-Token": self.api_key
+        }
+        ac_list = current_app.config.get('ACTIVE_CAMPAIGN_LIST')
+        self.list_id = self.get_list_id(ac_list)
+
+    def get_list_id(self, ac_list):
+        #Returns the list id where contacts will be stored
+
+        url = f'{self.url}/lists'
+        response = requests.get(url, headers=self.request_header)
+        data = json.loads(response.text)
+
+        for list in data['lists']:
+            if list['stringid'] == ac_list:
+                return list['id']   
+    
+    def check_contact_existence(self, user_id) -> bool:
+        # check if user already exsists in active campaign system. 
+        # Also checks to see if user is already in the active campaign list
+        # Returns True if contact exists and False if not
+
+        email = User.query.filter_by(user_id=user_id).one_or_none().email
+        query = { 'email': email }
+        url = self.url + 'contacts/?' + urlencode(query)
+
+        response = requests.get(url, headers=self.request_header)
+        data = json.loads(response.text)
+
+        #contact exists, check if there is an db entry in UserActiveCampaign
+        if data['meta']['total'] == '1':
+            contact_id = data['contacts'][0]['id']
+            ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+
+            #if None, create db entry
+            if not ac_contact:
+                ac_contact = UserActiveCampaign(
+                    user_id=user_id, 
+                    active_campaign_id=contact_id
+                )
+                db.session.add(ac_contact)
+                db.session.commit()
+
+            #Check if contact is in active campaign list. 
+            url = f"{self.url}/contacts/{contact_id}/contactLists"
+            response = requests.get(url, headers=self.request_header)
+            data = json.loads(response.text)
+
+            in_list = False
+            if len(data['contactLists']) > 0:
+                for x in data['contactLists']:
+                    if x['list'] == self.list_id:    #Contact is already created and in list
+                        in_list = True
+                        # User is already in active campaign list, check to see if they have been marked as a prospect. 
+                        # If so change this adds a tag of "Converted-Clients".
+                        self.convert_prosect(user_id)   
+                        return True
+            if not in_list:
+                #add contact to list
+                url = f'{self.url}/contactLists'
+                payload = {
+                    "contactList": {
+                        "list": self.list_id,
+                        "contact": contact_id,
+                        "status": 1    # '1': Set active to list, '2': unsubscribe from list
+                    }
+                }
+                response = requests.post(url, json=payload, headers=self.request_header)
+            return True
+        else:
+            # Returns false if contact not in Active Campaigns
+            return False
+
+    def create_contact(self, email, first_name, last_name):
+        #create contact and save contact id
+        url = f'{self.url}/contacts'
+        payload = {
+            'contact': {
+                'email': email, 
+                'firstName': first_name,
+                'lastName': last_name
+            }
+        }
+        contant_response = requests.post(url, json=payload, headers=self.request_header)
+        data = json.loads(contant_response.text)
+        contact_id = data['contact']['id']
+
+        user_id = User.query.filter_by(email=email).one_or_none().user_id
+
+        ac_contact = UserActiveCampaign(
+            user_id=user_id, 
+            active_campaign_id=contact_id, 
+        )
+        db.session.add(ac_contact)
+        db.session.commit()
+
+        #add contact to list
+        url = f'{self.url}/contactLists'
+        payload = {
+            "contactList": {
+                "list": self.list_id,
+                "contact": contact_id,
+                "status": 1    # '1': Set active to list, '2': unsubscribe from list
+            }
+        }
+        list_response = requests.post(url, json=payload, headers=self.request_header)
+        
+        return contant_response, list_response
+
+    def add_tag(self, user_id, tag_name):  
+        #Get tag id from tag name
+        query = { 'search': tag_name }
+        url = self.url + 'tags/?' + urlencode(query)
+
+        response = requests.get(url, headers=self.request_header)
+        data = json.loads(response.text)
+        if data['meta']['total'] == '0':
+            raise BadRequest('No tag found with the provided name.')
+        
+        tag_id = data['tags'][0]['id']
+
+        #Get active campaign contact id
+        ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+        if not ac_id:
+            raise BadRequest('No active campaign contact found with provided user ID.')
+
+        #Add tag to contact
+        url = f'{self.url}/contactTags'
+        payload = {
+            "contactTag": {
+                "contact": ac_id.active_campaign_id,
+                "tag": tag_id
+            }
+        }
+
+        response = requests.post(url, json=payload, headers=self.request_header)
+        data = json.loads(response.text)
+        tag_id = data['contactTag']['id']
+
+        #Check if tag already exists with user, if not store to db
+        tag = UserActiveCampaignTags.query.filter_by(user_id=user_id, tag_name=tag_name).one_or_none()
+        if not tag:
+            tag = UserActiveCampaignTags(user_id=user_id, tag_id=tag_id, tag_name=tag_name)
+            db.session.add(tag)
+            db.session.commit()
+        
+        return response
+
+    def remove_tag(self, user_id, tag_name):
+        #Get tag from db
+        tag = UserActiveCampaignTags.query.filter_by(user_id=user_id, tag_name=tag_name).one_or_none()
+        if not tag:
+            raise BadRequest('Tag not associated with user.')
+
+        #Remove tag
+        url = f'{self.url}/contactTags/{tag.tag_id}'
+        response = requests.delete(url, headers=self.request_header)
+        
+        db.session.delete(tag)
+        db.session.commit()
+
+        return response
+
+    def update_ac_contact_info(self, user_id, first_name=None, last_name=None, email=None):
+        #Get active campaign contact id
+        ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+        if not ac_id:
+            raise BadRequest('No active campaign contact found with provided user ID.')
+
+        payload = {'contact': {}}
+
+        if first_name:
+            payload['contact']['firstName'] = first_name
+        if last_name:
+            payload['contact']['lastName'] = last_name
+        if email:
+            payload['contact']['email'] = email
+        
+        #Update contact info
+        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
+        response = requests.put(url, json=payload, headers=self.request_header)
+
+        return response
+
+    def delete_contact(self, user_id):
+        #Delete contact from active campaign
+        ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+        if not ac_id:
+            raise BadRequest('No active campaign contact found with provided user ID.')
+
+        #Delete contact info
+        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
+        response = requests.delete(url, headers=self.request_header)
+
+        db.session.delete(ac_id)
+        db.session.commit()
+
+        return response
+
+    def add_age_group_tag(self, user_id):
+        #Gets users age and adds to age group
+        dob = User.query.filter_by(user_id=user_id).one_or_none().dob 
+        today = date.today()
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+        if age < 25:
+            return self.add_tag(user_id, 'Age 25 -')
+        elif age >= 25 and age < 45:
+            return self.add_tag(user_id, 'Age 25-44')
+        elif age >= 45 and age < 64:
+            return self.add_tag(user_id, 'Age 45-64')
+        elif age >= 64:
+            return self.add_tag(user_id, 'Age 64+')
+    
+    def add_user_subscription_type(self, user_id):
+        #Remove old subscription tags if any
+        subscription_tags = UserActiveCampaignTags.query.filter(
+            UserActiveCampaignTags.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Subscription')).all()
+        if subscription_tags:
+            for tag in subscription_tags:
+                self.remove_tag(user_id, tag.tag_name)
+
+        #Get subscription type and add tag based off subsctipyon type
+        client_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
+        if client_sub:
+            if client_sub.subscription_status == 'unsubscribed':   #Unsubscribed
+                return self.add_tag(user_id, 'Subscription - None')
+            elif client_sub.subscription_type_id == 2:             #Monthly Subscription ID from LookupTable
+                return self.add_tag(user_id, 'Subscription - Month')
+            elif client_sub.subscription_type_id == 3:             #Yearly Subscrioption ID from LookupTable
+                return self.add_tag(user_id, 'Subscription - Annual')
+
+    def convert_prosect(self, user_id):
+        #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        prospect_tags = UserActiveCampaignTags.query.filter(
+            UserActiveCampaignTags.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Prospect')).all()
+        if prospect_tags:
+            prospect_provider = False
+            for tag in prospect_tags:
+                if tag.tag_name == 'Prospect - Provider':
+                    prospect_provider = True
+                    
+            if not prospect_provider and user.is_client:
+                return self.add_tag(user_id, 'Converted - Client')
+
