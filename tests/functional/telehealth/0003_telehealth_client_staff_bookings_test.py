@@ -205,9 +205,9 @@ def test_put_1_client_staff_bookings(test_client, booking):
         data=dumps(telehealth_client_staff_bookings_put_1_data),
         content_type='application/json')
     
+    assert response.status_code == 201
     assert chat.conversation_sid == None
 
-    assert response.status_code == 201
 
 
 def test_put_confirm_client_staff_booking(test_client, booking):

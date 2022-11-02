@@ -14,8 +14,8 @@ def test_post_staff_availability_exception(test_client):
     telehealth_exceptions_post_data["bad_data_1"][0]["exception_date"] = str(current_date)
     
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_exceptions_post_data["bad_data_1"]),
         content_type='application/json')
 
@@ -25,8 +25,8 @@ def test_post_staff_availability_exception(test_client):
     telehealth_exceptions_post_data["bad_data_2"][0]["exception_date"] = str(current_date + relativedelta(months=+6, days=+1))
         
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_exceptions_post_data["bad_data_2"]),
         content_type='application/json')
 
@@ -36,8 +36,8 @@ def test_post_staff_availability_exception(test_client):
     telehealth_exceptions_post_data["bad_data_2"][0]["exception_date"] = str(current_date + relativedelta(days=-1))
         
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_exceptions_post_data["bad_data_2"]),
         content_type='application/json')
 
@@ -47,8 +47,8 @@ def test_post_staff_availability_exception(test_client):
     telehealth_exceptions_post_data["good_data"][0]["exception_date"] = str(current_date)
     
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_exceptions_post_data["good_data"]),
         content_type='application/json')
 
@@ -62,8 +62,8 @@ def test_post_staff_availability_exception(test_client):
 def test_get_staff_availability_exception(test_client):
 
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -76,16 +76,16 @@ def test_get_staff_availability_exception(test_client):
 def test_delete_staff_availability_exception(test_client):
 
     response = test_client.delete(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps([{'exception_id': 1}]),
         content_type='application/json')
 
     assert response.status_code == 204
     
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
     
     assert response.status_code == 200
@@ -96,8 +96,8 @@ def test_celery_delete_exceptions_task(test_client):
     telehealth_exceptions_post_data["good_data"][0]["exception_date"] = str(current_date)
     
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_exceptions_post_data["good_data"]),
         content_type='application/json')
 
@@ -105,8 +105,8 @@ def test_celery_delete_exceptions_task(test_client):
     
     #check that GET now returns 1 exception
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -117,15 +117,15 @@ def test_celery_delete_exceptions_task(test_client):
     
     #check that exception still exists since it's not after the date yet
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
     assert len(response.json) == 1
     
     #have to forcibly change the date since past dates can't be submitted
-    exception = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=test_client.staff_id).one_or_none()
+    exception = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=test_client.provider_id).one_or_none()
     
     exception.exception_date = str(current_date - relativedelta(days=1))
     db.session.commit()
@@ -134,8 +134,8 @@ def test_celery_delete_exceptions_task(test_client):
     remove_expired_availability_exceptions()
     
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
