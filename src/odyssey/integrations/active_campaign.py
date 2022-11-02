@@ -9,6 +9,8 @@ from urllib.parse import urlencode
 from odyssey import db
 from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags, UserSubscriptions
 
+import logging
+logger = logging.getLogger(__name__)
 class ActiveCampaign:
     """ Active Campaign integration class"""
 
@@ -21,6 +23,7 @@ class ActiveCampaign:
         }
         ac_list = current_app.config.get('ACTIVE_CAMPAIGN_LIST')
         self.list_id = self.get_list_id(ac_list)
+        logger.info('Active Campaign initialization complete.')
 
     def get_list_id(self, ac_list):
         #Returns the list id where contacts will be stored
@@ -31,7 +34,10 @@ class ActiveCampaign:
 
         for list in data['lists']:
             if list['stringid'] == ac_list:
+                logger.info(f'Found list {ac_list} with list ID {list["id"]}')
                 return list['id']   
+
+        logger.error(f'No list ID found of {ac_list} found.')
     
     def check_contact_existence(self, user_id) -> bool:
         # check if user already exsists in active campaign system. 
@@ -47,11 +53,13 @@ class ActiveCampaign:
 
         #contact exists, check if there is an db entry in UserActiveCampaign
         if data['meta']['total'] == '1':
+            logger.info(f'Active campagign contact exisits for {email}')
             contact_id = data['contacts'][0]['id']
             ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
 
             #if None, create db entry
             if not ac_contact:
+                logger.info(f'Creating UserActiveCampaign db entry for already exisiting user {email}.')
                 ac_contact = UserActiveCampaign(
                     user_id=user_id, 
                     active_campaign_id=contact_id
@@ -68,6 +76,7 @@ class ActiveCampaign:
             if len(data['contactLists']) > 0:
                 for x in data['contactLists']:
                     if x['list'] == self.list_id:    #Contact is already created and in list
+                        logger.info('Active Campaign contact exists in targeted list.')
                         in_list = True
                         # User is already in active campaign list, check to see if they have been marked as a prospect. 
                         # If so change this adds a tag of "Converted-Clients".
@@ -75,6 +84,7 @@ class ActiveCampaign:
                         return True
             if not in_list:
                 #add contact to list
+                logger.info('Adding existing active campaign contact to list.')
                 url = f'{self.url}/contactLists'
                 payload = {
                     "contactList": {
@@ -87,6 +97,7 @@ class ActiveCampaign:
             return True
         else:
             # Returns false if contact not in Active Campaigns
+            logger.info(f'No contact in Active Campaign with the email: {email}')
             return False
 
     def create_contact(self, email, first_name, last_name):
@@ -100,6 +111,9 @@ class ActiveCampaign:
             }
         }
         contant_response = requests.post(url, json=payload, headers=self.request_header)
+        logger.info(f'Contact Create response code: {contant_response.status_code}')
+        logger.info(f'Contact Create response  {contant_response.text}')
+
         data = json.loads(contant_response.text)
         contact_id = data['contact']['id']
 
@@ -122,7 +136,9 @@ class ActiveCampaign:
             }
         }
         list_response = requests.post(url, json=payload, headers=self.request_header)
-        
+        logger.info(f'Add contact to list response code: {list_response.status_code}')  
+        logger.info(f'Contact Create response  {list_response.text}')
+
         return contant_response, list_response
 
     def add_tag(self, user_id, tag_name):  
@@ -161,7 +177,8 @@ class ActiveCampaign:
             tag = UserActiveCampaignTags(user_id=user_id, tag_id=tag_id, tag_name=tag_name)
             db.session.add(tag)
             db.session.commit()
-        
+
+            logger.info(f'Added Active Campaign tag: {tag_name} to user with user_id: {user_id}')
         return response
 
     def remove_tag(self, user_id, tag_name):
@@ -177,6 +194,7 @@ class ActiveCampaign:
         db.session.delete(tag)
         db.session.commit()
 
+        logger.info(f'Removed Active Campaign tag: {tag_name} from user with user_id: {user_id}')
         return response
 
     def update_ac_contact_info(self, user_id, first_name=None, last_name=None, email=None):
@@ -198,6 +216,8 @@ class ActiveCampaign:
         url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
         response = requests.put(url, json=payload, headers=self.request_header)
 
+        logger.info(f'Update Active Campaign contact information status code: {response.status_code}') 
+        logger.info(f'Update Active Campaign contact information error: {response.text}')
         return response
 
     def delete_contact(self, user_id):
