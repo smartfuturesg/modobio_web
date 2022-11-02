@@ -31,6 +31,7 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import get_time_index, create_notification
 from odyssey.tasks.tasks import cancel_telehealth_appointment
+from odyssey.utils.message import send_email
 
 logger = get_task_logger(__name__)
 
@@ -482,7 +483,29 @@ def check_for_upcoming_booking_charges():
 
     logger.info(f'upcoming booking charges periodic task for {time_now} completed')
 
+@celery.task()
+def send_appointment_reminder_email():
+    logger.info(f'Finding bookings to send pre appointment reminder.')
 
+    current_time = datetime.now(timezone.utc)
+    target_datetime = current_time + timedelta(hours=6)
+    target_date = target_datetime.date()
+    target_time_idx = get_time_index(target_datetime)
+    
+    #find all target bookings 
+    bookings = TelehealthBookings.query.filter_by(
+        status = 'Accepted', target_date_utc=target_date, booking_window_id_start_time_utc=target_time_idx
+    ).all()
+
+    for booking in bookings:
+        logger.info(f'Sending pre appointment reminder to {booking.client.email}')
+        send_email(
+            'pre-appointment-reminder',
+            booking.client.email,
+            firstname=booking.client.firstname,
+            provider_firstname=booking.practitioner.firstname
+        )
+    
 celery.conf.beat_schedule = {
     # look for upcoming appointments:
     'check-for-upcoming-bookings': {
@@ -528,6 +551,11 @@ celery.conf.beat_schedule = {
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
         'task': 'odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
         'schedule': crontab(minute='*/15')
+    },
+    # appointment email reminders
+    'send_appointment_reminder_email': {
+        'task': 'odyssey.tasks.periodic.send_appointment_reminder_email',
+        'schedule': crontab(minute='*/5')
     }
     # upcoming booking payment to be charged
     #'check_for_upcoming_booking_charges': {
