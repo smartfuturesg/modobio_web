@@ -215,8 +215,8 @@ def update_active_campaign_contact(mapper, connection, target):
     modded_fname = get_history(target, 'firstname').added
     modded_lname = get_history(target, 'lastname').added
     modded_email = get_history(target, 'email').added
-
-    #Check if there were any changes to fields
+    modded_dob = get_history(target, 'dob').added
+    #Check if there were any changes to user info 
     if any(len(mod) > 0 for mod in [modded_fname, modded_lname, modded_email]):
         firstname = target.firstname if len(modded_fname) > 0 else None
         lastname = target.lastname if len(modded_lname) > 0 else None
@@ -224,14 +224,14 @@ def update_active_campaign_contact(mapper, connection, target):
 
         #Run active campatign operations in prod
         if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-            from odyssey.integrations.active_campaign import ActiveCampaign
-            from odyssey.api.user.models import UserActiveCampaign
-            
-            ac_contact = UserActiveCampaign.query.filter_by(user_id=target.user_id).one_or_none()
-            if ac_contact:
-                ac = ActiveCampaign()
-                ac.update_ac_contact_info(
-                target.user_id, first_name=firstname, last_name=lastname, email=email)
+            from odyssey.tasks.tasks import update_active_campaign_contact
+            update_active_campaign_contact(target.user_id, firstname, lastname, email)
+    #Check updates on dob 
+    if len(modded_dob) > 0 :
+        #Run active campatign operations in prod
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            from odyssey.tasks.tasks import add_age_tag
+            add_age_tag.delay(target.user_id)
 
 class UserLogin(db.Model):
     """ 

@@ -765,8 +765,17 @@ class EmailVerification():
             user.update({'email_verified': True})
             #Run active campaign operations for when a user verifies their email.
             #Only run active campaign operations in prod
-            if not any((current_app.config['DEV'], current_app.config['TESTING'])): 
-                create_active_campaign_contact(user)      
+            #if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            ac = ActiveCampaign()    
+            if not ac.check_contact_existence(user.user_id):
+                ac.create_contact(user.email, user.firstname, user.lastname) 
+            #Add user type tag
+            if user.is_client:
+                ac.add_tag(user.user_id, 'Persona - Client')
+            if user.is_staff:
+                ac.add_tag(user.user_id, 'Persona - Provider')
+            #Add subcription tag
+            ac.add_user_subscription_type(user.user_id)
         elif verification.email:
             user.update({'email': verification.email})
         
@@ -782,24 +791,7 @@ class EmailVerification():
         db.session.commit()
 
         return
-
-def create_active_campaign_contact(user):
-    #Add to Active Campaign after email_verification
-    ac = ActiveCampaign()    
-    if not ac.check_contact_existence(user.user_id):
-        ac.create_contact(user.email, user.firstname, user.lastname)
-    #Add user type tag
-    if user.is_client:
-        ac.add_tag(user.user_id, 'Persona - Client')
-    if user.is_staff:
-        ac.add_tag(user.user_id, 'Persona - Provider')
-    #Add subcription tag
-    ac.add_user_subscription_type(user.user_id)
-    #Add age group tag
-    ac.add_age_group_tag(user.user_id)
-
-
-        
+       
 def delete_staff_data(user_id):
     """ Delete staff specific data.
     
