@@ -330,3 +330,7 @@ Name and port number of the server. This setting allows for
 url generation outside of the Flask request context. This is useful for
 creating urls as part of celery tasks. 
 """
+# Active Campaign 
+ACTIVE_CAMPAIGN_BASE_URL = 'https://modobio.api-us1.com/api/3/'
+ACTIVE_CAMPAIGN_LIST = ''
+ACTIVE_CAMPAIGN_API_KEY = ''

@@ -3,7 +3,9 @@ DECLARE
     _user_id INTEGER;
     _role_id INTEGER;
     _country_id INTEGER;
+
 BEGIN
+
     INSERT INTO "User" (
         email,
         modobio_id,
@@ -15,7 +17,9 @@ BEGIN
         is_provider,
         email_verified,
         biological_sex_male,
-        dob)
+        gender,
+        dob
+        )
     VALUES (
         'pro@modobio.com',
         'EXK7322KFN12',
@@ -27,7 +31,9 @@ BEGIN
         true,
         true,
         true,
-        '1990-06-01')
+        'm',
+        '1941-09-12'
+        )
     RETURNING user_id INTO _user_id;
 
     INSERT INTO "UserLogin" (
@@ -78,5 +84,6 @@ BEGIN
         (_user_id, _country_id, 'CA', 'dea', '123342534', 'Verified', _role_id, true),
         (_user_id, _country_id, 'FL', 'med_lic', '523746512', 'Verified', _role_id, true),
         (_user_id, _country_id, 'CA', 'med_lic', '839547692', 'Verified', _role_id, true);
+
 END;
 $$ LANGUAGE plpgsql;

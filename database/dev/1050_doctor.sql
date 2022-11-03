@@ -15,6 +15,7 @@ BEGIN
         is_provider,
         email_verified,
         biological_sex_male,
+        gender,
         dob)
     VALUES (
         'doc@modobio.com',
@@ -27,7 +28,8 @@ BEGIN
         true,
         true,
         true,
-        '1990-06-01')
+        'm',
+        '1976-03-19')
     RETURNING user_id INTO _user_id;
 
     INSERT INTO "UserLogin" (

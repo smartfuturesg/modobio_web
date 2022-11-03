@@ -458,3 +458,13 @@ def cancel_telehealth_appointment(booking, reason='Failed Payment'):
 
     db.session.commit()
     return
+
+@celery.task()
+def add_subscription_tag(user_id):
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    from odyssey.api.user.models import UserActiveCampaign
+    
+    ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+    if ac_contact:
+        ac = ActiveCampaign()
+        ac.add_user_subscription_type(user_id)

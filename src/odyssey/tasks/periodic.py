@@ -3,9 +3,10 @@ from flask import current_app
 import boto3
 from boto3.dynamodb.conditions import Attr
 from odyssey.api.dosespot.models import DoseSpotPractitionerID
+from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.dosespot import DoseSpot
 
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone, date
 from celery.schedules import crontab
 from celery.signals import worker_process_init, worker_ready   
 from celery.utils.log import get_task_logger
@@ -497,6 +498,31 @@ def send_appointment_reminder_email():
         status = 'Accepted', target_date_utc=target_date, booking_window_id_start_time_utc=target_time_idx
     ).all()
 
+@celery.task()
+def update_ac_age_tags():
+    ac = ActiveCampaign()
+
+    users = User.query.all()
+    for user in users:
+        dob = user.dob   
+        today = date.today()
+        last_week = date.today() - timedelta(weeks=1)
+        age_today = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        age_last_week = last_week.year - dob.year - ((last_week.month, last_week.day) < (dob.month, dob.day))
+
+        #check age and compare to age a week ago, place user in new age tag catergory
+        if age_today == 25 and age_last_week == 24: 
+            ac.remove_tag(user.user_id, 'Age 25 -')
+            ac.add_tag(user.user_id,'Age 25-44')
+        if age_today == 45 and age_last_week == 44: 
+            ac.remove_tag(user.user_id, 'Age 25-44')
+            ac.add_tag(user.user_id,'Age 45-64')
+        if age_today == 64 and age_last_week == 63: 
+            ac.remove_tag(user.user_id, 'Age 45-64')
+            ac.add_tag(user.user_id,'Age 64+')
+
+    logger.info(f'Age group tags have been updated')
+
     for booking in bookings:
         logger.info(f'Sending pre appointment reminder to {booking.client.email}')
         send_email(
@@ -556,11 +582,17 @@ celery.conf.beat_schedule = {
     'send_appointment_reminder_email': {
         'task': 'odyssey.tasks.periodic.send_appointment_reminder_email',
         'schedule': crontab(minute='*/5')
-    }
+    },
     # upcoming booking payment to be charged
-    #'check_for_upcoming_booking_charges': {
-    #    'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
-    #    'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
-    #    # off setting this slightly might theoretically smooth out the load on celery
-    #}
+    'check_for_upcoming_booking_charges': {
+        'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
+        'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
+        # off setting this slightly might theoretically smooth out the load on celery
+    },
+    # Active campaign tags (age group)
+    'update_ac_age_tags': {
+        'task': 'odyssey.tasks.periodic.update_ac_age_tags',
+        'schedule': crontab(day_of_week=0) # Run every sunday 
+    }
+
 }

@@ -61,7 +61,11 @@ def setup_db(app):
 
     # Load SQL scripts.
     runner = root / 'database' / 'sql_scriptrunner.py'
-    cmd = [sys.executable, runner, '--db_uri', app.config['SQLALCHEMY_DATABASE_URI']]
+    cmd = [
+        sys.executable,
+        runner,
+        '--db_uri', app.config['SQLALCHEMY_DATABASE_URI'],
+    ]
 
     proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True, env=os.environ)
 

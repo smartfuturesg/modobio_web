@@ -26,7 +26,7 @@ to substitute a username which is only available from the environment at runtime
 
 import importlib
 import pathlib
-
+import boto3
 from sqlalchemy import create_engine, text
 
 from odyssey.config import Config, database_parser
@@ -82,6 +82,11 @@ dev_group.add_argument(
     help='Negate the options of --dev. Do NOT include development scripts when '
          'FLASK_ENV=development.')
 
+parser.add_argument(
+    '--demo',
+    action='store_true',
+    help='Run extra scripts from the "demo/" subdirectory. Intended for the demo environment.')
+
 args = parser.parse_args()
 
 # Collect files.
@@ -131,6 +136,14 @@ if not files:
         dev_sql_files.sort()
         files.extend(dev_sql_files)
 
+if args.demo:
+    demo_dir = pathlib.Path(__file__).parent / 'demo'
+    demo_sql_files = list(demo_dir.glob('*.sql'))
+    demo_py_files = list(demo_dir.glob('*py'))
+    demo_sql_files.extend(demo_py_files)
+    demo_sql_files.sort()
+    files.extend(demo_sql_files)
+
 # Open DB connection.
 print(f'Using the following database: {args.db_uri}')
 engine = create_engine(args.db_uri)
@@ -157,8 +170,9 @@ with engine.connect() as conn:
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
 
-            conn.execute(text(mod.sql))
-            conn.execute(text('commit;'))
+            if hasattr(mod, 'sql'):
+                conn.execute(text(mod.sql))
+                conn.execute(text('commit;'))
             print('done')
         else:
             print('skipped')

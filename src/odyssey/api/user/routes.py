@@ -28,6 +28,7 @@ from odyssey.api.staff.models import StaffRoles
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
+    UserActiveCampaignTags,
     UserLogin,
     UserRemovalRequests,
     UserSubscriptions,
@@ -66,6 +67,7 @@ from odyssey.utils.misc import (
     check_staff_existence,
     update_client_subscription,
     verify_jwt)
+from odyssey.integrations.active_campaign import ActiveCampaign
 
 ns = Namespace('user', description='Endpoints for user accounts.')
 
@@ -99,6 +101,7 @@ class ApiUser(BaseResource):
         email = user_info.get('email')
 
         payload = {}
+        
         #if email is part of payload, use email update routine
         if email:
             email_domain_blacklisted(email)
@@ -107,9 +110,11 @@ class ApiUser(BaseResource):
             # respond with verification code in dev/testing
             if any((current_app.config['DEV'], current_app.config['TESTING'])) :
                 payload['email_verification_code'] = email_verification_data.get('code')
+
         
         user.update(user_info)
         db.session.commit()
+
 
         return payload
 
@@ -189,10 +194,20 @@ class NewStaffUser(BaseResource):
                 # user account exists but only the client portion of the account is defined
                 user.is_staff = True
                 user.was_staff = True
+                del user_info['password']
                 user.update(user_info)
 
                 if user.email_verified:
                     verify_email = False
+
+                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        #User already exists and email is verified.
+                        #Check if contact exists in Active Campaign, if not create contact. 
+                        ac = ActiveCampaign()
+                        if not ac.check_contact_existence(user.user_id):
+                            ac.create_contact(user.email, user.firstname, user.lastname)
+                            ac.add_age_group_tag(user.user_id)
+                        ac.add_tag(user.user_id, 'Persona - Provider')
                 else:
                     verify_email = True
         else:
@@ -356,6 +371,16 @@ class NewClientUser(BaseResource):
                     # update client subscription status if necessary
                     verify_email = False
                     subscription_update = True
+
+                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        #User already exists and email is verified.
+                        #Check if contact exists in Active Campaign, if not create contact. 
+                        ac = ActiveCampaign()
+                        if not ac.check_contact_existence(user.user_id):
+                            ac.create_contact(user.email, user.firstname, user.lastname)
+                            ac.add_age_group_tag(user.user_id)
+                            ac.add_user_subscription_type(user.user_id)
+                        ac.add_tag(user.user_id, 'Persona - Client')
                 else:
                     verify_email = True
         else:
@@ -697,6 +722,43 @@ class UserSubscriptionApi(BaseResource):
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
 
+        # Update the previous subscription if necessary
+        if prev_sub.subscription_status == 'subscribed':
+            if prev_sub.expire_date:
+                if prev_sub.expire_date < datetime.utcnow() or transaction_info.get('productId') != prev_sub.subscription_type_information.ios_product_id:
+                    prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
+                else:
+                    # new subscription entry not required return the current subscription
+                    prev_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
+                    prev_sub.update({'last_checked_date': datetime.utcnow().isoformat()})
+                    db.session.commit()
+                    return prev_sub
+        else:
+            prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
+    
+            # if this subscription is following an unsubscribed status: 
+            #   either first time subscription or first subscription ever
+            # Send a Welcome email
+            send_email('subscription-confirm', user.email, firstname=user.firstname)
+                
+        # make a new subscription entry
+        new_data = {
+            'subscription_status': request.parsed_obj.subscription_status,
+            'subscription_type_id': request.parsed_obj.subscription_type_id,
+            'is_staff': request.parsed_obj.is_staff,
+            'apple_original_transaction_id': request.parsed_obj.apple_original_transaction_id,
+            'last_checked_date': datetime.utcnow().isoformat()
+        }
+
+        new_sub = UserSubscriptionsSchema().load(new_data)
+        new_sub.user_id = user_id
+
+        if request.parsed_obj.apple_original_transaction_id:
+            new_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
+            new_sub.expire_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None)
+            new_sub.start_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None)
+        
+        db.session.add(new_sub)
         db.session.commit()
 
         current_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
@@ -826,7 +888,24 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             email verification code provided during client creation
         """
         EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
-
+        
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        
+        #Only run active campaign operations in prod
+        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            #Add to Active Campaign after email_verification
+            ac = ActiveCampaign()    
+            if not ac.check_contact_existence(user_id):
+                ac.create_contact(user.email, user.firstname, user.lastname)
+            #Add user type tag
+            if user.is_client:
+                ac.add_tag(user_id, 'Persona - Client')
+            if user.is_staff:
+                ac.add_tag(user_id, 'Persona - Provider')
+            #Add subcription tag
+            ac.add_user_subscription_type(user_id)
+            #Add age group tag
+            ac.add_age_group_tag(user_id)
         return
 
 @ns.route('/email-verification/resend/<int:user_id>/')
