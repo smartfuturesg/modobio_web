@@ -242,7 +242,7 @@ class ActiveCampaign:
 
     def add_age_group_tag(self, user_id):
         #Gets users age and adds to age group
-        dob = User.query.filter_by(user_id=user_id).one_or_none().dob 
+        dob = User.query.filter_by(user_id=user_id).one_or_none().dob
         today = date.today()
         age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
 

@@ -453,3 +453,23 @@ def add_subscription_tag(user_id):
     if ac_contact:
         ac = ActiveCampaign()
         ac.add_user_subscription_type(user_id)
+
+@celery.task()
+def add_age_tag(user_id):
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    from odyssey.api.user.models import UserActiveCampaign
+    
+    ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+    if ac_contact:
+        ac = ActiveCampaign()
+        ac.add_age_group_tag(user_id)
+
+@celery.task()
+def update_active_campaign_contact(user_id, firstname, lastname, email):
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    from odyssey.api.user.models import UserActiveCampaign
+    
+    ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+    if ac_contact:
+        ac = ActiveCampaign()
+        ac.update_ac_contact_info(user_id, first_name=firstname, last_name=lastname, email=email)
