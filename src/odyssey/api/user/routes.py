@@ -852,23 +852,6 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         """
         EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
         
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-        
-        #Only run active campaign operations in prod
-        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-            #Add to Active Campaign after email_verification
-            ac = ActiveCampaign()    
-            if not ac.check_contact_existence(user_id):
-                ac.create_contact(user.email, user.firstname, user.lastname)
-            #Add user type tag
-            if user.is_client:
-                ac.add_tag(user_id, 'Persona - Client')
-            if user.is_staff:
-                ac.add_tag(user_id, 'Persona - Provider')
-            #Add subcription tag
-            ac.add_user_subscription_type(user_id)
-            #Add age group tag
-            ac.add_age_group_tag(user_id)
         return
 
 @ns.route('/email-verification/resend/<int:user_id>/')

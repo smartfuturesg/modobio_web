@@ -2,8 +2,6 @@ from datetime import date
 import requests
 import json
 
-from werkzeug.exceptions import BadRequest
-
 from flask import current_app
 from urllib.parse import urlencode
 from odyssey import db
@@ -152,14 +150,16 @@ class ActiveCampaign:
         response = requests.get(url, headers=self.request_header)
         data = json.loads(response.text)
         if data['meta']['total'] == '0':
-            raise BadRequest('No tag found with the provided name.')
+            logger.error('No tag found with the provided name.')
+            return
         
         tag_id = data['tags'][0]['id']
 
         #Get active campaign contact id
         ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
         if not ac_id:
-            raise BadRequest('No active campaign contact found with provided user ID.')
+            logger.error('No active campaign contact found with provided user ID.')
+            return
 
         #Add tag to contact
         url = f'{self.url}/contactTags'
@@ -188,7 +188,8 @@ class ActiveCampaign:
         #Get tag from db
         tag = UserActiveCampaignTags.query.filter_by(user_id=user_id, tag_name=tag_name).one_or_none()
         if not tag:
-            raise BadRequest('Tag not associated with user.')
+            logger.error('Tag not associated with user.')
+            return
 
         #Remove tag
         url = f'{self.url}/contactTags/{tag.tag_id}'
@@ -204,8 +205,8 @@ class ActiveCampaign:
         #Get active campaign contact id
         ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
         if not ac_id:
-            raise BadRequest('No active campaign contact found with provided user ID.')
-
+            logger.error('No active campaign contact found with provided user ID.')
+            return
         payload = {'contact': {}}
 
         if first_name:
@@ -227,7 +228,8 @@ class ActiveCampaign:
         #Delete contact from active campaign
         ac_id = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
         if not ac_id:
-            raise BadRequest('No active campaign contact found with provided user ID.')
+            logger.error('No active campaign contact found with provided user ID.')
+            return
 
         #Delete contact info
         url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
