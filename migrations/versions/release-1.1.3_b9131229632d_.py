@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'b9131229632d'
-down_revision = '6be0e73cb0cc'
+down_revision = '89a011cf13b8'
 branch_labels = None
 depends_on = None
 
@@ -63,6 +63,27 @@ def upgrade():
     op.add_column('UserPendingEmailVerifications', sa.Column('email', sa.String(length=75), nullable=True))
     op.create_unique_constraint(None, 'UserPendingEmailVerifications', ['user_id'])
     op.create_unique_constraint(None, 'UserPendingEmailVerifications', ['email'])
+    # ### manual additions     ###
+    op.add_column('User', sa.Column('gender', sa.String(length=1), nullable=True))
+    op.create_table('UserActiveCampaign',
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
+    sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('active_campaign_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('idx')
+    )
+    op.create_table('UserActiveCampaignTags',
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
+    sa.Column('idx', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('tag_id', sa.Integer(), nullable=True),
+    sa.Column('tag_name', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('idx')
+    )
     # ### end Alembic commands ###
 
 
@@ -91,4 +112,8 @@ def downgrade():
     op.add_column('LookupNotifications', sa.Column('symbol_color', sa.VARCHAR(), autoincrement=False, nullable=True))
     op.drop_table('TelehealthStaffAvailabilityExceptions')
     op.drop_table('LookupVisitReasons')
+    # ### manual additions     ###
+    op.drop_column('User', 'gender')
+    op.drop_table('UserActiveCampaignTags')
+    op.drop_table('UserActiveCampaign')
     # ### end Alembic commands ###
