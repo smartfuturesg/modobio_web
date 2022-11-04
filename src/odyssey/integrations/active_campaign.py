@@ -282,11 +282,11 @@ class ActiveCampaign:
         url = self.url + 'tags/?' + urlencode(query)
         response = requests.get(url, headers=self.request_header)
         data = json.loads(response.text)
-        prospect_tag_ids = data['tags']
 
         if data['meta']['total'] == '0':
             logger.error('No tag found with the provided name.')
             return
+        prospect_tag_ids = data['tags']
         
         #Get the tags associated with the user. 
         url = f'{self.url}/contacts/{ac_contact_id}/contactTags' 
