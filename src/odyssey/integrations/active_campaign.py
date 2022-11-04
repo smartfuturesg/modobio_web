@@ -68,6 +68,10 @@ class ActiveCampaign:
                 db.session.add(ac_contact)
                 db.session.commit()
 
+            # User already exists as a contact, check to see if they have been marked as a prospect. 
+            # If so change this adds a tag of "Converted-Clients".
+            self.convert_prosect(user_id, contact_id)  
+
             #Check if contact is in active campaign list. 
             url = f"{self.url}/contacts/{contact_id}/contactLists"
             response = requests.get(url, headers=self.request_header)
@@ -78,11 +82,7 @@ class ActiveCampaign:
                 for x in data['contactLists']:
                     if x['list'] == self.list_id:    #Contact is already created and in list
                         logger.info('Active Campaign contact exists in targeted list.')
-                        in_list = True
-                        # User is already in active campaign list, check to see if they have been marked as a prospect. 
-                        # If so change this adds a tag of "Converted-Clients".
-                        self.convert_prosect(user_id)   
-                        return True
+                        in_list = True 
             if not in_list:
                 #add contact to list
                 logger.info('Adding existing active campaign contact to list.')
@@ -273,17 +273,37 @@ class ActiveCampaign:
             elif client_sub.subscription_type_id == 3:             #Yearly Subscrioption ID from LookupTable
                 return self.add_tag(user_id, 'Subscription - Annual')
 
-    def convert_prosect(self, user_id):
+    def convert_prosect(self, user_id, ac_contact_id):
         #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
         user = User.query.filter_by(user_id=user_id).one_or_none()
-        prospect_tags = UserActiveCampaignTags.query.filter(
-            UserActiveCampaignTags.user_id == user_id, UserActiveCampaignTags.tag_name.contains('Prospect')).all()
-        if prospect_tags:
-            prospect_provider = False
-            for tag in prospect_tags:
-                if tag.tag_name == 'Prospect - Provider':
-                    prospect_provider = True
-                    
-            if not prospect_provider and user.is_client:
-                return self.add_tag(user_id, 'Converted - Client')
 
+        #Get the ids of the 'Prospect' tags stored in Active Campaign
+        query = { 'search': 'prospect' }
+        url = self.url + 'tags/?' + urlencode(query)
+        response = requests.get(url, headers=self.request_header)
+        data = json.loads(response.text)
+        prospect_tag_ids = data['tags']
+
+        if data['meta']['total'] == '0':
+            logger.error('No tag found with the provided name.')
+            return
+        
+        #Get the tags associated with the user. 
+        url = f'{self.url}/contacts/{ac_contact_id}/contactTags' 
+        response = requests.get(url, headers=self.request_header)
+        data = json.loads(response.text)
+        user_tags = data['contactTags']
+
+        #Check if user has 'Prospect' tags on account
+        has_prospect_tag = False
+        for user_tag in user_tags:
+            for tag_id in prospect_tag_ids:
+                #User has some tag of 'Prospect' 
+                if tag_id['tag'] != 'Prospect - Provider' and user_tag['tag'] == tag_id['id']:
+                    has_prospect_tag = True
+                #Disregard operation because user has tag of 'Prospect - Provider'
+                elif tag_id['tag'] == 'Prospect - Provider' and user_tag['tag'] == tag_id['id']:
+                    return
+                
+        if has_prospect_tag and user.is_client:
+            return self.add_tag(user_id, 'Converted - Client')
