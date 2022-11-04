@@ -253,20 +253,6 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
-# Dosespot Settings
-DOSESPOT_API_KEY = ''
-""" DoseSpot API access key ID number. """
-
-DOSESPOT_MODOBIO_ID = ''
-""" DoseSpot ModoBio ID. """
-
-DOSESPOT_ADMIN_ID = ''
-""" DoseSpot Admin ID"""
-
-DOSESPOT_PROXY_USER_ID = '238851'
-
-DOSESPOT_BASE_URL = 'https://my.staging.dosespot.com'
-
 # Wheel settings
 WHEEL_API_TOKEN = ''
 WHEEL_MD_CONSULT_RATE = '7161c1e9-69a6-4430-a7ef-04593300f48a'

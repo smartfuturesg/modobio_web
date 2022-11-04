@@ -102,10 +102,6 @@ BEGIN
         (_user_id, _country_id, 'CA', 'dea', '43218470', 'Verified', _role_id, true),
         (_user_id, _country_id, 'FL', 'med_lic', '21323512', 'Verified', _role_id, true);
 
-    -- Add DoseSpot credentials.
-    INSERT INTO "DoseSpotPractitionerID" (user_id, ds_user_id, ds_enrollment_status)
-    VALUES (_user_id, 227295, 'pending');
-
 END;
 
 $$ LANGUAGE plpgsql;

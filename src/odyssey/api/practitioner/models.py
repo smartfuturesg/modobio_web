@@ -108,26 +108,3 @@ class PractitionerOrganizationAffiliation(BaseModelWithIdx, UserIdFkeyMixin):
     
     :type: :class:`LookupOrganizations` instance 
     """
-
-# @db.event.listens_for(PractitionerCredentials, "after_update")
-# def ds_onboard_practitioner(mapper, connection, target):
-#     """ 
-#     Listens for any updates to PractitionerCredentials table
-
-#     If any updates occur, we will try to automatically onboard that MD to to the DS platform
-#     """
-#     from odyssey.integrations.dosespot import DoseSpot
-#     from odyssey.api.staff.models import StaffOffices
-#     from odyssey.api.dosespot.models import DoseSpotPractitionerID
-
-#     staff_office = StaffOffices.query.filter_by(user_id=target.user_id).one_or_none()
-#     verified_npi = PractitionerCredentials.query.filter_by(user_id=target.user_id,credential_type='npi',status='Verified').one_or_none()
-#     ds_practitioner = DoseSpotPractitionerID.query.filter_by(user_id=target.user_id).one_or_none()
-
-#     if (staff_office and verified_npi) and not ds_practitioner:
-#         try:
-#             ds = DoseSpot()
-#             ds.onboard_practitioner(target.user_id)
-#             db.session.commit() 
-#         except:
-#             return
