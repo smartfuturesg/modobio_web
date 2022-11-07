@@ -25,7 +25,6 @@ BEGIN
         false,
         true,
         true,
-        true,
         false,
         'f',
         '1972-08-07')
