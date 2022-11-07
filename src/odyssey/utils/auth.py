@@ -26,7 +26,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client', 'provider'), staff_role=None, internal_required=False, email_required=True, resources = (), dev_only=False):
+    def login_required(self, f=None, user_type=('staff','client', 'provider'), staff_role=None, email_required=True, resources = ()):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -41,8 +41,8 @@ class BasicAuth(object):
                   authenticate(auth,pass)
         '''
         logger.debug(f'Login required wrapper called with args: f={f}, user_type={user_type}, '
-                     f'staff_role={staff_role}, internal_required={internal_required} '
-                     f'email_required={email_required}, resources={resources}, dev_only={dev_only}.')
+                     f'staff_role={staff_role}, '
+                     f'email_required={email_required}, resources={resources}')
 
         ###
         ##  Validate kwargs: user_type, staff_role
@@ -80,7 +80,6 @@ class BasicAuth(object):
                         - 'modobio' anyone logged in through the modobio platform
                         - 'provider'
                     - staff_role: roles specified in utils/constants
-                    - internal_required: some resources are meant only for 'internal' or 'beta' users
                     
                 Any issues coming from the above should raise a 401 error with no message.
                 """
@@ -89,13 +88,9 @@ class BasicAuth(object):
                 self.resources = resources
                 
                 logger.debug(f'Login required decorator called with: f={f}, user_type={user_type}, '
-                             f'staff_role={staff_role}, internal_required={internal_required} '
-                             f'email_required={email_required}, resources={resources}, '
-                             f'dev_only={dev_only}.')
-
-                if dev_only:
-                    if not current_app.config['DEV']:
-                        raise BadRequest('This request is only available in dev')
+                             f'staff_role={staff_role}, '
+                             f'email_required={email_required}, resources={resources}'
+                             )
                 
                 auth = self.get_auth()
                 
@@ -118,11 +113,6 @@ class BasicAuth(object):
                         user_login,
                         user_context,)
                 
-                # If necessary, restrict access to internal users
-                if internal_required:
-                    if not user.is_internal:
-                        raise Unauthorized
-
                 g.flask_httpauth_user = (user, user_login) if user else (None,None)
                 return f(*args, **kwargs)
             return decorated
