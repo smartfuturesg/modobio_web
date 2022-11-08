@@ -473,14 +473,38 @@ def send_appointment_reminder_email():
     logger.info(f'Finding bookings to send pre appointment reminder.')
 
     current_time = datetime.now(timezone.utc)
-    target_datetime = current_time + timedelta(hours=6)
-    target_date = target_datetime.date()
-    target_time_idx = get_time_index(target_datetime)
+    target_time = current_time + timedelta(hours=6)
+    target_time_window_start = get_time_index(datetime.now(timezone.utc))
+    target_time_window_end = get_time_index(target_time)
 
-    # find all target bookings
-    bookings = TelehealthBookings.query.filter_by(
-        status='Accepted', target_date_utc=target_date, booking_window_id_start_time_utc=target_time_idx
-    ).all()
+    #find all accepted bookings who have not been notified yet
+    bookings = TelehealthBookings.query.filter(TelehealthBookings.status == 'Accepted', TelehealthBookings.email_reminded == False)
+    if target_time_window_start > target_time_window_end:
+        #this will happen from 18:00 to 23:55
+        #in this case, we have to query across two dates
+        bookings = \
+            bookings.filter(
+            or_(
+                and_(
+                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.target_date_utc == current_time.date()
+                ),
+                and_(
+                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.target_date_utc == target_time.date()
+                )
+            )
+            ).all()
+    else:
+        #otherwise just query for bookings whose start id falls between the target times on for today
+        bookings =  \
+            bookings.filter(
+            and_(
+                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.target_date_utc == target_time.date()
+                    )
+            ).all()
 
     for booking in bookings:
         logger.info(f'Sending pre appointment reminder to {booking.client.email}')
@@ -490,6 +514,9 @@ def send_appointment_reminder_email():
             firstname=booking.client.firstname,
             provider_firstname=booking.practitioner.firstname
         )
+        booking.email_reminded = True
+
+    db.session.commit()
 
 
 @celery.task()
@@ -562,7 +589,7 @@ celery.conf.beat_schedule = {
     # appointment email reminders
     'send_appointment_reminder_email': {
         'task': 'odyssey.tasks.periodic.send_appointment_reminder_email',
-        'schedule': crontab(minute='*/5')
+        'schedule': crontab(minute='*/1')
     },
     # upcoming booking payment to be charged
     'check_for_upcoming_booking_charges': {
