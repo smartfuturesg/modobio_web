@@ -17,6 +17,7 @@ from odyssey.api.lookup.models import (
     LookupOrganizations,
     LookupCurrencies)
 from odyssey.api.provider.schemas import *
+from odyssey.api.provider.models import *
 from odyssey.api.staff.models import (
     StaffOperationalTerritories,
     StaffRoles,
@@ -300,7 +301,7 @@ class ProviderConsultationRates(BaseResource):
         return
 
 @ns.route('/affiliations/<int:user_id>/')
-class PractitionerOganizationAffiliationAPI(BaseResource):
+class ProviderOganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
     """
