@@ -589,7 +589,7 @@ celery.conf.beat_schedule = {
     # appointment email reminders
     'send_appointment_reminder_email': {
         'task': 'odyssey.tasks.periodic.send_appointment_reminder_email',
-        'schedule': crontab(minute='*/1')
+        'schedule': crontab(minute='*/5')
     },
     # upcoming booking payment to be charged
     'check_for_upcoming_booking_charges': {
