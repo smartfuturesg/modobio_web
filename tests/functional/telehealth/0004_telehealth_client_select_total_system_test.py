@@ -9,7 +9,7 @@ from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRe
 from odyssey.api.user.models import User
 from odyssey.api.practitioner.models import PractitionerCredentials
 from odyssey.api.staff.models import StaffRoles
-from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthQueueClientPool
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthQueueClientPool, TelehealthStaffSettings
 from odyssey.tasks.tasks import cleanup_unended_call
 from flask import g
 
@@ -66,10 +66,16 @@ def test_generate_staff_availability(test_client, telehealth_staff):
         telehealth_staff_10_general_availability_post_data,
         telehealth_staff_12_general_availability_post_data,
         telehealth_staff_14_general_availability_post_data]
-
     for availability, user in zip(availability_data, telehealth_staff):
         auth_header = login(test_client, user)
 
+        staff_telehealth_access = TelehealthStaffSettings.query.filter_by(user_id=user.user_id).one_or_none()
+        #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+        if not staff_telehealth_access:
+             staff_telehealth_access = TelehealthStaffSettings(user_id=user.user_id, provider_telehealth_access = True)
+             test_client.db.session.add(staff_telehealth_access)
+             test_client.db.session.commit()
+      
         response = test_client.post(
             f'/telehealth/settings/staff/availability/{user.user_id}/',
             headers=auth_header,
@@ -77,7 +83,6 @@ def test_generate_staff_availability(test_client, telehealth_staff):
             content_type='application/json')
 
         assert response.status_code == 201
-
 
 def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, staff_availabilities):
 
@@ -273,7 +278,7 @@ def test_client_time_select_specific_provider_client_not_in_queue_without_requir
     
     assert response.status_code == 400
 
-def test_full_system_with_settings(test_client, telehealth_staff):
+def test_full_system_with_settings(test_client, telehealth_staff, provider_telehealth_access):
     """
     Testing the full telehealth system:
 
@@ -292,6 +297,13 @@ def test_full_system_with_settings(test_client, telehealth_staff):
     test_client.db.session.query(TelehealthChatRooms).delete()
     test_client.db.session.query(TelehealthBookingDetails).delete()
     test_client.db.session.query(TelehealthBookings).delete()
+    test_client.db.session.commit()
+
+    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+    staff_telehealth_access = TelehealthStaffSettings(user_id=telehealth_staff[0].user_id, provider_telehealth_access=True)
+    test_client_staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    test_client.db.session.add(staff_telehealth_access)
+    test_client.db.session.add(test_client_staff_telehealth_access)
     test_client.db.session.commit()
 
     ##
@@ -415,9 +427,17 @@ def test_full_system_with_settings(test_client, telehealth_staff):
     assert current_booking['client']['end_time_localized'] == '04:50:00'
     assert current_booking['client']['timezone'] == 'America/Phoenix'
 
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.delete(test_client_staff_telehealth_access)
+    test_client.db.session.commit()
+
 
 def test_booking_start_and_complete(test_client, booking_function_scope):
-    
+    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    test_client.db.session.add(staff_telehealth_access)
+    test_client.db.session.commit()
+
     # start telehealth call as a staff member
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
@@ -433,6 +453,9 @@ def test_booking_start_and_complete(test_client, booking_function_scope):
         headers=test_client.staff_auth_header)
 
     assert response.status_code == 200
+
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.commit()
 
 @pytest.mark.skip('Disabled until an alternative to InstaMed is implemented')
 def test_booking_start_fail(test_client, booking_function_scope):
@@ -496,6 +519,10 @@ def test_booking_start_fail(test_client, booking_function_scope):
 
 
 def test_cleanup_unended_call(test_client, booking_function_scope):
+
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access = True)
+    test_client.db.session.add(staff_telehealth_access)
+    test_client.db.session.commit()
     
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
@@ -511,6 +538,8 @@ def test_cleanup_unended_call(test_client, booking_function_scope):
     assert booking_function_scope.status_history[-1].reporter_role == 'System'
     assert complete == 'Booking Completed by System'
 
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.commit()
 
 def test_delete_generated_users(test_client):
     assert 1 == 1

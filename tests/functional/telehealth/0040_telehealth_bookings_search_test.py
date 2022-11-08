@@ -5,7 +5,7 @@ from datetime import timedelta
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 
 
-def test_get_booking_by_date_time(test_client, booking_function_scope):
+def test_get_booking_by_date_time(test_client, booking_function_scope, provider_telehealth_access):
     # change the timing of the call so that it has already ended
 
     response = test_client.get(
@@ -26,7 +26,7 @@ def test_get_booking_by_date_time(test_client, booking_function_scope):
     assert response.status_code == 200
     assert len(booking_dates) == 0
     
-def test_get_booking_by_status(test_client, booking_function_scope):
+def test_get_booking_by_status(test_client, booking_function_scope, provider_telehealth_access):
     # change the timing of the call so that it has already ended
 
     response = test_client.get(
@@ -50,7 +50,7 @@ def test_get_booking_by_status(test_client, booking_function_scope):
 
     
     
-def test_get_booking_by_order(test_client, booking_function_scope):
+def test_get_booking_by_order(test_client, booking_function_scope, provider_telehealth_access):
     
     # 
     # create an extra booking based on data from the booking fixture used

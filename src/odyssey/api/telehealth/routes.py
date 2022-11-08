@@ -654,7 +654,7 @@ class TelehealthBookingsApi(BaseResource):
         }
         return payload
 
-    @token_auth.login_required(user_type=('client',), check_staff_telehealth_access=True)
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=TelehealthBookingsSchema(only=['booking_window_id_start_time', 'target_date']), api=ns)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=201)
     @ns.doc(params={'client_user_id': 'Client User ID', 'staff_user_id': 'Staff User ID'})
@@ -1301,6 +1301,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         # To conform to FE request
         # If the staff already has information in telehealthStaffStettings, delete it and take new payload as truth
         settings_query = TelehealthStaffSettings.query.filter_by(user_id=user_id).one_or_none()
+        old_telehealth_access = settings_query.provider_telehealth_access
         if settings_query:
             db.session.delete(settings_query)
 
@@ -1311,9 +1312,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
             if not request.parsed_obj['settings']:
                 raise BadRequest('Missing required field settings.')
 
-            # Update tzone and auto-confirm in telehealth staff settings table once
+            # Update tzone, auto-confirm, and telehealth access in telehealth staff settings table once
             settings_data = request.parsed_obj['settings']
             settings_data.user_id = user_id
+            settings_data.provider_telehealth_access = old_telehealth_access
             db.session.add(settings_data)
 
             data = {'user_id': user_id}

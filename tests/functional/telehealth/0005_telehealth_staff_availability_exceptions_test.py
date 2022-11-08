@@ -3,14 +3,27 @@ from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 
 from odyssey import db
-from odyssey.api.telehealth.models import TelehealthStaffAvailabilityExceptions
+from odyssey.api.telehealth.models import TelehealthStaffAvailabilityExceptions, TelehealthStaffSettings
 from odyssey.tasks.periodic import remove_expired_availability_exceptions
+import pytest
 
 from .data import telehealth_exceptions_post_data
 
 current_date = datetime.now(timezone.utc).date()
 
-def test_post_staff_availability_exception(test_client):
+#Used to grant telehealth access to test client 
+@pytest.fixture(scope='function')
+def grant_telehealth_access(test_client):
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    test_client.db.session.add(staff_telehealth_access)
+    test_client.db.session.commit()
+
+    yield staff_telehealth_access
+
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.commit()
+
+def test_post_staff_availability_exception(test_client, grant_telehealth_access):
     telehealth_exceptions_post_data["bad_data_1"][0]["exception_date"] = str(current_date)
     
     response = test_client.post(
@@ -59,7 +72,7 @@ def test_post_staff_availability_exception(test_client):
     assert response.json['exceptions'][0]['label'] == telehealth_exceptions_post_data["good_data"][0]['label']
     assert response.json['exceptions'][0]['exception_date'] == str(current_date)
 
-def test_get_staff_availability_exception(test_client):
+def test_get_staff_availability_exception(test_client, grant_telehealth_access):
 
     response = test_client.get(
         f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
@@ -73,7 +86,7 @@ def test_get_staff_availability_exception(test_client):
     assert response.json[0]['label'] == telehealth_exceptions_post_data["good_data"][0]['label']
     assert response.json[0]['exception_date'] == str(current_date)
 
-def test_delete_staff_availability_exception(test_client):
+def test_delete_staff_availability_exception(test_client, grant_telehealth_access):
 
     response = test_client.delete(
         f'/telehealth/settings/staff/availability/exceptions/{test_client.staff_id}/',
@@ -91,7 +104,7 @@ def test_delete_staff_availability_exception(test_client):
     assert response.status_code == 200
     assert len(response.json) == 0
 
-def test_celery_delete_exceptions_task(test_client):
+def test_celery_delete_exceptions_task(test_client, grant_telehealth_access):
     
     telehealth_exceptions_post_data["good_data"][0]["exception_date"] = str(current_date)
     

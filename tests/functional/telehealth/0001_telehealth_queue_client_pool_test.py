@@ -66,7 +66,7 @@ def test_post_5_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_get_1_client_appointment_queue(test_client):
+def test_get_1_client_appointment_queue(test_client, provider_telehealth_access):
     for header in (test_client.staff_auth_header, test_client.client_auth_header):
         response = test_client.get(
             '/telehealth/queue/client-pool/',
@@ -89,7 +89,7 @@ def test_post_6_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_get_2_client_appointment_queue(test_client):
+def test_get_2_client_appointment_queue(test_client, provider_telehealth_access):
     for header in (test_client.staff_auth_header, test_client.client_auth_header):
         # send get request for client blood pressure on user_id = 1
         response = test_client.get(
@@ -125,7 +125,7 @@ def test_post_8_client_appointment(test_client):
 
     assert response.status_code == 201
 
-def test_get_4_client_appointment_queue(test_client):
+def test_get_4_client_appointment_queue(test_client, provider_telehealth_access):
     for header in (test_client.staff_auth_header, test_client.client_auth_header):
         # send get request for client blood pressure on user_id = 1
         response = test_client.get(
@@ -165,7 +165,7 @@ def test_get_5_client_appointment_queue(test_client):
                 response.json['queue'][0]['priority']] == [telehealth_queue_client_pool_3_post_data['target_date'], True]
         assert response.json['total_queue'] == 1
 
-def test_get_1_specific_client_appointment_queue(test_client):
+def test_get_1_specific_client_appointment_queue(test_client, provider_telehealth_access):
     for header in (test_client.staff_auth_header, test_client.client_auth_header):
         response = test_client.get(
             f'/telehealth/queue/client-pool/{test_client.client_id}/',

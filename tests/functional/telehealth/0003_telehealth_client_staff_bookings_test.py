@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 from flask.json import dumps
 from sqlalchemy import select
 
-from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffSettings
 from odyssey.api.staff.models import StaffCalendarEvents
 from tests.utils import login
 
@@ -118,8 +118,14 @@ def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_avail
     # booking fails because client is not in queue
     assert response.status_code == 400
 
-def test_get_1_staff_bookings(test_client, telehealth_staff):
+def test_get_1_staff_bookings(test_client, telehealth_staff, provider_telehealth_access):
     staff_header = login(test_client, telehealth_staff[0])
+
+    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+    staff_telehealth_access = TelehealthStaffSettings(user_id=telehealth_staff[0].user_id, provider_telehealth_access=True)
+    test_client.db.session.add(staff_telehealth_access)
+    test_client.db.session.commit()
+
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?staff_user_id={telehealth_staff[0].user_id}',
@@ -127,6 +133,8 @@ def test_get_1_staff_bookings(test_client, telehealth_staff):
         content_type='application/json')
 
     assert response.status_code == 200
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.commit()
 
 def test_get_2_client_bookings(test_client):
     response = test_client.get(
@@ -137,7 +145,13 @@ def test_get_2_client_bookings(test_client):
 
     assert response.status_code == 200
 
-def test_get_3_staff_client_bookings(test_client, telehealth_staff):
+def test_get_3_staff_client_bookings(test_client, telehealth_staff, provider_telehealth_access):
+
+    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    test_client.db.session.add(staff_telehealth_access)
+    test_client.db.session.commit()
+
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -148,8 +162,11 @@ def test_get_3_staff_client_bookings(test_client, telehealth_staff):
     assert response.status_code == 200
     assert response.json['bookings'][0]['status'] == 'Accepted'
     
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.commit()
+
 #@pytest.mark.skip('randomly failing on pipeline but not locally')
-def test_put_1_client_staff_bookings(test_client, booking):
+def test_put_1_client_staff_bookings(test_client, booking, provider_telehealth_access):
     
     chat = TelehealthChatRooms.query.filter_by(booking_id=booking.idx).one_or_none()
     assert chat.conversation_sid != None
@@ -165,7 +182,7 @@ def test_put_1_client_staff_bookings(test_client, booking):
     assert response.status_code == 201
 
 
-def test_put_confirm_client_staff_booking(test_client, booking):
+def test_put_confirm_client_staff_booking(test_client, booking, provider_telehealth_access):
     """confirm the booking from the staff and client ends. 
     Staff cannot confirm the booking
     Client will not be able to confirm booking.Booking already Confirmed"""
@@ -187,7 +204,7 @@ def test_put_confirm_client_staff_booking(test_client, booking):
     assert response.status_code == 400
 
 
-def test_put_2_client_staff_bookings(test_client, booking_function_scope):
+def test_put_2_client_staff_bookings(test_client, booking_function_scope, provider_telehealth_access):
     """
     Attempt to cancel a booking that has already started. should respond with 400
     """
@@ -206,7 +223,7 @@ def test_put_2_client_staff_bookings(test_client, booking_function_scope):
     assert response.status_code == 400
 
 
-def test_get_4_staff_client_bookings(test_client, booking):
+def test_get_4_staff_client_bookings(test_client, booking, provider_telehealth_access):
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'

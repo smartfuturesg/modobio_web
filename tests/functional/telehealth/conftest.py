@@ -65,8 +65,7 @@ def telehealth_staff(test_client):
             was_staff=True,
             is_client=False,
             email_verified=True,
-            modobio_id=f'ZW99TSVWP88{i}',
-            provider_telehealth_access=True)
+            modobio_id=f'ZW99TSVWP88{i}')
 
         test_client.db.session.add(staff)
         test_client.db.session.commit()
@@ -79,7 +78,13 @@ def telehealth_staff(test_client):
         staff_profile = StaffProfile(user_id = staff.user_id)
         test_client.db.session.add(staff_profile)
         test_client.db.session.commit()
-        
+
+        staff_telehealth_access = TelehealthStaffSettings(
+                user_id=staff.user_id, provider_telehealth_access=True
+        )
+        test_client.db.session.add(staff_telehealth_access)
+        test_client.db.session.commit()
+
         if i < 5:
             staff_role = StaffRoles(
                 user_id=staff.user_id,
@@ -287,11 +292,12 @@ def booking(test_client, payment_method):
     )
 
     if not TelehealthStaffSettings.query.filter_by(user_id = test_client.staff_id).one_or_none():
-        # Add telehealth staff settings for test staff where auto_confirm is True. 
+        # Add telehealth staff settings for test staff where auto_confirm is True and telehealth access is True. 
         staff_telehealth_settings = TelehealthStaffSettings(
             timezone='UTC',
             auto_confirm = True,
-            user_id = test_client.staff_id)
+            user_id = test_client.staff_id,
+            provider_telehealth_access=True)
 
         test_client.db.session.add(staff_telehealth_settings)
 
@@ -351,7 +357,8 @@ def staff_availabilities(test_client, telehealth_staff):
         staff_settings.append(TelehealthStaffSettings(
             user_id = staff.user_id,
             auto_confirm=True,
-            timezone = 'UTC'
+            timezone = 'UTC',
+            provider_telehealth_access=True
         ))
         for day in DAY_OF_WEEK:
             for time_id in time_inc:
