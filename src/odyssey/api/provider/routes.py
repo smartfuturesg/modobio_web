@@ -392,7 +392,7 @@ class ProviderRoleRequestsEndpoint(BaseResource):
     # Multiple organizations per practitioner possible
     __check_resource__ = False
 
-    @token_auth.login_required(user_type = ('staff_self',))
+    @token_auth.login_required(user_type = ('client', 'staff_self',))
     @responds(schema=ProviderRoleRequestsAllSchema, status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -413,7 +413,8 @@ class ProviderRoleRequestsEndpoint(BaseResource):
         role_requests = ProviderRoleRequests.query.filter_by(user_id=user_id).all()
 
         payload = {'items': role_requests, 'total_items': len(role_requests)} 
-        return
+
+        return payload
 
     @token_auth.login_required(user_type = ('client', 'staff_self'))
     @ns.doc(params={'role_id': 'Index of role to request from LookupRoles.idx'})
