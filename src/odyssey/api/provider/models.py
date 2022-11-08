@@ -13,7 +13,6 @@ class ProviderRoleRequests(BaseModelWithIdx,UserIdFkeyMixin):
 
     role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'), nullable=False)
 
-
     status = db.Column(db.String(10), nullable=False, default='inactive')
     """
     Status of the role request. Modobio staff will be responsible for
@@ -34,4 +33,4 @@ class ProviderRoleRequests(BaseModelWithIdx,UserIdFkeyMixin):
     :type: :class:`LookupRoles` instance 
     """
 
-    reviewer_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="SET NULL"), nullable=True)
+    reviewer_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="SET NULL"), nullable=True)
