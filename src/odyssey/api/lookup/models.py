@@ -1023,7 +1023,8 @@ class LookupRoles(BaseModelWithIdx):
 
     is_practitioner = db.Column(db.Boolean)
     """
-    Denotes if this role is a practioner or not.
+    DEPRECATED: 11.8.22 - use is_provider instead
+    Denotes if this role is a practitioner or not.
 
     :type: boolean
     """
@@ -1062,6 +1063,14 @@ class LookupRoles(BaseModelWithIdx):
     Notes about this role.
 
     :type: string
+    """
+
+    
+    is_provider = db.Column(db.Boolean)
+    """
+    Denotes if this role is a p or not.
+
+    :type: boolean
     """
 
 class LookupLegalDocs(BaseModelWithIdx):

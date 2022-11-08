@@ -53,7 +53,6 @@ def test_put_1_credentials(test_client):
 
     assert response.status_code == 201    
     assert credentials.status == 'Pending Verification'
-    assert credentials.want_to_practice == True
     assert credentials.state == "AZ"
     assert credentials.credential_type == "npi"
           

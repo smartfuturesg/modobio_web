@@ -25,20 +25,12 @@ from odyssey.api.staff.models import (
     StaffProfile,
     StaffCalendarEvents,
     StaffOffices)
-from odyssey.api.staff.schemas import (
-    StaffOperationalTerritoriesNestedSchema,
-    StaffProfileSchema, 
-    StaffRolesSchema,
-    StaffRecentClientsSchema,
-    StaffTokenRequestSchema,
-    StaffInternalRolesSchema)
+from odyssey.api.staff.schemas import StaffTokenRequestSchema
 from odyssey.api.user.models import (
     User,
     UserLogin,
     UserTokenHistory,
     UserProfilePictures)
-from odyssey.api.user.routes import UserLogoutApi
-from odyssey.api.user.schemas import UserSchema
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import MIN_CUSTOM_REFRESH_TOKEN_LIFETIME, MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
@@ -389,3 +381,77 @@ class ProviderOganizationAffiliationAPI(BaseResource):
         for org in organizations:
             org.org_info = org.org_info
         return organizations
+
+@ns.route('/role/requests/<int:user_id>/')
+class ProviderRoleRequestsEndpoint(BaseResource):
+    """
+    Endpoint for submitting, removing, and retrieving requests for provider roles
+
+    Provider roles are those found in the LookupRoles table and are marked as is_provider = True
+    """
+    # Multiple organizations per practitioner possible
+    __check_resource__ = False
+
+    @token_auth.login_required(user_type = ('staff_self',))
+    @responds(schema=ProviderRoleRequestsAllSchema, status_code=200, api=ns)
+    def get(self, user_id):
+        """
+        View current role requests. Only one ongoing role request is active at a time. 
+
+        Active role requests are those with a status listed as pending. All other role 
+        requests are considered completed (rejected, granted) or inactive.
+
+        Returns
+        ------- 
+        dict with all role request details for the user_id specified
+        """
+
+        # TODO
+        # bring up role requests for user_id
+        # place list in schema and return
+
+        role_requests = ProviderRoleRequests.query.filter_by(user_id=user_id).all()
+
+        payload = {'items': role_requests, 'total_items': len(role_requests)} 
+        return
+
+    @token_auth.login_required(user_type = ('client', 'staff_self'))
+    @ns.doc(params={'role_id': 'Index of role to request from LookupRoles.idx'})
+    @responds(schema=ProviderRoleRequestsAllSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """
+        Make a request for a provider role. If the user is not currently a provider, this endpoint
+        will grant provider login to the user. 
+
+        Role requests are considered pending until all required information is provided and request is
+        reviewed by a staff member. 
+        
+        """
+        user, _ = token_auth.current_user()
+        # validate role_id. Must be a provider role
+        requested_role = LookupRoles.query.filter_by(idx=request.args['role_id']).first()
+
+        if not requested_role.is_provider:
+            raise BadRequest('Requested role is not intended for providers.')
+
+        # check if there are any other pending role requests for the user_id
+        if ProviderRoleRequests.query.filter_by(user_id=user_id, status='pending').first():
+            raise BadRequest('There is already an active role request for this user.')
+
+        # grant user provider login privileges if they don't have them already
+        if not user.is_provider:
+            user.is_provider = True
+            db.session.flush()
+        
+        # create a new role request
+        role_request = ProviderRoleRequests(user_id=user_id, role_id=request.args['role_id'], status='pending')
+        db.session.add(role_request)
+
+        db.session.commit()
+        # return role requests for user_id
+        payload = {'items': [role_request], 'total_items': 1}
+
+        return payload
+
+
+        

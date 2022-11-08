@@ -65,11 +65,11 @@ BEGIN
         credential_type,
         credentials,
         status,
-        role_id,
-        want_to_practice)
+        role_id
+        )
     VALUES
-        (_user_id, _country_id, NULL, 'npi', '1296336567', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'CA', 'dea', '43218470', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'FL', 'med_lic', '21323512', 'Verified', _role_id, true);
+        (_user_id, _country_id, NULL, 'npi', '1296336567', 'Verified', _role_id),
+        (_user_id, _country_id, 'CA', 'dea', '43218470', 'Verified', _role_id),
+        (_user_id, _country_id, 'FL', 'med_lic', '21323512', 'Verified', _role_id);
 END;
 $$ LANGUAGE plpgsql;

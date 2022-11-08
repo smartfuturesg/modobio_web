@@ -76,14 +76,14 @@ BEGIN
         credential_type,
         credentials,
         status,
-        role_id,
-        want_to_practice)
+        role_id
+        )
     VALUES
-        (_user_id, _country_id, Null, 'npi', '1296336567', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'FL', 'dea', '183451435', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'CA', 'dea', '123342534', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'FL', 'med_lic', '523746512', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'CA', 'med_lic', '839547692', 'Verified', _role_id, true);
+        (_user_id, _country_id, Null, 'npi', '1296336567', 'Verified', _role_id),
+        (_user_id, _country_id, 'FL', 'dea', '183451435', 'Verified', _role_id),
+        (_user_id, _country_id, 'CA', 'dea', '123342534', 'Verified', _role_id),
+        (_user_id, _country_id, 'FL', 'med_lic', '523746512', 'Verified', _role_id),
+        (_user_id, _country_id, 'CA', 'med_lic', '839547692', 'Verified', _role_id);
 
 END;
 $$ LANGUAGE plpgsql;

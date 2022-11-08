@@ -1,6 +1,7 @@
 """Provider role requests
 ProviderRoleRequests table.
 Make role_id nullable in PractitionerCredentials
+Change LookupRoles.is_practitioner to LookupRoles.is_provider
 
 Revision ID: f81e7cbdab82
 Revises: 3669c98b6396
@@ -37,6 +38,8 @@ def upgrade():
                existing_type=sa.INTEGER(),
                nullable=True)
     op.drop_column('PractitionerCredentials', 'want_to_practice')
+    
+    op.add_column('LookupRoles', sa.Column('is_provider', sa.Boolean(), nullable=True))
     # ### end Alembic commands ###
 
 
@@ -47,4 +50,6 @@ def downgrade():
                existing_type=sa.INTEGER(),
                nullable=False)
     op.drop_table('ProviderRoleRequests')
+
+    op.drop_column('LookupRoles', 'is_provider')
     # ### end Alembic commands ###
