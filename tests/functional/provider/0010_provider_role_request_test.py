@@ -37,6 +37,35 @@ def test_provider_role_request(test_client, client_user):
     assert response.status_code == 200
     assert response.json['items'][0]["status"] == 'pending'
 
+    role_request_id = response.json['items'][0]["idx"]
+    ##
+    # change status of provider role request to inactive
+    ##
+
+    response = test_client.put(
+        f'/provider/role/requests/{client_user["user"].user_id}/?request_id={role_request_id}',
+        headers=client_user["auth_header"],
+        content_type='application/json')
+
+    role_request = ProviderRoleRequests.query.filter_by(user_id=client_user["user"].user_id).first()
+
+    assert response.status_code == 200
+    assert role_request.status == 'inactive'
+
     # delete role request
     ProviderRoleRequests.query.filter_by(user_id=client_user["user"].user_id).delete()
+
+
+def test_provider_role_request_bad(test_client, client_user):
+    """
+    request a role that is not considered a provider role
+    """
+    role_id = LookupRoles.query.filter_by(role_name='client_services').first().idx
+
+    response = test_client.post(
+        f'/provider/role/requests/{client_user["user"].user_id}/?role_id={role_id}',
+        headers=client_user["auth_header"],
+        content_type='application/json')
     
+    
+    assert response.status_code == 400
