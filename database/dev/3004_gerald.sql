@@ -6,7 +6,6 @@ DECLARE
     _team_member_c INTEGER;
     _team_member_d INTEGER;
     _team_member_e INTEGER;
-    _team_member_f INTEGER;
 
 BEGIN
 
@@ -23,17 +22,17 @@ BEGIN
         gender,
         dob)
     VALUES (
-        'client@modobio.com',
-        'TC12JASDFF12',
-        'Bernie',
-        'Focker',
+        'gerald.martinez@modobio.com',
+        'XY97KBSENZ19',
+        'Gerald',
+        'Martinez',
         false,
 		false,
         true,
         true,
         true,
         'm',
-        '1959-09-10')
+        '1995-10-08')
     RETURNING user_id INTO _user_id;
 
     INSERT INTO "UserLogin" (
@@ -67,19 +66,17 @@ BEGIN
          CURRENT_DATE + interval '1 year'
         );
 
-    -- Create a care team with two staff members.
     SELECT user_id INTO _team_member_a FROM "User"
-    WHERE email = 'name@modobio.com';
+    WHERE email = 'vilma.esparza@modobio.com';
     SELECT user_id INTO _team_member_b FROM "User"
-    WHERE email = 'pro@modobio.com';
+    WHERE email = 'louise.hogue@modobio.com';
     SELECT user_id INTO _team_member_c FROM "User"
-    WHERE email = 'doc@modobio.com';
+    WHERE email = 'justin.venturi@modobio.com';
     SELECT user_id INTO _team_member_d FROM "User"
-    WHERE email = 'diet@modobio.com';
+    WHERE email = 'dustin.king@modobio.com';
     SELECT user_id INTO _team_member_e FROM "User"
-    WHERE email = 'train@modobio.com';
-    SELECT user_id INTO _team_member_f FROM "User"
-    WHERE email = 'psych@modobio.com';
+    WHERE email = 'eleanor.heenan@modobio.com';
+
     INSERT INTO "ClientClinicalCareTeam"
         (
          user_id,
@@ -91,8 +88,7 @@ BEGIN
         (_user_id, _team_member_b, false),
         (_user_id, _team_member_c, false),
         (_user_id, _team_member_d, false),
-        (_user_id, _team_member_e, false),
-        (_user_id, _team_member_f, false);
+        (_user_id, _team_member_e, false);
 
     INSERT INTO "ClientClinicalCareTeamAuthorizations" (
         user_id,
@@ -132,14 +128,6 @@ BEGIN
         resource_id,
         status)
     SELECT _user_id, _team_member_e, resources.resource_id, 'accepted'
-    FROM "LookupClinicalCareTeamResources" AS resources;
-
-    INSERT INTO "ClientClinicalCareTeamAuthorizations" (
-        user_id,
-        team_member_user_id,
-        resource_id,
-        status)
-    SELECT _user_id, _team_member_f, resources.resource_id, 'accepted'
     FROM "LookupClinicalCareTeamResources" AS resources;
 
 END;

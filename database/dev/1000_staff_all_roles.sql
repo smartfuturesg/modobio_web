@@ -3,42 +3,65 @@ DECLARE
     _user_id INTEGER;
     _role_id INTEGER;
     _country_id INTEGER;
+
 BEGIN
-    INSERT INTO "User" (
-        email,
-        modobio_id,
-        firstname,
-        lastname,
-        is_staff,
-		was_staff,
-        is_client,
-        email_verified,
-        biological_sex_male,
-        dob)
-    VALUES (
-        'name@modobio.com',
-        'XFB1SN3GM512',
-        'First',
-        'Last',
-        true,
-		true,
-        false,
-        true,
-        true,
-        '1990-06-01')
-    RETURNING user_id INTO _user_id;
 
-    INSERT INTO "UserLogin" (
-        user_id,
-        password)
-    VALUES (
-        _user_id,
-        'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
+    INSERT INTO "User"
+        (
+         modobio_id,
+         email,
+         firstname,
+         lastname,
+         is_staff,
+         is_client,
+         biological_sex_male,
+         email_verified,
+         dob,
+         was_staff,
+         gender
+         )
+    VALUES
+        (
+         'XFB1SN3GM512',
+         'name@modobio.com',
+         'First',
+         'Last',
+         true,
+         false,
+         false,
+         true,
+         '1970-01-01',
+         true,
+         'm'
+         ) RETURNING user_id INTO _user_id;
 
-    INSERT INTO "StaffProfile" (user_id, membersince)
-    VALUES (_user_id, '2021-01-01');
+    INSERT INTO "UserLogin"
+        (
+         user_id,
+         password
+         )
+    VALUES
+        (
+         _user_id,
+         'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1'
+         );
 
-    INSERT INTO "StaffRoles" (user_id, role)
+    INSERT INTO "StaffProfile"
+        (
+         user_id,
+         membersince
+         )
+    VALUES
+        (
+         _user_id,
+         '2021-01-01'
+         );
+
+    INSERT INTO "StaffRoles"
+        (
+         user_id,
+         role
+         )
     VALUES
         (_user_id, 'system_admin'),
         (_user_id, 'staff_admin'),
@@ -79,8 +102,6 @@ BEGIN
         (_user_id, _country_id, 'CA', 'dea', '43218470', 'Verified', _role_id, true),
         (_user_id, _country_id, 'FL', 'med_lic', '21323512', 'Verified', _role_id, true);
 
-    -- Add DoseSpot credentials.
-    INSERT INTO "DoseSpotPractitionerID" (user_id, ds_user_id, ds_enrollment_status)
-    VALUES (_user_id, 227295, 'pending');
 END;
+
 $$ LANGUAGE plpgsql;

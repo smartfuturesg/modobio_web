@@ -2,10 +2,9 @@ import logging
 from flask import current_app
 import boto3
 from boto3.dynamodb.conditions import Attr
-from odyssey.api.dosespot.models import DoseSpotPractitionerID
-from odyssey.integrations.dosespot import DoseSpot
+from odyssey.integrations.active_campaign import ActiveCampaign
 
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone, date
 from celery.schedules import crontab
 from celery.signals import worker_process_init, worker_ready   
 from celery.utils.log import get_task_logger
@@ -31,6 +30,7 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import get_time_index, create_notification
 from odyssey.tasks.tasks import cancel_telehealth_appointment
+from odyssey.utils.message import send_email
 
 logger = get_task_logger(__name__)
 
@@ -338,21 +338,6 @@ def detect_practitioner_no_show():
 
 
 @celery.task()
-def get_dosespot_notifications():
-    """
-    Populate dosespot notifications for all practitioners registered on the DS platform
-    """
-    # bring up all ds practitioners
-
-    ds_practitioners = DoseSpotPractitionerID.query.all()
-    
-    for practitioner in ds_practitioners:
-        ds = DoseSpot()
-        ds.practitioner_ds_id = practitioner.ds_user_id
-        ds.notifications(practitioner.user_id) 
-
-
-@celery.task()
 def deploy_subscription_update_tasks(interval:int):
     """
     Checks for subscriptions that are near expiration and then shoots off tasks to 
@@ -483,6 +468,56 @@ def check_for_upcoming_booking_charges():
     logger.info(f'upcoming booking charges periodic task for {time_now} completed')
 
 
+@celery.task()
+def send_appointment_reminder_email():
+    logger.info(f'Finding bookings to send pre appointment reminder.')
+
+    current_time = datetime.now(timezone.utc)
+    target_datetime = current_time + timedelta(hours=6)
+    target_date = target_datetime.date()
+    target_time_idx = get_time_index(target_datetime)
+
+    # find all target bookings
+    bookings = TelehealthBookings.query.filter_by(
+        status='Accepted', target_date_utc=target_date, booking_window_id_start_time_utc=target_time_idx
+    ).all()
+
+    for booking in bookings:
+        logger.info(f'Sending pre appointment reminder to {booking.client.email}')
+        send_email(
+            'pre-appointment-reminder',
+            booking.client.email,
+            firstname=booking.client.firstname,
+            provider_firstname=booking.practitioner.firstname
+        )
+
+
+@celery.task()
+def update_ac_age_tags():
+    ac = ActiveCampaign()
+
+    users = User.query.all()
+    for user in users:
+        dob = user.dob
+        today = date.today()
+        last_week = date.today() - timedelta(weeks=1)
+        age_today = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        age_last_week = last_week.year - dob.year - ((last_week.month, last_week.day) < (dob.month, dob.day))
+
+        # check age and compare to age a week ago, place user in new age tag catergory
+        if age_today == 25 and age_last_week == 24:
+            ac.remove_tag(user.user_id, 'Age 25 -')
+            ac.add_tag(user.user_id, 'Age 25-44')
+        if age_today == 45 and age_last_week == 44:
+            ac.remove_tag(user.user_id, 'Age 25-44')
+            ac.add_tag(user.user_id, 'Age 45-64')
+        if age_today == 64 and age_last_week == 63:
+            ac.remove_tag(user.user_id, 'Age 45-64')
+            ac.add_tag(user.user_id, 'Age 64+')
+
+    logger.info(f'Age group tags have been updated')
+
+
 celery.conf.beat_schedule = {
     # look for upcoming appointments:
     'check-for-upcoming-bookings': {
@@ -509,11 +544,6 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.detect_practitioner_no_show',
         'schedule': crontab(minute='*/5')
     },
-    # dosespot notifications
-    'get_dosespot_notifications': {
-        'task': 'odyssey.tasks.periodic.get_dosespot_notifications',
-        'schedule': crontab(hour=1, minute=0)
-    },
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
         'args': (60,),
@@ -528,11 +558,22 @@ celery.conf.beat_schedule = {
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
         'task': 'odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
         'schedule': crontab(minute='*/15')
-    }
+    },
+    # appointment email reminders
+    'send_appointment_reminder_email': {
+        'task': 'odyssey.tasks.periodic.send_appointment_reminder_email',
+        'schedule': crontab(minute='*/5')
+    },
     # upcoming booking payment to be charged
-    #'check_for_upcoming_booking_charges': {
-    #    'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
-    #    'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
-    #    # off setting this slightly might theoretically smooth out the load on celery
-    #}
+    'check_for_upcoming_booking_charges': {
+        'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
+        'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
+        # off setting this slightly might theoretically smooth out the load on celery
+    },
+    # Active campaign tags (age group)
+    'update_ac_age_tags': {
+        'task': 'odyssey.tasks.periodic.update_ac_age_tags',
+        'schedule': crontab(day_of_week=0) # Run every sunday
+    }
+
 }
