@@ -455,4 +455,25 @@ class ProviderRoleRequestsEndpoint(BaseResource):
         return payload
 
 
+    @token_auth.login_required(user_type = ('client', 'staff_self'))
+    @ns.doc(params={'request_id': 'Index of role request from LookupRoles.idx'})
+    @responds(schema=ProviderRoleRequestsAllSchema, status_code=200, api=ns)
+    def put(self, user_id):
+        """
+        Update the status of a role request to inactive. This will remove the role request
+        from the review process.
+        """
+        # bring up the role request 
+        role_request = ProviderRoleRequests.query.filter_by(user_id = user_id, idx=request.args['request_id']).one_or_none()
+        if not role_request:
+            raise BadRequest('Role request does not exist.')
+
+        if role_request.status not in ('pending', 'inactive', 'rejected'):
+            raise BadRequest('Role request status cannot be changed')
+
+        role_request.status = 'inactive'
+        db.session.commit()
+
+        return
+
         
