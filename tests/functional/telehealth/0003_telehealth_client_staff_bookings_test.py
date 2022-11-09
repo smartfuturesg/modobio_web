@@ -161,6 +161,9 @@ def test_get_3_staff_client_bookings(test_client, telehealth_staff, provider_tel
 
     assert response.status_code == 200
     assert response.json['bookings'][0]['status'] == 'Accepted'
+ 
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.commit()
 
 def test_post_4_client_staff_bookings(test_client, staff_availabilities, telehealth_staff):
     """make booking without specifying a payment method nor location"""
@@ -206,9 +209,6 @@ def test_post_4_client_staff_bookings(test_client, staff_availabilities, telehea
     assert response.json.get('bookings')[0].get('consult_rate') == 0
     assert response.json.get('bookings')[0].get('client_location_id') == None
     assert response.json.get('bookings')[0].get('payment_method_id') == None
-    
-    test_client.db.session.delete(staff_telehealth_access)
-    test_client.db.session.commit()
 
 #@pytest.mark.skip('randomly failing on pipeline but not locally')
 def test_put_1_client_staff_bookings(test_client, booking, provider_telehealth_access):
