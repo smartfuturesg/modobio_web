@@ -49,7 +49,6 @@ class PractitionerCredentialsSchema(ma.SQLAlchemyAutoSchema):
     state = fields.String(validate=validate.OneOf(USSTATES_2))
     status = fields.String(validate=validate.OneOf(CREDENTIAL_STATUS) ,missing='Pending Verification')
     credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPE['medical_doctor']))
-    want_to_practice = fields.Boolean(required=False,missing=True)
     staff_role = fields.String(validate=validate.OneOf(CREDENTIAL_ROLES), required=True)
     expiration_date = fields.Date(required=False)
 
