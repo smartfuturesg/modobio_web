@@ -1339,7 +1339,6 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         # To conform to FE request
         # If the staff already has information in telehealthStaffStettings, delete it and take new payload as truth
         settings_query = TelehealthStaffSettings.query.filter_by(user_id=user_id).one_or_none()
-        old_telehealth_access = settings_query.provider_telehealth_access
         if settings_query:
             db.session.delete(settings_query)
 
@@ -1353,7 +1352,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
             # Update tzone, auto-confirm, and telehealth access in telehealth staff settings table once
             settings_data = request.parsed_obj['settings']
             settings_data.user_id = user_id
-            settings_data.provider_telehealth_access = old_telehealth_access
+            settings_data.provider_telehealth_access = True
             db.session.add(settings_data)
 
             data = {'user_id': user_id}
