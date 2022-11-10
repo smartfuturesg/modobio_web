@@ -107,7 +107,7 @@ class BasicAuth(object):
                         telehelath_settings = TelehealthStaffSettings.query.filter_by(user_id=user.user_id).one_or_none()
                         if not telehelath_settings:
                             raise Unauthorized('Provider does not have telehealth settings set.')
-                        if user.is_staff and not telehelath_settings.provider_telehealth_access:
+                        if not telehelath_settings.provider_telehealth_access:
                             raise Unauthorized('Provider does not have telehealth access')
 
                 if email_required and not user.email_verified:
