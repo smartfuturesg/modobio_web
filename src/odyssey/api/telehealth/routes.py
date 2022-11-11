@@ -1,3 +1,4 @@
+from http import client
 import uuid
 from bson import ObjectId
 from itertools import groupby
@@ -925,6 +926,20 @@ class TelehealthBookingsApi(BaseResource):
                 calendar_idx = telehealth_utils.accept_booking(booking = booking, staff_settings = staff_settings)
                 booking.staff_calendar_id = calendar_idx
 
+                booking_time = LookupBookingTimeIncrements.query. \
+                filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                booking_time = booking_time.strftime('%I:%M %p')
+                booking_date = booking.target_date.strftime('%d-%b-%Y')
+
+                send_email(
+                    'pre-appointment-confirmation',
+                    booking.client.email,
+                    firstname=booking.client.firstname,
+                    provider_firstname=booking.practitioner.firstname,
+                    booking_date=booking_date,
+                    booking_time=booking_time
+                )
+
             elif new_status == 'Canceled':
                 # both client and practitioner can change status to canceled 
                 # If staff initiated cancellation, refund should be true.
@@ -983,6 +998,20 @@ class TelehealthBookingsApi(BaseResource):
                     data['status'] = 'Accepted'
                     calendar_idx = telehealth_utils.accept_booking(booking = booking, staff_settings = staff_settings)
                     booking.staff_calendar_id = calendar_idx
+
+                    booking_time = LookupBookingTimeIncrements.query. \
+                    filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                    booking_time = booking_time.strftime('%I:%M %p')
+                    booking_date = booking.target_date.strftime('%d-%b-%Y')
+
+                    send_email(
+                        'pre-appointment-confirmation',
+                        booking.client.email,
+                        firstname=booking.client.firstname,
+                        provider_firstname=booking.practitioner.firstname,
+                        booking_date=booking_date,
+                        booking_time=booking_time
+                    )
 
             elif new_status == 'Abandoned':
                 # only client can abandon booking
