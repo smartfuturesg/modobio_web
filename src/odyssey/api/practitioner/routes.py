@@ -255,7 +255,7 @@ class PractitionerOrganizationAffiliationAPI(BaseResource):
             raise BadRequest('Invalid organization.')
         
         # verify user_id has a practitioner role (will also raise error if user_id doesn't exist or is client)
-        if True not in [role.role_info.is_practitioner for role in StaffRoles.query.filter_by(user_id=user_id).all()]:
+        if True not in [role.role_info.is_provider for role in StaffRoles.query.filter_by(user_id=user_id).all()]:
             raise BadRequest('Not a practitioner.')
         
         # verify the practitioner is not already affiliated with same organization
