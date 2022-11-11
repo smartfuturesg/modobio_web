@@ -1,4 +1,3 @@
-import pytest
 from .data import staff_office_data
 from flask.json import dumps
 

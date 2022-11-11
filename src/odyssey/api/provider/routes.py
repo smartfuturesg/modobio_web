@@ -1,34 +1,114 @@
-import logging
-logger = logging.getLogger(__name__)
 
-from flask import request, current_app, Response
+import logging
+
+from datetime import time, datetime, timedelta
+
+from flask import current_app, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest, Unauthorized
 from sqlalchemy import select
+
 from odyssey import db
-from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation, PractitionerCredentials
-from odyssey.api.practitioner.schemas import (
-    PractitionerOrganizationAffiliationSchema,
-    PractitionerConsultationRateInputSchema,
-    PractitionerCredentialsInputSchema, 
-    PractitionerCredentialsSchema,
-    PractitionerDeleteCredentialsSchema
-)
-from odyssey.api.staff.models import StaffRoles
-from odyssey.api.lookup.models import LookupCurrencies, LookupOrganizations
-from odyssey.utils.misc import check_staff_existence
-from odyssey.utils.auth import token_auth
+from odyssey.api.lookup.models import (
+    LookupTerritoriesOfOperations,
+    LookupCountriesOfOperations,
+    LookupRoles,
+    LookupOrganizations,
+    LookupCurrencies)
+from odyssey.api.provider.schemas import *
+from odyssey.api.staff.models import (
+    StaffOperationalTerritories,
+    StaffRoles,
+    StaffRecentClients,
+    StaffProfile,
+    StaffCalendarEvents,
+    StaffOffices)
+from odyssey.api.staff.schemas import (
+    StaffOperationalTerritoriesNestedSchema,
+    StaffProfileSchema, 
+    StaffRolesSchema,
+    StaffRecentClientsSchema,
+    StaffTokenRequestSchema,
+    StaffInternalRolesSchema)
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserTokenHistory,
+    UserProfilePictures)
+from odyssey.api.user.routes import UserLogoutApi
+from odyssey.api.user.schemas import UserSchema
+from odyssey.utils.auth import token_auth, basic_auth
+from odyssey.utils.base.resources import BaseResource
+from odyssey.utils.constants import MIN_CUSTOM_REFRESH_TOKEN_LIFETIME, MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
+
+from odyssey.api.staff.schemas import StaffTokenRequestSchema
 from odyssey.utils.base.resources import BaseResource
 
-ns = Namespace('practitioner', description='Operations related to practitioners')
+logger = logging.getLogger(__name__)
 
+ns = Namespace('provider', description='Operations related to providers')
+
+@ns.route('/token/')
+class ProviderToken(BaseResource):
+    """create and revoke tokens"""
+    @ns.doc(security='password', params={'refresh_token_lifetime': 'Lifetime for staff refresh token'})
+    @basic_auth.login_required(user_type=('provider',), email_required=False)
+    @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
+    def post(self):
+        """generates a token for the 'current_user' immediately after password authentication"""
+        user, user_login = basic_auth.current_user()
+
+        if not user:
+            raise Unauthorized
+
+        # bring up list of staff roles
+        access_roles = db.session.query(
+                                StaffRoles.role
+                            ).filter(
+                                StaffRoles.user_id==user.user_id
+                            ).all()
+
+        refresh_token_lifetime = request.args.get('refresh_token_lifetime', type=int)
+
+        # Handle refresh token lifetime param
+        if refresh_token_lifetime:
+            # Convert lifetime from days to hours
+            if MIN_CUSTOM_REFRESH_TOKEN_LIFETIME <= refresh_token_lifetime <= MAX_CUSTOM_REFRESH_TOKEN_LIFETIME:
+                refresh_token_lifetime *= 24
+            # Else lifetime is not in acceptable range
+            else:
+                raise BadRequest('Custom refresh token lifetime must be between 1 and 30 days.')
+
+        access_token = UserLogin.generate_token(user_type='provider', user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type='provider', user_id=user.user_id, token_type='refresh', refresh_token_lifetime=refresh_token_lifetime)
+
+        db.session.add(UserTokenHistory(user_id=user.user_id, 
+                                        refresh_token=refresh_token,
+                                        event='login',
+                                        ua_string = request.headers.get('User-Agent')))
+
+        # If a user logs in after closing the account, but within the account
+        # deletion limit, the account will be reopened and not deleted.
+        if user_login.staff_account_closed:
+            user_login.staff_account_closed = None
+            user_login.staff_account_closed_reason = None
+
+        db.session.commit()
+
+        return {'email': user.email, 
+                'firstname': user.firstname, 
+                'lastname': user.lastname, 
+                'token': access_token,
+                'refresh_token': refresh_token,
+                'user_id': user.user_id,
+                'access_roles': [item[0] for item in access_roles],
+                'email_verified': user.email_verified}
 @ns.route('/credentials/<int:user_id>/')
-@ns.deprecated
-class PractionerCredentialsEndpoint(BaseResource):
+class ProviderCredentialsEndpoint(BaseResource):
     """Endpoints for getting and updating credentials. Reroutes to provider/credentials"""
     @token_auth.login_required(user_type=('staff_self',))
-    @responds(schema=PractitionerCredentialsInputSchema,status_code=200,api=ns)
+    @responds(schema=ProviderCredentialsInputSchema,status_code=200,api=ns)
     def get(self, user_id):
         """
         GET Request for Pulling Medical Credentials for a practitioner
@@ -52,7 +132,7 @@ class PractionerCredentialsEndpoint(BaseResource):
         return {'items': query}
 
     @token_auth.login_required(user_type=('staff_self',))
-    @accepts(schema=PractitionerCredentialsInputSchema, api=ns)
+    @accepts(schema=ProviderCredentialsInputSchema, api=ns)
     @responds(status_code=201,api=ns)
     def post(self, user_id):
         """
@@ -103,7 +183,7 @@ class PractionerCredentialsEndpoint(BaseResource):
         return
 
     @token_auth.login_required(user_type=('staff_self',))
-    @accepts(schema=PractitionerCredentialsSchema, api=ns)
+    @accepts(schema=ProviderCredentialsSchema, api=ns)
     @responds(status_code=201,api=ns)
     def put(self, user_id):
         """
@@ -137,7 +217,7 @@ class PractionerCredentialsEndpoint(BaseResource):
         return
 
     @token_auth.login_required(user_type=('staff_self',))
-    @accepts(schema=PractitionerDeleteCredentialsSchema,api=ns)
+    @accepts(schema=ProviderDeleteCredentialsSchema,api=ns)
     @responds(status_code=201,api=ns)
     def delete(self, user_id):
         """
@@ -165,13 +245,13 @@ class PractionerCredentialsEndpoint(BaseResource):
 
 
 @ns.route('/consult-rates/<int:user_id>/')
-class PractitionerConsultationRates(BaseResource):
+class ProviderConsultationRates(BaseResource):
     """
     Endpoint for practitioners to GET and SET their own HOURLY rates.
     """
     @token_auth.login_required(user_type=('staff_self',))
     @accepts(api=ns)
-    @responds(schema=PractitionerConsultationRateInputSchema,status_code=200)
+    @responds(schema=ProviderConsultationRateInputSchema,status_code=200)
     def get(self,user_id):
         """
         Responds with all roles and consultation rates for provider
@@ -185,7 +265,7 @@ class PractitionerConsultationRates(BaseResource):
         return {'items': items}
     
     @token_auth.login_required(user_type = ('staff_self',))
-    @accepts(schema=PractitionerConsultationRateInputSchema,api=ns)
+    @accepts(schema=ProviderConsultationRateInputSchema,api=ns)
     @responds(status_code=201)
     def post(self,user_id):
         """
@@ -219,15 +299,15 @@ class PractitionerConsultationRates(BaseResource):
         return
 
 @ns.route('/affiliations/<int:user_id>/')
-class PractitionerOrganizationAffiliationAPI(BaseResource):
+class ProviderOganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
     """
-    # Multiple origanizations per practitioner possible
+    # Multiple organizations per practitioner possible
     __check_resource__ = False
 
     @token_auth.login_required(user_type = ('staff', 'staff_self'), staff_role = ('staff_admin',))
-    @responds(schema=PractitionerOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
+    @responds(schema=ProviderOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
         """
         Request to see the list of organizations the user_id is affiliated with
@@ -241,8 +321,8 @@ class PractitionerOrganizationAffiliationAPI(BaseResource):
 
 
     @token_auth.login_required(user_type = ('staff',), staff_role = ('staff_admin',))
-    @accepts(schema=PractitionerOrganizationAffiliationSchema, api=ns)
-    @responds(schema=PractitionerOrganizationAffiliationSchema(many=True), status_code=201, api=ns)
+    @accepts(schema=ProviderOrganizationAffiliationSchema, api=ns)
+    @responds(schema=ProviderOrganizationAffiliationSchema(many=True), status_code=201, api=ns)
     def post(self, user_id):
         """
         Request to add an organization the user_id is affiliated with
@@ -261,7 +341,7 @@ class PractitionerOrganizationAffiliationAPI(BaseResource):
         # verify the practitioner is not already affiliated with same organization
         if data.organization_idx in [org.organization_idx for org in PractitionerOrganizationAffiliation.query.filter_by(user_id=user_id).all()]:
             raise BadRequest(
-                f'Practitioner is already affiliated with organization {data.organization_idx}.')
+                f'Provider is already affiliated with organization {data.organization_idx}.')
 
         # Add an affiliation to PractitionerOrganizationAffiliation table
         data.user_id = user_id
@@ -275,7 +355,7 @@ class PractitionerOrganizationAffiliationAPI(BaseResource):
 
 
     @token_auth.login_required(user_type = ('staff',), staff_role = ('staff_admin',))
-    @responds(schema=PractitionerOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
+    @responds(schema=ProviderOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
     @ns.doc(params={'organization_idx': '(Optional) Index of organization to remove affiliation with'})
     def delete(self, user_id):
         """

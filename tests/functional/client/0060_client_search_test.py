@@ -12,14 +12,14 @@ def test_get_client_search(test_client, care_team):
     # Simple search request by modobio_id and firstname
     response = test_client.get(
         '/client/search/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 200
 
     # Search by modobio ID
     response = test_client.get(
         f'/client/search/?modobio_id={test_client.client.modobio_id}',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 200
     assert response.json['items'][0]['firstname'] == test_client.client.firstname
@@ -31,7 +31,7 @@ def test_get_client_search(test_client, care_team):
     # Search by first name
     response = test_client.get(
         f'/client/search/?firstname={test_client.client.firstname}',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 200
     assert response.json['items'][0]['firstname'] == test_client.client.firstname

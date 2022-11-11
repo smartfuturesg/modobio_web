@@ -36,6 +36,7 @@ from .utils import login
 # See database/1000_staff_all_roles.sql and database/3000_client.sql
 STAFF_EMAIL = 'name@modobio.com'
 CLIENT_EMAIL = 'client@modobio.com'
+PROVIDER_EMAIL = 'pro@modobio.com'
 
 # For care team fixture
 USER_TM = 'test_team_member_user@modobio.com'
@@ -142,6 +143,7 @@ def test_client():
             # Load the main users for testing
             client = db.session.query(User).filter_by(email=CLIENT_EMAIL).one_or_none()
             staff = db.session.query(User).filter_by(email=STAFF_EMAIL).one_or_none()
+            provider = db.session.query(User).filter_by(email=PROVIDER_EMAIL).one_or_none()
 
             # Add everything we want to pass to tests
             # into the test_client instance as parameters.
@@ -159,6 +161,11 @@ def test_client():
             tc.staff_pass = '123'
             tc.staff_auth_header = login(tc, staff, password='123')
 
+            tc.provider = provider
+            tc.provider_id = provider.user_id
+            tc.provider_pass = '123'
+            tc.provider_auth_header = login(tc, provider, password='123')
+            
             yield tc
             
             # Cleanup functions also need a live app.
@@ -211,8 +218,8 @@ def care_team(test_client):
     ------
     dict
         Dictionary containing a user_id and modobio_id for each of the newly
-        addded team members:
-        - staff_id (for name@modobio.com)
+        added team members:
+        - staff_id (for pro@modobio.com)
         - staff_modobio_id
         - client_id
         - client_modobio_id
@@ -270,8 +277,8 @@ def care_team(test_client):
 
     # Return user_ids and modobio_ids
     yield {
-        'staff_id': test_client.staff_id,
-        'staff_modobio_id': test_client.staff.modobio_id,
+        'provider_id': test_client.provider_id,
+        'provider_modobio_id': test_client.provider.modobio_id,
         'client_id': tm_client.user_id,
         'client_modobio_id': tm_client.modobio_id,
         'non_user_id': tm_non_user.user_id,
@@ -324,7 +331,7 @@ def booking_function_scope(test_client):
     test_client.db.session.flush()
 
     # simulates logged-in user accepting a booking. Necessary to satisfy background process: telehealth.models.add_booking_status_history
-    g.flask_httpauth_user = (test_client.staff, UserLogin.query.filter_by(user_id = test_client.staff_id).one_or_none())
+    g.flask_httpauth_user = (test_client.provider, UserLogin.query.filter_by(user_id = test_client.provider_id).one_or_none())
 
     # make a telehealth booking by direct db call
     # booking is made less than 10 minutes out from the current time
@@ -350,7 +357,7 @@ def booking_function_scope(test_client):
         booking_end_idx = booking_start_idx + 3
 
     booking = TelehealthBookings(
-        staff_user_id = test_client.staff_id,
+        staff_user_id = test_client.provider_id,
         client_user_id = test_client.client_id,
         target_date = target_datetime.date(),
         target_date_utc = target_datetime.date(),

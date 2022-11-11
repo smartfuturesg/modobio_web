@@ -504,7 +504,7 @@ class Clients(BaseResource):
                 'phone': 'phone number to search',
                 'dob': 'date of birth to search',
                 'modobio_id': 'modobio id to search'})
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff','provider'))
     @responds(schema=ClientSearchOutSchema, api=ns)
     def get(self):
         """returns list of clients given query parameters,"""
@@ -1419,7 +1419,7 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
     Temporary members are not considered in a user's maximum allowed team members limit (20).
     They will lose access 180 hours after having been added to a user's care team.
     """
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @accepts(schema=ClinicalCareTeamTemporaryMembersSchema, api=ns)
     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1465,7 +1465,7 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
 
         return {"care_team": current_team, "total_items": len(current_team)}
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('client',))
     @ns.doc(params={'team_member_user_id': 'User id of the member to make permanent.'})
     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
     def put(self, user_id):
@@ -1558,13 +1558,13 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
     There are 2 contexts which this API can be accessed:
         - client (self): client is editing and viewing their own care team settings
             -POST,GET,PUT,DELETE access
-        - staff: staff user is requesting to have resource access
+        - provider: provider user is requesting to have resource access
             -POST, limited access
 
     Client users not accessing their own resource authorization are not allowed to use this endpoint.
 
-    More on staff access:
-        Staff may request resource authorization though the POST method. Resource request is logged but not yet verified until the 
+    More on provider access:
+        provider may request resource authorization though the POST method. Resource request is logged but not yet verified until the 
         client themselves makes a PUT request to verify the resource access. 
         
     Adding current modobio users to the care team:
@@ -1574,9 +1574,9 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
 
     Care team resources are added by resource_id.    
-    The available options can be foundby using the /lookup/care-team/ehr-resources/ (GET) API. 
+    The available options can be found by using the /lookup/care-team/ehr-resources/ (GET) API. 
     """
-    @token_auth.login_required(user_type=('client', 'staff'))
+    @token_auth.login_required(user_type=('client', 'provider'))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     @responds(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1758,6 +1758,7 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
 @ns.route('/drinks/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
+@ns.deprecated
 class ClientDrinksApi(BaseResource):
     """
     Endpoints related to nutritional beverages that are assigned to clients.
@@ -1765,7 +1766,7 @@ class ClientDrinksApi(BaseResource):
     # Multiple drinks per user, allow multiple POSTs
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
+    @token_auth.login_required(user_type=('provider',), staff_role=('medical_doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1791,7 +1792,7 @@ class ClientDrinksApi(BaseResource):
 
         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
     
-    @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
+    @token_auth.login_required(user_type=('provider',), staff_role=('medical_doctor', 'nutritionist'))
     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
     def delete(self, user_id):
         """
@@ -1816,7 +1817,6 @@ class ClientMobileSettingsApi(BaseResource):
     @responds(api=ns, status_code=201)
     def post(self, user_id):
         """ Set a client's mobile settings for the first time. """
-        self.check_user(user_id, user_type='client')
 
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
         if settings:
@@ -1852,8 +1852,6 @@ class ClientMobileSettingsApi(BaseResource):
     def get(self, user_id):
         """ Returns the mobile settings that a client has set. """
 
-        self.check_user(user_id, user_type='client')
-
         gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
         # TODO: push_notification_types deprecated
@@ -1876,7 +1874,6 @@ class ClientMobileSettingsApi(BaseResource):
     @responds(api=ns, status_code=201)
     def put(self, user_id):
         """ Update a client's mobile settings. """
-        self.check_user(user_id, user_type='client')
 
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
@@ -1945,7 +1942,6 @@ class ClientHeightEndpoint(BaseResource):
         height : float
             Height of the client in centimeters.
         """
-        self.check_user(user_id, user_type='client')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1956,7 +1952,7 @@ class ClientHeightEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', 'staff'))
+    @token_auth.login_required(user_type=('client', 'provider'))
     @responds(schema=ClientHeightSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """ All height measurements and dates.
@@ -1966,7 +1962,6 @@ class ClientHeightEndpoint(BaseResource):
         dict
             Dict of date-height pairs. Height is in centimeters.
         """
-        self.check_user(user_id, user_type='client')
 
         return ClientHeight.query.filter_by(user_id=user_id).all()
 
@@ -2001,7 +1996,7 @@ class ClientWeightEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', 'staff'))
+    @token_auth.login_required(user_type=('client', 'provider'))
     @responds(schema=ClientWeightSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """ All weight measurements and dates.
@@ -2011,7 +2006,6 @@ class ClientWeightEndpoint(BaseResource):
         dict
             Dict of date-weight pairs. Weight is in kilograms.
         """
-        self.check_user(user_id, user_type='client')
 
         return ClientWeight.query.filter_by(user_id=user_id).all()
 
@@ -2046,7 +2040,7 @@ class ClientWaistSizeEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', 'staff'))
+    @token_auth.login_required(user_type=('client', 'provider'))
     @responds(schema=ClientWaistSizeSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """ All waist size measurements and dates.
@@ -2110,7 +2104,7 @@ class ClientWeightEndpoint(BaseResource):
         db.session.commit()
         return request.parsed_obj
 
-    @token_auth.login_required(user_type=('client', 'staff'))
+    @token_auth.login_required(user_type=('client', 'provider'))
     @responds(schema=ClientFertilitySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """ All fertility status updates.
@@ -2237,13 +2231,12 @@ class ClientDefaultHealthMetricApi(BaseResource):
 @ns.doc(params={'user_id': 'User ID number'})
 class ClientRaceAndEthnicityApi(BaseResource):
     """
-    Endpoint for returning viewing and editing informations about a client's race and ethnicity
+    Endpoint for returning viewing and editing information about a client's race and ethnicity
     information.
     """
-    @token_auth.login_required()
+    @token_auth.login_required(user_type=('client','provider'))
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
-        self.check_user(user_id, user_type='client')
 
         res = db.session.query(ClientRaceAndEthnicity.is_client_mother, LookupRaces.race_id, LookupRaces.race_name) \
             .join(LookupRaces, LookupRaces.race_id == ClientRaceAndEthnicity.race_id) \
@@ -2251,7 +2244,7 @@ class ClientRaceAndEthnicityApi(BaseResource):
         
         return res
 
-    @token_auth.login_required()
+    @token_auth.login_required(user_type = ('client',))
     @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
     def put(self, user_id):

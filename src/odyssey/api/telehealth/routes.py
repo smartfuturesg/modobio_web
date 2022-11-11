@@ -60,7 +60,8 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
-    check_client_existence, 
+    check_client_existence,
+    check_provider_existence, 
     check_staff_existence,
     check_user_existence,
     create_notification
@@ -167,7 +168,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         token, video_room_sid = twilio_obj.create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
         meeting_room.sid = video_room_sid
 
-        if g.user_type == 'staff':
+        if g.user_type == 'provider':
             meeting_room.staff_access_token = token
 
 
@@ -190,7 +191,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
-        if g.user_type == 'staff':
+        if g.user_type == 'provider':
             pn = PushNotification()
 
             # TODO: at the moment only Apple is supported. When Android is needed,
@@ -682,7 +683,7 @@ class TelehealthBookingsApi(BaseResource):
         if not staff_user_id:
             raise BadRequest('Missing practitioner ID.')    
         # Check staff existence
-        self.check_user(staff_user_id, user_type='staff')
+        self.check_user(staff_user_id, user_type='provider')
         
         if client_user_id == staff_user_id:
             raise BadRequest('Staff user id cannot be the same as client user id.')
@@ -1075,7 +1076,7 @@ class TelehealthBookingsApi(BaseResource):
 @ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
 class ProvisionMeetingRooms(BaseResource):
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('provider',))
     @responds(schema = TelehealthMeetingRoomSchema, status_code=201, api=ns)
     def post(self, user_id):
         """
@@ -1241,7 +1242,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
         """
         # grab staff availability
-        check_staff_existence(user_id)
+        check_provider_existence(user_id)
         # Grab the staff's availability and sorted by booking_window_id AND day_of_week
         # Both of the sorts are necessary for this conversion
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
@@ -1297,7 +1298,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
     @responds(schema=TelehealthStaffAvailabilityConflictSchema, api=ns, status_code=201)
     def post(self,user_id):
@@ -1325,8 +1326,6 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         1, 'Monday', 11
         1, 'Monday', 12
         """
-        # Detect if the staff exists
-        check_staff_existence(user_id)
 
         # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
@@ -1496,7 +1495,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         Add new availability exception. Start and end window_ids should be in reference to UTC.
         To determine the correct window_ids, please see /lookup/telehealth/booking-increments/.
         """
-        check_user_existence(user_id, user_type='staff')
+        check_user_existence(user_id, user_type='provider')
         current_date = datetime.now(tz.UTC).date()
 
         conflicts = []
@@ -1585,14 +1584,14 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
             'conflicts': conflicts
         }
     
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('provider',))
     @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         View availability exceptions. start and end window_ids are in reference to UTC.
         To convert window_ids to real time please see /lookup/telehealth/booking-increments/.
         """
-        check_user_existence(user_id, user_type='staff')
+        check_user_existence(user_id, user_type='provider')
         
         exceptions = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=user_id).all()
         formatted_exceptions = []
@@ -2200,7 +2199,7 @@ class TelehealthAllChatRoomApi(BaseResource):
                 where(TelehealthChatRooms.client_user_id==user_id)
             query = db.session.execute(stmt).all()
             conversations = [dict(zip(('conversation','staff_user'), dat)) for dat in query ]
-        elif user_type == 'staff':
+        elif user_type == 'provider':
             stmt = select(TelehealthChatRooms, User). \
                 join(User, User.user_id == TelehealthChatRooms.client_user_id).\
                 where(TelehealthChatRooms.staff_user_id==user_id)
@@ -2243,7 +2242,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
     """
     API for completing bookings
     """
-    @token_auth.login_required(user_type=('staff','client'))
+    @token_auth.login_required(user_type=('provider','client'))
     @responds(api=ns, status_code=200)
     def put(self, booking_id):
         """

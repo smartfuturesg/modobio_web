@@ -121,6 +121,9 @@ class User(db.Model):
     Denotes if this user was ever a staff member. This is important to retain necessary staff info 
     even if a user has deleted their staff account and then later deletes their client account.
 
+    This flag is also related to providers. If a user ever has User.is_provider set to true, then
+    we will retain that user's provider account. 
+
     :type: boolean
     """
 
@@ -179,6 +182,13 @@ class User(db.Model):
     User date of birth.
 
     :type: :class:`datetime.date`
+    """
+
+    is_provider = db.Column(db.Boolean, nullable=False, server_default='false')
+    """
+    Flags if the user is a provider
+
+    :type: boolean
     """
 
     gender = db.Column(db.String(1))
