@@ -105,7 +105,6 @@ class ProviderToken(BaseResource):
                 'access_roles': [item[0] for item in access_roles],
                 'email_verified': user.email_verified}
 @ns.route('/credentials/<int:user_id>/')
-@ns.deprecated
 class ProviderCredentialsEndpoint(BaseResource):
     """Endpoints for getting and updating credentials. Reroutes to provider/credentials"""
     @token_auth.login_required(user_type=('staff_self',))
@@ -300,7 +299,7 @@ class ProviderConsultationRates(BaseResource):
         return
 
 @ns.route('/affiliations/<int:user_id>/')
-class PractitionerOganizationAffiliationAPI(BaseResource):
+class ProviderOganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
     """
