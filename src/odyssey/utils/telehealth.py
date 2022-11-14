@@ -120,16 +120,20 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
             .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                     .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
                         .join(User, User.user_id == TelehealthStaffAvailability.user_id) \
-                            .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
-                            StaffRoles.consult_rate != None)
+                            .join(TelehealthStaffSettings, TelehealthStaffSettings.user_id == TelehealthStaffAvailability.user_id) \
+                                .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
+                                StaffRoles.consult_rate != None,
+                                TelehealthStaffSettings.provider_telehealth_access == True)
         if location:
             query = query.filter(PractitionerCredentials.state == location)
     else:
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
             .join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id) \
                 .join(User, User.user_id == TelehealthStaffAvailability.user_id) \
+                    .join(TelehealthStaffSettings, TelehealthStaffSettings.user_id == TelehealthStaffAvailability.user_id) \
                     .filter(StaffRoles.consult_rate != None,
-                    StaffRoles.role == q_request.profession_type)
+                    StaffRoles.role == q_request.profession_type, 
+                    TelehealthStaffSettings.provider_telehealth_access == True)
     
     # if we need to check for gender
     if q_request.medical_gender != 'np':

@@ -715,3 +715,10 @@ class TelehealthStaffSettings(BaseModel):
 
     :type: :class:`TelehealthStaffAvailability` instance list
     """
+
+    provider_telehealth_access = db.Column(db.Boolean, nullable=True, default=False)
+    """
+    Flag whether staff provider has access to telehealth system or not.
+
+    :type: boolean
+    """

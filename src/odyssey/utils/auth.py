@@ -26,7 +26,7 @@ class BasicAuth(object):
         self.scheme = scheme
         self.header = header
 
-    def login_required(self, f=None, user_type=('staff','client', 'provider'), staff_role=None, email_required=True, resources = ()):
+    def login_required(self, f=None, user_type=('staff','client', 'provider'), staff_role=None, email_required=True, resources = (), check_staff_telehealth_access=False):
         ''' The login_required method is the main method that we will be using
             for authenticating both tokens and basic authorizations.
             This method decorates each CRUD request and verifies the person
@@ -99,6 +99,16 @@ class BasicAuth(object):
                 
                 if user in (False, None):
                     raise Unauthorized
+
+                if check_staff_telehealth_access:
+                    if user_context == 'staff':
+                        from odyssey.api.telehealth.models import TelehealthStaffSettings
+
+                        telehelath_settings = TelehealthStaffSettings.query.filter_by(user_id=user.user_id).one_or_none()
+                        if not telehelath_settings:
+                            raise Unauthorized('Provider does not have telehealth settings set.')
+                        if not telehelath_settings.provider_telehealth_access:
+                            raise Unauthorized('Provider does not have telehealth access')
 
                 if email_required and not user.email_verified:
                     raise BadRequest('Please verify your email address.')
