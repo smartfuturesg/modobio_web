@@ -56,7 +56,7 @@ from odyssey.integrations.apple import AppStore
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME, PROVIDER_ROLES, STAFF_ROLES
 from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import email_domain_blacklisted, send_email
@@ -120,7 +120,7 @@ class ApiUser(BaseResource):
 
 @ns.route('/staff/')
 class NewStaffUser(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin', 'system_admin', 'client_services'))
     @accepts(schema=NewStaffUserSchema, api=ns)
     @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
     def post(self):
@@ -154,10 +154,14 @@ class NewStaffUser(BaseResource):
 
         staff_info = request.json.get('staff_info')
 
+        # validate requested roles. Assign user as staff, provider or both
+        is_provider = True if any(role in PROVIDER_ROLES for role in staff_info.get('access_roles', [])) else False
+        is_staff = True if any(role in STAFF_ROLES for role in staff_info.get('access_roles', [])) else False
+        
         user = User.query.filter(User.email.ilike(email)).first()
         if user:
-            if user.is_staff:
-                # user account already exists for this email and is already a staff account
+            if user.is_staff or user.is_provider:
+                # user account already exists for this email and is already a staff/provider account
                 raise BadRequest('Email address {email} already exists.')
 
             elif user.is_client == False and user.is_staff == False:
@@ -173,7 +177,8 @@ class NewStaffUser(BaseResource):
                 
                 del user_info['password']
                 user_info['is_client'] = False
-                user_info['is_staff'] = True
+                user_info['is_staff'] = is_staff
+                user_info['is_provider'] = is_provider
                 user_info['was_staff'] = True
                 user.update(user_info)
                 
@@ -186,7 +191,7 @@ class NewStaffUser(BaseResource):
                 db.session.flush()
                 verify_email = True
             else:
-                #user account exists but only the client portion of the account is defined
+                # user account exists but only the client portion of the account is defined
                 user.is_staff = True
                 user.was_staff = True
                 del user_info['password']
@@ -215,7 +220,8 @@ class NewStaffUser(BaseResource):
             del user_info['password']
             
             user_info["is_client"] = False
-            user_info["is_staff"] = True
+            user_info['is_staff'] = is_staff
+            user_info['is_provider'] = is_provider
             user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables

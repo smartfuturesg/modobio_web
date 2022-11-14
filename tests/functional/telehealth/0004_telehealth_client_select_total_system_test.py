@@ -399,7 +399,7 @@ def test_full_system_with_settings(test_client, telehealth_staff, provider_teleh
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
         f'&staff_user_id={telehealth_staff[0].user_id}',
-        headers=test_client.staff_auth_header,
+        headers=staff_login,
         content_type='application/json')
     for booking in response.json['bookings']:
         if booking['booking_id'] == booking_id:
@@ -441,7 +441,7 @@ def test_booking_start_and_complete(test_client, booking_function_scope):
     # start telehealth call as a staff member
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 200
 
@@ -450,7 +450,7 @@ def test_booking_start_and_complete(test_client, booking_function_scope):
     ###
     response = test_client.put(
         f'/telehealth/bookings/complete/{booking_function_scope.idx}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 200
 
@@ -467,7 +467,7 @@ def test_booking_start_fail(test_client, booking_function_scope):
   
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
     
     assert response.status_code == 400
     
@@ -483,7 +483,7 @@ def test_booking_start_fail(test_client, booking_function_scope):
     test_client.db.session.flush()
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
     
     assert response.status_code == 400   
     
@@ -503,7 +503,7 @@ def test_booking_start_fail(test_client, booking_function_scope):
 
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 400
     
@@ -513,7 +513,7 @@ def test_booking_start_fail(test_client, booking_function_scope):
     
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
 
     assert response.status_code == 400
 
@@ -526,7 +526,7 @@ def test_cleanup_unended_call(test_client, booking_function_scope):
     
     response = test_client.get(
         f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.staff_auth_header)
+        headers=test_client.provider_auth_header)
     
     assert response.status_code == 200
     assert booking_function_scope.status == 'In Progress'

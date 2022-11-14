@@ -61,7 +61,8 @@ def telehealth_staff(test_client):
             lastname='Stafferson',
             email=f'staff{i}@example.com',
             phone_number=f'922222222{i}',
-            is_staff=True,
+            is_staff=False,
+            is_provider=True,
             was_staff=True,
             is_client=False,
             email_verified=True,
@@ -156,12 +157,12 @@ def staff_credentials(test_client):
         StaffRoles
         .query
         .filter_by(
-            user_id=test_client.staff_id,
+            user_id=test_client.provider_id,
             role='medical_doctor')
         .one_or_none())
 
     creds = PractitionerCredentials(
-        user_id=test_client.staff_id,
+        user_id=test_client.provider_id,
         country_id=1,
         state='FL',
         credential_type='NPI',
@@ -185,7 +186,7 @@ def staff_consult_rate(test_client):
         StaffRoles
         .query
         .filter_by(
-            user_id=test_client.staff_id,
+            user_id=test_client.provider_id,
             role='medical_doctor')
         .one_or_none())
     
@@ -204,12 +205,12 @@ def staff_territory(test_client):
         StaffRoles
         .query
         .filter_by(
-            user_id=test_client.staff_id,
+            user_id=test_client.provider_id,
             role='medical_doctor')
         .one_or_none())
 
     territory = StaffOperationalTerritories(
-        user_id=test_client.staff_id,
+        user_id=test_client.provider_id,
         role_id=role.idx,
         operational_territory_id=1)
     test_client.db.session.add(territory)
@@ -248,7 +249,7 @@ def booking(test_client, payment_method):
     The Twilio section has its own bookings fixture.
     """
     # simulates logged-in user accepting a booking. Necessary to satisfy background process: telehealth.models.add_booking_status_history
-    g.flask_httpauth_user = (test_client.staff, UserLogin.query.filter_by(user_id = test_client.staff_id).one_or_none())
+    g.flask_httpauth_user = (test_client.provider, UserLogin.query.filter_by(user_id = test_client.provider_id).one_or_none())
 
     # make a telehealth booking by direct db call
     # booking is made with minimum lead time
@@ -273,7 +274,7 @@ def booking(test_client, payment_method):
 
     bk = TelehealthBookings(
         client_user_id=test_client.client_id,
-        staff_user_id=test_client.staff_id,
+        staff_user_id=test_client.provider_id,
         profession_type='medical_doctor',
         target_date = target_datetime.date(),
         target_date_utc = target_datetime.date(),
@@ -291,12 +292,12 @@ def booking(test_client, payment_method):
         consult_rate = 15.00
     )
 
-    if not TelehealthStaffSettings.query.filter_by(user_id = test_client.staff_id).one_or_none():
-        # Add telehealth staff settings for test staff where auto_confirm is True and telehealth access is True. 
+    if not TelehealthStaffSettings.query.filter_by(user_id = test_client.provider_id).one_or_none():
+        # Add telehealth staff settings for test staff where auto_confirm is True. 
         staff_telehealth_settings = TelehealthStaffSettings(
             timezone='UTC',
             auto_confirm = True,
-            user_id = test_client.staff_id,
+            user_id = test_client.provider_id, 
             provider_telehealth_access=True)
 
         test_client.db.session.add(staff_telehealth_settings)
@@ -390,7 +391,7 @@ def upcoming_bookings(test_client, payment_method):
     This fixture will create 3 bookings within the next 2 hours and 2 bookings after this time frame.
     """
     # simulates logged-in user accepting a booking. Necessary to satisfy background process: telehealth.models.add_booking_status_history
-    g.flask_httpauth_user = (test_client.staff, UserLogin.query.filter_by(user_id = test_client.staff_id).one_or_none())
+    g.flask_httpauth_user = (test_client.provider, UserLogin.query.filter_by(user_id = test_client.provider_id).one_or_none())
 
     intervals = [(0,30),(1,0),(1,30),(2,30),(5,0)]
     bookings = []
@@ -416,7 +417,7 @@ def upcoming_bookings(test_client, payment_method):
     
         bk = TelehealthBookings(
             client_user_id=test_client.client_id,
-            staff_user_id=test_client.staff_id,
+            staff_user_id=test_client.provider_id,
             profession_type='medical_doctor',
             target_date = target_datetime.date(),
             target_date_utc = target_datetime.date(),

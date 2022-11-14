@@ -9,8 +9,8 @@ def test_get_booking_by_date_time(test_client, booking_function_scope, provider_
     # change the timing of the call so that it has already ended
 
     response = test_client.get(
-        f'/telehealth/bookings/?staff_user_id={test_client.staff_id}&target_date={str(booking_function_scope.target_date_utc)}',
-        headers=test_client.staff_auth_header,
+        f'/telehealth/bookings/?staff_user_id={test_client.provider_id}&target_date={str(booking_function_scope.target_date_utc)}',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
     
     booking_dates = [booking['target_date_utc'] for booking in response.json.get('bookings') ]
@@ -18,8 +18,8 @@ def test_get_booking_by_date_time(test_client, booking_function_scope, provider_
     assert all([booking_date == str(booking_function_scope.target_date_utc) for booking_date in booking_dates])
     
     response = test_client.get(
-        f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&target_date={'1977-05-25'}",
-        headers=test_client.staff_auth_header,
+        f"/telehealth/bookings/?staff_user_id={test_client.provider_id}&target_date={'1977-05-25'}",
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     booking_dates = [booking['target_date_utc'] for booking in response.json.get('bookings') ]
@@ -30,8 +30,8 @@ def test_get_booking_by_status(test_client, booking_function_scope, provider_tel
     # change the timing of the call so that it has already ended
 
     response = test_client.get(
-        f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&status={'Accepted'}",
-        headers=test_client.staff_auth_header,
+        f"/telehealth/bookings/?staff_user_id={test_client.provider_id}&status={'Accepted'}",
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     booking_statuss = [booking['status_history'][0]['status'] for booking in response.json.get('bookings') ]
@@ -39,8 +39,8 @@ def test_get_booking_by_status(test_client, booking_function_scope, provider_tel
     assert all([booking_status == 'Accepted' for booking_status in booking_statuss])
 
     response = test_client.get(
-        f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&status={'Canceled'}",
-        headers=test_client.staff_auth_header,
+        f"/telehealth/bookings/?staff_user_id={test_client.provider_id}&status={'Canceled'}",
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     booking_statuss = [booking['status_history'][0]['status'] for booking in response.json.get('bookings') ]
@@ -76,16 +76,16 @@ def test_get_booking_by_order(test_client, booking_function_scope, provider_tele
 
     # order by date ascending
     response = test_client.get(
-        f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&order=date_asc",
-        headers=test_client.staff_auth_header,
+        f"/telehealth/bookings/?staff_user_id={test_client.provider_id}&order=date_asc",
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     bookings_ascending = [booking['target_date_utc'] for booking in response.json.get('bookings')]
 
     # order by date descending
     response = test_client.get(
-        f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&order=date_desc",
-        headers=test_client.staff_auth_header,
+        f"/telehealth/bookings/?staff_user_id={test_client.provider_id}&order=date_desc",
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     bookings_descending = [booking['target_date_utc'] for booking in response.json.get('bookings')]
@@ -93,8 +93,8 @@ def test_get_booking_by_order(test_client, booking_function_scope, provider_tele
 
     # order by most recent booking
     response = test_client.get(
-        f"/telehealth/bookings/?staff_user_id={test_client.staff_id}&order=date_recent",
-        headers=test_client.staff_auth_header,
+        f"/telehealth/bookings/?staff_user_id={test_client.provider_id}&order=date_recent",
+        headers=test_client.provider_auth_header,
         content_type='application/json')
     
     bookings_recent = [booking['target_date_utc'] for booking in response.json.get('bookings')]

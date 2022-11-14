@@ -1,9 +1,6 @@
 DO $$
 DECLARE
     _user_id INTEGER;
-    _role_id INTEGER;
-    _country_id INTEGER;
-
 BEGIN
 
     INSERT INTO "User"
@@ -66,41 +63,7 @@ BEGIN
         (_user_id, 'system_admin'),
         (_user_id, 'staff_admin'),
         (_user_id, 'client_services'),
-        (_user_id, 'medical_doctor'),
-        (_user_id, 'therapist'),
-        (_user_id, 'trainer'),
-        (_user_id, 'dietitian'),
         (_user_id, 'community_manager');
-
-    -- NOTE: StaffOperationalTerritories is obsolete, but will be kept
-    -- until we can safely remove it. PractitionerCredentials will take
-    -- its place, so it is also filled out here
-    SELECT idx INTO _role_id FROM "StaffRoles"
-    WHERE role = 'medical_doctor' AND user_id = _user_id;
-
-    SELECT idx INTO _country_id FROM "LookupCountriesOfOperations"
-    WHERE LOWER(country) = 'usa';
-
-    INSERT INTO "StaffOperationalTerritories" (
-        user_id,
-        operational_territory_id,
-        role_id)
-    SELECT _user_id, idx, _role_id
-    FROM "LookupTerritoriesOfOperations";
-
-    INSERT INTO "PractitionerCredentials" (
-        user_id,
-        country_id,
-        state,
-        credential_type,
-        credentials,
-        status,
-        role_id,
-        want_to_practice)
-    VALUES
-        (_user_id, _country_id, NULL, 'npi', '1296336567', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'CA', 'dea', '43218470', 'Verified', _role_id, true),
-        (_user_id, _country_id, 'FL', 'med_lic', '21323512', 'Verified', _role_id, true);
 
 END;
 
