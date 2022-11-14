@@ -36,7 +36,6 @@ def test_put_user_subscription(test_client):
         headers=test_client.client_auth_header,
         data=dumps(users_subscription_data),
         content_type='application/json')
-
     # The transaction_id being used will be moving from valid to invalid as we test this feature
     # 201 means the requested transaction_id is active on the applestore. 
     # 400 indicates the transaction_is is tied to an inactive subscription and
