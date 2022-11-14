@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.api.user.models import User
 logger = logging.getLogger(__name__)
 
 from flask import request, current_app, Response
@@ -15,6 +17,8 @@ from odyssey.api.practitioner.schemas import (
     PractitionerCredentialsSchema,
     PractitionerDeleteCredentialsSchema
 )
+from odyssey.api.telehealth.schemas import TelehealthStaffSettingsSchema
+from odyssey.api.telehealth.models import TelehealthStaffSettings
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.lookup.models import LookupCurrencies, LookupOrganizations
 from odyssey.utils.misc import check_staff_existence
@@ -307,3 +311,41 @@ class PractitionerOrganizationAffiliationAPI(BaseResource):
         for org in organizations:
             org.org_info = org.org_info
         return organizations
+
+
+@ns.route('/telehealth-activation/<int:user_id>/')
+class PractitionerTelehealthActivationEndpoint(BaseResource):
+    """
+    Activate or deactivate telehealth for providers.
+    """
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(schema=TelehealthStaffSettingsSchema(only=['provider_telehealth_access']),status_code=200)
+    def get(self, user_id):
+        
+        telehealth_settings = TelehealthStaffSettings.query.filter_by(user_id=user_id).one_or_none()
+        if not telehealth_settings:
+            #User has no telehealth settting set, therefore has no telehalth access
+            return {'provider_telehealth_access': False}
+
+        return telehealth_settings
+        
+    @token_auth.login_required(user_type=('staff',), staff_role=('community_manager',))
+    @accepts(schema=TelehealthStaffSettingsSchema(only=['provider_telehealth_access']))
+    @responds(schema=TelehealthStaffSettingsSchema(only=['provider_telehealth_access']), status_code=200)
+    def put(self, user_id):
+        user = self.check_user(user_id, user_type='staff')
+
+        #update telehealth access flag
+        telehalth_access_flag = request.json.get('provider_telehealth_access')
+        telehealth_settings = TelehealthStaffSettings.query.filter_by(user_id=user.user_id).one_or_none()
+        if not telehealth_settings:
+            #Create telehealth settings with default values and provided flag
+            telehealth_settings = TelehealthStaffSettings(
+                user_id=user.user_id, provider_telehealth_access=telehalth_access_flag
+                )
+            db.session.add(telehealth_settings)
+        else:
+            telehealth_settings.provider_telehealth_access = telehalth_access_flag
+        db.session.commit()
+
+        return telehealth_settings
