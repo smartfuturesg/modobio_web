@@ -1,7 +1,7 @@
 """Add provider_telehealth_access field to TelehealthSettings table
 
 Revision ID: ad7334aab63b
-Revises: a2cd76a0affa
+Revises: 3669c98b6396
 Create Date: 2022-11-02 10:07:32.995389
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'ad7334aab63b'
-down_revision = 'a2cd76a0affa'
+down_revision = '3669c98b6396'
 branch_labels = None
 depends_on = None
 
