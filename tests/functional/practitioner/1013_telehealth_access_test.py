@@ -2,7 +2,7 @@ from flask.json import dumps
 from odyssey.api.telehealth.models import TelehealthStaffSettings
 
 
-def test_get_telehealth_activation(test_client, provider_telehealth_access):
+def test_get_telehealth_activation(test_client, staff_telehealth_access):
     staff_settings = TelehealthStaffSettings.query.filter_by(user_id=test_client.staff_id).one_or_none()
 
     response = test_client.get(
@@ -13,7 +13,7 @@ def test_get_telehealth_activation(test_client, provider_telehealth_access):
     assert response.json['provider_telehealth_access'] == staff_settings.provider_telehealth_access
     assert response.status_code == 200
 
-def test_update_telehealth_activation(test_client, provider_telehealth_access):
+def test_update_telehealth_activation(test_client, staff_telehealth_access):
     staff_settings = TelehealthStaffSettings.query.filter_by(user_id=test_client.staff_id).one_or_none()
 
     previous_telehealth_access_flag = staff_settings.provider_telehealth_access
