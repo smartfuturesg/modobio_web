@@ -434,7 +434,7 @@ def test_full_system_with_settings(test_client, telehealth_staff, provider_teleh
 
 def test_booking_start_and_complete(test_client, booking_function_scope):
     #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
-    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access=True)
     test_client.db.session.add(staff_telehealth_access)
     test_client.db.session.commit()
 
@@ -520,7 +520,7 @@ def test_booking_start_fail(test_client, booking_function_scope):
 
 def test_cleanup_unended_call(test_client, booking_function_scope):
 
-    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access = True)
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access = True)
     test_client.db.session.add(staff_telehealth_access)
     test_client.db.session.commit()
     

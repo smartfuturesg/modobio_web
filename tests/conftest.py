@@ -189,13 +189,27 @@ def test_client():
                 'Quiet': True}
             bucket.delete_objects(Delete=delete)
 
-#Used to grant telehealth access to test client 
+#Used to grant telehealth access to test client provider 
 @pytest.fixture(scope='session')
 def provider_telehealth_access(test_client):
+
+    provider_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access=True)
+    test_client.db.session.add(provider_telehealth_access)
+    test_client.db.session.commit()
+
+    yield provider_telehealth_access
+
+    test_client.db.session.delete(provider_telehealth_access)
+    test_client.db.session.commit()
+
+#Used to grant telehealth access to test client staff
+@pytest.fixture(scope='function')
+def staff_telehealth_access(test_client):
+
     staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
     test_client.db.session.add(staff_telehealth_access)
     test_client.db.session.commit()
-
+    
     yield staff_telehealth_access
 
     test_client.db.session.delete(staff_telehealth_access)

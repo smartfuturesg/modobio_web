@@ -14,7 +14,7 @@ current_date = datetime.now(timezone.utc).date()
 #Used to grant telehealth access to test client 
 @pytest.fixture(scope='function')
 def grant_telehealth_access(test_client):
-    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access=True)
     test_client.db.session.add(staff_telehealth_access)
     test_client.db.session.commit()
 
