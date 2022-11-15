@@ -227,6 +227,13 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: boolean
     """
 
+    email_reminded = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent email reminder for this booking.
+    
+    :type: boolean
+    """
+
 
 @db.event.listens_for(TelehealthBookings, "after_insert")
 def add_booking_status_history(mapper, connection, target):
