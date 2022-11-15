@@ -870,8 +870,8 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
             raise Unauthorized('Email verification failed.')
 
         # create a new token and code for this user
-        verification.token = UserPendingEmailVerifications.generate_token(user_id)
-        verification.code = UserPendingEmailVerifications.generate_code()
+        verification.token = EmailVerification.generate_token(user_id)
+        verification.code = EmailVerification.generate_code()
 
         db.session.commit()
 
