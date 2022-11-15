@@ -50,7 +50,7 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     :type: str
     """
 
-    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=True)
     """
     Role from the StaffRoles table. 
 
@@ -63,15 +63,6 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     Many to one relationship with staff roles table
 
     :type: :class:`StaffRoles` instance
-    """
-
-    want_to_practice = db.Column(db.Boolean)
-    """
-    TODO: Always set to true, will need a story to turn this to false
-
-    This boolean is used if the practitioner WANTS to practice
-
-    :type: bool
     """
 
     expiration_date = db.Column(db.Date)

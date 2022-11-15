@@ -1,0 +1,1 @@
+UPDATE "LookupRoles" SET is_provider = is_practitioner;

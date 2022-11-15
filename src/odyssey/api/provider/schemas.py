@@ -1,4 +1,5 @@
 import logging
+from odyssey.api.provider.models import ProviderRoleRequests
 
 from odyssey.api.staff.models import StaffRoles
 logger = logging.getLogger(__name__)
@@ -9,7 +10,7 @@ from sqlalchemy import select
 from odyssey import ma,db
 
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation, PractitionerCredentials
-from odyssey.api.lookup.schemas import LookupOrganizationsSchema
+from odyssey.api.lookup.schemas import LookupOrganizationsSchema, LookupRolesSchema
 from odyssey.utils.constants import CREDENTIAL_TYPE, USSTATES_2, CREDENTIAL_STATUS, CREDENTIAL_ROLES
 
 """
@@ -49,7 +50,6 @@ class ProviderCredentialsSchema(ma.SQLAlchemyAutoSchema):
     state = fields.String(validate=validate.OneOf(USSTATES_2))
     status = fields.String(validate=validate.OneOf(CREDENTIAL_STATUS) ,missing='Pending Verification')
     credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPE['medical_doctor']))
-    want_to_practice = fields.Boolean(required=False,missing=True)
     staff_role = fields.String(validate=validate.OneOf(CREDENTIAL_ROLES), required=True)
     expiration_date = fields.Date(required=False)
 
@@ -65,3 +65,24 @@ class ProviderDeleteCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PractitionerCredentials
         only = ('idx')
+
+
+class ProviderRoleRequestsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ProviderRoleRequests
+        exclude = ('created_at','updated_at')
+        dump_only = ('user_id', 'role_id', 'idx')
+        include_fk = True
+
+    role_info= fields.Nested(LookupRolesSchema(many=False), missing=[], dump_only=True)
+
+class ProviderRoleRequestsAllSchema(Schema):
+    items = fields.Nested(ProviderRoleRequestsSchema(many=True))
+    total_items = fields.Integer()
+    
+
+    
+
+    
+
+    
