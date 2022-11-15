@@ -1162,6 +1162,7 @@ class ClinicalCareTeamMembers(BaseResource):
                     team_member_user = User(
                         email=team_member['team_member_email'],
                         is_staff=False,
+                        was_staff=False,
                         is_client=False)
 
                     db.session.add(team_member_user)
