@@ -15,7 +15,8 @@ def build_es_indices():
     if not es: return
 
     queries = []
-    # clients = db.session.query(User, ClientInfo).filter_by(is_client=True, deleted=False).join(ClientInfo).order_by(User.lastname.asc(), User.firstname.asc()).all()
+    # clients = db.session.query_data(User, ClientInfo).filter_by(is_client=True, deleted=False).join(
+    # ClientInfo).order_by(User.lastname.asc(), User.firstname.asc()).all()
     clients = db.session.query(User).filter_by(is_client=True, deleted=False).order_by(User.lastname.asc(),
                                                                                        User.firstname.asc()).all()
     staff = db.session.query(User).filter_by(is_staff=True, deleted=False).order_by(User.lastname.asc(),
@@ -23,26 +24,26 @@ def build_es_indices():
     queries.append(('clients', clients))
     queries.append(('staff', staff))
 
-    # Create two(2) searchable indices (called "clients" and "staff") from query data
-    def build_index(indexName: str, query: list):
+    # Create two(2) searchable indices (called "clients" and "staff") from query_data
+    def build_index(index_name: str, query_data: list):
         action = ''
-        for user in query:
+        for user in query_data:
             payload = {}
 
             for field in user.__searchable__:
                 payload[field] = str(getattr(user, field))
             _id = user.user_id
-            action = '{\"index\":{\"_index\":\"'f'{indexName}''\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
+            action = '{\"index\":{\"_index\":\"'f'{index_name}''\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
             yield action
 
     for queryName, query in queries:
         if len(query) != 0:
             # Elasticsearch 8.0 requires all arguments to be named parameters.
             if elasticsearch.__version__[0] >= 8:
-                es.bulk(operations=build_index(indexName=queryName, query=query), refresh=True)
+                es.bulk(operations=build_index(index_name=queryName, query_data=query), refresh=True)
             else:
                 # But it's not backwards compatible.
-                es.bulk(build_index(indexName=queryName, query=query), refresh=True)
+                es.bulk(build_index(index_name=queryName, query_data=query), refresh=True)
 
 
 # def update_user_dob(user_id:int, dob:str):
