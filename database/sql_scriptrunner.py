@@ -49,12 +49,12 @@ prev_group.add_argument(
     '--previous',
     action='store_true',
     help='Include scripts from all previous releases. Searches all "release-x.y/" subdirectories. '
-         'Defaults to True when FLASK_ENV=development, False otherwise.')
+         'Defaults to True when FLASK_DEBUG=true, False otherwise.')
 prev_group.add_argument(
     '--no-previous',
     action='store_false',
     help='Negate the options of --previous. Do NOT include scripts from previous releases when '
-         'FLASK_ENV=development.')
+         'FLASK_DEBUG=true.')
 
 current_group = parser.add_mutually_exclusive_group()
 current_group.add_argument(
@@ -75,12 +75,12 @@ dev_group.add_argument(
     '--dev',
     action='store_true',
     help='Include development scripts, all scripts under the "dev/" subdirectory. '
-         'Defaults to True when FLASK_ENV=development, False otherwise.')
+         'Defaults to True when FLASK_DEBUG=true, False otherwise.')
 dev_group.add_argument(
     '--no-dev',
     action='store_false',
     help='Negate the options of --dev. Do NOT include development scripts when '
-         'FLASK_ENV=development.')
+         'FLASK_DEBUG=true.')
 
 parser.add_argument(
     '--demo',
