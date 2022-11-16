@@ -71,7 +71,7 @@ def setup_db(app):
     print(proc.stdout, file=sys.stderr)
 
     # Add elastic search index
-    search.build_ES_indices()
+    search.build_es_indices()
 
 def clear_db():
     """ Delete all tables in the database. """
