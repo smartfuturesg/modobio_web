@@ -26,14 +26,18 @@ def build_es_indices():
 
     # Create two(2) searchable indices (called "clients" and "staff") from query_data
     def build_index(index_name: str, query_data: list):
-        action = ''
+        # action = ''
         for user in query_data:
             payload = {}
 
             for field in user.__searchable__:
                 payload[field] = str(getattr(user, field))
             _id = user.user_id
+          # action = '{\"index\":{\"_index\":\"'f'{index_name}''\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
+            # '{"index":{"_index":"clients", "_id":17}\n{"modobio_id": "TC12JASDFF12", "email": "client@modobio.com", "phone_number": "None", "firstname": "Bernie", "lastname": "Focker", "user_id": "17", "dob": "1990-06-01"}'
             action = '{\"index\":{\"_index\":\"'f'{index_name}''\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
+            # '{"index":{"_index":"clients}", "_id":17}\n{"modobio_id": "TC12JASDFF12", "email": "client@modobio.com", "phone_number": "None", "firstname": "Bernie", "lastname": "Focker", "user_id": "17", "dob": "1990-06-01"}'
+            # breakpoint()
             yield action
 
     for queryName, query in queries:
