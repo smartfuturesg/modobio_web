@@ -684,6 +684,14 @@ class UserSubscriptionApi(BaseResource):
         prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
 
         if request.parsed_obj.apple_original_transaction_id:
+            # ensure that the transaction id is not already in use by another user
+            if UserSubscriptions.query.filter_by(
+                        apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id
+                    ).filter(
+                        UserSubscriptions.user_id != user_id 
+                    ).first():
+                raise BadRequest('This original transaction ID is already in use.')
+
             # Verify subscription through apple
             appstore  = AppStore()
             transaction_info, renewal_info, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
