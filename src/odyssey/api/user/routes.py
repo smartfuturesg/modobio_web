@@ -56,7 +56,7 @@ from odyssey.integrations.apple import AppStore
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME, PROVIDER_ROLES, STAFF_ROLES
 from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import email_domain_blacklisted, send_email
@@ -65,6 +65,7 @@ from odyssey.utils.misc import (
     check_user_existence,
     check_client_existence,
     check_staff_existence,
+    update_client_subscription,
     verify_jwt)
 from odyssey.integrations.active_campaign import ActiveCampaign
 
@@ -119,7 +120,7 @@ class ApiUser(BaseResource):
 
 @ns.route('/staff/')
 class NewStaffUser(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin', 'system_admin', 'client_services'))
     @accepts(schema=NewStaffUserSchema, api=ns)
     @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
     def post(self):
@@ -153,10 +154,14 @@ class NewStaffUser(BaseResource):
 
         staff_info = request.json.get('staff_info')
 
+        # validate requested roles. Assign user as staff, provider or both
+        is_provider = True if any(role in PROVIDER_ROLES for role in staff_info.get('access_roles', [])) else False
+        is_staff = True if any(role in STAFF_ROLES for role in staff_info.get('access_roles', [])) else False
+        
         user = User.query.filter(User.email.ilike(email)).first()
         if user:
-            if user.is_staff:
-                # user account already exists for this email and is already a staff account
+            if user.is_staff or user.is_provider:
+                # user account already exists for this email and is already a staff/provider account
                 raise BadRequest('Email address {email} already exists.')
 
             elif user.is_client == False and user.is_staff == False:
@@ -172,7 +177,8 @@ class NewStaffUser(BaseResource):
                 
                 del user_info['password']
                 user_info['is_client'] = False
-                user_info['is_staff'] = True
+                user_info['is_staff'] = is_staff
+                user_info['is_provider'] = is_provider
                 user_info['was_staff'] = True
                 user.update(user_info)
                 
@@ -185,7 +191,7 @@ class NewStaffUser(BaseResource):
                 db.session.flush()
                 verify_email = True
             else:
-                #user account exists but only the client portion of the account is defined
+                # user account exists but only the client portion of the account is defined
                 user.is_staff = True
                 user.was_staff = True
                 del user_info['password']
@@ -213,7 +219,8 @@ class NewStaffUser(BaseResource):
             del user_info['password']
             
             user_info["is_client"] = False
-            user_info["is_staff"] = True
+            user_info['is_staff'] = is_staff
+            user_info['is_provider'] = is_provider
             user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables
@@ -318,6 +325,7 @@ class NewClientUser(BaseResource):
         email = user_info['email'] = email.lower()
 
         user = db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
+        subscription_update = False
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
@@ -358,7 +366,10 @@ class NewClientUser(BaseResource):
                 #Create client account for existing staff member
                 user.is_client = True
                 if user.email_verified:
+                    # email already verified, no need to send verification email
+                    # update client subscription status if necessary
                     verify_email = False
+                    subscription_update = True
 
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
                         #User already exists and email is verified.
@@ -445,6 +456,10 @@ class NewClientUser(BaseResource):
                                         ua_string = request.headers.get('User-Agent')))
 
         db.session.commit()
+
+        if subscription_update:
+            # checks for any existing subscriptions and updates the client subscription status
+            update_client_subscription(user_id=user.user_id)
 
         payload = {'user_info': user, 'token':access_token, 'refresh_token':refresh_token}
 
@@ -568,8 +583,12 @@ class ResetPassword(BaseResource):
         pswd = request.parsed_obj['password']
 
         user = UserLogin.query.filter_by(user_id=decoded_token['sid']).first()
-        user.set_password(pswd)
 
+        # Make sure user does not enter the previous password as the new password
+        if check_password_hash(user.password, pswd):
+            raise BadRequest('New password must be different than the old password.')
+
+        user.set_password(pswd)
         db.session.commit()
 
         return 200
@@ -588,17 +607,24 @@ class ChangePassword(BaseResource):
         # bring up the staff member and reset their password
         _, user_login = token_auth.current_user()
 
+        # Check that the user entered the correct current password
         if check_password_hash(user_login.password, request.parsed_obj['current_password']):
+            # Make sure user does not enter the previous password as the new password
+            if check_password_hash(user_login.password, request.parsed_obj['new_password']):
+                raise BadRequest('New password must be different than the old password.')
+
             user_login.set_password(request.parsed_obj['new_password'])
         else:
             raise Unauthorized
 
         db.session.commit()
 
+        return 200
+
 @ns.route('/token/refresh')
 @ns.doc(params={'refresh_token': "token from password reset endpoint"})
 class RefreshToken(BaseResource):
-    """User refesh token to issue a new token with a 1 hr TTL"""
+    """User refresh token to issue a new token with a 1 hr TTL"""
     def post(self):
         """
         Issues new API access token if refrsh_token is still valid
@@ -620,7 +646,8 @@ class RefreshToken(BaseResource):
         
         # if valid, create a new access token, return it in the payload
         access_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='access')
-        new_refresh_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='refresh')  
+        #pass new lifetime here
+        new_refresh_token = UserLogin.generate_token(user_id=decoded_token['uid'], user_type=decoded_token['utype'], token_type='refresh', refresh_token_lifetime=decoded_token['ttl'])  
         
         # add refresh details to UserTokenHistory table
         db.session.add(UserTokenHistory(user_id=decoded_token['uid'], 
@@ -661,9 +688,17 @@ class UserSubscriptionApi(BaseResource):
         if renewal_info:
             current_subscription.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
 
+        if current_subscription.sponsorship:
+            sponsoring_user = User.query.filter_by(user_id=current_subscription.sponsorship.user_id).one_or_none()
+            current_subscription.__dict__["sponsorship"] = {
+                "sponsor": current_subscription.sponsorship.sponsor, 
+                "first_name": sponsoring_user.firstname, 
+                "last_name": sponsoring_user.lastname, 
+                "modobio_id": sponsoring_user.modobio_id
+            }
         return current_subscription
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff-self', 'client'))
     @accepts(schema=UserSubscriptionsSchema, api=ns)
     @responds(schema=UserSubscriptionsSchema, api=ns, status_code=201)
     def put(self, user_id):
@@ -671,17 +706,13 @@ class UserSubscriptionApi(BaseResource):
         Updates the currently active subscription for the given user_id. 
         Also sets the end date to the previously active subscription.
         """
+        
         if request.parsed_obj.is_staff:
             check_staff_existence(user_id)
         else:
             check_client_existence(user_id)
-        
-        user, _ = token_auth.current_user()
 
-        #update end_date for user's previous subscription
-        #NOTE: users always have a subscription, even a brand new account will have an entry
-        #      in this table as an 'unsubscribed' subscription
-        prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
+        user, _ = token_auth.current_user()
 
         if request.parsed_obj.apple_original_transaction_id:
             # ensure that the transaction id is not already in use by another user
@@ -691,59 +722,16 @@ class UserSubscriptionApi(BaseResource):
                         UserSubscriptions.user_id != user_id 
                     ).first():
                 raise BadRequest('This original transaction ID is already in use.')
-
-            # Verify subscription through apple
-            appstore  = AppStore()
-            transaction_info, renewal_info, status = appstore.latest_transaction(request.parsed_obj.apple_original_transaction_id)
-            if status != 1:
-                raise BadRequest('Appstore subscription status does not match request')
-
-            # NOTE: We check the app store and use the subscription type from apple. This potentially overrides request from FE. 
-            request.parsed_obj.subscription_type_id = LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id
+            
+            update_client_subscription(user_id = user_id, apple_original_transaction_id =  request.parsed_obj.apple_original_transaction_id)
+            db.session.commit()
         
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
 
-        # Update the previous subscription if necessary
-        if prev_sub.subscription_status == 'subscribed':
-            if prev_sub.expire_date:
-                if prev_sub.expire_date < datetime.utcnow() or transaction_info.get('productId') != prev_sub.subscription_type_information.ios_product_id:
-                    prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
-                else:
-                    # new subscription entry not required return the current subscription
-                    prev_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
-                    prev_sub.update({'last_checked_date': datetime.utcnow().isoformat()})
-                    db.session.commit()
-                    return prev_sub
-        else:
-            prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
-    
-            # if this subscription is following an unsubscribed status: 
-            #   either first time subscription or first subscription ever
-            # Send a Welcome email
-            send_email('subscription-confirm', user.email, firstname=user.firstname)
-                
-        # make a new subscription entry
-        new_data = {
-            'subscription_status': request.parsed_obj.subscription_status,
-            'subscription_type_id': request.parsed_obj.subscription_type_id,
-            'is_staff': request.parsed_obj.is_staff,
-            'apple_original_transaction_id': request.parsed_obj.apple_original_transaction_id,
-            'last_checked_date': datetime.utcnow().isoformat()
-        }
+        current_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
 
-        new_sub = UserSubscriptionsSchema().load(new_data)
-        new_sub.user_id = user_id
-
-        if request.parsed_obj.apple_original_transaction_id:
-            new_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
-            new_sub.expire_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None)
-            new_sub.start_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None)
-        
-        db.session.add(new_sub)
-        db.session.commit()
-
-        return new_sub
+        return current_subscription
 
 
 @ns.route('/subscription/history/<int:user_id>/')
@@ -760,6 +748,17 @@ class UserSubscriptionHistoryApi(BaseResource):
         check_user_existence(user_id)
 
         client_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+        for i, client_subscription in enumerate(client_history):
+            if client_subscription.sponsorship:
+                sponsoring_user = User.query.filter_by(user_id=client_subscription.sponsorship.user_id).one_or_none()
+                client_subscription.__dict__["sponsorship"] = {
+                    "sponsor": client_subscription.sponsorship.sponsor, 
+                    "first_name": sponsoring_user.firstname, 
+                    "last_name": sponsoring_user.lastname, 
+                    "modobio_id": sponsoring_user.modobio_id
+                }
+                client_history[i] = client_subscription
+                
         staff_history = UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
 
         res = {}

@@ -270,7 +270,7 @@ class ClientInfo(BaseModel):
         :class:`flask_sqlalchemy.Pagination`
             An object holding the paginated search results from the SQLAlchemy query.
         """
-        resources = query.paginate(page, per_page, False)
+        resources = query.paginate(page=page, per_page=per_page, error_out=False)
         data = {
             'items': [item.client_info_search_dict() for item in resources.items],
             '_meta': {
@@ -281,26 +281,6 @@ class ClientInfo(BaseModel):
                 }
             }
         return data, resources
-
-@db.event.listens_for(ClientInfo, "after_update")
-def ds_onboard_client(mapper, connection, target):
-    """ 
-    Listens for any updates to ClientInfo table
-
-    If any updates occur, we will try to automatically onboard client to the DS platform
-    """
-    from odyssey.integrations.dosespot import DoseSpot
-    from odyssey.api.dosespot.models import DoseSpotPatientID
-
-    ds_client = DoseSpotPatientID.query.filter_by(user_id=target.user_id).one_or_none()
-
-    if not ds_client and all((target.street, target.zipcode, target.city, target.territory_id)):
-        try:
-            ds = DoseSpot()
-            ds.onboard_client(target.user_id)   
-        except:
-            return
-
 
 
 class ClientRaceAndEthnicity(BaseModelWithIdx, UserIdFkeyMixin):

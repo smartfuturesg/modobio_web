@@ -10,15 +10,12 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api import api
-from odyssey.integrations.instamed import Instamed, cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.api.lookup.models import LookupOrganizations
-from odyssey.api.payment.models import PaymentMethods, PaymentStatus, PaymentHistory, PaymentRefunds
+from odyssey.api.payment.models import PaymentMethods, PaymentHistory, PaymentRefunds
 from odyssey.api.payment.schemas import (
 PaymentMethodsSchema,
-PaymentStatusSchema,
-PaymentStatusOutputSchema,
 PaymentHistorySchema,
 PaymentRefundsSchema,
 PaymentTestChargeVoidSchema,
@@ -28,6 +25,7 @@ from odyssey.api.user.models import User
 
 ns = api.namespace('payment', description='Endpoints for functions related to payments.')
 
+@ns.deprecated
 @ns.route('/methods/<int:user_id>/')
 class PaymentMethodsApi(BaseResource):
     # Multiple payment methods per user allowed
@@ -39,10 +37,7 @@ class PaymentMethodsApi(BaseResource):
         """get active user payment methods"""
         self.check_user(user_id, user_type='client')
 
-        return PaymentMethods.query.filter(
-            and_(
-            PaymentMethods.user_id == user_id,
-            PaymentMethods.payment_id != None)).all()
+        return PaymentMethods.query.filter_by(user_id=user_id)
 
     @token_auth.login_required(user_type=('client',))
     @accepts(schema=PaymentMethodsSchema, api=ns)
@@ -52,13 +47,8 @@ class PaymentMethodsApi(BaseResource):
         self.check_user(user_id, user_type='client')
 
         if len(PaymentMethods.query.filter(PaymentMethods.user_id == user_id,
-                                           PaymentMethods.payment_id.isnot(None),
                                            PaymentMethods.expiration.isnot(None)).all()) >= 5:
             raise BadRequest('Maximum number of payment methods reached.')
-
-        im = Instamed()
-
-        response_data = im.add_payment_method(request.json['token'], request.json['expiration'], request.json['cardholder_name'], user_id)
 
         #if requesting to set this method to default and user already has a default 
         #payment method, remove default status from their previous default method
@@ -70,10 +60,7 @@ class PaymentMethodsApi(BaseResource):
         payment_data = {
             'user_id': user_id,
             'cardholder_name': request.json['cardholder_name'],
-            'payment_id': response_data['PaymentPlanID'],
-            'number': response_data['CardResult']['LastFour'],
             'expiration': request.json['expiration'],
-            'payment_type': response_data['CardResult']['Type'],
             'is_default': request.json['is_default']
         }
 
@@ -122,7 +109,7 @@ class PaymentMethodsApi(BaseResource):
                         raise BadRequest(f"The payment method with id {replacement_id} does not belong " \
                             "to the current user. Please use a valid payment method id that belongs to the " \
                             "current user.")
-                    elif method.payment_id == None:
+                    elif method.expiration == None:
                         #this method has been removed, it only exists to be displayed in history
                         raise BadRequest(f"The payment method with id {replacement_id} has been removed, " \
                             "it can no longer be charged.")
@@ -144,39 +131,13 @@ class PaymentMethodsApi(BaseResource):
                     }
                     raise e
             
-            #remove token so card can't be charged anymore
-            payment.payment_id = None
             #ensure card is not default and remove expiration date info
             payment.expiration = None
             payment.is_default = False
             db.session.commit()
 
-@ns.route('/status/')
-class PaymentStatusApi(BaseResource):
-    @accepts(schema=PaymentStatusSchema, api=ns)
-    @responds(schema=PaymentStatusSchema, api=ns, status_code=200)
-    def post(self):
-        self.check_user(request.parsed_obj.user_id, user_type='client')
 
-        #retrieve token from header
-        org_token = request.headers.get('Authorization')
-
-        if not LookupOrganizations.query.filter_by(org_token=org_token, org_name='InstaMed').one_or_none():
-            raise Unauthorized('Invalid organization token.')
-
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-        return request.parsed_obj
-
-@ns.route('/status/<int:user_id>/')
-class PaymentStatusGetApi(BaseResource):
-    @token_auth.login_required(user_type=('client', 'staff',), staff_role=('client_services',))
-    @responds(schema=PaymentStatusOutputSchema, api=ns, status_code=200)
-    def get(self, user_id):
-        self.check_user(user_id, user_type='client')
-
-        return {'payment_statuses': PaymentStatus.query.filter_by(user_id=user_id).all()}
-
+@ns.deprecated
 @ns.route('/history/<int:user_id>/')
 class PaymentHistoryApi(BaseResource):
 
@@ -191,6 +152,8 @@ class PaymentHistoryApi(BaseResource):
 
         return  PaymentHistory.query.filter_by(user_id=user_id).all()
 
+
+@ns.deprecated
 @ns.route('/transaction-history/<int:user_id>/')
 class PaymentHistoryApi(BaseResource):
 
@@ -210,6 +173,8 @@ class PaymentHistoryApi(BaseResource):
 
         return payload
 
+
+@ns.deprecated
 @ns.route('/refunds/<int:user_id>/')
 class PaymentRefundApi(BaseResource):
     # Multiple refunds allowed
@@ -233,8 +198,9 @@ class PaymentRefundApi(BaseResource):
         Issue a refund for a user. Multiple refunds may be issued for a single transaction, but the
         total amount refunded cannot exceed the amount of the original transaction.
         """
+        raise BadRequest("This endpoint has been deprecated until a replacement for InstaMed has been implemented.")
         
-        self.check_user(user_id, user_type='client')
+        """self.check_user(user_id, user_type='client')
 
         payment_id = request.parsed_obj.payment_id
 
@@ -258,60 +224,4 @@ class PaymentRefundApi(BaseResource):
         return Instamed().refund_payment(original_transaction,
             request.parsed_obj.refund_amount,
             request.parsed_obj.refund_reason,
-            reporter_id=token_auth.current_user()[0].user_id)
-
-# Development-only Namespace, sets up endpoints for testing payments.
-ns_dev = Namespace(
-    'payment',
-    path='/payment/test',
-    description='[DEV ONLY] Endpoints for testing payments.')
-
-@ns_dev.route('/telehealth-charge/')
-class PaymentTestCharge(BaseResource):
-    """
-    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
-    charging in the InstaMed system. 
-
-    Note
-    ---
-    **This endpoint is only available in DEV environments.**
-
-    """
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
-    @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
-    def post(self):
-        booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
-        if not booking:
-            raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
-        if booking.charged:
-            raise BadRequest('The booking with booking id {booking_id} has already been charged.'.format(**request.parsed_obj))
-
-        payment_data = Instamed().charge_telehealth_booking(booking)
-        if payment_data.get('is_partially_approved') or not payment_data['is_successful']:
-            status_code = 400
-        else:
-            status_code = 200
-        return payment_data, status_code
-
-@ns_dev.route('/void/')
-class PaymentVoidRefund(BaseResource):
-    """
-    [DEV ONLY] This endpoint is used for testing purposes only. It can be used by a system admin to test
-    voids in the InstaMed system.
-
-    Note
-    ---
-    **This endpoint is only available in DEV environments.**
-
-    """
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',), dev_only=True)
-    @accepts(schema=PaymentTestChargeVoidSchema, api=ns_dev)
-    def post(self):
-        #send InstaMed void request
-        booking = TelehealthBookings.query.filter_by(idx=request.parsed_obj['booking_id']).one_or_none()
-        if not booking:
-            raise BadRequest('No booking exists with booking id {booking_id}.'.format(**request.parsed_obj))
-        if not booking.charged:
-            raise BadRequest('The booking with booking id {booking_id}'.format(**request.parsed_obj) + \
-            'has not been charged yet,so it cannot be voided.')
-        return Instamed().void_payment(booking.payment_history_id, "Test void functionality")
+            reporter_id=token_auth.current_user()[0].user_id)"""

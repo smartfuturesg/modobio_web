@@ -149,9 +149,7 @@ def create_app():
         api.add_namespace(ns_dev_push)
         api.add_namespace(ns_dev_notif)
 
-        from odyssey.api.payment.routes import ns_dev
-        api.add_namespace(ns_dev)
-
+    
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)

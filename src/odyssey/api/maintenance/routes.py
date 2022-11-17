@@ -3,6 +3,7 @@ import time
 import pytz
 import uuid
 import boto3
+from boto3.dynamodb.conditions import Key
 from datetime import datetime, timedelta, time
 from flask import current_app, request
 from flask_accepts import accepts, responds
@@ -10,12 +11,12 @@ from odyssey.api import api
 from odyssey.api.maintenance.schemas import MaintenanceBlocksDeleteSchema
 from odyssey.api.maintenance.schemas import MaintenanceBlocksCreateSchema
 from odyssey.api.telehealth.models import TelehealthBookings
-from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from werkzeug.exceptions import BadRequest
 from sqlalchemy import and_, or_, select
 from odyssey.utils.misc import get_time_index
+from odyssey.tasks.tasks import cancel_telehealth_appointment
 
 logger = logging.getLogger(__name__)
 
@@ -101,13 +102,19 @@ class MaintenanceApi(BaseResource):
 
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
+        reasons_table = dynamodb.Table(current_app.config['MAINTENANCE_REASONS_TABLE'])
 
         # Set timezone
         zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
 
         # Set start and end times to the designated timezone for DB storage
-        start = datetime.fromisoformat(request.json["start_time"]).replace(tzinfo=zone).astimezone(zone)
-        end = datetime.fromisoformat(request.json["end_time"]).replace(tzinfo=zone).astimezone(zone)
+        start = datetime.fromisoformat(request.json['start_time']).replace(tzinfo=zone).astimezone(zone)
+        end = datetime.fromisoformat(request.json['end_time']).replace(tzinfo=zone).astimezone(zone)
+
+        # Check if reason_id exists
+        reason_response = reasons_table.query(KeyConditionExpression=Key('id').eq(request.json['reason_id']))
+        if not reason_response['Items']:
+            raise BadRequest(f"Reason ID {request.json['reason_id']} does not exist.")
 
         # Get the current users token auth info
         user, _ = token_auth.current_user()
@@ -123,6 +130,7 @@ class MaintenanceApi(BaseResource):
             'updated_by': None,
             'updated_at': None,
             'comments': request.json['comments'],
+            'reason_id': request.json['reason_id'],
             'notified': "False",
         }
 
@@ -169,7 +177,7 @@ class MaintenanceApi(BaseResource):
 
         # cancel each of them
         for booking in bookings_to_cancel:
-            cancel_telehealth_appointment(booking, False, 'Conflicted with newly scheduled server maintenance')
+            cancel_telehealth_appointment(booking, 'Conflicted with newly scheduled server maintenance')
 
         logger.info(f'Scheduled maintenance for {request.json["start_time"]} to {request.json["end_time"]}')
 

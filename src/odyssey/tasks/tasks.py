@@ -2,36 +2,27 @@ import logging
 import secrets
 
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.user.schemas import UserSubscriptionsSchema
-
-from odyssey.integrations.apple import AppStore
 
 from datetime import datetime, timedelta, time
 from io import BytesIO
-from typing import Any, Dict
-from PIL import Image
-from pytz import utc
 
-from bson import ObjectId
 from flask_migrate import current_app
 from sqlalchemy import select
-from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import BadRequest
 
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations
-from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources, LookupSubscriptions
+from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupClinicalCareTeamResources
 from odyssey.api.notifications.models import Notifications
+from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
-from odyssey.api.user.models import User, UserSubscriptions
+from odyssey.api.user.models import User
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.utils.files import FileUpload
 from odyssey.utils.telehealth import complete_booking
 from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
-from odyssey.utils.misc import create_notification
-
-# avoid circular imports by importing entire module
-import odyssey.integrations.instamed
+from odyssey.utils.misc import create_notification, update_client_subscription
 
 logger = logging.getLogger(__name__)
 
@@ -202,16 +193,16 @@ def upcoming_appointment_care_team_permissions(booking_id):
     return
 
 
-@celery.task()
-def charge_telehealth_appointment(booking_id):
-    """
-    This task will go through the process of attemping to charge a user for a telehealth booking.
-    If the payment is unsuccesful, the booking will be canceled.
-    """
-    # TODO: Notify user of the canceled booking via email? They are already notified via notification
-    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-
-    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
+#@celery.task()
+#def charge_telehealth_appointment(booking_id):
+#    """
+#    This task will go through the process of attempting to charge a user for a telehealth booking.
+#    If the payment is unsuccessful, the booking will be canceled.
+#    """
+#    # TODO: Notify user of the canceled booking via email? They are already notified via notification
+#    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
+#
+#    odyssey.integrations.instamed.Instamed().charge_telehealth_booking(booking)
     
 @celery.task()
 def cancel_noshow_appointment(booking_id):
@@ -220,8 +211,23 @@ def cancel_noshow_appointment(booking_id):
     the start time. It will then refund the user.
     """
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-    
-    odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
+    booking.status = "Canceled"
+
+    # run the task to store the chat transcript immediately
+    if current_app.config['TESTING']:
+        #run task directly if in test env
+        store_telehealth_transcript(booking.idx)
+    else:
+        #otherwise run with celery
+        store_telehealth_transcript.delay(booking.idx)
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(idx = booking.staff_calendar_id).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    db.session.commit()
+    #odyssey.integrations.instamed.cancel_telehealth_appointment(booking, reason='Practitioner No Show', refund=True)
 
 @celery.task()
 def cleanup_unended_call(booking_id: int):
@@ -309,7 +315,7 @@ def store_telehealth_transcript(booking_id: int):
     return
 
 @celery.task(base=BaseTaskWithRetry)
-def update_apple_subscription(user_id: int):
+def update_client_subscription_task(user_id: int):
     """
     Updates the user's subscription by checking the subscription status with apple. 
     This task is intended to be scheduled right after the current subscription expires.
@@ -320,47 +326,9 @@ def update_apple_subscription(user_id: int):
         used to grab the latest subscription
     """
     
-    prev_sub = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(UserSubscriptions.idx.desc()).first()
+    update_client_subscription(user_id = user_id)
 
-    # only update the most recent subscription
-    if prev_sub.apple_original_transaction_id:
-        # if the subscription does not need to be updated, skip update
-        if datetime.utcnow() < prev_sub.expire_date:
-            return 
-        # grab the latest subscription details from Apple
-        appstore  = AppStore()
-        transaction_info, renewal_info, status = appstore.latest_transaction(prev_sub.apple_original_transaction_id)
-
-        prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 
-                        'subscription_status': 'unsubscribed', 
-                        'last_checked_date': datetime.utcnow().isoformat()})
-        if status not in (1, 3, 4):
-            # create entry for unsubscribed status
-            new_sub_data = {
-                'subscription_status': 'unsubscribed',
-                'is_staff': False,
-                'start_date':  datetime.utcnow().isoformat()
-            }
-        else:
-            new_sub_data = {
-                'subscription_status': 'subscribed',
-                'subscription_type_id': LookupSubscriptions.query.filter_by(ios_product_id = transaction_info.get('productId')).one_or_none().sub_id,
-                'is_staff': False,
-                'apple_original_transaction_id': prev_sub.apple_original_transaction_id,
-                'last_checked_date': datetime.utcnow().isoformat(),
-                'expire_date': datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None).isoformat(),
-                'start_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None).isoformat()
-            }
-        
-        new_sub = UserSubscriptionsSchema().load(new_sub_data)
-        new_sub.user_id = user_id
-
-        db.session.add(new_sub)
-
-        db.session.commit()
-
-        logger.info(f"Apple subscription updated for user_id: {user_id}")
-
+    db.session.commit()
     return
 
 
@@ -443,6 +411,53 @@ def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
         datum['end_time']
     )
     db.session.commit()
+
+@celery.task()
+def cancel_telehealth_appointment(booking, reason='Failed Payment'):
+    """
+    Used to cancel an appointment in the event a payment is unsuccessful
+    and from bookings PUT to cancel a booking
+
+    args:
+    booking: a booking object for the telehealth appointment to be canceled
+    reason: reason for the cancellation, either (Practitioner Cancellation, Practitioner No-Show, or Failed Payment)
+    reporter_id: user_id of the user that initiated the cancellation, null if system automated
+    reporter_role: role of the user that initiated the cancellation(staff or client), System if system automated
+    """
+
+    # ensure that cancellation request does not occur during or after the scheduled meeting time
+    booking_start_time = datetime.combine(
+            date=booking.target_date_utc,
+            time = LookupBookingTimeIncrements.query.filter_by(idx = booking.booking_window_id_start_time_utc).one_or_none().start_time)
+
+    current_time_utc = datetime.utcnow()
+    
+    # prevent bookings that have already started from being cancelled. 
+    # exception: practitioner no show triggered by background process
+    if current_time_utc > booking_start_time and reason != 'Practitioner No Show':
+        raise BadRequest('Unable to cancel booking. Schedueld meeting has already begun')
+    
+    # update booking status to canceled
+    booking.status = 'Canceled'
+    
+    # run the task to store the chat transcript immediately
+    # imported in this way to get around circular importing issues
+    if current_app.config['TESTING']:
+        #run task directly if in test env
+        store_telehealth_transcript(booking.idx)
+    else:
+        #otherwise run with celery
+        store_telehealth_transcript.delay(booking.idx)
+
+    # delete booking from Practitioner's calendar
+    staff_event = StaffCalendarEvents.query.filter_by(idx = booking.staff_calendar_id).one_or_none()
+    if staff_event:
+        db.session.delete(staff_event)
+
+    #TODO: Create notification/send email(?) to user that their appointment 
+
+    db.session.commit()
+    return
 
 @celery.task()
 def add_subscription_tag(user_id):

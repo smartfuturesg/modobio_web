@@ -1,8 +1,5 @@
 import logging
-import os
 import sys
-
-import boto3
 
 from alembic import context
 from flask import current_app

@@ -11,7 +11,7 @@ def test_post_chessboard_assessment(test_client):
     # For COVERAGE, raise ContentNotFound error
     response = test_client.get(
         f'/physiotherapy/chessboard/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -19,7 +19,7 @@ def test_post_chessboard_assessment(test_client):
     payload = trainer_chessboard_assessment_data
     response = test_client.post(
         f'/physiotherapy/chessboard/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(payload),
         content_type='application/json')
 
@@ -30,7 +30,7 @@ def test_post_chessboard_assessment(test_client):
 def test_get_chessboard_assessment(test_client):
     response = test_client.get(
         f'/physiotherapy/chessboard/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200

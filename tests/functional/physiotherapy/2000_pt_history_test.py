@@ -13,14 +13,14 @@ def test_post_pt_history(test_client):
     # For COVERAGE, raise a ContentNotFound error
     response = test_client.get(
         f'/physiotherapy/history/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
     assert response.status_code == 200
 
     # For coverage, raise a UserNotFound error
     response = test_client.put(
         f'/physiotherapy/history/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(payload),
         content_type='application/json')
 
@@ -28,7 +28,7 @@ def test_post_pt_history(test_client):
 
     response = test_client.post(
         f'/physiotherapy/history/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(payload),
         content_type='application/json')
 
@@ -43,7 +43,7 @@ def test_put_pt_history(test_client):
     # For COVERAGE, raise an IllegalSettings Error
     response = test_client.post(
         f'/physiotherapy/history/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(payload),
         content_type='application/json')
 
@@ -51,7 +51,7 @@ def test_put_pt_history(test_client):
 
     response = test_client.put(
         f'/physiotherapy/history/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(payload),
         content_type='application/json')
 
@@ -63,7 +63,7 @@ def test_put_pt_history(test_client):
 def test_get_pt_history(test_client):
     response = test_client.get(
         f'/physiotherapy/history/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200

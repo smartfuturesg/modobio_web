@@ -1,14 +1,22 @@
 {% extends "modo-bio-automated-email-template-body.txt" %}
 {% block body %}
-It’s an absolute pleasure to have you join our platform.
+Hi {{ firstname }},
 
-We built Modo Bio because we believe in human expertise and relationships, data-driven care, and self-determination. We also believe in making good health care accessible to everyone.
+We're excited to have you as a member!
 
-Our network of vetted health and wellness providers are ready to start helping you with your health goals. We’ve also included space for your friends and family so please be sure to add them to your team. Being on a team is FREE of charge!
+To get the most out of your subscription, start by syncing your wearable device and entering your health records.
 
-Join us on https://www.instagram.com/modo.bio/ so you can stay up to date, get our latest health and wellness content, meet other members, and share your experiences.
+Next you'll want to add your friends and family to your team. It's free for them and the value of the added support and motivation can't be understated.
 
-We’re excited to be of assistance, talk soon!
+You can also invite your health providers to become part of your team. It's free for them and provides them with a continuous view of your health, so they can make more informed decisions.
+
+We're here to help, so if you have any issues or questions, please feel free to reach out at support@modobio.com!
+
+Be sure to check out our YouTube channel if you need help with syncing your device or general app navigation.
+https://www.youtube.com/channel/UChRpuF81bndqK0fWoZJvcWw
+
+Join us on Instagram, so you can stay up to date, get our latest health and wellness content, meet other members, and share your experiences.
+https://www.instagram.com/modo.bio/
 
 -The Modo Bio Team
 {% endblock %}

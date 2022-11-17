@@ -108,31 +108,40 @@ def get_possible_ranges(
 
     return time_blocks
 
-def get_practitioners_available(time_block, q_request):
+def get_practitioners_available(time_block, q_request, staff_user_id):
     gender = True if q_request.medical_gender == 'm' else False
     date1, day1, day1_start, day1_end = time_block[0]
     date2, day2, day2_start, day2_end = time_block[1] if len(time_block) > 1 else (None,None,None,None)
-    location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation
+    location = LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id).one_or_none().sub_territory_abbreviation if q_request.location_id else None
     duration = q_request.duration
-    
+
     if q_request.profession_type == 'medical_doctor':
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
             .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
                     .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
                         .join(User, User.user_id == TelehealthStaffAvailability.user_id) \
-                            .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
-                            PractitionerCredentials.state == location,
-                            StaffRoles.consult_rate != None)
+                            .join(TelehealthStaffSettings, TelehealthStaffSettings.user_id == TelehealthStaffAvailability.user_id) \
+                                .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
+                                StaffRoles.consult_rate != None,
+                                TelehealthStaffSettings.provider_telehealth_access == True)
+        if location:
+            query = query.filter(PractitionerCredentials.state == location)
     else:
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
             .join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id) \
                 .join(User, User.user_id == TelehealthStaffAvailability.user_id) \
+                    .join(TelehealthStaffSettings, TelehealthStaffSettings.user_id == TelehealthStaffAvailability.user_id) \
                     .filter(StaffRoles.consult_rate != None,
-                    StaffRoles.role == q_request.profession_type)
+                    StaffRoles.role == q_request.profession_type, 
+                    TelehealthStaffSettings.provider_telehealth_access == True)
     
     # if we need to check for gender
     if q_request.medical_gender != 'np':
         query = query.filter(User.biological_sex_male == gender)
+
+    # filter by practitioner id
+    if staff_user_id:
+        query = query.filter(User.user_id == staff_user_id)
     
     # if there are no overlaps on time block
     if not day2:    
@@ -244,8 +253,7 @@ def verify_availability(
     utc_start_idx,
     utc_end_idx,
     target_start_datetime_utc,
-    target_end_datetime_utc,
-    client_location_id):
+    ):
     ###
     # Check to see the client and staff still have the requested time slot available
     # - current bookings
@@ -290,7 +298,7 @@ def verify_availability(
             TelehealthStaffAvailability.user_id == staff_user_id
             )
     ).scalars().all()
-    # Make sure the full range of requested idices are found in staff_availability
+    # Make sure the full range of requested indices are found in staff_availability
     available_indices = {line.booking_window_id for line in staff_availability}
     requested_indices = {req_idx for req_idx in range(utc_start_idx, utc_end_idx + 1)}
     has_availability = requested_indices.issubset(available_indices)

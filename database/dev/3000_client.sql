@@ -142,10 +142,6 @@ BEGIN
     SELECT _user_id, _team_member_f, resources.resource_id, 'accepted'
     FROM "LookupClinicalCareTeamResources" AS resources;
 
-    -- Add DoseSpot credentials.
-    INSERT INTO "DoseSpotPatientID" (user_id, ds_user_id)
-    VALUES (_user_id, 18090700);
-
 END;
 
 $$ LANGUAGE plpgsql;

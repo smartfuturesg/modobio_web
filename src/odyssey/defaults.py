@@ -253,20 +253,6 @@ INSTAMED_API_KEY = ''
 INSTAMED_API_SECRET = ''
 """ InstaMed API access key secret. """
 
-# Dosespot Settings
-DOSESPOT_API_KEY = ''
-""" DoseSpot API access key ID number. """
-
-DOSESPOT_MODOBIO_ID = ''
-""" DoseSpot ModoBio ID. """
-
-DOSESPOT_ADMIN_ID = ''
-""" DoseSpot Admin ID"""
-
-DOSESPOT_PROXY_USER_ID = '238851'
-
-DOSESPOT_BASE_URL = 'https://my.staging.dosespot.com'
-
 # Wheel settings
 WHEEL_API_TOKEN = ''
 WHEEL_MD_CONSULT_RATE = '7161c1e9-69a6-4430-a7ef-04593300f48a'
@@ -309,6 +295,8 @@ APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'
 
 MAINTENANCE_DYNAMO_TABLE='dev_maintenance_v02'
 
+MAINTENANCE_REASONS_TABLE='prod_maintenance_reasons'
+
 MAINTENANCE_TIMEZONE='UTC'
 
 # Maintenance Business Hours Time Window In UTC
@@ -321,6 +309,13 @@ MAINT_SHORT_NOTICE = 2
 
 MAINT_STD_NOTICE = 14
 
+
+SERVER_NAME = '127.0.0.1:5000'
+"""
+Name and port number of the server. This setting allows for
+url generation outside of the Flask request context. This is useful for
+creating urls as part of celery tasks. 
+"""
 # Active Campaign 
 ACTIVE_CAMPAIGN_BASE_URL = 'https://modobio.api-us1.com/api/3/'
 ACTIVE_CAMPAIGN_LIST = ''

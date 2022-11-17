@@ -1,3 +1,4 @@
+from http import client
 import uuid
 from bson import ObjectId
 from itertools import groupby
@@ -46,7 +47,6 @@ from odyssey.api.lookup.models import (
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.integrations.instamed import cancel_telehealth_appointment
 from odyssey.utils.constants import (
     TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TWILIO_ACCESS_KEY_TTL,
@@ -60,7 +60,8 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.message import PushNotification, PushNotificationType, send_email
 from odyssey.utils.misc import (
-    check_client_existence, 
+    check_client_existence,
+    check_provider_existence, 
     check_staff_existence,
     check_user_existence,
     create_notification
@@ -69,7 +70,7 @@ from odyssey.integrations.twilio import Twilio
 import odyssey.utils.telehealth as telehealth_utils
 from odyssey.utils.files import AudioUpload, ImageUpload, FileDownload
 from odyssey.utils.base.resources import BaseResource
-from odyssey.tasks.tasks import abandon_telehealth_booking, cleanup_unended_call, store_telehealth_transcript
+from odyssey.tasks.tasks import abandon_telehealth_booking, cleanup_unended_call, store_telehealth_transcript, cancel_telehealth_appointment
 
 ns = Namespace('telehealth', description='telehealth bookings management API')
 
@@ -83,7 +84,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
     Call start
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthBookingMeetingRoomsTokensSchema, api=ns, status_code=200)
     def get(self, booking_id):
         current_user, _ = token_auth.current_user()
@@ -137,7 +138,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         # only practitioners may initiate a call
         if not meeting_room:
             if current_user.user_id == booking.staff_user_id:
-                #check that the booking has been paid for and the payment has not been voided or refunded
+                """#check that the booking has been paid for and the payment has not been voided or refunded
                 payment = PaymentHistory.query.filter_by(idx=booking.payment_history_id).one_or_none()
                 if payment:
                     refund = PaymentRefunds.query.filter_by(payment_id=payment.idx).one_or_none()
@@ -145,7 +146,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
                         raise BadRequest('Telehealth call cannot be started because it has not been paid for.')    
                 else:
                     raise BadRequest('Telehealth call cannot be started because it has not been paid for.')
-                
+                """
                 #check that booking has been accepted
                 if booking.status not in ('Accepted', 'In Progress'):
                     raise BadRequest('Telehealth call cannot be started because its status is not \'Accepted\' or \'In Progress\'')
@@ -167,7 +168,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         token, video_room_sid = twilio_obj.create_twilio_access_token(current_user.modobio_id, meeting_room_name=meeting_room.room_name)
         meeting_room.sid = video_room_sid
 
-        if g.user_type == 'staff':
+        if g.user_type == 'provider':
             meeting_room.staff_access_token = token
 
 
@@ -190,7 +191,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         
         # Send push notification to user, only if this endpoint is accessed by staff.
         # Do this as late as possible, have everything else ready.
-        if g.user_type == 'staff':
+        if g.user_type == 'provider':
             pn = PushNotification()
 
             # TODO: at the moment only Apple is supported. When Android is needed,
@@ -220,10 +221,21 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
 
 
 @ns.route('/client/time-select/<int:user_id>/')
-@ns.doc(params={'user_id': 'Client user ID'})
+@ns.doc(params={
+    'user_id': 'Client user ID', 
+    'staff_user_id': 'Practitioner ID',
+    'target_date': 'Target date to be seen',
+    'timezone': 'Timezone',
+    'profession_type': 'Profession Role', 
+    'location_id': 'Location ID',
+    'priority': 'Priority',
+    'medical_gender': 'Medical gender preference',
+    'duration': 'Duration of appointment'
+    #'payment_method_id': 'Payment method ID'
+}) # Add all other required params 
 class TelehealthClientTimeSelectApi(BaseResource):
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthTimeSelectOutputSchema,api=ns, status_code=200)
     def get(self, user_id):
         """
@@ -236,8 +248,34 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
         client_in_queue = TelehealthQueueClientPool.query.filter_by(user_id=user_id).\
             order_by(TelehealthQueueClientPool.priority.desc(), TelehealthQueueClientPool.target_date.asc()).first()
+
+        #Create queue entry with request params     
         if not client_in_queue:
-            raise BadRequest('Client is not in the queue.')
+            if not request.args.get('profession_type'):
+                raise BadRequest('Profession role not provided.')
+
+            location_id = request.args.get('location_id')
+            profession_type = request.args.get('profession_type')
+            target_date = request.args.get('target_date') if request.args.get('target_date') else datetime.today()
+            timezone = request.args.get('timezone') if request.args.get('timezone') else 'UTC'
+            priority = request.args.get('priority') if request.args.get('priority') else False
+            medical_gender = request.args.get('medical_gender') if request.args.get('medical_gender') else 'np'
+            duration = request.args.get('duration') if request.args.get('duration') else TELEHEALTH_BOOKING_DURATION
+            payment_method_id = request.args.get('payment_method_id') if request.args.get('payment_method_id') else None
+
+            client_in_queue = TelehealthQueueClientPool(
+                user_id=user_id, 
+                profession_type=profession_type, 
+                target_date=target_date, 
+                timezone=timezone, 
+                duration=duration,
+                medical_gender=medical_gender,
+                location_id=location_id, 
+                payment_method_id=payment_method_id,
+                priority=priority
+            )
+            db.session.add(client_in_queue)
+            db.session.commit()
 
         time_inc = LookupBookingTimeIncrements.query.all()
 
@@ -320,7 +358,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 if and_continue:
                     continue  # but continue block for loop
 
-                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue)
+                staff_user_id = request.args.get('staff_user_id') if request.args.get('staff_user_id') else None
+                _practitioner_ids = telehealth_utils.get_practitioners_available(time_blocks[block], client_in_queue, staff_user_id)
                 
                 # if the user has a staff + client account, it may be possible for their staff account
                 # to appear as an option when attempting to book a meeting as a client
@@ -385,7 +424,7 @@ class TelehealthBookingsApi(BaseResource):
     """
     This API resource is used to get and post client and staff bookings.
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthBookingsOutputSchema, api=ns, status_code=200)
     @ns.doc(params={'client_user_id': 'Client User ID',
                 'staff_user_id' : 'Staff User ID',
@@ -488,7 +527,7 @@ class TelehealthBookingsApi(BaseResource):
         if status:
             bookings_query = bookings_query.filter(TelehealthBookings.status.in_(status))
 
-        bookings_query = bookings_query.paginate(page,per_page,error_out=False)
+        bookings_query = bookings_query.paginate(page=page, per_page=per_page, error_out=False)
         bookings = bookings_query.items
         
         # ensure requested booking_id is allowed
@@ -635,7 +674,6 @@ class TelehealthBookingsApi(BaseResource):
         # only booking_window_id_start_time and target_date
 
         client_user_id = request.args.get('client_user_id', type=int)
-        client_scheduled = User.query.filter_by(user_id=client_user_id).one_or_none()
         if not client_user_id:
             raise BadRequest('Missing client ID.')
         # Check client existence
@@ -645,7 +683,7 @@ class TelehealthBookingsApi(BaseResource):
         if not staff_user_id:
             raise BadRequest('Missing practitioner ID.')    
         # Check staff existence
-        self.check_user(staff_user_id, user_type='staff')
+        self.check_user(staff_user_id, user_type='provider')
         
         if client_user_id == staff_user_id:
             raise BadRequest('Staff user id cannot be the same as client user id.')
@@ -662,6 +700,14 @@ class TelehealthBookingsApi(BaseResource):
         if not client_in_queue:
             raise BadRequest('Client not in queue.')
         
+        # validate payment method if provided
+        # Payments paused 10.24.22
+        # payment_method_id = request.parsed_obj.payment_method_id if request.parsed_obj.payment_method_id else client_in_queue.payment_method_id
+        
+        # if payment_method_id:
+        #     if not PaymentMethods.query.filter_by(user_id=client_user_id, idx=payment_method_id).one_or_none():
+        #         raise BadRequest('Payment ID does not exist for user.')
+
         # requested duration in minutes
         duration = client_in_queue.duration
 
@@ -669,7 +715,7 @@ class TelehealthBookingsApi(BaseResource):
         client_tz = client_in_queue.timezone
         start_idx = request.parsed_obj.booking_window_id_start_time
         if (start_idx - 1) % 3 > 0:
-            # verify time idx-1 is mulitple of 3. Only allowed start times are: X:00, X:15, X:30, X:45
+            # verify time idx-1 is multiple of 3. Only allowed start times are: X:00, X:15, X:30, X:45
             raise BadRequest("Invalid start time")
 
         start_time = time_inc[start_idx-1].start_time
@@ -697,7 +743,7 @@ class TelehealthBookingsApi(BaseResource):
        
         # call on verify_availability, will raise an error if practitioner doens't have availability requested
         telehealth_utils.verify_availability(client_user_id, staff_user_id, target_start_time_idx_utc, 
-            target_end_time_idx_utc, target_start_datetime_utc, target_end_datetime_utc,client_in_queue.location_id)      
+            target_end_time_idx_utc, target_start_datetime_utc)      
 
         # staff and client may proceed with scheduling the booking, 
         # create the booking object
@@ -715,7 +761,6 @@ class TelehealthBookingsApi(BaseResource):
         request.parsed_obj.staff_timezone = staff_settings.timezone
         request.parsed_obj.client_timezone = client_in_queue.timezone
         request.parsed_obj.client_location_id = client_in_queue.location_id
-        request.parsed_obj.payment_method_id = client_in_queue.payment_method_id
         request.parsed_obj.profession_type = client_in_queue.profession_type
         request.parsed_obj.medical_gender_preference = client_in_queue.medical_gender
 
@@ -728,14 +773,25 @@ class TelehealthBookingsApi(BaseResource):
 
         # consultation rate to booking
         consult_rate = StaffRoles.query.filter_by(user_id=staff_user_id,role=client_in_queue.profession_type).one_or_none().consult_rate
-
+        
         # Calculate time for display:
         # consult is in hours
         # 30 minutes -> 0.5*consult_rate
         # 60 minutes -> 1*consult_rate
         # 90 minutes -> 1.5*consult_rate
-        if not consult_rate:
+        if consult_rate == None:
             raise BadRequest('Practitioner has not set a consult rate')
+
+        # Payments paused on 10.24.22
+        # If provider has a consult rate of 0, assume that they will be handling
+        # payment outside of the modobio platform
+        # otherwise, the client must have provided a payment method
+        # if consult_rate == 0:
+        #     request.parsed_obj.charged = True
+        #     request.parsed_obj.payment_notified = True
+        # elif consult_rate != 0 and not payment_method_id:
+        #     raise BadRequest('Payment method required')
+
         rate = telehealth_utils.calculate_consult_rate(consult_rate,duration)
         request.parsed_obj.consult_rate = str(rate)
 
@@ -777,14 +833,6 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['start_time_localized'] = booking_start_staff_localized.time()
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
-        client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
-
-        send_email(
-            'appointment-booked-practitioner',
-            booking.practitioner.email,
-            practitioner=booking.practitioner.firstname,
-            client=client_fullname)
-
         # schedule task to abandon booking in 30-minutes if not confirmed
         if not current_app.config['TESTING']:
             abandon_telehealth_booking.apply_async((booking.idx,), eta=datetime.utcnow() + timedelta(minutes=30))
@@ -802,7 +850,7 @@ class TelehealthBookingsApi(BaseResource):
                 'profession_type': booking.profession_type,
                 'chat_room': booking.chat_room,
                 'client_location_id': booking.client_location_id,
-                'payment_method_id': booking.payment_method_id,
+                #'payment_method_id': booking.payment_method_id,
                 'status_history': booking.status_history,
                 'client': client,
                 'practitioner': practitioner,
@@ -813,8 +861,8 @@ class TelehealthBookingsApi(BaseResource):
         }
         return payload
 
-    @token_auth.login_required
-    @accepts(schema=TelehealthBookingsPUTSchema(only=['status', 'payment_method_id']), api=ns)
+    @token_auth.login_required(check_staff_telehealth_access=True)
+    @accepts(schema=TelehealthBookingsPUTSchema(only=['status']), api=ns)
     @responds(status_code=201,api=ns)
     @ns.doc(params={'booking_id': 'booking_id'})
     def put(self):
@@ -845,7 +893,7 @@ class TelehealthBookingsApi(BaseResource):
 
         data = request.get_json()
 
-        payment_id = data.get('payment_method_id')
+        """payment_id = data.get('payment_method_id')
         # If user wants to change the payment method for booking
         if payment_id:
             # Verify it's the client that's trying to change the payment method
@@ -859,7 +907,7 @@ class TelehealthBookingsApi(BaseResource):
             
             if booking.charged:
                 raise BadRequest('Booking has already been paid for. The payment method cannot be changed.')
-
+        """
 
         new_status = data.get('status')
         if new_status:
@@ -874,10 +922,23 @@ class TelehealthBookingsApi(BaseResource):
                 # Booking can only be moved to accepted from Confirmed status
                 elif booking.status != 'Confirmed':
                     raise BadRequest("Cannot accept booking")
-
                 staff_settings = TelehealthStaffSettings.query.filter_by(user_id = booking.staff_user_id).one_or_none()
                 calendar_idx = telehealth_utils.accept_booking(booking = booking, staff_settings = staff_settings)
                 booking.staff_calendar_id = calendar_idx
+
+                booking_time = LookupBookingTimeIncrements.query. \
+                filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                booking_time = booking_time.strftime('%I:%M %p')
+                booking_date = booking.target_date.strftime('%d-%b-%Y')
+
+                send_email(
+                    'pre-appointment-confirmation',
+                    booking.client.email,
+                    firstname=booking.client.firstname,
+                    provider_firstname=booking.practitioner.firstname,
+                    booking_date=booking_date,
+                    booking_time=booking_time
+                )
 
             elif new_status == 'Canceled':
                 # both client and practitioner can change status to canceled 
@@ -891,8 +952,7 @@ class TelehealthBookingsApi(BaseResource):
                     #cancel appointment with refund and send client notification that meeting was cancelled
                     cancel_telehealth_appointment(
                         booking,
-                        reason="Practitioner Cancellation",
-                        refund=True)
+                        reason="Practitioner Cancellation")
                     create_notification(
                         booking.client_user_id,
                         NOTIFICATION_SEVERITY_TO_ID.get('High'),
@@ -906,9 +966,7 @@ class TelehealthBookingsApi(BaseResource):
                     )
                 else:
                     #cancel appointment without refund and send staff notification that meeting was cancelled
-                    cancel_telehealth_appointment(
-                        booking,
-                        refund=False)
+                    cancel_telehealth_appointment(booking)
 
                     client_fullname = f'{current_user.firstname} {current_user.lastname}'
                     send_email(
@@ -926,13 +984,34 @@ class TelehealthBookingsApi(BaseResource):
                     raise BadRequest("Cannot change booking status to Confirmed")
 
                 staff_settings = TelehealthStaffSettings.query.filter_by(user_id = booking.staff_user_id).one_or_none()
-               
+                client_fullname = f'{booking.client.firstname} {booking.client.lastname}'
+                
+                send_email(
+                    'appointment-booked-practitioner',
+                    booking.practitioner.email,
+                    practitioner=booking.practitioner.firstname,
+                    client=client_fullname)
+                
                 # if the staff has the auto_confirm setting set to True, immediately set the status to Accepted
                 # add the booking to the Staff's calendar of events
                 if staff_settings.auto_confirm:
                     data['status'] = 'Accepted'
                     calendar_idx = telehealth_utils.accept_booking(booking = booking, staff_settings = staff_settings)
                     booking.staff_calendar_id = calendar_idx
+
+                    booking_time = LookupBookingTimeIncrements.query. \
+                    filter_by(idx=booking.booking_window_id_start_time_utc).one_or_none().start_time
+                    booking_time = booking_time.strftime('%I:%M %p')
+                    booking_date = booking.target_date.strftime('%d-%b-%Y')
+
+                    send_email(
+                        'pre-appointment-confirmation',
+                        booking.client.email,
+                        firstname=booking.client.firstname,
+                        provider_firstname=booking.practitioner.firstname,
+                        booking_date=booking_date,
+                        booking_time=booking_time
+                    )
 
             elif new_status == 'Abandoned':
                 # only client can abandon booking
@@ -942,12 +1021,16 @@ class TelehealthBookingsApi(BaseResource):
 
                 # delete the telehealth entry. Nothing else should have been created at this point
                 TelehealthBookings.query.filter_by(idx = booking_id).delete()
+
+            else:
+                raise BadRequest('Invalid status.')
+
         booking.update(data)
         db.session.commit()
                
         return 201
 
-    @token_auth.login_required()
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthBookingsSchema, api=ns)
     @responds(status_code=201,api=ns)
     @ns.deprecated
@@ -993,7 +1076,7 @@ class TelehealthBookingsApi(BaseResource):
 @ns.deprecated
 @ns.doc(params={'user_id': 'User ID number'})
 class ProvisionMeetingRooms(BaseResource):
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('provider',))
     @responds(schema = TelehealthMeetingRoomSchema, status_code=201, api=ns)
     def post(self, user_id):
         """
@@ -1117,7 +1200,7 @@ class MeetingRoomStatusAPI(BaseResource):
         - use TelehealthMeetingRooms table
         """
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema = TelehealthMeetingRoomSchema, status_code=200, api=ns)
     def get(self, room_id):
         """
@@ -1134,7 +1217,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
     """
     This API resource is used to get, post the staff's general availability
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthStaffAvailabilityOutputSchema, api=ns, status_code=200)
     def get(self,user_id):
         """
@@ -1159,7 +1242,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
         """
         # grab staff availability
-        check_staff_existence(user_id)
+        check_provider_existence(user_id)
         # Grab the staff's availability and sorted by booking_window_id AND day_of_week
         # Both of the sorts are necessary for this conversion
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).\
@@ -1215,7 +1298,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
 
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff_self',), check_staff_telehealth_access=True)
     @accepts(schema=TelehealthStaffAvailabilityOutputSchema, api=ns)
     @responds(schema=TelehealthStaffAvailabilityConflictSchema, api=ns, status_code=201)
     def post(self,user_id):
@@ -1243,8 +1326,6 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
         1, 'Monday', 11
         1, 'Monday', 12
         """
-        # Detect if the staff exists
-        check_staff_existence(user_id)
 
         # Get the staff's availability
         availability = TelehealthStaffAvailability.query.filter_by(user_id=user_id).all()
@@ -1267,9 +1348,10 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
             if not request.parsed_obj['settings']:
                 raise BadRequest('Missing required field settings.')
 
-            # Update tzone and auto-confirm in telehealth staff settings table once
+            # Update tzone, auto-confirm, and telehealth access in telehealth staff settings table once
             settings_data = request.parsed_obj['settings']
             settings_data.user_id = user_id
+            settings_data.provider_telehealth_access = True
             db.session.add(settings_data)
 
             data = {'user_id': user_id}
@@ -1406,7 +1488,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
     """
     __check_resource__ = False
     
-    @token_auth.login_required(user_type=('staff_self',))
+    @token_auth.login_required(user_type=('staff_self',), check_staff_telehealth_access=True)
     @accepts(schema=TelehealthStaffAvailabilityExceptionsPOSTSchema(many=True), api=ns)
     @responds(schema=TelehealthStaffAvailabilityExceptionsOutputSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1414,7 +1496,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         Add new availability exception. Start and end window_ids should be in reference to UTC.
         To determine the correct window_ids, please see /lookup/telehealth/booking-increments/.
         """
-        check_user_existence(user_id, user_type='staff')
+        check_user_existence(user_id, user_type='provider')
         current_date = datetime.now(tz.UTC).date()
 
         conflicts = []
@@ -1503,14 +1585,14 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
             'conflicts': conflicts
         }
     
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('provider',), check_staff_telehealth_access=True)
     @responds(schema=TelehealthStaffAvailabilityExceptionsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         View availability exceptions. start and end window_ids are in reference to UTC.
         To convert window_ids to real time please see /lookup/telehealth/booking-increments/.
         """
-        check_user_existence(user_id, user_type='staff')
+        check_user_existence(user_id, user_type='provider')
         
         exceptions = TelehealthStaffAvailabilityExceptions.query.filter_by(user_id=user_id).all()
         formatted_exceptions = []
@@ -1526,7 +1608,7 @@ class TelehealthSettingsStaffAvailabilityExceptionsApi(BaseResource):
         
         return formatted_exceptions
     
-    @token_auth.login_required(user_type=('staff_self',))
+    @token_auth.login_required(user_type=('staff_self',), check_staff_telehealth_access=True)
     @accepts(schema=TelehealthStaffAvailabilityExceptionsDeleteSchema(many=True), api=ns)
     def delete(self, user_id):
         """
@@ -1550,7 +1632,7 @@ class TelehealthGetQueueClientPoolApi(BaseResource):
     """
     This API resource is used to get all the users in the queue.
     """
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
     def get(self):
         """
@@ -1574,7 +1656,7 @@ class TelehealthQueueClientPoolApi(BaseResource):
     # Multiple allowed
     __check_resource__ = False
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthQueueClientPoolOutputSchema, api=ns, status_code=200)
     def get(self,user_id):
         """
@@ -1589,14 +1671,13 @@ class TelehealthQueueClientPoolApi(BaseResource):
 
         return payload
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self,user_id):
         """
         Add a client to the queue
         """
-        check_client_existence(user_id)
 
         # Verify target date is client's local today or in the future 
         client_tz = request.parsed_obj.timezone
@@ -1617,22 +1698,26 @@ class TelehealthQueueClientPoolApi(BaseResource):
 
         # Verify location_id is valid
         location_id = request.parsed_obj.location_id
-        location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
-        if not location:
-            raise BadRequest(f'Location {location_id} does not exist.')
+        
+        if location_id:
+            location = LookupTerritoriesOfOperations.query.filter_by(idx=location_id).one_or_none()
+            if not location:
+                raise BadRequest(f'Location {location_id} does not exist.')
 
+        # payments paused 10.24.22
         # Verify payment method idx is valid from PaymentMethods
         # and that the payment method chosen has the user_id
-        payment_id = request.parsed_obj.payment_method_id
-        verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
-        if not verified_payment_method:
-            raise BadRequest('Invalid payment method.')
+        # payment_id = request.parsed_obj.payment_method_id
+        # if payment_id:
+        #     verified_payment_method = PaymentMethods.query.filter_by(user_id=user_id, idx=payment_id).one_or_none()
+        #     if not verified_payment_method:
+        #         raise BadRequest('Invalid payment method.')
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
         db.session.commit()
 
-    @token_auth.login_required()
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
     @responds(api=ns, status_code=204)
     def delete(self, user_id):
@@ -1655,7 +1740,7 @@ class TelehealthBookingDetailsApi(BaseResource):
     # because files are being send.
     __check_resource__ = False
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(schema=TelehealthBookingDetailsSchema, api=ns, status_code=200)
     def get(self, booking_id):
         """
@@ -1704,7 +1789,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         return res
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(api=ns, status_code=200)
     def put(self, booking_id):
         """
@@ -1887,7 +1972,7 @@ class TelehealthBookingDetailsApi(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(api=ns, status_code=201)
     def post(self, booking_id):
         """
@@ -1987,7 +2072,7 @@ class TelehealthBookingDetailsApi(BaseResource):
         db.session.add(booking_details)
         db.session.commit()
 
-    @token_auth.login_required
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(status_code=204)
     def delete(self, booking_id):
         """
@@ -2115,7 +2200,7 @@ class TelehealthAllChatRoomApi(BaseResource):
                 where(TelehealthChatRooms.client_user_id==user_id)
             query = db.session.execute(stmt).all()
             conversations = [dict(zip(('conversation','staff_user'), dat)) for dat in query ]
-        elif user_type == 'staff':
+        elif user_type == 'provider':
             stmt = select(TelehealthChatRooms, User). \
                 join(User, User.user_id == TelehealthChatRooms.client_user_id).\
                 where(TelehealthChatRooms.staff_user_id==user_id)
@@ -2158,7 +2243,7 @@ class TelehealthBookingsCompletionApi(BaseResource):
     """
     API for completing bookings
     """
-    @token_auth.login_required(user_type=('staff','client'))
+    @token_auth.login_required(user_type=('provider','client'), check_staff_telehealth_access=True)
     @responds(api=ns, status_code=200)
     def put(self, booking_id):
         """
@@ -2187,7 +2272,7 @@ class TelehealthTranscripts(Resource):
     """
     Operations related to stored telehealth transcripts
     """
-    @token_auth.login_required()
+    @token_auth.login_required(check_staff_telehealth_access=True)
     @responds(api=ns, schema = TelehealthTranscriptsSchema, status_code=200)
     @ns.doc(params={'page': 'pagination index',
                 'per_page': 'results per page'})

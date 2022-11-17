@@ -124,13 +124,13 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key('LookupBookingTimeIncrements.idx')
     """
 
-    client_location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=False)
+    client_location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=True)
     """
     client location id for this booking
         :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=True)
     """
     client payment method selected from PaymentMethods previously set up
 
@@ -144,11 +144,12 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: int, foreign key(StaffCalendarEvents.idx)
     """
 
-    charged = db.Column(db.Boolean, default=False)
+    charged = db.Column(db.Boolean, default=True)
     """
     Denotes if the system has attempted to charge the client for this bookings yet. Even if a charge
     is unsuccessful, this will be set to true to denote that the booking was attempted to be charged
-    by the initial charge task.
+    by the initial charge task. Defaults to true until a new payment system is implemented at which 
+    point it will default to false.
 
     :type: boolean
     """
@@ -223,6 +224,13 @@ class TelehealthBookings(BaseModelWithIdx):
     Denotes if celery has already sent the notification for this booking being charged. 
     Gets set to True when it has been.
 
+    :type: boolean
+    """
+
+    email_reminded = db.Column(db.Boolean, default=False)
+    """
+    Denotes if celery has already sent email reminder for this booking.
+    
     :type: boolean
     """
 
@@ -532,13 +540,13 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'), nullable=True)
     """
     client location id for this booking request
     :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=False)
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=True)
     """
     client payment method selected from PaymentMethods previously set up
 
@@ -713,4 +721,11 @@ class TelehealthStaffSettings(BaseModel):
     One to many relationship with staff availability
 
     :type: :class:`TelehealthStaffAvailability` instance list
+    """
+
+    provider_telehealth_access = db.Column(db.Boolean, nullable=True, default=False)
+    """
+    Flag whether staff provider has access to telehealth system or not.
+
+    :type: boolean
     """

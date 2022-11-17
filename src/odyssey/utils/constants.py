@@ -477,6 +477,24 @@ the domain @modobio.com
 :type: tuple
 """
 
+PROVIDER_ROLES = (
+    'beautician',
+    'chef',
+    'dietitian',
+    'medical_doctor',
+    'nurse',
+    'nutritionist',
+    'physical_therapist',
+    'therapist',
+    'trainer',
+)
+"""
+Provider roles are external. They work directly with clients and will require care team permissions to access client resources. 
+
+:type: tuple
+"""
+
+
 MEDICAL_CONDITIONS = {
     'Autoimmune': {
         'Diabetes type 1': None,
@@ -846,6 +864,20 @@ Refresh token lifetime in hours.
 :type: int
 """
 
+MIN_CUSTOM_REFRESH_TOKEN_LIFETIME =  1
+"""
+Minimum custom refresh token lifetime in hours. 
+
+:type: int
+"""
+
+MAX_CUSTOM_REFRESH_TOKEN_LIFETIME =  30
+"""
+Maximum refresh token lifetime in hours. 
+
+:type: int
+"""
+
 ORG_TOKEN_LIFETIME = 4380
 """
 Org token lifetime in hours.
@@ -906,12 +938,16 @@ CREDENTIAL_TYPE = {
     'medical_doctor': ('npi','dea','med_lic')
 }
 
+CREDENTIAL_ROLES = ('medical_doctor', 'therapist', 'dietitian')
+
+CREDENTIAL_STATUS = ('Pending Verification','Verified','Rejected','Expired')
+
 DEV_EMAIL_DOMAINS = [
-    '3pillarglobal.com',
     'modobio.com',
-    'atventurepartners.com',
+    'atventurepartners.tech',
     'atlanticventurepartners.tech',
-    'simulator.amazonses.com']
+    'simulator.amazonses.com',
+]
 """ List of email address domain that will receive an email.
 
 In DEV environment, emails are send to success@simulator.amazonses.com to avoid spamming

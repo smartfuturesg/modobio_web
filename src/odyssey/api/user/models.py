@@ -19,6 +19,7 @@ from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
 from odyssey.api.client.models import ClientInfo
 from odyssey.api.staff.models import StaffProfile
+from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 
 
 class User(db.Model):
@@ -120,6 +121,9 @@ class User(db.Model):
     Denotes if this user was ever a staff member. This is important to retain necessary staff info 
     even if a user has deleted their staff account and then later deletes their client account.
 
+    This flag is also related to providers. If a user ever has User.is_provider set to true, then
+    we will retain that user's provider account. 
+
     :type: boolean
     """
 
@@ -178,6 +182,13 @@ class User(db.Model):
     User date of birth.
 
     :type: :class:`datetime.date`
+    """
+
+    is_provider = db.Column(db.Boolean, nullable=False, server_default='false')
+    """
+    Flags if the user is a provider
+
+    :type: boolean
     """
 
     gender = db.Column(db.String(1))
@@ -383,7 +394,7 @@ class UserLogin(db.Model):
         self.password_created_at = DB_SERVER_TIME
 
     @staticmethod
-    def generate_token(user_type, user_id, token_type):
+    def generate_token(user_type, user_id, token_type, refresh_token_lifetime=None):
         """
         Generate a JWT with the appropriate user type and user_id
         """
@@ -391,8 +402,18 @@ class UserLogin(db.Model):
             raise ValueError
         
         secret = current_app.config['SECRET_KEY']
+
+        # Handle token lifetime based on token type and params
+        if token_type == 'access':
+            lifetime = TOKEN_LIFETIME
+        elif token_type == 'refresh' and refresh_token_lifetime == None:
+            lifetime = REFRESH_TOKEN_LIFETIME
+        else:
+            lifetime = refresh_token_lifetime
+
         
-        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours =(TOKEN_LIFETIME if token_type == 'access' else REFRESH_TOKEN_LIFETIME)), 
+        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=lifetime), 
+                            'ttl': lifetime,
                             'uid': user_id,
                             'utype': user_type,
                             'x-hasura-allowed-roles': [user_type],
@@ -484,7 +505,7 @@ class UserSubscriptions(db.Model):
     """
     table index
 
-    :type: integer, primary key, autoincrementing
+    :type: integer, primary key, auto incrementing
     """
 
     user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
@@ -553,12 +574,29 @@ class UserSubscriptions(db.Model):
 
     :type: datetime
     """
+    
+    sponsorship_id = db.Column(db.Integer, db.ForeignKey('CommunityManagerSubscriptionGrants.idx'), nullable=True)
+    """
+    Subscription sponsorship id. 
+
+    :type: str
+    """
 
     subscription_type_information = db.relationship("LookupSubscriptions")
     """
     Relationship lookup subscriptions
     """
 
+   
+    sponsorship = db.relationship('CommunityManagerSubscriptionGrants')
+    """
+    One to one relationship with CommunityManagerSubscriptionGrants
+
+    :type: :class:`CommunityManagerSubscriptionGrants` instance
+    """
+
+
+    
 @db.event.listens_for(UserSubscriptions, "after_insert")
 def add_active_campaign_sub_tag(mapper, connection, target):
     """

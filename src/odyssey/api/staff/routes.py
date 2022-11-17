@@ -48,7 +48,7 @@ from odyssey.api.user.routes import UserLogoutApi
 from odyssey.api.user.schemas import UserSchema
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS
+from odyssey.utils.constants import ALLOWED_IMAGE_TYPES, IMAGE_MAX_SIZE, IMAGE_DIMENSIONS, MIN_CUSTOM_REFRESH_TOKEN_LIFETIME, MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
 from odyssey.utils.misc import check_staff_existence
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ class StaffMembers(BaseResource):
             raise BadRequest('Email {email} already in use.')
 
         ## TODO: rework Role suppression
-        # system_admin: permisison to create staff admin.
+        # system_admin: permission to create staff admin.
         # staff_admin:  can create all other roles except staff/systemadmin
         # if data.get('is_system_admin'):
         #     raise Unauthorized(f"Staff member with email {token_auth.current_user()[0].email} is unauthorized to create a system administrator role.")
@@ -144,7 +144,7 @@ class UpdateRoles(BaseResource):
 
                 if '@modobio.com' not in user.email or not user.email_verified:
                     raise BadRequest(
-                        'Non-practitioner roles can only be granted to users '
+                        'Non-provider roles can only be granted to users '
                         'with a verified @modobio.com address.')
                 else:
                     db.session.add(StaffRolesSchema().load({'user_id': user_id, 
@@ -154,7 +154,7 @@ class UpdateRoles(BaseResource):
         db.session.commit()
         return StaffRoles.query.filter_by(user_id=user_id).all()
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff','staff_self'), staff_role=('staff_admin',))
     @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)   
     def get(self, user_id):
         """
@@ -261,7 +261,7 @@ class OperationalTerritories(BaseResource):
 class RecentClients(BaseResource):
     """endpoint related to the staff recent client feature"""
     
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff_self',))
     @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
     def get(self):
         """get the 10 most recent clients a staff member has loaded"""
@@ -271,11 +271,16 @@ class RecentClients(BaseResource):
 @ns.route('/token/')
 class StaffToken(BaseResource):
     """create and revoke tokens"""
-    @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('staff',), email_required=False)
+    @ns.doc(security='password', params={'refresh_token_lifetime': 'Lifetime for staff refresh token'})
+    @basic_auth.login_required(user_type=('staff', 'provider'), email_required=False)
     @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
-        """generates a token for the 'current_user' immediately after password authentication"""
+        """
+        generates a token for the 'current_user' immediately after password authentication
+        
+        Responds with either a provider token or staff token. Provider is the default if the user is a provider.
+        
+        """
         user, user_login = basic_auth.current_user()
 
         if not user:
@@ -288,8 +293,21 @@ class StaffToken(BaseResource):
                                 StaffRoles.user_id==user.user_id
                             ).all()
 
-        access_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='access')
-        refresh_token = UserLogin.generate_token(user_type='staff', user_id=user.user_id, token_type='refresh')
+        refresh_token_lifetime = request.args.get('refresh_token_lifetime', type=int)
+
+        # Handle refresh token lifetime param
+        if refresh_token_lifetime:
+            # Convert lifetime from days to hours
+            if MIN_CUSTOM_REFRESH_TOKEN_LIFETIME <= refresh_token_lifetime <= MAX_CUSTOM_REFRESH_TOKEN_LIFETIME:
+                refresh_token_lifetime *= 24
+            # Else lifetime is not in acceptable range
+            else:
+                raise BadRequest('Custom refresh token lifetime must be between 1 and 30 days.')
+
+        utype = 'provider' if user.is_provider else 'staff'
+
+        access_token = UserLogin.generate_token(user_type=utype, user_id=user.user_id, token_type='access')
+        refresh_token = UserLogin.generate_token(user_type=utype, user_id=user.user_id, token_type='refresh', refresh_token_lifetime=refresh_token_lifetime)
 
         db.session.add(UserTokenHistory(user_id=user.user_id, 
                                         refresh_token=refresh_token,
@@ -312,16 +330,6 @@ class StaffToken(BaseResource):
                 'user_id': user.user_id,
                 'access_roles': [item[0] for item in access_roles],
                 'email_verified': user.email_verified}
-
-
-    @ns.doc(security='password')
-    @ns.deprecated
-    @token_auth.login_required(user_type=('staff',))
-    def delete(self):
-        """
-        Deprecated 11.23.20..does nothing now
-        """
-        return '', 200
 
 
 # user_id in path is not necessary here, except that
