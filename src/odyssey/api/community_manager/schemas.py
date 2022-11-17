@@ -2,6 +2,8 @@ import logging
 
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderRoleRequests
+from odyssey.api.staff.models import StaffRoles
 
 logger = logging.getLogger(__name__)
 
@@ -53,3 +55,26 @@ class VerifyMedicalCredentialSchema(ma.SQLAlchemyAutoSchema):
         exclude = ('country_id','role_id')
         
     user_id = fields.Integer(required=True)
+
+
+class ProviderRolesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = StaffRoles
+        exclude = ('idx', 'created_at', 'updated_at', 'user_id')
+        dump_only = ('user_id', )
+    
+class ProviderRoleRequestsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ProviderRoleRequests
+        exclude = ('idx',)
+
+    first_name = fields.String()
+    last_name = fields.String()
+    modobio_id = fields.String()
+    email = fields.Email()
+    current_roles = fields.Nested(ProviderRolesSchema, many=True)
+
+class ProviderRoleRequestsAllSchema(Schema):
+    provider_role_requests = fields.List(fields.Nested(ProviderRoleRequestsSchema), missing=[])
+    total_items = fields.Integer()
+    _links = fields.Nested(PaginationLinks)

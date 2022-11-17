@@ -10,7 +10,8 @@ from odyssey import db
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 from odyssey.api.community_manager.schemas import (
     PostSubscriptionGrantSchema, 
-    ProviderLiscensingAllSchema, 
+    ProviderLiscensingAllSchema,
+    ProviderRoleRequestsAllSchema, 
     VerifyMedicalCredentialSchema, 
     SubscriptionGrantsAllSchema, 
     ProviderLicensingSchema
@@ -19,6 +20,7 @@ from odyssey.api.lookup.models import LookupSubscriptions
 
 from odyssey.api.user.models import User
 from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderRoleRequests
 from odyssey.tasks.tasks import update_client_subscription_task
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -291,3 +293,23 @@ class CMVerifyCredentialsEndpoint(BaseResource):
             query[0].modobio_id = query[1].modobio_id
 
         return query[0]
+
+
+@ns.route("/provider/role-requests/")
+class CMProviderRoleRequestsEndpoint(BaseResource):
+    """View and update the status of provider role requests"""
+
+    @token_auth.login_required(user_type=("staff",), staff_role=("community_manager",))
+    @responds(schema=ProviderRoleRequestsAllSchema,status_code=200,api=ns)
+    def get(self):
+        """
+        Returns a list of all provider role requests
+        """
+        role_requests = ProviderRoleRequests.query.all()
+
+        # query provider role requests table join with user table
+        query = db.session.query(ProviderRoleRequests, User
+            ).join(User, User.user_id == ProviderRoleRequests.user_id
+            ).order_by(ProviderRoleRequests.created_at.asc()).all()
+
+        return role_requests
