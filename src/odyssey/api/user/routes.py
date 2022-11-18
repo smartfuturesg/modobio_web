@@ -2,8 +2,6 @@ import logging
 
 from sqlalchemy import text
 
-from odyssey.tasks.tasks import update_active_campaign_tag
-
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -55,6 +53,7 @@ from odyssey.api.user.schemas import (
     UserLegalDocsSchema
 )
 from odyssey.integrations.apple import AppStore
+from odyssey.tasks.tasks import update_active_campaign_tags
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
@@ -197,9 +196,10 @@ class NewStaffUser(BaseResource):
                     verify_email = False
 
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
-                        update_active_campaign_tag.delay(user_id = user.user_id, tags = ['Persona - Provider'])
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Provider'])
                 else:
                     verify_email = True
         else:
@@ -362,7 +362,7 @@ class NewClientUser(BaseResource):
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
-                        update_active_campaign_tag.delay(user_id = user.user_id, tags = ['Persona - Client'])
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Client'])
                         
                 else:
                     verify_email = True

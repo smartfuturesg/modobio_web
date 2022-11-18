@@ -51,7 +51,7 @@ from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVE
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
 from odyssey.utils import search
-from odyssey.tasks.tasks import update_active_campaign_tags
+
 logger = logging.getLogger(__name__)
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -765,6 +765,7 @@ class EmailVerification():
             #Run active campaign operations for when a user verifies their email.
             #Only run active campaign operations in prod
             if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                from odyssey.tasks.tasks import update_active_campaign_tags
                 tags = [] 
                 #Add user type tags
                 if user.is_client:
