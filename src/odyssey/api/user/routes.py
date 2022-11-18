@@ -53,6 +53,7 @@ from odyssey.api.user.schemas import (
     UserLegalDocsSchema
 )
 from odyssey.integrations.apple import AppStore
+from odyssey.tasks.tasks import update_active_campaign_tags
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
@@ -195,12 +196,10 @@ class NewStaffUser(BaseResource):
                     verify_email = False
 
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
-                        ac = ActiveCampaign()
-                        if not ac.check_contact_existence(user.user_id):
-                            ac.create_contact(user.email, user.firstname, user.lastname)
-                        ac.add_tag(user.user_id, 'Persona - Provider')
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Provider'])
                 else:
                     verify_email = True
         else:
@@ -363,11 +362,8 @@ class NewClientUser(BaseResource):
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
-                        ac = ActiveCampaign()
-                        if not ac.check_contact_existence(user.user_id):
-                            ac.create_contact(user.email, user.firstname, user.lastname)
-                            ac.add_user_subscription_type(user.user_id)
-                        ac.add_tag(user.user_id, 'Persona - Client')
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Client'])
+                        
                 else:
                     verify_email = True
         else:
