@@ -482,7 +482,7 @@ def update_active_campaign_tags(user_id: int, tags: list):
     we will add them an tag their current subscription type. 
     """
     from odyssey.integrations.active_campaign import ActiveCampaign
-    user = User.query.filter_by(user_id=user.user_id).one_or_none()
+    user = User.query.filter_by(user_id=user_id).one_or_none()
     ac = ActiveCampaign()
     if not ac.check_contact_existence(user.user_id):
         ac.create_contact(user.email, user.firstname, user.lastname)
