@@ -4,6 +4,8 @@ import json
 
 from flask import current_app
 from urllib.parse import urlencode
+from werkzeug.exceptions import BadRequest
+
 from odyssey import db
 from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags, UserSubscriptions
 
@@ -31,6 +33,13 @@ class ActiveCampaign:
 
         url = f'{self.url}/lists'
         response = requests.get(url, headers=self.request_header)
+
+        # raise error if response is not 200
+        try:
+            response.raise_for_status()
+        except:
+            raise BadRequest(f'Active Campaign unable to connect. Error: {response.text}')
+
         data = json.loads(response.text)
 
         for list in data['lists']:

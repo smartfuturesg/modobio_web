@@ -12,7 +12,6 @@ import typing as t
 import uuid
 
 from datetime import datetime, date, time, timedelta, timezone
-from time import mktime
 
 import flask.json
 
@@ -52,7 +51,6 @@ from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVE
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
 from odyssey.utils import search
-from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.tasks.tasks import update_active_campaign_tags
 logger = logging.getLogger(__name__)
 
