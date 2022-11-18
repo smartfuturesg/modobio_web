@@ -53,6 +53,7 @@ from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
 from odyssey.utils import search
 from odyssey.integrations.active_campaign import ActiveCampaign
+from odyssey.tasks.tasks import update_active_campaign_tags
 logger = logging.getLogger(__name__)
 
 _uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
@@ -766,16 +767,13 @@ class EmailVerification():
             #Run active campaign operations for when a user verifies their email.
             #Only run active campaign operations in prod
             if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-                ac = ActiveCampaign()    
-                if not ac.check_contact_existence(user.user_id):
-                    ac.create_contact(user.email, user.firstname, user.lastname) 
-                #Add user type tag
+                tags = [] 
+                #Add user type tags
                 if user.is_client:
-                    ac.add_tag(user.user_id, 'Persona - Client')
+                    tags.append('Persona - Client')
                 if user.is_staff:
-                    ac.add_tag(user.user_id, 'Persona - Provider')
-                #Add subcription tag
-                ac.add_user_subscription_type(user.user_id)
+                    tags.append('Persona - Provider')
+                update_active_campaign_tags.delay(user.user_id, tags)
         elif verification.email:
             user.update({'email': verification.email})
         
