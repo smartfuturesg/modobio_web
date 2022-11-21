@@ -11,19 +11,8 @@ from .data import telehealth_exceptions_post_data
 
 current_date = datetime.now(timezone.utc).date()
 
-#Used to grant telehealth access to test client 
-@pytest.fixture(scope='function')
-def grant_telehealth_access(test_client):
-    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access=True)
-    test_client.db.session.add(staff_telehealth_access)
-    test_client.db.session.commit()
 
-    yield staff_telehealth_access
-
-    test_client.db.session.delete(staff_telehealth_access)
-    test_client.db.session.commit()
-
-def test_post_staff_availability_exception(test_client, grant_telehealth_access):
+def test_post_staff_availability_exception(test_client):
     telehealth_exceptions_post_data["bad_data_1"][0]["exception_date"] = str(current_date)
     
     response = test_client.post(
@@ -72,7 +61,7 @@ def test_post_staff_availability_exception(test_client, grant_telehealth_access)
     assert response.json['exceptions'][0]['label'] == telehealth_exceptions_post_data["good_data"][0]['label']
     assert response.json['exceptions'][0]['exception_date'] == str(current_date)
 
-def test_get_staff_availability_exception(test_client, grant_telehealth_access):
+def test_get_staff_availability_exception(test_client):
 
     response = test_client.get(
         f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
@@ -86,7 +75,7 @@ def test_get_staff_availability_exception(test_client, grant_telehealth_access):
     assert response.json[0]['label'] == telehealth_exceptions_post_data["good_data"][0]['label']
     assert response.json[0]['exception_date'] == str(current_date)
 
-def test_delete_staff_availability_exception(test_client, grant_telehealth_access):
+def test_delete_staff_availability_exception(test_client):
 
     response = test_client.delete(
         f'/telehealth/settings/staff/availability/exceptions/{test_client.provider_id}/',
@@ -104,7 +93,7 @@ def test_delete_staff_availability_exception(test_client, grant_telehealth_acces
     assert response.status_code == 200
     assert len(response.json) == 0
 
-def test_celery_delete_exceptions_task(test_client, grant_telehealth_access):
+def test_celery_delete_exceptions_task(test_client):
     
     telehealth_exceptions_post_data["good_data"][0]["exception_date"] = str(current_date)
     
