@@ -398,6 +398,8 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
     @accepts(schema=ProviderRoleRequestUpdateSchema, api=ns)
     @responds(status_code=200, api=ns)
     def put(self):
+
+        current_user, _ = token_auth.current_user()
         payload = request.json
         # validate provider role request
         provider_role_request = ProviderRoleRequests.query.filter_by(idx = payload.get('role_request_id')).one_or_none()
@@ -408,7 +410,28 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
         if provider_role_request.status != "pending":
             raise BadRequest(f"Role request cannot be transitioned to accepted status from {provider_role_request.status} status.")
 
-        breakpoint()
         provider_role_request.status = payload.get('status')
+        provider_role_request.reviewer_user_id = current_user.user_id
+
+
+        # add new StaffRole entry for the user
+        if payload.get('status') == 'granted':
+            staff_role = StaffRoles(
+                user_id = provider_role_request.user_id, 
+                role = provider_role_request.role_info.role_name, \
+                granter_id = current_user.user_id,
+                consult_rate = 0)
+            db.session.add(staff_role)
+
+        # bring up the user who requested the role
+        # and their current roles
+        user = User.query.filter_by(user_id = provider_role_request.user_id).one_or_none()
+        user_current_roles = StaffRoles.query.filter_by(user_id = user.user_id).all()
+
+        # if the user has no current roles and the pending role request has been rejected
+        # remove their is_Provider flag from the user table
+        if len(user_current_roles) == 0 and payload.get('status') == 'rejected':
+            user.is_provider = False
         db.session.commit()
+        
         return
