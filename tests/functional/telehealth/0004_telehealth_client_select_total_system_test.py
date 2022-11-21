@@ -278,7 +278,7 @@ def test_client_time_select_specific_provider_client_not_in_queue_without_requir
     
     assert response.status_code == 400
 
-def test_full_system_with_settings(test_client, telehealth_staff, provider_telehealth_access):
+def test_full_system_with_settings(test_client, telehealth_staff):
     """
     Testing the full telehealth system:
 
