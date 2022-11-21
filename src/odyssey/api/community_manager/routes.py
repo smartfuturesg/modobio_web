@@ -338,7 +338,7 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
     """View and update the status of provider role requests"""
 
     @token_auth.login_required(user_type=("staff",), staff_role=("community_manager",))
-    @ns.doc(params={"page": "Pagination Index", "per_page": "Results per page"})
+    @ns.doc(params={"page": "Pagination Index", "per_page": "Results per page", "status": "Status of role request"})
     @responds(schema=ProviderRoleRequestsAllSchema, status_code=200, api=ns)
     def get(self):
         """
@@ -346,6 +346,7 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
         """
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 1, type=int)
+        status = request.args.get("status", "pending", type=str)
 
         # query provider role requests table join with user table
         query = (
@@ -353,7 +354,8 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
             .join(User, User.user_id == ProviderRoleRequests.user_id)
             .order_by(ProviderRoleRequests.created_at.asc())
         )
-
+        if status:
+            query = query.filter(ProviderRoleRequests.status == status)
         # Create Pagination Object
         pagination_query = query.paginate(page=page, per_page=per_page, error_out=False)
         items = pagination_query.items
@@ -433,5 +435,5 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
         if len(user_current_roles) == 0 and payload.get('status') == 'rejected':
             user.is_provider = False
         db.session.commit()
-        
+
         return
