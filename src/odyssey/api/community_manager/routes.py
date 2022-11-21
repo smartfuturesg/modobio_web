@@ -11,6 +11,7 @@ from odyssey.api.community_manager.models import CommunityManagerSubscriptionGra
 from odyssey.api.community_manager.schemas import (
     PostSubscriptionGrantSchema,
     ProviderLiscensingAllSchema,
+    ProviderRoleRequestUpdateSchema,
     ProviderRoleRequestsAllSchema,
     VerifyMedicalCredentialSchema,
     SubscriptionGrantsAllSchema,
@@ -369,7 +370,7 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
                 ).all()
             role_request.current_roles = user_current_roles[user.user_id]
             role_requests.append(role_request)
-            
+
         return {
             "provider_role_requests": role_requests,
             "total_items": len(role_requests),
@@ -392,3 +393,22 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
                 else None,
             },
         }
+
+    @token_auth.login_required(user_type=("staff",), staff_role=("community_manager",))
+    @accepts(schema=ProviderRoleRequestUpdateSchema, api=ns)
+    @responds(status_code=200, api=ns)
+    def put(self):
+        payload = request.json
+        # validate provider role request
+        provider_role_request = ProviderRoleRequests.query.filter_by(idx = payload.get('role_request_id')).one_or_none()
+        if not provider_role_request:
+            raise BadRequest("Provider role request not found.")
+
+        # validate status
+        if provider_role_request.status != "pending":
+            raise BadRequest(f"Role request cannot be transitioned to accepted status from {provider_role_request.status} status.")
+
+        breakpoint()
+        provider_role_request.status = payload.get('status')
+        db.session.commit()
+        return

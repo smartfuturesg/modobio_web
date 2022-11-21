@@ -75,6 +75,7 @@ class ProviderRoleRequestsSchema(ma.SQLAlchemyAutoSchema):
     lastname = fields.String()
     modobio_id = fields.String()
     email = fields.Email()
+    status = fields.String()
     current_roles = fields.List(fields.Nested(ProviderRolesSchema), missing=[])
     role_id = fields.Integer()
     role_info = fields.Nested(LookupRolesSchema)
@@ -83,3 +84,8 @@ class ProviderRoleRequestsAllSchema(Schema):
     provider_role_requests = fields.List(fields.Nested(ProviderRoleRequestsSchema), missing=[])
     total_items = fields.Integer()
     _links = fields.Nested(PaginationLinks)
+
+class ProviderRoleRequestUpdateSchema(Schema):
+    # status must be one of the following: inactive, pending, rejected, granted
+    status = fields.String(required=True, validate=lambda x: x in ['rejected', 'granted'])
+    role_request_id = fields.Integer(required=True)
