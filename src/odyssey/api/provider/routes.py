@@ -438,6 +438,10 @@ class ProviderRoleRequestsEndpoint(BaseResource):
         if ProviderRoleRequests.query.filter_by(user_id=user_id, status='pending').first():
             raise BadRequest('There is already an active role request for this user.')
 
+        # check if user already has the requested role
+        if StaffRoles.query.filter_by(user_id=user_id, role=requested_role.role_name).one_or_none():
+            raise BadRequest('User already has the requested role.')
+
         # grant user provider login privileges if they don't have them already
         if not user.is_provider:
             user.is_provider = True
