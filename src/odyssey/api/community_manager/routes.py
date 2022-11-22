@@ -417,7 +417,6 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
         provider_role_request.status = payload.get('status')
         provider_role_request.reviewer_user_id = current_user.user_id
 
-
         # add new StaffRole entry for the user
         if payload.get('status') == 'granted':
             staff_role = StaffRoles(
@@ -427,15 +426,17 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
                 consult_rate = 0)
             db.session.add(staff_role)
 
-        # bring up the user who requested the role
-        # and their current roles
-        user = User.query.filter_by(user_id = provider_role_request.user_id).one_or_none()
-        user_current_roles = StaffRoles.query.filter_by(user_id = user.user_id).all()
+        else:
+            # bring up the user who requested the role
+            # and their current roles
+            user = User.query.filter_by(user_id = provider_role_request.user_id).one_or_none()
+            user_current_roles = StaffRoles.query.filter_by(user_id = user.user_id).all()
 
-        # if the user has no current roles and the pending role request has been rejected
-        # remove their is_Provider flag from the user table
-        if len(user_current_roles) == 0 and payload.get('status') == 'rejected':
-            user.is_provider = False
+            # if the user has no current roles and the pending role request has been rejected
+            # remove their is_Provider flag from the user table
+            if len(user_current_roles) == 0:
+                user.is_provider = False
+        
         db.session.commit()
 
         return
