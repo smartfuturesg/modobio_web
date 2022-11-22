@@ -381,6 +381,7 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
                     "api.community-manager_cm_provider_role_requests_endpoint",
                     page=pagination_query.prev_num,
                     per_page=per_page,
+                    status=status,
                     _external=True,
                 )
                 if pagination_query.has_prev
@@ -389,6 +390,7 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
                     "api.community-manager_cm_provider_role_requests_endpoint",
                     page=pagination_query.next_num,
                     per_page=per_page,
+                    status=status,
                     _external=True,
                 )
                 if pagination_query.has_next
