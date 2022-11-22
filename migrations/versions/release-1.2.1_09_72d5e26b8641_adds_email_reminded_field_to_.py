@@ -11,11 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '72d5e26b8641'
-<<<<<<<< HEAD:migrations/versions/release-1.2.1_11_72d5e26b8641_adds_email_reminded_field_to_.py
-down_revision = 'f81e7cbdab82'
-========
 down_revision = '3669c98b6396'
->>>>>>>> release-1.2.1:migrations/versions/release-1.2.1_09_72d5e26b8641_adds_email_reminded_field_to_.py
 branch_labels = None
 depends_on = None
 
