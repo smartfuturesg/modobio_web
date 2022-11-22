@@ -43,7 +43,7 @@ def test_grant_provider_role_request(test_client, provider_role_request):
     test_client.db.session.commit()
 
 def test_reject_provider_role_request(test_client, provider_role_request):
-    """ Grant a role request and check that role has been assign correctly"""
+    """ Reject a role request """
 
     response = test_client.put(
         f"/community-manager/provider/role-requests/",
