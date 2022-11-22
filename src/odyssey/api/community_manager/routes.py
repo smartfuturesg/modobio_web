@@ -345,7 +345,7 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
         Returns a list of all provider role requests
         """
         page = request.args.get("page", 1, type=int)
-        per_page = request.args.get("per_page", 1, type=int)
+        per_page = request.args.get("per_page", 10, type=int)
         status = request.args.get("status", "pending", type=str)
 
         # query provider role requests table join with user table
