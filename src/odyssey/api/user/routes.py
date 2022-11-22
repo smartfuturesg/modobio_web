@@ -404,7 +404,7 @@ class NewClientUser(BaseResource):
         if verify_email:
             email_verification_data = EmailVerification().begin_email_verification(user, False)
 
-            # #Authenticate newly created client account for immediate login
+            # Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
         client_info = ClientInfoSchema().load({"user_id": user.user_id})
