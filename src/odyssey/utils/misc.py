@@ -772,6 +772,17 @@ class EmailVerification():
         # If account is new, update modobio_id, membersince, and set User.email_verified=True
         if user.email_verified == False: 
             user.update({'email_verified': True})
+            #Run active campaign operations for when a user verifies their email.
+            #Only run active campaign operations in prod
+            if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                from odyssey.tasks.tasks import update_active_campaign_tags
+                tags = [] 
+                #Add user type tags
+                if user.is_client:
+                    tags.append('Persona - Client')
+                if user.is_staff:
+                    tags.append('Persona - Provider')
+                update_active_campaign_tags.delay(user.user_id, tags)
         elif verification.email:
             user.update({'email': verification.email})
         
@@ -797,10 +808,9 @@ class EmailVerification():
         #code/token were valid, remove the pending request
         db.session.delete(verification)
         db.session.commit()
+
         return
-
-
-        
+       
 def delete_staff_data(user_id):
     """ Delete staff specific data.
     

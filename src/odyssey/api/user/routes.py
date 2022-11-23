@@ -53,6 +53,7 @@ from odyssey.api.user.schemas import (
     UserLegalDocsSchema
 )
 from odyssey.integrations.apple import AppStore
+from odyssey.tasks.tasks import update_active_campaign_tags
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
@@ -201,13 +202,10 @@ class NewStaffUser(BaseResource):
                     verify_email = False
 
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
-                        ac = ActiveCampaign()
-                        if not ac.check_contact_existence(user.user_id):
-                            ac.create_contact(user.email, user.firstname, user.lastname)
-                            ac.add_age_group_tag(user.user_id)
-                        ac.add_tag(user.user_id, 'Persona - Provider')
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Provider'])
                 else:
                     verify_email = True
         else:
@@ -375,12 +373,8 @@ class NewClientUser(BaseResource):
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
-                        ac = ActiveCampaign()
-                        if not ac.check_contact_existence(user.user_id):
-                            ac.create_contact(user.email, user.firstname, user.lastname)
-                            ac.add_age_group_tag(user.user_id)
-                            ac.add_user_subscription_type(user.user_id)
-                        ac.add_tag(user.user_id, 'Persona - Client')
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Client'])
+                        
                 else:
                     verify_email = True
         else:
@@ -717,49 +711,19 @@ class UserSubscriptionApi(BaseResource):
         user, _ = token_auth.current_user()
 
         if request.parsed_obj.apple_original_transaction_id:
-           update_client_subscription(user_id = user_id, apple_original_transaction_id =  request.parsed_obj.apple_original_transaction_id)
+            # ensure that the transaction id is not already in use by another user
+            if UserSubscriptions.query.filter_by(
+                        apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id
+                    ).filter(
+                        UserSubscriptions.user_id != user_id 
+                    ).first():
+                raise BadRequest('This original transaction ID is already in use.')
+            
+            update_client_subscription(user_id = user_id, apple_original_transaction_id =  request.parsed_obj.apple_original_transaction_id)
+            db.session.commit()
         
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
-
-        # Update the previous subscription if necessary
-        if prev_sub.subscription_status == 'subscribed':
-            if prev_sub.expire_date:
-                if prev_sub.expire_date < datetime.utcnow() or transaction_info.get('productId') != prev_sub.subscription_type_information.ios_product_id:
-                    prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None), 'subscription_status': 'unsubscribed', 'last_checked_date': datetime.utcnow().isoformat()})
-                else:
-                    # new subscription entry not required return the current subscription
-                    prev_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
-                    prev_sub.update({'last_checked_date': datetime.utcnow().isoformat()})
-                    db.session.commit()
-                    return prev_sub
-        else:
-            prev_sub.update({'end_date': datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None),'last_checked_date': datetime.utcnow().isoformat()})
-    
-            # if this subscription is following an unsubscribed status: 
-            #   either first time subscription or first subscription ever
-            # Send a Welcome email
-            send_email('subscription-confirm', user.email, firstname=user.firstname)
-                
-        # make a new subscription entry
-        new_data = {
-            'subscription_status': request.parsed_obj.subscription_status,
-            'subscription_type_id': request.parsed_obj.subscription_type_id,
-            'is_staff': request.parsed_obj.is_staff,
-            'apple_original_transaction_id': request.parsed_obj.apple_original_transaction_id,
-            'last_checked_date': datetime.utcnow().isoformat()
-        }
-
-        new_sub = UserSubscriptionsSchema().load(new_data)
-        new_sub.user_id = user_id
-
-        if request.parsed_obj.apple_original_transaction_id:
-            new_sub.auto_renew_status = True if renewal_info.get('autoRenewStatus') == 1 else False
-            new_sub.expire_date = datetime.fromtimestamp(transaction_info['expiresDate']/1000, utc).replace(tzinfo=None)
-            new_sub.start_date = datetime.fromtimestamp(transaction_info['purchaseDate']/1000, utc).replace(tzinfo=None)
-        
-        db.session.add(new_sub)
-        db.session.commit()
 
         current_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
 
@@ -889,23 +853,6 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
         """
         EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
         
-        user = User.query.filter_by(user_id=user_id).one_or_none()
-        
-        #Only run active campaign operations in prod
-        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-            #Add to Active Campaign after email_verification
-            ac = ActiveCampaign()    
-            if not ac.check_contact_existence(user_id):
-                ac.create_contact(user.email, user.firstname, user.lastname)
-            #Add user type tag
-            if user.is_client:
-                ac.add_tag(user_id, 'Persona - Client')
-            if user.is_staff:
-                ac.add_tag(user_id, 'Persona - Provider')
-            #Add subcription tag
-            ac.add_user_subscription_type(user_id)
-            #Add age group tag
-            ac.add_age_group_tag(user_id)
         return
 
 @ns.route('/email-verification/resend/<int:user_id>/')
@@ -926,8 +873,8 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
             raise Unauthorized('Email verification failed.')
 
         # create a new token and code for this user
-        verification.token = UserPendingEmailVerifications.generate_token(user_id)
-        verification.code = UserPendingEmailVerifications.generate_code()
+        verification.token = EmailVerification.generate_token(user_id)
+        verification.code = EmailVerification.generate_code()
 
         db.session.commit()
 

@@ -1,7 +1,7 @@
 """Adds email_reminded field to TelehealthBookings table
 
 Revision ID: 72d5e26b8641
-Revises: a2cd76a0affa
+Revises: f81e7cbdab82
 Create Date: 2022-11-08 12:28:50.785179
 
 """
