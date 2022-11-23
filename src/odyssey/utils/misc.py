@@ -793,7 +793,7 @@ class EmailVerification():
             # send welcome email
             send_email('email-welcome', user.email, firstname=user.firstname)  
 
-        # check for pending subscription grants on this email
+        # check for pending subscription grants on this email, add new user_id to subscription grant entries
         subscription_grants = CommunityManagerSubscriptionGrants.query.filter_by(email = user.email.lower()).all()
         for grant in subscription_grants:
             grant.subscription_grantee_user_id = user.user_id
@@ -1109,9 +1109,6 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 'is_staff': False,
                 'start_date':  utc_time_now.isoformat()
             }
-
-    elif latest_subscription.subscription_status == 'unsubscribed':
-        welcome_email = True
         
     # check appstore first
     if apple_original_transaction_id or latest_subscription.apple_original_transaction_id:
@@ -1141,6 +1138,8 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 latest_subscription.update({
                     'end_date': utc_time_now.isoformat(),
                     'last_checked_date': utc_time_now.isoformat()})
+                
+                welcome_email = True # user was previously unsubscribed and now has a subscription
         
         elif status == 5 and latest_subscription.subscription_status == 'subscribed':
             # update current subscription to unsubscribed
@@ -1178,11 +1177,12 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
             latest_subscription.update({
                     'end_date': utc_time_now.isoformat(),
                     'last_checked_date': utc_time_now.isoformat()})
+            welcome_email = True # user was previously unsubscribed and now has a subscription
     else:
         # user is subscribed and hasn't expired yet
         latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
 
-    if new_sub_data:
+    if new_sub_data.get("subscription_status"):
         new_sub = UserSubscriptionsSchema().load(new_sub_data)
         new_sub.user_id = user_id
         db.session.add(new_sub) 

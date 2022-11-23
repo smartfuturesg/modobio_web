@@ -1,7 +1,7 @@
 """Make location_id nullable for TelehealthQueueClientPool and TelehealthBookings
 
 Revision ID: 2494f8e10157
-Revises: 09bd96cf3eb5
+Revises: 912d5d0c6dd3
 Create Date: 2022-10-18 12:37:54.134866
 
 """
