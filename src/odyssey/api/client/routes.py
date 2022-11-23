@@ -1826,8 +1826,9 @@ class ClientMobileSettingsApi(BaseResource):
         gen_settings.user_id = user_id
         db.session.add(gen_settings)
 
+        ntypes = set()
         if request.parsed_obj['notification_type_ids']:
-            ntypes = set(request.parsed_obj['notification_type_ids'])
+            ntypes.update(request.parsed_obj['notification_type_ids'])
 
         lu_ntypes = set(
             db.session.execute(
@@ -1883,8 +1884,9 @@ class ClientMobileSettingsApi(BaseResource):
         for k, v in request.json['general_settings'].items():
             setattr(settings, k, v)
 
+        ntypes = set()
         if request.parsed_obj['notification_type_ids']:
-            ntypes = set(request.parsed_obj['notification_type_ids'])
+            ntypes.update(request.parsed_obj['notification_type_ids'])
 
         lu_ntypes = set(
             db.session.execute(
