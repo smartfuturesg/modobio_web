@@ -138,8 +138,6 @@ class ProviderCredentialsEndpoint(BaseResource):
             raise BadRequest('Missing User ID.')
 
         current_user, _ = token_auth.current_user()
-        if current_user.user_id != user_id:
-            raise Unauthorized()
 
         payload = request.parsed_obj
         state_check = {}

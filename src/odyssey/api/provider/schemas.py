@@ -46,9 +46,9 @@ class ProviderCredentialsSchema(ma.SQLAlchemyAutoSchema):
         dump_only = ('timestamp','user_id', 'role_id')
         include_fk = True
     
-    idx = fields.Integer(required=False)
+    idx = fields.Integer(required=False, dump_only=True)
     state = fields.String(validate=validate.OneOf(USSTATES_2))
-    status = fields.String(validate=validate.OneOf(CREDENTIAL_STATUS) ,missing='Pending Verification')
+    status = fields.String(validate=validate.OneOf(CREDENTIAL_STATUS) ,missing='Pending Verification', dump_only=True)
     credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPE['medical_doctor']))
     staff_role = fields.String(validate=validate.OneOf(CREDENTIAL_ROLES), required=True)
     expiration_date = fields.Date(required=False)
