@@ -233,13 +233,13 @@ def update_active_campaign_contact(mapper, connection, target):
         lastname = target.lastname if len(modded_lname) > 0 else None
         email = target.email if len(modded_email) > 0 else None
 
-        #Run active campatign operations in prod
+        #Run active campaign operations in prod
         if not any((current_app.config['DEV'], current_app.config['TESTING'])):
             from odyssey.tasks.tasks import update_active_campaign_contact
-            update_active_campaign_contact(target.user_id, firstname, lastname, email)
+            update_active_campaign_contact.delay(target.user_id, firstname, lastname, email)
     #Check updates on dob 
     if len(modded_dob) > 0 :
-        #Run active campatign operations in prod
+        #Run active campaign operations in prod
         if not any((current_app.config['DEV'], current_app.config['TESTING'])):
             from odyssey.tasks.tasks import add_age_tag
             add_age_tag.delay(target.user_id)
