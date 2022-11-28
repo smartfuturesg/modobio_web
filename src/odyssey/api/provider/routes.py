@@ -142,12 +142,38 @@ class ProviderCredentialsEndpoint(BaseResource):
         payload = request.parsed_obj
         state_check = {}
         for role, cred in payload['items']:
+            
+
+            
+            # credentials must be tied to a role or role request
+            # check if user holds the role
+            # if user does not hold role, attempt to bring up role request
 
             curr_role = StaffRoles.query.filter_by(user_id=user_id,role=role).one_or_none()
+            role_request = None
+            if not curr_role:
+                lookup_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
+                role_request = ProviderRoleRequests.query.filter_by(user_id=user_id,role_id=lookup_role.idx).one_or_none()
+                if not role_request:
+                    raise BadRequest(f'User does not hold role {role} or have requested role. Cannot submit credentials for role.')
+
             # This takes care of ensuring credential number is submitted if user
             # submits a payload with a state for DEA and Medical License credential types
             if (cred.credential_type != 'npi' and cred.state) and not cred.credentials:
                 raise BadRequest('Credential number is mandatory if submitting with a state.')
+            
+            # only one credential type, state, per role/role request allowed.
+            # ensure user does not currently have a credential for this role
+            current_cred = ProviderCredentials.query.filter_by(
+                user_id=user_id,
+                credential_type=cred.credential_type,
+                state = cred.state,
+                role_id = curr_role.idx if curr_role else None,
+                role_request_id = role_request.idx if role_request else None
+                ).filter(ProviderCredentials.status.not_in(('Rejected','Expired'))).one_or_none()
+
+            if current_cred:
+                raise BadRequest('User has already submitted this credential. Delete the existing credential before adding a new one.')
 
             # This takes care of only allowing 1 state input per credential type
             # Example:
@@ -165,9 +191,12 @@ class ProviderCredentialsEndpoint(BaseResource):
                 else:
                     state_check[cred.credential_type].append(cred.state)
 
+
+
             cred.status = 'Pending Verification' if not any([current_app.config['DEV'],current_app.config['TESTING']]) else 'Verified'
-            cred.role_id = curr_role.idx
+            cred.role_id = curr_role.idx if curr_role else None
             cred.user_id = user_id
+            cred.role_request_id = role_request.idx if role_request else None
             db.session.add(cred)
 
         db.session.commit()

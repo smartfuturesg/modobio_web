@@ -35,6 +35,12 @@ class ProviderRoleRequests(BaseModelWithIdx,UserIdFkeyMixin):
 
     reviewer_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="SET NULL"), nullable=True)
 
+    credentials = db.relationship('ProviderCredentials', uselist=False, back_populates='role_request')
+    """
+    One to many relationship with ProviderCredentials table
+    :type: :class:`ProviderCredentials`
+    """
+
 
 class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     """ Medical Credentials table
@@ -99,4 +105,17 @@ class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
 
     :type: date
     """
+
+    role_request_id = db.Column(db.Integer, db.ForeignKey('ProviderRoleRequests.idx'), nullable=True)
+    """
+    Role request ID number, foreign key to ProviderRoleRequests.idx
+
+    :type: int, foreign key
+    """
     
+    role_request = db.relationship('ProviderRoleRequests', uselist=True, back_populates='credentials')
+    """
+    One to many relationship with ProviderRoleRequests table
+
+    :type: :class:`ProviderRoleRequests`
+    """
