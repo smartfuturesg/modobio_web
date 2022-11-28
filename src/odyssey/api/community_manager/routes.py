@@ -21,8 +21,7 @@ from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.staff.models import StaffRoles
 
 from odyssey.api.user.models import User
-from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.provider.models import ProviderRoleRequests
+from odyssey.api.provider.models import ProviderCredentials, ProviderRoleRequests
 from odyssey.tasks.tasks import update_client_subscription_task
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -197,21 +196,21 @@ class CMProviderLicensingEndpoint(BaseResource):
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 100, type=int)
 
-        query = db.session.query(PractitionerCredentials, User).join(
-            User, User.user_id == PractitionerCredentials.user_id
+        query = db.session.query(ProviderCredentials, User).join(
+            User, User.user_id == ProviderCredentials.user_id
         )
 
         # Filter and order by status
         if status:
-            query = query.filter(PractitionerCredentials.status == status)
+            query = query.filter(ProviderCredentials.status == status)
             if status == "Pending Verification":
-                query = query.order_by(PractitionerCredentials.created_at.asc())
+                query = query.order_by(ProviderCredentials.created_at.asc())
             if status == "Verified":
-                query = query.order_by(PractitionerCredentials.updated_at.asc())
+                query = query.order_by(ProviderCredentials.updated_at.asc())
             if status == "Rejected":
-                query = query.order_by(PractitionerCredentials.created_at.asc())
+                query = query.order_by(ProviderCredentials.created_at.asc())
             if status == "Expired":
-                query = query.order_by(PractitionerCredentials.expiration_date.asc())
+                query = query.order_by(ProviderCredentials.expiration_date.asc())
 
         # Filter by provider id
         if email:
@@ -232,17 +231,17 @@ class CMProviderLicensingEndpoint(BaseResource):
             if (end_date - start_date).days > 90:
                 raise BadRequest("Date Range Limited to 90 Days.")
             query = query.filter(
-                PractitionerCredentials.created_at.between(start_date, end_date)
+                ProviderCredentials.created_at.between(start_date, end_date)
             )
         if start_date and not end_date:
             end_date = start_date + timedelta(days=90)
             query = query.filter(
-                PractitionerCredentials.created_at.between(start_date, end_date)
+                ProviderCredentials.created_at.between(start_date, end_date)
             )
         if end_date and not start_date:
             start_date = end_date - timedelta(days=90)
             query = query.filter(
-                PractitionerCredentials.created_at.between(start_date, end_date)
+                ProviderCredentials.created_at.between(start_date, end_date)
             )
 
         # Create Pagination Object
@@ -311,16 +310,16 @@ class CMVerifyCredentialsEndpoint(BaseResource):
             raise BadRequest("Status must be one of {}.".format(", ".join(status)))
 
         query = (
-            db.session.query(PractitionerCredentials, User)
-            .join(User, User.user_id == PractitionerCredentials.user_id)
+            db.session.query(ProviderCredentials, User)
+            .join(User, User.user_id == ProviderCredentials.user_id)
             .filter(
-                PractitionerCredentials.user_id == payload["user_id"],
-                PractitionerCredentials.idx == payload["idx"],
+                ProviderCredentials.user_id == payload["user_id"],
+                ProviderCredentials.idx == payload["idx"],
             )
             .one_or_none()
         )
 
-        if query:  # query = (<PractitionerCredentials>, <User>)
+        if query:  # query = (<ProviderCredentials>, <User>)
             query[0].update(payload)
             db.session.commit()
         else:

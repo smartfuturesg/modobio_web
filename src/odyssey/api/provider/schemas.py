@@ -9,7 +9,8 @@ from marshmallow.decorators import post_load, pre_load
 from sqlalchemy import select
 from odyssey import ma,db
 
-from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation, PractitionerCredentials
+from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
+from odyssey.api.provider.models import ProviderCredentials
 from odyssey.api.lookup.schemas import LookupOrganizationsSchema, LookupRolesSchema
 from odyssey.utils.constants import CREDENTIAL_TYPE, USSTATES_2, CREDENTIAL_STATUS, CREDENTIAL_ROLES
 
@@ -41,7 +42,7 @@ class ProviderOrganizationAffiliationSchema(ma.SQLAlchemyAutoSchema):
 
 class ProviderCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = PractitionerCredentials
+        model = ProviderCredentials
         exclude = ('created_at','updated_at')
         dump_only = ('timestamp','user_id', 'role_id')
         include_fk = True
@@ -56,14 +57,14 @@ class ProviderCredentialsSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         role = data.pop("staff_role")
-        return (role, PractitionerCredentials(**data))
+        return (role, ProviderCredentials(**data))
 
 class ProviderCredentialsInputSchema(Schema):
     items = fields.Nested(ProviderCredentialsSchema(many=True))
 
 class ProviderDeleteCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = PractitionerCredentials
+        model = ProviderCredentials
         only = ('idx')
 
 

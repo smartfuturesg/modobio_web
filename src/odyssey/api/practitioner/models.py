@@ -12,6 +12,9 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     """ Medical Credentials table
     
     This table is used for storing the Medical Doctor's credentials
+
+    Deprecated 11.28.22
+    All data from this table is migrated to ProviderCredentials
     """
 
     country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
@@ -58,7 +61,7 @@ class PractitionerCredentials(BaseModelWithIdx,UserIdFkeyMixin):
 
     """
     
-    role = db.relationship('StaffRoles', uselist=False, back_populates='credentials')
+    role = db.relationship('StaffRoles', uselist=False)
     """
     Many to one relationship with staff roles table
 

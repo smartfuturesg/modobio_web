@@ -117,9 +117,9 @@ class ProviderCredentialsEndpoint(BaseResource):
             raise Unauthorized()
 
         query = db.session.execute(
-            select(PractitionerCredentials).
+            select(ProviderCredentials).
             where(
-                PractitionerCredentials.user_id == user_id
+                ProviderCredentials.user_id == user_id
                 )
         ).scalars().all()
         return {'items': query}
@@ -193,9 +193,9 @@ class ProviderCredentialsEndpoint(BaseResource):
         valid_statuses = ['Rejected', 'Expired']
 
         payload = request.json
-        payload.pop('staff_role') # Staff_role passed in schema but isn't part of PractitionerCredentials model
+        payload.pop('staff_role') # Staff_role passed in schema but isn't part of ProviderCredentials model
         
-        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+        curr_credentials = ProviderCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
         if curr_credentials.status not in valid_statuses:
             raise BadRequest('Current credential status must be rejected or expired.')
 
@@ -225,7 +225,7 @@ class ProviderCredentialsEndpoint(BaseResource):
 
         payload = request.json
 
-        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+        curr_credentials = ProviderCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
 
         if curr_credentials:
             db.session.delete(curr_credentials)
