@@ -44,7 +44,7 @@ class ProviderCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ProviderCredentials
         exclude = ('created_at','updated_at')
-        dump_only = ('timestamp','user_id', 'role_id')
+        dump_only = ('timestamp','user_id', 'role_id', 'role_request_id')
         include_fk = True
     
     idx = fields.Integer(required=False, dump_only=True)

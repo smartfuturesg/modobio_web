@@ -134,16 +134,11 @@ class ProviderCredentialsEndpoint(BaseResource):
         User should be Staff Self
         """
 
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-
         current_user, _ = token_auth.current_user()
 
         payload = request.parsed_obj
         state_check = {}
         for role, cred in payload['items']:
-            
-
             
             # credentials must be tied to a role or role request
             # check if user holds the role
@@ -191,8 +186,6 @@ class ProviderCredentialsEndpoint(BaseResource):
                 else:
                     state_check[cred.credential_type].append(cred.state)
 
-
-
             cred.status = 'Pending Verification' if not any([current_app.config['DEV'],current_app.config['TESTING']]) else 'Verified'
             cred.role_id = curr_role.idx if curr_role else None
             cred.user_id = user_id
@@ -212,13 +205,8 @@ class ProviderCredentialsEndpoint(BaseResource):
         User for this request should be the Staff Admin
         """
 
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-
         current_user, _ = token_auth.current_user()
-        if current_user.user_id != user_id:
-            raise Unauthorized()
-        
+      
         valid_statuses = ['Rejected', 'Expired']
 
         payload = request.json
@@ -245,12 +233,8 @@ class ProviderCredentialsEndpoint(BaseResource):
 
         User for this request should be the Staff Self and Staff Admin
         """
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-                
+        
         current_user, _ = token_auth.current_user()
-        if current_user.user_id != user_id:
-            raise Unauthorized()
 
         payload = request.json
 
