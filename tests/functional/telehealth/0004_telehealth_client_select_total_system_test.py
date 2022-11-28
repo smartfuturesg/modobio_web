@@ -7,7 +7,7 @@ from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.user.models import User
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderCredentials
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthQueueClientPool, TelehealthStaffSettings
 from odyssey.tasks.tasks import cleanup_unended_call
@@ -220,10 +220,10 @@ def test_client_time_select_specific_provider_client_in_queue(test_client, staff
 
     location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
-                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
-                            PractitionerCredentials.state == location,
+            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
+                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
+                            ProviderCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
 
     response = test_client.get(
@@ -242,10 +242,10 @@ def test_client_time_select_specific_provider_client_not_in_queue_with_query_par
     #Get staff_id of staff user with role medical_doctor with availability
     location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
-                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
-                            PractitionerCredentials.state == location,
+            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
+                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
+                            ProviderCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
 
     # Request with the valid query parameters which should add client to the queue
@@ -265,10 +265,10 @@ def test_client_time_select_specific_provider_client_not_in_queue_without_requir
     #Get staff_id of staff user with role medical_doctor with availability
     location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
-                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
-                            PractitionerCredentials.state == location,
+            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
+                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
+                            ProviderCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
 
     # Request without required query parameters add a new client in the queue
