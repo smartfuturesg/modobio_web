@@ -298,7 +298,7 @@ class LookupLegalDocsSchema(ma.SQLAlchemyAutoSchema):
         model = LookupLegalDocs
         exclude = ('created_at', 'updated_at', 'path')
 
-    target = fields.String(validate=validate.OneOf(('User', 'Professional', 'Practitioner')))
+    target = fields.String(validate=validate.OneOf(('User', 'Professional', 'Provider')))
     content = fields.String(dump_only=True)
     idx = fields.Integer(dump_only=True)
 
