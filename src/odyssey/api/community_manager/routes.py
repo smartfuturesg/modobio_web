@@ -425,6 +425,15 @@ class CMProviderRoleRequestsEndpoint(BaseResource):
                 consult_rate = 0)
             db.session.add(staff_role)
 
+            db.session.flush()
+
+            # check if user has credentials linked to the role request
+            provider_credentials = ProviderCredentials.query.filter_by(user_id = provider_role_request.user_id, role_request_id = provider_role_request.idx).all()
+            for credential in provider_credentials:
+                credential.role_id = staff_role.idx
+            
+            db.session.commit()
+
         else:
             # bring up the user who requested the role
             # and their current roles
