@@ -477,6 +477,24 @@ the domain @modobio.com
 :type: tuple
 """
 
+PROVIDER_ROLES = (
+    'beautician',
+    'chef',
+    'dietitian',
+    'medical_doctor',
+    'nurse',
+    'nutritionist',
+    'physical_therapist',
+    'therapist',
+    'trainer',
+)
+"""
+Provider roles are external. They work directly with clients and will require care team permissions to access client resources. 
+
+:type: tuple
+"""
+
+
 MEDICAL_CONDITIONS = {
     'Autoimmune': {
         'Diabetes type 1': None,

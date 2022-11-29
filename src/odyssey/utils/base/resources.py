@@ -60,6 +60,8 @@ class BaseResource(Resource):
             user = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
         elif user_type == 'staff':
             user = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
+        elif user_type == 'provider':
+            user = User.query.filter_by(user_id=user_id, is_provider=True, deleted=False).one_or_none()
         else:
             user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
 

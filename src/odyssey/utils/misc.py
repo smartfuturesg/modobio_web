@@ -117,6 +117,13 @@ def check_staff_existence(user_id):
         raise Unauthorized
     return staff
 
+def check_provider_existence(user_id):
+    """Check that the user is in the database and is a staff member"""
+    staff = User.query.filter_by(user_id=user_id, is_provider=True, deleted=False).one_or_none()
+    if not staff:
+        raise Unauthorized
+    return staff
+
 def check_user_existence(user_id, user_type=None):
     """Check that the user is in the database
     If user_type is 'client', check if user_id exists in ClientInfo table.
@@ -766,6 +773,17 @@ class EmailVerification():
         # If account is new, update modobio_id, membersince, and set User.email_verified=True
         if user.email_verified == False: 
             user.update({'email_verified': True})
+            #Run active campaign operations for when a user verifies their email.
+            #Only run active campaign operations in prod
+            if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                from odyssey.tasks.tasks import update_active_campaign_tags
+                tags = [] 
+                #Add user type tags
+                if user.is_client:
+                    tags.append('Persona - Client')
+                if user.is_staff:
+                    tags.append('Persona - Provider')
+                update_active_campaign_tags.delay(user.user_id, tags)
         elif verification.email:
             user.update({'email': verification.email})
         
@@ -776,7 +794,7 @@ class EmailVerification():
             # send welcome email
             send_email('email-welcome', user.email, firstname=user.firstname)  
 
-        # check for pending subscription grants on this email
+        # check for pending subscription grants on this email, add new user_id to subscription grant entries
         subscription_grants = CommunityManagerSubscriptionGrants.query.filter_by(email = user.email.lower()).all()
         for grant in subscription_grants:
             grant.subscription_grantee_user_id = user.user_id
@@ -791,10 +809,9 @@ class EmailVerification():
         #code/token were valid, remove the pending request
         db.session.delete(verification)
         db.session.commit()
+
         return
-
-
-        
+       
 def delete_staff_data(user_id):
     """ Delete staff specific data.
     
@@ -1093,9 +1110,6 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 'is_staff': False,
                 'start_date':  utc_time_now.isoformat()
             }
-
-    elif latest_subscription.subscription_status == 'unsubscribed':
-        welcome_email = True
         
     # check appstore first
     if apple_original_transaction_id or latest_subscription.apple_original_transaction_id:
@@ -1125,6 +1139,8 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
                 latest_subscription.update({
                     'end_date': utc_time_now.isoformat(),
                     'last_checked_date': utc_time_now.isoformat()})
+                
+                welcome_email = True # user was previously unsubscribed and now has a subscription
         
         elif status == 5 and latest_subscription.subscription_status == 'subscribed':
             # update current subscription to unsubscribed
@@ -1162,11 +1178,12 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
             latest_subscription.update({
                     'end_date': utc_time_now.isoformat(),
                     'last_checked_date': utc_time_now.isoformat()})
+            welcome_email = True # user was previously unsubscribed and now has a subscription
     else:
         # user is subscribed and hasn't expired yet
         latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
 
-    if new_sub_data:
+    if new_sub_data.get("subscription_status"):
         new_sub = UserSubscriptionsSchema().load(new_sub_data)
         new_sub.user_id = user_id
         db.session.add(new_sub) 

@@ -28,6 +28,7 @@ from odyssey.api.staff.models import StaffRoles
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
+    UserActiveCampaignTags,
     UserLogin,
     UserRemovalRequests,
     UserSubscriptions,
@@ -52,10 +53,11 @@ from odyssey.api.user.schemas import (
     UserLegalDocsSchema
 )
 from odyssey.integrations.apple import AppStore
+from odyssey.tasks.tasks import update_active_campaign_tags
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME
+from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME, PROVIDER_ROLES, STAFF_ROLES
 from odyssey.utils import search
 from odyssey import db
 from odyssey.utils.message import email_domain_blacklisted, send_email
@@ -66,6 +68,7 @@ from odyssey.utils.misc import (
     check_staff_existence,
     update_client_subscription,
     verify_jwt)
+from odyssey.integrations.active_campaign import ActiveCampaign
 
 ns = Namespace('user', description='Endpoints for user accounts.')
 
@@ -99,6 +102,7 @@ class ApiUser(BaseResource):
         email = user_info.get('email')
 
         payload = {}
+        
         #if email is part of payload, use email update routine
         if email:
             email_domain_blacklisted(email)
@@ -107,15 +111,17 @@ class ApiUser(BaseResource):
             # respond with verification code in dev/testing
             if any((current_app.config['DEV'], current_app.config['TESTING'])) :
                 payload['email_verification_code'] = email_verification_data.get('code')
+
         
         user.update(user_info)
         db.session.commit()
+
 
         return payload
 
 @ns.route('/staff/')
 class NewStaffUser(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',), staff_role=('staff_admin', 'system_admin', 'client_services'))
     @accepts(schema=NewStaffUserSchema, api=ns)
     @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
     def post(self):
@@ -149,10 +155,14 @@ class NewStaffUser(BaseResource):
 
         staff_info = request.json.get('staff_info')
 
+        # validate requested roles. Assign user as staff, provider or both
+        is_provider = True if any(role in PROVIDER_ROLES for role in staff_info.get('access_roles', [])) else False
+        is_staff = True if any(role in STAFF_ROLES for role in staff_info.get('access_roles', [])) else False
+        
         user = User.query.filter(User.email.ilike(email)).first()
         if user:
-            if user.is_staff:
-                # user account already exists for this email and is already a staff account
+            if user.is_staff or user.is_provider:
+                # user account already exists for this email and is already a staff/provider account
                 raise BadRequest('Email address {email} already exists.')
 
             elif user.is_client == False and user.is_staff == False:
@@ -168,7 +178,8 @@ class NewStaffUser(BaseResource):
                 
                 del user_info['password']
                 user_info['is_client'] = False
-                user_info['is_staff'] = True
+                user_info['is_staff'] = is_staff
+                user_info['is_provider'] = is_provider
                 user_info['was_staff'] = True
                 user.update(user_info)
                 
@@ -181,13 +192,20 @@ class NewStaffUser(BaseResource):
                 db.session.flush()
                 verify_email = True
             else:
-                #user account exists but only the client portion of the account is defined
+                # user account exists but only the client portion of the account is defined
                 user.is_staff = True
                 user.was_staff = True
+                del user_info['password']
                 user.update(user_info)
 
                 if user.email_verified:
                     verify_email = False
+
+                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        
+                        #User already exists and email is verified.
+                        #Check if contact exists in Active Campaign, if not create contact. 
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Provider'])
                 else:
                     verify_email = True
         else:
@@ -200,7 +218,8 @@ class NewStaffUser(BaseResource):
             del user_info['password']
             
             user_info["is_client"] = False
-            user_info["is_staff"] = True
+            user_info['is_staff'] = is_staff
+            user_info['is_provider'] = is_provider
             user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables
@@ -350,6 +369,12 @@ class NewClientUser(BaseResource):
                     # update client subscription status if necessary
                     verify_email = False
                     subscription_update = True
+
+                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                        #User already exists and email is verified.
+                        #Check if contact exists in Active Campaign, if not create contact. 
+                        update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Client'])
+                        
                 else:
                     verify_email = True
         else:
@@ -373,7 +398,7 @@ class NewClientUser(BaseResource):
         if verify_email:
             email_verification_data = EmailVerification().begin_email_verification(user, False)
 
-            # #Authenticate newly created client account for immediate login
+            # Authenticate newly created client account for immediate login
             user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
 
         client_info = ClientInfoSchema().load({"user_id": user.user_id})
@@ -686,12 +711,19 @@ class UserSubscriptionApi(BaseResource):
         user, _ = token_auth.current_user()
 
         if request.parsed_obj.apple_original_transaction_id:
-           update_client_subscription(user_id = user_id, apple_original_transaction_id =  request.parsed_obj.apple_original_transaction_id)
+            # ensure that the transaction id is not already in use by another user
+            if UserSubscriptions.query.filter_by(
+                        apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id
+                    ).filter(
+                        UserSubscriptions.user_id != user_id 
+                    ).first():
+                raise BadRequest('This original transaction ID is already in use.')
+            
+            update_client_subscription(user_id = user_id, apple_original_transaction_id =  request.parsed_obj.apple_original_transaction_id)
+            db.session.commit()
         
         elif not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id:
             raise BadRequest('Missing original transaction id')
-
-        db.session.commit()
 
         current_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=True if g.user_type == 'staff' else False).order_by(UserSubscriptions.idx.desc()).first()
 
@@ -820,7 +852,7 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             email verification code provided during client creation
         """
         EmailVerification().complete_email_verification(user_id = user_id, code = request.args.get('code'))
-
+        
         return
 
 @ns.route('/email-verification/resend/<int:user_id>/')
@@ -841,8 +873,8 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
             raise Unauthorized('Email verification failed.')
 
         # create a new token and code for this user
-        verification.token = UserPendingEmailVerifications.generate_token(user_id)
-        verification.code = UserPendingEmailVerifications.generate_code()
+        verification.token = EmailVerification.generate_token(user_id)
+        verification.code = EmailVerification.generate_code()
 
         db.session.commit()
 

@@ -35,9 +35,9 @@ def test_post_subscription_grant(test_client):
     ).all()
 
     # teardown, delete subscription and grants
-    UserSubscriptions.query.filter_by(
-        user_id=test_client.client_id, subscription_status="subscribed"
-    ).delete()
+    # UserSubscriptions.query.filter_by(
+    #     user_id=test_client.client_id, subscription_status="subscribed"
+    # ).delete()
     CommunityManagerSubscriptionGrants.query.filter_by(
         user_id=test_client.staff_id
     ).delete()
