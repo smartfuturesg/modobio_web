@@ -43,7 +43,8 @@ def test_creating_new_staff(test_client, new_staff):
     # some simple checks for validity
 
     assert new_staff['firstname'] == users_staff_new_user_data['user_info']['firstname']
-    assert new_staff['is_staff'] == True
+    assert new_staff['is_staff'] == False
+    assert new_staff['is_provider'] == True
     assert new_staff['is_client'] == False
     assert new_staff['email_verified'] == False
 
@@ -138,6 +139,12 @@ def test_creating_new_staff_blacklisted_email(test_client):
     assert response.json['message'] == 'Email adresses from "10-minute-mail.com" are not allowed.'
 
 def test_add_roles_to_staff(test_client, new_staff):
+    # new_staff is only a provider up to this point
+    # make new_staff a staff member to add staff roles
+    user = User.query.filter_by(user_id=new_staff['user_id']).one_or_none()
+    user.is_staff = True
+    test_client.db.session.commit()
+
     uid = new_staff['user_id']
     response = test_client.put(
         f'/staff/roles/{uid}/',

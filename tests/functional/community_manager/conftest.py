@@ -1,7 +1,7 @@
-from re import U
 import pytest
 
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
+from odyssey.api.provider.models import ProviderRoleRequests
 from odyssey.api.user.models import (
     User,
     UserPendingEmailVerifications,
@@ -84,3 +84,29 @@ def unverified_user(test_client):
         subscription_grantee_user_id=user_id
     ).delete()
     test_client.db.session.commit()
+
+
+@pytest.fixture(scope="function")
+def provider_role_request(test_client):
+    """
+    For the test client user, add a provider role request and User.is_provider = True
+
+    role_id = 14 (trainer)
+    """
+    # add
+    role_request = ProviderRoleRequests(user_id = test_client.client_id, role_id = 14, status = 'pending')
+     
+    test_client.client.is_provider = True
+
+    test_client.db.session.add(role_request)
+    test_client.db.session.commit()
+
+    yield role_request
+
+    # delete all role requests
+    test_client.db.session.query(ProviderRoleRequests).delete()
+
+    test_client.client.is_provider = False
+
+    test_client.db.session.commit()
+    

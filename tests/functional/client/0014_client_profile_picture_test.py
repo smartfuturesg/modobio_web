@@ -10,7 +10,7 @@ from tests.functional.client.data import client_profile_picture_data
 def test_put_client_profile_picture(test_client):
 
     # Test a staff member trying to add client profile picture
-    # Will return 401 unnauthorized
+    # Will return 401 unauthorized
     response = test_client.put(
         f'/client/profile-picture/{test_client.client_id}/',
         headers=test_client.staff_auth_header,
@@ -35,7 +35,7 @@ def test_put_client_profile_picture(test_client):
 
 def test_delete_client_profile_picture(test_client):
     # Test a staff member trying to delete client profile picture
-    # Will return 401 unnauthorized
+    # Will return 401 unauthorized
     response = test_client.delete(
         f'/client/profile-picture/{test_client.client_id}/',
         headers=test_client.staff_auth_header)

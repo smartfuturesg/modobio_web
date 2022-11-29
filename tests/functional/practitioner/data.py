@@ -49,7 +49,6 @@ practitioner_credentials_post_3_data = {
 
 practitioner_credentials_put_1_data = {
     "idx": None, #idx will be set in test
-    "want_to_practice": True,
     "state": "AZ",
     "country_id": 1,
     "credential_type": "npi"
@@ -57,7 +56,6 @@ practitioner_credentials_put_1_data = {
 
 practitioner_credentials_put_2_data = {
     "idx": None, #idx will be set in test
-    "want_to_practice": True,
     "state": "TX",
     "country_id": 1,
     "credential_type": "npi"

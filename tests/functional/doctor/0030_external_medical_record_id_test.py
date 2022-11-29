@@ -29,7 +29,7 @@ def test_post_medical_record_ids(test_client):
 def test_get_medical_record_ids(test_client):
     response = test_client.get(
         f'/doctor/medicalinstitutions/recordid/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200
@@ -38,7 +38,7 @@ def test_get_medical_record_ids(test_client):
 def test_get_medical_institutes(test_client):
     response = test_client.get(
         '/doctor/medicalinstitutions/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200

@@ -1,6 +1,10 @@
 from flask.json import dumps
+import pytest
 
 from tests.functional.client.data import clients_assigned_drinks
+
+# skip module
+pytest.skip('Skipping drink assignment tests', allow_module_level=True)
 
 def test_post_client_assigned_drink(test_client):
     response = test_client.post(

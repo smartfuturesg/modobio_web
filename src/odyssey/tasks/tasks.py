@@ -458,3 +458,50 @@ def cancel_telehealth_appointment(booking, reason='Failed Payment'):
 
     db.session.commit()
     return
+
+@celery.task()
+def add_subscription_tag(user_id):
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    from odyssey.api.user.models import UserActiveCampaign
+    
+    ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+    if ac_contact:
+        ac = ActiveCampaign()
+        ac.add_user_subscription_type(user_id)
+
+@celery.task()
+def add_age_tag(user_id):
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    from odyssey.api.user.models import UserActiveCampaign
+    
+    ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+    if ac_contact:
+        ac = ActiveCampaign()
+        ac.add_age_group_tag(user_id)
+
+@celery.task()
+def update_active_campaign_contact(user_id, firstname, lastname, email):
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    from odyssey.api.user.models import UserActiveCampaign
+    
+    ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+    if ac_contact:
+        ac = ActiveCampaign()
+        ac.update_ac_contact_info(user_id, first_name=firstname, last_name=lastname, email=email)
+
+
+@celery.task(base=BaseTaskWithRetry)
+def update_active_campaign_tags(user_id: int, tags: list):
+    """
+    Adds active campaign tags to a user's profile. If the user does not yet exist in the AC system,
+    we will add them an tag their current subscription type. 
+    """
+    from odyssey.integrations.active_campaign import ActiveCampaign
+    user = User.query.filter_by(user_id=user_id).one_or_none()
+    ac = ActiveCampaign()
+    if not ac.check_contact_existence(user.user_id):
+        ac.create_contact(user.email, user.firstname, user.lastname)
+        ac.add_user_subscription_type(user.user_id)
+
+    for tag in tags:
+        ac.add_tag(user.user_id, tag)
