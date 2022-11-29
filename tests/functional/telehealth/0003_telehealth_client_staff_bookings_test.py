@@ -2,8 +2,8 @@ from datetime import datetime, time, timedelta
 from flask.json import dumps
 from sqlalchemy import select
 
-from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms
-from odyssey.api.staff.models import StaffCalendarEvents
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffSettings
+from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
 from tests.utils import login
 
 import pytest
@@ -120,13 +120,14 @@ def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_avail
 
 def test_get_1_staff_bookings(test_client, telehealth_staff):
     staff_header = login(test_client, telehealth_staff[0])
+
+
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?staff_user_id={telehealth_staff[0].user_id}',
         headers=staff_header,
         content_type='application/json')
 
-    assert response.status_code == 200
 
 def test_get_2_client_bookings(test_client):
     response = test_client.get(
@@ -138,6 +139,12 @@ def test_get_2_client_bookings(test_client):
     assert response.status_code == 200
 
 def test_get_3_staff_client_bookings(test_client, telehealth_staff):
+
+    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    test_client.db.session.add(staff_telehealth_access)
+    test_client.db.session.commit()
+
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
@@ -147,7 +154,55 @@ def test_get_3_staff_client_bookings(test_client, telehealth_staff):
 
     assert response.status_code == 200
     assert response.json['bookings'][0]['status'] == 'Accepted'
+ 
+    test_client.db.session.delete(staff_telehealth_access)
+    test_client.db.session.commit()
+
+def test_post_4_client_staff_bookings(test_client, staff_availabilities, telehealth_staff):
+    """make booking without specifying a payment method nor location"""
+    # delete previous bookings
+    test_client.db.session.query(TelehealthChatRooms).delete()
+    test_client.db.session.query(TelehealthBookingDetails).delete()
+    test_client.db.session.query(TelehealthBookings).delete()
+    test_client.db.session.commit()
+
+    if telehealth_client_staff_bookings_post_1_data.get('payment_method_id'):
+        del telehealth_client_staff_bookings_post_1_data['payment_method_id']
+        
+    # add client to queue first
+    queue_data = {
+        'profession_type': 'medical_doctor',
+        'target_date': datetime.strptime(
+            telehealth_client_staff_bookings_post_1_data.get('target_date'), '%Y-%m-%d').isoformat(),
+        'priority': False,
+        'medical_gender': 'np',
+        'duration': 30}
     
+    response = test_client.post(
+        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(queue_data),
+        content_type='application/json')
+
+    # set staff consult rate to 0
+    staff_role = StaffRoles.query.filter_by(user_id=telehealth_staff[0].user_id, role = 'medical_doctor').one_or_none()
+    staff_role.consult_rate = 0
+    test_client.db.session.commit()
+    
+    response = test_client.post(
+        f'/telehealth/bookings/'
+        f'?client_user_id={test_client.client_id}'
+        f'&staff_user_id={telehealth_staff[0].user_id}',
+        headers=test_client.client_auth_header,
+        data=dumps(telehealth_client_staff_bookings_post_1_data),
+        content_type='application/json')
+
+    assert response.status_code == 201
+    assert response.json.get('bookings')[0].get('status') == 'Pending'
+    assert response.json.get('bookings')[0].get('consult_rate') == 0
+    assert response.json.get('bookings')[0].get('client_location_id') == None
+    assert response.json.get('bookings')[0].get('payment_method_id') == None
+
 #@pytest.mark.skip('randomly failing on pipeline but not locally')
 def test_put_1_client_staff_bookings(test_client, booking):
     
@@ -156,13 +211,13 @@ def test_put_1_client_staff_bookings(test_client, booking):
     
     response = test_client.put(
         f'/telehealth/bookings/?booking_id={booking.idx}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_client_staff_bookings_put_1_data),
         content_type='application/json')
     
+    assert response.status_code == 201
     assert chat.conversation_sid == None
 
-    assert response.status_code == 201
 
 
 def test_put_confirm_client_staff_booking(test_client, booking):
@@ -172,7 +227,7 @@ def test_put_confirm_client_staff_booking(test_client, booking):
 
     response = test_client.put(
         f'/telehealth/bookings/?booking_id={booking.idx}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps( {'status': 'Confirmed'}),
         content_type='application/json')
 
@@ -199,7 +254,7 @@ def test_put_2_client_staff_bookings(test_client, booking_function_scope):
 
     response = test_client.put(
         f'/telehealth/bookings/?booking_id={booking_function_scope.idx}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         data=dumps(telehealth_client_staff_bookings_put_1_data),
         content_type='application/json')
 
@@ -210,8 +265,8 @@ def test_get_4_staff_client_bookings(test_client, booking):
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
-        headers=test_client.staff_auth_header,
+        f'&staff_user_id={test_client.provider_id}',
+        headers=test_client.provider_auth_header,
         content_type='application/json')
         
     assert response.status_code == 200
@@ -224,3 +279,5 @@ def test_get_4_staff_client_bookings(test_client, booking):
 
     assert response_booking['status'] == booking.status
     assert response_booking['status_history'][0]['reporter_role'] == booking.status_history[0].reporter_role
+
+

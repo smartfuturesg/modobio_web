@@ -1,7 +1,7 @@
 """Allow payment_method_id to be null
 
 Revision ID: c3cfeb49a26e
-Revises: b9131229632d
+Revises: a8c8b8ed2cd4
 Create Date: 2022-09-01 16:58:52.541202
 
 """

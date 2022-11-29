@@ -106,9 +106,6 @@ api.add_namespace(ns)
 from odyssey.api.doctor.routes import ns
 api.add_namespace(ns)
 
-from odyssey.api.dosespot.routes import ns
-api.add_namespace(ns)
-
 from odyssey.api.facility.routes import ns
 api.add_namespace(ns)
 
@@ -152,4 +149,7 @@ from odyssey.api.wearables.routes import ns
 api.add_namespace(ns)
 
 from odyssey.api.community_manager.routes import ns
+api.add_namespace(ns)
+
+from odyssey.api.provider.routes import ns
 api.add_namespace(ns)

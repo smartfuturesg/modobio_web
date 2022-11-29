@@ -1023,7 +1023,8 @@ class LookupRoles(BaseModelWithIdx):
 
     is_practitioner = db.Column(db.Boolean)
     """
-    Denotes if this role is a practioner or not.
+    DEPRECATED: 11.8.22 - use is_provider instead
+    Denotes if this role is a practitioner or not.
 
     :type: boolean
     """
@@ -1064,6 +1065,14 @@ class LookupRoles(BaseModelWithIdx):
     :type: string
     """
 
+    
+    is_provider = db.Column(db.Boolean)
+    """
+    Denotes if this role is a p or not.
+
+    :type: boolean
+    """
+
 class LookupLegalDocs(BaseModelWithIdx):
 
     name = db.Column(db.String)
@@ -1082,7 +1091,7 @@ class LookupLegalDocs(BaseModelWithIdx):
 
     target = db.Column(db.String)
     """
-    Target of this document. Types are 'User', 'Professional', and 'Practitioner'.
+    Target of this document. Types are 'User', 'Professional', and 'Provider'.
 
     :type: string
     """

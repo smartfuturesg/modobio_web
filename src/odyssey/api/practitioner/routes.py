@@ -1,4 +1,6 @@
 import logging
+
+from odyssey.api.user.models import User
 logger = logging.getLogger(__name__)
 
 from flask import request, current_app, Response
@@ -15,6 +17,8 @@ from odyssey.api.practitioner.schemas import (
     PractitionerCredentialsSchema,
     PractitionerDeleteCredentialsSchema
 )
+from odyssey.api.telehealth.schemas import TelehealthStaffSettingsSchema
+from odyssey.api.telehealth.models import TelehealthStaffSettings
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.lookup.models import LookupCurrencies, LookupOrganizations
 from odyssey.utils.misc import check_staff_existence
@@ -24,8 +28,10 @@ from odyssey.utils.base.resources import BaseResource
 ns = Namespace('practitioner', description='Operations related to practitioners')
 
 @ns.route('/credentials/<int:user_id>/')
+@ns.deprecated
 class PractionerCredentialsEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('staff',))
+    """Endpoints for getting and updating credentials. Reroutes to provider/credentials"""
+    @token_auth.login_required(user_type=('staff_self',))
     @responds(schema=PractitionerCredentialsInputSchema,status_code=200,api=ns)
     def get(self, user_id):
         """
@@ -49,7 +55,7 @@ class PractionerCredentialsEndpoint(BaseResource):
         ).scalars().all()
         return {'items': query}
 
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=PractitionerCredentialsInputSchema, api=ns)
     @responds(status_code=201,api=ns)
     def post(self, user_id):
@@ -100,7 +106,7 @@ class PractionerCredentialsEndpoint(BaseResource):
         db.session.commit()
         return
 
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=PractitionerCredentialsSchema, api=ns)
     @responds(status_code=201,api=ns)
     def put(self, user_id):
@@ -134,7 +140,7 @@ class PractionerCredentialsEndpoint(BaseResource):
             raise BadRequest('Credentials not found.')
         return
 
-    @token_auth.login_required(user_type=('staff',))
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(schema=PractitionerDeleteCredentialsSchema,api=ns)
     @responds(status_code=201,api=ns)
     def delete(self, user_id):
@@ -167,12 +173,12 @@ class PractitionerConsultationRates(BaseResource):
     """
     Endpoint for practitioners to GET and SET their own HOURLY rates.
     """
-    @token_auth.login_required()
+    @token_auth.login_required(user_type=('staff_self',))
     @accepts(api=ns)
     @responds(schema=PractitionerConsultationRateInputSchema,status_code=200)
     def get(self,user_id):
         """
-        GET - Request to get the practitioners
+        Responds with all roles and consultation rates for provider
         """
         staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
 
@@ -187,7 +193,7 @@ class PractitionerConsultationRates(BaseResource):
     @responds(status_code=201)
     def post(self,user_id):
         """
-        POST - Practitioner inputs their consultation rate
+        Provider submits consultation rates for each role
         """
         # grab all of the roles the practitioner may have
         staff_user_roles = db.session.query(StaffRoles).filter(StaffRoles.user_id==user_id).all()
@@ -217,14 +223,14 @@ class PractitionerConsultationRates(BaseResource):
         return
 
 @ns.route('/affiliations/<int:user_id>/')
-class PractitionerOganizationAffiliationAPI(BaseResource):
+class PractitionerOrganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
     """
     # Multiple origanizations per practitioner possible
     __check_resource__ = False
 
-    @token_auth.login_required(user_type = ('staff',), staff_role = ('staff_admin',))
+    @token_auth.login_required(user_type = ('staff', 'staff_self'), staff_role = ('staff_admin',))
     @responds(schema=PractitionerOrganizationAffiliationSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -253,7 +259,7 @@ class PractitionerOganizationAffiliationAPI(BaseResource):
             raise BadRequest('Invalid organization.')
         
         # verify user_id has a practitioner role (will also raise error if user_id doesn't exist or is client)
-        if True not in [role.role_info.is_practitioner for role in StaffRoles.query.filter_by(user_id=user_id).all()]:
+        if True not in [role.role_info.is_provider for role in StaffRoles.query.filter_by(user_id=user_id).all()]:
             raise BadRequest('Not a practitioner.')
         
         # verify the practitioner is not already affiliated with same organization
@@ -305,3 +311,41 @@ class PractitionerOganizationAffiliationAPI(BaseResource):
         for org in organizations:
             org.org_info = org.org_info
         return organizations
+
+
+@ns.route('/telehealth-activation/<int:user_id>/')
+class PractitionerTelehealthActivationEndpoint(BaseResource):
+    """
+    Activate or deactivate telehealth for providers.
+    """
+    @token_auth.login_required(user_type=('staff_self',))
+    @responds(schema=TelehealthStaffSettingsSchema(only=['provider_telehealth_access']),status_code=200)
+    def get(self, user_id):
+        
+        telehealth_settings = TelehealthStaffSettings.query.filter_by(user_id=user_id).one_or_none()
+        if not telehealth_settings:
+            #User has no telehealth settting set, therefore has no telehalth access
+            return {'provider_telehealth_access': False}
+
+        return telehealth_settings
+        
+    @token_auth.login_required(user_type=('staff',), staff_role=('community_manager',))
+    @accepts(schema=TelehealthStaffSettingsSchema(only=['provider_telehealth_access']))
+    @responds(schema=TelehealthStaffSettingsSchema(only=['provider_telehealth_access']), status_code=200)
+    def put(self, user_id):
+        user = self.check_user(user_id, user_type='staff')
+
+        #update telehealth access flag
+        telehalth_access_flag = request.json.get('provider_telehealth_access')
+        telehealth_settings = TelehealthStaffSettings.query.filter_by(user_id=user.user_id).one_or_none()
+        if not telehealth_settings:
+            #Create telehealth settings with default values and provided flag
+            telehealth_settings = TelehealthStaffSettings(
+                user_id=user.user_id, provider_telehealth_access=telehalth_access_flag
+                )
+            db.session.add(telehealth_settings)
+        else:
+            telehealth_settings.provider_telehealth_access = telehalth_access_flag
+        db.session.commit()
+
+        return telehealth_settings
