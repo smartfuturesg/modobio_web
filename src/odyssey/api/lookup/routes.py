@@ -9,72 +9,8 @@ from flask_restx import Namespace
 
 from werkzeug.exceptions import BadRequest
 
-from odyssey.api.lookup.models import (
-     LookupActivityTrackers,
-     LookupBookingTimeIncrements,
-     LookupClientBookingWindow,
-     LookupClinicalCareTeamResources,
-     LookupCountriesOfOperations,
-     LookupDefaultHealthMetrics,
-     LookupDrinks, 
-     LookupDrinkIngredients,
-     LookupGoals, 
-     LookupProfessionalAppointmentConfirmationWindow,
-     LookupRaces,
-     LookupSubscriptions,
-     LookupTelehealthSessionDuration,
-     LookupTermsAndConditions,
-     LookupTerritoriesOfOperations,
-     LookupTransactionTypes,
-     LookupNotifications,
-     LookupEmergencyNumbers,
-     LookupRoles,
-     LookupMacroGoals,
-     LookupLegalDocs,
-     LookupMedicalSymptoms,
-     LookupOrganizations,
-     LookupCurrencies,
-     LookupNotificationSeverity,
-     LookupBloodTests,
-     LookupBloodTestRanges,
-     LookupDevNames,
-     LookupVisitReasons
-     )
-from odyssey.api.lookup.schemas import (
-    LookupActivityTrackersOutputSchema,
-    LookupBookingTimeIncrementsOutputSchema,
-    LookupCareTeamResourcesOutputSchema,
-    LookupCountriesOfOperationsOutputSchema,
-    LookupDefaultHealthMetricsOutputSchema, 
-    LookupDrinksOutputSchema, 
-    LookupDrinkIngredientsOutputSchema,
-    LookupEHRPagesOutputSchema, 
-    LookupGoalsOutputSchema,
-    LookupRacesOutputSchema,
-    LookupSubscriptionsOutputSchema,
-    LookupTerritoriesOfOperationsOutputSchema,
-    LookupTermsAndConditionsOutputSchema,
-    LookupTransactionTypesOutputSchema,
-    LookupNotificationsOutputSchema,
-    LookupCareTeamResourcesOutputSchema,
-    LookupTimezones,
-    LookupTelehealthSettingsSchema,
-    LookupEmergencyNumbersOutputSchema,
-    LookupRolesOutputSchema,
-    LookupMacroGoalsOutputSchema,
-    LookupLegalDocsOutputSchema,
-    LookupNotificationsOutputSchema,
-    LookupMedicalSymptomsOutputSchema,
-    LookupOrganizationsOutputSchema,
-    LookupCurrenciesOutputSchema,
-    LookupUSStatesOutputSchema,
-    LookupNotificationSeverityOutputSchema,
-    LookupBloodTestsOutputSchema,
-    LookupBloodTestRangesOutputSchema,
-    LookupBloodTestRangesAllOutputSchema,
-    LookupDevNamesOutputSchema,
-    LookupVisitReasonsOutputSchema
-)
+from odyssey.api.lookup.models import *
+from odyssey.api.lookup.schemas import*
 from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -593,3 +529,15 @@ class LookupVisitReasonsApi(BaseResource):
             reasons = LookupVisitReasons.query.filter_by(role_id=role.idx).all()
 
         return {'total_items': len(reasons), 'items': reasons}
+
+@ns.route('/credential-types/')
+class LookupCredentialTypesEndpoint(BaseResource):
+    """
+    Endpoint that returns credential types
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCredentialTypesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        credential_types = LookupCredentialTypes.query.all()
+
+        return {'total_items': len(credential_types), 'items': credential_types}
