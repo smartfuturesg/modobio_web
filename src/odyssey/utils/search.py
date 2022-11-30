@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 def build_es_indices():
     es = current_app.elasticsearch
-    if not es: return
+    if not es:
+        # TODO: throw some kind of error or something?
+        return
 
     queries = []
     # clients = db.session.query_data(User, ClientInfo).filter_by(is_client=True, deleted=False).join(
@@ -32,12 +34,16 @@ def build_es_indices():
 
             for field in user.__searchable__:
                 payload[field] = str(getattr(user, field))
+
             _id = user.user_id
-          # action = '{\"index\":{\"_index\":\"'f'{index_name}''\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
-            # '{"index":{"_index":"clients", "_id":17}\n{"modobio_id": "TC12JASDFF12", "email": "client@modobio.com", "phone_number": "None", "firstname": "Bernie", "lastname": "Focker", "user_id": "17", "dob": "1990-06-01"}'
-            action = '{\"index\":{\"_index\":\"'f'{index_name}''\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
-            # '{"index":{"_index":"clients}", "_id":17}\n{"modobio_id": "TC12JASDFF12", "email": "client@modobio.com", "phone_number": "None", "firstname": "Bernie", "lastname": "Focker", "user_id": "17", "dob": "1990-06-01"}'
-            # breakpoint()
+
+            action = {
+                'index': {
+                    '_index': f'{index_name}',
+                    '_id': f'{_id}' + f'{json.dumps(payload)}'
+                }
+            }
+
             yield action
 
     for queryName, query in queries:
