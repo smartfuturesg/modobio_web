@@ -148,7 +148,7 @@ class ProviderCredentialsEndpoint(BaseResource):
             role_request = None
             if not curr_role:
                 lookup_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
-                role_request = ProviderRoleRequests.query.filter_by(user_id=user_id,role_id=lookup_role.idx).one_or_none()
+                role_request = ProviderRoleRequests.query.filter_by(user_id=user_id,role_id=lookup_role.idx, status = "pending").one_or_none()
                 if not role_request:
                     raise BadRequest(f'User does not hold role {role} or have requested role. Cannot submit credentials for role.')
 
