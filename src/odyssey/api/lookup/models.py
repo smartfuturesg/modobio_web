@@ -1373,3 +1373,34 @@ class LookupVisitReasons(BaseModelWithIdx):
     """
     Role that the reason would justify a visit with
     """
+
+
+class LookupCredentialTypes(BaseModelWithIdx):
+
+    credential_type = db.Column(db.String, unique=True)
+    """
+    Internal name of credential type used in ProviderCredentials.credential_type
+
+    :type: string
+    """
+
+    display_name = db.Column(db.String)
+    """
+    Display name of this credential that should be presented in user-facing applications.
+
+    :type: string
+    """
+    
+    country_required = db.Column(db.Boolean)
+    """
+    Whether or not a country is required for this credential type
+
+    :type: bool
+    """ 
+
+    sub_territory_required = db.Column(db.Boolean)
+    """
+    Whether or not a sub-territory (US state) is required for this credential type
+
+    :type: bool
+    """
