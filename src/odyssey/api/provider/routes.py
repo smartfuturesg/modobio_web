@@ -139,11 +139,9 @@ class ProviderCredentialsEndpoint(BaseResource):
         payload = request.parsed_obj
         state_check = {}
         for role, cred in payload['items']:
-            
             # credentials must be tied to a role or role request
             # check if user holds the role
             # if user does not hold role, attempt to bring up role request
-
             curr_role = StaffRoles.query.filter_by(user_id=user_id,role=role).one_or_none()
             role_request = None
             if not curr_role:
@@ -159,14 +157,19 @@ class ProviderCredentialsEndpoint(BaseResource):
             
             # only one credential type, state, per role/role request allowed.
             # ensure user does not currently have a credential for this role
-            current_cred = ProviderCredentials.query.filter_by(
+            query = ProviderCredentials.query.filter_by(
                 user_id=user_id,
                 credential_type=cred.credential_type,
                 state = cred.state,
-                role_id = curr_role.idx if curr_role else None,
-                role_request_id = role_request.idx if role_request else None
                 ).filter(ProviderCredentials.status.not_in(('Rejected','Expired'))).one_or_none()
 
+            if curr_role:
+                query = query.filter_by(role_id=curr_role.idx)
+            else: 
+                query = query.filter_by(role_request_id=role_request.idx)
+
+            current_cred = query.one_or_none()
+            
             if current_cred:
                 raise BadRequest('User has already submitted this credential. Delete the existing credential before adding a new one.')
 

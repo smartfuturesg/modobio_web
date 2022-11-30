@@ -43,10 +43,7 @@ class ProviderRoleRequests(BaseModelWithIdx,UserIdFkeyMixin):
 
 
 class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
-    """ Medical Credentials table
-    
-    This table is used for storing the Medical Doctor's credentials
-    """
+    """ Licensing and other credentials for providers. """
 
     country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
     """
@@ -57,16 +54,15 @@ class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
 
     state = db.Column(db.String(2))
     """
-    State the MD has medical license for
+    State or sub-territory the credential is tied. 
     
     :type: str
     """
 
     credential_type = db.Column(db.String)
     """
-    (Can be found in constants)
-    For Medical Doctor: <NPI, DEA, Medical License>
-
+    (Can be found in constants and LookupCredentialTypes table)
+   
     :type: str
     """
 
