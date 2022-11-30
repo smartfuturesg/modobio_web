@@ -1091,7 +1091,7 @@ class LookupLegalDocs(BaseModelWithIdx):
 
     target = db.Column(db.String)
     """
-    Target of this document. Types are 'User', 'Professional', and 'Practitioner'.
+    Target of this document. Types are 'User', 'Professional', and 'Provider'.
 
     :type: string
     """
