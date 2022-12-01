@@ -10,7 +10,7 @@ from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest
 
 from odyssey.api.lookup.models import *
-from odyssey.api.lookup.schemas import*
+from odyssey.api.lookup.schemas import *
 from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -525,3 +525,16 @@ class LookupCredentialTypesEndpoint(BaseResource):
         credential_types = LookupCredentialTypes.query.all()
 
         return {'total_items': len(credential_types), 'items': credential_types}
+
+@ns.route('/team/phr-resources/')
+class LookupClinicalCareTeamResourcesApi(BaseResource):
+    """
+    Returns available resources that can be shared within clinical care teams
+    """
+    @token_auth.login_required
+    @responds(schema=LookupPHRResourcesOutputSchema, api=ns)
+    def get(self):
+        """get contents of clinical care team resources lookup table"""
+        care_team_resources = LookupClinicalCareTeamResources.query.all()
+
+        return {'total_items': len(care_team_resources), 'items': care_team_resources}

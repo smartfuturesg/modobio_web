@@ -356,3 +356,7 @@ class LookupCredentialTypesSchema(ma.SQLAlchemyAutoSchema):
 class LookupCredentialTypesOutputSchema(Schema):
     items = fields.Nested(LookupCredentialTypesSchema(many=True), missing=[])
     total_items = fields.Integer()
+
+class LookupPHRResourcesOutputSchema(Schema):
+    items = fields.Nested(LookupEHRPagesSchema(many=True, exclude = ('display_grouping',)), missing = [])
+    total_items = fields.Integer()

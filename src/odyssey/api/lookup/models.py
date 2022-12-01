@@ -622,7 +622,7 @@ class LookupClinicalCareTeamResources(BaseModel):
 
     access_group = db.Column(db.String)
     """
-    Grouping as it relates to practitioner and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
+    Grouping as it relates to provider and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
     should have access to) and 'medical_doctor' (resources specific to the medical_doctor role).
 
     :type: string
