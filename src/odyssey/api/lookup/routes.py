@@ -288,22 +288,6 @@ class LookupRacesApi(BaseResource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
-@ns.route('/care-team/resources/')
-class LookupClinicalCareTeamResourcesApi(BaseResource):
-    """
-    To be replaced by care-team/ehr-resources/
-    Returns available resources that can be shared within clinical care teams
-    """
-    @token_auth.login_required
-    @responds(schema=LookupCareTeamResourcesOutputSchema, api=ns)
-    def get(self):
-        """get contents of clinical care team resources lookup table"""
-        #temporarily not returning medications resource since these features are hidden until
-        #further development
-        res = LookupClinicalCareTeamResources.query \
-            .filter(ClientClinicalCareTeamResources.resource_name != 'medications').all()
-        return {'total_items': len(res), 'items': res}
-
 @ns.route('/care-team/ehr-resources/')
 class LookupClinicalCareTeamResourcesApi(BaseResource):
     """
