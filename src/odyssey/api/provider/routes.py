@@ -161,7 +161,7 @@ class ProviderCredentialsEndpoint(BaseResource):
                 user_id=user_id,
                 credential_type=cred.credential_type,
                 state = cred.state,
-                ).filter(ProviderCredentials.status.not_in(('Rejected','Expired'))).one_or_none()
+                ).filter(ProviderCredentials.status.not_in(('Rejected','Expired')))
 
             if curr_role:
                 query = query.filter_by(role_id=curr_role.idx)
