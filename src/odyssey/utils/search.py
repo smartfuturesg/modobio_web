@@ -28,7 +28,6 @@ def build_es_indices():
 
     # Create two(2) searchable indices (called "clients" and "staff") from query_data
     def build_index(index_name: str, query_data: list):
-        # action = ''
         for user in query_data:
             payload = {}
 
@@ -89,27 +88,29 @@ def update_index(user: dict, new_entry: bool):
     or if firstname, lastname, phone_number, email, dob or modobio_id are changed
     """
     es = current_app.elasticsearch
-    if not es: return
+    if not es:
+        return
     # updating index indexName when there's an event notification from
     # listening to the db.
 
     _id = user['user_id']
     client = user['is_client']
     staff = user['is_staff']
-    dob = None
+
     try:
         dob = user['dob'].date()
     except:
         dob = user['dob']
+
     update_body = {
         "script": {
             "source": "ctx._source.firstname = params.firstname;\
-                ctx._source.lastname = params.lastname;\
-                ctx._source.phone_number = params.phone_number;\
-                ctx._source.modobio_id = params.modobio_id;\
-                ctx._source.email = params.email;\
-                ctx._source.dob = params.dob;\
-                ctx._source.user_id = params.user_id",
+            ctx._source.lastname = params.lastname;\
+            ctx._source.phone_number = params.phone_number;\
+            ctx._source.modobio_id = params.modobio_id;\
+            ctx._source.email = params.email;\
+            ctx._source.dob = params.dob;\
+            ctx._source.user_id = params.user_id",
             "lang": "painless",
             "params": {
                 "firstname": f"{user['firstname']}",
@@ -118,15 +119,18 @@ def update_index(user: dict, new_entry: bool):
                 "email": f"{user['email']}",
                 "modobio_id": f"{user['modobio_id']}",
                 "dob": f"{dob}" if dob else dob,
-                "user_id": f"{_id}"}}}
+                "user_id": f"{_id}"
+            }
+        }
+    }
 
-    if new_entry:
+    if new_entry:  # in all usages as of 12/01/2022 new_entry is always False
         if client:
             payload = update_body['script']['params']
             body = '{\"index\":{\"_index\":\"clients\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
             es.bulk(body=body, refresh=True)
 
-        if staff:
+        if staff:  # What about if client and staff both???
             payload = update_body['script']['params']
             body = '{\"index\":{\"_index\":\"staff\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
             es.bulk(body=body, refresh=True)
@@ -134,16 +138,11 @@ def update_index(user: dict, new_entry: bool):
     else:
         if client:
             if not es.exists(index='clients', id=_id):
-                payload = update_body['script']['params']
-                body = '{\"index\":{\"_index\":\"clients\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
-                es.bulk(body=body, refresh=True)
+                es.index(index='clients', id=_id, document=update_body['script']['params'])
             es.update(index="clients", id=_id, body=update_body, refresh=True)
-
         if staff:
             if not es.exists(index='staff', id=_id):
-                payload = update_body['script']['params']
-                body = '{\"index\":{\"_index\":\"staff\", \"_id\":'f'{_id}''}\n'f'{json.dumps(payload)}'
-                es.bulk(body=body, refresh=True)
+                es.index(index='staff', id=_id, document=update_body['script']['params'])
             es.update(index="staff", id=_id, body=update_body, refresh=True)
 
 
