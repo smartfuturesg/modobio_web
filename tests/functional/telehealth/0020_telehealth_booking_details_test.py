@@ -1,3 +1,4 @@
+import pytest
 from flask.json import dumps
 
 from odyssey.api.telehealth.models import (
@@ -27,6 +28,9 @@ from odyssey.api.user.models import User
 #   DELETE(delete all details for a booking.idx)
 #10. delete client and staff created for this purpose
 
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_post_booking_details(test_client, booking):
     payload = telehealth_post_booking_details_with_visit_reason
 
@@ -70,6 +74,8 @@ def test_post_booking_details(test_client, booking):
         data=payload)
     assert response.status_code == 400
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_put_booking_details(test_client, booking):
     #To update an entry of booking details, we need the index,
     #since we've only created one entry up to now, we use idx = 1 in the data
@@ -130,6 +136,7 @@ def test_put_booking_details(test_client, booking):
     assert response.status_code == 400
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_booking_details_with_reason(test_client, booking):
     # Get booking details for existing booking.idx
     response = test_client.get(
@@ -150,6 +157,7 @@ def test_get_booking_details_with_reason(test_client, booking):
     assert response.status_code == 200
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_put_booking_details_edit_visit_reason(test_client, booking):
     payload = telehealth_put_booking_details_2
 
@@ -162,6 +170,7 @@ def test_put_booking_details_edit_visit_reason(test_client, booking):
     assert response.status_code == 200
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_booking_details_edited_visit_reason(test_client, booking):
     #Get booking details for existing booking.idx
     response = test_client.get(
@@ -179,6 +188,8 @@ def test_get_booking_details_edited_visit_reason(test_client, booking):
 
     assert response.status_code == 200
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_put_booking_details_remove_visit_reason(test_client, booking):
     payload = telehealth_put_booking_details_3
 
@@ -190,6 +201,8 @@ def test_put_booking_details_remove_visit_reason(test_client, booking):
 
     assert response.status_code == 200
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_booking_details_remove_visit_reason(test_client, booking):
     # Get booking details for existing booking.idx
     response = test_client.get(
@@ -208,6 +221,7 @@ def test_get_booking_details_remove_visit_reason(test_client, booking):
     assert response.status_code == 200
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_delete_booking_details(test_client, booking):
     response = test_client.delete(
         f'/telehealth/bookings/details/{booking.idx}',
