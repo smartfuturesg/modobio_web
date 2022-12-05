@@ -10,7 +10,7 @@ from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest
 
 from odyssey.api.lookup.models import *
-from odyssey.api.lookup.schemas import*
+from odyssey.api.lookup.schemas import *
 from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
