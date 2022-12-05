@@ -58,7 +58,7 @@ from odyssey.api.lookup.models import (
 )
 from odyssey.api.physiotherapy.models import PTHistory 
 from odyssey.api.staff.models import StaffProfile, StaffRecentClients, StaffRoles
-from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
@@ -1348,6 +1348,14 @@ class ClinicalCareTeamMembers(BaseResource):
                         StaffRoles.user_id == team_member[1].user_id))
                     .scalars()
                     .all())
+                
+                # Get provider_telehealth_access flag for staff users
+                provider_telehealth_access_flag = (db.session.execute(
+                    select(TelehealthStaffSettings.provider_telehealth_access)
+                    .where(
+                        TelehealthStaffSettings.user_id == team_member[1].user_id))
+                    .scalars()
+                    .one_or_none())
 
                 is_staff = True
             else:
@@ -1394,6 +1402,7 @@ class ClinicalCareTeamMembers(BaseResource):
                 'membersince': membersince,
                 'is_staff': is_staff,
                 'authorizations' : authorizations,
+                'provider_telehealth_access' : provider_telehealth_access_flag if team_member[1].is_staff else None,
                 'bio': team_member[1].staff_profile.bio if team_member[1].is_staff else None}
 
             # calculate how much time is remaining for temporary members

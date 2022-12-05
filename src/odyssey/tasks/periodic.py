@@ -52,7 +52,7 @@ def refresh_client_data_storage():
 
     return
 
-
+#TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
 @celery.task()
 def deploy_upcoming_appointment_tasks():
     """
@@ -122,7 +122,7 @@ def deploy_upcoming_appointment_tasks():
     db.session.commit()
     logger.info('upcoming bookings task completed')
 
-
+#TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
 @celery.task()
 def deploy_appointment_transcript_store_tasks(target_date=None):
     """
@@ -305,7 +305,7 @@ def find_chargable_bookings():
         charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
     logger.info('charge booking task completed')
 
-
+#TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
 @celery.task()
 def detect_practitioner_no_show():
     """
@@ -369,7 +369,7 @@ def deploy_subscription_update_tasks(interval:int):
     
     return 
 
-
+#TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
 @celery.task()
 def remove_expired_availability_exceptions():
     """
@@ -428,7 +428,7 @@ def create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenanc
         )
         logger.info(f'Maintenance with block_id:{datum["block_id"]} had notifications for it sent to client and staff.')
 
-
+#TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
 @celery.task()
 def check_for_upcoming_booking_charges():
     """
@@ -467,7 +467,7 @@ def check_for_upcoming_booking_charges():
 
     logger.info(f'upcoming booking charges periodic task for {time_now} completed')
 
-
+#TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
 @celery.task()
 def send_appointment_reminder_email():
     logger.info(f'Finding bookings to send pre appointment reminder.')
@@ -546,56 +546,21 @@ def update_ac_age_tags():
 
 
 celery.conf.beat_schedule = {
-    # look for upcoming appointments:
-    'check-for-upcoming-bookings': {
-        'task': 'odyssey.tasks.periodic.deploy_upcoming_appointment_tasks',
-        'schedule': crontab(minute='*/10')
-    },
     # temporary member cleanup
     'cleanup_temporary_care_team': {
         'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
         'schedule': crontab(minute='0', hour='*/1')
     },
-    # telehealth appointment charging
-    #'find_chargable_bookings': {
-    #    'task': 'odyssey.tasks.periodic.find_chargable_bookings',
-    #    'schedule': crontab(minute='*/5')
-    #},
-    # search for telehealth transcripts that need to be stored, deploy those storage tasks
-    'appointment_transcript_store_scheduler': {
-        'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
-        'schedule': crontab(hour=0, minute=10)
-    },
-    # practitioner no show
-    'detect_practitioner_no_show': {
-        'task': 'odyssey.tasks.periodic.detect_practitioner_no_show',
-        'schedule': crontab(minute='*/5')
-    },
+    # update active subscriptions
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
         'args': (60,),
         'schedule': crontab(minute='*/60')
     },
-    # availability
-    'remove_expired_availability_exceptions': {
-        'task': 'odyssey.tasks.periodic.remove_expired_availability_exceptions',
-        'schedule': crontab(hour='0', minute='0')
-    },
     # scheduled maintenances
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
         'task': 'odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
         'schedule': crontab(minute='*/15')
-    },
-    # appointment email reminders
-    'send_appointment_reminder_email': {
-        'task': 'odyssey.tasks.periodic.send_appointment_reminder_email',
-        'schedule': crontab(minute='*/5')
-    },
-    # upcoming booking payment to be charged
-    'check_for_upcoming_booking_charges': {
-        'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
-        'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
-        # off setting this slightly might theoretically smooth out the load on celery
     },
     # Active campaign tags (age group)
     'update_ac_age_tags': {
@@ -604,3 +569,47 @@ celery.conf.beat_schedule = {
     }
 
 }
+
+#TODO Telehealth on the Shelf - removed tasks - re-add to scheduler when telehealth returns
+
+# look for upcoming appointments:
+# 'check-for-upcoming-bookings': {
+#     'task': 'odyssey.tasks.periodic.deploy_upcoming_appointment_tasks',
+#     'schedule': crontab(minute='*/10')
+# },
+
+# telehealth appointment charging
+#'find_chargable_bookings': {
+#    'task': 'odyssey.tasks.periodic.find_chargable_bookings',
+#    'schedule': crontab(minute='*/5')
+#},
+
+# search for telehealth transcripts that need to be stored, deploy those storage tasks
+# 'appointment_transcript_store_scheduler': {
+#     'task': 'odyssey.tasks.periodic.deploy_appointment_transcript_store_tasks',
+#     'schedule': crontab(hour=0, minute=10)
+# },
+
+# practitioner no show
+# 'detect_practitioner_no_show': {
+#     'task': 'odyssey.tasks.periodic.detect_practitioner_no_show',
+#     'schedule': crontab(minute='*/5')
+# },
+
+# availability
+# 'remove_expired_availability_exceptions': {
+#     'task': 'odyssey.tasks.periodic.remove_expired_availability_exceptions',
+#     'schedule': crontab(hour='0', minute='0')
+# },
+
+# appointment email reminders
+# 'send_appointment_reminder_email': {
+#     'task': 'odyssey.tasks.periodic.send_appointment_reminder_email',
+#     'schedule': crontab(minute='*/5')
+# },
+# upcoming booking payment to be charged
+# 'check_for_upcoming_booking_charges': {
+#     'task': 'odyssey.tasks.periodic.check_for_upcoming_booking_charges',
+#     'schedule': crontab(minute='*/6')  # if this were just 30 it would be run at the same time as other periodics
+#     # off setting this slightly might theoretically smooth out the load on celery
+# },
