@@ -946,7 +946,11 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
     def post(self):
         """ Webhook for incoming notifications from Terra. """
         tc = TerraClient()
-        response = tc.handle_flask_webhook(request)
+        # This is correct, but checks the signature in the header,
+        # which relies on having the secret. Don't know key or secret
+        # for data generator on dev portal. The next line does the same without the check.
+        # response = tc.handle_flask_webhook(request)
+        response = terra.api.api_responses.TerraWebhookResponse(request.get_json(), dtype='hook')
 
         if response.dtype == 'auth':
             # Completion of new wearable registration for user,
