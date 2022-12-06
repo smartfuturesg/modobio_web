@@ -68,7 +68,6 @@ from odyssey.utils.misc import (
     check_staff_existence,
     update_client_subscription,
     verify_jwt)
-from odyssey.integrations.active_campaign import ActiveCampaign
 
 ns = Namespace('user', description='Endpoints for user accounts.')
 

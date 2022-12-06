@@ -28,6 +28,32 @@ class ActiveCampaign:
         self.list_id = self.get_list_id(ac_list)
         logger.info('Active Campaign initialization complete.')
 
+    def request(self, method, endpoint, payload=None):
+        """Request handler"""
+
+        url = f'{self.url}{endpoint}'
+
+
+        # error handling of requests
+        try:
+            response = requests.request(method, url, json=payload, headers=self.request_header)
+            response.raise_for_status()
+
+        except requests.exceptions.HTTPError as err:
+            logger.error(f'Active Campaign request failed. Error: {err}')
+            raise err
+        except requests.exceptions.ConnectionError as err:
+            logger.error(f'Active Campaign request failed. Error: {err}')
+            raise err
+        except requests.exceptions.Timeout as err:
+            logger.error(f'Active Campaign request failed. Error: {err}')
+            raise err
+        except requests.exceptions.RequestException as err:
+            logger.error(f'Active Campaign request failed. Error: {err}')
+            raise err
+        
+        return response
+
     def get_list_id(self, ac_list):
         #Returns the list id where contacts will be stored
 
@@ -250,7 +276,7 @@ class ActiveCampaign:
         return response
 
     def add_age_group_tag(self, user_id):
-        #Gets users age and adds to age group
+        # Gets users age and adds to age group
         dob = User.query.filter_by(user_id=user_id).one_or_none().dob
         today = date.today()
         age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
