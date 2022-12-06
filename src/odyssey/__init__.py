@@ -169,7 +169,7 @@ def create_app():
                 app.elasticsearch.indices.delete(index='clients,staff', ignore_unavailable=True)
                 from odyssey.utils import search
                 try:
-                    search.build_ES_indices()
+                    search.build_es_indices()
                 except ProgrammingError as err:
                     # ProgrammingError wraps lower level errors, in this case a
                     # psycopg2.errors.UndefinedTable error. Ignore UndefinedTable error.
