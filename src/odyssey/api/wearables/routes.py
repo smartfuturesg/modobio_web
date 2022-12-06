@@ -974,7 +974,9 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
         elif response.dtype == 'request_processing':
             # TODO: handle data
             pass
-        # elif OTHER TYPES OF DATA PROCESSING
+        elif response.dtype in ('body', 'nutrition', 'sleep', 'daily', 'activity'):
+            import pprint
+            pprint.pprint(response.parsed_response)
         else:
             logger.error(
                 f'Terra webhook response with unknown type {response.dtype}. '
