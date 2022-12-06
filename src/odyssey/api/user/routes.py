@@ -201,7 +201,6 @@ class NewStaffUser(BaseResource):
                     verify_email = False
 
                     if not any((current_app.config['DEV'], current_app.config['TESTING'])):
-                        
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
                         update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Provider'])
