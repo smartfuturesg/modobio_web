@@ -40,6 +40,7 @@ from odyssey.utils.files import FileDownload, FileUpload, ImageUpload, get_profi
 from odyssey.utils.constants import ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE
 from odyssey.api.doctor.schemas import (
     AllMedicalBloodTestSchema,
+    BloodTestsByTestIDSchema,
     CheckBoxArrayDeleteSchema,
     MedicalBloodPressuresSchema,
     MedicalBloodPressuresOutputSchema,
@@ -1801,3 +1802,158 @@ class MedicalSurgeriesAPI(BaseResource):
 
         return MedicalSurgeries.query.filter_by(user_id=user_id).all()
 
+
+@ns.route('/blood-glucose/<int:user_id>/')
+class MedicalBloodGlucoseEndpoint(BaseResource):
+    @token_auth.login_required(user_type=('client', 'provider'), staff_role=('medical_doctor',))
+    @responds(schema=BloodTestsByTestIDSchema, status_code=200, api=ns)
+    @ns.doc(params={'test_id': 'int',})
+    def get(self, user_id):
+        """returns a list of all specified blood glucose test for the given user_id"""
+        
+        test_id = request.args.get('test_id', type=int)
+        if not test_id:
+            raise BadRequest('Test ID not provided')
+
+        query = db.session.query(MedicalBloodTests, MedicalBloodTestResults, LookupBloodTests.display_name)\
+            .join(MedicalBloodTestResults, MedicalBloodTestResults.test_id == MedicalBloodTests.test_id)\
+                .join(LookupBloodTests, LookupBloodTests.modobio_test_code == MedicalBloodTestResults.modobio_test_code)\
+                .filter(MedicalBloodTests.test_id == test_id).all()
+
+        output = {
+            'test_id': query[0][0].test_id,
+            'date': query[0][0].date,
+            'notes': query[0][0].notes,
+            'was_fasted': query[0][0].was_fasted,
+            'test_id': query[0][0].test_id,
+            'reporter_id': query[0][0].reporter_id,
+            'results': []
+        }
+
+        for test, test_result, display_name in query:
+            print(display_name)
+            test_result.display_name = display_name
+            output['results'].append(test_result)
+            
+        return output
+        
+    @token_auth.login_required(user_type=('client', 'provider'), staff_role=('medical_doctor',))
+    @accepts(schema=MedicalBloodTestsInputSchema, api=ns)
+    @responds(schema=MedicalBloodTestsInputSchema, status_code=201, api=ns)
+    def post(self, user_id):
+        """Submits blood glucose tests"""
+
+        self.check_user(user_id, user_type='client')
+        
+        # remove results from data, commit test info without results to db
+        results = request.parsed_obj['results']
+
+        #insert non results data into MedicalBloodTests in order to generate the test_id
+        glucose_test = MedicalBloodTests(**{
+            'user_id': user_id,
+            'reporter_id': token_auth.current_user()[0].user_id,
+            'date': request.parsed_obj['date'],
+            'notes': request.parsed_obj['notes'],
+            'was_fasted': request.parsed_obj['was_fasted']
+        })
+        
+        db.session.add(glucose_test)
+        db.session.commit()
+
+        #for each provided result, evaluate the results based on the range that most applies to the client
+        for result in results:
+            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_code=result['modobio_test_code']).one_or_none()
+            
+            eval_values = {
+                'critical_min': ranges.critical_min if ranges.critical_min is not None else 0,
+                'ref_min': ranges.ref_min if ranges.ref_min is not None else 0,
+                'ref_max': ranges.ref_max if ranges.ref_max is not None else float('inf'),
+                'critical_max': ranges.critical_max if ranges.critical_max is not None else float('inf')
+            }
+
+            #make the evaluation based on the eval values found above
+            if result['result_value'] < eval_values['critical_min']:
+                result['evaluation'] = 'critical'
+            elif result['result_value'] < eval_values['ref_min']:
+                result['evaluation'] = 'abnormal'
+            elif result['result_value'] < eval_values['ref_max']:
+                result['evaluation'] = 'normal'
+            elif result['result_value'] < eval_values['critical_max']:
+                result['evaluation'] = 'abnormal'
+            else:
+                result['evaluation'] = 'critical'
+            result['test_id'] = glucose_test.test_id
+            db.session.add(MedicalBloodTestResults(**result))
+            
+        db.session.commit()
+        
+        return glucose_test
+
+    @token_auth.login_required(user_type=('client', 'provider'), staff_role=('medical_doctor',))
+    @accepts(schema=BloodTestsByTestIDSchema(only=['results', 'notes', 'date', 'reporter_id', 'was_fasted']), api=ns)
+    @responds(status_code=200, api=ns)
+    @ns.doc(params={'test_id': 'int', 'modobio_test_code': 'string'})
+    def put(self, user_id): 
+        test_id = request.args.get('test_id', type=int)
+        if not test_id:
+            raise BadRequest('Test ID not provided')
+
+        glucose_test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
+
+        self.check_ehr_permissions(glucose_test)
+
+        data = request.parsed_obj
+        results = data.pop('results')
+        
+        glucose_test.update(data)
+        db.session.flush()
+
+        if results:
+            for result in results:
+                ranges = LookupBloodTestRanges.query.filter_by(modobio_test_code=result['modobio_test_code']).one_or_none()
+                test_result = MedicalBloodTestResults.query.filter_by(modobio_test_code=result['modobio_test_code'], test_id=test_id).one_or_none()
+                eval_values = {
+                    'critical_min': ranges.critical_min if ranges.critical_min is not None else 0,
+                    'ref_min': ranges.ref_min if ranges.ref_min is not None else 0,
+                    'ref_max': ranges.ref_max if ranges.ref_max is not None else float('inf'),
+                    'critical_max': ranges.critical_max if ranges.critical_max is not None else float('inf')
+                }
+
+                #make the evaluation based on the eval values found above
+                if result['result_value'] < eval_values['critical_min']:
+                    result['evaluation'] = 'critical'
+                elif result['result_value'] < eval_values['ref_min']:
+                    result['evaluation'] = 'abnormal'
+                elif result['result_value'] < eval_values['ref_max']:
+                    result['evaluation'] = 'normal'
+                elif result['result_value'] < eval_values['critical_max']:
+                    result['evaluation'] = 'abnormal'
+                else:
+                    result['evaluation'] = 'critical'
+
+                test_result.update(result)
+
+        db.session.commit()
+
+        return
+
+    @token_auth.login_required(user_type=('client', 'provider'), staff_role=('medical_doctor',))
+    @responds(status_code=200, api=ns)
+    @ns.doc(params={'test_id': 'int',})
+    def delete(self, user_id):
+        '''
+        Delete request for a client's blood test
+        '''
+        test_id = request.args.get('test_id', type=int)
+        if not test_id:
+            raise BadRequest('Test ID not provided')
+
+        result = MedicalBloodTests.query.filter_by(user_id=user_id, test_id=test_id).one_or_none()
+
+        #ensure logged in user is the reporter for this test
+        self.check_ehr_permissions(result)
+
+        db.session.delete(result)
+        db.session.commit()
+\
+        
