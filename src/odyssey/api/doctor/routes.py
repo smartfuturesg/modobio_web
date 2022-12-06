@@ -1938,7 +1938,7 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
         return
 
     @token_auth.login_required(user_type=('client', 'provider'), staff_role=('medical_doctor',))
-    @responds(status_code=200, api=ns)
+    @responds(status_code=204, api=ns)
     @ns.doc(params={'test_id': 'int',})
     def delete(self, user_id):
         '''
