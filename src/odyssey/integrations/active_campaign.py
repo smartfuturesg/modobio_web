@@ -21,12 +21,9 @@ class ActiveCampaign:
         logger.info(f'ACTIVE_CAMPAIGN_API_KEY: {self.url[-4:]}')
         self.request_header = {
             "accept": "application/json",
-            "Api-Token": self.api_key + ":api_token"
+            "Api-Token": self.api_key
         }
-        # self.request_header = {
-        #     "accept": "application/json",
-        #     "Api-Token": ""
-        # }
+       
         ac_list = current_app.config.get('ACTIVE_CAMPAIGN_LIST')
         logger.info(f'ACTIVE_CAMPAIGN_LIST {ac_list}')
         self.list_id = self.get_list_id(ac_list)
@@ -37,7 +34,6 @@ class ActiveCampaign:
 
         url = f'{self.url}{endpoint}'
 
-        # error handling of requests
         try:
             response = requests.request(method, url, json=payload, headers=self.request_header)
             response.raise_for_status()
@@ -227,7 +223,6 @@ class ActiveCampaign:
             return
 
         #Remove tag
-        url = f'{self.url}/contactTags/{tag.tag_id}'
         response = self.request('DELETE', endpoint = f'contactTags/{tag.tag_id}')        
 
         db.session.delete(tag)
@@ -252,8 +247,7 @@ class ActiveCampaign:
             payload['contact']['email'] = email
         
         #Update contact info
-        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
-        response = requests.put(url, json=payload, headers=self.request_header)
+        response = self.request('PUT', endpoint = f'contacts/{ac_id.active_campaign_id}', payload=payload)
 
         logger.info(f'Update Active Campaign contact information status code: {response.status_code}') 
         logger.info(f'Update Active Campaign contact information error: {response.text}')
@@ -267,8 +261,7 @@ class ActiveCampaign:
             return
 
         #Delete contact info
-        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
-        response = requests.delete(url, headers=self.request_header)
+        response = self.request('DELETE', endpoint = f'contacts/{ac_id.active_campaign_id}')
 
         db.session.delete(ac_id)
         db.session.commit()
@@ -314,8 +307,7 @@ class ActiveCampaign:
 
         #Get the ids of the 'Prospect' tags stored in Active Campaign
         query = { 'search': 'prospect' }
-        url = self.url + 'tags/?' + urlencode(query)
-        response = requests.get(url, headers=self.request_header)
+        response = self.request('GET', endpoint = 'tags/?' + urlencode(query))
         data = json.loads(response.text)
 
         if data['meta']['total'] == '0':
@@ -324,8 +316,8 @@ class ActiveCampaign:
         prospect_tag_ids = data['tags']
         
         #Get the tags associated with the user. 
-        url = f'{self.url}/contacts/{ac_contact_id}/contactTags' 
-        response = requests.get(url, headers=self.request_header)
+        response = self.request('GET', endpoint = f'contacts/{ac_contact_id}/contactTags')
+
         data = json.loads(response.text)
         user_tags = data['contactTags']
 
