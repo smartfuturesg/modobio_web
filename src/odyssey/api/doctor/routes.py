@@ -1831,7 +1831,6 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
         }
 
         for test, test_result, display_name in query:
-            print(display_name)
             test_result.display_name = display_name
             output['results'].append(test_result)
             
