@@ -105,7 +105,6 @@ class ActiveCampaign:
             self.convert_prosect(user_id, contact_id)  
 
             #Check if contact is in active campaign list. 
-            url = f"{self.url}/contacts/{contact_id}/contactLists"
             response = self.request('GET', endpoint = f'contacts/{contact_id}/contactLists')
 
             data = json.loads(response.text)
@@ -135,7 +134,6 @@ class ActiveCampaign:
 
     def create_contact(self, email, first_name, last_name):
         #create contact and save contact id
-        url = f'{self.url}/contacts'
         payload = {
             'contact': {
                 'email': email, 
@@ -160,7 +158,6 @@ class ActiveCampaign:
         db.session.commit()
 
         #add contact to list
-        url = f'{self.url}/contactLists'
         payload = {
             "contactList": {
                 "list": self.list_id,
@@ -192,7 +189,6 @@ class ActiveCampaign:
             return
 
         #Add tag to contact
-        url = f'{self.url}/contactTags'
         payload = {
             "contactTag": {
                 "contact": ac_id.active_campaign_id,
