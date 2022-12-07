@@ -368,7 +368,7 @@ class BasicAuth(object):
                     request.view_args.get('staff_user_id',
                         request.view_args.get('provider_user_id',None))))
 
-        if len(staff_user_roles) == 0:
+        if len(staff_user_roles) == 0 and requested_user_id != user.user_id:
             raise Unauthorized("Provider does not have any roles")
         # provider accessing their own resources
         # request args will either contain uid or staff_uid which must match the logged-in user

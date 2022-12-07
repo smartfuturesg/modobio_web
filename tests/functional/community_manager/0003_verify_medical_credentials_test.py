@@ -1,8 +1,8 @@
 from flask.json import dumps
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderCredentials
 
 def test_verify_credentials(test_client):
-    cred = PractitionerCredentials.query.filter_by(user_id=test_client.provider.user_id).first()
+    cred = ProviderCredentials.query.filter_by(user_id=test_client.provider.user_id).first()
     cred.status = 'Pending Verification'
     test_client.db.session.commit()
 
@@ -30,7 +30,7 @@ def test_verify_credentials(test_client):
 
 
 def test_verify_credentials_bad_status(test_client):
-    cred = PractitionerCredentials.query.filter_by(user_id=test_client.provider.user_id).first()
+    cred = ProviderCredentials.query.filter_by(user_id=test_client.provider.user_id).first()
     cred.status = 'Pending Verification'
     test_client.db.session.commit()
 

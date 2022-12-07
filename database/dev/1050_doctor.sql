@@ -58,7 +58,7 @@ BEGIN
     SELECT _user_id, idx, _role_id
     FROM "LookupTerritoriesOfOperations";
 
-    INSERT INTO "PractitionerCredentials" (
+    INSERT INTO "ProviderCredentials" (
         user_id,
         country_id,
         state,
