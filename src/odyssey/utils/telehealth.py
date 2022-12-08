@@ -13,7 +13,7 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements, LookupTerritoriesOfOperations
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderCredentials
 from odyssey.api.telehealth.models import(
     TelehealthBookings, 
     TelehealthStaffAvailability, 
@@ -117,15 +117,15 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
 
     if q_request.profession_type == 'medical_doctor':
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
-            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
+            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
                         .join(User, User.user_id == TelehealthStaffAvailability.user_id) \
                             .join(TelehealthStaffSettings, TelehealthStaffSettings.user_id == TelehealthStaffAvailability.user_id) \
-                                .filter(PractitionerCredentials.role.has(role=q_request.profession_type),
+                                .filter(ProviderCredentials.role.has(role=q_request.profession_type),
                                 StaffRoles.consult_rate != None,
                                 TelehealthStaffSettings.provider_telehealth_access == True)
         if location:
-            query = query.filter(PractitionerCredentials.state == location)
+            query = query.filter(ProviderCredentials.state == location)
     else:
         query = db.session.query(TelehealthStaffAvailability.user_id, TelehealthStaffAvailability)\
             .join(StaffRoles, StaffRoles.user_id == TelehealthStaffAvailability.user_id) \

@@ -133,8 +133,9 @@ api.add_namespace(ns)
 from odyssey.api.system.routes import ns
 api.add_namespace(ns)
 
-from odyssey.api.telehealth.routes import ns
-api.add_namespace(ns)
+#TODO Telehealth on the Shelf - removed the telehealth namespace from api - add back when changes reversed
+# from odyssey.api.telehealth.routes import ns
+# api.add_namespace(ns)
 
 from odyssey.api.trainer.routes import ns
 api.add_namespace(ns)
