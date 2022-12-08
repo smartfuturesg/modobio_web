@@ -1,5 +1,5 @@
 from flask.json import dumps
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderCredentials
 
 from .data import (
     practitioner_credentials_post_1_data,
@@ -19,8 +19,8 @@ def test_post_1_credentials(test_client):
         data=dumps(practitioner_credentials_post_1_data),
         content_type='application/json')
 
-    credentials = PractitionerCredentials.query.filter_by(user_id=test_client.staff_id) \
-        .order_by(PractitionerCredentials.idx.desc()).first()
+    credentials = ProviderCredentials.query.filter_by(user_id=test_client.staff_id) \
+        .order_by(ProviderCredentials.idx.desc()).first()
 
     assert response.status_code == 201
     #status will be set to 'verified' in test and dev enviornments and 'Pending Verification' in production
@@ -39,8 +39,8 @@ def test_get_1_credentials(test_client):
 
 def test_put_1_credentials(test_client):
 
-    credentials = PractitionerCredentials.query.filter_by(user_id=test_client.staff_id) \
-        .order_by(PractitionerCredentials.idx.desc()).first()
+    credentials = ProviderCredentials.query.filter_by(user_id=test_client.staff_id) \
+        .order_by(ProviderCredentials.idx.desc()).first()
     
     credentials.status = 'Rejected'
     practitioner_credentials_put_1_data["idx"] = credentials.idx
@@ -77,8 +77,8 @@ def test_post_2_credentials_bad_payload_with_state_missing_credential_number(tes
 
 def test_put_2_credentials_invalid_status(test_client):
 
-    credentials = PractitionerCredentials.query.filter_by(user_id=test_client.staff_id) \
-        .order_by(PractitionerCredentials.idx.desc()).first()
+    credentials = ProviderCredentials.query.filter_by(user_id=test_client.staff_id) \
+        .order_by(ProviderCredentials.idx.desc()).first()
 
     practitioner_credentials_put_2_data["idx"] = credentials.idx
 
@@ -91,8 +91,8 @@ def test_put_2_credentials_invalid_status(test_client):
     assert response.status_code == 400    
 
 def test_delete_1_credentials(test_client):
-    credentials = PractitionerCredentials.query.filter_by(user_id=test_client.staff_id) \
-        .order_by(PractitionerCredentials.idx.desc()).first()
+    credentials = ProviderCredentials.query.filter_by(user_id=test_client.staff_id) \
+        .order_by(ProviderCredentials.idx.desc()).first()
 
     practitioner_credentials_delete_1_data["idx"] = credentials.idx
 
