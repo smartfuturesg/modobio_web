@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import or_, select
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
@@ -8,6 +9,9 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
 from odyssey.tasks.tasks import abandon_telehealth_booking, upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
 
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_upcoming_bookings_scan(test_client, upcoming_bookings):
     """
         To test the upcoming bookings scan we have to

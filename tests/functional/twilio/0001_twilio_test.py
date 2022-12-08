@@ -7,7 +7,7 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.periodic import deploy_appointment_transcript_store_tasks
 from odyssey.tasks.tasks import store_telehealth_transcript
 
-pytest.skip(allow_module_level=True)
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations if/when Twilio reactivated
 
 def test_twilio_wrapper(test_client, booking_function_scope):
     """
@@ -147,6 +147,7 @@ def test_conversation_cache_scheduler(test_client, booking_function_scope):
 
     assert len(bookings) == 1
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_telehealth_transcript_get(test_client, booking_function_scope):
     """
     Testing the API for retrieving telehealth transcripts stored on the modobio end. Only bookings which have 
@@ -214,6 +215,7 @@ def test_telehealth_transcript_get(test_client, booking_function_scope):
     assert msg_count == 13
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_telehealth_bookings_get(test_client, booking_function_scope):
     """
     Testing the API for retrieving telehealth bookings..again. This time the focus is on retrieving the details of the
