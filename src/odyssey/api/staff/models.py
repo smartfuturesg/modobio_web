@@ -12,6 +12,7 @@ from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
 from odyssey.api.lookup.models import LookupRoles
+from odyssey.api.provider.models import ProviderCredentials
 
 class StaffProfile(BaseModel):
     """ Staff member profile information table.
@@ -129,11 +130,11 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: :class:`StaffOperationalTerritories` instance list
     """ 
 
-    credentials = db.relationship('PractitionerCredentials', uselist=True, back_populates='role')
+    credentials = db.relationship('ProviderCredentials', uselist=True, back_populates='role')
     """
-    One to many relationship with staff's opeartional territories
+    One to many relationship with staff's credentials
 
-    :type: :class:`StaffOperationalTerritories` instance list
+    :type: :class:`ProviderCredentials` instance list
     """            
 
     granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=True)

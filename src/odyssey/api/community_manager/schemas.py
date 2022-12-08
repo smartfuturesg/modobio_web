@@ -2,8 +2,7 @@ import logging
 
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 from odyssey.api.lookup.schemas import LookupRolesSchema
-from odyssey.api.practitioner.models import PractitionerCredentials
-from odyssey.api.provider.models import ProviderRoleRequests
+from odyssey.api.provider.models import *
 from odyssey.api.staff.models import StaffRoles
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class PaginationLinks(Schema):
     
 class ProviderLicensingSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = PractitionerCredentials
+        model = ProviderCredentials
         exclude = ('idx',)
 
     firstname = fields.String()
@@ -52,7 +51,7 @@ class ProviderLiscensingAllSchema(Schema):
 
 class VerifyMedicalCredentialSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = PractitionerCredentials
+        model = ProviderCredentials
         exclude = ('country_id','role_id')
         
     user_id = fields.Integer(required=True)
