@@ -1373,3 +1373,64 @@ class LookupVisitReasons(BaseModelWithIdx):
     """
     Role that the reason would justify a visit with
     """
+
+
+class LookupBloodGlucoseRanges(BaseModelWithIdx):
+    """
+    Lookup table for blood glucose test ranges.
+    """
+
+    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'), nullable=False,)
+    """
+    Internal test code
+    
+    :type: string, foreign key
+    """
+
+    units = db.Column(db.String)
+    """
+    Units of range.
+    
+    :type: string
+    """
+
+    hypoglycemia_max = db.Column(db.Float)
+    """
+    Hypoglycemia max
+    
+    :type: float    
+    """
+
+    normal_min = db.Column(db.Float)
+    """
+    Normal min.
+    
+    :type: float    
+    """
+
+    normal_max = db.Column(db.Float)
+    """
+    Normal max.
+    
+    :type: float    
+    """
+
+    prediabetic_min = db.Column(db.Float)
+    """
+    Prediabetic min.
+    
+    :type: float    
+    """
+    prediabetic_max = db.Column(db.Float)
+    """
+    Prediabetic max.
+    
+    :type: float    
+    """
+
+    diabetic_min = db.Column(db.Float)
+    """
+    Diabetic min.
+    
+    :type: float    
+    """

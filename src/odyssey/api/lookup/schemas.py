@@ -6,6 +6,7 @@ from marshmallow import Schema, fields, post_load, validate
 from odyssey import ma
 from odyssey.api.lookup.models import (
     LookupActivityTrackers,
+    LookupBloodGlucoseRanges,
     LookupBloodTests, 
     LookupBookingTimeIncrements,
     LookupClinicalCareTeamResources,
@@ -377,4 +378,14 @@ class LookupVisitReasonsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupVisitReasonsOutputSchema(Schema):
     items = fields.Nested(LookupVisitReasonsSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+
+class LookupBloodGlucoseRangesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupBloodGlucoseRanges
+        exclude = ('created_at', 'updated_at')
+
+class LookupBloodGlucoseRangesOutputSchema(Schema):
+    items = fields.Nested(LookupBloodGlucoseRangesSchema(many=True), missing=[])
     total_items = fields.Integer()

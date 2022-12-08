@@ -11,6 +11,7 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey.api.lookup.models import (
      LookupActivityTrackers,
+     LookupBloodGlucoseRanges,
      LookupBookingTimeIncrements,
      LookupClientBookingWindow,
      LookupClinicalCareTeamResources,
@@ -42,6 +43,7 @@ from odyssey.api.lookup.models import (
      )
 from odyssey.api.lookup.schemas import (
     LookupActivityTrackersOutputSchema,
+    LookupBloodGlucoseRangesOutputSchema,
     LookupBookingTimeIncrementsOutputSchema,
     LookupCareTeamResourcesOutputSchema,
     LookupCountriesOfOperationsOutputSchema,
@@ -593,3 +595,16 @@ class LookupVisitReasonsApi(BaseResource):
             reasons = LookupVisitReasons.query.filter_by(role_id=role.idx).all()
 
         return {'total_items': len(reasons), 'items': reasons}
+
+
+@ns.route('/blood-glucose/')
+class LookupBloodTestsApi(BaseResource):
+    """
+    Endpoint that returns the ranges of blood glucose levels.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodGlucoseRangesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of blood glucose lookup table"""
+        res = LookupBloodGlucoseRanges.query.all()
+        return {'total_items': len(res), 'items': res}
