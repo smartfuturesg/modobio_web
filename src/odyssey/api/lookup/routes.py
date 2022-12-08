@@ -606,5 +606,13 @@ class LookupBloodTestsApi(BaseResource):
     @responds(schema=LookupBloodGlucoseRangesOutputSchema, status_code=200, api=ns)
     def get(self):
         """get contents of blood glucose lookup table"""
-        res = LookupBloodGlucoseRanges.query.all()
+
+        query = db.session.query(LookupBloodGlucoseRanges, LookupBloodTests.display_name)\
+            .join(LookupBloodTests, LookupBloodGlucoseRanges.modobio_test_code == LookupBloodTests.modobio_test_code).all()
+
+        res = []
+        for result, display_name in query:
+            result.test_name = display_name
+            res.append(result)
+
         return {'total_items': len(res), 'items': res}

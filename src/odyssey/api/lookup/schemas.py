@@ -385,6 +385,8 @@ class LookupBloodGlucoseRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupBloodGlucoseRanges
         exclude = ('created_at', 'updated_at')
+    
+    test_name = fields.String()
 
 class LookupBloodGlucoseRangesOutputSchema(Schema):
     items = fields.Nested(LookupBloodGlucoseRangesSchema(many=True), missing=[])
