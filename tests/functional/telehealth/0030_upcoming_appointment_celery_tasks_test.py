@@ -54,7 +54,7 @@ def test_upcoming_bookings_scan(test_client, upcoming_bookings):
     ).scalars().all()
     
     # in syntax is used to ensure the test can pass when run either on its own or in a suite
-    # 2 notifications are created for each booking (one for cleint and one for practitioner) 
+    # 2 notifications are created for each booking (one for client and one for practitioner) 
     # during this test and if the cancellation test has also been run an additional 1 
     # notification will exist 
     assert len(notifications) in [(len(bookings)*2), len(bookings)*2 + 1]
