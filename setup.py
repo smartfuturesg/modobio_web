@@ -42,7 +42,8 @@ setup(
         'redis',
         'requests',
         'requests-oauthlib',
-        'twilio',
+        #TODO Telehealth on the Shelf - twilio removed from required installs - add back when telehealth and twilio reactivated
+        #'twilio',
         'PyJWT',
         'WeasyPrint'
     ],

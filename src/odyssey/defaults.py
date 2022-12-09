@@ -191,18 +191,20 @@ Note that files will be kept for only 24 hours after a pytest run, unless
 
 .. seealso:: :const:`AWS_S3_PREFIX`
 """
+#TODO Telehealth on the Shelf - removed twilio access key defaults - should be added back when we
+# reactivate a Twilio enabled telehealth feature.
 
 # Twilio settings
-TWILIO_ACCOUNT_SID = ''
+#TWILIO_ACCOUNT_SID = ''
 """ Twilio account ID number. """
 
-TWILIO_API_KEY_SID = ''
+#TWILIO_API_KEY_SID = ''
 """ Twilio API access key ID number. """
 
-TWILIO_API_KEY_SECRET = ''
+#TWILIO_API_KEY_SECRET = ''
 """ Twilio API access key secret. """
 
-CONVERSATION_SERVICE_SID = ''
+#CONVERSATION_SERVICE_SID = ''
 """ Twilio conversation serive ID number. """
 
 # Celery settings.
