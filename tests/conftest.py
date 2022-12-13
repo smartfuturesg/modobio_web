@@ -170,7 +170,8 @@ def test_client():
             
             # Cleanup functions also need a live app.
             db.session.rollback()
-            clear_twilio()
+            #TODO Telehealth on the Shelf - removed clear_twilio call - add back when telehealth and twilio reactivated
+            #clear_twilio()
             clear_db()
 
             # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
