@@ -34,7 +34,53 @@ from odyssey.api.client.models import (
     ClientTransactionHistory,
     ClientRaceAndEthnicity
 )
-from odyssey.api.client.schemas import (
+from odyssey.api.doctor.models import (
+    MedicalFamilyHistory,
+    MedicalGeneralInfo,
+    MedicalGeneralInfoMedications,
+    MedicalGeneralInfoMedicationAllergy,
+    MedicalHistory, 
+    MedicalPhysicalExam,               
+    MedicalSocialHistory
+)
+from odyssey.api.lookup.models import (
+    LookupClinicalCareTeamResources,
+    LookupCountriesOfOperations,
+    LookupDefaultHealthMetrics,
+    LookupGoals, 
+    LookupDrinks,
+    LookupMacroGoals, 
+    LookupRaces,
+    LookupNotifications,
+    LookupTerritoriesOfOperations
+)
+from odyssey.api.physiotherapy.models import PTHistory 
+from odyssey.api.staff.models import StaffProfile, StaffRecentClients, StaffRoles
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
+from odyssey.api.trainer.models import FitnessQuestionnaire
+from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.api.user.models import User, UserLogin, UserTokenHistory, UserProfilePictures
+from odyssey.api.user.routes import UserLogoutApi
+from odyssey.utils.auth import token_auth, basic_auth
+from odyssey.utils.constants import (
+    FERTILITY_STATUSES,
+    TABLE_TO_URI,
+    ALLOWED_IMAGE_TYPES,
+    IMAGE_MAX_SIZE,
+    IMAGE_DIMENSIONS,
+    DEV_EMAIL_DOMAINS,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID)
+from odyssey.utils.message import send_email, email_domain_blacklisted
+from odyssey.utils.misc import (
+    check_client_existence, 
+    check_drink_existence,
+    create_notification
+)
+from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
+from odyssey.utils.pdf import to_pdf, merge_pdfs
+
+from odyssey.api.client.schemas import(
     AllClientsDataTier,
     ClientAssignedDrinksSchema,
     ClientAssignedDrinksDeleteSchema,
@@ -1418,8 +1464,16 @@ class ClinicalCareTeamMembers(BaseResource):
                     select(StaffRoles.role)
                     .where(
                         StaffRoles.user_id == team_member[1].user_id))
-                               .scalars()
-                               .all())
+                    .scalars()
+                    .all())
+                
+                # Get provider_telehealth_access flag for staff users
+                provider_telehealth_access_flag = (db.session.execute(
+                    select(TelehealthStaffSettings.provider_telehealth_access)
+                    .where(
+                        TelehealthStaffSettings.user_id == team_member[1].user_id))
+                    .scalars()
+                    .one_or_none())
 
                 is_staff = True
             else:
@@ -1465,7 +1519,8 @@ class ClinicalCareTeamMembers(BaseResource):
                 'is_temporary': team_member[0].is_temporary,
                 'membersince': membersince,
                 'is_staff': is_staff,
-                'authorizations': authorizations,
+                'authorizations' : authorizations,
+                'provider_telehealth_access' : provider_telehealth_access_flag if team_member[1].is_staff else None,
                 'bio': team_member[1].staff_profile.bio if team_member[1].is_staff else None}
 
             # calculate how much time is remaining for temporary members

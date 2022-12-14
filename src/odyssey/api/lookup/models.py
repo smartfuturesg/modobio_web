@@ -622,7 +622,7 @@ class LookupClinicalCareTeamResources(BaseModel):
 
     access_group = db.Column(db.String)
     """
-    Grouping as it relates to practitioner and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
+    Grouping as it relates to provider and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
     should have access to) and 'medical_doctor' (resources specific to the medical_doctor role).
 
     :type: string
@@ -1372,4 +1372,35 @@ class LookupVisitReasons(BaseModelWithIdx):
     role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
     """
     Role that the reason would justify a visit with
+    """
+
+
+class LookupCredentialTypes(BaseModelWithIdx):
+
+    credential_type = db.Column(db.String, unique=True)
+    """
+    Internal name of credential type used in ProviderCredentials.credential_type
+
+    :type: string
+    """
+
+    display_name = db.Column(db.String)
+    """
+    Display name of this credential that should be presented in user-facing applications.
+
+    :type: string
+    """
+    
+    country_required = db.Column(db.Boolean)
+    """
+    Whether or not a country is required for this credential type
+
+    :type: bool
+    """ 
+
+    sub_territory_required = db.Column(db.Boolean)
+    """
+    Whether or not a sub-territory (US state) is required for this credential type
+
+    :type: bool
     """

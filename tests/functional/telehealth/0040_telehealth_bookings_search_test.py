@@ -1,10 +1,10 @@
-
-
-
+import pytest
 from datetime import timedelta
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms
 
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_booking_by_date_time(test_client, booking_function_scope):
     # change the timing of the call so that it has already ended
 
@@ -25,7 +25,9 @@ def test_get_booking_by_date_time(test_client, booking_function_scope):
     booking_dates = [booking['target_date_utc'] for booking in response.json.get('bookings') ]
     assert response.status_code == 200
     assert len(booking_dates) == 0
-    
+
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_booking_by_status(test_client, booking_function_scope):
     # change the timing of the call so that it has already ended
 
@@ -49,7 +51,7 @@ def test_get_booking_by_status(test_client, booking_function_scope):
     assert all([booking_status == 'Canceled' for booking_status in booking_statuss])
 
     
-    
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_booking_by_order(test_client, booking_function_scope):
     
     # 
