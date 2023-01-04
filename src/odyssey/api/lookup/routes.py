@@ -548,6 +548,17 @@ class LookupCGMRangesEndpoint(BaseResource):
     @responds(schema=LookupBloodGlucoseCGMRangesOutputSchema, status_code=200, api=ns)
     def get(self):
         cgm_ranges = LookupBloodGlucoseCGMRanges.query.all()
-        # breakpoint()
 
         return {'total_items': len(cgm_ranges), 'items': cgm_ranges}
+
+@ns.route('/blood-glucose/cgm/demographics/')
+class LookupCGMDemographicsEndpoint(BaseResource):
+    """
+    Endpoint that returns CGM demographics
+    """
+    # @token_auth.login_required
+    @responds(schema=LookupBloodGlucoseCGMDemographicsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        cgm_demographics = LookupCGMDemographics.query.all()
+
+        return {'total_items': len(cgm_demographics), 'items': cgm_demographics}

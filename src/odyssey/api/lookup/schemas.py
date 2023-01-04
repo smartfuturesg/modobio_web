@@ -375,3 +375,7 @@ class LookupBloodGlucoseCGMRangesSchema(ma.SQLAlchemyAutoSchema):
 class LookupBloodGlucoseCGMRangesOutputSchema(Schema):
     items = fields.Nested(LookupBloodGlucoseCGMRangesSchema(many=True), missing=[])
     total_items = fields.Integer()
+
+class LookupBloodGlucoseCGMDemographicsOutputSchema(Schema):
+    items = fields.Nested(LookupCGMDemographicsSchema(many=True), missing=[])
+    total_items = fields.Integer()
