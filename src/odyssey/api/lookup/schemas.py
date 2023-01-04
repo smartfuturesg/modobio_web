@@ -358,6 +358,8 @@ class LookupBloodGlucoseRangesSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupBloodGlucoseRangesOutputSchema(Schema):
     items = fields.Nested(LookupBloodGlucoseRangesSchema(many=True), missing=[])
+    total_items = fields.Integer()
+    
 class LookupCredentialTypesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupCredentialTypes
