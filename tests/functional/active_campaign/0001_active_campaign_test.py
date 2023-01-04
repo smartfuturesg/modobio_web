@@ -93,8 +93,11 @@ def test_convert_prospect(test_client, create_contact):
     response = ac.add_tag(test_client.client_id, 'Prospect')
     assert response.status_code == 201
 
+    contact_response = create_contact[0]
+    data = json.loads(contact_response.text)
+
     #Convert Prospect 
-    response = ac.convert_prosect(test_client.client_id)
+    response = ac.convert_prosect(test_client.client_id, int(data['contact']['id']))
     data = json.loads(response.text)
 
     assert response.status_code == 201
