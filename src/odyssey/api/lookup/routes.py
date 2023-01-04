@@ -514,6 +514,27 @@ class LookupVisitReasonsApi(BaseResource):
 
         return {'total_items': len(reasons), 'items': reasons}
 
+
+@ns.route('/blood-glucose/')
+class LookupBloodTestsApi(BaseResource):
+    """
+    Endpoint that returns the ranges of blood glucose levels.
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodGlucoseRangesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        """get contents of blood glucose lookup table"""
+
+        query = db.session.query(LookupBloodGlucoseRanges, LookupBloodTests.display_name)\
+            .join(LookupBloodTests, LookupBloodGlucoseRanges.modobio_test_code == LookupBloodTests.modobio_test_code).all()
+
+        res = []
+        for result, display_name in query:
+            result.test_name = display_name
+            res.append(result)
+
+        return {'total_items': len(res), 'items': res}
+        
 @ns.route('/credential-types/')
 class LookupCredentialTypesEndpoint(BaseResource):
     """
