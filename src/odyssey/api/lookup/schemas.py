@@ -360,3 +360,18 @@ class LookupCredentialTypesOutputSchema(Schema):
 class LookupPHRResourcesOutputSchema(Schema):
     items = fields.Nested(LookupEHRPagesSchema(many=True, exclude = ('display_grouping',)), missing = [])
     total_items = fields.Integer()
+
+class LookupCGMDemographicsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupCGMDemographics
+        exclude = ('created_at', 'updated_at')
+class LookupBloodGlucoseCGMRangesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupBloodGlucoseCGMRanges
+        exclude = ('created_at', 'updated_at')
+
+    demographic = fields.Nested(LookupCGMDemographicsSchema, dump_only=True)
+
+class LookupBloodGlucoseCGMRangesOutputSchema(Schema):
+    items = fields.Nested(LookupBloodGlucoseCGMRangesSchema(many=True), missing=[])
+    total_items = fields.Integer()

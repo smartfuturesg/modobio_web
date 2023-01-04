@@ -1418,14 +1418,14 @@ class LookupCGMDemographics(BaseModelWithIdx):
     :type: string
     """
 
-    demographic_display_name = db.Column(db.String)
+    display_name = db.Column(db.String)
     """
     Display name of this demographic that should be presented in user-facing applications.
 
     :type: string
     """
 
-    ranges = db.relationship('LookupBloodGlucoseCGM')
+    ranges = db.relationship('LookupBloodGlucoseCGMRanges', back_populates='demographic')
     """
     Relation holding information on ranges that apply to this demographic.
 
@@ -1435,7 +1435,14 @@ class LookupCGMDemographics(BaseModelWithIdx):
 class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
     """ Lookup table of reference ranges for continuous glucose monitors (CGM)""" 
 
-    demographic_id = db.Column(db.Integer, db.ForeignKey('LookupCGMDemographics.demographic_id'))
+    demographic_id = db.Column(db.Integer, db.ForeignKey('LookupCGMDemographics.idx'))
+
+    demographic = db.relationship('LookupCGMDemographics', back_populates='ranges')
+    """
+    Relation holding information on demographics that apply to this range.
+
+    :type: :class: LookupCGMDemographics
+    """
     
     classification = db.Column(db.String)
     """
@@ -1444,35 +1451,35 @@ class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
     :type: string
     """
     
-    min_mg_dL = db.Column(db.float, nullable=True)
+    min_mg_dL = db.Column(db.Float, nullable=True)
     """
     Minimum of blood glucose in mg/dL for this range. Left null if there is no minimum.
 
     :type: float
     """
 
-    max_mg_dL = db.Column(db.float)
+    max_mg_dL = db.Column(db.Float)
     """
     Maximum of blood glucose in mg/dL for this range. Left null if there is no maximum.
 
     :type: float
     """
 
-    max_mmol_L = db.Column(db.float)
+    max_mmol_L = db.Column(db.Float)
     """
     Maximum of blood glucose in mmol/L. Left null if there is no maximum.
 
     :type: float
     """
 
-    min_mmol_L = db.Column(db.float)
+    min_mmol_L = db.Column(db.Float)
     """
     Minimum of blood glucose in mmol/L. Left null if there is no minimum.
 
     :type: float
     """
 
-    min_percent_in = db.column(db.float)
+    min_percent_in = db.Column(db.Float)
     """
     Minimum percentage of time in this range. Represented as a percentage of a day.
     Left null if there is no minimum.
@@ -1480,7 +1487,7 @@ class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
     :type: float
     """
 
-    max_percent_in = db.column(db.float)
+    max_percent_in = db.Column(db.Float)
     """
     Maximum percentage of time in this range. Represented as a percentage of a day.
     Left null if there is no maximum.
@@ -1488,14 +1495,14 @@ class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
     :type: float
     """
 
-    min_time_in = db.column(db.float)
+    min_time_in = db.Column(db.Float)
     """
     Minimum time in this range in minutes. Left null if there is no minimum.
 
     :type: float
     """
 
-    max_time_in = db.column(db.float)
+    max_time_in = db.Column(db.Float)
     """
     Maximum time in this range in minutes. Left null if there is no maximum.
 

@@ -538,3 +538,16 @@ class LookupClinicalCareTeamResourcesApi(BaseResource):
         care_team_resources = LookupClinicalCareTeamResources.query.all()
 
         return {'total_items': len(care_team_resources), 'items': care_team_resources}
+
+@ns.route('/blood-glucose/cgm/ranges/')
+class LookupCGMRangesEndpoint(BaseResource):
+    """
+    Endpoint that returns CGM ranges
+    """
+    # @token_auth.login_required
+    @responds(schema=LookupBloodGlucoseCGMRangesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        cgm_ranges = LookupBloodGlucoseCGMRanges.query.all()
+        # breakpoint()
+
+        return {'total_items': len(cgm_ranges), 'items': cgm_ranges}
