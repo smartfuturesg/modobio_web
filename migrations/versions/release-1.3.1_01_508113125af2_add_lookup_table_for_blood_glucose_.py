@@ -1,7 +1,7 @@
 """Add lookup table for blood glucose ranges
 
 Revision ID: 508113125af2
-Revises: f81e7cbdab82
+Revises: b50b55dbf985
 Create Date: 2022-12-08 12:58:06.049264
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '508113125af2'
-down_revision = 'f81e7cbdab82'
+down_revision = 'b50b55dbf985'
 branch_labels = None
 depends_on = None
 
