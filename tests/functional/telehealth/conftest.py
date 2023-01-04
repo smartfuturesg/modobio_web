@@ -12,7 +12,7 @@ from twilio.base.exceptions import TwilioRestException
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.api.payment.models import PaymentMethods
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderCredentials
 from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffOperationalTerritories
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthStaffSettings
@@ -104,7 +104,7 @@ def telehealth_staff(test_client):
 
         test_client.db.session.commit()
         creds = []
-        creds.append(PractitionerCredentials(
+        creds.append(ProviderCredentials(
             user_id = staff.user_id,
             country_id = 1,
             state = 'FL',
@@ -114,7 +114,7 @@ def telehealth_staff(test_client):
             role_id = StaffRoles.query.filter_by(user_id=staff.user_id, role = 'medical_doctor').one_or_none().idx
         ))
 
-        creds.append(PractitionerCredentials(
+        creds.append(ProviderCredentials(
             user_id = staff.user_id,
             country_id = 1,
             credential_type = 'npi',
@@ -161,7 +161,7 @@ def staff_credentials(test_client):
             role='medical_doctor')
         .one_or_none())
 
-    creds = PractitionerCredentials(
+    creds = ProviderCredentials(
         user_id=test_client.provider_id,
         country_id=1,
         state='FL',

@@ -87,11 +87,11 @@ def test_authorize_clinical_care_team(test_client, care_team):
     #####
     # Authorize another client to access all clinical care team resources
     #####
-    total_resources = LookupClinicalCareTeamResources.query.count()
+    phr_resources = LookupClinicalCareTeamResources.query.all()
     auths = [{
         'team_member_user_id': care_team['client_id'],
-        'resource_id': num}
-        for num in range(1, total_resources + 1)]
+        'resource_id': resource.resource_id}
+        for resource in phr_resources]
     payload = {'clinical_care_team_authorization': auths}
 
     response = test_client.post(
@@ -122,8 +122,8 @@ def test_authorize_clinical_care_team(test_client, care_team):
 
     auths = [{
         'team_member_user_id': care_team['provider_id'],
-        'resource_id': num}
-        for num in range(1, total_resources)]
+        'resource_id': resource.resource_id}
+        for resource in phr_resources]
     payload = {'clinical_care_team_authorization': auths}
 
     response = test_client.post(
@@ -181,10 +181,16 @@ def test_authorize_clinical_care_team(test_client, care_team):
     # As a staff member, post for data access.
     # Authorization should be pending.
     #####
+
+    # delete resource authorization for staff member
+    ClientClinicalCareTeamAuthorizations.query.filter_by(
+        team_member_user_id=care_team['provider_id'], resource_id = phr_resources[-1].resource_id).delete()
+    test_client.db.session.commit()
+    
     payload = {
         'clinical_care_team_authorization': [{
             'team_member_user_id': care_team['provider_id'],
-            'resource_id': total_resources}]}
+            'resource_id': phr_resources[-1].resource_id}]}
             
     response = test_client.post(
         f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
@@ -198,7 +204,7 @@ def test_authorize_clinical_care_team(test_client, care_team):
         select(ClientClinicalCareTeamAuthorizations)
         .filter(
             ClientClinicalCareTeamAuthorizations.team_member_user_id == care_team['provider_id'],
-            ClientClinicalCareTeamAuthorizations.resource_id == total_resources)
+            ClientClinicalCareTeamAuthorizations.resource_id == phr_resources[-1].resource_id)
         ).scalars().one_or_none()
 
     assert staff_authorization.status == 'pending'
@@ -224,7 +230,7 @@ def test_authorize_clinical_care_team(test_client, care_team):
     # The status was automatically set to 'pending'
     for idx, info in enumerate(response.json['clinical_care_team_authorization']):
         if (info['team_member_user_id'] == care_team['provider_id']
-        and info['resource_id'] == total_resources):
+        and info['resource_id'] == phr_resources[-1].resource_id):
             assert response.json['clinical_care_team_authorization'][idx]['status'] == 'pending'
 
     # Now, note the header has switched to the test_client.client_auth_header, indicating

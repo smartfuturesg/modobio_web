@@ -1,4 +1,3 @@
-
 import pytest
 from datetime import datetime, timedelta
 
@@ -7,7 +6,7 @@ from odyssey.api.lookup.models import LookupTerritoriesOfOperations
 
 from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.user.models import User
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderCredentials
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthQueueClientPool, TelehealthStaffSettings
 from odyssey.tasks.tasks import cleanup_unended_call
@@ -31,7 +30,9 @@ from .client_select_data import (
     payment_method_data
 )
 
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_generate_client_queue(test_client):
     #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
@@ -43,6 +44,7 @@ def test_generate_client_queue(test_client):
     assert response.status_code == 201
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_client_time_select(test_client, staff_availabilities):
 
     response = test_client.get(
@@ -53,6 +55,7 @@ def test_client_time_select(test_client, staff_availabilities):
     assert response.json['total_options'] == 94
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_generate_staff_availability(test_client, telehealth_staff):
     """
     fill up the staff availabilities
@@ -84,6 +87,8 @@ def test_generate_staff_availability(test_client, telehealth_staff):
 
         assert response.status_code == 201
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, staff_availabilities):
 
     ##
@@ -188,6 +193,7 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, st
     assert response.status_code == 201
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_generate_client_queue(test_client):
     #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
@@ -199,6 +205,7 @@ def test_generate_client_queue(test_client):
     assert response.status_code == 201
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_client_time_select(test_client, staff_availabilities):
     response = test_client.get(
         f'/telehealth/client/time-select/{test_client.client_id}/',
@@ -207,6 +214,8 @@ def test_client_time_select(test_client, staff_availabilities):
     assert response.status_code == 200
     assert response.json['total_options'] == 95
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_client_time_select_specific_provider_client_in_queue(test_client, staff_availabilities):
 
     #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
@@ -220,10 +229,10 @@ def test_client_time_select_specific_provider_client_in_queue(test_client, staff
 
     location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
-                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
-                            PractitionerCredentials.state == location,
+            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
+                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
+                            ProviderCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
 
     response = test_client.get(
@@ -233,7 +242,9 @@ def test_client_time_select_specific_provider_client_in_queue(test_client, staff
     assert response.status_code == 200
     for staff_id in response.json['practitioners_info']:
         assert staff_id == f'{staff_role_id[0]}'
-    
+
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_client_time_select_specific_provider_client_not_in_queue_with_query_params(test_client, staff_availabilities):
 
     #Delete all clients in queue.  
@@ -242,10 +253,10 @@ def test_client_time_select_specific_provider_client_not_in_queue_with_query_par
     #Get staff_id of staff user with role medical_doctor with availability
     location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
-                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
-                            PractitionerCredentials.state == location,
+            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
+                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
+                            ProviderCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
 
     # Request with the valid query parameters which should add client to the queue
@@ -257,6 +268,8 @@ def test_client_time_select_specific_provider_client_not_in_queue_with_query_par
     for staff_id in response.json['practitioners_info']:
         assert staff_id == f'{staff_role_id[0]}'
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_client_time_select_specific_provider_client_not_in_queue_without_required_query_params(test_client, staff_availabilities):
 
     #Delete all clients in queue.  
@@ -265,10 +278,10 @@ def test_client_time_select_specific_provider_client_not_in_queue_without_requir
     #Get staff_id of staff user with role medical_doctor with availability
     location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
     staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(PractitionerCredentials, PractitionerCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == PractitionerCredentials.role_id) \
-                            .filter(PractitionerCredentials.role.has(role='medical_doctor'),
-                            PractitionerCredentials.state == location,
+            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
+                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
+                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
+                            ProviderCredentials.state == location,
                             StaffRoles.consult_rate != None).first()
 
     # Request without required query parameters add a new client in the queue
@@ -278,6 +291,8 @@ def test_client_time_select_specific_provider_client_not_in_queue_without_requir
     
     assert response.status_code == 400
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_full_system_with_settings(test_client, telehealth_staff):
     """
     Testing the full telehealth system:
@@ -432,6 +447,7 @@ def test_full_system_with_settings(test_client, telehealth_staff):
     test_client.db.session.commit()
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_booking_start_and_complete(test_client, booking_function_scope):
     #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
     staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access=True)
@@ -518,6 +534,7 @@ def test_booking_start_fail(test_client, booking_function_scope):
     assert response.status_code == 400
 
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_cleanup_unended_call(test_client, booking_function_scope):
 
     staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access = True)
@@ -541,5 +558,7 @@ def test_cleanup_unended_call(test_client, booking_function_scope):
     test_client.db.session.delete(staff_telehealth_access)
     test_client.db.session.commit()
 
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_delete_generated_users(test_client):
     assert 1 == 1

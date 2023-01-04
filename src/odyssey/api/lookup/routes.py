@@ -9,74 +9,8 @@ from flask_restx import Namespace
 
 from werkzeug.exceptions import BadRequest
 
-from odyssey.api.lookup.models import (
-     LookupActivityTrackers,
-     LookupBloodGlucoseRanges,
-     LookupBookingTimeIncrements,
-     LookupClientBookingWindow,
-     LookupClinicalCareTeamResources,
-     LookupCountriesOfOperations,
-     LookupDefaultHealthMetrics,
-     LookupDrinks, 
-     LookupDrinkIngredients,
-     LookupGoals, 
-     LookupProfessionalAppointmentConfirmationWindow,
-     LookupRaces,
-     LookupSubscriptions,
-     LookupTelehealthSessionDuration,
-     LookupTermsAndConditions,
-     LookupTerritoriesOfOperations,
-     LookupTransactionTypes,
-     LookupNotifications,
-     LookupEmergencyNumbers,
-     LookupRoles,
-     LookupMacroGoals,
-     LookupLegalDocs,
-     LookupMedicalSymptoms,
-     LookupOrganizations,
-     LookupCurrencies,
-     LookupNotificationSeverity,
-     LookupBloodTests,
-     LookupBloodTestRanges,
-     LookupDevNames,
-     LookupVisitReasons
-     )
-from odyssey.api.lookup.schemas import (
-    LookupActivityTrackersOutputSchema,
-    LookupBloodGlucoseRangesOutputSchema,
-    LookupBookingTimeIncrementsOutputSchema,
-    LookupCareTeamResourcesOutputSchema,
-    LookupCountriesOfOperationsOutputSchema,
-    LookupDefaultHealthMetricsOutputSchema, 
-    LookupDrinksOutputSchema, 
-    LookupDrinkIngredientsOutputSchema,
-    LookupEHRPagesOutputSchema, 
-    LookupGoalsOutputSchema,
-    LookupRacesOutputSchema,
-    LookupSubscriptionsOutputSchema,
-    LookupTerritoriesOfOperationsOutputSchema,
-    LookupTermsAndConditionsOutputSchema,
-    LookupTransactionTypesOutputSchema,
-    LookupNotificationsOutputSchema,
-    LookupCareTeamResourcesOutputSchema,
-    LookupTimezones,
-    LookupTelehealthSettingsSchema,
-    LookupEmergencyNumbersOutputSchema,
-    LookupRolesOutputSchema,
-    LookupMacroGoalsOutputSchema,
-    LookupLegalDocsOutputSchema,
-    LookupNotificationsOutputSchema,
-    LookupMedicalSymptomsOutputSchema,
-    LookupOrganizationsOutputSchema,
-    LookupCurrenciesOutputSchema,
-    LookupUSStatesOutputSchema,
-    LookupNotificationSeverityOutputSchema,
-    LookupBloodTestsOutputSchema,
-    LookupBloodTestRangesOutputSchema,
-    LookupBloodTestRangesAllOutputSchema,
-    LookupDevNamesOutputSchema,
-    LookupVisitReasonsOutputSchema
-)
+from odyssey.api.lookup.models import *
+from odyssey.api.lookup.schemas import *
 from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -354,22 +288,6 @@ class LookupRacesApi(BaseResource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
-@ns.route('/care-team/resources/')
-class LookupClinicalCareTeamResourcesApi(BaseResource):
-    """
-    To be replaced by care-team/ehr-resources/
-    Returns available resources that can be shared within clinical care teams
-    """
-    @token_auth.login_required
-    @responds(schema=LookupCareTeamResourcesOutputSchema, api=ns)
-    def get(self):
-        """get contents of clinical care team resources lookup table"""
-        #temporarily not returning medications resource since these features are hidden until
-        #further development
-        res = LookupClinicalCareTeamResources.query \
-            .filter(ClientClinicalCareTeamResources.resource_name != 'medications').all()
-        return {'total_items': len(res), 'items': res}
-
 @ns.route('/care-team/ehr-resources/')
 class LookupClinicalCareTeamResourcesApi(BaseResource):
     """
@@ -616,3 +534,28 @@ class LookupBloodTestsApi(BaseResource):
             res.append(result)
 
         return {'total_items': len(res), 'items': res}
+        
+@ns.route('/credential-types/')
+class LookupCredentialTypesEndpoint(BaseResource):
+    """
+    Endpoint that returns credential types
+    """
+    @token_auth.login_required
+    @responds(schema=LookupCredentialTypesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        credential_types = LookupCredentialTypes.query.all()
+
+        return {'total_items': len(credential_types), 'items': credential_types}
+
+@ns.route('/team/phr-resources/')
+class LookupClinicalCareTeamResourcesApi(BaseResource):
+    """
+    Returns available resources that can be shared within clinical care teams
+    """
+    @token_auth.login_required
+    @responds(schema=LookupPHRResourcesOutputSchema, api=ns)
+    def get(self):
+        """get contents of clinical care team resources lookup table"""
+        care_team_resources = LookupClinicalCareTeamResources.query.all()
+
+        return {'total_items': len(care_team_resources), 'items': care_team_resources}

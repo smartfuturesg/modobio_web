@@ -934,11 +934,9 @@ EVENT_AVAILABILITY = ('Busy', 'Available')
 RECURRENCE_TYPE = ('Daily', 'Weekly', 'Monthly', 'Yearly')
 """ Types of recurrence that may be chosen for a recurring event """
 
-CREDENTIAL_TYPE = {
-    'medical_doctor': ('npi','dea','med_lic')
-}
+CREDENTIAL_TYPES = ('npi','dea','med_lic', 'certificate')
 
-CREDENTIAL_ROLES = ('medical_doctor', 'therapist', 'dietitian')
+CREDENTIAL_ROLES = ('medical_doctor', 'therapist', 'dietitian', 'trainer')
 
 CREDENTIAL_STATUS = ('Pending Verification','Verified','Rejected','Expired')
 

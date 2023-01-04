@@ -34,3 +34,84 @@ class ProviderRoleRequests(BaseModelWithIdx,UserIdFkeyMixin):
     """
 
     reviewer_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="SET NULL"), nullable=True)
+
+    credentials = db.relationship('ProviderCredentials', uselist=False, back_populates='role_request')
+    """
+    One to many relationship with ProviderCredentials table
+    :type: :class:`ProviderCredentials`
+    """
+
+
+class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
+    """ Licensing and other credentials for providers. """
+
+    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
+    """
+    Country the MD is submitting credentials for (USA)
+
+    :type: str
+    """
+
+    state = db.Column(db.String(2))
+    """
+    State or sub-territory the credential is tied. 
+    
+    :type: str
+    """
+
+    credential_type = db.Column(db.String)
+    """
+    (Can be found in constants and LookupCredentialTypes table)
+   
+    :type: str
+    """
+
+    credentials = db.Column(db.String)
+    """
+    Staff Input values
+
+    :type: str    
+    """
+
+    status = db.Column(db.String)
+    """
+    Verification Status <Pending Verification, Verified, Rejected, Expired>
+
+    :type: str
+    """
+
+    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=True)
+    """
+    Role from the StaffRoles table. 
+
+    :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
+
+    """
+    
+    role = db.relationship('StaffRoles', uselist=False, back_populates='credentials')
+    """
+    Many to one relationship with staff roles table
+
+    :type: :class:`StaffRoles` instance
+    """
+
+    expiration_date = db.Column(db.Date)
+    """
+    Not currently used; will be used for expiration date for the license
+
+    :type: date
+    """
+
+    role_request_id = db.Column(db.Integer, db.ForeignKey('ProviderRoleRequests.idx'), nullable=True)
+    """
+    Role request ID number, foreign key to ProviderRoleRequests.idx
+
+    :type: int, foreign key
+    """
+    
+    role_request = db.relationship('ProviderRoleRequests', uselist=True, back_populates='credentials')
+    """
+    One to many relationship with ProviderRoleRequests table
+
+    :type: :class:`ProviderRoleRequests`
+    """
