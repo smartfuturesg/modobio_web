@@ -4,38 +4,7 @@ logger = logging.getLogger(__name__)
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.lookup.models import (
-    LookupActivityTrackers,
-    LookupBloodTests, 
-    LookupBookingTimeIncrements,
-    LookupClinicalCareTeamResources,
-    LookupClientBookingWindow,
-    LookupCountriesOfOperations,
-    LookupDefaultHealthMetrics,
-    LookupDrinks, 
-    LookupDrinkIngredients,
-    LookupGoals, 
-    LookupProfessionalAppointmentConfirmationWindow,
-    LookupRaces,
-    LookupSubscriptions,
-    LookupTelehealthSessionDuration,
-    LookupTermsAndConditions,
-    LookupTerritoriesOfOperations,
-    LookupTransactionTypes,
-    LookupNotifications,
-    LookupEmergencyNumbers,
-    LookupRoles,
-    LookupMacroGoals,
-    LookupLegalDocs,
-    LookupMedicalSymptoms,
-    LookupOrganizations,
-    LookupCurrencies,
-    LookupNotificationSeverity,
-    LookupBloodTests,
-    LookupBloodTestRanges,
-    LookupDevNames,
-    LookupVisitReasons
-)
+from odyssey.api.lookup.models import *
 from odyssey.utils.base.schemas import BaseSchema
 
 class LookupNotificationSeveritySchema(ma.SQLAlchemyAutoSchema):
@@ -377,4 +346,29 @@ class LookupVisitReasonsSchema(ma.SQLAlchemyAutoSchema):
 
 class LookupVisitReasonsOutputSchema(Schema):
     items = fields.Nested(LookupVisitReasonsSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+
+class LookupBloodGlucoseRangesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupBloodGlucoseRanges
+        exclude = ('created_at', 'updated_at')
+    
+    test_name = fields.String()
+
+class LookupBloodGlucoseRangesOutputSchema(Schema):
+    items = fields.Nested(LookupBloodGlucoseRangesSchema(many=True), missing=[])
+    total_items = fields.Integer()
+    
+class LookupCredentialTypesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupCredentialTypes
+        exclude = ('created_at', 'updated_at')
+
+class LookupCredentialTypesOutputSchema(Schema):
+    items = fields.Nested(LookupCredentialTypesSchema(many=True), missing=[])
+    total_items = fields.Integer()
+
+class LookupPHRResourcesOutputSchema(Schema):
+    items = fields.Nested(LookupEHRPagesSchema(many=True, exclude = ('display_grouping',)), missing = [])
     total_items = fields.Integer()

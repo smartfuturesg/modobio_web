@@ -622,7 +622,7 @@ class LookupClinicalCareTeamResources(BaseModel):
 
     access_group = db.Column(db.String)
     """
-    Grouping as it relates to practitioner and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
+    Grouping as it relates to provider and staff roles. Current access groups are 'general' (for generic client info which all practitioners 
     should have access to) and 'medical_doctor' (resources specific to the medical_doctor role).
 
     :type: string
@@ -1372,4 +1372,94 @@ class LookupVisitReasons(BaseModelWithIdx):
     role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
     """
     Role that the reason would justify a visit with
+    """
+
+
+class LookupBloodGlucoseRanges(BaseModelWithIdx):
+    """
+    Lookup table for blood glucose test ranges.
+    """
+
+    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'), nullable=False,)
+    """
+    Internal test code
+    
+    :type: string, foreign key
+    """
+
+    units = db.Column(db.String)
+    """
+    Units of range.
+    
+    :type: string
+    """
+
+    hypoglycemia_max = db.Column(db.Float)
+    """
+    Hypoglycemia max
+    
+    :type: float    
+    """
+
+    normal_min = db.Column(db.Float)
+    """
+    Normal min.
+    
+    :type: float    
+    """
+
+    normal_max = db.Column(db.Float)
+    """
+    Normal max.
+    
+    :type: float    
+    """
+
+    prediabetic_min = db.Column(db.Float)
+    """
+    Prediabetic min.
+    
+    :type: float    
+    """
+    prediabetic_max = db.Column(db.Float)
+    """
+    Prediabetic max.
+    
+    :type: float    
+    """
+
+    diabetic_min = db.Column(db.Float)
+    """
+    Diabetic min.
+    
+    :type: float    
+    """
+class LookupCredentialTypes(BaseModelWithIdx):
+
+    credential_type = db.Column(db.String, unique=True)
+    """
+    Internal name of credential type used in ProviderCredentials.credential_type
+
+    :type: string
+    """
+
+    display_name = db.Column(db.String)
+    """
+    Display name of this credential that should be presented in user-facing applications.
+
+    :type: string
+    """
+    
+    country_required = db.Column(db.Boolean)
+    """
+    Whether or not a country is required for this credential type
+
+    :type: bool
+    """ 
+
+    sub_territory_required = db.Column(db.Boolean)
+    """
+    Whether or not a sub-territory (US state) is required for this credential type
+
+    :type: bool
     """

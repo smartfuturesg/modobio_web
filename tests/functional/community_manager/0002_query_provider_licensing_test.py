@@ -1,4 +1,4 @@
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.provider.models import ProviderCredentials
 
 def test_get_provider_licensing(test_client):
     #Returns all provider licensing
@@ -23,7 +23,7 @@ def test_get_provider_licensing_status_query_param(test_client):
 
     assert response.status_code == 200
 
-    cred = PractitionerCredentials.query.filter_by(idx=1).one_or_none()
+    cred = ProviderCredentials.query.filter_by(idx=1).one_or_none()
     cred.status = 'Rejected'
     test_client.db.session.commit()
 

@@ -66,11 +66,11 @@ def test_account_delete_client_and_staff(test_client):
         headers=client_auth_header,
         content_type='application/json')
 
-    total_resources = LookupClinicalCareTeamResources.query.count()
+    phr_resources = LookupClinicalCareTeamResources.query.all()
     auths = [{
         'team_member_user_id': staff_client_id,
-        'resource_id': num}
-        for num in range(1, total_resources + 1)]
+        'resource_id': resource.resource_id}
+        for resource in phr_resources]
 
     payload = {'clinical_care_team_authorization' : auths}
     response = test_client.post(

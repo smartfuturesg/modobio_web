@@ -54,7 +54,7 @@ BEGIN
         (_user_id, 'trainer', '125.00');
 
     -- NOTE: StaffOperationalTerritories is obsolete, but will be kept
-    -- until we can safely remove it. PractitionerCredentials will take
+    -- until we can safely remove it. ProviderCredentials will take
     -- its place, so it is also filled out here
     SELECT idx INTO _role_id FROM "StaffRoles"
     WHERE role = 'medical_doctor' AND user_id = _user_id;
@@ -69,7 +69,7 @@ BEGIN
     SELECT _user_id, idx, _role_id
     FROM "LookupTerritoriesOfOperations";
 
-    INSERT INTO "PractitionerCredentials" (
+    INSERT INTO "ProviderCredentials" (
         user_id,
         country_id,
         state,
