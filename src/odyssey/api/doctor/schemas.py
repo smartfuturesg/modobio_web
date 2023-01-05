@@ -275,7 +275,7 @@ class MedicalBloodTestsInputSchema(ma.SQLAlchemyAutoSchema):
     results = fields.Nested(MedicalBloodTestResultsSchema, many=True)
     was_fasted = fields.Boolean(required = False, missing = None)
 
-class BloodTestsByTestID(Schema):
+class BloodTestsByTestIDSchema(Schema):
     """
     Organizes blood test results into a nested results field
     General information about the test entry like testid, date, notes, panel
@@ -299,7 +299,7 @@ class MedicalBloodTestResultsOutputSchema(Schema):
     """
     tests = fields.Integer(metadata={'description': '# of test entry sessions. All each test may have more than one test result'})
     test_results = fields.Integer(metadata={'description': '# of test results'})
-    items = fields.Nested(BloodTestsByTestID(many=True), missing = [])
+    items = fields.Nested(BloodTestsByTestIDSchema(many=True), missing = [])
     clientid = fields.Integer()
     _links = fields.Nested(PaginationLinks)
 

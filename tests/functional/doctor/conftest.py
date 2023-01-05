@@ -54,3 +54,46 @@ def blood_tests(test_client):
     MedicalBloodTests.query.filter_by(user_id=blood_test_1.test_id).delete()
 
     test_client.db.session.commit()
+
+
+@pytest.fixture(scope='function')
+def blood_glucose(test_client):
+
+    blood_test = MedicalBloodTests(
+        user_id=test_client.client_id,
+        notes='Test notes',
+        date='2023-01-01',
+        was_fasted=True,
+        reporter_id = test_client.client_id
+    )
+
+    test_client.db.session.add(blood_test)
+    test_client.db.session.flush()
+
+    bloodtest_results_1 = MedicalBloodTestResults(
+        test_id=blood_test.test_id,
+        modobio_test_code='CMP001',
+        result_value = 69,
+        evaluation = "Normal",
+        age = 30,
+    )
+
+    bloodtest_results_2 = MedicalBloodTestResults(
+        test_id=blood_test.test_id,
+        modobio_test_code='TST001',
+        result_value = 4.7,
+        evaluation = "Normal",
+        age = 30,
+    )
+
+
+    test_client.db.session.add_all([bloodtest_results_1, bloodtest_results_2])
+    test_client.db.session.commit()
+
+    yield blood_test, bloodtest_results_1, bloodtest_results_2
+
+    test_client.db.session.delete(blood_test)
+    test_client.db.session.delete(bloodtest_results_1)
+    test_client.db.session.delete(bloodtest_results_2)
+
+    test_client.db.session.commit()
