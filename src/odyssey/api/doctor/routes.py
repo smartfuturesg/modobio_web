@@ -1841,8 +1841,6 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
     @responds(schema=MedicalBloodTestsInputSchema, status_code=201, api=ns)
     def post(self, user_id):
         """Submits blood glucose tests"""
-
-        self.check_user(user_id, user_type='client')
         
         # remove results from data, commit test info without results to db
         results = request.parsed_obj['results']
@@ -1861,8 +1859,13 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
 
         #for each provided result, evaluate the results based on the range that most applies to the client
         for result in results:
-            ranges = LookupBloodTestRanges.query.filter_by(modobio_test_code=result['modobio_test_code']).one_or_none()
-            
+            ranges = LookupBloodTestRanges.query.filter(
+                or_(LookupBloodTestRanges.modobio_test_code == 'TST001', LookupBloodTestRanges.modobio_test_code == 'CMP001')
+                ).filter_by(modobio_test_code=result['modobio_test_code']).one_or_none()
+
+            if not ranges:
+                continue    
+
             eval_values = {
                 'critical_min': ranges.critical_min if ranges.critical_min is not None else 0,
                 'ref_min': ranges.ref_min if ranges.ref_min is not None else 0,
@@ -1909,7 +1912,13 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
 
         if results:
             for result in results:
-                ranges = LookupBloodTestRanges.query.filter_by(modobio_test_code=result['modobio_test_code']).one_or_none()
+                ranges = LookupBloodTestRanges.query.filter(
+                    or_(LookupBloodTestRanges.modobio_test_code == 'TST001', LookupBloodTestRanges.modobio_test_code == 'CMP001')
+                    ).filter_by(modobio_test_code=result['modobio_test_code']).one_or_none()
+
+                if not ranges:
+                    continue
+                
                 test_result = MedicalBloodTestResults.query.filter_by(modobio_test_code=result['modobio_test_code'], test_id=test_id).one_or_none()
                 eval_values = {
                     'critical_min': ranges.critical_min if ranges.critical_min is not None else 0,
