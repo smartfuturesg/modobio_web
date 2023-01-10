@@ -297,7 +297,7 @@ class ActiveCampaign:
             elif client_sub.subscription_type_id == 3:             #Yearly Subscrioption ID from LookupTable
                 return self.add_tag(user_id, 'Subscription - Annual')
 
-    def convert_prosect(self, user_id, ac_contact_id):
+    def convert_prospect(self, user_id, ac_contact_id):
         #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
         user = User.query.filter_by(user_id=user_id).one_or_none()
 

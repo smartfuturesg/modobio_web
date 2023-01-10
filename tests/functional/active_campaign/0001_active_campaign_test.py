@@ -97,7 +97,7 @@ def test_convert_client_prospect(test_client, create_contact):
     data = json.loads(contact_response.text)
 
     #Convert Prospect 
-    ac.convert_prosect(test_client.client_id, int(data['contact']['id']))
+    ac.convert_prospect(test_client.client_id, int(data['contact']['id']))
     data = json.loads(response.text)
 
     # bring up tags for client. ensure that "Converted - Client" tag is present
@@ -119,7 +119,7 @@ def test_convert_provider_prospect(test_client, create_contact):
     data = json.loads(contact_response.text)
 
     #Convert Prospect 
-    response = ac.convert_prosect(test_client.client_id, int(data['contact']['id']))
+    response = ac.convert_prospect(test_client.client_id, int(data['contact']['id']))
     data = json.loads(response.text)
 
     assert response.status_code == 201
