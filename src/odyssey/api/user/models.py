@@ -219,7 +219,7 @@ def update_ES_index(mapper, connection, target):
     update_index(user, False)
 
 @db.event.listens_for(User, "after_update")
-def update_active_campaign_contact(mapper, connection, target):
+def update_active_campaign_contact_info(mapper, connection, target):
     """
     Listens for updates on User table
     """

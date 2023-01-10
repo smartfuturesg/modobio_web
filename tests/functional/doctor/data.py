@@ -509,3 +509,37 @@ doctor_surgery_data = {
   'surgeon': 'John Q. Surgeon',
   'institution': 'Our Lady of Perpetual Surgery',
 }
+
+blood_glucose_post_data ={
+   "date": "2023-01-01",
+   "notes": "Not many notes to report",
+   "was_fasted": True,
+   "results": 
+       [
+           {
+               "modobio_test_code": "CMP001",
+               "result_value" : 69
+           }, 
+            {
+               "modobio_test_code": "TST001",
+               "result_value" : 4.7
+           }
+       ]
+}
+
+blood_glucose_put_data = {
+   "date": "2023-01-01",
+   "notes": "Updated notes",
+   "was_fasted": False,
+   "results": 
+       [
+           {
+               "modobio_test_code": "CMP001",
+               "result_value" : 40
+           }, 
+            {
+               "modobio_test_code": "TST001",
+               "result_value" : 8
+           }
+       ]
+}

@@ -516,7 +516,7 @@ class LookupVisitReasonsApi(BaseResource):
 
 
 @ns.route('/blood-glucose/')
-class LookupBloodTestsApi(BaseResource):
+class LookupBloodGlucoseEndpoint(BaseResource):
     """
     Endpoint that returns the ranges of blood glucose levels.
     """

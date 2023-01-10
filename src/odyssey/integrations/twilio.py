@@ -15,6 +15,8 @@ from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRoom
 from odyssey.api.user.models import User
 from odyssey.utils.constants import ALPHANUMERIC, TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, TWILIO_ACCESS_KEY_TTL
 
+#TODO Telehealth on the Shelf - leaving this integration here because it is only called inside the Telehealth
+# namespace and tests, which are already deactivated
 
 class Twilio():
 
