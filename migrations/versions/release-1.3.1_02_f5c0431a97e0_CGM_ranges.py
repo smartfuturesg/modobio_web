@@ -1,4 +1,4 @@
-"""empty message
+"""Add lookup table for CGM reference range support
 
 Revision ID: f5c0431a97e0
 Revises: 508113125af2
