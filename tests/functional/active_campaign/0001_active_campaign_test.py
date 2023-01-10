@@ -85,7 +85,29 @@ def test_add_user_subscription_tag(test_client, create_contact):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Subscription - Annual').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_convert_prospect(test_client, create_contact):
+def test_convert_client_prospect(test_client, create_contact):
+    #Tests adding subscription tag
+    ac = ActiveCampaign()
+
+    #Add "Prospect" tag to contact
+    response = ac.add_tag(test_client.client_id, 'Prospect')
+    assert response.status_code == 201
+
+    contact_response = create_contact[0]
+    data = json.loads(contact_response.text)
+
+    #Convert Prospect 
+    ac.convert_prosect(test_client.client_id, int(data['contact']['id']))
+    data = json.loads(response.text)
+
+    # bring up tags for client. ensure that "Converted - Client" tag is present
+    response = ac.get_tags(test_client.client_id)
+
+    assert response.status_code == 201
+    ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Converted - Client').one_or_none()
+    assert ac_tag.tag_id == int(data['contactTag']['id'])
+
+def test_convert_client_prospect(test_client, create_contact):
     #Tests adding subscription tag
     ac = ActiveCampaign()
 

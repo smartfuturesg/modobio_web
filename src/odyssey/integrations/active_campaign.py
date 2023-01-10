@@ -86,13 +86,13 @@ class ActiveCampaign:
 
         #contact exists, check if there is an db entry in UserActiveCampaign
         if data['meta']['total'] == '1':
-            logger.info(f'Active campagign contact exisits for {email}')
+            logger.info(f'Active campaign contact exists for {email}')
             contact_id = data['contacts'][0]['id']
             ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
 
             #if None, create db entry
             if not ac_contact:
-                logger.info(f'Creating UserActiveCampaign db entry for already exisiting user {email}.')
+                logger.info(f'Creating UserActiveCampaign db entry for already existing user {email}.')
                 ac_contact = UserActiveCampaign(
                     user_id=user_id, 
                     active_campaign_id=contact_id
@@ -209,7 +209,7 @@ class ActiveCampaign:
             db.session.commit()
 
             logger.info(f'Added Active Campaign tag: {tag_name} to user with user_id: {user_id}')
-        return response
+        return 
 
     def remove_tag(self, user_id, tag_name):
         #Get tag from db
@@ -310,7 +310,7 @@ class ActiveCampaign:
             logger.error('No tag found with the provided name.')
             return
         prospect_tag_ids = data['tags']
-        
+        breakpoint()
         #Get the tags associated with the user. 
         response = self.request('GET', endpoint = f'contacts/{ac_contact_id}/contactTags')
 
@@ -326,7 +326,19 @@ class ActiveCampaign:
                     has_prospect_tag = True
                 #Disregard operation because user has tag of 'Prospect - Provider'
                 elif tag_id['tag'] == 'Prospect - Provider' and user_tag['tag'] == tag_id['id']:
-                    return
+                    has_prospect_tag = True
                 
         if has_prospect_tag and user.is_client:
-            return self.add_tag(user_id, 'Converted - Client')
+            self.add_tag(user_id, 'Converted - Client')
+
+        if has_prospect_tag and user.is_provider:
+            self.add_tag(user_id, 'Converted - Provider')
+
+
+    def get_tags(self):
+        """
+        Retrieves all tags a user has from Active Campaign
+        """
+        response = self.request('GET', endpoint = 'tags')
+        data = json.loads(response.text)
+        return data
