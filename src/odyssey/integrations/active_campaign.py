@@ -310,13 +310,10 @@ class ActiveCampaign:
             logger.error('No tag found with the provided name.')
             return
         prospect_tag_ids = data['tags']
-        breakpoint()
+
         #Get the tags associated with the user. 
-        response = self.request('GET', endpoint = f'contacts/{ac_contact_id}/contactTags')
-
-        data = json.loads(response.text)
-        user_tags = data['contactTags']
-
+        user_tags = self.get_tags(ac_contact_id = ac_contact_id)
+        
         #Check if user has 'Prospect' tags on account
         has_prospect_tag = False
         for user_tag in user_tags:
@@ -335,10 +332,30 @@ class ActiveCampaign:
             self.add_tag(user_id, 'Converted - Provider')
 
 
-    def get_tags(self):
+    def get_tags(self, user_id = None, ac_contact_id = None):
         """
         Retrieves all tags a user has from Active Campaign
         """
-        response = self.request('GET', endpoint = 'tags')
+        if not user_id and not ac_contact_id:
+            logger.error('No user ID or Active Campaign contact ID provided.')
+            raise ValueError('No user ID or Active Campaign contact ID provided.')
+
+        if not ac_contact_id:
+            ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+            if not ac_contact:
+                logger.error('No Active Campaign contact ID found with provided user ID.')
+                raise ValueError('No Active Campaign contact ID found with provided user ID.')
+            ac_contact_id = ac_contact.active_campaign_id
+
+        response = self.request('GET', endpoint = f'contacts/{ac_contact_id}/contactTags')
+
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            logger.error(err)
+            raise err
+        
         data = json.loads(response.text)
-        return data
+        user_tags = data['contactTags']
+        
+        return user_tags

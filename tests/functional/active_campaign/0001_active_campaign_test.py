@@ -107,7 +107,7 @@ def test_convert_client_prospect(test_client, create_contact):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Converted - Client').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_convert_client_prospect(test_client, create_contact):
+def test_convert_provider_prospect(test_client, create_contact):
     #Tests adding subscription tag
     ac = ActiveCampaign()
 
