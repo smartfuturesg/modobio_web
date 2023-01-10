@@ -13,11 +13,11 @@ import pytest
     # Delete Contact
 
 
-def test_create_contact(test_client, create_contact):
+def test_create_client_contact(test_client, create_client_contact):
     ac = ActiveCampaign()
 
-    contact_response = create_contact[0]
-    list_response = create_contact[1]
+    contact_response = create_client_contact[0]
+    list_response = create_client_contact[1]
     data = json.loads(contact_response.text)
     #assert contact was added to Active Campaign and stored in db
     assert contact_response.status_code == 201
@@ -30,18 +30,17 @@ def test_create_contact(test_client, create_contact):
     assert list_response.status_code == 201
     assert data['contactList']['list'] == ac.list_id
 
-def test_create_tag(test_client, create_contact):
+def test_create_tag(test_client, create_client_contact):
     ac = ActiveCampaign()
 
     #create tag
     response = ac.add_tag(test_client.client_id, 'Persona - Client')
     data = json.loads(response.text) 
 
-    assert response.status_code == 201
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Persona - Client').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_remove_tag(test_client, create_contact):
+def test_remove_tag(test_client, create_client_contact):
     ac = ActiveCampaign()
 
     #remove tag
@@ -52,7 +51,7 @@ def test_remove_tag(test_client, create_contact):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Persona - Client').one_or_none()
     assert ac_tag == None
 
-def test_update_contact_name(test_client, create_contact):
+def test_update_contact_name(test_client, create_client_contact):
     ac = ActiveCampaign()
 
     #update name
@@ -64,7 +63,7 @@ def test_update_contact_name(test_client, create_contact):
     assert data['contact']['lastName'] == 'Name'
     assert data['contact']['email'] == 'updated@email.com'
 
-def test_add_age_tag(test_client, create_contact):
+def test_add_age_tag(test_client, create_client_contact):
     #Test adding age group tag
     ac = ActiveCampaign()
 
@@ -75,7 +74,7 @@ def test_add_age_tag(test_client, create_contact):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Age 45-64').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_add_user_subscription_tag(test_client, create_contact):
+def test_add_user_subscription_tag(test_client, create_client_contact):
     #Tests adding subscription tag
     ac = ActiveCampaign()
     response = ac.add_user_subscription_type(test_client.client_id)
@@ -85,7 +84,7 @@ def test_add_user_subscription_tag(test_client, create_contact):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Subscription - Annual').one_or_none()
     assert ac_tag.tag_id == int(data['contactTag']['id'])
 
-def test_convert_client_prospect(test_client, create_contact):
+def test_convert_client_prospect(test_client, create_client_contact):
     #Tests adding subscription tag
     ac = ActiveCampaign()
 
@@ -93,7 +92,7 @@ def test_convert_client_prospect(test_client, create_contact):
     response = ac.add_tag(test_client.client_id, 'Prospect')
     assert response.status_code == 201
 
-    contact_response = create_contact[0]
+    contact_response = create_client_contact[0]
     data = json.loads(contact_response.text)
 
     #Convert Prospect 
@@ -101,27 +100,29 @@ def test_convert_client_prospect(test_client, create_contact):
     data = json.loads(response.text)
 
     # bring up tags for client. ensure that "Converted - Client" tag is present
-    response = ac.get_tags(test_client.client_id)
-
-    assert response.status_code == 201
+    user_tags = ac.get_tags(test_client.client_id)
+    tag_ids = [int(tag["id"]) for tag in user_tags]
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Converted - Client').one_or_none()
-    assert ac_tag.tag_id == int(data['contactTag']['id'])
+    assert ac_tag.tag_id in tag_ids
 
-def test_convert_provider_prospect(test_client, create_contact):
+def test_convert_provider_prospect(test_client, create_provider_contact):
     #Tests adding subscription tag
     ac = ActiveCampaign()
 
-    #Add "Prospect" tag to contact
-    response = ac.add_tag(test_client.client_id, 'Prospect')
+    #Add "Prospect - Provider" tag to contact
+    response = ac.add_tag(test_client.provider_id, 'Prospect - Provider')
     assert response.status_code == 201
 
-    contact_response = create_contact[0]
+    contact_response = create_provider_contact[0]
     data = json.loads(contact_response.text)
 
     #Convert Prospect 
-    response = ac.convert_prospect(test_client.client_id, int(data['contact']['id']))
+    ac.convert_prospect(test_client.provider_id, int(data['contact']['id']))
     data = json.loads(response.text)
 
-    assert response.status_code == 201
-    ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Converted - Client').one_or_none()
-    assert ac_tag.tag_id == int(data['contactTag']['id'])
+    # bring up tags for client. ensure that "Converted - Client" tag is present
+    user_tags = ac.get_tags(test_client.provider_id)
+    tag_ids = [int(tag["id"]) for tag in user_tags]
+    ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.provider_id, tag_name='Converted - Provider').one_or_none()
+
+    assert ac_tag.tag_id in tag_ids

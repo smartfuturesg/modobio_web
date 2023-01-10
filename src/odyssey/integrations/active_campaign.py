@@ -209,7 +209,7 @@ class ActiveCampaign:
             db.session.commit()
 
             logger.info(f'Added Active Campaign tag: {tag_name} to user with user_id: {user_id}')
-        return 
+        return response
 
     def remove_tag(self, user_id, tag_name):
         #Get tag from db
@@ -351,9 +351,9 @@ class ActiveCampaign:
 
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
+        except Exception as err:
             logger.error(err)
-            raise err
+            raise BadRequest(err)
         
         data = json.loads(response.text)
         user_tags = data['contactTags']
