@@ -102,7 +102,7 @@ class ActiveCampaign:
 
             # User already exists as a contact, check to see if they have been marked as a prospect. 
             # If so change this adds a tag of "Converted-Clients".
-            self.convert_prosect(user_id, contact_id)  
+            self.convert_prospect(user_id, contact_id)  
 
             #Check if contact is in active campaign list. 
             response = self.request('GET', endpoint = f'contacts/{contact_id}/contactLists')
