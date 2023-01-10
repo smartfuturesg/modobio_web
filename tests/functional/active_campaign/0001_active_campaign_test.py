@@ -106,7 +106,6 @@ def test_convert_client_prospect(test_client, create_client_contact):
     assert ac_tag.tag_id in tag_ids
 
 def test_convert_provider_prospect(test_client, create_provider_contact):
-    #Tests adding subscription tag
     ac = ActiveCampaign()
 
     #Add "Prospect - Provider" tag to contact
