@@ -100,10 +100,10 @@ def test_convert_client_prospect(test_client, create_client_contact):
     data = json.loads(response.text)
 
     # bring up tags for client. ensure that "Converted - Client" tag is present
-    user_tags = ac.get_tags(test_client.client_id)
-    tag_ids = [int(tag["id"]) for tag in user_tags]
+    user_tags = ac.get_user_tag_ids(test_client.client_id)
+    
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Converted - Client').one_or_none()
-    assert ac_tag.tag_id in tag_ids
+    assert ac_tag.tag_id in list(user_tags.values())
 
 def test_convert_provider_prospect(test_client, create_provider_contact):
     ac = ActiveCampaign()
@@ -121,7 +121,6 @@ def test_convert_provider_prospect(test_client, create_provider_contact):
 
     # bring up tags for client. ensure that "Converted - Client" tag is present
     user_tags = ac.get_tags(test_client.provider_id)
-    tag_ids = [int(tag["id"]) for tag in user_tags]
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.provider_id, tag_name='Converted - Provider').one_or_none()
 
-    assert ac_tag.tag_id in tag_ids
+    assert ac_tag.tag_id in list(user_tags.values())

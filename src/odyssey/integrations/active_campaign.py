@@ -298,43 +298,44 @@ class ActiveCampaign:
                 return self.add_tag(user_id, 'Subscription - Annual')
 
     def convert_prospect(self, user_id, ac_contact_id):
-        #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
+        """Checks if contact is marked as a "prospect" and converts them to "Converted - Clients" and/or "Converted - Providers" based on their user type."""
         user = User.query.filter_by(user_id=user_id).one_or_none()
+        #Get the ids of the 'Prospect' and 'Converted' tags stored in Active Campaign
+        prospect_tags_dict = self.search_tags(search_param='prospect')
 
-        #Get the ids of the 'Prospect' tags stored in Active Campaign
-        query = { 'search': 'prospect' }
-        response = self.request('GET', endpoint = 'tags/?' + urlencode(query))
-        data = json.loads(response.text)
-
-        if data['meta']['total'] == '0':
-            logger.error('No tag found with the provided name.')
-            return
-        prospect_tag_ids = data['tags']
-
-        #Get the tags associated with the user. 
-        user_tags = self.get_tags(ac_contact_id = ac_contact_id)
+        converted_tags_dict = self.search_tags(search_param='converted')
         
-        #Check if user has 'Prospect' tags on account
-        has_prospect_tag = False
-        for user_tag in user_tags:
-            for tag_id in prospect_tag_ids:
-                #User has some tag of 'Prospect' 
-                if tag_id['tag'] != 'Prospect - Provider' and user_tag['tag'] == tag_id['id']:
-                    has_prospect_tag = True
-                #Disregard operation because user has tag of 'Prospect - Provider'
-                elif tag_id['tag'] == 'Prospect - Provider' and user_tag['tag'] == tag_id['id']:
-                    has_prospect_tag = True
-                
-        if has_prospect_tag and user.is_client:
-            self.add_tag(user_id, 'Converted - Client')
+        #Get the tags associated with the user. 
+        user_tags = self.get_user_tag_ids(ac_contact_id = ac_contact_id)
 
-        if has_prospect_tag and user.is_provider:
+        # user has Prospect tag but not converted tag
+        if prospect_tags_dict["Prospect"] in user_tags.keys() \
+                and not converted_tags_dict["Converted - Client"] in user_tags.keys() \
+                    and user.is_client:
+            self.add_tag(user_id, 'Converted - Client')
+        
+        # user has Prospect - Provider tag but not converted provider tag
+        if prospect_tags_dict["Prospect - Provider"] in user_tags.keys() \
+            and not converted_tags_dict["Converted - Provider"] in user_tags.keys() \
+                and user.is_provider:
             self.add_tag(user_id, 'Converted - Provider')
 
 
-    def get_tags(self, user_id = None, ac_contact_id = None):
+    def get_user_tag_ids(self, user_id = None, ac_contact_id = None) -> dict:
         """
         Retrieves all tags a user has from Active Campaign
+
+        Parameters
+        ----------
+            user_id: int (optional)
+                User ID. If provided will be used to get Active Campaign contact ID
+            ac_contact_id: int (optional)
+                Active Campaign contact ID. If provided will be used to get tags
+
+        Returns
+        -------
+            tag_ids: dict
+                dict of user tags. key - tag_id, value - user's unique tag id
         """
         if not user_id and not ac_contact_id:
             logger.error('No user ID or Active Campaign contact ID provided.')
@@ -357,5 +358,33 @@ class ActiveCampaign:
         
         data = json.loads(response.text)
         user_tags = data['contactTags']
+        user_tags_dict = {int(tag["tag"]): int(tag["id"]) for tag in user_tags}
+        return user_tags_dict
+
+    def search_tags(self, search_param = '') -> dict:
+        """
+        search active campaign for tags that match the search parameter
         
-        return user_tags
+        Parameters
+        ----------
+            search_param: str
+                search parameter to search for tags
+        
+        Returns
+        -------
+            tags_dict: dict
+                dict of tags. key - tag name, value - tag id
+        """
+
+        #Get the ids of the 'Prospect' tags stored in Active Campaign
+        query = { 'search': search_param }
+        response = self.request('GET', endpoint = 'tags/?' + urlencode(query))
+        data = json.loads(response.text)
+
+        if data['meta']['total'] == '0':
+            logger.error('No tag found with the provided name.')
+            return
+
+        tags_dict = {tag["tag"]: int(tag["id"]) for tag in data["tags"]}
+
+        return tags_dict
