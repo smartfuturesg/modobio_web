@@ -306,7 +306,7 @@ class ActiveCampaign:
         converted_tags_dict = self.search_tags(search_param='converted')
         
         #Get the tags associated with the user. 
-        user_tags = self.get_user_tag_ids(ac_contact_id = ac_contact_id)
+        user_tags = self.get_user_tags(ac_contact_id = ac_contact_id)
 
         # user has Prospect tag but not converted tag
         if prospect_tags_dict["Prospect"] in user_tags.keys() \
@@ -321,7 +321,7 @@ class ActiveCampaign:
             self.add_tag(user_id, 'Converted - Provider')
 
 
-    def get_user_tag_ids(self, user_id = None, ac_contact_id = None) -> dict:
+    def get_user_tags(self, user_id = None, ac_contact_id = None) -> dict:
         """
         Retrieves all tags a user has from Active Campaign
 
