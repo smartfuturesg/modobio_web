@@ -23,16 +23,40 @@ class ActiveCampaign:
             "accept": "application/json",
             "Api-Token": self.api_key
         }
+       
         ac_list = current_app.config.get('ACTIVE_CAMPAIGN_LIST')
         logger.info(f'ACTIVE_CAMPAIGN_LIST {ac_list}')
         self.list_id = self.get_list_id(ac_list)
         logger.info('Active Campaign initialization complete.')
 
+    def request(self, method, endpoint, payload=None):
+        """Request handler"""
+
+        url = f'{self.url}{endpoint}'
+
+        try:
+            response = requests.request(method, url, json=payload, headers=self.request_header)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            logger.error(f'Active Campaign request to url {url} failed. Error: {err}')
+            if response.status_code >= 500: # retry on 5xx errors
+                raise BadRequest(f"Active Campaign returned error: {str(err)}")
+            raise err
+        except requests.exceptions.ConnectionError as err:
+            logger.error(f'Active Campaign request to url {url} failed. Error: {err}')
+            raise err
+        except requests.exceptions.Timeout as err:
+            logger.error(f'Active Campaign request to url {url} failed. Error: {err}')
+            raise err
+        except requests.exceptions.RequestException as err:
+            logger.error(f'Active Campaign request to url {url} failed. Error: {err}')
+            raise BadRequest(f"Active Campaign returned error: {str(err)}")
+        
+        return response
+
     def get_list_id(self, ac_list):
         #Returns the list id where contacts will be stored
-
-        url = f'{self.url}/lists'
-        response = requests.get(url, headers=self.request_header)
+        response = self.request('GET', endpoint = 'lists')
 
         # raise error if response is not 200
         try:
@@ -50,15 +74,14 @@ class ActiveCampaign:
         logger.error(f'No list ID found of {ac_list} found.')
     
     def check_contact_existence(self, user_id) -> bool:
-        # check if user already exsists in active campaign system. 
+        # check if user already exists in active campaign system. 
         # Also checks to see if user is already in the active campaign list
         # Returns True if contact exists and False if not
 
         email = User.query.filter_by(user_id=user_id).one_or_none().email
         query = { 'email': email }
-        url = self.url + 'contacts/?' + urlencode(query)
 
-        response = requests.get(url, headers=self.request_header)
+        response = self.request('GET', endpoint = f'contacts/?{urlencode(query)}')
         data = json.loads(response.text)
 
         #contact exists, check if there is an db entry in UserActiveCampaign
@@ -82,8 +105,8 @@ class ActiveCampaign:
             self.convert_prosect(user_id, contact_id)  
 
             #Check if contact is in active campaign list. 
-            url = f"{self.url}/contacts/{contact_id}/contactLists"
-            response = requests.get(url, headers=self.request_header)
+            response = self.request('GET', endpoint = f'contacts/{contact_id}/contactLists')
+
             data = json.loads(response.text)
 
             in_list = False
@@ -95,7 +118,6 @@ class ActiveCampaign:
             if not in_list:
                 #add contact to list
                 logger.info('Adding existing active campaign contact to list.')
-                url = f'{self.url}/contactLists'
                 payload = {
                     "contactList": {
                         "list": self.list_id,
@@ -103,7 +125,7 @@ class ActiveCampaign:
                         "status": 1    # '1': Set active to list, '2': unsubscribe from list
                     }
                 }
-                response = requests.post(url, json=payload, headers=self.request_header)
+                response = self.request('POST', endpoint = f'contactLists', payload=payload)
             return True
         else:
             # Returns false if contact not in Active Campaigns
@@ -112,7 +134,6 @@ class ActiveCampaign:
 
     def create_contact(self, email, first_name, last_name):
         #create contact and save contact id
-        url = f'{self.url}/contacts'
         payload = {
             'contact': {
                 'email': email, 
@@ -120,11 +141,11 @@ class ActiveCampaign:
                 'lastName': last_name
             }
         }
-        contant_response = requests.post(url, json=payload, headers=self.request_header)
-        logger.info(f'Contact Create response code: {contant_response.status_code}')
-        logger.info(f'Contact Create response  {contant_response.text}')
+        contact_response = self.request('POST', endpoint = 'contacts', payload=payload)
+        logger.info(f'Contact Create response code: {contact_response.status_code}')
+        logger.info(f'Contact Create response  {contact_response.text}')
 
-        data = json.loads(contant_response.text)
+        data = json.loads(contact_response.text)
         contact_id = data['contact']['id']
 
         user_id = User.query.filter_by(email=email).one_or_none().user_id
@@ -137,7 +158,6 @@ class ActiveCampaign:
         db.session.commit()
 
         #add contact to list
-        url = f'{self.url}/contactLists'
         payload = {
             "contactList": {
                 "list": self.list_id,
@@ -145,18 +165,16 @@ class ActiveCampaign:
                 "status": 1    # '1': Set active to list, '2': unsubscribe from list
             }
         }
-        list_response = requests.post(url, json=payload, headers=self.request_header)
+        list_response = self.request('POST', endpoint = 'contactLists', payload=payload)
         logger.info(f'Add contact to list response code: {list_response.status_code}')  
         logger.info(f'Contact Create response  {list_response.text}')
 
-        return contant_response, list_response
+        return contact_response, list_response
 
     def add_tag(self, user_id, tag_name):  
         #Get tag id from tag name
         query = { 'search': tag_name }
-        url = self.url + 'tags/?' + urlencode(query)
-
-        response = requests.get(url, headers=self.request_header)
+        response = self.request('GET', endpoint = f'tags/?{urlencode(query)}')
         data = json.loads(response.text)
         if data['meta']['total'] == '0':
             logger.error('No tag found with the provided name.')
@@ -171,7 +189,6 @@ class ActiveCampaign:
             return
 
         #Add tag to contact
-        url = f'{self.url}/contactTags'
         payload = {
             "contactTag": {
                 "contact": ac_id.active_campaign_id,
@@ -179,7 +196,8 @@ class ActiveCampaign:
             }
         }
 
-        response = requests.post(url, json=payload, headers=self.request_header)
+        response = self.request('POST', endpoint = 'contactTags', payload=payload)
+
         data = json.loads(response.text)
         tag_id = data['contactTag']['id']
 
@@ -201,9 +219,8 @@ class ActiveCampaign:
             return
 
         #Remove tag
-        url = f'{self.url}/contactTags/{tag.tag_id}'
-        response = requests.delete(url, headers=self.request_header)
-        
+        response = self.request('DELETE', endpoint = f'contactTags/{tag.tag_id}')        
+
         db.session.delete(tag)
         db.session.commit()
 
@@ -226,8 +243,7 @@ class ActiveCampaign:
             payload['contact']['email'] = email
         
         #Update contact info
-        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
-        response = requests.put(url, json=payload, headers=self.request_header)
+        response = self.request('PUT', endpoint = f'contacts/{ac_id.active_campaign_id}', payload=payload)
 
         logger.info(f'Update Active Campaign contact information status code: {response.status_code}') 
         logger.info(f'Update Active Campaign contact information error: {response.text}')
@@ -241,8 +257,7 @@ class ActiveCampaign:
             return
 
         #Delete contact info
-        url = f'{self.url}/contacts/{ac_id.active_campaign_id}'
-        response = requests.delete(url, headers=self.request_header)
+        response = self.request('DELETE', endpoint = f'contacts/{ac_id.active_campaign_id}')
 
         db.session.delete(ac_id)
         db.session.commit()
@@ -250,7 +265,7 @@ class ActiveCampaign:
         return response
 
     def add_age_group_tag(self, user_id):
-        #Gets users age and adds to age group
+        # Gets users age and adds to age group
         dob = User.query.filter_by(user_id=user_id).one_or_none().dob
         today = date.today()
         age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
@@ -288,8 +303,7 @@ class ActiveCampaign:
 
         #Get the ids of the 'Prospect' tags stored in Active Campaign
         query = { 'search': 'prospect' }
-        url = self.url + 'tags/?' + urlencode(query)
-        response = requests.get(url, headers=self.request_header)
+        response = self.request('GET', endpoint = 'tags/?' + urlencode(query))
         data = json.loads(response.text)
 
         if data['meta']['total'] == '0':
@@ -298,8 +312,8 @@ class ActiveCampaign:
         prospect_tag_ids = data['tags']
         
         #Get the tags associated with the user. 
-        url = f'{self.url}/contacts/{ac_contact_id}/contactTags' 
-        response = requests.get(url, headers=self.request_header)
+        response = self.request('GET', endpoint = f'contacts/{ac_contact_id}/contactTags')
+
         data = json.loads(response.text)
         user_tags = data['contactTags']
 
