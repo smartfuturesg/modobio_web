@@ -15,7 +15,11 @@ from typing import Type
 
 from botocore.exceptions import ClientError
 from flask import render_template, session, current_app, _request_ctx_stack
-from PyPDF2 import PdfFileMerger
+# PyPDF2 has been renamed to pypdf with v3.
+try:
+    from PyPDF2 import PdfFileMerger
+except ImportError:
+    from pypdf import PdfFileMerger
 from weasyprint import HTML, CSS
 
 from odyssey import db
