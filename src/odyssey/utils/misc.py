@@ -13,11 +13,12 @@ import typing as t
 import uuid
 
 from datetime import datetime, date, time, timedelta
-from pytz import utc
+from time import monotonic
 
 import flask.json
 
 from flask import current_app, request, url_for
+from pytz import utc
 from sqlalchemy import select
 from werkzeug.exceptions import BadRequest, Unauthorized
 
@@ -1228,15 +1229,20 @@ def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
         @functools.lru_cache(maxsize=maxsize, typed=typed)
         def cached_func(*args, **kwargs):
             value = func(*args, **kwargs)
-            expire = time.monotonic() + ttl
+            expire = monotonic() + ttl
+            logger.debug(
+                f'Loading "{func!r}" ttl cache expire "{expire}" with value "{value}"')
             return {'value': value, 'expire': expire}
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             result = cached_func(*args, **kwargs)
-            if result['expire'] < time.monotonic():
+            if result['expire'] < monotonic():
                 result['value'] = func(*args, **kwargs)
-                result['expire'] = time.monotonic() + ttl
+                result['expire'] = monotonic() + ttl
+                logger.debug(
+                    f'Reloading "{func!r}" expired ttl cache new expire "{result["expire"]}"'
+                    f'with value "{result["value"]}"')
             return result['value']
 
         wrapper.cache_clear = cached_func.cache_clear
