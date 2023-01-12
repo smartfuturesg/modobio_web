@@ -35,6 +35,7 @@ setup(
         'Flask_SQLAlchemy',
         'idna',
         'marshmallow',
+        'marshmallow_dataclass',
         'marshmallow-sqlalchemy',
         'psycopg2',        
         'PyPDF2',

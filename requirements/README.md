@@ -40,6 +40,7 @@ Keep a list of dependencies here with date and reason why we need it. This will 
 | Flask-SQLAlchemy              | 2020-05-19 | Integrate SQLAlchemy with Flask                |
 | idna                          | 2021-10-27 | Handle international domain names in email     |
 | marshmallow                   | 2020-07-27 | (De)serialization and validation of JSON       |
+| marshmallow-dataclass         | 2023-01-11 | Convert @dataclass into marshmallow schema     |
 | marshmallow-sqlalchemy        | 2020-07-27 | Generate marshmallow schemas from DB models    |
 | psycopg2                      | 2020-07-29 | Python PostgreSQL driver                       |
 | PyPDF2                        | 2020-09-08 | Manipulate (merge) PDF files                   |
