@@ -66,7 +66,7 @@ class UserIdFkeyPKMixin:
     """
     @declared_attr
     def user_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+        return db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True)
         """
         User ID number, primary key and foreign key to User.user_id
 
