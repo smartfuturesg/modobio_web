@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.base.models import BaseModel, UserIdFkeyPKMixin
+from odyssey.utils.base.models import BaseModel, UserIdFkeyMixin
 
 
 #######################################################################################
@@ -433,28 +433,24 @@ class WearablesFreeStyle(db.Model):
 # V2 of the Wearables tables.
 #
 
-class WearablesV2(BaseModel, UserIdFkeyPKMixin):
+class WearablesV2(BaseModel, UserIdFkeyMixin):
     """ Table that lists which supported wearables a client has. """
 
     __tablename__ = 'WearablesV2'
 
-    wearable = db.Column(db.String(64), primary_key=True)
+    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'wearable'),)
+
+    wearable = db.Column(db.String(64))
     """
     Wearable device. The combination of user_id + wearable must be unique.
 
     :type: str, primary key, max length 64
     """
 
-    terra_user_id = db.Column(UUID, index=True)
+    terra_user_id = db.Column(UUID, index=True, nullable=False)
     """
     Terra's user id. To Terra, each combination of user + wearable device is
     a unique user.
 
-    :type: :class:`uuid.UUID`
-    """
-
-    registration_complete = db.Column(db.Boolean, server_default='f')
-    """ Set to True when device registration is complete.
-
-    :type: bool, default False
+    :type: :class:`uuid.UUID`, not-null, indexed
     """
