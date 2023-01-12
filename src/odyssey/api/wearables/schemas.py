@@ -2,7 +2,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, EXCLUDE
 
 from odyssey import ma
 from odyssey.api.user.models import User
@@ -61,7 +61,9 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
 # V2 of the Wearables schemas.
 #
 
-import marshmallow_dataclass
+import terra.api.api_responses
+
+from marshmallow_dataclass import class_schema
 
 from terra.models.v2.activity import Activity
 from terra.models.v2.athlete import Athlete
@@ -72,15 +74,39 @@ from terra.models.v2.nutrition import Nutrition
 from terra.models.v2.sleep import Sleep
 from terra.models.user import User
 
-WearablesTerraActivitySchema = marshmallow_dataclass.class_schema(Activity)
-WearablesTerraAthleteSchema = marshmallow_dataclass.class_schema(Athlete)
-WearablesTerraBodySchema = marshmallow_dataclass.class_schema(Body)
-WearablesTerraDailySchema = marshmallow_dataclass.class_schema(Daily)
-WearablesTerraMenstruationSchema = marshmallow_dataclass.class_schema(Menstruation)
-WearablesTerraNutritionSchema = marshmallow_dataclass.class_schema(Nutrition)
-WearablesTerraSleepSchema = marshmallow_dataclass.class_schema(Sleep)
-WearablesTerraUserSchema = marshmallow_dataclass.class_schema(User)
+class WearablesV2BaseSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+        load_only = ('status', 'user_id')
 
-class WearablesV2RegisterSchema(Schema):
-    auth_success_redirect_url = fields.Url(default='')
-    auth_failure_redirect_url = fields.Url(default='')
+# Automatically convert all Terra classes to marshmallow schemas.
+# Terra defines all responses as dataclasses.dataclass. Use the
+# module marshmallow_dataclass to convert those directly to
+# marshmallow schemas.
+
+# API response classes
+for response_class_name in terra.api.api_responses.__all__:
+    response_class = getattr(terra.api.api_responses, response_class_name)
+    response_schema = class_schema(response_class, WearablesV2BaseSchema)
+    globals()[f'WearablesV2{response_class_name}Schema'] = response_schema
+
+# Data classes
+WearablesV2ActivitySchema = class_schema(Activity, WearablesV2BaseSchema)
+WearablesV2AthleteSchema = class_schema(Athlete, WearablesV2BaseSchema)
+WearablesV2BodySchema = class_schema(Body, WearablesV2BaseSchema)
+WearablesV2DailySchema = class_schema(Daily, WearablesV2BaseSchema)
+WearablesV2MenstruationSchema = class_schema(Menstruation, WearablesV2BaseSchema)
+WearablesV2NutritionSchema = class_schema(Nutrition, WearablesV2BaseSchema)
+WearablesV2SleepSchema = class_schema(Sleep, WearablesV2BaseSchema)
+WearablesV2UserSchema = class_schema(User, WearablesV2BaseSchema)
+
+# Additional schemas
+class WearablesV2UserGetSchema(Schema):
+    wearables = fields.List(fields.String(), dump_default=[])
+
+class WearablesV2ProvidersGetSchema(Schema):
+    providers = fields.Dict(keys=fields.String(), values=fields.String())
+    sdk_providers = fields.Dict(keys=fields.String(), values=fields.String())
+
+# Add extra field
+WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict({'token': fields.String(default=None)})
