@@ -1819,6 +1819,9 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
             .join(MedicalBloodTestResults, MedicalBloodTestResults.test_id == MedicalBloodTests.test_id)\
                 .join(LookupBloodTests, LookupBloodTests.modobio_test_code == MedicalBloodTestResults.modobio_test_code)\
                 .filter(MedicalBloodTests.test_id == test_id).all()
+                
+        if len(query) == 0:
+            return
 
         output = {
             'test_id': query[0][0].test_id,
