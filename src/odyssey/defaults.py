@@ -322,26 +322,27 @@ ACTIVE_CAMPAIGN_BASE_URL = 'https://modobio.api-us1.com/api/3/'
 ACTIVE_CAMPAIGN_LIST = ''
 ACTIVE_CAMPAIGN_API_KEY = ''
 
-TERRA_API_KEY = 'ussv5SAQ53a1nNTxsMr9G41zj2KUhYMk5eDU1hjG'
-"""
-Key for Terra API.
-
-Default value is taken from their API reference examples.
-https://docs.tryterra.co/reference/authenticate-user
-"""
-
-TERRA_DEV_ID = 'testingTerra'
+TERRA_DEV_ID = ''
 """
 Developer ID for Terra API.
 
-Default value is taken from their API reference examples.
-https://docs.tryterra.co/reference/authenticate-user
+There are three environments: testing, staging, and production.
+Each environment has its own developer ID, API key, and secret.
+The URL for the webhook must be set in the developer dashboard,
+which is also the place where id, key, and secret can be found.
+https://dashboard.tryterra.co/terraapi/customise
+"""
+
+TERRA_API_KEY = ''
+"""
+Key for Terra API.
+
+See :const:`TERRA_DEV_ID`
 """
 
 TERRA_API_SECRET = ''
 """
 Secret password for Terra API.
 
-Default value is taken from their API reference examples.
-https://docs.tryterra.co/reference/authenticate-user
+See :const:`TERRA_DEV_ID`
 """
