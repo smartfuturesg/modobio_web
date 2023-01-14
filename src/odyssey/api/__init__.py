@@ -25,7 +25,7 @@ if not hasattr(werkzeug.routing, 'parse_rule'):
         re.VERBOSE,
     )
 
-    def _parse_ruleZZ(rule: str):
+    def _parse_rule(rule: str):
         """Parse a rule and return it as generator. Each iteration yields tuples
         in the form ``(converter, arguments, variable)``. If the converter is
         `None` it's a static url part, otherwise it's a dynamic one.
@@ -55,7 +55,7 @@ if not hasattr(werkzeug.routing, 'parse_rule'):
                 raise ValueError(f"malformed url rule: {rule!r}")
             yield None, None, remaining
 
-    werkzeug.routing.parse_rule = _parse_ruleZZ
+    werkzeug.routing.parse_rule = _parse_rule
 
 from flask import Blueprint
 from flask_restx import Api
