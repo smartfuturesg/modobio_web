@@ -117,9 +117,9 @@ class ProviderCredentialsEndpoint(BaseResource):
             raise Unauthorized()
 
         query = db.session.execute(
-            select(PractitionerCredentials).
+            select(ProviderCredentials).
             where(
-                PractitionerCredentials.user_id == user_id
+                ProviderCredentials.user_id == user_id
                 )
         ).scalars().all()
         return {'items': query}
@@ -134,22 +134,44 @@ class ProviderCredentialsEndpoint(BaseResource):
         User should be Staff Self
         """
 
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-
         current_user, _ = token_auth.current_user()
-        if current_user.user_id != user_id:
-            raise Unauthorized()
 
         payload = request.parsed_obj
         state_check = {}
         for role, cred in payload['items']:
-
+            # credentials must be tied to a role or role request
+            # check if user holds the role
+            # if user does not hold role, attempt to bring up role request
             curr_role = StaffRoles.query.filter_by(user_id=user_id,role=role).one_or_none()
+            role_request = None
+            if not curr_role:
+                lookup_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
+                role_request = ProviderRoleRequests.query.filter_by(user_id=user_id,role_id=lookup_role.idx, status = "pending").one_or_none()
+                if not role_request:
+                    raise BadRequest(f'User does not hold role {role} or have requested role. Cannot submit credentials for role.')
+
             # This takes care of ensuring credential number is submitted if user
             # submits a payload with a state for DEA and Medical License credential types
             if (cred.credential_type != 'npi' and cred.state) and not cred.credentials:
                 raise BadRequest('Credential number is mandatory if submitting with a state.')
+            
+            # only one credential type, state, per role/role request allowed.
+            # ensure user does not currently have a credential for this role
+            query = ProviderCredentials.query.filter_by(
+                user_id=user_id,
+                credential_type=cred.credential_type,
+                state = cred.state,
+                ).filter(ProviderCredentials.status.not_in(('Rejected','Expired')))
+
+            if curr_role:
+                query = query.filter_by(role_id=curr_role.idx)
+            else: 
+                query = query.filter_by(role_request_id=role_request.idx)
+
+            current_cred = query.one_or_none()
+            
+            if current_cred:
+                raise BadRequest('User has already submitted this credential. Delete the existing credential before adding a new one.')
 
             # This takes care of only allowing 1 state input per credential type
             # Example:
@@ -168,8 +190,9 @@ class ProviderCredentialsEndpoint(BaseResource):
                     state_check[cred.credential_type].append(cred.state)
 
             cred.status = 'Pending Verification' if not any([current_app.config['DEV'],current_app.config['TESTING']]) else 'Verified'
-            cred.role_id = curr_role.idx
+            cred.role_id = curr_role.idx if curr_role else None
             cred.user_id = user_id
+            cred.role_request_id = role_request.idx if role_request else None
             db.session.add(cred)
 
         db.session.commit()
@@ -185,19 +208,14 @@ class ProviderCredentialsEndpoint(BaseResource):
         User for this request should be the Staff Admin
         """
 
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-
         current_user, _ = token_auth.current_user()
-        if current_user.user_id != user_id:
-            raise Unauthorized()
-        
+      
         valid_statuses = ['Rejected', 'Expired']
 
         payload = request.json
-        payload.pop('staff_role') # Staff_role passed in schema but isn't part of PractitionerCredentials model
+        payload.pop('staff_role') # Staff_role passed in schema but isn't part of ProviderCredentials model
         
-        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+        curr_credentials = ProviderCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
         if curr_credentials.status not in valid_statuses:
             raise BadRequest('Current credential status must be rejected or expired.')
 
@@ -218,16 +236,12 @@ class ProviderCredentialsEndpoint(BaseResource):
 
         User for this request should be the Staff Self and Staff Admin
         """
-        if not user_id:
-            raise BadRequest('Missing User ID.')
-                
+        
         current_user, _ = token_auth.current_user()
-        if current_user.user_id != user_id:
-            raise Unauthorized()
 
         payload = request.json
 
-        curr_credentials = PractitionerCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
+        curr_credentials = ProviderCredentials.query.filter_by(user_id=user_id,idx=payload['idx']).one_or_none()
 
         if curr_credentials:
             db.session.delete(curr_credentials)
@@ -437,6 +451,10 @@ class ProviderRoleRequestsEndpoint(BaseResource):
         # check if there are any other pending role requests for the user_id
         if ProviderRoleRequests.query.filter_by(user_id=user_id, status='pending').first():
             raise BadRequest('There is already an active role request for this user.')
+
+        # check if user already has the requested role
+        if StaffRoles.query.filter_by(user_id=user_id, role=requested_role.role_name).one_or_none():
+            raise BadRequest('User already has the requested role.')
 
         # grant user provider login privileges if they don't have them already
         if not user.is_provider:

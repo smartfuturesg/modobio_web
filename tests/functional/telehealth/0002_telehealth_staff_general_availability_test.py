@@ -1,4 +1,5 @@
 import copy
+import pytest
 from flask.json import dumps
 
 from .data import (
@@ -14,7 +15,10 @@ from .data import (
 )
 from tests.functional.practitioner.data import practitioner_credentials_post_1_data
 
-def test_post_1_staff_general_availability(test_client, staff_territory, staff_credentials, staff_consult_rate, provider_telehealth_access):
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_post_1_staff_general_availability(test_client, staff_territory, staff_credentials, staff_consult_rate):
     # DEPENDENCY - add practitioner credentials
     response = test_client.post(
         f'/practitioner/credentials/{test_client.provider_id}/',
@@ -62,7 +66,8 @@ def test_post_1_staff_general_availability(test_client, staff_territory, staff_c
     
     assert response.status_code == 201
 
-def test_get_1_staff_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_1_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -81,7 +86,8 @@ def test_get_1_staff_availability(test_client, provider_telehealth_access):
 
     assert response.status_code == 200
 
-def test_post_2_staff_general_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_post_2_staff_general_availability(test_client):
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -90,7 +96,8 @@ def test_post_2_staff_general_availability(test_client, provider_telehealth_acce
 
     assert response.status_code == 201
 
-def test_get_2_staff_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_2_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -126,7 +133,8 @@ def test_get_2_staff_availability(test_client, provider_telehealth_access):
         response.json['availability'][6]['start_time'],
         response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
 
-def test_invalid_post_3_staff_general_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_invalid_post_3_staff_general_availability(test_client):
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -135,7 +143,8 @@ def test_invalid_post_3_staff_general_availability(test_client, provider_telehea
 
     assert response.status_code == 400
 
-def test_get_3_staff_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_3_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -171,7 +180,8 @@ def test_get_3_staff_availability(test_client, provider_telehealth_access):
         response.json['availability'][6]['start_time'],
         response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
 
-def test_invalid_post_4_staff_general_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_invalid_post_4_staff_general_availability(test_client):
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -180,7 +190,8 @@ def test_invalid_post_4_staff_general_availability(test_client, provider_telehea
     assert response.status_code == 400
 
 
-def test_get_4_staff_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_4_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -216,7 +227,8 @@ def test_get_4_staff_availability(test_client, provider_telehealth_access):
         response.json['availability'][6]['start_time'],
         response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
 
-def test_invalid_post_5_staff_general_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_invalid_post_5_staff_general_availability(test_client):
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -225,7 +237,8 @@ def test_invalid_post_5_staff_general_availability(test_client, provider_telehea
 
     assert response.status_code == 400
 
-def test_get_5_staff_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_5_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -261,7 +274,8 @@ def test_get_5_staff_availability(test_client, provider_telehealth_access):
         response.json['availability'][6]['start_time'],
         response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
 
-def test_invalid_post_6_staff_general_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_invalid_post_6_staff_general_availability(test_client):
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -271,7 +285,8 @@ def test_invalid_post_6_staff_general_availability(test_client, provider_telehea
     assert response.status_code == 400
 
 
-def test_get_6_staff_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_6_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -307,7 +322,8 @@ def test_get_6_staff_availability(test_client, provider_telehealth_access):
         response.json['availability'][6]['start_time'],
         response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
 
-def test_invalid_post_7_staff_general_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_invalid_post_7_staff_general_availability(test_client):
     response = test_client.post(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -316,7 +332,8 @@ def test_invalid_post_7_staff_general_availability(test_client, provider_telehea
 
     assert response.status_code == 400
 
-def test_get_7_staff_availability(test_client, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_7_staff_availability(test_client):
     response = test_client.get(
         f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
         headers=test_client.provider_auth_header,
@@ -352,7 +369,8 @@ def test_get_7_staff_availability(test_client, provider_telehealth_access):
         response.json['availability'][6]['start_time'],
         response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
 
-def test_update_availability_conflicts(test_client, booking, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_update_availability_conflicts(test_client, booking):
     #tests that conflicting appointments show up when a practitioner updates their availability
     
     #set booking within availability (Monday 8:30AM)

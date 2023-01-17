@@ -335,6 +335,7 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     days_remaining = fields.Integer(required=False, dump_only=True)
     authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True),missing=[])
     bio = fields.String(required=False,dump_only=True)
+    provider_telehealth_access = fields.Boolean(required=False, dump_only=True)
 
 class UserClinicalCareTeamSchema(Schema):
 

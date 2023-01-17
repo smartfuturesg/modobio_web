@@ -23,7 +23,7 @@ from odyssey import create_app, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory
-from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings, TelehealthChatRooms, TelehealthStaffSettings
+from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings, TelehealthChatRooms
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils import search
@@ -170,7 +170,8 @@ def test_client():
             
             # Cleanup functions also need a live app.
             db.session.rollback()
-            clear_twilio()
+            #TODO Telehealth on the Shelf - removed clear_twilio call - add back when telehealth and twilio reactivated
+            #clear_twilio()
             clear_db()
 
             # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
@@ -189,31 +190,7 @@ def test_client():
                 'Quiet': True}
             bucket.delete_objects(Delete=delete)
 
-#Used to grant telehealth access to test client provider 
-@pytest.fixture(scope='session')
-def provider_telehealth_access(test_client):
 
-    provider_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access=True)
-    test_client.db.session.add(provider_telehealth_access)
-    test_client.db.session.commit()
-
-    yield provider_telehealth_access
-
-    test_client.db.session.delete(provider_telehealth_access)
-    test_client.db.session.commit()
-
-#Used to grant telehealth access to test client staff
-@pytest.fixture(scope='function')
-def staff_telehealth_access(test_client):
-
-    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
-    test_client.db.session.add(staff_telehealth_access)
-    test_client.db.session.commit()
-    
-    yield staff_telehealth_access
-
-    test_client.db.session.delete(staff_telehealth_access)
-    test_client.db.session.commit()
 
 # Used by tests in client/ and in doctor/
 @pytest.fixture(scope='module')

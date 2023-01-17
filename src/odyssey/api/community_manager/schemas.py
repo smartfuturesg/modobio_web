@@ -1,7 +1,9 @@
 import logging
 
 from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
-from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.lookup.schemas import LookupRolesSchema
+from odyssey.api.provider.models import *
+from odyssey.api.staff.models import StaffRoles
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +37,7 @@ class PaginationLinks(Schema):
     
 class ProviderLicensingSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = PractitionerCredentials
+        model = ProviderCredentials
         exclude = ('idx',)
 
     firstname = fields.String()
@@ -49,7 +51,40 @@ class ProviderLiscensingAllSchema(Schema):
 
 class VerifyMedicalCredentialSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = PractitionerCredentials
+        model = ProviderCredentials
         exclude = ('country_id','role_id')
         
     user_id = fields.Integer(required=True)
+
+
+class ProviderRolesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = StaffRoles
+        exclude = ('idx', 'created_at', 'updated_at', 'user_id', 'consult_rate')
+    role = fields.String()
+    role_info = fields.Nested(LookupRolesSchema)
+    
+class ProviderRoleRequestsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ProviderRoleRequests
+        exclude = ('created_at', 'updated_at', 'user_id')
+    
+    idx = fields.Integer()
+    firstname = fields.String()
+    lastname = fields.String()
+    modobio_id = fields.String()
+    email = fields.Email()
+    status = fields.String()
+    current_roles = fields.List(fields.Nested(ProviderRolesSchema), missing=[])
+    role_id = fields.Integer()
+    role_info = fields.Nested(LookupRolesSchema)
+
+class ProviderRoleRequestsAllSchema(Schema):
+    provider_role_requests = fields.List(fields.Nested(ProviderRoleRequestsSchema), missing=[])
+    total_items = fields.Integer()
+    _links = fields.Nested(PaginationLinks)
+
+class ProviderRoleRequestUpdateSchema(Schema):
+    # status must be one of the following: inactive, pending, rejected, granted
+    status = fields.String(required=True, validate=lambda x: x in ['rejected', 'granted'])
+    role_request_id = fields.Integer(required=True)

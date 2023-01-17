@@ -4,7 +4,7 @@ Make role_id nullable in PractitionerCredentials
 Change LookupRoles.is_practitioner to LookupRoles.is_provider
 
 Revision ID: f81e7cbdab82
-Revises: 3669c98b6396
+Revises: ad7334aab63b
 Create Date: 2022-11-08 11:28:17.972596
 
 """

@@ -10,7 +10,7 @@ from odyssey import ma,db
 
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation, PractitionerCredentials
 from odyssey.api.lookup.schemas import LookupOrganizationsSchema
-from odyssey.utils.constants import CREDENTIAL_TYPE, USSTATES_2, CREDENTIAL_STATUS, CREDENTIAL_ROLES
+from odyssey.utils.constants import CREDENTIAL_TYPES, USSTATES_2, CREDENTIAL_STATUS, CREDENTIAL_ROLES
 
 """
     Schemas for the practitioner API
@@ -48,7 +48,7 @@ class PractitionerCredentialsSchema(ma.SQLAlchemyAutoSchema):
     idx = fields.Integer(required=False)
     state = fields.String(validate=validate.OneOf(USSTATES_2))
     status = fields.String(validate=validate.OneOf(CREDENTIAL_STATUS) ,missing='Pending Verification')
-    credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPE['medical_doctor']))
+    credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPES))
     staff_role = fields.String(validate=validate.OneOf(CREDENTIAL_ROLES), required=True)
     expiration_date = fields.Date(required=False)
 
