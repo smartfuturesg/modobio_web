@@ -44,7 +44,7 @@ def build_es_indices():
         if len(query) != 0:
             # Elasticsearch 8.0 requires all arguments to be named parameters.
             if elasticsearch.__version__[0] >= 8:
-                es.bulk(body=build_index(index_name=queryName, query_data=query), refresh=True)
+                es.bulk(operations=build_index(index_name=queryName, query_data=query), refresh=True)
             else:
                 # But it's not backwards compatible.
                 es.bulk(build_index(index_name=queryName, query_data=query), refresh=True)
