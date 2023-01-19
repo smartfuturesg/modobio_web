@@ -165,7 +165,7 @@ def test_client():
             tc.provider_id = provider.user_id
             tc.provider_pass = '123'
             tc.provider_auth_header = login(tc, provider, password='123')
-            
+            breakpoint()
             yield tc
             
             # Cleanup functions also need a live app.
