@@ -308,7 +308,10 @@ class ActiveCampaign:
         #Get the tags associated with the user. 
         user_tags = self.get_user_tags(ac_contact_id = ac_contact_id)
 
-        if user.is_client and converted_tags_dict["Converted - Client"] not in user_tags.keys():
+        # add converted client tag to user profile if they are not already a provider prospect
+        if user.is_client and \
+            converted_tags_dict["Converted - Client"] not in user_tags.keys() and \
+                prospect_tags_dict["Prospect - Provider"] not in user_tags.keys():
             # loop through prospect tags that are NOT Prospect - Provider
             for tag, tag_id in prospect_tags_dict.items():
                 if tag == "Prospect - Provider":
