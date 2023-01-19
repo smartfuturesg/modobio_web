@@ -26,7 +26,7 @@ from odyssey.api.doctor.models import (
     MedicalSurgeries
 )
 from odyssey.api.facility.models import MedicalInstitutions
-from odyssey.utils.constants import  MEDICAL_CONDITIONS
+from odyssey.utils.constants import  MEDICAL_CONDITIONS, MIN_VALID_PULSE, MAX_VALID_PULSE
 from odyssey.utils.base.schemas import BaseSchema
 
 """
@@ -47,6 +47,7 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     timestamp = fields.DateTime()
     systolic = fields.Float(metadata={'description':'units mmHg'},required=True)
     diastolic = fields.Float(metadata={'description':'units mmHg'},required=True)
+    pulse = fields.Integer(metadata={'description':'units beats/minute'}, missing=None, validate=validate.Range(min=MIN_VALID_PULSE, max=MAX_VALID_PULSE))
     datetime_taken = fields.String(metadata={'description':'Date and time the blood pressure was taken'}, required=True)
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)

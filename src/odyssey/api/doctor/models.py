@@ -31,6 +31,13 @@ class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMix
     :type: float
     """
 
+    pulse = db.Column(db.Integer)
+    """
+    Pulse in beats per minute
+
+    :type: int
+    """
+
     datetime_taken = db.Column(db.String)
     """
     The date and time the blood pressure levels were taken
