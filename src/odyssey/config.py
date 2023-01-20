@@ -101,7 +101,7 @@ class Config:
 
         # Testing (running pytest) is always dev.
         if testing:
-            deployment_env = 'testing'
+            deployment_env = 'development'
 
         # The default flask envoironment is "production" if
         # DEPLOYMENT_ENV was not set. We don't want production by default, so raise
