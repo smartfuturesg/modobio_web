@@ -36,13 +36,8 @@ def build_es_indices():
 
             _id = user.user_id
 
-            action = {
-                'index': {
-                    '_index': f'{index_name}',
-                    '_id': f'{_id}' + f'{json.dumps(payload)}'
-                }
-            }
-
+            action = '{\"index\":{\"_index\":\"'f'{index_name}''\", \"_id\":'f'{_id}''}}\n'f'{json.dumps(payload)}'
+            
             yield action
 
     for queryName, query in queries:
@@ -53,7 +48,6 @@ def build_es_indices():
             else:
                 # But it's not backwards compatible.
                 es.bulk(build_index(index_name=queryName, query_data=query), refresh=True)
-
 
 # def update_user_dob(user_id:int, dob:str):
 #    """

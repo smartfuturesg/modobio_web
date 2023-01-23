@@ -20,7 +20,7 @@ def test_get_client_search(test_client, care_team):
     response = test_client.get(
         f'/client/search/?modobio_id={test_client.client.modobio_id}',
         headers=test_client.provider_auth_header)
-
+        
     assert response.status_code == 200
     assert response.json['items'][0]['firstname'] == test_client.client.firstname
     assert response.json['items'][0]['lastname'] == test_client.client.lastname
