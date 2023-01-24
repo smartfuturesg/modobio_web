@@ -98,7 +98,6 @@ def create_app():
 
         .. code-block:: shell
 
-            $ export FLASK_DEBUG=true
             $ export FLASK_APP=odyssey:create_app()
             $ flask run
 

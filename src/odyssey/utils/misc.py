@@ -1040,7 +1040,7 @@ def delete_user(user_id, requestor_id, delete_type):
     db.session.commit()
 
     # Send notification email to user being deleted.
-    # Also send to user requesting deletion when FLASK_DEBUG=true
+    # Also send to user requesting deletion when DEPLOYMENT_ENV=production
     if user_email != requester.email:
         send_email('account-deleted', requester.email, user_email=user_email)
         
