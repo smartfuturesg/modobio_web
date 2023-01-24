@@ -191,18 +191,20 @@ Note that files will be kept for only 24 hours after a pytest run, unless
 
 .. seealso:: :const:`AWS_S3_PREFIX`
 """
+#TODO Telehealth on the Shelf - removed twilio access key defaults - should be added back when we
+# reactivate a Twilio enabled telehealth feature.
 
 # Twilio settings
-TWILIO_ACCOUNT_SID = ''
+#TWILIO_ACCOUNT_SID = ''
 """ Twilio account ID number. """
 
-TWILIO_API_KEY_SID = ''
+#TWILIO_API_KEY_SID = ''
 """ Twilio API access key ID number. """
 
-TWILIO_API_KEY_SECRET = ''
+#TWILIO_API_KEY_SECRET = ''
 """ Twilio API access key secret. """
 
-CONVERSATION_SERVICE_SID = ''
+#CONVERSATION_SERVICE_SID = ''
 """ Twilio conversation serive ID number. """
 
 # Celery settings.
@@ -272,7 +274,7 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 # Google ReCaptcha api secret
 GOOGLE_RECAPTCHA_SECRET = ""
 
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-1.0.2'
+WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-2-1'
 """ Name of the table in AWS DynamoDB where wearables data is stored.
 
 The table name is versioned to allow multiple versions of the API to run

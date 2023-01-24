@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import or_, select
 from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
@@ -8,6 +9,9 @@ from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.periodic import deploy_upcoming_appointment_tasks
 from odyssey.tasks.tasks import abandon_telehealth_booking, upcoming_appointment_notification_2hr, upcoming_appointment_care_team_permissions
 
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_upcoming_bookings_scan(test_client, upcoming_bookings):
     """
         To test the upcoming bookings scan we have to
@@ -54,7 +58,7 @@ def test_upcoming_bookings_scan(test_client, upcoming_bookings):
     ).scalars().all()
     
     # in syntax is used to ensure the test can pass when run either on its own or in a suite
-    # 2 notifications are created for each booking (one for cleint and one for practitioner) 
+    # 2 notifications are created for each booking (one for client and one for practitioner) 
     # during this test and if the cancellation test has also been run an additional 1 
     # notification will exist 
     assert len(notifications) in [(len(bookings)*2), len(bookings)*2 + 1]

@@ -15,6 +15,9 @@ from .data import (
     telehealth_client_staff_bookings_put_1_data
 )
 
+#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehealth_staff):
     # delete previous bookings
     test_client.db.session.query(TelehealthChatRooms).delete()
@@ -77,6 +80,7 @@ def test_post_1_client_staff_bookings(test_client, staff_availabilities, telehea
     assert staff_events.start_time == time(8, 15)
     assert staff_events.end_time == time(8, 45)
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_post_2_client_staff_bookings(test_client, telehealth_staff, staff_availabilities):
     # add client to queue first
     queue_data = {
@@ -105,6 +109,7 @@ def test_post_2_client_staff_bookings(test_client, telehealth_staff, staff_avail
     assert response.status_code == 201
     assert response.json.get('bookings')[0].get('status') == 'Pending'
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_availabilities):
     #telehealth_client_staff_bookings_post_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
@@ -118,13 +123,10 @@ def test_post_3_client_staff_bookings(test_client, telehealth_staff, staff_avail
     # booking fails because client is not in queue
     assert response.status_code == 400
 
-def test_get_1_staff_bookings(test_client, telehealth_staff, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_1_staff_bookings(test_client, telehealth_staff):
     staff_header = login(test_client, telehealth_staff[0])
 
-    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
-    staff_telehealth_access = TelehealthStaffSettings(user_id=telehealth_staff[0].user_id, provider_telehealth_access=True)
-    test_client.db.session.add(staff_telehealth_access)
-    test_client.db.session.commit()
 
     response = test_client.get(
         f'/telehealth/bookings/'
@@ -132,10 +134,8 @@ def test_get_1_staff_bookings(test_client, telehealth_staff, provider_telehealth
         headers=staff_header,
         content_type='application/json')
 
-    assert response.status_code == 200
-    test_client.db.session.delete(staff_telehealth_access)
-    test_client.db.session.commit()
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_2_client_bookings(test_client):
     response = test_client.get(
         f'/telehealth/bookings/'
@@ -145,7 +145,8 @@ def test_get_2_client_bookings(test_client):
 
     assert response.status_code == 200
 
-def test_get_3_staff_client_bookings(test_client, telehealth_staff, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_3_staff_client_bookings(test_client, telehealth_staff):
 
     #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
     staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
@@ -165,6 +166,7 @@ def test_get_3_staff_client_bookings(test_client, telehealth_staff, provider_tel
     test_client.db.session.delete(staff_telehealth_access)
     test_client.db.session.commit()
 
+@pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_post_4_client_staff_bookings(test_client, staff_availabilities, telehealth_staff):
     """make booking without specifying a payment method nor location"""
     # delete previous bookings
@@ -211,7 +213,8 @@ def test_post_4_client_staff_bookings(test_client, staff_availabilities, telehea
     assert response.json.get('bookings')[0].get('payment_method_id') == None
 
 #@pytest.mark.skip('randomly failing on pipeline but not locally')
-def test_put_1_client_staff_bookings(test_client, booking, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_put_1_client_staff_bookings(test_client, booking):
     
     chat = TelehealthChatRooms.query.filter_by(booking_id=booking.idx).one_or_none()
     assert chat.conversation_sid != None
@@ -226,8 +229,8 @@ def test_put_1_client_staff_bookings(test_client, booking, provider_telehealth_a
     assert chat.conversation_sid == None
 
 
-
-def test_put_confirm_client_staff_booking(test_client, booking, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_put_confirm_client_staff_booking(test_client, booking):
     """confirm the booking from the staff and client ends. 
     Staff cannot confirm the booking
     Client will not be able to confirm booking.Booking already Confirmed"""
@@ -249,7 +252,8 @@ def test_put_confirm_client_staff_booking(test_client, booking, provider_telehea
     assert response.status_code == 400
 
 
-def test_put_2_client_staff_bookings(test_client, booking_function_scope, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_put_2_client_staff_bookings(test_client, booking_function_scope):
     """
     Attempt to cancel a booking that has already started. should respond with 400
     """
@@ -268,7 +272,8 @@ def test_put_2_client_staff_bookings(test_client, booking_function_scope, provid
     assert response.status_code == 400
 
 
-def test_get_4_staff_client_bookings(test_client, booking, provider_telehealth_access):
+@pytest.mark.skip(reason="Telehealth on the Shelf")
+def test_get_4_staff_client_bookings(test_client, booking):
     response = test_client.get(
         f'/telehealth/bookings/'
         f'?client_user_id={test_client.client_id}'

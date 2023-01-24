@@ -1,7 +1,7 @@
 """User.is_provider flag
 
 Revision ID: 3669c98b6396
-Revises: 09bd96cf3eb5
+Revises: a2cd76a0affa
 Create Date: 2022-10-24 13:27:45.370664
 
 """

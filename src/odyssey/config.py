@@ -2,12 +2,16 @@
 Flask app configuration
 =======================
 
-The configuration of the Odyssey API follows the Flask environmental variable ``FLASK_DEBUG``,
-but with stricter requirements. Here, it is only allowed to be set to ``true`` or 
-``false``. Any other value for ``FLASK_DEBUG`` will raise an error. Not setting
-``FLASK_DEBUG`` in the environment will also raise an error, forcing the user to make a
-concious decision when running the API. There is no default value for ``FLASK_DEBUG``.
+The configuration of the Odyssey API follows the environmental variable ``DEPLOYMENT_ENV``. 
+Here, it is only allowed to be set to ``development``, ``production``, ``testing``.
+Any other value for ``DEPLOYMENT_ENV`` will raise an error. Not setting
+``DEPLOYMENT_ENV`` in the environment will also raise an error, forcing the user to make a
+concious decision when running the API. There is no default value for ``DEPLOYMENT_ENV``.
 
+
+``FLASK_DEBUG`` is the environmental variable that sets Flask debugging mode to provide 
+code reloading and better error messages. Options are ``true`` or ``false``, and the default is 
+set to true. Debug mode should never be used in a production environment!
 Defaults
 ========
 
@@ -92,23 +96,22 @@ class Config:
         # Are we running flask db ...?
         migrate = (len(sys.argv) > 1 and sys.argv[1] == 'db')
 
-        # Are we running in development mode?
-        flask_debug = os.getenv('FLASK_DEBUG')
+        # Get enviroment mode we want to run in 
+        deployment_env = os.getenv('DEPLOYMENT_ENV')
 
         # Testing (running pytest) is always dev.
         if testing:
-            flask_debug = 'true'
+            deployment_env = 'development'
 
-        # FLASK_DEBUG is loaded by Flask before the app is created and thus
-        # before this config is loaded. The default is "production" if
-        # FLASK_DEBUG was not set. We don't want production by default, so raise
+        # The default flask envoironment is "production" if
+        # DEPLOYMENT_ENV was not set. We don't want production by default, so raise
         # an error if it was not set to force the user to set it explicitly.
-        if flask_debug not in ('1', '0', 'true', 'false'):
-            raise ValueError(f'FLASK_DEBUG must be either "true" or "false", '
-                             f'found "{flask_debug}".')
+        if deployment_env not in ('production', 'development', 'testing'):
+            raise ValueError(f'DEPLOYMENT_ENV must be either "production", "development", or "testing" '
+                             f'found "{deployment_env}".')
 
-        # Simple boolean switch for main code.
-        self.DEV = flask_debug == '1' or flask_debug == 'true'
+        # # Simple boolean switch for main code.
+        self.DEV = deployment_env == 'development'
         
         # Load defaults.
         for varname in odyssey.defaults.__dict__.keys():
