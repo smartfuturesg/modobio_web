@@ -114,9 +114,6 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
 
         ### Read HTML page
         if template:
-            session['staff_id'] = 1
-            #session['clientname'] = client.fullname
-            session['user_id'] = user_id
 
             cssfile = pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css'
             css = CSS(filename=cssfile)
