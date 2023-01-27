@@ -14,7 +14,7 @@ from datetime import date
 from typing import Type
 
 from botocore.exceptions import ClientError
-from flask import render_template, session, current_app, _request_ctx_stack
+from flask import render_template, current_app, _request_ctx_stack
 from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
 from flask_sqlalchemy import session
