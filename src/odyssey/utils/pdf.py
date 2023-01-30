@@ -14,7 +14,7 @@ from datetime import date
 from typing import Type
 
 from botocore.exceptions import ClientError
-from flask import render_template, session, current_app, _request_ctx_stack
+from flask import render_template, current_app, _request_ctx_stack
 from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
 from flask_sqlalchemy import session
@@ -114,9 +114,6 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
 
         ### Read HTML page
         if template:
-            session['staff_id'] = 1
-            #session['clientname'] = client.fullname
-            session['user_id'] = user_id
 
             cssfile = pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css'
             css = CSS(filename=cssfile)
