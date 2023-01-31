@@ -16,7 +16,7 @@ users_new_user_client_data = {
     "lastname": "Client",
     "email": "test_this_user_client@modobio.com",
     "phone_number": "1111111121",
-    "password": "password",
+    "password": "123456789A",
     "biological_sex_male": True
   },
   "client_info": {
@@ -58,11 +58,20 @@ users_client_new_info_data = {
 
 users_new_self_registered_client_data = {
   "email": "self_registered_client@mail.com",
-  "password": "password_self_reg",
+  "password": "0102030405abc",
   "firstname": "Testron",
   "lastname": "McClient",
   "middlename": "Selfreg",
   "phone_number": "1112223333"
+}
+
+users_bad_password_client_data = {
+  "email": "bad_pass@mail.com",
+  "password": "123abc",
+  "firstname": "Firsto",
+  "lastname": "Lasto",
+  "middlename": "Middos",
+  "phone_number": "1912223333"
 }
 
 users_to_delete_data = {
@@ -71,7 +80,7 @@ users_to_delete_data = {
     "middlename": "Bilius",
     "lastname": "Weasley",
     "email": "ronweasley@mail.com",
-    "password": "password2",
+    "password": "0102030405abc1",
     "phone_number": "1111112222"
   },
   "staff_client_user": {
@@ -104,7 +113,7 @@ users_staff_member_data = {
 
 users_staff_passwords_data = {
   "password" : "gogoleplexitykatcity65",
-  "current_password": "password",
+  "current_password": "password123",
   "new_password": "salt1ampintheruffs98"
 }
 
