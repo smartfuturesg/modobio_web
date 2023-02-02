@@ -1043,13 +1043,6 @@ class LookupRoles(BaseModelWithIdx):
     :type: string
     """
 
-    has_client_data_access = db.Column(db.Boolean)
-    """
-    Denotes if this role has access to client data
-
-    :type: boolean
-    """
-
     active = db.Column(db.Boolean)
     """
     Denotes whether a role type is currently used in the system.
@@ -1065,7 +1058,6 @@ class LookupRoles(BaseModelWithIdx):
     :type: string
     """
 
-    
     is_provider = db.Column(db.Boolean)
     """
     Denotes if this role is a p or not.
@@ -1073,6 +1065,66 @@ class LookupRoles(BaseModelWithIdx):
     :type: boolean
     """
 
+    rpm_enroll = db.Column(db.Boolean)
+    """
+    Denotes whether this role type can enroll a patient.
+
+    :type: boolean
+    """
+
+    rpm_support = db.Column(db.Boolean)
+    """
+    Denotes whether this role type can support an already enroled patient.
+
+    :type: boolean
+    """
+
+    telehealth_access = db.Column(db.Boolean)
+    """
+    Denotes whether this role has access to telehealth. 
+
+    :type: boolean
+    """
+
+    groups = db.relationship('LookupRoleGroups', back_populates='role')
+    """
+    One to many relationship with role groups
+
+    :type: :class:`StaffRoleGroups` instance list
+    """ 
+
+class LookupRoleGroups(BaseModelWithIdx):
+    """
+    Lookup table for groups a particualr role can be part of.
+    """
+    
+    group_name = db.Column(db.String)
+    """
+    Full group name.
+
+    :type: String
+    """
+
+    group_name_abbreviation = db.Column(db.String)
+    """
+    Group name abbreviation.
+
+    :type: String
+    """
+
+    role_idx = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
+    """
+    Foreign key to staff role ID 
+
+    :type: int, foreign key
+    """
+ 
+    role = db.relationship("LookupRoles", back_populates="groups")
+    """
+    Many to one relationship with lookup role
+
+    :type: :class:`LookupRoles` instance list
+    """ 
 class LookupLegalDocs(BaseModelWithIdx):
 
     name = db.Column(db.String)
