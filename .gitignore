@@ -50,4 +50,5 @@ celerybeat.pid
 
 # Ctags
 tags
+.tags
 
