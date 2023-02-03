@@ -145,8 +145,8 @@ def create_app():
     if not app.config['SWAGGER_DOC']:
         api._doc = False
         api_v2._doc = False
-    api.version = app.config['API_VERSION']
-    api_v2.version = app.config['API_VERSION']
+    api.version = app.config['VERSION_STRING']
+    api_v2.version = app.config['VERSION_STRING']
 
     # Register development-only endpoints.
     if app.config['DEV']:
