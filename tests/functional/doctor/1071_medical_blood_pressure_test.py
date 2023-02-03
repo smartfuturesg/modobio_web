@@ -11,6 +11,19 @@ def test_post_1_blood_pressure_history(test_client):
 
     assert response.status_code == 201
 
+def test_post_blood_pressure_invalid_pulse(test_client):
+    # Change pulse value outside the acceptable range
+    doctor_blood_pressures_data['pulse'] = 0
+
+    response = test_client.post(
+        f'/doctor/bloodpressure/{test_client.client_id}/',
+        headers=test_client.client_auth_header,
+        data=dumps(doctor_blood_pressures_data),
+        content_type='application/json')
+
+    # Ensure that invalid pulse throws bad request
+    assert response.status_code == 400
+
 def test_get_1_blood_pressure_history(test_client):
     response = test_client.get(
         f'/doctor/bloodpressure/{test_client.client_id}/',

@@ -86,13 +86,13 @@ class ActiveCampaign:
 
         #contact exists, check if there is an db entry in UserActiveCampaign
         if data['meta']['total'] == '1':
-            logger.info(f'Active campagign contact exisits for {email}')
+            logger.info(f'Active campaign contact exists for {email}')
             contact_id = data['contacts'][0]['id']
             ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
 
             #if None, create db entry
             if not ac_contact:
-                logger.info(f'Creating UserActiveCampaign db entry for already exisiting user {email}.')
+                logger.info(f'Creating UserActiveCampaign db entry for already existing user {email}.')
                 ac_contact = UserActiveCampaign(
                     user_id=user_id, 
                     active_campaign_id=contact_id
@@ -102,7 +102,7 @@ class ActiveCampaign:
 
             # User already exists as a contact, check to see if they have been marked as a prospect. 
             # If so change this adds a tag of "Converted-Clients".
-            self.convert_prosect(user_id, contact_id)  
+            self.convert_prospect(user_id, contact_id)  
 
             #Check if contact is in active campaign list. 
             response = self.request('GET', endpoint = f'contacts/{contact_id}/contactLists')
@@ -297,36 +297,101 @@ class ActiveCampaign:
             elif client_sub.subscription_type_id == 3:             #Yearly Subscrioption ID from LookupTable
                 return self.add_tag(user_id, 'Subscription - Annual')
 
-    def convert_prosect(self, user_id, ac_contact_id):
-        #Checks if contact is marked as a "prospect" and converts them to "Converted - Clients"
+    def convert_prospect(self, user_id, ac_contact_id):
+        """Checks if contact is marked as a "prospect" and converts them to "Converted - Clients" and/or "Converted - Providers" based on their user type."""
         user = User.query.filter_by(user_id=user_id).one_or_none()
+        #Get the ids of the 'Prospect' and 'Converted' tags stored in Active Campaign
+        prospect_tags_dict = self.search_tags(search_param='prospect')
+
+        converted_tags_dict = self.search_tags(search_param='converted')
+        
+        #Get the tags associated with the user. 
+        user_tags = self.get_user_tags(ac_contact_id = ac_contact_id)
+
+        # add converted client tag to user profile if they are not already a provider prospect
+        if user.is_client and \
+            converted_tags_dict["Converted - Client"] not in user_tags.keys() and \
+                prospect_tags_dict["Prospect - Provider"] not in user_tags.keys():
+            # loop through prospect tags that are NOT Prospect - Provider
+            for tag, tag_id in prospect_tags_dict.items():
+                if tag == "Prospect - Provider":
+                    continue
+                if tag_id in user_tags.keys():
+                    # user has Prospect tag but not converted tag
+                    self.add_tag(user_id, 'Converted - Client')
+                    break
+
+        if user.is_provider and converted_tags_dict["Converted - Provider"] not in user_tags.keys():
+            if prospect_tags_dict["Prospect - Provider"] in user_tags.keys():
+                self.add_tag(user_id, 'Converted - Provider')
+        
+        return
+
+
+    def get_user_tags(self, user_id = None, ac_contact_id = None) -> dict:
+        """
+        Retrieves all tags a user has from Active Campaign
+
+        Parameters
+        ----------
+            user_id: int (optional)
+                User ID. If provided will be used to get Active Campaign contact ID
+            ac_contact_id: int (optional)
+                Active Campaign contact ID. If provided will be used to get tags
+
+        Returns
+        -------
+            tag_ids: dict
+                dict of user tags. key - tag_id, value - user's unique tag id
+        """
+        if not user_id and not ac_contact_id:
+            logger.error('No user ID or Active Campaign contact ID provided.')
+            raise ValueError('No user ID or Active Campaign contact ID provided.')
+
+        if not ac_contact_id:
+            ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
+            if not ac_contact:
+                logger.error('No Active Campaign contact ID found with provided user ID.')
+                raise ValueError('No Active Campaign contact ID found with provided user ID.')
+            ac_contact_id = ac_contact.active_campaign_id
+
+        response = self.request('GET', endpoint = f'contacts/{ac_contact_id}/contactTags')
+
+        try:
+            response.raise_for_status()
+        except Exception as err:
+            logger.error(err)
+            raise BadRequest(err)
+        
+        data = json.loads(response.text)
+        user_tags = data['contactTags']
+        user_tags_dict = {int(tag["tag"]): int(tag["id"]) for tag in user_tags}
+        return user_tags_dict
+
+    def search_tags(self, search_param = '') -> dict:
+        """
+        search active campaign for tags that match the search parameter
+        
+        Parameters
+        ----------
+            search_param: str
+                search parameter to search for tags
+        
+        Returns
+        -------
+            tags_dict: dict
+                dict of tags. key - tag name, value - tag id
+        """
 
         #Get the ids of the 'Prospect' tags stored in Active Campaign
-        query = { 'search': 'prospect' }
+        query = { 'search': search_param }
         response = self.request('GET', endpoint = 'tags/?' + urlencode(query))
         data = json.loads(response.text)
 
         if data['meta']['total'] == '0':
             logger.error('No tag found with the provided name.')
             return
-        prospect_tag_ids = data['tags']
-        
-        #Get the tags associated with the user. 
-        response = self.request('GET', endpoint = f'contacts/{ac_contact_id}/contactTags')
 
-        data = json.loads(response.text)
-        user_tags = data['contactTags']
+        tags_dict = {tag["tag"]: int(tag["id"]) for tag in data["tags"]}
 
-        #Check if user has 'Prospect' tags on account
-        has_prospect_tag = False
-        for user_tag in user_tags:
-            for tag_id in prospect_tag_ids:
-                #User has some tag of 'Prospect' 
-                if tag_id['tag'] != 'Prospect - Provider' and user_tag['tag'] == tag_id['id']:
-                    has_prospect_tag = True
-                #Disregard operation because user has tag of 'Prospect - Provider'
-                elif tag_id['tag'] == 'Prospect - Provider' and user_tag['tag'] == tag_id['id']:
-                    return
-                
-        if has_prospect_tag and user.is_client:
-            return self.add_tag(user_id, 'Converted - Client')
+        return tags_dict
