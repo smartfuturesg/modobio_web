@@ -268,14 +268,6 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 # Google ReCaptcha api secret
 GOOGLE_RECAPTCHA_SECRET = ""
 
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-1.0.2'
-""" Name of the table in AWS DynamoDB where wearables data is stored.
-
-The table name is versioned to allow multiple versions of the API to run
-at the same time. Make sure to update this value when moving to a new
-branch.
-"""
-
 # Apple app store 
 APPLE_APPSTORE_API_KEY = ''
 
@@ -341,4 +333,15 @@ TERRA_API_SECRET = ''
 Secret password for Terra API.
 
 See :const:`TERRA_DEV_ID`
+"""
+
+WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r@VERSION_STRING@'
+""" Name of the table in AWS DynamoDB where wearables data is stored.
+
+.. deprecated:: 1.3.1
+    With Terra integration in release 1.3.1, AWS Dynamo will no longer be used.
+
+The table name is versioned to allow multiple versions of the API to run
+at the same time. Make sure to update this value when moving to a new
+branch.
 """
