@@ -22,6 +22,7 @@ from werkzeug.exceptions import HTTPException
 
 from odyssey.utils.logging import JsonFormatter
 from odyssey.utils.errors import exception_handler, http_exception_handler
+from odyssey.utils.json import JSONProvider
 
 from odyssey.config import Config
 conf = Config()
@@ -107,6 +108,10 @@ def create_app():
         :mod:`odyssey.config` and :mod:`odyssey.defaults`.
     """
     app = Flask(__name__, static_folder="static") 
+
+    # Extended JSON (de)serialization.
+    # TODO: not yet ready for primetime. Breaks too many things.
+    # app.json = JSONProvider(app)
 
     # Load configuration.
     app.config.from_object(conf)
