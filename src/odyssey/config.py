@@ -14,6 +14,17 @@ Defaults
 The API is configured by settings in :mod:`odyssey.defaults`. Each parameter in defaults can
 be overridden by setting an environmental variable with the same name (all upper case).
 
+Dependent variables
+===================
+
+Sometimes the value of a variable is dependent on the value of another variable. For example,
+one may want to include the current version in the name of a database. To do that, set
+``MY_DB_NAME="dev-@API_VERSION@-xyz"`` in defaults.py. ``API_VERSION`` is the variable that
+holds the current version. Let's say it's currently set to "release-1.2.3", then ``MY_DB_NAME``
+will be ``dev-release-1.2.3-xyz.
+
+Multiple replacements are allowed, but @...@ patterns cannot be nested.
+
 How to use
 ==========
 
@@ -55,6 +66,8 @@ Notes
 import argparse
 import getpass
 import os
+import pathlib
+import re
 import secrets
 import sys
 import textwrap
@@ -65,6 +78,9 @@ import packaging
 
 import odyssey.defaults
 
+# Capture all valid upper-case variable names
+# that do not start with underscore, surrounded by @
+_repl_rx = re.compile(r'@([A-Z][A-Z0-9_]*)@')
 
 class Config:
     """ Main configuration class.
@@ -154,6 +170,21 @@ class Config:
             else:
                 username = getpass.getuser()
                 self.AWS_S3_PREFIX = f'{username}'
+
+        # Look for values that need replacement.
+        for var, val in self.__dict__.items():
+            if (var.startswith('__')
+                or not var.isupper()
+                # replacement only makes sense with strings
+                or not isinstance(val, str)):
+                continue
+
+            replacements = re.findall(_repl_rx, val)
+            if replacements:
+                for replvar in replacements:
+                    replval = getattr(self, replvar)
+                    val = re.sub(f'@{replvar}@', replval, val, count=1)
+                setattr(self, var, val)
 
     def getvar(self, var: str) -> Any:
         """ Get a configuration setting.
