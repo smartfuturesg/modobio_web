@@ -204,6 +204,21 @@ class Config:
         # Not in environment, get from defaults or return None.
         return getattr(odyssey.defaults, var, None)
 
+    def dump(self) -> str:
+        """ Pretty print all config variables into a string.
+
+        Returns
+        -------
+        str
+            All configuration variables and their values in a single string.
+        """
+        conf = ['Configuration:']
+        for var, val in sorted(self.__dict__.items()):
+            if var.startswith('__') or not var.isupper():
+                continue
+            conf.append(f'   {var} = {val}')
+        return '\n'.join(conf)
+
     def get_version(self):
         """ Get and parse version string.
 

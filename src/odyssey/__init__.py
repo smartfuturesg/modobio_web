@@ -107,6 +107,9 @@ def create_app():
         --------
         :mod:`odyssey.config` and :mod:`odyssey.defaults`.
     """
+    # Temporarily quiet login function
+    logging.getLogger(name='odyssey.utils.auth').setLevel(logging.INFO)
+
     app = Flask(__name__, static_folder="static") 
 
     # Extended JSON (de)serialization.
@@ -183,6 +186,13 @@ def create_app():
     # mongo db
     if app.config['MONGO_URI']:
         mongo.init_app(app)
+
+    # Reset login function log level
+    logging.getLogger(name='odyssey.utils.auth').setLevel(conf.LOG_LEVEL)
+
+    # Print all config settings to debug, in DEV only.
+    if app.config['DEV']:
+        logger.debug(conf.dump())
 
     return app
 
