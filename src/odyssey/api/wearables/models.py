@@ -12,10 +12,12 @@ from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModel, UserIdFkeyMixin
 
 
-#######################################################################################
+#############################
 #
 # V1 of the Wearables tables.
 #
+#############################
+
 # TODO: deprecated in V2 of the API. Remove when V1 of the API is no longer supported.
 
 class Wearables(db.Model):
@@ -428,10 +430,11 @@ class WearablesFreeStyle(db.Model):
     :type: :class:`Wearables`
     """
 
-#######################################################################################
+#############################
 #
 # V2 of the Wearables tables.
 #
+#############################
 
 class WearablesV2(BaseModel, UserIdFkeyMixin):
     """ Table that lists which supported wearables a client has. """
@@ -447,10 +450,10 @@ class WearablesV2(BaseModel, UserIdFkeyMixin):
     :type: str, primary key, max length 64
     """
 
-    terra_user_id = db.Column(UUID, index=True, nullable=False)
+    terra_user_id = db.Column(UUID(as_uuid=True), index=True, nullable=False)
     """
     Terra's user id. To Terra, each combination of user + wearable device is
-    a unique user.
+    a unique user. Write to/read from database as :class:`uuid.UUID`.
 
     :type: :class:`uuid.UUID`, not-null, indexed
     """
