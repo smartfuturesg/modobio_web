@@ -20,8 +20,10 @@ from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import class_mapper
 from werkzeug.exceptions import HTTPException
 
-from odyssey.utils.logging import JsonFormatter
+import odyssey.utils.converters
+
 from odyssey.utils.errors import exception_handler, http_exception_handler
+from odyssey.utils.logging import JsonFormatter
 from odyssey.utils.json import JSONProvider
 
 from odyssey.config import Config
@@ -129,6 +131,11 @@ def create_app():
 
     # Convenience function
     db.Model.update = _update
+
+    # Custom path parameter converters
+    for converter_class in odyssey.utils.converters.__all__:
+        converter = getattr(odyssey.utils.converters, converter_class)
+        app.url_map.converters[converter.name] = converter
 
     # Load the API.
     from odyssey.api import bp, api, bp_v2, api_v2
