@@ -14,7 +14,7 @@ def test_get_default_health_metrics(test_client):
         'email': 'default_health_netric_client@modobio.com',
         'lastname': 'Two',
         'phone_number': '2222223333',
-        'password': '123'}
+        'password': '0987654321B'}
 
     response = test_client.post(
         '/user/client/',
@@ -33,7 +33,7 @@ def test_get_default_health_metrics(test_client):
     
     assert response.status_code == 200
 
-    valid_credentials = base64.b64encode(f'{new_client["email"]}:123'.encode('utf-8')).decode('utf-8')
+    valid_credentials = base64.b64encode(f'{new_client["email"]}:0987654321B'.encode('utf-8')).decode('utf-8')
 
     # get token
     headers = {'Authorization': f'Basic {valid_credentials}'}

@@ -1,7 +1,5 @@
 import logging
 
-from sqlalchemy import text
-
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -12,25 +10,21 @@ import json
 from flask import current_app, g, request, redirect, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
-from pytz import utc
 from sqlalchemy.sql.expression import select
 from werkzeug.security import check_password_hash
 from werkzeug.exceptions import BadRequest, Unauthorized
 
-from odyssey import db
 from odyssey.api.client.models import ClientFertility
 from odyssey.api.client.schemas import (
     ClientInfoSchema,
     ClientGeneralMobileSettingsSchema,
     ClientRaceAndEthnicitySchema)
-from odyssey.api.lookup.models import LookupSubscriptions, LookupLegalDocs
+from odyssey.api.lookup.models import LookupLegalDocs
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
     User,
-    UserActiveCampaignTags,
     UserLogin,
-    UserRemovalRequests,
     UserSubscriptions,
     UserTokenHistory,
     UserTokensBlacklist,
@@ -54,11 +48,9 @@ from odyssey.api.user.schemas import (
 )
 from odyssey.integrations.apple import AppStore
 from odyssey.tasks.tasks import update_active_campaign_tags
-from odyssey.utils import search
 from odyssey.utils.auth import token_auth, basic_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import PASSWORD_RESET_URL, DB_SERVER_TIME, PROVIDER_ROLES, STAFF_ROLES
-from odyssey.utils import search
+from odyssey.utils.constants import PASSWORD_RESET_URL, PROVIDER_ROLES, STAFF_ROLES
 from odyssey import db
 from odyssey.utils.message import email_domain_blacklisted, send_email
 from odyssey.utils.misc import (

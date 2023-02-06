@@ -2,15 +2,13 @@
 
 import logging
 
-from odyssey.api.community_manager.schemas import SubscriptionGrantSchema
 logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields, post_load, validate
-from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
-from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserPendingEmailVerifications, UserLegalDocs
+from odyssey.api.user.models import User, UserLogin, UserSubscriptions, UserLegalDocs
 from odyssey.utils.constants import ACCESS_ROLES
 
 
@@ -54,7 +52,7 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     email = fields.Email(validate=validate.Length(min=0,max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0,max=50))
     password = fields.String(metadata={'description': 'password required'},
-                            validate=validate.Length(min=0,max=50), 
+                            validate=validate.Regexp(regex="^(?=.*[A-z]).{9,64}$"),
                             load_only=True, required=True)
 
 
@@ -117,16 +115,13 @@ class UserPasswordRecoveryContactSchema(Schema):
     password_reset_url = fields.String(dump_only=True)
 
 class UserPasswordResetSchema(Schema):
-    #TODO Validate password strength
-    password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'new password to be used going forward'})
+    password = fields.String(required=True,  validate=validate.Regexp(regex="^(?=.*[A-z]).{9,64}$"), metadata={'description': 'new password to be used going forward'})
 
 class UserPasswordUpdateSchema(Schema):
-    #TODO Validate password strength
-    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'current password'})
-    new_password = fields.String(required=True,  validate=validate.Length(min=3,max=50), metadata={'description': 'new password to be used going forward'})
+    current_password = fields.String(required=True,  validate=validate.Length(min=3,max=64), metadata={'description': 'current password'})
+    new_password = fields.String(required=True,  validate=validate.Regexp(regex="^(?=.*[A-z]).{9,64}$"), metadata={'description': 'new password to be used going forward'})
 
 class UserSubscriptionTypeSchema(Schema):
-
     name = fields.String()
     description = fields.String()
     cost = fields.Float()

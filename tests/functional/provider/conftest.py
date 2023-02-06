@@ -15,7 +15,7 @@ def client_user(test_client):
         "email": "tmp_test_client@tester.com",
         "middlename": "middlename",
         "lastname": "lastname",
-        "password": "123",
+        "password": "123password",
     } 
 
     response = test_client.post(
