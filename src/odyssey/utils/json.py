@@ -209,6 +209,10 @@ class JSONDecoder(json.JSONDecoder):
 class JSONProvider(flask.json.provider.JSONProvider):
     """ Extends JSONProvider with better datetime and uuid (de)serialization. """
 
+    def __init__(self, app=None, **kwargs):
+        if app:
+            super().__init__(app=app, **kwargs)
+
     def dumps(self, obj, **kwargs) -> str:
         """ Serialize data to a JSON string.
 
