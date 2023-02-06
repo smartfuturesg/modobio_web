@@ -7,7 +7,7 @@ users_staff_new_user_data = {
     "lastname": "Staff",
     "email": "test_this_user_staff@modobio.com",
     "phone_number": "1111111112",
-    "password": "password",
+    "password": "password123",
     "dob": '1995-6-13',
     "biological_sex_male": True
   },

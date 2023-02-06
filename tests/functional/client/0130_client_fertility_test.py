@@ -24,7 +24,7 @@ def test_create_female_client(test_client):
     client.email_verified = True
     test_client.db.session.flush()
     
-    header = login(test_client, client, 'password')
+    header = login(test_client, client, '123456789A')
 
     response = test_client.get(
         f"/client/fertility/{response.json['user_info']['user_id']}/",
@@ -37,7 +37,7 @@ def test_create_female_client(test_client):
 def test_post_client_fertility(test_client):    
     #test with mismatching combinations between pregnant and status
     female_user = User.query.filter_by(email="test_this_user_client_f@modobio.com").first()
-    header = login(test_client, female_user, 'password')
+    header = login(test_client, female_user, '123456789A')
     
     response = test_client.post(
         f'/client/fertility/{female_user.user_id}/',
@@ -96,7 +96,7 @@ def test_post_client_fertility(test_client):
 def test_get_client_fertility(test_client):
     
     female_user = User.query.filter_by(email='test_this_user_client_f@modobio.com').one_or_none()
-    header = login(test_client, female_user, 'password')
+    header = login(test_client, female_user, '123456789A')
 
     response = test_client.get(
         f"/client/fertility/{female_user.user_id}/",

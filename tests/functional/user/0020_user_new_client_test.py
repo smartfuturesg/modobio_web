@@ -1,11 +1,11 @@
 import base64
-from datetime import datetime
 
 from flask.json import dumps
 from sqlalchemy import select
 
-from odyssey.api.user.models import User, UserLogin, UserPendingEmailVerifications, UserTokenHistory
-from tests.functional.user.data import users_new_self_registered_client_data
+from odyssey.api.user.models import User, UserPendingEmailVerifications, UserTokenHistory
+from tests.functional.user.data import users_new_self_registered_client_data, users_bad_password_client_data
+
 
 def test_self_registered_new_client(test_client):
     # We don't need a staff to be logged-in for a client to self-register
@@ -91,7 +91,7 @@ def test_self_registered_new_client(test_client):
 def test_blacklisted_email_address(test_client):
     payload = {
         'email': 'user@10-minute-mail.com',
-        'password': 'password'}
+        'password': 'password0987'}
 
     response = test_client.post(
         '/user/client/',
@@ -112,3 +112,14 @@ def test_update_blacklisted_email_address(test_client):
 
     assert response.status_code == 400
     assert response.json['message'] == 'Email adresses from "10-minute-mail.com" are not allowed.'
+
+def test_password_requirements(test_client):
+    payload = users_bad_password_client_data
+
+    # send post request for a new client user account
+    response = test_client.post(
+        '/user/client/',
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 400
