@@ -1,7 +1,7 @@
 """Add WearablesV2 table
 
 Revision ID: ee5450958fb4
-Revises: 508113125af2
+Revises: ec6823cd54af
 Create Date: 2023-01-05 09:01:10.201699
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'ee5450958fb4'
-down_revision = '508113125af2'
+down_revision = 'ec6823cd54af'
 branch_labels = None
 depends_on = None
 
