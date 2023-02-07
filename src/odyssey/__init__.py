@@ -8,14 +8,17 @@ import logging
 import os
 import time
 
+from bson.binary import UuidRepresentation
+from bson.codec_options import CodecOptions, DatetimeConversion
 from celery import Celery
 from elasticsearch import Elasticsearch
 from flask import Flask
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
-from flask_pymongo import PyMongo 
+from flask_pymongo import PyMongo, ASCENDING, DESCENDING
 from flask_sqlalchemy import SQLAlchemy
+from pymongo.errors import CollectionInvalid
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import class_mapper
 from werkzeug.exceptions import HTTPException
@@ -193,6 +196,28 @@ def create_app():
     # mongo db
     if app.config['MONGO_URI']:
         mongo.init_app(app)
+
+        # Wearables collection needs non-standard option for
+        # timezone-aware datetime and UUID interpretation.
+        co = CodecOptions(
+            tz_aware=True,
+            datetime_conversion=DatetimeConversion.DATETIME,
+            uuid_representation=UuidRepresentation.STANDARD)
+
+        try:
+            mongo.db.create_collection('wearables', codec_options=co)
+        except CollectionInvalid:
+            # Already exists
+            pass
+
+        # Wearables index, only needs to be created once.
+        # Does not fail if already exists.
+        mongo.db.wearables.create_index([
+            ('user_id', ASCENDING),
+            ('wearable', ASCENDING),
+            ('date', DESCENDING)],
+            name='user_id-wearable-date-index',
+            unique=True)
 
     # Reset login function log level
     logging.getLogger(name='odyssey.utils.auth').setLevel(conf.LOG_LEVEL)
