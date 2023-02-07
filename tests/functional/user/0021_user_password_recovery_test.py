@@ -52,6 +52,27 @@ def test_full_password_recovery_routine(test_client):
 
     assert response.status_code == 400
 
+def test_bad_password_reset(test_client):
+    response = test_client.post(
+        '/user/password/forgot-password/recovery-link/',
+        data=dumps({'email': test_client.staff.email}),
+        content_type='application/json')
+
+    ##
+    # Using the password reset token returned from the request above
+    # send put request to reset password with new password in payload
+    ##
+    # token is provided like this only in DEV
+    password_rest_token = response.json['token']
+    payload_password_reset = {'password': '123abc'} # too short
+
+    response = test_client.put(
+        f'/user/password/forgot-password/reset?reset_token={password_rest_token}',
+        data=dumps(payload_password_reset),
+        content_type='application/json')
+
+    assert response.status_code == 400
+
 def test_password_update(test_client):
     ###
     # Update Password with the correct current password and a
@@ -102,6 +123,21 @@ def test_password_update(test_client):
     payload = {
         'current_password': users_staff_passwords_data['new_password'],
         'new_password': users_staff_passwords_data['new_password']}
+
+    response = test_client.post(
+        '/user/password/update/',
+        headers=test_client.staff_auth_header,
+        data=dumps(payload),
+        content_type='application/json')
+
+    assert response.status_code == 400
+
+
+def test_bad_password_update(test_client):
+    payload = {
+        'current_password': 'wownewpass',
+        'new_password': 'badpass',
+    }
 
     response = test_client.post(
         '/user/password/update/',

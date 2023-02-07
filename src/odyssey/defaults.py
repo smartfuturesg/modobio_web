@@ -52,7 +52,7 @@ LOG_LEVEL = ''
 Accepted levels are:
 DEBUG, INFO, AUDIT, WARNING, ERROR, CRITICAL, or any integer.
 
-If not set, it will default to DEBUG if FLASK_ENV=development and AUDIT otherwise.
+If not set, it will default to DEBUG if FLASK_DEBUG=true and AUDIT otherwise.
 """
 
 LOG_FORMAT_JSON = False
