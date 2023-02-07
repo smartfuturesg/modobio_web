@@ -9,10 +9,12 @@ from odyssey.api.user.models import User
 from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
 
-#######################################################################################
+##############################
 #
-# V1 of the Wearables tables.
+# V1 of the Wearables schemas.
 #
+##############################
+
 # TODO: deprecated in V2 of the API. Remove when V1 of the API is no longer supported.
 
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
@@ -56,10 +58,11 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         fields = ('activation_timestamp',)
 
-#######################################################################################
+##############################
 #
 # V2 of the Wearables schemas.
 #
+##############################
 
 import terra.api.api_responses
 
