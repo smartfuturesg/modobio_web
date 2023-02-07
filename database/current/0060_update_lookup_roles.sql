@@ -6,19 +6,19 @@ WHERE role_name = 'nurse';
 INSERT INTO "LookupRoles"
 (role_name, display_name, alt_role_name, is_practitioner, color, icon, active, notes, is_provider, rpm_enroll, rpm_support, telehealth_access)
 VALUES
-('nurse_practitioner', 'Nurse Practitioner', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
-('certified_nurse_specialist', 'Certified Nurse Specialist', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
-('physician_assistant', 'Physician Assistant', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
-('certified_nurse_midwife', 'Certified Nurse Midwife', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
-('certified_registered_nurse', 'Certified Registered Nurse Anesthetist', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
-('medical_assistant', 'Medical Assistant', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
-('licensed_practical_nurse', 'Licensed Practical Nurse', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
-('registered_nurse', 'Registered Nurse', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
-('care_coordinator', 'Care Coordinator', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true), 
-('care_manager', 'Care Manager', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
-('case_manager', 'Case Manager', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
-('patient_advocate', 'Patient Advocate', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
-('patient_navigator', 'Patient Navigator ', NULL, true, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true);
+('nurse_practitioner', 'Nurse Practitioner', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
+('certified_nurse_specialist', 'Certified Nurse Specialist', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
+('physician_assistant', 'Physician Assistant', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
+('certified_nurse_midwife', 'Certified Nurse Midwife', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
+('certified_registered_nurse', 'Certified Registered Nurse Anesthetist', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, true, true, true),
+('medical_assistant', 'Medical Assistant', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
+('licensed_practical_nurse', 'Licensed Practical Nurse', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
+('registered_nurse', 'Registered Nurse', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
+('care_coordinator', 'Care Coordinator', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true), 
+('care_manager', 'Care Manager', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
+('case_manager', 'Case Manager', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
+('patient_advocate', 'Patient Advocate', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true),
+('patient_navigator', 'Patient Navigator ', NULL, NULL, NULL, 'MedicalDoctorP.svg', true, NULL, true, false, true, true);
 
 
 UPDATE "LookupRoles"
