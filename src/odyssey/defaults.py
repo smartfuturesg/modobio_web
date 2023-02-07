@@ -335,7 +335,7 @@ Secret password for Terra API.
 See :const:`TERRA_DEV_ID`
 """
 
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-2-1
+WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-2-1'
 """ Name of the table in AWS DynamoDB where wearables data is stored.
 
 .. deprecated:: 1.3.1
