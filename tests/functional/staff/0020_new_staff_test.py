@@ -127,7 +127,7 @@ def test_creating_new_staff_blacklisted_email(test_client):
     payload =  {
         'user_info': {
             'email': 'user@10-minute-mail.com',
-            'password': 'password'}}
+            'password': 'password123'}}
 
     response = test_client.post(
         '/user/staff/',

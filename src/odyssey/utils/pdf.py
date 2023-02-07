@@ -14,9 +14,10 @@ from datetime import date
 from typing import Type
 
 from botocore.exceptions import ClientError
-from flask import render_template, session, current_app, _request_ctx_stack
+from flask import render_template, current_app, _request_ctx_stack
 from PyPDF2 import PdfFileMerger
 from weasyprint import HTML, CSS
+from flask_sqlalchemy import session
 
 from odyssey import db
 from odyssey.api.client.models import ClientInfo
@@ -83,7 +84,7 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
     # Even though the db.session instance created by Flask-SQLAlchemy is
     # a 'scoped_session', it is still thread_local. Create a new session,
     # local to this thread, with the same configuration.
-    local_session = db.create_scoped_session()
+    local_session = session.Session(db)
     with req_ctx:
         ### Load data and perform checks
         client = local_session.query(ClientInfo).filter_by(user_id=user_id).one_or_none()
@@ -113,9 +114,6 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
 
         ### Read HTML page
         if template:
-            session['staff_id'] = 1
-            #session['clientname'] = client.fullname
-            session['user_id'] = user_id
 
             cssfile = pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css'
             css = CSS(filename=cssfile)

@@ -261,9 +261,8 @@ class LookupRoleGroupsSchema(ma.SQLAlchemyAutoSchema):
 class LookupRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupRoles
-        exclude = ('created_at', 'updated_at', 'color')
-    
-    groups = fields.Nested(LookupRoleGroupsSchema, many=True)
+        exclude = ('created_at', 'updated_at', 'color', 'is_practitioner')
+
 class LookupRolesOutputSchema(Schema):
     items = fields.Nested(LookupRolesSchema(many=True), missing=[])
     total_items = fields.Integer()

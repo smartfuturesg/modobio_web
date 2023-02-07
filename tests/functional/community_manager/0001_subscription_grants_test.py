@@ -7,7 +7,6 @@ from odyssey.api.user.models import (
     UserSubscriptions,
 )
 from odyssey.utils.misc import EmailVerification
-from tests.utils import login
 
 
 def test_post_subscription_grant(test_client):
@@ -132,7 +131,7 @@ def test_post_subscription_grant_non_user(test_client):
         "firstname": "Not",
         "email": non_user_email,
         "lastname": "A User",
-        "password": "123",
+        "password": "password123A",
         "phone_number": "1234567890",
     }
     response = test_client.post(
