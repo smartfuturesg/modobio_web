@@ -26,7 +26,7 @@ from odyssey.api.doctor.models import (
     MedicalSurgeries
 )
 from odyssey.api.facility.models import MedicalInstitutions
-from odyssey.utils.constants import  MEDICAL_CONDITIONS, MIN_VALID_PULSE, MAX_VALID_PULSE
+from odyssey.utils.constants import  MEDICAL_CONDITIONS, MIN_VALID_PULSE, MAX_VALID_PULSE, VALID_SOURCES
 from odyssey.utils.base.schemas import BaseSchema
 
 """
@@ -52,7 +52,8 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     reporter_firstname = fields.String(metadata={'description': 'first name of reporting physician'}, dump_only=True)
     reporter_lastname = fields.String(metadata={'description': 'last name of reporting physician'}, dump_only=True)
     reporter_profile_pictures = fields.Dict(keys=fields.Str(), values=fields.Str(), dump_only=True)
-    
+    source = fields.String(metadata={'description': 'Source of blood pressure value'}, validate=validate.OneOf(VALID_SOURCES), missing='manual')
+    device_name = fields.String(metadata={'description': 'Name of device the reading came from'})
 
     @post_load
     def make_object(self, data, **kwargs):
