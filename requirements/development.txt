@@ -17,12 +17,12 @@ marshmallow
 marshmallow-dataclass
 marshmallow-sqlalchemy
 psycopg2
-PyPDF2
+PyJWT
+pypdf
 pytz
 redis
 requests
 requests-oauthlib
 terra-python
 twilio
-PyJWT
 weasyprint
