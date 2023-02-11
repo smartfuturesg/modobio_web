@@ -16,7 +16,7 @@ must have a key of at least 32 characters long. The same key must also be passed
 as part of the ``HASURA_GRAPHQL_JWT_SECRET`` variable. See ``hasura/README.md``.
 """
 
-API_VERSION = 'unknown version'
+API_VERSION = ''
 """
 Version number of the API.
 
@@ -30,12 +30,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 Turn this off to prevent warnings.
 
 https://stackoverflow.com/questions/33738467/how-do-i-know-if-i-can-disable-sqlalchemy-track-modifications/33790196#33790196
-"""
-
-TESTING = False
-"""
-Special mode for running tests. There is usually no need to set this manually, it will
-be set to True when running pytest.
 """
 
 FLASK_SKIP_DOTENV = True
@@ -274,14 +268,6 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 # Google ReCaptcha api secret
 GOOGLE_RECAPTCHA_SECRET = ""
 
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-2-1'
-""" Name of the table in AWS DynamoDB where wearables data is stored.
-
-The table name is versioned to allow multiple versions of the API to run
-at the same time. Make sure to update this value when moving to a new
-branch.
-"""
-
 # Apple app store 
 APPLE_APPSTORE_API_KEY = ''
 
@@ -318,7 +304,44 @@ Name and port number of the server. This setting allows for
 url generation outside of the Flask request context. This is useful for
 creating urls as part of celery tasks. 
 """
+
 # Active Campaign 
 ACTIVE_CAMPAIGN_BASE_URL = 'https://modobio.api-us1.com/api/3/'
 ACTIVE_CAMPAIGN_LIST = ''
 ACTIVE_CAMPAIGN_API_KEY = ''
+
+TERRA_DEV_ID = ''
+"""
+Developer ID for Terra API.
+
+There are three environments: testing, staging, and production.
+Each environment has its own developer ID, API key, and secret.
+The URL for the webhook must be set in the developer dashboard,
+which is also the place where id, key, and secret can be found.
+https://dashboard.tryterra.co/terraapi/customise
+"""
+
+TERRA_API_KEY = ''
+"""
+Key for Terra API.
+
+See :const:`TERRA_DEV_ID`
+"""
+
+TERRA_API_SECRET = ''
+"""
+Secret password for Terra API.
+
+See :const:`TERRA_DEV_ID`
+"""
+
+WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-2-1'
+""" Name of the table in AWS DynamoDB where wearables data is stored.
+
+.. deprecated:: 1.3.1
+    With Terra integration in release 1.3.1, AWS Dynamo will no longer be used.
+
+The table name is versioned to allow multiple versions of the API to run
+at the same time. Make sure to update this value when moving to a new
+branch.
+"""

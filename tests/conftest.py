@@ -56,8 +56,8 @@ def setup_db(app):
 
     try:
         upgrade(directory=migrations)
-    except:
-        pytest.exit('Failed to run flask-migrate during test setup')
+    except Exception as err:
+        pytest.exit(f'Failed to run flask-migrate during test setup: {err}')
 
     # Load SQL scripts.
     runner = root / 'database' / 'sql_scriptrunner.py'

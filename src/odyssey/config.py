@@ -18,6 +18,17 @@ Defaults
 The API is configured by settings in :mod:`odyssey.defaults`. Each parameter in defaults can
 be overridden by setting an environmental variable with the same name (all upper case).
 
+Dependent variables
+===================
+
+Sometimes the value of a variable is dependent on the value of another variable. For example,
+one may want to include the current version in the name of a database. To do that, set
+``MY_DB_NAME="dev-@API_VERSION@-xyz"`` in defaults.py. ``API_VERSION`` is the variable that
+holds the current version. Let's say it's currently set to "release-1.2.3", then ``MY_DB_NAME``
+will be ``dev-release-1.2.3-xyz.
+
+Multiple replacements are allowed, but @...@ patterns cannot be nested.
+
 How to use
 ==========
 
@@ -59,19 +70,21 @@ Notes
 import argparse
 import getpass
 import os
+import pathlib
+import re
 import secrets
 import sys
 import textwrap
 
 from typing import Any
 
+import packaging
+
 import odyssey.defaults
 
-try:
-    from odyssey.api.misc import version
-except:
-    version = None
-
+# Capture all valid upper-case variable names
+# that do not start with underscore, surrounded by @
+_repl_rx = re.compile(r'@([A-Z][A-Z0-9_]*)@')
 
 class Config:
     """ Main configuration class.
@@ -91,7 +104,7 @@ class Config:
 
     def __init__(self):
         # Are we running pytest?
-        testing = 'pytest' in sys.modules
+        self.TESTING = 'pytest' in sys.modules
 
         # Are we running flask db ...?
         migrate = (len(sys.argv) > 1 and sys.argv[1] == 'db')
@@ -100,7 +113,7 @@ class Config:
         deployment_env = os.getenv('DEPLOYMENT_ENV')
 
         # Testing (running pytest) is always dev.
-        if testing:
+        if self.TESTING:
             deployment_env = 'development'
 
         # The default flask envoironment is "production" if
@@ -114,8 +127,8 @@ class Config:
         self.DEV = deployment_env == 'development'
         
         # Load defaults.
-        for varname in odyssey.defaults.__dict__.keys():
-            if varname.startswith('__') or not varname.isupper():
+        for var in odyssey.defaults.__dict__.keys():
+            if var.startswith('__') or not var.isupper():
                 continue
 
             # Celery expects configuration variables to be lower case and without 
@@ -123,22 +136,18 @@ class Config:
             # That is fine, because they are not relevant to Flask. If there is ever a
             # need to access these variables from Flask, simply remove 'continue' and
             # use the upper case, celery_ prefixed version of the variables in Flask.
-            if varname.startswith('CELERY_'):
-                _, stripped = varname.split('_', maxsplit=1)
-                setattr(self, stripped.lower(), self.getvar(varname))
+            if var.startswith('CELERY_'):
+                _, stripped = var.split('_', maxsplit=1)
+                setattr(self, stripped.lower(), self.getvar(var))
                 continue
 
-            setattr(self, varname, self.getvar(varname))
+            setattr(self, var, self.getvar(var))
+
+        # Find version
+        self.get_version()
 
         # No swagger in production.
         self.SWAGGER_DOC = self.DEV
-
-        # Testing is always true when running pytest.
-        self.TESTING = testing
-
-        # Version info, override from file if exists, but environment takes precedence.
-        if version and self.API_VERSION == odyssey.defaults.API_VERSION:
-            self.API_VERSION = version
 
         # Logging
         if not self.LOG_LEVEL:
@@ -149,7 +158,7 @@ class Config:
         # Database URI.
         if not self.DB_URI:
             name = self.DB_NAME
-            if testing:
+            if self.TESTING:
                 name = self.DB_NAME_TESTING
 
             self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'        
@@ -158,12 +167,27 @@ class Config:
 
         # S3 prefix
         if self.DEV and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX:
-            if testing:
+            if self.TESTING:
                 rand = secrets.token_hex(3)
                 self.AWS_S3_PREFIX = f'temp/pytest-{rand}'
             else:
                 username = getpass.getuser()
                 self.AWS_S3_PREFIX = f'{username}'
+
+        # Look for values that need replacement.
+        for var, val in self.__dict__.items():
+            if (var.startswith('__')
+                or not var.isupper()
+                # replacement only makes sense with strings
+                or not isinstance(val, str)):
+                continue
+
+            replacements = re.findall(_repl_rx, val)
+            if replacements:
+                for replvar in replacements:
+                    replval = getattr(self, replvar)
+                    val = re.sub(f'@{replvar}@', replval, val, count=1)
+                setattr(self, var, val)
 
     def getvar(self, var: str) -> Any:
         """ Get a configuration setting.
@@ -211,7 +235,74 @@ class Config:
 
             return env
 
+        # Not in environment, get from defaults or return None.
         return getattr(odyssey.defaults, var, None)
+
+    def dump(self) -> str:
+        """ Pretty print all config variables into a string.
+
+        Returns
+        -------
+        str
+            All configuration variables and their values in a single string.
+        """
+        conf = ['Configuration:']
+        for var, val in sorted(self.__dict__.items()):
+            if var.startswith('__') or not var.isupper():
+                continue
+            conf.append(f'   {var} = {val}')
+        return '\n'.join(conf)
+
+    def get_version(self):
+        """ Get and parse version string.
+
+        This function will try to obtain a version string from the following sources:
+
+        1. environment variable ``API_VERSION``,
+        2. the git branch name if it starts with "release-".
+
+        The version will then be parsed and saved under the following variables:
+
+        - VERSION, :class:`packaging.version.Version` instance,
+        - VERSION_STRING, full version string with "release-" prefix,
+        - VERSION_BRANCH, same as version string but with "major.minor" digits only.
+
+        If a parsable version string cannot be found, VERSION will be Version(0)
+        and VERSION_BRANCH and VERSION_STRING will be set to whatever was found,
+        unparsed.
+
+        What that means in practice is that on a feature branch (e.g. NRV-XXXX-abc)
+        that name will be used (and Version(0)) and on release branches the version
+        number will be used ("release-1.2.3" and Version(1.2.3)).
+        """
+        version = self.getvar('API_VERSION')
+
+        if not version:
+            head = ''
+            here = pathlib.Path(__file__)
+            for p in here.parents:
+                if (p / '.git' / 'HEAD').exists():
+                    head = (p / '.git' / 'HEAD').read_text()
+                    break
+            version = head.strip().split('/')[-1]
+
+        if version and version.startswith('release-'):
+            version = version[7:]
+
+        try:
+            self.VERSION = packaging.version.parse(version)
+        except packaging.version.InvalidVersion:
+            self.VERSION = packaging.version.parse('0')
+            self.VERSION_BRANCH = version
+            self.VERSION_STRING = version
+        else:
+            # packaging.version does not store 4th digit.
+            if len(self.VERSION.release) > 3:
+                self.VERSION.build = self.VERSION.release[3]
+
+            self.VERSION_BRANCH = f'release-{self.VERSION.major}.{self.VERSION.minor}'
+            self.VERSION_STRING = self.VERSION_BRANCH + f'.{self.VERSION.micro}.{self.VERSION.build}'
+
 
 def database_parser() -> argparse.ArgumentParser:
     """ Return CLI parser for database arguments.

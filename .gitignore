@@ -47,3 +47,8 @@ celerybeat.pid
 
 # aws certificate
 *.pem
+
+# Ctags
+tags
+.tags
+
