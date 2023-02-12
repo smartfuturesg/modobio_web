@@ -1,52 +1,45 @@
-import logging
-
-from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
-logger = logging.getLogger(__name__)
-
 import base64
+import logging
 import secrets
-from datetime import datetime, timedelta
+
+from datetime import datetime, date, time, timedelta, timezone
 
 import boto3
+import dateutil
+import requests
+
 from boto3.dynamodb.conditions import Key
 from flask import current_app, jsonify, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
+from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
 
-
-from odyssey import db
-from odyssey.api.wearables.models import (
-    Wearables,
-    WearablesOura,
-    WearablesFitbit,
-    WearablesFreeStyle)
-from odyssey.api.wearables.schemas import (
-    WearablesSchema,
-    WearablesOuraAuthSchema,
-    WearablesOAuthGetSchema,
-    WearablesOAuthPostSchema,
-    WearablesFreeStyleSchema,
-    WearablesFreeStyleActivateSchema)
+from odyssey import db, mongo
+from odyssey.api.wearables.models import *
+from odyssey.api.wearables.schemas import *
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.misc import check_client_existence, date_validator
+from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
+from odyssey.utils.json import JSONProvider
+from odyssey.utils.misc import check_client_existence, date_validator, lru_cache_with_ttl
+
+logger = logging.getLogger(__name__)
+
+#########################
+#
+# V1 of the Wearables API
+#
+#########################
 
 ns = Namespace('wearables', description='Endpoints for registering wearable devices.')
-
-
-###########################################################
-#
-# All wearables
-#
-###########################################################
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
+    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',))
     @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, user_id):
         """ Wearable device information for client ``user_id`` in response to a GET request.
@@ -110,137 +103,6 @@ class WearablesEndpoint(BaseResource):
         query.update(data)
         db.session.commit()
 
-
-###########################################################
-#
-# Oura Ring
-#
-###########################################################
-
-@ns.route('/oura-old/auth/<int:user_id>/')
-@ns.deprecated
-@ns.doc(params={'user_id': 'User ID number'})
-class WearablesOuraOldAuthEndpoint(BaseResource):
-    @token_auth.login_required
-    @responds(schema=WearablesOuraAuthSchema, status_code=200, api=ns)
-    def get(self, user_id):
-        """ [DEPRECATED] Oura Ring OAuth2 parameters to initialize the access grant process.
-
-        Note
-        ----
-
-        This endpoint was designed for the web-based staff app. The new endpoint should
-        work with both web-based and mobile apps. Keeping this endpoint around until staff app
-        has been updated.
-
-        Parameters
-        ----------
-        user_id : int
-            User ID number.
-
-        Returns
-        -------
-        dict
-            JSON encoded dict containing:
-            - oura_client_id
-            - oauth_state
-        """
-        wearables = (
-            Wearables.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
-
-        oura_id = current_app.config['OURA_CLIENT_ID']
-        state = secrets.token_urlsafe(24)
-
-        # Store state in database
-        oura = (
-            WearablesOura.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
-
-        if not oura:
-            oura = WearablesOura(user_id=user_id, oauth_state=state)
-            db.session.add(oura)
-        else:
-            oura.oauth_state = state
-        db.session.commit()
-
-        return {'oura_client_id': oura_id, 'oauth_state': state}
-
-
-@ns.route('/oura-old/callback/<int:user_id>/')
-@ns.deprecated
-@ns.doc(params={
-    'user_id': 'User ID number',
-    'state': 'OAuth2 state token',
-    'code': 'OAuth2 access grant code',
-    'redirect_uri': 'OAuth2 redirect URI',
-    'scope': 'The accepted scope of information: email, personal, and/or daily'
-})
-class WearablesOuraCallbackEndpoint(BaseResource):
-    @token_auth.login_required
-    @responds(status_code=200, api=ns)
-    def get(self, user_id):
-        """ [DEPRECATED] Oura Ring OAuth2 callback URL
-
-        Note
-        ----
-
-        This endpoint was designed for the web-based staff app. The new endpoint should
-        work with both web-based and mobile apps. Keeping this endpoint around until staff app
-        has been updated.
-        """
-        check_client_existence(user_id)
-
-        oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
-        if not oura:
-            raise BadRequest(
-                f'user_id {user_id} not found in WearablesOura table. '
-                f'Connect to /wearables/oura/auth first.')
-
-        oauth_state = request.args.get('state')
-        oauth_grant_code = request.args.get('code')
-        redirect_uri = request.args.get('redirect_uri')
-        scope = request.args.get('scope')
-
-        if oauth_state != oura.oauth_state:
-            raise BadRequest('OAuth state changed between requests.')
-
-        if not scope or 'daily' not in scope:
-            raise BadRequest('You must agree to share at least the sleep and activity data.')
-
-        # Exchange access grant code for access token
-        oura_id = current_app.config['OURA_CLIENT_ID']
-        oura_secret = current_app.config['OURA_CLIENT_SECRET']
-        token_url = current_app.config['OURA_TOKEN_URL']
-
-        oauth_session = OAuth2Session(
-            oura_id,
-            state=oauth_state,
-            redirect_uri=redirect_uri)
-        try:
-            oauth_reply = oauth_session.fetch_token(
-                token_url,
-                code=oauth_grant_code,
-                include_client_id=True,
-                client_secret=oura_secret)
-        except Exception as e:
-            raise BadRequest(f'Error while exchanging grant code for access token: {e}')
-
-        # Everything was successful
-        oura.access_token = oauth_reply['access_token']
-        oura.refresh_token = oauth_reply['refresh_token']
-        oura.token_expires = datetime.utcnow() + timedelta(seconds=oauth_reply['expires_in'])
-        oura.oauth_state = None
-
-        # TODO: disable this until frontend has a way of setting wearable devices.
-        # wearables = Wearables.query.filter_by(user_id=oura.user_id).first()
-        # wearables.registered_oura = True
-
-        db.session.commit()
-
-############### V2
 
 @ns.route('/oura/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -397,12 +259,6 @@ class WearablesOuraAuthEndpoint(BaseResource):
             oura.wearable.registered_oura = False
             db.session.commit()
 
-
-###########################################################
-#
-# Fitbit
-#
-###########################################################
 
 @ns.route('/fitbit/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -568,12 +424,6 @@ class WearablesFitbitAuthEndpoint(BaseResource):
             db.session.commit()
 
 
-###########################################################
-#
-# FreeStyle Libre CGM
-#
-###########################################################
-
 @ns.route('/freestyle/activate/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFreeStyleActivateEndpoint(BaseResource):
@@ -713,7 +563,7 @@ class WearablesFreeStyleEndpoint(BaseResource):
             for t, g in temp:
                 tstamps.append(t)
                 glucose.append(g)
-                
+
         # Find index where new data starts
         n = 0
         if cgm.timestamps:
@@ -742,13 +592,13 @@ class WearablesFreeStyleEndpoint(BaseResource):
 
 @ns.route('/data/<string:device_type>/<int:user_id>/')
 @ns.doc(params={
-    'user_id': 'User ID number', 
+    'user_id': 'User ID number',
     'device_type': 'fitbit, applewatch, oura, freestyle',
     'start_date': '(optional) iso formatted date. start of date range',
     'end_date': '(optional) iso formatted date. end of date range'
     })
 class WearablesData(BaseResource):
-    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',)) 
+    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',))
     @responds(status_code=200, api=ns)
     def get(self, user_id, device_type):
         """ Retrieve wearables data from dynamodb.
@@ -776,10 +626,10 @@ class WearablesData(BaseResource):
             raise BadRequest(f"wearable device type, {device_type}, not supported")
 
         # configure date range expression
-        # Four cases: 
+        # Four cases:
         #   - both start and end date provided: return data for date range
-        #   - only start date specified: return start_date + WEARABLE_DATA_DEFAULT_RANGE_DAYS 
-        #   - only end date specified: return end_date - WEARABLE_DATA_DEFAULT_RANGE_DAYS 
+        #   - only start date specified: return start_date + WEARABLE_DATA_DEFAULT_RANGE_DAYS
+        #   - only end date specified: return end_date - WEARABLE_DATA_DEFAULT_RANGE_DAYS
         #   - no dates specified: return last WEARABLE_DATA_DEFAULT_RANGE_DAYS days of data
         start_date = date_validator(request.values.get('start_date')) if request.values.get('start_date') else None
         end_date =  date_validator(request.values.get('end_date')) if request.values.get('end_date') else None
@@ -793,17 +643,717 @@ class WearablesData(BaseResource):
             date_condition = Key('date').between(start_date, end_date)
         else:
             start_date = (datetime.now() - timedelta(days=WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
-            end_date = datetime.now().date().isoformat() 
+            end_date = datetime.now().date().isoformat()
             date_condition =  Key('date').gte(start_date)
-        
+
         # make reqeust for data
         response = table.query(
             KeyConditionExpression= Key('user_id').eq(user_id) & date_condition,
             FilterExpression = Key('wearable').eq(device_type))
-        
+
         payload = {'start_date': start_date, 'end_date': end_date, 'total_items': len(response.get('Items', [])), 'items': []}
-        
+
         # only provide the data that is required
         payload['items'] = response.get('Items', [])
 
         return jsonify(payload)
+
+
+#########################
+#
+# V2 of the Wearables API
+#
+#########################
+
+# V2 is the terra integration. It is namespaced into v2, which will eventually be
+# the v2/ prefix for the entire API once we reach v2.0.0. Once that is reached,
+# fold this v2 into that.
+#
+
+import enum
+import requests
+import terra
+
+from terra.api.api_responses import (
+    HOOK_TYPES,
+    HOOK_RESPONSE,
+    USER_DATATYPES,
+    TerraApiResponse,
+    ConnectionErrorHookResponse,
+    RequestProcessingHookResponse,
+    RequestCompletedHookResponse)
+
+ns_v2 = Namespace(
+    'wearables',
+    description='Endpoints for registering wearable devices.')
+
+# Fix mistakes in terra-python wrappers:
+# - misspelled connexion_error instead of connection_error (v0.0.7)
+# - request_processing was replaced by large_request_processing (v0.0.7)
+# - request_completed was replaced by large_request_sending (v0.0.7)
+# - permission_change is undocumented, seems come be in response to scope change (v0.0.7)
+HOOK_TYPES.add('connection_error')
+HOOK_RESPONSE['connection_error'] = ConnectionErrorHookResponse
+
+HOOK_TYPES.add('large_request_processing')
+HOOK_RESPONSE['large_request_processing'] = RequestProcessingHookResponse
+
+HOOK_TYPES.add('large_request_sending')
+HOOK_RESPONSE['large_request_sending'] = RequestCompletedHookResponse
+
+HOOK_TYPES.add('permission_change')
+
+MIDNIGHT = time(0)
+ONE_WEEK = timedelta(weeks=1)
+WAY_BACK_WHEN = datetime(2010, 1, 1)
+
+WEBHOOK_RESPONSES = HOOK_TYPES.copy()
+WEBHOOK_RESPONSES.update(set(USER_DATATYPES))
+
+
+class TerraClient(terra.Terra):
+    """ Subclass of :class:`terra.Terra` with extra response handling functions.
+
+    Terra uses different names for variables than we do in our API. Below is a
+    mapping of variable names.
+
+    =============  ============
+    Modo Bio       Terra
+    =============  ============
+    user_id        reference_id
+    terra_user_id  user_id
+    wearable       provider
+    =============  ============
+    """
+
+    def __init__(
+        self,
+        terra_api_key: str = None,
+        terra_dev_id: str = None,
+        terra_api_secret: str = None
+    ):
+        """ Initialize :class:``TerraClient``.
+
+        The connection with Terra requires 3 tokens: the API key, the
+        API secret, and a developer ID. By default they are taken from
+        the app config. Provide any of them as kwargs to override the
+        environmental variables.
+
+        Parameters
+        ----------
+        terra_api_key : str, default = None
+            Override the value taken from TERRA_API_KEY.
+
+        terra_dev_id : str, default = None
+            Override the value taken from TERRA_DEV_ID.
+
+        terra_api_secret : str, default = None
+            Override the value taken from TERRA_API_SECRET.
+        """
+        if terra_api_key is None:
+            terra_api_key = current_app.config['TERRA_API_KEY']
+        if terra_dev_id is None:
+            terra_dev_id = current_app.config['TERRA_DEV_ID']
+        if terra_api_secret is None:
+            terra_api_secret = current_app.config['TERRA_API_SECRET']
+        super().__init__(terra_api_key, terra_dev_id, terra_api_secret)
+
+    def status(self, response: TerraApiResponse, raise_on_error: bool=True):
+        """ Handles various response status messages from Terra.
+
+        If status is:
+
+        - **success** or **processing** the message is logged at debug level.
+        - **warning** the message is logged at warning level.
+        - **error** or **not_available** an error is raised.
+        - anything else or missing, an error is raised.
+
+        No error is raised if ``raise_on_error`` is False. Instead, the error
+        is logged at error level.
+
+        The response object is not consumed or altered; nothing is returned.
+
+        Parameters
+        ----------
+        response : :class:`terra.api.api_responses.TerraApiResponse`
+            Any subclass of :class:`terra.api.api_responses.TerraApiResponse`.
+
+        raise_on_error : bool, default = True
+            Whether or not to raise a :class:`werkzeug.exceptions.BadRequest` on error.
+
+        Raises
+        ------
+        :class:`werkzeug.exceptions.BadRequest`
+            Raised when ``status`` is error, not available, or an unknown response. Only
+            raised if ``raise_on_error`` is True (default).
+        """
+        if 'status' not in response.json:
+            if 'data' in response.json:
+                # Data messages in webhook do not (always?) have a status message.
+                return
+            elif raise_on_error:
+                raise BadRequest(f'Terra returned a response without a status.')
+            logger.error(f'Terra response without a status: {response.json}')
+            return
+
+        status = response.json['status']
+
+        if status in ('error', 'not_available'):
+            msg = response.json.get('message', 'no error message provided')
+            if raise_on_error:
+                raise BadRequest(f'Terra error: {msg}')
+            logger.error(f'Terra balked: {msg}')
+        elif status == 'warning':
+            msg = response.json.get('message', 'no warning message provided')
+            logger.warn(f'Terra complained: {msg}')
+        elif status in ('success', 'processing'):
+            logger.debug(f'Terra proclaimed: {response.json}')
+        else:
+            logger.error(f'Unknown status "{status}" in Terra response: {response.json}')
+            if raise_on_error:
+                raise BadRequest(f'Terra returned an unknown response.')
+
+    def auth_response(self, response: TerraApiResponse):
+        """ Handle authentication and reauthentication webhook responses.
+
+        This function is called by the webhook in response to user authentication or
+        reauthentication messages. It adds a new user + wearable combination to the WearablesV2
+        table in the database, or updates an existing user + wearable combo. It then fetches
+        historical data for the user and finally logs an audit message.
+
+        Parameters
+        ----------
+        response : :class:`terra.api.api_responses.TerraApiResponse`
+            The repsonse object returned from :func:`terra.Terra.handle_flask_webhook`.
+        """
+        user_id = response.parsed_response.reference_id
+        wearable = response.parsed_response.user.provider
+        terra_user = response.parsed_response.user
+        terra_user_id = response.parsed_response.user.user_id
+
+        user_wearable = db.session.get(WearablesV2, (user_id, wearable))
+
+        if not user_wearable:
+            # New user
+            user_wearable = WearablesV2(
+                user_id=user_id,
+                wearable=wearable,
+                terra_user_id=terra_user_id)
+            db.session.add(user_wearable)
+            db.session.commit()
+
+            logger.audit(
+                f'User {user_id} successfully registered wearable '
+                f'device {wearable} (Terra ID {terra_user_id})')
+
+            # Fetch historical data. Data is send to webhook.
+            now = datetime.utcnow()
+
+            # The incoming Terra "User" class is converted to an object,
+            # but it is not connected to the client (here: self).
+            terra_user._client = self
+
+            response = self.get_activity_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
+            self.status(response, raise_on_error=False)
+
+            # We already have biographical info.
+            # response = self.get_athlete_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
+            # self.status(response, raise_on_error=False)
+
+            response = self.get_body_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
+            self.status(response, raise_on_error=False)
+
+            response = self.get_daily_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
+            self.status(response, raise_on_error=False)
+
+            response = self.get_menstruation_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
+            self.status(response, raise_on_error=False)
+
+            response = self.get_nutrition_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
+            self.status(response, raise_on_error=False)
+
+            response = self.get_sleep_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
+            self.status(response, raise_on_error=False)
+
+        elif user_wearable.terra_user_id != terra_user_id:
+            # User reauthentication
+            user_wearable.terra_user_id = terra_user_id
+            db.session.commit()
+
+            logger.audit(
+                f'User {user_id} reauthenticated wearable device {wearable} '
+                f'(new Terra ID {terra_user_id})')
+
+    def access_revoked_response(self, response: TerraApiResponse):
+        """ Handle deauthentication webhook responses.
+
+        This function is called by the webhook in response to user deauthentication messages.
+        The user can revoke access in three ways:
+
+        1.  Through our API. This case is handled by the DELETE v2/wearables/<user_id>/<wearable>
+            endpoint.
+        2.  Through the wearable provider AND the provider informs Terra. In this case Terra
+            will send a deauthentication message to the webhook.
+        3.  Through the wearable provider and the provider does NOT inform Terra. Eventually,
+            Terra will try to fetch data from the now blocked account, which will fail. Terra
+            then sends a connection error message to the webhook.
+
+        This function handles situations 2 and 3. In both cases, the user + wearable combination
+        will be deleted from the database and all wearable data will be erased. An audit message
+        is logged.
+
+        If the user + wearable combo does not exist in the database, it is silently ignored.
+
+        Parameters
+        ----------
+        response : :class:`terra.api.api_responses.TerraApiResponse`
+            The repsonse object returned from :func:`terra.Terra.handle_flask_webhook`.
+        """
+        user_id = response.parsed_response.user.reference_id
+        wearable = response.parsed_response.user.provider
+        terra_user = response.parsed_response.user
+
+        user_wearable = db.session.get(WearablesV2, (user_id, wearable))
+
+        if not user_wearable:
+            logger.warn(
+                f'Access revoke requested for user_id {user_id} and wearable {wearable}, '
+                f'but was not found in the DB. Ignoring.')
+            return
+
+        if isinstance(response, ConnectionErrorHookResponse):
+            # Request Terra to remove user
+            resp = self.deauthenticate_user(terra_user)
+            self.status(resp, raise_on_error=False)
+
+        mongo.db.wearables.delete_many({
+            'user_id': user_id,
+            'wearable': wearable})
+
+        db.session.delete(user_wearable)
+        db.session.commit()
+
+        logger.audit(
+            f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
+
+    def store_data(self, response: TerraApiResponse):
+        """ Store incoming data in Mongo.
+
+        Data is stored as::
+
+            { "user_id": 1,
+              "wearable": "FITBIT",
+              "timestamp": datetime(2022, 10, 12, 4, 0, 0, tz=(None, -28800)),
+              "data": {
+                  <data_type> (e.g. "activity", "nutrition"): {
+                  ...data...
+                },
+                  <data_type>: {
+                  ...data...
+                }
+              }
+            }
+
+        Timestamps are passed in from Terra as data.metadata.start_time. This is converted
+        into a timezone-aware datetime object by the JSONProvider class. The "wearables"
+        Mongo collection is timezone aware.
+
+        This means that, in order to get all data for one day, you have to search for
+        ">= 2022-12-11T00:00:00" and "< 2022-12-13T00:00:00".
+        """
+        terra_user_id = response.parsed_response.user.user_id
+        wearable = response.parsed_response.user.provider
+        data_type = response.parsed_response.type
+
+        user_id = (db.session.execute(
+            select(WearablesV2.user_id)
+            .filter_by(terra_user_id=terra_user_id))
+            .scalars()
+            .one_or_none())
+
+        if not user_id:
+            logger.error(f'User id not found for incoming data for Terra user id {terra_user_id}.')
+            return
+
+        # Don't use parsed_response here, want to re-deserialize JSON with our JSONProvider.
+        for data in response.get_json()['data']:
+            # Update existing or create new doc (upsert).
+            result = mongo.db.wearables.update_one(
+                {'user_id': user_id, 'wearable': wearable, 'timestamp': data['metadata']['start_time']},
+                {'$set': {f'data.{data_type}': data}},
+                upsert=True)
+
+
+@lru_cache_with_ttl(maxsize=1, ttl=86400)
+def supported_wearables() -> dict:
+    """ Get the list of supported wearables from Terra.
+
+    Terra's API provides a list of supported wearable devices. This function fetches that
+    list and caches the result. It is updated once per day.
+
+    The wearable devices are split into two lists, "providers" (web API based devices) and
+    "sdk_providers" (SDK based devices). Each entry has an enum name (used in the API) and
+    a display name.
+
+    The display names are generated from the enum names, with an exception list for those
+    cases where simply lower-casing is not sufficient. By having a "default translation"
+    from enum name to display name plus a list of exceptions, any newly supported devices
+    returned from Terra's API are automatically included. Exceptions can later be added
+    to the list.
+
+    Returns
+    -------
+    dict
+        Dictionary with two keys "providers" and "sdk_providers". The values are dictionaries
+        with enum names as keys and display names as values.
+    """
+    tc = TerraClient()
+    response = tc.list_providers()
+    tc.status(response, raise_on_error=False)
+
+    # List of display names that cannot be generated by simply capitalizing the enum names.
+    exceptions = {
+        'APPLE': 'Apple HealthKit',
+        'CONCEPT2': 'Concept 2',
+        'EIGHT': 'Eight Sleep',
+        'FREESTYLELIBRE': 'Freestyle Libre',
+        'FREESTYLELIBRESDK': 'Freestyle Libre (SDK)',
+        'GOOGLE': 'Google Fit',
+        'GOOGLEFIT': 'Google Fit (SDK)',
+        'IFIT': 'iFit',
+        'TEMPO': 'Tempo Fit',
+        'TRAININGPEAKS': 'Training Peaks',
+        'WEAROS': 'Wear OS'}
+
+    # These devices are not supported at the moment.
+    # That's a business decision, there is no technical reason not to support them.
+    # Simply remove them from this list to start supporting them.
+    suppressed = {
+        'BIOSTRAP',
+        'BRYTONSPORT',
+        'CARDIOMOOD',
+        'CONCEPT2',
+        'CRONOMETER',
+        'CYCLINGANALYTICS',
+        'EATTHISMUCH',
+        'EIGHT',
+        'FATSECRET',
+        'FINALSURGE',
+        'GOOGLE',
+        'GOOGLEFIT',
+        'HAMMERHEAD',
+        'HUAWEI',
+        'IFIT',
+        'INBODY',
+        'KETOMOJOEU',
+        'KETOMOJOUS',
+        'KOMOOT',
+        'LEZYNE',
+        'LIVEROWING',
+        'MOXY',
+        'MYFITNESSPAL',
+        'NOLIO',
+        'NUTRACHECK',
+        'PELOTON',
+        'PUL',
+        'REALTIME',
+        'RENPHO',
+        'RIDEWITHGPS',
+        'ROUVY',
+        'SAMSUNG',
+        'TECHNOGYM',
+        'TEMPO',
+        'TODAYSPLAN',
+        'TRAINERROAD',
+        'TRAININGPEAKS',
+        'TRAINXHALE',
+        'TRIDOT',
+        'UNDERARMOUR',
+        'VELOHERO',
+        'VIRTUAGYM',
+        'WAHOO',
+        'WEAROS',
+        'WGER',
+        'WHOOP',
+        'XERT',
+        'XOSS',
+        'ZWIFT'}
+
+    result = {}
+    for provider_type in ('providers', 'sdk_providers'):
+        subresult = {}
+        for provider in getattr(response.parsed_response, provider_type):
+            if provider in suppressed:
+                continue
+            if provider in exceptions:
+                subresult[provider] = exceptions[provider]
+            else:
+                subresult[provider] = provider.capitalize()
+        result[provider_type] = subresult
+
+    return result
+
+def parse_wearable(wearable: str) -> str:
+    """ Parse wearable path parameter.
+
+    Clean up path parameter and check against list of supported devices.
+    Cleaning up consists of converting to all-caps and removing spaces.
+
+    Parameters
+    ----------
+    wearable : str
+        Name of the wearable.
+
+    Returns
+    -------
+    str
+        Name of the wearable "cleaned up". Cleaning up consists of converting to
+        all-caps and removing spaces.
+
+    Raises
+    ------
+    :class:`werkzeug.exceptions.BadRequest`
+        Raised when the wearable (after cleaning up), is not found in the list
+        of supported wearable devices, see :func:`supported_wearables`.
+    """
+    wearable_clean = wearable.upper().replace(' ', '')
+    supported = supported_wearables()
+    if (wearable_clean in supported['providers']
+        or wearable_clean in supported['sdk_providers']):
+        return wearable_clean
+    raise BadRequest(f'Unknown wearable {wearable}')
+
+
+@ns_v2.route('')
+class WearablesV2Endpoint(BaseResource):
+    @token_auth.login_required
+    @responds(schema=WearablesV2ProvidersGetSchema, api=ns_v2)
+    def get(self):
+        """ Get a list of all supported wearable devices. """
+        return supported_wearables()
+
+
+@ns_v2.route('/<int:user_id>')
+class WearablesV2UserEndpoint(BaseResource):
+    @token_auth.login_required
+    @responds(schema=WearablesV2UserGetSchema, status_code=200, api=ns_v2)
+    def get(self, user_id):
+        """ Get a list of wearable devices registered to this user. """
+        # user_id = self.check_user(uid, user_type='client').user_id
+
+        wearables = (db.session.execute(
+            select(WearablesV2.wearable)
+            .filter_by(user_id=user_id))
+            .scalars()
+            .all())
+
+        return {'wearables': wearables}
+
+
+@ns_v2.route('/<int:user_id>/<wearable>')
+class WearablesV2DataEndpoint(BaseResource):
+    @token_auth.login_required
+    # @responds(schema=WearablesV2DataSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        """ Get data for this combination of user and wearable device for the default date range. """
+        wearable = parse_wearable(wearable)
+        today = datetime.utcnow()
+        start = today - ONE_WEEK
+        data = mongo.db.wearables.find({
+            'user_id': user_id,
+            'wearable': wearable,
+            'timestamp': {'$gte': start}})
+
+        return JSONProvider().dumps(list(data))
+
+    @token_auth.login_required
+    @responds(schema=WearablesV2UserAuthUrlSchema, status_code=201, api=ns_v2)
+    def post(self, user_id, wearable):
+        """ Register a new wearable device for this user. """
+        # user_id = self.check_user(uid, user_type='client').user_id
+        wearable = parse_wearable(wearable)
+
+        # API based providers
+        if wearable in supported_wearables()['providers']:
+            # For local testing, set the redirect urls to something like http://localhost/xyz
+            # When you copy the URL into a browser and allow access, Terra will redirect back
+            # to localhost. It will give an error in the browser, but the URL in the address
+            # bar will have all the relevant information.
+            tc = TerraClient()
+            response = tc.generate_authentication_url(
+                resource=wearable,
+                auth_success_redirect_url='modobio://wearablesAuthSuccess',
+                auth_failure_redirect_url='modobio://wearablesAuthFailure',
+                reference_id=user_id)
+            tc.status(response)
+
+            # Not stored in the database at this point.
+            # Registration is only complete when client follows the link to the provider.
+            # The response of that action comes in through the webhook and will be stored.
+
+            return response.parsed_response
+
+        # SDK based providers
+        else:
+            # Functionality not in terra-python (v0.0.7), use requests.
+            url = f'{terra.constants.BASE_URL}/auth/generateAuthToken'
+            headers = {
+                'accept': 'application/json',
+                'dev-id': current_app.config['TERRA_DEV_ID'],
+                'x-api-key': current_app.config['TERRA_API_KEY']}
+
+            response = requests.post(url, headers=headers)
+            response_json = response.json()
+
+            status = response_json.pop('status', 'error')
+            if status != 'success':
+                raise BadRequest(f'Terra replied: {response_json}')
+
+            # Same as for API based providers, nothing stored in the database at this point.
+            # Registration is only complete when frontend calls initConnection() with token.
+            # The response of that action comes in through the webhook and will be stored.
+
+            return response_json
+
+    @token_auth.login_required
+    @responds(status_code=204, api=ns_v2)
+    def delete(self, user_id, wearable):
+        """ Revoke access for this wearable device. """
+        # user_id = self.check_user(uid, user_type='client').user_id
+        wearable = parse_wearable(wearable)
+
+        user_wearable = db.session.get(WearablesV2, (user_id, wearable))
+
+        # Don't error on non-existant users, delete is idempotent
+        if not user_wearable:
+            logger.debug(f'Nothing to delete for user {user_id} and wearable {wearable}')
+            return
+
+        tc = TerraClient()
+        try:
+            terra_user = tc.from_user_id(str(user_wearable.terra_user_id))
+        except (terra.exceptions.NoUserInfoException, KeyError):
+            # Terra-python (at least v0.0.7) should fail with NoUserInfoException
+            # if terra_user_id does not exist in their system. However, it checks
+            # whether response.json is empty, which is not empty in the case of an
+            # error (it holds the error message and status). The next step in
+            # terra.models.user.User.fill_in_user_info() is to access
+            # response.json["user"] which does not exist and fails with KeyError.
+            # In any case, we don't care that the terra_user_id is invalid, we
+            # were going to delete it anyway.
+            # 2023-01-10: Terra has been notified of this bug.
+            pass
+        else:
+            response = tc.deauthenticate_user(terra_user)
+            tc.status(response)
+
+        mongo.db.wearables.delete_many({
+            'user_id': user_id,
+            'wearable': wearable})
+
+        db.session.delete(user_wearable)
+        db.session.commit()
+        logger.audit(
+            f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
+
+
+@ns_v2.route('/<int:user_id>/<wearable>/<date:start_date>')
+@ns_v2.route('/<int:user_id>/<wearable>/<datetime:start_date>')
+class WearablesV2DataStartDateEndpoint(BaseResource):
+    @token_auth.login_required
+    # @responds(schema=WearablesV2DataSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable, start_date):
+        """ Get data for this combination of user and wearable device from start_date to now.
+
+        Date range includes start date and latest available data. Start_date can be either
+        a full ISO8601 datetime, or just the date.
+        """
+        if isinstance(start_date, date):
+            start_date = datetime.combine(start_date, MIDNIGHT)
+
+        wearable = parse_wearable(wearable)
+        data = mongo.db.wearables.find({
+            'user_id': user_id,
+            'wearable': wearable,
+            'timestamp': {'$gte': start_date}})
+
+        return JSONProvider().dumps(list(data))
+
+
+@ns_v2.route('/<int:user_id>/<wearable>/<date:start_date>/<date:end_date>')
+@ns_v2.route('/<int:user_id>/<wearable>/<datetime:start_date>/<datetime:end_date>')
+class WearablesV2DataStartToEndDateEndpoint(BaseResource):
+    @token_auth.login_required
+    # @responds(schema=WearablesV2DataSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable, start_date, end_date):
+        """ Get data for this combination of user and wearable device from start_date to end_date.
+
+        Date range includes boundaries: [start_date, end_date]. Start_date can be either
+        a full ISO8601 datetime, or just the date. End_date must be of the same format as
+        start_date.
+        """
+        if isinstance(start_date, date):
+            start_date = datetime.combine(start_date, MIDNIGHT)
+            end_date = datetime.combine(end_date, MIDNIGHT)
+
+        wearable = parse_wearable(wearable)
+        data = mongo.db.wearables.find({
+            'user_id': user_id,
+            'wearable': wearable,
+            'timestamp': {
+                '$and': [
+                    {'$gte': start_date},
+                    {'$lte': end_date}]}})
+
+        return JSONProvider().dumps(list(data))
+
+
+@ns_v2.route('/terra')
+class WearablesV2TerraWebHookEndpoint(BaseResource):
+    @accepts(api=ns_v2)
+    def post(self):
+        """ Webhook for incoming notifications from Terra. """
+        # Override JSON handling for this request.
+        request.json_module = JSONProvider()
+
+        tc = TerraClient()
+        # These two lines do the same thing, but the first checks the signature in the header,
+        # which relies on having the secret. For testing without the secret, use the second line.
+        response = tc.handle_flask_webhook(request)
+        # response = terra.api.api_responses.TerraWebhookResponse(request.get_json(), dtype='hook')
+
+        tc.status(response, raise_on_error=False)
+
+        if response.dtype not in WEBHOOK_RESPONSES:
+            logger.error(
+                f'Terra webhook response with unknown type "{response.dtype}". '
+                f'Full message: {response.json}')
+        elif response.dtype == 'auth':
+            # Completion of new wearable registration for user,
+            # or reauthentication by existing user.
+            tc.auth_response(response)
+        elif response.dtype == 'user_reauth':
+            # Terra sends both auth and user_reauth in response
+            # to reauthentication. Only need one, ignore this one.
+            pass
+        elif response.dtype == 'permission_change':
+            # Undocumented response. Seems to be in response to OAuth scope change.
+            pass
+        elif response.dtype == 'deauth':
+            # User revoked access through our API. Nothing else to do.
+            pass
+        elif response.dtype in ('access_revoked', 'connection_error'):
+            # User revoked access through wearable provider.
+            tc.access_revoked_response(response)
+        elif response.dtype == 'google_no_datasource':
+            # uh, ok
+            pass
+        elif response.dtype in (
+            'request_processing',
+            'request_completed',
+            'large_request_processing',
+            'large_request_sending'):
+            # Terra is letting us know that they're working on it. Great.
+            pass
+        elif response.dtype in USER_DATATYPES:
+            tc.store_data(response)

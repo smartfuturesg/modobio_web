@@ -1,5 +1,6 @@
+import importlib
 import logging
-logger = logging.getLogger(__name__)
+import pathlib
 
 # Temporary workaround
 # Flask 2.1 updated dependency werkzeug to 2.2. But flask-restx 0.5.1 uses a
@@ -58,6 +59,8 @@ if not hasattr(werkzeug.routing, 'parse_rule'):
 
 from flask import Blueprint
 from flask_restx import Api
+
+logger = logging.getLogger(__name__)
 
 # To use authentication in Swagger:
 # 1. Click Authenticate button at top of the page
@@ -154,3 +157,21 @@ api.add_namespace(ns)
 
 from odyssey.api.provider.routes import ns
 api.add_namespace(ns)
+
+# V2 of the API, only wearables for now, expand for release 2.0.0.
+# Loading mechanism backported from release 2.0.0.
+
+bp_v2 = Blueprint('api_v2', __name__)
+api_v2 = Api(bp_v2, authorizations=authorizations, security='apikey')
+
+here = pathlib.Path(__file__).parent
+namespaces = here.glob('**/routes.py')
+
+for namespace in namespaces:
+    loader = importlib.machinery.SourceFileLoader('routes', namespace.as_posix())
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    if hasattr(module, 'ns_v2'):
+        api_v2.add_namespace(module.ns_v2)

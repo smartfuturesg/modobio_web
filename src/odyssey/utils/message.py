@@ -158,10 +158,11 @@ def send_email(
         logger.info(f'Email based on template "{template}" sent to "{to}", message ID: {mid}')
 
 
-##############################################################
+####################
 #
 # Push notifications
 #
+####################
 
 @dataclass
 class EndpointARN:
