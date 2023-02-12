@@ -1,7 +1,7 @@
 """Adds field to MedicalBloodPressures
 
 Revision ID: 91df2cb12fba
-Revises: ec6823cd54af
+Revises: ee5450958fb4
 Create Date: 2023-02-06 08:03:43.772775
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '91df2cb12fba'
-down_revision = 'ec6823cd54af'
+down_revision = 'ee5450958fb4'
 branch_labels = None
 depends_on = None
 
