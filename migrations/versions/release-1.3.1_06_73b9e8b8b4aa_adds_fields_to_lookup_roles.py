@@ -1,7 +1,7 @@
 """Adds fields to lookup roles
 
 Revision ID: 73b9e8b8b4aa
-Revises: ec6823cd54af
+Revises: 91df2cb12fba
 Create Date: 2023-02-02 02:16:37.068831
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '73b9e8b8b4aa'
-down_revision = 'ec6823cd54af'
+down_revision = '91df2cb12fba'
 branch_labels = None
 depends_on = None
 
