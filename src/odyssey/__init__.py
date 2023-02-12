@@ -8,20 +8,26 @@ import logging
 import os
 import time
 
+from bson.binary import UuidRepresentation
+from bson.codec_options import CodecOptions, DatetimeConversion
 from celery import Celery
 from elasticsearch import Elasticsearch
 from flask import Flask
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
-from flask_pymongo import PyMongo 
+from flask_pymongo import PyMongo, ASCENDING, DESCENDING
 from flask_sqlalchemy import SQLAlchemy
+from pymongo.errors import CollectionInvalid
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import class_mapper
 from werkzeug.exceptions import HTTPException
 
-from odyssey.utils.logging import JsonFormatter
+import odyssey.utils.converters
+
 from odyssey.utils.errors import exception_handler, http_exception_handler
+from odyssey.utils.logging import JsonFormatter
+from odyssey.utils.json import JSONProvider
 
 from odyssey.config import Config
 conf = Config()
@@ -105,7 +111,14 @@ def create_app():
         --------
         :mod:`odyssey.config` and :mod:`odyssey.defaults`.
     """
+    # Temporarily quiet login function
+    logging.getLogger(name='odyssey.utils.auth').setLevel(logging.INFO)
+
     app = Flask(__name__, static_folder="static") 
+
+    # Extended JSON (de)serialization.
+    # TODO: not yet ready for primetime. Breaks too many things.
+    # app.json = JSONProvider(app)
 
     # Load configuration.
     app.config.from_object(conf)
@@ -121,8 +134,13 @@ def create_app():
     # Convenience function
     db.Model.update = _update
 
+    # Custom path parameter converters
+    for converter_class in odyssey.utils.converters.__all__:
+        converter = getattr(odyssey.utils.converters, converter_class)
+        app.url_map.converters[converter.name] = converter
+
     # Load the API.
-    from odyssey.api import bp, api
+    from odyssey.api import bp, api, bp_v2, api_v2
 
     # Register error handlers
     #
@@ -132,12 +150,15 @@ def create_app():
     # but this is essentially what the @api.errorhandler decorator does.
     app.register_error_handler(Exception, exception_handler)
     api.error_handlers[HTTPException] = http_exception_handler
+    api_v2.error_handlers[HTTPException] = http_exception_handler
 
     # api._doc or Api(doc=...) is not True/False,
     # it is 'path' (default '/') or False to disable.
     if not app.config['SWAGGER_DOC']:
         api._doc = False
-    api.version = app.config['API_VERSION']
+        api_v2._doc = False
+    api.version = app.config['VERSION_STRING']
+    api_v2.version = app.config['VERSION_STRING']
 
     # Register development-only endpoints.
     if app.config['DEV']:
@@ -152,6 +173,7 @@ def create_app():
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)
+    app.register_blueprint(bp_v2, url_prefix='/v2')
 
     # Elasticsearch setup.
     app.elasticsearch = None
@@ -173,6 +195,35 @@ def create_app():
     # mongo db
     if app.config['MONGO_URI']:
         mongo.init_app(app)
+
+        # Wearables collection needs non-standard option for
+        # timezone-aware datetime and UUID interpretation.
+        co = CodecOptions(
+            tz_aware=True,
+            datetime_conversion=DatetimeConversion.DATETIME,
+            uuid_representation=UuidRepresentation.STANDARD)
+
+        try:
+            mongo.db.create_collection('wearables', codec_options=co)
+        except CollectionInvalid:
+            # Already exists
+            pass
+
+        # Wearables index, only needs to be created once.
+        # Does not fail if already exists.
+        mongo.db.wearables.create_index([
+            ('user_id', ASCENDING),
+            ('wearable', ASCENDING),
+            ('date', DESCENDING)],
+            name='user_id-wearable-date-index',
+            unique=True)
+
+    # Reset login function log level
+    logging.getLogger(name='odyssey.utils.auth').setLevel(conf.LOG_LEVEL)
+
+    # Print all config settings to debug, in DEV only.
+    if app.config['DEV']:
+        logger.debug(conf.dump())
 
     return app
 
