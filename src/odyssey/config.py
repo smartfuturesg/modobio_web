@@ -301,7 +301,7 @@ class Config:
         else:
             self.VERSION.prefix = prefix
             self.VERSION_BRANCH = f'{prefix}{self.VERSION.major}.{self.VERSION.minor}'
-            self.VERSION_STRING = prefix + version.public
+            self.VERSION_STRING = prefix + self.VERSION.public
 
 
 def database_parser() -> argparse.ArgumentParser:
