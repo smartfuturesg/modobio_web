@@ -286,22 +286,22 @@ class Config:
                     break
             version = head.strip().split('/')[-1]
 
+        prefix = ''
         if version and version.startswith('release-'):
+            prefix = 'release-'
             version = version[7:]
 
         try:
             self.VERSION = packaging.version.parse(version)
         except packaging.version.InvalidVersion:
             self.VERSION = packaging.version.parse('0')
+            self.VERSION.prefix = prefix
             self.VERSION_BRANCH = version
             self.VERSION_STRING = version
         else:
-            # packaging.version does not store 4th digit.
-            if len(self.VERSION.release) > 3:
-                self.VERSION.build = self.VERSION.release[3]
-
-            self.VERSION_BRANCH = f'release-{self.VERSION.major}.{self.VERSION.minor}'
-            self.VERSION_STRING = self.VERSION_BRANCH + f'.{self.VERSION.micro}.{self.VERSION.build}'
+            self.VERSION.prefix = prefix
+            self.VERSION_BRANCH = f'{prefix}{self.VERSION.major}.{self.VERSION.minor}'
+            self.VERSION_STRING = prefix + version.public
 
 
 def database_parser() -> argparse.ArgumentParser:
