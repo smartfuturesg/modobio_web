@@ -289,7 +289,7 @@ class Config:
         prefix = ''
         if version and version.startswith('release-'):
             prefix = 'release-'
-            version = version[7:]
+            version = version[8:]
 
         try:
             self.VERSION = packaging.version.parse(version)
@@ -301,7 +301,7 @@ class Config:
         else:
             self.VERSION.prefix = prefix
             self.VERSION_BRANCH = f'{prefix}{self.VERSION.major}.{self.VERSION.minor}'
-            self.VERSION_STRING = prefix + version.public
+            self.VERSION_STRING = prefix + self.VERSION.public
 
 
 def database_parser() -> argparse.ArgumentParser:
