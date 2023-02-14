@@ -289,7 +289,7 @@ class Config:
         prefix = ''
         if version and version.startswith('release-'):
             prefix = 'release-'
-            version = version[7:]
+            version = version[8:]
 
         try:
             self.VERSION = packaging.version.parse(version)
