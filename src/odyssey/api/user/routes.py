@@ -156,10 +156,10 @@ class NewStaffUser(BaseResource):
                 # user account already exists for this email and is already a staff/provider account
                 raise BadRequest('Email address {email} already exists.')
 
-            elif user.is_client == False and user.is_staff == False:
-                # user is neither a staff or client user
-                # currently, this can be the case when the user has been added by another user through the clinical
-                # care team system. the user info provided will populate the already existing user entry and the 
+            elif all((user.is_client == False, user.is_staff == False, user.is_provider == False)):
+                # user is neither a staff, provider, nor client user
+                # currently, this can be the case when the user has been added by another user through the 
+                # team system. the user info provided will populate the already existing user entry and the 
                 # password given will overwrite the password in the UserLogin entry (if it exist)
 
                 password=user_info.get('password', None)
@@ -184,7 +184,8 @@ class NewStaffUser(BaseResource):
                 verify_email = True
             else:
                 # user account exists but only the client portion of the account is defined
-                user.is_staff = True
+                user.is_staff = is_staff
+                user.is_provider = is_provider
                 user.was_staff = True
                 del user_info['password']
                 user.update(user_info)
