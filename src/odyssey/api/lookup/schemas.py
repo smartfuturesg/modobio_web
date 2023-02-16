@@ -253,6 +253,11 @@ class LookupEmergencyNumbersOutputSchema(Schema):
     items = fields.Nested(LookupEmergencyNumbersSchema(many=True), missing=[])
     total_items = fields.Integer()
 
+class LookupRoleGroupsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupRoleGroups
+        exclude = ('created_at', 'updated_at', 'idx')
+
 class LookupRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupRoles
