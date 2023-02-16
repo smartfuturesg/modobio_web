@@ -670,9 +670,6 @@ class EmailVerification():
             md_id = generate_modobio_id(user.user_id,user.firstname,user.lastname)
             user.update({'modobio_id':md_id,'membersince': DB_SERVER_TIME})      
 
-            # send welcome email
-            send_email('email-welcome', user.email, firstname=user.firstname)  
-
         # check for pending subscription grants on this email, add new user_id to subscription grant entries
         subscription_grants = CommunityManagerSubscriptionGrants.query.filter_by(email = user.email.lower()).all()
         for grant in subscription_grants:
