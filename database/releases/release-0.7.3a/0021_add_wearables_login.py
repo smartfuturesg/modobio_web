@@ -15,13 +15,11 @@ BEGIN
     INSERT INTO "LookupRoles" (
         role_name,
         display_name,
-        is_practitioner,
-        has_client_data_access)
+        is_practitioner)
     VALUES (
         'wearables_scraper',
         'Wearbles data scraper',
-        false,
-        true);
+        false);
 
     INSERT INTO "User" (
         email,

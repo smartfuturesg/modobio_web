@@ -5,10 +5,20 @@ All tables in this module are prefixed with 'Wearables'.
 import logging
 logger = logging.getLogger(__name__)
 
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
+from odyssey.utils.base.models import BaseModel, UserIdFkeyMixin
+
+
+#############################
+#
+# V1 of the Wearables tables.
+#
+#############################
+
+# TODO: deprecated in V2 of the API. Remove when V1 of the API is no longer supported.
 
 class Wearables(db.Model):
     """ Table that lists which supported wearables a client has. """
@@ -418,4 +428,32 @@ class WearablesFreeStyle(db.Model):
     Wearable instance this WearablesFreeStyle instance is linked to.
 
     :type: :class:`Wearables`
+    """
+
+#############################
+#
+# V2 of the Wearables tables.
+#
+#############################
+
+class WearablesV2(BaseModel, UserIdFkeyMixin):
+    """ Table that lists which supported wearables a client has. """
+
+    __tablename__ = 'WearablesV2'
+
+    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'wearable'),)
+
+    wearable = db.Column(db.String(64))
+    """
+    Wearable device. The combination of user_id + wearable must be unique.
+
+    :type: str, primary key, max length 64
+    """
+
+    terra_user_id = db.Column(UUID(as_uuid=True), index=True, nullable=False)
+    """
+    Terra's user id. To Terra, each combination of user + wearable device is
+    a unique user. Write to/read from database as :class:`uuid.UUID`.
+
+    :type: :class:`uuid.UUID`, not-null, indexed
     """

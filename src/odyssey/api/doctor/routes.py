@@ -114,10 +114,15 @@ class MedBloodPressures(BaseResource):
         '''
         # First check if the client exists
         self.check_user(user_id, user_type='client')
+        
+        if request.parsed_obj.source:
+            if request.parsed_obj.source == 'device' and not request.parsed_obj.device_name:
+                raise BadRequest('Device name is missing.')
+        
         self.set_reporter_id(request.parsed_obj)
 
         request.parsed_obj.user_id = user_id
-        
+
         db.session.add(request.parsed_obj)
         db.session.commit()
 

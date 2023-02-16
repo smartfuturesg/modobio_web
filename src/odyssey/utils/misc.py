@@ -1,6 +1,7 @@
 """ Utility functions for the odyssey package. """
 
 import ast
+import functools
 import inspect
 import jwt
 import logging
@@ -12,11 +13,12 @@ import typing as t
 import uuid
 
 from datetime import datetime, date, time, timedelta
-from pytz import utc
+from time import monotonic
 
 import flask.json
 
 from flask import current_app, request, url_for
+from pytz import utc
 from sqlalchemy import select
 from werkzeug.exceptions import BadRequest, Unauthorized
 
@@ -56,8 +58,6 @@ from odyssey.utils.message import send_email
 from odyssey.utils import search
 
 logger = logging.getLogger(__name__)
-
-_uuid_rx = re.compile(r'[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}', flags=re.IGNORECASE)
 
 def generate_modobio_id(user_id: int, firstname: str=None, lastname: str=None) -> str:
     """ Generate the user's mdobio_id.
@@ -176,126 +176,6 @@ def check_std_existence(std_id):
     std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
     if not std:
         raise BadRequest(f'STD {std_id} not found.')
-
-
-class JSONEncoder(flask.json.JSONEncoder):
-    """ Converts :class:`datetime.datetime`, :class:`datetime.date`,
-        or :class:`datetime.time` objects to a JSON compatible ISO8601 string.
-
-    This subclass of :class:`flask.json.JSONEncoder` overrides the
-    :meth:`default` method to convert datetime objects to ISO8601 strings,
-    instead of the RFC 822 strings. RFC 822 strings are much harder to
-    deserialize. Everything else is passed on to the parent class.
-    """
-    def default(self, obj):
-        """ Convert a Python object to a JSON string. """
-        if isinstance(obj, (date, datetime, time)):
-            return obj.isoformat()
-        return super().default(obj)
-
-
-class JSONDecoder(flask.json.JSONDecoder):
-    """ Deserialize JSON string into a dictionary of Python objects.
-
-    :class:`flask.json.JSONDecoder` only supports a small set of types that
-    can be deserialized into Python objects. This class adds a set of parsers
-    that can convert JSON strings into their respective Python objects.
-    
-    To add more functionality, simply create a new parser method below, with
-    the following properties:
-
-    1. The method must have 1 argument, a string.
-    2. The method must return 1 object, the converted string.
-    3. The method should not raise an error if the conversion fails.
-    4. If the conversion was unsuccessful, the method must return the
-       original string unaltered.
-    5. The method name must start with 'parse\\_' to be picked up by the
-       automatic registration system.
-    
-    Of course, there should be a corresponding serializer in :class:`JSONEncoder`.
-    """
-    def __init__(self, *args, **kwargs):
-        kwargs['object_hook'] = self.parse
-        super().__init__(*args, **kwargs)
-
-        self.registered_parsers = []
-        # Don't use self.__dict__ here, or you'll pick up parsers from
-        # parent (they're also called parse_xxx) that already have been applied
-        for name, func in JSONDecoder.__dict__.items():
-            if name.startswith('parse_'):
-                self.registered_parsers.append(func)
-
-
-    def parse_datetime(self, string: str):
-        """ Convert a string to a :class:`datetime` object.
-
-        Parameters
-        ----------
-        string: str
-            ISO8601 formatted datetime (yyyy-mm-dd HH:MM:ss.ssssss), date (yyyy-mm-dd),
-            or time (HH:MM:ss.ssssss) string. Timezone information (+/-tttt after time)
-            is not yet handled.
-
-        Returns
-        -------
-        :class:`datetime.datetime`, :class:`datetime.date`, or :class:`datetime.time` object, or the original string if string could not be converted.
-        """
-        dt = None
-        try:
-            # Will fail on full datetime string
-            dt = date.fromisoformat(string)
-        except TypeError:
-            # Not a string
-            pass
-        except ValueError:
-            try:
-                # Will fail on full datetime string
-                dt = time.fromisoformat(string)
-            except ValueError:
-                try:
-                    dt = datetime.fromisoformat(string)
-                except ValueError:
-                    # Not a datetime string
-                    pass
-        if dt:
-            return dt
-        return string
-
-    def parse_uuid(self, string):
-        """ Convert a string into a :class:`uuid.UUID` object.
-
-        Serializing :class:`uuid.UUID` is supported by :class:`flask.json.JSONEncoder`,
-        but the reverse process is not natively supported by flask. This parser adds
-        support for the deserialization of UUID strings into :class:`uuid.UUID`
-        objects.
-
-        Parameters
-        ----------
-        string : str
-            UUID compatible string, e.g. '56128bcc-da87-3204-892e-177f8df298a8'.
-
-        Returns
-        -------
-        :class:`uuid.UUID` or the original string if it could not be converted.
-        """
-        if _uuid_rx.match(string):
-            return uuid.UUID(hex=string)
-        return string
-
-    def parse(self, jsonobj):
-        """ Apply the registered parsers to the Python dict. """
-        if isinstance(jsonobj, str):
-            for parser in self.registered_parsers:
-                obj = parser(self, jsonobj)
-                if not obj is jsonobj:
-                    return obj
-        elif isinstance(jsonobj, (list, tuple)):
-            return [self.parse(j) for j in jsonobj]
-        elif isinstance(jsonobj, dict):
-            for k, v in jsonobj.items():
-                jsonobj[k] = self.parse(v)
-        return jsonobj
-
 
 def verify_jwt(token, error_message="", refresh=False):
     """
@@ -1192,3 +1072,57 @@ def update_client_subscription(user_id: int, latest_subscription: UserSubscripti
         user = User.query.filter_by(user_id=user_id).one_or_none()
         send_email('subscription-confirm', user.email, firstname=user.firstname)
 
+def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
+    """Least-recently used cache with time-to-live (ttl) limit.
+
+    This cache works just like :func:`functools.lru_cache`, but enhances it
+    with a time-to-live (ttl) parameter. An item in the cache is updated only
+    if it is older than ``ttl``. Any item that is not requested but it older
+    than ``ttl`` is deleted from the cache. This only happens at the moment
+    the cache is accessed, though.
+
+    Use as a decorator::
+
+        @lru_cache_with_ttl(ttl=20)
+        def expensive_function():
+            return something
+
+    Parameters
+    ----------
+    maxsize : int, default = 128
+        Maximum number of items in the cache. See :func:`functools.lru_cache`.
+
+    typed : bool, default = False
+        Decides whether arguments of different type are equivalent. See
+        :func:`functools.lru_cache`.
+
+    ttl : int, default = 60
+        Time-to-live, in seconds, after which an item in the cache is considered
+        expired.
+    """
+    # Idea from https://stackoverflow.com/a/71634221
+    # Replaced Result class with a dict. Creation is ~4x faster
+    # and both read from and assign to are ~20% faster.
+    def decorator(func):
+        @functools.lru_cache(maxsize=maxsize, typed=typed)
+        def cached_func(*args, **kwargs):
+            value = func(*args, **kwargs)
+            expire = monotonic() + ttl
+            logger.debug(
+                f'Loading "{func!r}" ttl cache expire "{expire}" with value "{value}"')
+            return {'value': value, 'expire': expire}
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            result = cached_func(*args, **kwargs)
+            if result['expire'] < monotonic():
+                result['value'] = func(*args, **kwargs)
+                result['expire'] = monotonic() + ttl
+                logger.debug(
+                    f'Reloading "{func!r}" expired ttl cache new expire "{result["expire"]}"'
+                    f'with value "{result["value"]}"')
+            return result['value']
+
+        wrapper.cache_clear = cached_func.cache_clear
+        return wrapper
+    return decorator

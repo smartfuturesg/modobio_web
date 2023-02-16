@@ -26,7 +26,7 @@ class PostmanEndpoint(BaseResource):
             mimetype='application/json',
             direct_passthrough=True)
 
-        version = current_app.config['API_VERSION']
+        version = current_app.config['VERSION_STRING']
         filename = f'ModoBio API v{version}.json'
         response.headers.set('Content-Disposition', 'attachment', filename=filename)
         return response

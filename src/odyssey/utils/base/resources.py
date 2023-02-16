@@ -164,7 +164,7 @@ class BaseResource(Resource):
             table = schema.Meta.model
             try:
                 exists = table.query.filter_by(**request.view_args).one_or_none()
-            except InvalidRequestError:
+            except (InvalidRequestError, AttributeError):
                 logger.debug(f'Not running check_resource() because table {table} can not be '
                              f'filtered by any of the path arguments in the URL.')
                 return func(*args, **kwargs)

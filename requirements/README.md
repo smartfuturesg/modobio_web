@@ -40,6 +40,7 @@ Keep a list of dependencies here with date and reason why we need it. This will 
 | Flask-SQLAlchemy              | 2020-05-19 | Integrate SQLAlchemy with Flask                |
 | idna                          | 2021-10-27 | Handle international domain names in email     |
 | marshmallow                   | 2020-07-27 | (De)serialization and validation of JSON       |
+| marshmallow-dataclass         | 2023-01-11 | Convert @dataclass into marshmallow schema     |
 | marshmallow-sqlalchemy        | 2020-07-27 | Generate marshmallow schemas from DB models    |
 | psycopg2                      | 2020-07-29 | Python PostgreSQL driver                       |
 | PyPDF2                        | 2020-09-08 | Manipulate (merge) PDF files                   |
@@ -47,6 +48,7 @@ Keep a list of dependencies here with date and reason why we need it. This will 
 | redis                         | 2021-04-30 | Stores tasks for celery                        |
 | requests                      | 2021-02-17 | HTTP connections                               |
 | requests-oauthlib             | 2020-09-04 | OAuth2 authentication                          |
+| terra-python                  | 2022-10-19 | Terra integration for wearable devices         |
 | twilio                        | 2021-03-03 | Chat and video calls                           |
 | PyJWT                         | 2020-10-06 | JSON Web Tokens for authentication             |
 | WeasyPrint                    | 2020-07-13 | Convert HTML pages to PDF                      |
