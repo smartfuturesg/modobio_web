@@ -583,3 +583,19 @@ class LookupCGMDemographicsEndpoint(BaseResource):
         cgm_demographics = LookupCGMDemographics.query.all()
 
         return {'total_items': len(cgm_demographics), 'items': cgm_demographics}
+
+@ns.route('/keys/')
+class LookupKeys(BaseResource):
+    """
+    Endpoint that returns 3rd party keys
+    """
+    @token_auth.login_required
+    @responds(schema=LookupKeysOutputSchema, status_code=200, api=ns)
+    def get(self):
+        
+        output = [
+            {'terra_developer_id' : current_app.config.get('TERRA_DEV_ID')},
+            {'google-captcha-site-key' : current_app.config.get('GOOGLE_RECAPTCHA_SECRET')}
+        ]
+        
+        return {'keys': output}
