@@ -98,7 +98,7 @@ def deploy_upcoming_appointment_tasks():
             ).all()
 
     # do not deploy appointment notifications in testing
-    if current_app.config['TESTING']:
+    if current_app.testing:
         for booking in bookings:
             booking.notified = True
         db.session.commit()
@@ -149,7 +149,7 @@ def deploy_appointment_transcript_store_tasks(target_date=None):
     ).scalars().all()
 
     # do not deploy task in testing
-    if current_app.config['TESTING']:
+    if current_app.testing:
         return chatrooms
 
     for chat in chatrooms:
@@ -295,7 +295,7 @@ def find_chargable_bookings():
         )).all()
     
     # do not deploy charge task in testing
-    if current_app.config['TESTING']:
+    if current_app.testing:
         return bookings
 
     for booking in bookings:
@@ -329,7 +329,7 @@ def detect_practitioner_no_show():
     for booking in bookings:
         logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client
-        if current_app.config['TESTING']:
+        if current_app.testing:
             #cancel_noshow_appointment(booking.idx)
             cancel_telehealth_appointment(booking, reason='Practitioner No Show')
         else:

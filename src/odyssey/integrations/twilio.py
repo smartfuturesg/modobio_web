@@ -110,7 +110,7 @@ class Twilio():
         """
         Generate a twilio access token for the provided modobio_id
         """
-        if current_app.config['TESTING']:
+        if current_app.testing:
             return (None, None)
 
         twilio_credentials = self.grab_twilio_credentials()

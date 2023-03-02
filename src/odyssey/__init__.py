@@ -168,7 +168,7 @@ def create_app():
     app.elasticsearch = None
     if app.config['ELASTICSEARCH_URL']:
         app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
-        if not app.config['TESTING']:
+        if not app.testing:
             with app.app_context():
                 # action.destructive_requires_namesetting defaults to true in v8,
                 # which disallows use of wildcards or _all.

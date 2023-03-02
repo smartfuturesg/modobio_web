@@ -112,7 +112,7 @@ def exception_handler(error: Exception) -> tuple:
         this into a Response object.
     """
     # Simply reraise the error in testing, gives an immediate and clear traceback.
-    if current_app.config['TESTING']:
+    if current_app.testing:
         raise error
 
     # Keep this order so that custom values from error.data can be added to the

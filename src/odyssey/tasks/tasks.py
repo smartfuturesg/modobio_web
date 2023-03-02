@@ -214,7 +214,7 @@ def cancel_noshow_appointment(booking_id):
     booking.status = "Canceled"
 
     # run the task to store the chat transcript immediately
-    if current_app.config['TESTING']:
+    if current_app.testing:
         #run task directly if in test env
         store_telehealth_transcript(booking.idx)
     else:
@@ -309,7 +309,7 @@ def store_telehealth_transcript(booking_id: int):
 
     db.session.commit()
 
-    if current_app.config['TESTING']:
+    if current_app.testing:
         return payload
     
     return
@@ -442,7 +442,7 @@ def cancel_telehealth_appointment(booking, reason='Failed Payment'):
     
     # run the task to store the chat transcript immediately
     # imported in this way to get around circular importing issues
-    if current_app.config['TESTING']:
+    if current_app.testing:
         #run task directly if in test env
         store_telehealth_transcript(booking.idx)
     else:

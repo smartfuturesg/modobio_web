@@ -185,7 +185,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
-        if not current_app.config['TESTING']:
+        if not current_app.testing:
             cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
         # Send push notification to user, only if this endpoint is accessed by staff.
@@ -833,7 +833,7 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
         # schedule task to abandon booking in 30-minutes if not confirmed
-        if not current_app.config['TESTING']:
+        if not current_app.testing:
             abandon_telehealth_booking.apply_async((booking.idx,), eta=datetime.utcnow() + timedelta(minutes=30))
 
         payload = {

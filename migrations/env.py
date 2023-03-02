@@ -85,7 +85,7 @@ def run_migrations_online():
             **current_app.extensions['migrate'].configure_args)
 
         with context.begin_transaction():
-            if current_app.config['TESTING']: 
+            if current_app.testing:
                 try:
                     context.run_migrations()
                 except:
