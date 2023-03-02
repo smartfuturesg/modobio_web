@@ -142,9 +142,6 @@ def create_app():
     #
     # Since Flask is the "lower" of the two, we will register all error handlers on Flask and
     # have Flask-RestX pass everything through.
-    #
-    # In release 1.2.1, with Flask 2.2 and Flask-RestX 1.0.7, FLASK_ENV was deprecated in favour
-    # of setting the debug flag. This changed how the errors are handled.
     app.register_error_handler(Exception, exception_handler)
     app.register_error_handler(HTTPException, http_exception_handler)
 
@@ -155,7 +152,7 @@ def create_app():
     api.version = app.config['API_VERSION']
 
     # Register development-only endpoints.
-    if app.config['DEV']:
+    if app.debug:
         from odyssey.api.misc.postman import ns_dev
         api.add_namespace(ns_dev)
 
@@ -163,7 +160,6 @@ def create_app():
         api.add_namespace(ns_dev_push)
         api.add_namespace(ns_dev_notif)
 
-    
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)

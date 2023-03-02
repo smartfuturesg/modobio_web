@@ -234,13 +234,13 @@ def update_active_campaign_contact_info(mapper, connection, target):
         email = target.email if len(modded_email) > 0 else None
 
         #Run active campaign operations in prod
-        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+        if not current_app.debug:
             from odyssey.tasks.tasks import update_active_campaign_contact
             update_active_campaign_contact.delay(target.user_id, firstname, lastname, email)
     #Check updates on dob 
     if len(modded_dob) > 0 :
         #Run active campaign operations in prod
-        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+        if not current_app.debug:
             from odyssey.tasks.tasks import add_age_tag
             add_age_tag.delay(target.user_id)
 
@@ -607,7 +607,7 @@ def add_active_campaign_sub_tag(mapper, connection, target):
 
     #Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
-        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+        if not current_app.debug:
             from odyssey.tasks.tasks import add_subscription_tag
             add_subscription_tag.delay(target.user_id)
 
@@ -621,7 +621,7 @@ def update_active_campaign_sub_tag(mapper, connection, target):
 
     #Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
-        if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+        if not current_app.debug:
             from odyssey.tasks.tasks import add_subscription_tag
             add_subscription_tag.delay(target.user_id)
 

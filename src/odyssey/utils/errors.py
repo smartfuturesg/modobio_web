@@ -62,10 +62,10 @@ def http_exception_handler(error: HTTPException) -> tuple:
     response['error'] = HTTP_STATUS_CODES.get(error.code, 'Unknown error')
 
     # Full traceback for testing and dev only.
-    if current_app.config['TESTING']:
+    if current_app.testing:
         tb = traceback.format_tb(error.__traceback__)
         response['trace'] = ''.join(tb)
-    elif current_app.config['DEV']:
+    elif current_app.debug:
         tb = []
         # This looks better in swagger
         for line in traceback.format_tb(error.__traceback__):
@@ -130,7 +130,7 @@ def exception_handler(error: Exception) -> tuple:
     response['error'] = 'Internal server error'
     response['message'] = 'Internal server error'
 
-    if current_app.config['DEV']:
+    if current_app.debug:
         tb = []
         # This looks better in swagger
         for line in traceback.format_tb(error.__traceback__):

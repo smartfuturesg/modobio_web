@@ -94,7 +94,7 @@ files = args.scripts
 if not files:
     # if args.previous == args.no_previous (i.e. both are True or both are False)
     # then --prev or --no-prev was given. Otherwise, no option was given so go by env.
-    prev = dev = conf.DEV
+    prev = dev = conf.FLASK_DEBUG
     if args.previous == args.no_previous:
         prev = args.previous
 

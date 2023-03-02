@@ -24,7 +24,7 @@ db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
 # Load metadata from sqlalchemy
 target_metadata = current_app.extensions['migrate'].db.metadata
 
-if not current_app.config['TESTING']: 
+if not current_app.testing:
     print(f'\n***\nUpdating the database at URI: \n {db_uri}')
     print('Continue? [Y,n]')
     answer = input()

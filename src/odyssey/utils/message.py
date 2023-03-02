@@ -119,7 +119,7 @@ def send_email(
 
     # Route emails to AWS mailbox simulator when in DEV environment,
     # unless domain is in the accepted domains list.
-    if (current_app.config['DEV'] and domain[1] not in DEV_EMAIL_DOMAINS):
+    if (current_app.debug and domain[1] not in DEV_EMAIL_DOMAINS):
         to = 'success@simulator.amazonses.com'
 
     if template.endswith('.html'):
@@ -162,6 +162,7 @@ def send_email(
 #
 # Push notifications
 #
+##############################################################
 
 @dataclass
 class EndpointARN:
@@ -638,7 +639,7 @@ class PushNotification:
                 channel += '_VOIP'
 
             # Apple also has separate channels for development.
-            if current_app.config['DEV']:
+            if current_app.debug:
                 channel += '_SANDBOX'
 
         app = self.channel_platapp[channel]
