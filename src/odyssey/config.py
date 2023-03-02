@@ -83,7 +83,7 @@ import secrets
 import sys
 import textwrap
 
-from typing import Any
+from typing import Any, Callable
 
 from flask import current_app
 
@@ -242,7 +242,7 @@ class Config:
         return getattr(odyssey.defaults, var, None)
 
 
-def config_wrapper(key: str) -> Any:
+def config_wrapper(key: str) -> Callable:
     """ Returns current_app.config[key].
 
     In some situations ``current_app.config`` is used to define new functions and classes,
@@ -257,10 +257,12 @@ def config_wrapper(key: str) -> Any:
 
     Returns
     -------
-    Any
-        The value of ``current_app.config[key]``.
+    Callable
+        A function which, when called, will return the value of ``current_app.config[key]``.
     """
-    return current_app.config[key]
+    def wrapper():
+        return current_app.config[key]
+    return wrapper
 
 def database_parser() -> argparse.ArgumentParser:
     """ Return CLI parser for database arguments.

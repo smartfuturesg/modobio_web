@@ -1677,7 +1677,6 @@ class TelehealthQueueClientPoolApi(BaseResource):
         """
         Add a client to the queue
         """
-
         # Verify target date is client's local today or in the future 
         client_tz = request.parsed_obj.timezone
         target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))

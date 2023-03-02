@@ -238,7 +238,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        return TelehealthQueueClientPool(**data)    
+        return TelehealthQueueClientPool(**data)
 
 class TelehealthQueueClientPoolOutputSchema(Schema):
     queue = fields.Nested(TelehealthQueueClientPoolSchema(many=True),missing=[],metadata={'description':'SORTED queue of client pool'})
