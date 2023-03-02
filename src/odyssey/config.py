@@ -2,24 +2,31 @@
 Flask app configuration
 =======================
 
-The configuration of the Odyssey API follows the environmental variable ``DEPLOYMENT_ENV``. 
-Here, it is only allowed to be set to ``development``, ``production``, ``testing``.
-Any other value for ``DEPLOYMENT_ENV`` will raise an error. Not setting
-``DEPLOYMENT_ENV`` in the environment will also raise an error, forcing the user to make a
-concious decision when running the API. There is no default value for ``DEPLOYMENT_ENV``.
-
-
-``FLASK_DEBUG`` is the environmental variable that sets Flask debugging mode to provide 
-code reloading and better error messages. Options are ``true`` or ``false``, and the default is 
-set to true. Debug mode should never be used in a production environment!
 Defaults
-========
+--------
 
 The API is configured by settings in :mod:`odyssey.defaults`. Each parameter in defaults can
 be overridden by setting an environmental variable with the same name (all upper case).
 
+Debug
+-----
+
+``FLASK_DEBUG`` is the environmental variable that sets Flask debugging mode to provide
+code reloading and better error messages. Options are ``true, 1, yes`` or ``false, 0, no``.
+
+Debug mode is set by Flask very early on in the process, before the configuration is loaded.
+It can therefore not be set in this configuration. From https://flask.palletsprojects.com/en/2.2.x/config/#DEBUG: "config['DEBUG'] may not
+behave as expected if set in code."
+
+What we can do, is check afterwards if it was set or not. We demand that it is set, either
+on or off and raise an error if it is not set. This forces the user to make a concious
+decision when running the API.
+
+``TESTING`` is picked up by Flask automatically. Do not set it in the environment, it is
+set in conftest.py when running pytest.
+
 How to use
-==========
+----------
 
 In the rest of the API code, any of the variables set in :mod:`odyssey.defaults` can be
 called from the config dict::
@@ -31,15 +38,24 @@ The API should **always assume to be in production**. Only if there are specific
 to introduce dev-only or test-only code, for example a debug endpoint or testing helpers, can
 conditionals be used::
 
-    if current_app.config['DEV']:
-        # True when in development
+    if current_app.debug:
+        # True when in development, including testing
         ...
-    if current_app.config['TESTING']:
+    if current_app.testing:
         # True when running pytest
         ...
 
+In which environments are ``debug`` and ``testing`` enabled?
+
+=======  =====  ======  ====  =======  ====
+         local  pytest  dev   staging  prod
+=======  =====  ======  ====  =======  ====
+debug    T      T       T     ?        F
+testing  F      T       F     F        F
+=======  =====  ======  ====  =======  ====
+
 AWS and other 3rd party services
-================================
+--------------------------------
 
 In order for remote development to work, the program must have access to AWS. A client key
 ID and secret key must be provided either in ``$HOME/.aws/credentials`` or in the environment as
@@ -47,13 +63,17 @@ ID and secret key must be provided either in ``$HOME/.aws/credentials`` or in th
 region must be set in ``$HOME/.aws/config`` or ``AWS_DEFAULT_REGION``.
 
 Notes
-=====
+-----
 
 - This file is loaded by the main Flask app using ``app.config.from_object(Config())``.
 - Only uppercase parameters will be added to app.config.
 
 .. deprecated:: release 0.7
    ``FLASK_DEV`` is no longer used.
+
+.. deprecated:: release 1.2.2
+    ``FLASK_ENV`` is deprecated by Flask v2.2. Instead, use the ``FLASK_DEBUG`` key
+    to enable/disable debugging.
 """
 
 import argparse
@@ -90,29 +110,33 @@ class Config:
     """
 
     def __init__(self):
-        # Are we running pytest?
-        testing = 'pytest' in sys.modules
+        # Debug has already been enabled by Flask at startup, but we don't
+        # have access to current_app here. We still need to know what
+        # FLASK_DEBUG was set to, so we can make decisions in the rest of
+        # the config and propagate it to scripts outside of Flask.
+        # https://flask.palletsprojects.com/en/2.2.x/config/#debug-mode
+
+        # Force debug to be set.
+        flask_debug_env = os.getenv('FLASK_DEBUG')
+        if flask_debug_env is None:
+            # Allow for CLI option --debug/--no-debug
+            if '--debug' in sys.argv:
+                flask_debug_env = '1'
+            elif '--no-debug' in sys.argv:
+                flask_debug_env = '0'
+            else:
+                raise ValueError('FLASK_DEBUG must be set.')
+
+        # Here we propagate the env FLASK_DEBUG setting for external scripts.
+        # We don't want to set DEBUG, since that is set by Flask at startup.
+        # However, API code should use app.debug and app.testing.
+        self.FLASK_DEBUG = True
+        if flask_debug_env.lower() in ('false', '0', 'no'):
+            self.FLASK_DEBUG = False
 
         # Are we running flask db ...?
         migrate = (len(sys.argv) > 1 and sys.argv[1] == 'db')
 
-        # Get enviroment mode we want to run in 
-        deployment_env = os.getenv('DEPLOYMENT_ENV')
-
-        # Testing (running pytest) is always dev.
-        if testing:
-            deployment_env = 'development'
-
-        # The default flask envoironment is "production" if
-        # DEPLOYMENT_ENV was not set. We don't want production by default, so raise
-        # an error if it was not set to force the user to set it explicitly.
-        if deployment_env not in ('production', 'development', 'testing'):
-            raise ValueError(f'DEPLOYMENT_ENV must be either "production", "development", or "testing" '
-                             f'found "{deployment_env}".')
-
-        # # Simple boolean switch for main code.
-        self.DEV = deployment_env == 'development'
-        
         # Load defaults.
         for varname in odyssey.defaults.__dict__.keys():
             if varname.startswith('__') or not varname.isupper():
@@ -131,10 +155,7 @@ class Config:
             setattr(self, varname, self.getvar(varname))
 
         # No swagger in production.
-        self.SWAGGER_DOC = self.DEV
-
-        # Testing is always true when running pytest.
-        self.TESTING = testing
+        self.SWAGGER_DOC = self.FLASK_DEBUG
 
         # Version info, override from file if exists, but environment takes precedence.
         if version and self.API_VERSION == odyssey.defaults.API_VERSION:
@@ -143,13 +164,13 @@ class Config:
         # Logging
         if not self.LOG_LEVEL:
             self.LOG_LEVEL = 'INFO'
-            if self.DEV:
+            if self.FLASK_DEBUG:
                 self.LOG_LEVEL = 'DEBUG'
 
         # Database URI.
         if not self.DB_URI:
             name = self.DB_NAME
-            if testing:
+            if self.TESTING:
                 name = self.DB_NAME_TESTING
 
             self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'        
@@ -157,13 +178,18 @@ class Config:
         self.SQLALCHEMY_DATABASE_URI = self.DB_URI
 
         # S3 prefix
-        if self.DEV and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX:
-            if testing:
+        if self.FLASK_DEBUG and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX:
+            if self.TESTING:
                 rand = secrets.token_hex(3)
                 self.AWS_S3_PREFIX = f'temp/pytest-{rand}'
             else:
                 username = getpass.getuser()
                 self.AWS_S3_PREFIX = f'{username}'
+
+        # Telehealth timing
+        if self.FLASK_DEBUG:
+            self.TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0
+            self.TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 0.5
 
     def getvar(self, var: str) -> Any:
         """ Get a configuration setting.
