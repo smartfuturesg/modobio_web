@@ -27,7 +27,7 @@ from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, Clie
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.user.models import User, UserSubscriptions
-from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
+from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import get_time_index, create_notification
 from odyssey.tasks.tasks import cancel_telehealth_appointment
 from odyssey.utils.message import send_email
