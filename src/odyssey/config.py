@@ -85,6 +85,8 @@ import textwrap
 
 from typing import Any
 
+from flask import current_app
+
 import odyssey.defaults
 
 try:
@@ -238,6 +240,27 @@ class Config:
             return env
 
         return getattr(odyssey.defaults, var, None)
+
+
+def config_wrapper(key: str) -> Any:
+    """ Returns current_app.config[key].
+
+    In some situations ``current_app.config`` is used to define new functions and classes,
+    e.g. default parameters in Marshmallow schemas. If that happens on import, Flask is still
+    starting up and current_app is yet not available. This function returns
+    ``current_app.config[key]`` only when it is called.
+
+    Parameters
+    ----------
+    key : str
+        Any key in :class:`Config`.
+
+    Returns
+    -------
+    Any
+        The value of ``current_app.config[key]``.
+    """
+    return current_app.config[key]
 
 def database_parser() -> argparse.ArgumentParser:
     """ Return CLI parser for database arguments.
