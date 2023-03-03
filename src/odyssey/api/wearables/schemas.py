@@ -2,7 +2,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from marshmallow import Schema, fields, EXCLUDE
+from marshmallow import Schema, fields, EXCLUDE, post_dump
 
 from odyssey import ma
 from odyssey.api.user.models import User
@@ -111,5 +111,26 @@ class WearablesV2ProvidersGetSchema(Schema):
     providers = fields.Dict(keys=fields.String(), values=fields.String())
     sdk_providers = fields.Dict(keys=fields.String(), values=fields.String())
 
+class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
+    user_id = fields.Integer(required=True)
+    wearable = fields.String(required=True)
+    average_glucose = fields.Integer(missing=None)
+    standard_deviation = fields.Float(missing=None)
+    glucose_management_indicator = fields.Float(missing=None)
+    glucose_variability = fields.Float(missing=None)
+
+    @post_dump
+    def make_object(self, in_data, **kwargs):
+        # Round the calculations if they are not null
+        if in_data.get('standard_deviation'):
+            in_data['standard_deviation'] = round(in_data.get('standard_deviation'), 1)
+        if in_data.get('glucose_management_indicator'):
+            in_data['glucose_management_indicator'] = round(in_data.get('glucose_management_indicator'), 1)
+        if in_data.get('glucose_variability'):
+            in_data['glucose_variability'] = round(in_data.get('glucose_variability'), 1)
+
+        return in_data
+            
+        
 # Add extra field
 WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict({'token': fields.String(default=None)})
