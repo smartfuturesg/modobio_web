@@ -48,7 +48,6 @@ from odyssey.api.payment.models import PaymentMethods
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (
-    TELEHEALTH_BOOKING_LEAD_TIME_HRS,
     TWILIO_ACCESS_KEY_TTL,
     DAY_OF_WEEK,
     ALLOWED_AUDIO_TYPES,
@@ -186,7 +185,7 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
         
         cleanup_eta = datetime.combine(booking.target_date_utc, booking_start_time, tz.UTC) + timedelta(minutes=duration) + timedelta(minutes=10)
         
-        if not current_app.config['TESTING']:
+        if not current_app.testing:
             cleanup_unended_call.apply_async((booking.idx,), eta=cleanup_eta)
         
         # Send push notification to user, only if this endpoint is accessed by staff.
@@ -260,7 +259,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             timezone = request.args.get('timezone') if request.args.get('timezone') else 'UTC'
             priority = request.args.get('priority') if request.args.get('priority') else False
             medical_gender = request.args.get('medical_gender') if request.args.get('medical_gender') else 'np'
-            duration = request.args.get('duration') if request.args.get('duration') else TELEHEALTH_BOOKING_DURATION
+            duration = request.args.get('duration') if request.args.get('duration') else current_app.config.TELEHEALTH_BOOKING_DURATION
             payment_method_id = request.args.get('payment_method_id') if request.args.get('payment_method_id') else None
 
             client_in_queue = TelehealthQueueClientPool(
@@ -721,7 +720,7 @@ class TelehealthBookingsApi(BaseResource):
         start_time = time_inc[start_idx-1].start_time
         # datetime start localized to client's timezone
         target_date = datetime.combine(request.parsed_obj.target_date, time(hour=start_time.hour, minute=start_time.minute, tzinfo=tz.gettz(client_tz)))
-        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(second=0,microsecond=0) + timedelta(hours=TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(second=0,microsecond=0) + timedelta(hours=current_app.config.TELEHEALTH_BOOKING_LEAD_TIME_HRS)
         if target_date < client_local_datetime_now:
             raise BadRequest("Invalid target date or time")
         
@@ -834,7 +833,7 @@ class TelehealthBookingsApi(BaseResource):
         practitioner['end_time_localized'] = booking_end_staff_localized.time()
 
         # schedule task to abandon booking in 30-minutes if not confirmed
-        if not current_app.config['TESTING']:
+        if not current_app.testing:
             abandon_telehealth_booking.apply_async((booking.idx,), eta=datetime.utcnow() + timedelta(minutes=30))
 
         payload = {
@@ -1678,7 +1677,6 @@ class TelehealthQueueClientPoolApi(BaseResource):
         """
         Add a client to the queue
         """
-
         # Verify target date is client's local today or in the future 
         client_tz = request.parsed_obj.timezone
         target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))

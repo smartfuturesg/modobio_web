@@ -126,12 +126,24 @@ def create_app():
 
     # Register error handlers
     #
-    # Basic exceptions (unexpected erros) are handled by Flask,
-    # HTTP exceptions (expected errors) are handled by Flask-RestX.
-    # Flask-RestX does not have a nice register function like Flask does,
-    # but this is essentially what the @api.errorhandler decorator does.
+    # There are 2 types of errors:
+    # - expected errors, e.g. client input error, unauthorized
+    # - unexpected errors, e.g. programming error, database error
+    #
+    # Expected errors are typically raised in our code, derive from HTTPException (werkzeug),
+    # and have a 400-499 http status code. Unexpected errors are typically raised by the
+    # underlying system and derive from Python builtin Exception. They are wrapped by Flask
+    # into a HTTPException with status 500-599.
+    #
+    # Both Flask and Flask-RestX do error handling. Flask-RestX handles the error with its
+    # own error handlers if the endpoint is registered on a Flask-RestX namespace (versus a
+    # Flask blueprint), otherwise it will pass the error through to Flask. See
+    # flask_restx.api.Api._should_use_fr_error_handler() and flask.app.Flask._find_error_handler()
+    #
+    # Since Flask is the "lower" of the two, we will register all error handlers on Flask and
+    # have Flask-RestX pass everything through.
     app.register_error_handler(Exception, exception_handler)
-    api.error_handlers[HTTPException] = http_exception_handler
+    app.register_error_handler(HTTPException, http_exception_handler)
 
     # api._doc or Api(doc=...) is not True/False,
     # it is 'path' (default '/') or False to disable.
@@ -140,7 +152,7 @@ def create_app():
     api.version = app.config['API_VERSION']
 
     # Register development-only endpoints.
-    if app.config['DEV']:
+    if app.debug:
         from odyssey.api.misc.postman import ns_dev
         api.add_namespace(ns_dev)
 
@@ -148,7 +160,6 @@ def create_app():
         api.add_namespace(ns_dev_push)
         api.add_namespace(ns_dev_notif)
 
-    
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)
@@ -157,7 +168,7 @@ def create_app():
     app.elasticsearch = None
     if app.config['ELASTICSEARCH_URL']:
         app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
-        if not app.config['TESTING']:
+        if not app.testing:
             with app.app_context():
                 # action.destructive_requires_namesetting defaults to true in v8,
                 # which disallows use of wildcards or _all.

@@ -774,7 +774,7 @@ class EmailVerification():
             user.update({'email_verified': True})
             #Run active campaign operations for when a user verifies their email.
             #Only run active campaign operations in prod
-            if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+            if not current_app.debug:
                 from odyssey.tasks.tasks import update_active_campaign_tags
                 tags = [] 
                 #Add user type tags

@@ -1,6 +1,6 @@
 import logging
 
-from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
+from odyssey.utils.constants import WEARABLE_DEVICE_TYPES
 logger = logging.getLogger(__name__)
 
 import base64
@@ -240,7 +240,9 @@ class WearablesOuraCallbackEndpoint(BaseResource):
 
         db.session.commit()
 
-############### V2
+###############
+# V2
+###############
 
 @ns.route('/oura/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
@@ -786,13 +788,13 @@ class WearablesData(BaseResource):
         if start_date and end_date:
             date_condition = Key('date').between(start_date, end_date)
         elif start_date:
-            end_date = (datetime.fromisoformat(start_date) + timedelta(days=WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
+            end_date = (datetime.fromisoformat(start_date) + timedelta(days=current_app.config.WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
             date_condition = Key('date').between(start_date, end_date)
         elif end_date:
-            start_date = (datetime.fromisoformat(end_date) - timedelta(days=WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
+            start_date = (datetime.fromisoformat(end_date) - timedelta(days=current_app.config.WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
             date_condition = Key('date').between(start_date, end_date)
         else:
-            start_date = (datetime.now() - timedelta(days=WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
+            start_date = (datetime.now() - timedelta(days=current_app.config.WEARABLE_DATA_DEFAULT_RANGE_DAYS)).date().isoformat()
             end_date = datetime.now().date().isoformat() 
             date_condition =  Key('date').gte(start_date)
         

@@ -17,7 +17,7 @@ from odyssey.api.staff.models import StaffProfile, StaffRoles, StaffOperationalT
 from odyssey.api.user.models import User, UserLogin
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthStaffSettings
 from odyssey.integrations.twilio import Twilio
-from odyssey.utils.constants import ACCESS_ROLES, DAY_OF_WEEK, TELEHEALTH_BOOKING_LEAD_TIME_HRS
+from odyssey.utils.constants import ACCESS_ROLES, DAY_OF_WEEK
 from odyssey.utils.message import PushNotification
 
 @pytest.fixture(scope='session', autouse=True)
