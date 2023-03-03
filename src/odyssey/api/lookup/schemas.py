@@ -398,3 +398,7 @@ class LookupBloodGlucoseCGMRangesOutputSchema(Schema):
 class LookupBloodGlucoseCGMDemographicsOutputSchema(Schema):
     items = fields.Nested(LookupCGMDemographicsSchema(many=True), missing=[])
     total_items = fields.Integer()
+
+
+class LookupKeysOutputSchema(Schema):
+    keys = fields.List(fields.Dict(keys=fields.String(), values=fields.String()))
