@@ -595,7 +595,7 @@ class LookupKeys(BaseResource):
         
         output = [
             {'terra_developer_id' : current_app.config.get('TERRA_DEV_ID')},
-            {'google-captcha-site-key' : current_app.config.get('GOOGLE_RECAPTCHA_SECRET')}
+            {'google_captcha_site_key' : current_app.config.get('GOOGLE_RECAPTCHA_SECRET')}
         ]
         
         return {'keys': output}
