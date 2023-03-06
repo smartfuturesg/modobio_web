@@ -27,7 +27,6 @@ test:
   after_script:
     - echo "Destroying test databases and elasticsearch instance..."
     - sudo docker rm -f postgres_$CI_BUILD_ID
-    - sudo docker rm -f mongo_$CI_BUILD_ID
     - sudo docker rm -f elasticsearch_$CI_BUILD_ID
     - sudo docker rm -f redis_$CI_BUILD_ID
 
