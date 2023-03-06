@@ -13,6 +13,7 @@ test:
   only:
     - merge_requests
   script:
+    - echo "MONGO_URI=$MONGO_URI"
     - echo "Creating test database and elasticsearch instance..."
     - sudo docker run --name postgres_$CI_BUILD_ID --network modobio -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=modobio_test -d postgres
     - sudo docker run --name mongo_$CI_BUILD_ID --network modobio -d mongo
