@@ -175,10 +175,6 @@ class Config:
         # No swagger in production.
         self.SWAGGER_DOC = self.FLASK_DEBUG
 
-        # Version info, override from file if exists, but environment takes precedence.
-        if version and self.API_VERSION == odyssey.defaults.API_VERSION:
-            self.API_VERSION = version
-
         # Logging
         if not self.LOG_LEVEL:
             self.LOG_LEVEL = 'INFO'

@@ -32,6 +32,12 @@ Turn this off to prevent warnings.
 https://stackoverflow.com/questions/33738467/how-do-i-know-if-i-can-disable-sqlalchemy-track-modifications/33790196#33790196
 """
 
+TESTING = False
+"""
+Special mode for running tests. There is usually no need to set this manually, it will
+be set to True when running pytest.
+"""
+
 FLASK_SKIP_DOTENV = True
 """
 If :mod:`python-dotenv` is installed, Flask will by default use it to find .env files and
