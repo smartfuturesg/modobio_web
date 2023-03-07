@@ -201,6 +201,27 @@ Note that files will be kept for only 24 hours after a pytest run, unless
 #CONVERSATION_SERVICE_SID = ''
 """ Twilio conversation serive ID number. """
 
+TELEHEALTH_BOOKING_LEAD_TIME_HRS = 2
+""" Telehealth booking lead time.
+
+This config variable represents the minimum amount of time between making a
+booking and the start of the booking. Will be set to 0 for debug and testing.
+"""
+
+TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 336
+""" Telehealth booking edit time.
+
+Booking transcripts can be edited after the booking starts. This config variable
+sets the maximum time in hours, from the start of the booking, when editing is
+still possible. Will be set to 0.5 for debug and testing.
+"""
+
+TELEHEALTH_BOOKING_DURATION = 30
+""" Telehealth booking duration.
+
+The default telehealth duration in minutes.
+"""
+
 # Celery settings.
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 """ Celery default broker URL.
@@ -267,6 +288,21 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 
 # Google ReCaptcha api secret
 GOOGLE_RECAPTCHA_SECRET = ""
+
+WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-3-1'
+""" Name of the table in AWS DynamoDB where wearables data is stored.
+
+The table name is versioned to allow multiple versions of the API to run
+at the same time. Make sure to update this value when moving to a new
+branch.
+"""
+
+WEARABLE_DATA_DEFAULT_RANGE_DAYS = 14
+""" Default date range for wearable data.
+
+When no date range is specified when requesting wearable data,
+this many days of data is returned.
+"""
 
 # Apple app store 
 APPLE_APPSTORE_API_KEY = ''

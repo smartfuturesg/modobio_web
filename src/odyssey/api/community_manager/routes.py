@@ -151,7 +151,7 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
         # only update subscriptions for users with a verified email
         user_ids = [uid for uid in user_ids if uid not in unverified_user_ids]
         for user_id in user_ids:
-            if current_app.config["TESTING"]:
+            if current_app.testing:
                 update_client_subscription(user_id)
             else:
                 update_client_subscription_task.delay(user_id)

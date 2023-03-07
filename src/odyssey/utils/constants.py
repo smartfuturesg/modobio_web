@@ -3,10 +3,6 @@ import logging
 
 from sqlalchemy import text
 
-from odyssey.config import Config
-
-config = Config()
-
 logger = logging.getLogger(__name__)
 
 TABLE_TO_URI = {
@@ -953,16 +949,6 @@ innocent email addresses. However, developers do want to receive emails, even in
 for email address domains in this list, a real email will be send even in DEV environment.
 """
 
-# bookings must be made at least this many hours in advance
-TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0 if any((config.TESTING, config.DEV)) else 2
-
-# clients and practitioners are no longer able to alter booking transcripts this many hours after the booking starts
-TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = .5 if any((config.TESTING, config.DEV)) else 336
-
-
-# Default telehealth booking duration in minutes
-TELEHEALTH_BOOKING_DURATION = 30
-
 MODOBIO_ADDRESS = {
     "firstname": "Modo",
     "lastname": "Bio",
@@ -974,9 +960,6 @@ MODOBIO_ADDRESS = {
     "zipcode": "85260",
     "phone": "4806810406"
 }
-
-# By default, the wearables data API will provide data for this range of days
-WEARABLE_DATA_DEFAULT_RANGE_DAYS = 14
 
 # wearable device types
 WEARABLE_DEVICE_TYPES = ('fitbit', 'oura', 'applewatch')

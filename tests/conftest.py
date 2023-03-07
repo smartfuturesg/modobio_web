@@ -1,4 +1,9 @@
+# Set DEBUG and TESTING. Do this before anything else,
+# definitely before Flask is started.
 import os
+os.environ['TESTING'] = 'true'
+os.environ['FLASK_DEBUG'] = 'true'
+
 import pathlib
 import uuid
 from bson import ObjectId
