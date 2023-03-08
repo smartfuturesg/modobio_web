@@ -259,7 +259,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
             timezone = request.args.get('timezone') if request.args.get('timezone') else 'UTC'
             priority = request.args.get('priority') if request.args.get('priority') else False
             medical_gender = request.args.get('medical_gender') if request.args.get('medical_gender') else 'np'
-            duration = request.args.get('duration') if request.args.get('duration') else current_app.config.TELEHEALTH_BOOKING_DURATION
+            duration = request.args.get('duration') if request.args.get('duration') else current_app.config['TELEHEALTH_BOOKING_DURATION']
             payment_method_id = request.args.get('payment_method_id') if request.args.get('payment_method_id') else None
 
             client_in_queue = TelehealthQueueClientPool(
@@ -720,7 +720,7 @@ class TelehealthBookingsApi(BaseResource):
         start_time = time_inc[start_idx-1].start_time
         # datetime start localized to client's timezone
         target_date = datetime.combine(request.parsed_obj.target_date, time(hour=start_time.hour, minute=start_time.minute, tzinfo=tz.gettz(client_tz)))
-        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(second=0,microsecond=0) + timedelta(hours=current_app.config.TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz)).replace(second=0,microsecond=0) + timedelta(hours=current_app.config['TELEHEALTH_BOOKING_LEAD_TIME_HRS'])
         if target_date < client_local_datetime_now:
             raise BadRequest("Invalid target date or time")
         
