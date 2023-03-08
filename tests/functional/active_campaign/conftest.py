@@ -1,6 +1,8 @@
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.api.user.models import User, UserActiveCampaign
 import pytest
+import random
+import string
 
 @pytest.fixture(scope='module')
 def create_client_contact(test_client):
@@ -8,7 +10,16 @@ def create_client_contact(test_client):
 
     #create contact
     user =  User.query.filter_by(user_id=test_client.client_id).one_or_none()
-    contact_response, list_response = ac.create_contact(user.email, user.firstname, user.lastname)
+
+    
+    #Give user temporary email with random characters to avoid potential conflicts in AC
+    random_chars = ''.join(random.choice(string.ascii_lowercase) for _ in range(7))
+    user_email = f'{random_chars}.{user.email}'
+    user.email = user_email
+    test_client.db.session.commit()
+
+    #Create contact in active campaign
+    contact_response, list_response = ac.create_contact(user_email, user.firstname, user.lastname)
     
     yield contact_response, list_response
 
@@ -23,7 +34,15 @@ def create_provider_contact(test_client):
 
     #create contact
     user =  User.query.filter_by(user_id=test_client.provider_id).one_or_none()
-    contact_response, list_response = ac.create_contact(user.email, user.firstname, user.lastname)
+    
+    #Give user temporary email with random characters to avoid potential conflicts
+    random_chars = ''.join(random.choice(string.ascii_lowercase) for _ in range(7))
+    user_email = f'{random_chars}.{user.email}'
+    user.email = user_email
+    test_client.db.session.commit()
+
+    #Create contact in active campaign
+    contact_response, list_response = ac.create_contact(user_email, user.firstname, user.lastname)
     
     yield contact_response, list_response
 
