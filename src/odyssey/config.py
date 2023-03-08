@@ -200,6 +200,11 @@ class Config:
                 username = getpass.getuser()
                 self.AWS_S3_PREFIX = f'{username}'
 
+        # Telehealth timing
+        if self.FLASK_DEBUG:
+            self.TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0
+            self.TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 0.5
+
         # Look for values that need replacement.
         for var, val in self.__dict__.items():
             if (var.startswith('__')
@@ -214,11 +219,6 @@ class Config:
                     replval = getattr(self, replvar)
                     val = re.sub(f'@{replvar}@', replval, val, count=1)
                 setattr(self, var, val)
-
-        # Telehealth timing
-        if self.FLASK_DEBUG:
-            self.TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0
-            self.TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 0.5
 
     def getvar(self, var: str) -> Any:
         """ Get a configuration setting.

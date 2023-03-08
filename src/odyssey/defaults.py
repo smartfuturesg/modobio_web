@@ -298,6 +298,9 @@ GOOGLE_RECAPTCHA_SECRET = ""
 WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-3-1'
 """ Name of the table in AWS DynamoDB where wearables data is stored.
 
+.. deprecated:: 1.3.1
+    With Terra integration in release 1.3.1, AWS Dynamo will no longer be used.
+
 The table name is versioned to allow multiple versions of the API to run
 at the same time. Make sure to update this value when moving to a new
 branch.
@@ -375,15 +378,4 @@ TERRA_API_SECRET = ''
 Secret password for Terra API.
 
 See :const:`TERRA_DEV_ID`
-"""
-
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-3-1'
-""" Name of the table in AWS DynamoDB where wearables data is stored.
-
-.. deprecated:: 1.3.1
-    With Terra integration in release 1.3.1, AWS Dynamo will no longer be used.
-
-The table name is versioned to allow multiple versions of the API to run
-at the same time. Make sure to update this value when moving to a new
-branch.
 """

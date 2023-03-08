@@ -27,7 +27,7 @@ from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
+from odyssey.utils.constants import WEARABLE_DEVICE_TYPES
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import check_client_existence, date_validator, lru_cache_with_ttl
 

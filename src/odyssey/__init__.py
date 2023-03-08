@@ -232,7 +232,7 @@ def create_app():
     logging.getLogger(name='odyssey.utils.auth').setLevel(conf.LOG_LEVEL)
 
     # Print all config settings to debug, in DEV only.
-    if app.config['DEV']:
+    if app.debug:
         logger.debug(conf.dump())
 
     return app
