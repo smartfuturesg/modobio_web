@@ -57,7 +57,7 @@ def test_remove_tag(test_client, create_client_contact):
 def test_update_contact_information(test_client, create_client_contact):
     ac = ActiveCampaign()
 
-    #update name
+    #update contact info
     random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(7))
     email = f'{random_string}.updated@email.com'
     response = ac.update_ac_contact_info(test_client.client_id, 'Update', 'Name', email)

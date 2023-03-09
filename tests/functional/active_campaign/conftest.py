@@ -10,7 +10,7 @@ def create_client_contact(test_client):
 
     #create contact
     user =  User.query.filter_by(user_id=test_client.client_id).one_or_none()
-
+    user_prev_email = user.email
     
     #Give user temporary email with random characters to avoid potential conflicts in AC
     random_chars = ''.join(random.choice(string.ascii_lowercase) for _ in range(7))
@@ -23,6 +23,9 @@ def create_client_contact(test_client):
     
     yield contact_response, list_response
 
+    #Ensure to restore test_client user to original email
+    user.email = user_prev_email
+    test_client.db.session.commit()
     # In order for tests not to depend on each other, after creating contact and running test,
     # we need to remove contact from active campaign, unless they will throw duplicate email error
     ac_contact = UserActiveCampaign.query.filter_by(user_id=test_client.client_id).one_or_none()
@@ -34,7 +37,8 @@ def create_provider_contact(test_client):
 
     #create contact
     user =  User.query.filter_by(user_id=test_client.provider_id).one_or_none()
-    
+    user_prev_email = user.email
+
     #Give user temporary email with random characters to avoid potential conflicts
     random_chars = ''.join(random.choice(string.ascii_lowercase) for _ in range(7))
     user_email = f'{random_chars}.{user.email}'
@@ -46,6 +50,9 @@ def create_provider_contact(test_client):
     
     yield contact_response, list_response
 
+    #Ensure to restore test_client user to original email
+    user.email = user_prev_email
+    test_client.db.session.commit()
     # In order for tests not to depend on each other, after creating contact and running test,
     # we need to remove contact from active campaign, unless they will throw duplicate email error
     ac_contact = UserActiveCampaign.query.filter_by(user_id=test_client.provider_id).one_or_none()
