@@ -36,7 +36,7 @@ def get_utc_start_day_time(target_date: datetime, client_tz: str) -> tuple:
     # consider if the request is being made less than TELEHEALTH_BOOKING_LEAD_TIME_HRS before the start of the next day
     # if it's thurs 11 pm, we should offer friday 1 am the earliest, not midnight
     localized_target_date = datetime.combine(target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
-    time_now_client_localized = datetime.now(tz.gettz(client_tz)) + timedelta(hours=current_app.config.TELEHEALTH_BOOKING_LEAD_TIME_HRS)
+    time_now_client_localized = datetime.now(tz.gettz(client_tz)) + timedelta(hours=current_app.config['TELEHEALTH_BOOKING_LEAD_TIME_HRS'])
     
     # if request was for a time in the past or current time, use the present time + booking lead time window
     if localized_target_date <= time_now_client_localized:
