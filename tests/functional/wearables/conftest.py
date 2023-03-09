@@ -11,5 +11,5 @@ def add_blood_glucose_data(test_client):
     
     yield [blood_glucose_data_1, blood_glucose_data_2]
 
-    del_query = {'user_id': test_client.client_id, 'wearable': 'FREESTYLELIBRE'}
+    del_query = {'user_id': test_client.client_id, 'wearable': BLOOD_GLUCOSE_WEARABLE}
     test_client.mongo.db.wearables.delete_many(del_query)

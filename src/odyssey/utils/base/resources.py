@@ -6,7 +6,7 @@ from functools import wraps
 
 from flask import request
 from flask_restx import Resource
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError, ArgumentError
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey.utils.auth import token_auth
@@ -164,7 +164,7 @@ class BaseResource(Resource):
             table = schema.Meta.model
             try:
                 exists = table.query.filter_by(**request.view_args).one_or_none()
-            except (InvalidRequestError, AttributeError):
+            except (InvalidRequestError, ArgumentError, AttributeError):
                 logger.debug(f'Not running check_resource() because table {table} can not be '
                              f'filtered by any of the path arguments in the URL.')
                 return func(*args, **kwargs)
