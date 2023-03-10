@@ -12,6 +12,7 @@ from boto3.dynamodb.conditions import Key
 from flask import current_app, jsonify, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
+from flask_pymongo import ASCENDING, DESCENDING
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
 from sqlalchemy import select
@@ -24,7 +25,7 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import WEARABLE_DATA_DEFAULT_RANGE_DAYS, WEARABLE_DEVICE_TYPES
 from odyssey.utils.json import JSONProvider
-from odyssey.utils.misc import check_client_existence, date_validator, lru_cache_with_ttl
+from odyssey.utils.misc import check_client_existence, date_validator, lru_cache_with_ttl, iso_string_to_iso_datetime
 
 logger = logging.getLogger(__name__)
 
@@ -1357,3 +1358,130 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
             pass
         elif response.dtype in USER_DATATYPES:
             tc.store_data(response)
+
+
+@ns_v2.route('/calculations/blood-glucose/<int:user_id>/<string:wearable>')
+class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
+    @token_auth.login_required
+    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
+    @responds(schema=WearablesV2BloodGlucoseCalculationOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        """ Get calculated values related to blood glucose wearable data.
+
+        This route will return all calculated values related to blood glucose data for a particular user_id, wearable, and date range.
+
+        Path Parameters
+        ----------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood glucose data
+
+        Query Parameters
+        ----------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 7 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+            - user_id
+            - average_glucose - mg/dL
+            - standard_deviation
+            - glucose_management_indicator - percentage
+            - glucose_variability - percentage
+        """
+
+        wearable = parse_wearable(wearable)
+
+        # Default dates
+        today = datetime.utcnow()
+        start = today - ONE_WEEK
+
+        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
+        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+
+        """Calculate Average Glucose"""
+        #  Begin with defining each stage of the pipeline
+
+        # Filter documents on user_id, wearable, and date range
+        stage_match_user_id_and_wearable = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'date': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Unwind the blood_glucose_samples array so that we can operate on each individual sample
+        stage_unwind_blood_glucose_samples = {
+            '$unwind': '$data.body.glucose_data.blood_glucose_samples'
+        }
+
+        # Group all of these documents together and calculate average glucose and standard deviation for the group
+        stage_group_average_and_std_dev = {
+            '$group': {
+                '_id': None,
+                'average_glucose': { 
+                    '$avg': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
+                    },
+                'standard_deviation': {
+                    '$stdDevPop': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
+                }
+            }
+        }
+
+        # Add field for GMI and calculate it. Calculated as 3.31 + 0.02392 x (mean glucose in mg/dL) 
+        stage_add_gmi = {
+            '$addFields': {
+                'glucose_management_indicator': { '$add': [{'$multiply': ['$average_glucose', 0.02392]}, 3.31] }
+            }
+        }
+
+        # Add field for glucose variability and calculate it. Calculated as 100 * (Standard Deviation / Mean Glucose)
+        stage_add_glucose_variability = {
+            '$addFields': {
+                'glucose_variability': { '$multiply': [100, {'$divide': ['$standard_deviation', '$average_glucose']}] }
+            }
+        }
+
+        # Assemble pipeline
+        pipeline = [
+            stage_match_user_id_and_wearable,
+            stage_unwind_blood_glucose_samples,
+            stage_group_average_and_std_dev,
+            stage_add_gmi,
+            stage_add_glucose_variability
+        ]
+
+        # MongoDB pipelines return a cursor
+        cursor = mongo.db.wearables.aggregate(pipeline)
+        document_list = list(cursor)
+        data = {}
+
+        # We need to grab the document that we want from that cursor so we can format the data in a payload
+        if document_list:
+            data = document_list[0]
+
+        # Build and return payload
+        payload = {
+            'user_id': user_id,
+            'wearable': wearable,
+            'average_glucose': data.get('average_glucose'),
+            'standard_deviation': data.get('standard_deviation'),
+            'glucose_management_indicator': data.get('glucose_management_indicator'),
+            'glucose_variability': data.get('glucose_variability')
+        }
+
+        return payload
+        
+

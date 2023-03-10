@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 wearables_data = {
     'has_freestyle': True,
     'has_fitbit': True,
@@ -55,3 +57,55 @@ wearables_freestyle_duplicate_data = {
         '2020-04-05T06:00:00.000',
         '2020-04-05T07:00:00.000',
         '2020-04-05T07:00:00.000']}
+
+BLOOD_GLUCOSE_WEARABLE = 'FREESTYLELIBRE'
+
+blood_glucose_data_1 = {
+    "user_id" : 17,
+    "wearable" : BLOOD_GLUCOSE_WEARABLE,
+    "data" : {
+        "body" : {
+            "testField" : 1.0,
+            "testFieldAgain" : 2.0,
+            "glucose_data" : {
+                "day_avg_blood_glucose_mg_per_dL" : 120.0,
+                "blood_glucose_samples" : [
+                    {
+                        "timestamp" : datetime.utcnow(),
+                        "blood_glucose_mg_per_dL" : 100.0
+                    },
+                    {
+                        "timestamp" : datetime.utcnow(),
+                        "blood_glucose_mg_per_dL" : 150.0
+                    }
+                ]
+            }
+        }
+    },
+    "date" : datetime.utcnow()
+}
+
+blood_glucose_data_2 = {
+    "user_id" : 17,
+    "wearable" : BLOOD_GLUCOSE_WEARABLE,
+    "data" : {
+        "body" : {
+            "testField" : 1.0,
+            "testFieldAgain" : 2.0,
+            "glucose_data" : {
+                "day_avg_blood_glucose_mg_per_dL" : 90.0,
+                "blood_glucose_samples" : [
+                    {
+                        "timestamp" : (datetime.utcnow() - timedelta(weeks=3)),
+                        "blood_glucose_mg_per_dL" : 90.0
+                    },
+                    {
+                        "timestamp" : (datetime.utcnow() - timedelta(weeks=3)),
+                        "blood_glucose_mg_per_dL" : 110.0
+                    }
+                ]
+            }
+        }
+    },
+    "date" : (datetime.utcnow() - timedelta(weeks=3))
+}
