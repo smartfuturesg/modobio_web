@@ -1,8 +1,6 @@
 import logging
 
-from odyssey.api.lookup.schemas import LookupVisitReasonsSchema
-
-logger = logging.getLogger(__name__)
+import pytz
 
 from marshmallow import (
     Schema, 
@@ -10,12 +8,11 @@ from marshmallow import (
     post_load,
     validate
 )
-from pytz import timezone
-import pytz
 from twilio.jwt import access_token
 from twilio.rest.conversations.v1 import conversation
 
 from odyssey import ma
+from odyssey.api.lookup.schemas import LookupVisitReasonsSchema
 from odyssey.api.telehealth.models import (
     TelehealthChatRooms,
     TelehealthBookingStatus,
@@ -29,7 +26,11 @@ from odyssey.api.telehealth.models import (
     TelehealthStaffSettings,  
 )
 from odyssey.api.user.models import User
-from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, TELEHEALTH_BOOKING_DURATION, USSTATES_2
+from odyssey.config import config_wrapper
+from odyssey.utils.constants import DAY_OF_WEEK, GENDERS, BOOKINGS_STATUS, ACCESS_ROLES, USSTATES_2
+
+logger = logging.getLogger(__name__)
+
 
 class TelehealthBookingMeetingRoomsTokensSchema(Schema):
     twilio_token = fields.String()
@@ -219,14 +220,15 @@ class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
 
     access_token = fields.String(metadata={'description':'meeting room access token. To be shown only to the owner'}, required=False)
     conversation_sid = fields.String(metadata={'description':'chat room sid'}, required=False)
-    
+
+
 class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthQueueClientPool
         exclude = ('created_at', 'updated_at')
         dump_only = ('idx', 'user_id', 'location_name')
-    
-    duration = fields.Integer(missing=TELEHEALTH_BOOKING_DURATION)
+
+    duration = fields.Integer(missing=config_wrapper('TELEHEALTH_BOOKING_DURATION'))
     medical_gender = fields.String(validate=validate.OneOf([gender[0] for gender in GENDERS]),metadata={'description': 'Preferred Medical Professional gender'}, missing='np', required=False)
     timezone = fields.String(validate=validate.OneOf(pytz.common_timezones),metadata={'description': 'optional timezone selection, defaults to UTC'}, missing='UTC')
     location_name = fields.String()
@@ -236,7 +238,7 @@ class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        return TelehealthQueueClientPool(**data)    
+        return TelehealthQueueClientPool(**data)
 
 class TelehealthQueueClientPoolOutputSchema(Schema):
     queue = fields.Nested(TelehealthQueueClientPoolSchema(many=True),missing=[],metadata={'description':'SORTED queue of client pool'})

@@ -13,7 +13,7 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.telehealth.models import TelehealthBookings, TelehealthChatRooms, TelehealthMeetingRooms
 from odyssey.api.user.models import User
-from odyssey.utils.constants import ALPHANUMERIC, TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, TWILIO_ACCESS_KEY_TTL
+from odyssey.utils.constants import ALPHANUMERIC, TWILIO_ACCESS_KEY_TTL
 
 #TODO Telehealth on the Shelf - leaving this integration here because it is only called inside the Telehealth
 # namespace and tests, which are already deactivated
@@ -110,7 +110,7 @@ class Twilio():
         """
         Generate a twilio access token for the provided modobio_id
         """
-        if current_app.config['TESTING']:
+        if current_app.testing:
             return (None, None)
 
         twilio_credentials = self.grab_twilio_credentials()
@@ -214,7 +214,7 @@ class Twilio():
         # create chatroom entry into DB
         new_chat_room.conversation_sid = conversation_sid
         booking_end_time = LookupBookingTimeIncrements.query.get(booking.booking_window_id_end_time_utc).end_time
-        new_chat_room.write_access_timeout = datetime.combine(booking.target_date_utc, booking_end_time) + timedelta(hours=TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS)
+        new_chat_room.write_access_timeout = datetime.combine(booking.target_date_utc, booking_end_time) + timedelta(hours=current_app.config['TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS'])
         db.session.add(new_chat_room)
 
         return conversation_sid
