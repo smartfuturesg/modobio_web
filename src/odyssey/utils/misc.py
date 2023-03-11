@@ -11,7 +11,7 @@ import statistics
 import textwrap
 import typing as t
 import uuid
-
+from dateutil import parser
 from datetime import datetime, date, time, timedelta
 from time import monotonic
 
@@ -446,6 +446,35 @@ def date_validator(date_string: str):
             raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
     except TypeError:
         raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
+
+def iso_string_to_iso_datetime(date_string: str):
+    """
+    Convert iso string to an iso datetime object.
+
+    Function Parameters
+    ------
+    date_string: str
+        Input string to be converted. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+
+    Returns
+    ------
+    date: datetime
+        Converted datetime object
+    """
+    import re
+    regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$'
+    match_iso8601 = re.compile(regex).match
+
+    # ISO Date was passed in. Ex. '2023-01-01'. Need to append midnight to the date to use to filter MongoDB documents
+    if match_iso8601(date_string) is not None:
+        parsed_date = parser.parse(date_string)
+        date = datetime.combine(parsed_date, time(0))
+        return date
+    # Full ISO timestamp passed in. Ex. '2023-01-01T00:00:00Z'
+    else:
+        date = parser.parse(date_string)
+        return date
+    
 
 def get_time_index(target_time: datetime):
     """
