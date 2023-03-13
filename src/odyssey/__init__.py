@@ -214,8 +214,8 @@ def create_app():
         mongo.db.wearables.create_index([
             ('user_id', ASCENDING),
             ('wearable', ASCENDING),
-            ('date', DESCENDING)],
-            name='user_id-wearable-date-index',
+            ('timestamp', DESCENDING)],
+            name='user_id-wearable-timestamp-index',
             unique=True)
 
     # Reset login function log level
