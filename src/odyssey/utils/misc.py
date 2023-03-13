@@ -1181,10 +1181,8 @@ def create_wearables_filter_query(user_id: int, wearable: str, start_date: datet
         "date" : {"$gte": start_date, "$lte": end_date}
     }
     # Data that should or shouldn't be included in final result.
-    # Defaults to all fields if no query_specification is specified
-    specification = {
-        "_id": 0
-    }
+    # Defaults to all fields
+    specification = {}
 
     if len(query_specificaiton) > 0:
         #Validate
