@@ -8,16 +8,16 @@ from werkzeug.http import HTTP_STATUS_CODES
 logger = logging.getLogger(__name__)
 
 def http_exception_handler(error: HTTPException) -> tuple:
-    """ Create a JSON response from any HTTPException.
+    """ Turn a HTTPException into a response.
 
-    :class:`werkzeug.exceptions.HTTPException`s are handled by default by flask-restx,
+    :class:`werkzeug.exceptions.HTTPException`s are handled by default by flask,
     but this handler adds extra information to the error response. It also logs the
     error, including the error traceback. It is logged at the :attr:`logging.INFO` level,
     because it is a handled error, i.e. the message is forwarded to the user.
 
-    This handles :class:`werkzeug.exceptions.HTTPException` and **all it's subclasses**.
+    This handler handles all subclasses of :class:`werkzeug.exceptions.HTTPException`.
 
-    Traceback information is added to the response for ``DEV`` and ``TESTING`` environments.
+    Traceback information is added to the response for debugging environments.
     It is **not** added in the production environment, for security reasons. It is
     available under the ``trace`` keyword in the response. In all three environments,
     the same traceback information is added to logs.
@@ -40,16 +40,13 @@ def http_exception_handler(error: HTTPException) -> tuple:
     ----------
     error : :class:`werkzeug.exceptions.HTTPException`
         The error raised in the code. Must be a subclass of :class:`werkzeug.exceptions.HTTPException`.
-        If an extra parameter ``data`` (``dict``) exists on the error object, it will be merged into
+        If an extra parameter ``data`` (dict) exists on the error object, it will be merged into
         the response.
 
     Returns
     -------
-    dict
-        Response as dict, flask-restx will turn it into JSON.
-
-    int
-        HTTP status code for error.
+    tuple(dict, int)
+        Response as dict, HTTP status code as int. Flask will turn this into a Response object.
     """
     # Keep this order so that custom values from error.data can be added to the
     # response, but cannot be used to override status_code, message, and error.
@@ -62,10 +59,10 @@ def http_exception_handler(error: HTTPException) -> tuple:
     response['error'] = HTTP_STATUS_CODES.get(error.code, 'Unknown error')
 
     # Full traceback for testing and dev only.
-    if current_app.config['TESTING']:
+    if current_app.testing:
         tb = traceback.format_tb(error.__traceback__)
         response['trace'] = ''.join(tb)
-    elif current_app.config['DEV']:
+    elif current_app.debug:
         tb = []
         # This looks better in swagger
         for line in traceback.format_tb(error.__traceback__):
@@ -77,12 +74,12 @@ def http_exception_handler(error: HTTPException) -> tuple:
     return response, error.code
 
 def exception_handler(error: Exception) -> tuple:
-    """ Create a JSON response from any :class:`Exception` that is *not* handled by :func:`http_exception_handler`.
+    """ Turn Exception into a response.
 
     Flask usually turns any unhandled :class:`Exception` into a
     :class:`werkzeug.exceptions.InternalServerError`, but does not provide any further
     information as to where the exception was raised. This is done for security: we do
-    not want to provide any extra information about the inner workings of out program
+    not want to provide any extra information about the inner workings of our program
     which may be exploited.
 
     This handler returns a 500 (Internal server error) as expected, but also logs the
@@ -95,29 +92,27 @@ def exception_handler(error: Exception) -> tuple:
     a full traceback in pytest, which makes it easier for developers to trace the
     error back to the code.
 
-    In ``DEV`` mode, traceback information is added to the response. It is **not**
+    In debug mode, traceback information is added to the response. It is **not**
     added in the production environment, for security reasons. It is available under
     the ``trace`` keyword in the response.
 
-    This handles :class:`Exception`s and **all it's subclasses** that are not otherwise
-    handled by :func:`http_exception_handler`.
+    This handles all subclasses of :class:`Exception`s, except
+    :class:`werkzeug.exceptions.HTTPException` and its subclasses.
 
     Parameters
     ----------
     error : :class:`Exception`
-        The error raised in the code. If an extra parameter ``data`` (``dict``) exists on the
+        The error raised in the code. If an extra parameter ``data`` (dict) exists on the
         error object, it will be merged into the response.
 
     Returns
     -------
-    dict
-        Response as dict, flask-restx will turn it into JSON.
-
-    int
-        HTTP status code. Always 500, internal server error.
+    tuple(dict, int)
+        Response as dict, HTTP status code as int. Status code is always 500. Flask will turn
+        this into a Response object.
     """
     # Simply reraise the error in testing, gives an immediate and clear traceback.
-    if current_app.config['TESTING']:
+    if current_app.testing:
         raise error
 
     # Keep this order so that custom values from error.data can be added to the
@@ -130,7 +125,7 @@ def exception_handler(error: Exception) -> tuple:
     response['error'] = 'Internal server error'
     response['message'] = 'Internal server error'
 
-    if current_app.config['DEV']:
+    if current_app.debug:
         tb = []
         # This looks better in swagger
         for line in traceback.format_tb(error.__traceback__):

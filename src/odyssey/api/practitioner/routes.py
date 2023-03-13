@@ -98,7 +98,9 @@ class PractionerCredentialsEndpoint(BaseResource):
                 else:
                     state_check[cred.credential_type].append(cred.state)
 
-            cred.status = 'Pending Verification' if not any([current_app.config['DEV'],current_app.config['TESTING']]) else 'Verified'
+            cred.status = 'Pending Verification'
+            if current_app.debug:
+                cred.status = 'Verified'
             cred.role_id = curr_role.idx
             cred.user_id = user_id
             db.session.add(cred)
