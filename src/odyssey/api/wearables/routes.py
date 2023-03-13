@@ -16,7 +16,7 @@ from flask_pymongo import ASCENDING, DESCENDING
 from requests_oauthlib import OAuth2Session
 from sqlalchemy.sql import text
 from sqlalchemy import select
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db, mongo
 from odyssey.api.wearables.models import *
@@ -1318,10 +1318,21 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
         request.json_module = JSONProvider()
 
         tc = TerraClient()
-        # These two lines do the same thing, but the first checks the signature in the header,
-        # which relies on having the secret. For testing without the secret, use the second line.
-        response = tc.handle_flask_webhook(request)
+
+        # For testing without TERRA_API_SECRET or the need to sign every request,
+        # use the next line instead of the try-except block.
         # response = terra.api.api_responses.TerraWebhookResponse(request.get_json(), dtype='hook')
+
+        try:
+            response = tc.handle_flask_webhook(request)
+        except KeyError:
+            # This happens when terra-signature is not present in the request header.
+            raise Unauthorized
+
+        if not response:
+            # This happens when terra-signature was present in the header, but wrong.
+            # Most likely because TERRA_API_SECRET does not match.
+            raise Unauthorized
 
         tc.status(response, raise_on_error=False)
 
