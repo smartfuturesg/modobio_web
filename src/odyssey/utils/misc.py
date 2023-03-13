@@ -1152,3 +1152,59 @@ def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
         wrapper.cache_clear = cached_func.cache_clear
         return wrapper
     return decorator
+
+def create_wearables_filter_query(user_id: int, wearable: str, start_date: datetime, end_date: datetime, query_specificaiton: list):
+    """
+    Creates and formats the query to be passed into mongo to filter and specify the data wanting to be returned.
+
+    Ex query :) db.wearables.find(
+        {   //Filters the query 
+            'user_id': 1, 
+            "wearable": "FITBIT", 
+            'date': {
+                '$gte': start_date, '$lte': end_date
+            },
+            "data.Activity.heart_rate_data": { "$exists": true }, 
+            "data.Activity.calories_data": { "$exists": true }
+        }, 
+        {   //Specifies what fields or/or data should be returned
+            "user_id": 1, 
+            "date": 1, 
+            "data.Activity.heart_rate_data": 1, 
+            "data.Activity.calories_data": 1
+        })
+    """
+
+    filters = {
+        "user_id" : user_id,
+        "wearable" : wearable,
+        "date" : {"$gte": start_date, "$lte": end_date}
+    }
+    # Data that should or shouldn't be included in final result.
+    # Defaults to all fields if no query_specification is specified
+    specification = {
+        "_id": 0
+    }
+
+    if len(query_specificaiton) > 0:
+        #Validate
+        valid_query_specification = re.compile(r'^[A-Za-z_.]*$')
+        #must manually include these fields to be returned if specifying data
+        specification['user_id'] = specification['date'] = specification['wearable'] = 1
+
+        for field in query_specificaiton:
+            # validate only allowed characters are in the query specifcation.  
+            if not valid_query_specification.match(field):
+                raise BadRequest('Invalid character in query_specification. Only letters, underscores, and periods allowed.')
+            
+            #Format to filter if requested field exists in document
+            if '$or' not in filters:
+                filters["$or"] = [{field : {"$exists": True}}]
+            else:
+                filters["$or"].append({field : {"$exists": True}})
+            
+            #Set field to be included in result
+            specification[field] = 1
+
+    
+    return filters, specification

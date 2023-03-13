@@ -111,6 +111,15 @@ class WearablesV2ProvidersGetSchema(Schema):
     providers = fields.Dict(keys=fields.String(), values=fields.String())
     sdk_providers = fields.Dict(keys=fields.String(), values=fields.String())
 
+class WearablesV2UserDataSchema(Schema):
+    user_id = fields.Integer()
+    wearable = fields.String()
+    date = fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
+    data = fields.Dict()
+
+class WearablesV2UserDataGetSchema(Schema):
+    results = fields.List(fields.Nested(WearablesV2UserDataSchema))
+
 class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
