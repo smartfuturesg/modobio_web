@@ -1,8 +1,3 @@
-import logging
-
-from odyssey.utils.constants import WEARABLE_DEVICE_TYPES
-logger = logging.getLogger(__name__)
-
 import base64
 import logging
 import secrets
