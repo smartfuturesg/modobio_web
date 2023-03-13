@@ -100,7 +100,7 @@ class ApiUser(BaseResource):
             email_verification_data = EmailVerification().begin_email_verification(user, True, email = email)
             del user_info['email']
             # respond with verification code in dev/testing
-            if any((current_app.config['DEV'], current_app.config['TESTING'])) :
+            if current_app.debug:
                 payload['email_verification_code'] = email_verification_data.get('code')
 
         
@@ -193,7 +193,7 @@ class NewStaffUser(BaseResource):
                 if user.email_verified:
                     verify_email = False
 
-                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                    if not current_app.debug:
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
                         update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Provider'])
@@ -255,7 +255,7 @@ class NewStaffUser(BaseResource):
         payload["user_info"] =  user
 
         # respond with verification code in dev
-        if current_app.config['DEV'] and verify_email:
+        if current_app.debug and verify_email:
             payload['email_verification_code'] = email_verification_data.get('code')
 
         return payload
@@ -361,7 +361,7 @@ class NewClientUser(BaseResource):
                     verify_email = False
                     subscription_update = True
 
-                    if not any((current_app.config['DEV'], current_app.config['TESTING'])):
+                    if not current_app.debug:
                         #User already exists and email is verified.
                         #Check if contact exists in Active Campaign, if not create contact. 
                         update_active_campaign_tags.delay(user_id = user.user_id, tags = ['Persona - Client'])
@@ -451,7 +451,7 @@ class NewClientUser(BaseResource):
         payload = {'user_info': user, 'token':access_token, 'refresh_token':refresh_token}
 
         # respond with verification code in dev
-        if current_app.config['DEV'] and verify_email:
+        if current_app.debug and verify_email:
             payload['email_verification_code'] = email_verification_data.get('code')
 
         return payload
@@ -483,8 +483,9 @@ class PasswordResetEmail(BaseResource):
 
         res = {}
 
-        # verify Google ReCaptcha - optional if in dev environment, otherwise required. () for clarity
-        if (current_app.config['DEV'] and 'captcha_key' in request.parsed_obj) or not current_app.config['DEV']:
+        # verify Google ReCaptcha - optional if in dev environment, otherwise required.
+        if (not current_app.debug
+            or (current_app.debug and 'captcha_key' in request.parsed_obj)):
             request_data = {
                 'secret': current_app.config['GOOGLE_RECAPTCHA_SECRET'],
                 'response': request.parsed_obj['captcha_key']
@@ -539,7 +540,7 @@ class PasswordResetEmail(BaseResource):
             reset_password_url=PASSWORD_RESET_URL.format(url_scheme, password_reset_token))
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
-        if current_app.config['DEV']:
+        if current_app.debug:
             res['token'] = password_reset_token
             res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme, password_reset_token)
 

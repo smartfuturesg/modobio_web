@@ -27,7 +27,7 @@ from odyssey.api.client.models import ClientClinicalCareTeamAuthorizations, Clie
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.user.models import User, UserSubscriptions
-from odyssey.utils.constants import TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS, NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
+from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.misc import get_time_index, create_notification
 from odyssey.tasks.tasks import cancel_telehealth_appointment
 from odyssey.utils.message import send_email
@@ -98,7 +98,7 @@ def deploy_upcoming_appointment_tasks():
             ).all()
 
     # do not deploy appointment notifications in testing
-    if current_app.config['TESTING']:
+    if current_app.testing:
         for booking in bookings:
             booking.notified = True
         db.session.commit()
@@ -149,7 +149,7 @@ def deploy_appointment_transcript_store_tasks(target_date=None):
     ).scalars().all()
 
     # do not deploy task in testing
-    if current_app.config['TESTING']:
+    if current_app.testing:
         return chatrooms
 
     for chat in chatrooms:
@@ -295,7 +295,7 @@ def find_chargable_bookings():
         )).all()
     
     # do not deploy charge task in testing
-    if current_app.config['TESTING']:
+    if current_app.testing:
         return bookings
 
     for booking in bookings:
@@ -329,7 +329,7 @@ def detect_practitioner_no_show():
     for booking in bookings:
         logger.info(f'no show detected for the booking with id {booking.idx}')
         #change booking status to canceled and refund client
-        if current_app.config['TESTING']:
+        if current_app.testing:
             #cancel_noshow_appointment(booking.idx)
             cancel_telehealth_appointment(booking, reason='Practitioner No Show')
         else:
