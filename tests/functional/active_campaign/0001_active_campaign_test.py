@@ -1,7 +1,8 @@
 import json
 from odyssey.integrations.active_campaign import ActiveCampaign
-from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags, UserSubscriptions
-import pytest
+from odyssey.api.user.models import User, UserActiveCampaign, UserActiveCampaignTags
+import random
+import string
 
 # Test Active Campaign operations on staff client.
 # Operations: 
@@ -19,8 +20,10 @@ def test_create_client_contact(test_client, create_client_contact):
     contact_response = create_client_contact[0]
     list_response = create_client_contact[1]
     data = json.loads(contact_response.text)
+
     #assert contact was added to Active Campaign and stored in db
     assert contact_response.status_code == 201
+
     ac_contact = UserActiveCampaign.query.filter_by(user_id=test_client.client_id).one_or_none()
     assert ac_contact.user_id == test_client.client_id
     assert ac_contact.active_campaign_id == int(data['contact']['id'])
@@ -51,17 +54,19 @@ def test_remove_tag(test_client, create_client_contact):
     ac_tag = UserActiveCampaignTags.query.filter_by(user_id=test_client.client_id, tag_name='Persona - Client').one_or_none()
     assert ac_tag == None
 
-def test_update_contact_name(test_client, create_client_contact):
+def test_update_contact_information(test_client, create_client_contact):
     ac = ActiveCampaign()
 
-    #update name
-    response = ac.update_ac_contact_info(test_client.client_id, 'Update', 'Name', 'updated@email.com')
+    #update contact info
+    random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(7))
+    email = f'{random_string}.updated@email.com'
+    response = ac.update_ac_contact_info(test_client.client_id, 'Update', 'Name', email)
     data = json.loads(response.text) 
 
     assert response.status_code == 200
     assert data['contact']['firstName'] == 'Update'
     assert data['contact']['lastName'] == 'Name'
-    assert data['contact']['email'] == 'updated@email.com'
+    assert data['contact']['email'] == email
 
 def test_add_age_tag(test_client, create_client_contact):
     #Test adding age group tag
