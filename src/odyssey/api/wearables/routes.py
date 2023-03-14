@@ -1334,7 +1334,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     def get(self, user_id, wearable):
         """ Get calculated values related to blood glucose wearable data.
 
-        This route will return all calculated values related to blood glucose data for a particular user_id, wearable, and date range.
+        This route will return all calculated values related to blood glucose data for a particular user_id, wearable, and timestamp range.
 
         Path Parameters
         ----------
@@ -1380,7 +1380,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             '$match': {
                 'user_id': user_id,
                 'wearable': wearable,
-                'date': {
+                'timestamp': {
                     '$gte': start_date,
                     '$lte': end_date
                 }
