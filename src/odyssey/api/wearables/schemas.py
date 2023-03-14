@@ -114,7 +114,7 @@ class WearablesV2ProvidersGetSchema(Schema):
 class WearablesV2UserDataSchema(Schema):
     user_id = fields.Integer()
     wearable = fields.String()
-    date = fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
+    timestamp = fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
     data = fields.Dict()
 
 class WearablesV2UserDataGetSchema(Schema):
