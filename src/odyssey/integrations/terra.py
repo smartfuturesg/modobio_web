@@ -1,11 +1,12 @@
-from datetime import datetime
 import logging
+
+from datetime import datetime
+
 import terra
+
 from flask import current_app
-from terra.api.api_responses import (
-    TerraApiResponse,
-    ConnectionErrorHookResponse,
-)
+from sqlalchemy import select
+from terra.api.api_responses import TerraApiResponse, ConnectionErrorHookResponse
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db, mongo
