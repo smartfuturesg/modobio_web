@@ -82,7 +82,7 @@ blood_glucose_data_1 = {
             }
         }
     },
-    "date" : datetime.utcnow()
+    "timestamp" : datetime.utcnow()
 }
 
 blood_glucose_data_2 = {
@@ -107,5 +107,5 @@ blood_glucose_data_2 = {
             }
         }
     },
-    "date" : (datetime.utcnow() - timedelta(weeks=3))
+    "timestamp" : (datetime.utcnow() - timedelta(weeks=3))
 }
