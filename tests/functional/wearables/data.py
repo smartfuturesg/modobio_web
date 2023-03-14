@@ -134,7 +134,7 @@ wearables_fitbit_data_1 = {
       }
     }
   },
-  "date": datetime.utcnow()
+  "timestamp": datetime.utcnow()
 }
 
 wearables_fitbit_data_2 = {
@@ -154,5 +154,5 @@ wearables_fitbit_data_2 = {
       "first_name": "Bernie"
     }
   },
-  "date": (datetime.utcnow() - timedelta(weeks=2))
+  "timestamp": (datetime.utcnow() - timedelta(weeks=2))
 }

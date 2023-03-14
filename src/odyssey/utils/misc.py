@@ -1161,7 +1161,7 @@ def create_wearables_filter_query(user_id: int, wearable: str, start_date: datet
         {   //Filters the query 
             'user_id': 1, 
             "wearable": "FITBIT", 
-            'date': {
+            'timestamp': {
                 '$gte': start_date, '$lte': end_date
             },
             "data.Activity.heart_rate_data": { "$exists": true }, 
@@ -1169,7 +1169,7 @@ def create_wearables_filter_query(user_id: int, wearable: str, start_date: datet
         }, 
         {   //Specifies what fields or/or data should be returned
             "user_id": 1, 
-            "date": 1, 
+            "timestamp": 1, 
             "data.Activity.heart_rate_data": 1, 
             "data.Activity.calories_data": 1
         })
@@ -1178,7 +1178,7 @@ def create_wearables_filter_query(user_id: int, wearable: str, start_date: datet
     filters = {
         "user_id" : user_id,
         "wearable" : wearable,
-        "date" : {"$gte": start_date, "$lte": end_date}
+        "timestamp" : {"$gte": start_date, "$lte": end_date}
     }
     # Data that should or shouldn't be included in final result.
     # Defaults to all fields
@@ -1188,7 +1188,7 @@ def create_wearables_filter_query(user_id: int, wearable: str, start_date: datet
         #Validate
         valid_query_specification = re.compile(r'^[A-Za-z_.]*$')
         #must manually include these fields to be returned if specifying data
-        specification['user_id'] = specification['date'] = specification['wearable'] = 1
+        specification['user_id'] = specification['timestamp'] = specification['wearable'] = 1
 
         for field in query_specificaiton:
             # validate only allowed characters are in the query specifcation.  
