@@ -26,6 +26,7 @@ from odyssey.api.wearables.schemas import (
     WearablesFreeStyleActivateSchema,
     WearablesFreeStyleSchema,
     WearablesV2BloodGlucoseCalculationOutputSchema,
+    WearablesV2UserDataGetSchema
 )
 from odyssey.integrations.terra import TerraClient
 from odyssey.utils.auth import token_auth
