@@ -5,6 +5,7 @@ import functools
 import inspect
 import logging
 import random
+import re
 import statistics
 import textwrap
 import typing as t
