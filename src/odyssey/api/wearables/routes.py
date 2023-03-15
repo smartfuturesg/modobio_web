@@ -923,8 +923,8 @@ class WearablesV2DataEndpoint(BaseResource):
             tc = TerraClient()
             response = tc.generate_authentication_url(
                 resource=wearable,
-                auth_success_redirect_url='modobio://wearablesAuthSuccess',
-                auth_failure_redirect_url='modobio://wearablesAuthFailure',
+                auth_success_redirect_url='com.modobio.ModoBioClient://',
+                auth_failure_redirect_url='com.modobio.ModoBioClient://',
                 reference_id=user_id)
             tc.status(response)
 
