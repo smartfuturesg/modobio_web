@@ -97,6 +97,9 @@ class TerraClient(terra.Terra):
             if 'data' in response.json:
                 # Data messages in webhook do not (always?) have a status message.
                 return
+            elif response.json['type'] == 'large_request_sending':
+                # Missing status
+                return
             elif raise_on_error:
                 raise BadRequest(f'Terra returned a response without a status.')
             logger.error(f'Terra response without a status: {response.json}')
