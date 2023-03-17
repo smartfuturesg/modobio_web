@@ -905,15 +905,22 @@ class WearablesV2DataEndpoint(BaseResource):
             # When you copy the URL into a browser and allow access, Terra will redirect back
             # to localhost. It will give an error in the browser, but the URL in the address
             # bar will have all the relevant information.
+
+            # These URL schemes are registered with Apple and Google.
             redirect_url_scheme = 'com.modobio.ModoBioClient'
             if request.parsed_obj['platform'] == 'android':
-                redirect_url_scheme = 'buy.a.better.phone'
+                # Somebody was not paying attention when registering for Android.
+                redirect_url_scheme = redirect_url_scheme.lower()
+
+            # TODO: when frontend adds success and failure views, fill in these paths
+            success_path = ''
+            failure_path = ''
 
             tc = TerraClient()
             response = tc.generate_authentication_url(
                 resource=wearable,
-                auth_success_redirect_url=f'{redirect_url_scheme}://',
-                auth_failure_redirect_url=f'{redirect_url_scheme}://',
+                auth_success_redirect_url=f'{redirect_url_scheme}://{success_path}',
+                auth_failure_redirect_url=f'{redirect_url_scheme}://{failure_path}',
                 reference_id=user_id)
             tc.status(response)
 
