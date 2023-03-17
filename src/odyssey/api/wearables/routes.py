@@ -1236,3 +1236,39 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         return payload
         
 
+@ns_v2.route('/calculations/blood-glucose/percentiles/<int:user_id>/<string:wearable>')
+class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
+    @token_auth.login_required(user_type=('client', 'provider'))
+    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
+    @responds(schema=WearablesV2BloodGlucoseCalculationOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        wearable = parse_wearable(wearable)
+
+        # Default dates
+        today = datetime.utcnow()
+        start = today - timedelta(weeks=2)
+
+        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
+        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+
+        # Filter documents on user_id, wearable, and date range
+        stage_match_user_id_and_wearable = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'date': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        query = {"user_id": user_id, "wearable": wearable, "timestamp": {"$gte": start_date, "$lte": end_date}}
+        # query = { "timestamp": {"$gte": start_date, "$lte": end_date}}
+
+        cursor = mongo.db.wearables.find(query)
+
+        breakpoint()
+
+        return
