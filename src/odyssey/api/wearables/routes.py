@@ -16,24 +16,8 @@ from sqlalchemy.sql import text
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db, mongo
-from odyssey.api.wearables.models import (
-    WearablesV2,
-    Wearables,
-    WearablesOura,
-    WearablesFitbit,
-    WearablesFreeStyle,
-)
-from odyssey.api.wearables.schemas import (
-    WearablesV2ProvidersGetSchema,
-    WearablesV2UserGetSchema,
-    WearablesV2UserAuthUrlSchema,
-    WearablesSchema,
-    WearablesOAuthGetSchema,
-    WearablesOAuthPostSchema,
-    WearablesFreeStyleActivateSchema,
-    WearablesFreeStyleSchema,
-    WearablesV2BloodGlucoseCalculationOutputSchema,
-)
+from odyssey.api.wearables.models import *
+from odyssey.api.wearables.schemas import *
 from odyssey.integrations.terra import TerraClient
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -908,6 +892,7 @@ class WearablesV2DataEndpoint(BaseResource):
         return JSONProvider().dumps(list(data))
 
     @token_auth.login_required
+    @accepts(schema=WearablesV2UserAuthUrlInputSchema, api=ns_v2)
     @responds(schema=WearablesV2UserAuthUrlSchema, status_code=201, api=ns_v2)
     def post(self, user_id, wearable):
         """ Register a new wearable device for this user. """
@@ -920,11 +905,15 @@ class WearablesV2DataEndpoint(BaseResource):
             # When you copy the URL into a browser and allow access, Terra will redirect back
             # to localhost. It will give an error in the browser, but the URL in the address
             # bar will have all the relevant information.
+            redirect_url_scheme = 'com.modobio.ModoBioClient'
+            if request.parsed_obj['platform'] == 'android':
+                redirect_url_scheme = 'buy.a.better.phone'
+
             tc = TerraClient()
             response = tc.generate_authentication_url(
                 resource=wearable,
-                auth_success_redirect_url='com.modobio.ModoBioClient://',
-                auth_failure_redirect_url='com.modobio.ModoBioClient://',
+                auth_success_redirect_url=f'{redirect_url_scheme}://',
+                auth_failure_redirect_url=f'{redirect_url_scheme}://',
                 reference_id=user_id)
             tc.status(response)
 
