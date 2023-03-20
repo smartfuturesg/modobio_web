@@ -1,12 +1,11 @@
 import base64
-import logging
 import secrets
 
 from datetime import datetime, date, time, timedelta
 
 import boto3
-
 from boto3.dynamodb.conditions import Key
+
 from flask import current_app, jsonify, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
@@ -15,7 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.sql import text
 from werkzeug.exceptions import BadRequest, Unauthorized
 
-from odyssey import db, mongo
+from odyssey import mongo
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
 from odyssey.integrations.terra import TerraClient
