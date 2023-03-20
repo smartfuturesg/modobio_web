@@ -702,6 +702,7 @@ HOOK_TYPES.add('permission_change')
 
 MIDNIGHT = time(0)
 ONE_WEEK = timedelta(weeks=1)
+THIRTY_DAYS = timedelta(days=30)
 WAY_BACK_WHEN = datetime(2010, 1, 1)
 
 WEBHOOK_RESPONSES = HOOK_TYPES.copy()
@@ -1231,3 +1232,144 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         return payload
         
 
+@ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
+class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
+    @token_auth.login_required
+    @ns_v2.doc(params={
+        'start_date': 'Start of specified date range. '
+                      'Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+        'end_date': 'End of specified date range. '
+                    'Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+        }
+    )
+    @responds(schema=WearablesV2BloodPressureVariationCalculationOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        """ Get calculated blood pressure wearable data.
+
+        This route will return the average for blood pressure readings from a start to end date for a particular
+        user_id and wearable.
+
+        Path Parameters
+        ----------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood glucose data
+
+        Query Parameters
+        ----------
+        start_date : str
+            Start of specified date range
+            Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)
+            Default will be current date - 7 days if not specified
+        end_date: str
+            End of specified date range
+            Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+            - user_id
+            - wearable
+            - diastolic_bp_avg
+            - systolic_bp_avg
+            - diastolic_standard_deviation
+            - systolic_standard_deviation
+            - diastolic_bp_coefficient_of_variation
+            - systolic_bp_coefficient_of_variation
+        """
+
+        wearable = parse_wearable(wearable)
+
+        # Default dates
+        end_date = datetime.utcnow()
+        start_date = end_date - THIRTY_DAYS
+
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
+
+        """Calculate Average Blood Pressures"""
+        # Define each stage of the pipeline
+        # Filter documents on user_id, wearable, and date range
+        stage_match_id_wearable_dates = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Unwind the samples array so that we can operate on each individual sample
+        stage_unwind_blood_pressure_samples = {
+            '$unwind': '$data.body.glucose_data.blood_pressure_samples'
+        }
+
+        # Group all of these documents together and calculate average pressures and standard deviations for the group
+        stage_group_pressure_average_and_std_dev = {
+            '$group': {
+                '_id': None,
+                'diastolic_bp_avg': {
+                    '$avg': '$data.body.glucose_data.blood_glucose_samples.diastolic_bp'
+                    },
+                'systolic_bp_avg': {
+                    '$avg': '$data.body.glucose_data.blood_glucose_samples.systolic_bp'
+                },
+                'diastolic_standard_deviation': {
+                    '$stdDevSamp': '$data.body.glucose_data.blood_glucose_samples.diastolic_bp'
+                },
+                'systolic_standard_deviation': {
+                    '$stdDevSamp': '$data.body.glucose_data.blood_glucose_samples.systolic_bp'
+                },
+            }
+        }
+
+        # Add field for coefficient_of_variation and calculate it. Calculated as stdDev / mean(average)
+        stage_add_coefficient_of_variation = {
+            '$addFields': {
+                'diastolic_bp_coefficient_of_variation': {
+                    '$multiply': [100, {'$divide': ['$diastolic_bp_stdDev', '$diastolic_bp_avg']}]
+                },
+                'systolic_bp_coefficient_of_variation': {
+                    '$multiply': [100, {'$divide': ['$systolic_bp_stdDev', '$systolic_bp_avg']}]
+                },
+            }
+        }
+
+        # Assemble pipeline
+        pipeline = [
+            stage_match_id_wearable_dates,
+            stage_unwind_blood_pressure_samples,
+            stage_group_pressure_average_and_std_dev,
+            stage_add_coefficient_of_variation,
+        ]
+
+        # MongoDB pipelines return a cursor
+        cursor = mongo.db.wearables.aggregate(pipeline)
+        document_list = list(cursor)
+        data = {}
+
+        # We need to grab the document that we want from that cursor so we can format the data in a payload
+        if document_list:
+            data = document_list[0]
+
+        # Build and return payload
+        payload = {
+            'user_id': user_id,
+            'wearable': wearable,
+            'diastolic_bp_avg': data.get('diastolic_bp_avg'),
+            'systolic_bp_avg': data.get('systolic_bp_avg'),
+            'diastolic_standard_deviation': data.get('diastolic_standard_deviation'),
+            'systolic_standard_deviation': data.get('systolic_standard_deviation'),
+            'diastolic_bp_coefficient_of_variation': data.get('diastolic_bp_coefficient_of_variation'),
+            'systolic_bp_coefficient_of_variation': data.get('systolic_bp_coefficient_of_variation'),
+        }
+
+        return payload
