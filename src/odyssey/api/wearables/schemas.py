@@ -116,6 +116,14 @@ class WearablesV2ProvidersGetSchema(Schema):
     providers = fields.Dict(keys=fields.String(), values=fields.String())
     sdk_providers = fields.Dict(keys=fields.String(), values=fields.String())
 
+class WearablesV2UserDataSchema(Schema):
+    user_id = fields.Integer()
+    wearable = fields.String()
+    timestamp = fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
+    data = fields.Dict()
+
+class WearablesV2UserDataGetSchema(Schema):
+    results = fields.List(fields.Nested(WearablesV2UserDataSchema))
 
 class WearablesV2UserAuthUrlInputSchema(Schema):
     platform = fields.String(
