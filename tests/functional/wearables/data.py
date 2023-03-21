@@ -133,28 +133,28 @@ three_weeks_ago = now - timedelta(weeks=3)
 test_8100_data_past_week = {
     "user_id": None,
     "wearable": BLOOD_PRESSURE_WEARABLE,
-    "timestamp": three_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+    "timestamp": (three_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
     "data": {
         "body": {
             "blood_pressure_data": {
                 "blood_pressure_samples": [
                     {
-                        "timestamp": three_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+                        "timestamp": (three_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
                         "diastolic_bp": 68.33630592176382,
                         "systolic_bp": 119.19867497456774
                     },
                     {
-                        "timestamp": two_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+                        "timestamp": (two_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
                         "diastolic_bp": 73.3760192475188,
                         "systolic_bp": 127.9531023369045
                     },
                     {
-                        "timestamp": one_day_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+                        "timestamp": (one_day_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
                         "diastolic_bp": 71.44922696001048,
                         "systolic_bp": 137.9793511515013
                     },
                     {
-                        "timestamp": one_hour_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+                        "timestamp": (one_hour_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
                         "diastolic_bp": 69.81319560682198,
                         "systolic_bp": 142.49936593554165
                     },
@@ -182,23 +182,23 @@ test_8100_data_past_week = {
 test_8100_data_week_to_month_ago = {
     "user_id": None,
     "wearable": BLOOD_PRESSURE_WEARABLE,
-    "timestamp": one_week_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+    "timestamp": (one_week_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
     "data": {
         "body": {
             "blood_pressure_data": {
                 "blood_pressure_samples": [
                     {
-                        "timestamp": one_week_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+                        "timestamp": (one_week_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
                         "diastolic_bp": 96.66579727748561,
                         "systolic_bp": 146.58850876823806
                     },
                     {
-                        "timestamp": two_weeks_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+                        "timestamp": (two_weeks_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
                         "diastolic_bp": 67.3294429368544,
                         "systolic_bp": 128.60105668902614
                     },
                     {
-                        "timestamp": three_weeks_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
+                        "timestamp": (three_weeks_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")),
                         "diastolic_bp": 87.79067389650139,
                         "systolic_bp": 124.34609472361335
                     },
