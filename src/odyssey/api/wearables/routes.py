@@ -1300,9 +1300,13 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             '$match': {
                 'user_id': user_id,
                 'wearable': wearable,
-                'timestamp': {
-                    '$gte': start_date,
+                # to get exactly the information window we are being asked for
+                # at this level we need to
+                'data.body.metadata.start_time': {
                     '$lte': end_date
+                },
+                'data.body.metadata.end_time': {
+                    '$gte': start_date
                 }
             }
         }
@@ -1312,13 +1316,13 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             '$unwind': '$data.body.blood_pressure_data.blood_pressure_samples'
         }
 
-        # # Filter now on dates
-        # stage_match_date_range = {
-        #     '$match': {'$data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
-        #         '$gte': start_date,
-        #         '$lte': end_date
-        #     }}
-        # }
+        # Filter now again at the sample level to round out objects that overlap the tips of the desired range
+        stage_match_date_range = {
+            '$match': {'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+                '$gte': start_date,
+                '$lte': end_date
+            }}
+        }
 
         # Group all of these documents together and calculate average pressures and standard deviations for the group
         stage_group_pressure_average_and_std_dev = {
@@ -1355,7 +1359,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         pipeline = [
             stage_match_user_id_and_wearable,
             stage_unwind_blood_pressure_samples,
-            # stage_match_date_range,
+            stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
         ]
