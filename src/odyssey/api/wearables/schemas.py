@@ -156,7 +156,7 @@ class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     systolic_bp_coefficient_of_variation = fields.Integer(missing=None)
 
     @post_dump
-    def make_object(self, data):
+    def make_object(self, data, **kwargs):
         # Round the calculations if they are not null
         data_points = [
             'diastolic_bp_avg',
