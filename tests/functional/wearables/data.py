@@ -120,83 +120,93 @@ BLOOD_PRESSURE_WEARABLE = 'OMRON'
 #         {'$set': {f'data.{data_type}': data}},
 #         upsert=True)
 
-test_8100_data_1 = {
+now = datetime.utcnow()
+one_hour_ago = now - timedelta(hours=1)
+one_day_ago = now - timedelta(days=1)
+two_days_ago = now - timedelta(days=2)
+three_days_ago = now - timedelta(days=3)
+one_week_ago = now - timedelta(weeks=1)
+two_weeks_ago = now - timedelta(weeks=2)
+three_weeks_ago = now - timedelta(weeks=3)
+
+
+test_8100_data_past_week = {
     "user_id": None,
     "wearable": BLOOD_PRESSURE_WEARABLE,
-    "timestamp": "2023-03-21T07:58:39.812905+00:00",
+    "timestamp": three_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
     "data": {
         "body": {
             "blood_pressure_data": {
                 "blood_pressure_samples": [
                     {
-                        "timestamp": "2023-03-21T07:58:39.812905+00:00",
+                        "timestamp": three_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
                         "diastolic_bp": 68.33630592176382,
                         "systolic_bp": 119.19867497456774
                     },
                     {
-                        "timestamp": "2023-03-21T08:04:39.812905+00:00",
+                        "timestamp": two_days_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
                         "diastolic_bp": 73.3760192475188,
                         "systolic_bp": 127.9531023369045
                     },
                     {
-                        "timestamp": "2023-03-21T08:10:39.812905+00:00",
+                        "timestamp": one_day_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
                         "diastolic_bp": 71.44922696001048,
                         "systolic_bp": 137.9793511515013
                     },
                     {
-                        "timestamp": "2023-03-21T08:16:39.812905+00:00",
+                        "timestamp": one_hour_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
                         "diastolic_bp": 69.81319560682198,
                         "systolic_bp": 142.49936593554165
                     },
-                    {
-                        "timestamp": "2023-03-21T08:22:39.812905+00:00",
-                        "diastolic_bp": 78.16936804081661,
-                        "systolic_bp": 114.74266723680435
-                    },
-                    {
-                        "timestamp": "2023-03-21T08:28:39.812905+00:00",
-                        "diastolic_bp": 62.5342966175853,
-                        "systolic_bp": 121.63209790302301
-                    },
-                    {
-                        "timestamp": "2023-03-21T08:34:39.812905+00:00",
-                        "diastolic_bp": 65.65018211594425,
-                        "systolic_bp": 125.89360031655082
-                    }
+                    # {
+                    #     "timestamp": "2023-03-21T08:22:39.812905+00:00",
+                    #     "diastolic_bp": 78.16936804081661,
+                    #     "systolic_bp": 114.74266723680435
+                    # },
+                    # {
+                    #     "timestamp": "2023-03-21T08:28:39.812905+00:00",
+                    #     "diastolic_bp": 62.5342966175853,
+                    #     "systolic_bp": 121.63209790302301
+                    # },
+                    # {
+                    #     "timestamp": "2023-03-21T08:34:39.812905+00:00",
+                    #     "diastolic_bp": 65.65018211594425,
+                    #     "systolic_bp": 125.89360031655082
+                    # }
                 ]
             },
         }
     }
 }
 
-test_8100_data_2 = {
+test_8100_data_week_to_month_ago = {
     "user_id": None,
     "wearable": BLOOD_PRESSURE_WEARABLE,
-    "timestamp": "2023-03-21T07:28:46.501002+00:00",
+    "timestamp": one_week_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
     "data": {
         "body": {
             "blood_pressure_data": {
                 "blood_pressure_samples": [
                     {
-                        "timestamp": "2023-03-21T07:28:46.501002+00:00",
+                        "timestamp": one_week_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
                         "diastolic_bp": 96.66579727748561,
                         "systolic_bp": 146.58850876823806
                     },
                     {
-                        "timestamp": "2023-03-21T07:40:46.501002+00:00",
+                        "timestamp": two_weeks_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
                         "diastolic_bp": 67.3294429368544,
                         "systolic_bp": 128.60105668902614
                     },
                     {
-                        "timestamp": "2023-03-21T07:52:46.501002+00:00",
+                        "timestamp": three_weeks_ago.strftime("%Y-%m-%dT%H:%M:%S.000000+00:00"),
                         "diastolic_bp": 87.79067389650139,
                         "systolic_bp": 124.34609472361335
                     },
-                    {
-                        "timestamp": "2023-03-21T08:04:46.501002+00:00",
-                        "diastolic_bp": 68.15334488420415,
-                        "systolic_bp": 107.19440094427837
-                    }
+                    # {
+                    #     "timestamp": "2023-03-21T08:04:46.501002+00:00",
+                    #     "diastolic_bp": 68.15334488420415,
+                    #     "systolic_bp": 107.19440094427837
+                    # }
                 ]
             },
         }
