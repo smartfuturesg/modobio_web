@@ -122,8 +122,8 @@ BLOOD_PRESSURE_WEARABLE = 'OMRON'
 
 test_8100_data_1 = {
     "user_id": None,
-    "wearable": None,
-    "timestamp": None,
+    "wearable": BLOOD_PRESSURE_WEARABLE,
+    "timestamp": "2023-03-21T07:58:39.812905+00:00",
     "data": {
         "body": {
             "blood_pressure_data": {
@@ -171,8 +171,8 @@ test_8100_data_1 = {
 
 test_8100_data_2 = {
     "user_id": None,
-    "wearable": None,
-    "timestamp": None,
+    "wearable": BLOOD_PRESSURE_WEARABLE,
+    "timestamp": "2023-03-21T07:28:46.501002+00:00",
     "data": {
         "body": {
             "blood_pressure_data": {
