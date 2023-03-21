@@ -1,12 +1,12 @@
-from datetime import datetime
 import logging
+
+from datetime import datetime
+
 import terra
+
 from flask import current_app
 from sqlalchemy import select
-from terra.api.api_responses import (
-    TerraApiResponse,
-    ConnectionErrorHookResponse,
-)
+from terra.api.api_responses import TerraApiResponse, ConnectionErrorHookResponse
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db, mongo
@@ -98,6 +98,9 @@ class TerraClient(terra.Terra):
         if 'status' not in response.json:
             if 'data' in response.json:
                 # Data messages in webhook do not (always?) have a status message.
+                return
+            elif response.json['type'] == 'large_request_sending':
+                # Missing status
                 return
             elif raise_on_error:
                 raise BadRequest(f'Terra returned a response without a status.')

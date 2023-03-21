@@ -2,7 +2,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from marshmallow import Schema, fields, EXCLUDE, post_dump
+from marshmallow import Schema, fields, EXCLUDE, post_dump, validate
 
 from odyssey import ma
 from odyssey.api.user.models import User
@@ -103,13 +103,34 @@ WearablesV2NutritionSchema = class_schema(Nutrition, WearablesV2BaseSchema)
 WearablesV2SleepSchema = class_schema(Sleep, WearablesV2BaseSchema)
 WearablesV2UserSchema = class_schema(User, WearablesV2BaseSchema)
 
+# Add extra field
+WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict({'token': fields.String(default=None)})
+
+
 # Additional schemas
 class WearablesV2UserGetSchema(Schema):
     wearables = fields.List(fields.String(), dump_default=[])
 
+
 class WearablesV2ProvidersGetSchema(Schema):
     providers = fields.Dict(keys=fields.String(), values=fields.String())
     sdk_providers = fields.Dict(keys=fields.String(), values=fields.String())
+
+class WearablesV2UserDataSchema(Schema):
+    user_id = fields.Integer()
+    wearable = fields.String()
+    timestamp = fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
+    data = fields.Dict()
+
+class WearablesV2UserDataGetSchema(Schema):
+    results = fields.List(fields.Nested(WearablesV2UserDataSchema))
+
+class WearablesV2UserAuthUrlInputSchema(Schema):
+    platform = fields.String(
+        required=False,
+        load_default='ios',
+        validate=validate.OneOf(('ios', 'android')))
+
 
 class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
@@ -130,7 +151,3 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
             in_data['glucose_variability'] = round(in_data.get('glucose_variability'), 1)
 
         return in_data
-            
-        
-# Add extra field
-WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict({'token': fields.String(default=None)})
