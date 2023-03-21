@@ -1296,7 +1296,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         """Calculate Average Blood Pressures"""
         # Define each stage of the pipeline
         # Filter documents on user_id, wearable, and date range
-        stage_match_id_wearable_dates = {
+        stage_match_user_id_and_wearable = {
             '$match': {
                 'user_id': user_id,
                 'wearable': wearable,
@@ -1309,24 +1309,32 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 
         # Unwind the samples array so that we can operate on each individual sample
         stage_unwind_blood_pressure_samples = {
-            '$unwind': '$data.body.glucose_data.blood_pressure_samples'
+            '$unwind': '$data.body.blood_pressure_data.blood_pressure_samples'
         }
+
+        # # Filter now on dates
+        # stage_match_date_range = {
+        #     '$match': {'$data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+        #         '$gte': start_date,
+        #         '$lte': end_date
+        #     }}
+        # }
 
         # Group all of these documents together and calculate average pressures and standard deviations for the group
         stage_group_pressure_average_and_std_dev = {
             '$group': {
                 '_id': None,
                 'diastolic_bp_avg': {
-                    '$avg': '$data.body.glucose_data.blood_glucose_samples.diastolic_bp'
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
                     },
                 'systolic_bp_avg': {
-                    '$avg': '$data.body.glucose_data.blood_glucose_samples.systolic_bp'
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
                 'diastolic_standard_deviation': {
-                    '$stdDevSamp': '$data.body.glucose_data.blood_glucose_samples.diastolic_bp'
+                    '$stdDevSamp': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
                 },
                 'systolic_standard_deviation': {
-                    '$stdDevSamp': '$data.body.glucose_data.blood_glucose_samples.systolic_bp'
+                    '$stdDevSamp': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
             }
         }
@@ -1345,8 +1353,9 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 
         # Assemble pipeline
         pipeline = [
-            stage_match_id_wearable_dates,
+            stage_match_user_id_and_wearable,
             stage_unwind_blood_pressure_samples,
+            # stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
         ]
