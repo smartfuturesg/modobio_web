@@ -1284,8 +1284,10 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        end_date = datetime.utcnow()
+        end_date = datetime.utcnow() + timedelta(seconds=2)
         start_date = end_date - THIRTY_DAYS
+        end_date = end_date
+        start_date = start_date
 
         if request.args.get('start_date') and request.args.get('end_date'):
             start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
@@ -1301,17 +1303,9 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'user_id': user_id,
                 'wearable': wearable,
                 'timestamp': {
-                    '$gte': start_date,
+                    '$gte': start_date - timedelta(days=1),
                     '$lte': end_date
                 }
-                # # to get exactly the information window we are being asked for
-                # # at this level we need to
-                # 'data.body.metadata.start_time': {
-                #     '$lte': end_date
-                # },
-                # 'data.body.metadata.end_time': {
-                #     '$gte': start_date
-                # }
             }
         }
 
@@ -1321,24 +1315,12 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         }
 
         # Filter now again at the sample level to round out objects that overlap the tips of the desired range
-        # stage_match_date_range = {
-        #     '$match': {'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
-        #         '$gte': start_date,
-        #         '$lte': end_date
-        #     }}
-        # }
-
-        # stage_group_average_and_std_dev = {
-        #     '$group': {
-        #         '_id': None,
-        #         'average_glucose': {
-        #             '$avg': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
-        #             },
-        #         'standard_deviation': {
-        #             '$stdDevPop': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
-        #         }
-        #     }
-        # }
+        stage_match_date_range = {
+            '$match': {'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+                '$gte': start_date,
+                '$lte': end_date
+            }}
+        }
 
         # Group all of these documents together and calculate average pressures and standard deviations for the group
         stage_group_pressure_average_and_std_dev = {
@@ -1375,9 +1357,9 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         pipeline = [
             stage_match_user_id_and_wearable,
             stage_unwind_blood_pressure_samples,
-            # stage_match_date_range,
+            stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
-            stage_add_coefficient_of_variation,
+            # stage_add_coefficient_of_variation,
         ]
 
         # MongoDB pipelines return a cursor
