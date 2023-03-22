@@ -1233,7 +1233,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         return payload
         
 
-@ns_v2.route('/calculations/blood-glucose/percentiles/<int:user_id>/<string:wearable>')
+@ns_v2.route('/calculations/blood-glucose/cgm/percentiles/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     @token_auth.login_required(user_type=('client', 'provider'))
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
@@ -1260,12 +1260,15 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             "$match": {
                 "user_id": user_id,
                 "wearable": wearable,
-                "timestamp": {"$gte": start_date, "$lte": end_date},
+                "timestamp": {"$gte": start_date - timedelta(days=1), "$lte": end_date},
             }
         }
 
         # unwind the data in data
         stage_unwind = {"$unwind": {"path": "$data.blood_glucose_samples"}}
+
+        # match again on sample timestamp
+    
 
         # project just the blood_glucose_samples
         stage_project = {
@@ -1275,13 +1278,12 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             }
         }
 
-    
         stage_bucket = {
             "$bucket": {
                 "groupBy": "$24hr_minute",
                 "boundaries": boundaries,
                 "output": {
-                    "count": {"$sum": 1},
+                    "count": {"$toInt": {{"$sum": 1}}},
                     "avg_glucose": {"$avg": "$sample"},
                     "samples": {"$push": "$sample"},
                 },
@@ -1291,7 +1293,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         stage_sort_samples = {
             "$project": {
                 "samplesSorted": {"$sortArray": {"input": "$samples", "sortBy": 1}},
-                "count": {"$toInt": "$count"},
+                "count": 1,
                 "avg_glucose": 1,
             },
         }
