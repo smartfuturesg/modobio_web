@@ -1236,7 +1236,8 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     @token_auth.login_required(user_type=('client', 'provider'))
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
-                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
+                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'increment_mins': 'bin sizes in minutes'})
     @responds(schema=WearablesV2BloodGlucoseCalculationOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
         wearable = parse_wearable(wearable)
@@ -1244,27 +1245,104 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         # Default dates
         today = datetime.utcnow()
         start = today - timedelta(weeks=2)
+        increments = request.args.get('increment_mins', 10, type=int)
+
+        from math import ceil
+        boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
+        boundaries[-1] = 1440 # last index must be 1440
 
         start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
         end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
 
         # Filter documents on user_id, wearable, and date range
         stage_match_user_id_and_wearable = {
-            '$match': {
-                'user_id': user_id,
-                'wearable': wearable,
-                'date': {
-                    '$gte': start_date,
-                    '$lte': end_date
-                }
+            "$match": {
+                "user_id": user_id,
+                "wearable": wearable,
+                "timestamp": {"$gte": start_date, "$lte": end_date},
             }
         }
 
-        query = {"user_id": user_id, "wearable": wearable, "timestamp": {"$gte": start_date, "$lte": end_date}}
-        # query = { "timestamp": {"$gte": start_date, "$lte": end_date}}
+        # unwind the data in data
+        stage_unwind = {"$unwind": {"path": "$data.blood_glucose_samples"}}
 
-        cursor = mongo.db.wearables.find(query)
+        # project just the blood_glucose_samples
+        stage_project = {
+            "$project": {
+                "sample": "$data.blood_glucose_samples.blood_glucose_mg_per_dL",
+                '24hr_minute': {'$add' : [{'$multiply': [{'$hour': '$data.blood_glucose_samples.timestamp' }, 60]} , {'$minute': '$data.blood_glucose_samples.timestamp'} ]},
+            }
+        }
 
+    
+        stage_bucket = {
+            "$bucket": {
+                "groupBy": "$24hr_minute",
+                "boundaries": boundaries,
+                "output": {
+                    "count": {"$sum": 1},
+                    "avg_glucose": {"$avg": "$sample"},
+                    "samples": {"$push": "$sample"},
+                },
+            }
+        }
+
+        stage_sort_samples = {
+            "$project": {
+                "samplesSorted": {"$sortArray": {"input": "$samples", "sortBy": 1}},
+                "count": {"$toInt": "$count"},
+                "avg_glucose": 1,
+            },
+        }
+
+        stage_calculate_percentiles = {
+            "$project": {
+                "avg_glucose": 1,
+                "count": 1,
+                "min": {
+                    "$arrayElemAt": ["$samplesSorted", 0]
+                },
+                "max": {
+                    "$arrayElemAt": ["$samplesSorted", -1]
+                },
+                "5th_percentile": {
+                    "$arrayElemAt": [
+                        "$samplesSorted",
+                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.05]}, 1]}},
+                    ]
+                },
+                "25th_percentile": {
+                    "$arrayElemAt": [
+                        "$samplesSorted",
+                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.25]}, 1]}},
+                    ]
+                },
+                "50th_percentile": {
+                    "$arrayElemAt": [
+                        "$samplesSorted",
+                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.50]}, 1]}},
+                    ]
+                },
+                "75th_percentile": {
+                    "$arrayElemAt": [
+                        "$samplesSorted",
+                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.75]}, 1]}},
+                    ]
+                },
+                "95th_percentile": {
+                    "$arrayElemAt": [
+                        "$samplesSorted",
+                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.95]}, 1]}},
+                    ]
+                },
+            }
+        }
+
+        cursor = mongo.db.wearables.aggregate([stage_match_user_id_and_wearable, stage_unwind, stage_project, stage_bucket, stage_sort_samples, stage_calculate_percentiles])
+
+
+        data = list(cursor)
         breakpoint()
+
 
         return
