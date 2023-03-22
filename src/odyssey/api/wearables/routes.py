@@ -1302,7 +1302,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             '$match': {
                 'user_id': user_id,
                 'wearable': wearable,
-                'timestamp': {
+                'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
                     '$gte': start_date - timedelta(days=1),
                     '$lte': end_date
                 }
