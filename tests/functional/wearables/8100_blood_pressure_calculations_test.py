@@ -23,7 +23,8 @@ def test_blood_pressure_calculations_default_date_filters(test_client, bp_data_f
 
 def test_blood_pressure_calculations_extended_date_filters(test_client, bp_data_fixture):
     response = test_client.get(
-        f'/v2/wearables/calculations/blood-pressure/variation/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}?start_date={datetime.utcnow() - timedelta(weeks=40)}&end_date={datetime.utcnow() + timedelta(weeks=1)}',
+        f'/v2/wearables/calculations/blood-pressure/variation/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}'
+        f'?start_date={datetime.utcnow() - timedelta(weeks=40)}&end_date={datetime.utcnow() + timedelta(weeks=1)}',
         headers=test_client.staff_auth_header,
         content_type='application/json',
     )
