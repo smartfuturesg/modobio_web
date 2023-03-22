@@ -1,5 +1,6 @@
 import base64
 import logging
+from math import ceil
 import secrets
 
 from datetime import datetime, date, time, timedelta
@@ -1247,7 +1248,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         start = today - timedelta(weeks=2)
         increments = request.args.get('increment_mins', 10, type=int)
 
-        from math import ceil
+        
         boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
         boundaries[-1] = 1440 # last index must be 1440
 
@@ -1342,7 +1343,13 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 
 
         data = list(cursor)
-        breakpoint()
 
+        # Build and return payload
+        payload = {
+            'user_id': user_id,
+            'wearable': wearable,
+            'percentiles': data
+        }
+        breakpoint()
 
         return

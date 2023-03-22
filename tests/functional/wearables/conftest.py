@@ -53,10 +53,12 @@ def add_cgm_data(test_client):
                 }
             )
             dat["timestamp"] = parse(dat["timestamp"])
+            dat["blood_glucose_mg_per_dL"] = float(dat["blood_glucose_mg_per_dL"])
             cgm_samples = [dat]
             cgm_sum = float(dat["blood_glucose_mg_per_dL"])
         else:
             dat["timestamp"] = parse(dat["timestamp"])
+            dat["blood_glucose_mg_per_dL"] = float(dat["blood_glucose_mg_per_dL"])
             cgm_samples.append(dat)
             cgm_sum += float(dat["blood_glucose_mg_per_dL"])
 

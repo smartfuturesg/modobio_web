@@ -78,11 +78,16 @@ from .data import blood_glucose_data_1, blood_glucose_data_2, BLOOD_GLUCOSE_WEAR
 #     assert response.json.get('glucose_management_indicator') == 5.7
 
 def test_cgm_percentiles_calculation(test_client, add_cgm_data):
-
+    start_time = add_cgm_data["data_start_time"]
+    end_time = add_cgm_data["data_end_time"]
 
     response = test_client.get(
-        f'/v2/wearables/calculations/blood-glucose/percentiles/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?start_date=2023-03-14T00:00:00&end_date=2023-03-28T00:00:00',
+        f'/v2/wearables/calculations/blood-glucose/percentiles/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?start_date={start_time}&end_date={end_time}',
         headers=test_client.client_auth_header,
         content_type='application/json')
 
+    breakpoint()
+
+    # ensure all samples are returned
+    
     assert response.status_code == 200
