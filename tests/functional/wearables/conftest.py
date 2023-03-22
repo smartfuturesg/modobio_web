@@ -1,5 +1,3 @@
-import uuid
-
 import pytest
 
 from .data import (
@@ -12,6 +10,7 @@ from .data import (
     test_8100_data_week_to_month_ago,
     BLOOD_PRESSURE_WEARABLE,
 )
+
 
 @pytest.fixture(scope='function')
 def add_blood_glucose_data(test_client):
@@ -37,6 +36,7 @@ def fitbit_data(test_client):
 
     query = {'user_id': test_client.client_id, 'wearable': 'FITBIT'}
     test_client.mongo.db.wearables.delete_many(query)
+
 
 @pytest.fixture(scope='function')
 def bp_data_fixture(test_client):
