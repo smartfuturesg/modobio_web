@@ -148,12 +148,12 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    diastolic_bp_avg = fields.Integer(missing=None)
-    systolic_bp_avg = fields.Integer(missing=None)
-    diastolic_standard_deviation = fields.Integer(missing=None)
-    systolic_standard_deviation = fields.Integer(missing=None)
-    diastolic_bp_coefficient_of_variation = fields.Integer(missing=None)
-    systolic_bp_coefficient_of_variation = fields.Integer(missing=None)
+    diastolic_bp_avg = fields.Float(default=None)
+    systolic_bp_avg = fields.Float(default=None)
+    diastolic_standard_deviation = fields.Float(default=None)
+    systolic_standard_deviation = fields.Float(default=None)
+    diastolic_bp_coefficient_of_variation = fields.Float(default=None)
+    systolic_bp_coefficient_of_variation = fields.Float(default=None)
 
     @post_dump
     def make_object(self, data, **kwargs):
@@ -168,6 +168,6 @@ class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
         ]
         for datum in data_points:
             if data.get(datum):
-                data[datum] = round(data.get(datum), 0)
+                data[datum] = int(round(data.get(datum), 0))
 
         return data
