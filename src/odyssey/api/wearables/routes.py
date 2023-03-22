@@ -1292,7 +1292,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 '_id': None,
                 'diastolic_bp_avg': {
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
-                    },
+                },
                 'systolic_bp_avg': {
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
@@ -1309,10 +1309,10 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         stage_add_coefficient_of_variation = {
             '$addFields': {
                 'diastolic_bp_coefficient_of_variation': {
-                    '$multiply': [100, {'$divide': ['$diastolic_bp_stdDev', '$diastolic_bp_avg']}]
+                    '$multiply': [100, {'$divide': ['$diastolic_standard_deviation', '$diastolic_bp_avg']}]
                 },
                 'systolic_bp_coefficient_of_variation': {
-                    '$multiply': [100, {'$divide': ['$systolic_bp_stdDev', '$systolic_bp_avg']}]
+                    '$multiply': [100, {'$divide': ['$systolic_standard_deviation', '$systolic_bp_avg']}]
                 },
             }
         }
@@ -1323,7 +1323,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             stage_unwind_blood_pressure_samples,
             stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
-            # stage_add_coefficient_of_variation,
+            stage_add_coefficient_of_variation,
         ]
 
         # MongoDB pipelines return a cursor
