@@ -2,7 +2,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from marshmallow import Schema, fields, EXCLUDE, post_dump, validate
+from datetime import datetime
+from marshmallow import Schema, fields, EXCLUDE, post_dump, validate, pre_dump
 
 from odyssey import ma
 from odyssey.api.user.models import User
@@ -116,6 +117,41 @@ class WearablesV2ProvidersGetSchema(Schema):
     providers = fields.Dict(keys=fields.String(), values=fields.String())
     sdk_providers = fields.Dict(keys=fields.String(), values=fields.String())
 
+class WearablesV2UserDataSchema(Schema):
+    user_id = fields.Integer()
+    wearable = fields.String()
+    timestamp = fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
+    data = fields.Dict()
+
+    @pre_dump
+    def handle_datetime_fields(self, data, **kwargs):
+        """
+        Converts datetime objects to the string representation in the 'data' 
+        part of the mongo documents in order to serialize the object correctly
+        """
+        result = self.convert_datetime(data['data'])
+        data['data'] = result
+        return data
+
+    def convert_datetime(self, data):
+        """
+        Recursive function that iterates through nested dictionaries and 
+        replaces datetime object with string time format. 
+        """
+        for key, value in data.items():
+            if isinstance(value, datetime):
+                data[key] = datetime.isoformat(value)
+            elif isinstance(value, dict):
+                self.convert_datetime(data[key])
+            elif isinstance(value, list):
+                for x in value:
+                    if isinstance(x, dict):
+                        self.convert_datetime(x)
+        return data
+
+
+class WearablesV2UserDataGetSchema(Schema):
+    results = fields.List(fields.Nested(WearablesV2UserDataSchema))
 
 class WearablesV2UserAuthUrlInputSchema(Schema):
     platform = fields.String(

@@ -1024,3 +1024,20 @@ MIN_VALID_PULSE = 10
 MAX_VALID_PULSE = 300
 
 VALID_SOURCES = ('manual', 'device')
+
+
+# Key - String representation of wearable from terra
+# Value - String representation of tag name stored in Active Campaign
+WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES = {
+    'APPLE' : 'Device - Apple Watch',
+    'COROS' : 'Device - Coros',
+    'DEXCOM' : 'Device - Dexcom',
+    'FITBIT' : 'Device - Fitbit',
+    'FREESTYLELIBRESDK' : 'Device - FreeStyle Libre',
+    'GARMIN' : 'Device - Garmin',
+    'OMRON' : 'Device - Omron',
+    'OURA' : 'Device - Oura Ring',
+    'POLAR' : 'Device - Polar',
+    'SUUNTO' : 'Device - Suunto',
+    'WITHINGS' : 'Device - Withings'
+}
