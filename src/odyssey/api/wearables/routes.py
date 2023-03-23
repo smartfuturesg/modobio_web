@@ -24,7 +24,11 @@ from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import WEARABLE_DEVICE_TYPES
 from odyssey.utils.json import JSONProvider
-from odyssey.utils.misc import date_validator, lru_cache_with_ttl, iso_string_to_iso_datetime
+from odyssey.utils.misc import date_validator, lru_cache_with_ttl, iso_string_to_iso_datetime, create_wearables_filter_query
+from requests_oauthlib import OAuth2Session
+from sqlalchemy import select
+from sqlalchemy.sql import text
+from werkzeug.exceptions import BadRequest
 
 logger = logging.getLogger(__name__)
 
@@ -879,18 +883,30 @@ class WearablesV2UserEndpoint(BaseResource):
 @ns_v2.route('/<int:user_id>/<wearable>')
 class WearablesV2DataEndpoint(BaseResource):
     @token_auth.login_required
-    # @responds(schema=WearablesV2DataSchema, status_code=200, api=ns_v2)
+    @ns_v2.doc(params={
+        'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp.',
+        'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp.',
+        'query_specification': 'Specifies the wearable data fields that gets returned. Parsed as a array. Use the same key to pass multiple values.'
+    })
+    @responds(schema=WearablesV2UserDataGetSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
-        """ Get data for this combination of user and wearable device for the default date range. """
+        """ Get data for this combination of user and wearable device for the default date range. 
+            Optionally filters data by date range and allows to specify the fields of data to be returned.
+        """
         wearable = parse_wearable(wearable)
+
+        # Default dates
         today = datetime.utcnow()
         start = today - ONE_WEEK
-        data = mongo.db.wearables.find({
-            'user_id': user_id,
-            'wearable': wearable,
-            'timestamp': {'$gte': start}})
 
-        return JSONProvider().dumps(list(data))
+        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
+        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+        query_specification = request.args.getlist('query_specification', str)
+
+        query = create_wearables_filter_query(user_id, wearable, start_date, end_date, query_specification)
+        data = mongo.db.wearables.find(query[0], projection=query[1])
+        
+        return {'results' : list(data)}
 
     @token_auth.login_required
     @accepts(schema=WearablesV2UserAuthUrlInputSchema, api=ns_v2)
@@ -994,58 +1010,6 @@ class WearablesV2DataEndpoint(BaseResource):
         logger.audit(
             f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
 
-
-@ns_v2.route('/<int:user_id>/<wearable>/<date:start_date>')
-@ns_v2.route('/<int:user_id>/<wearable>/<datetime:start_date>')
-class WearablesV2DataStartDateEndpoint(BaseResource):
-    @token_auth.login_required
-    # @responds(schema=WearablesV2DataSchema, status_code=200, api=ns_v2)
-    def get(self, user_id, wearable, start_date):
-        """ Get data for this combination of user and wearable device from start_date to now.
-
-        Date range includes start date and latest available data. Start_date can be either
-        a full ISO8601 datetime, or just the date.
-        """
-        if isinstance(start_date, date):
-            start_date = datetime.combine(start_date, MIDNIGHT)
-
-        wearable = parse_wearable(wearable)
-        data = mongo.db.wearables.find({
-            'user_id': user_id,
-            'wearable': wearable,
-            'timestamp': {'$gte': start_date}})
-
-        return JSONProvider().dumps(list(data))
-
-
-@ns_v2.route('/<int:user_id>/<wearable>/<date:start_date>/<date:end_date>')
-@ns_v2.route('/<int:user_id>/<wearable>/<datetime:start_date>/<datetime:end_date>')
-class WearablesV2DataStartToEndDateEndpoint(BaseResource):
-    @token_auth.login_required
-    # @responds(schema=WearablesV2DataSchema, status_code=200, api=ns_v2)
-    def get(self, user_id, wearable, start_date, end_date):
-        """ Get data for this combination of user and wearable device from start_date to end_date.
-
-        Date range includes boundaries: [start_date, end_date]. Start_date can be either
-        a full ISO8601 datetime, or just the date. End_date must be of the same format as
-        start_date.
-        """
-        if isinstance(start_date, date):
-            start_date = datetime.combine(start_date, MIDNIGHT)
-            end_date = datetime.combine(end_date, MIDNIGHT)
-
-        wearable = parse_wearable(wearable)
-        data = mongo.db.wearables.find({
-            'user_id': user_id,
-            'wearable': wearable,
-            'timestamp': {
-                '$and': [
-                    {'$gte': start_date},
-                    {'$lte': end_date}]}})
-
-        return JSONProvider().dumps(list(data))
-
-
 @ns_v2.route('/terra')
 class WearablesV2TerraWebHookEndpoint(BaseResource):
     @accepts(api=ns_v2)
@@ -1117,7 +1081,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     def get(self, user_id, wearable):
         """ Get calculated values related to blood glucose wearable data.
 
-        This route will return all calculated values related to blood glucose data for a particular user_id, wearable, and date range.
+        This route will return all calculated values related to blood glucose data for a particular user_id, wearable, and timestamp range.
 
         Path Parameters
         ----------
