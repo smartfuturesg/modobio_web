@@ -152,7 +152,7 @@ blood_pressure_data_1 = {
             }
         }
     },
-    "date" : DATETIME_NOW_HOUR_18
+    "timestamp" : DATETIME_NOW_HOUR_18
 }
 
 blood_pressure_data_2 = {
@@ -192,7 +192,7 @@ blood_pressure_data_2 = {
             }
         }
     },
-    "date" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
+    "timestamp" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
 }
 
 wearables_fitbit_data_1 = {
