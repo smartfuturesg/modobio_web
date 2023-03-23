@@ -1239,14 +1239,14 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
                 'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
                 'increment_mins': 'bin sizes in minutes'})
-    @responds(schema=WearablesV2BloodGlucoseCalculationOutputSchema, status_code=200, api=ns_v2)
+    @responds(schema=WearablesV2CGMPercentilesOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
         wearable = parse_wearable(wearable)
 
         # Default dates
         today = datetime.utcnow()
         start = today - timedelta(weeks=2)
-        increments = request.args.get('increment_mins', 10, type=int)
+        increments = request.args.get('increment_mins', 15, type=int)
 
         
         boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
@@ -1319,88 +1319,141 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 
         stage_8_calculate_percentiles = {
             "$project": {
+                "minute": "$_id",
+                "_id": 0,
                 "count": 1,
-                "avg_glucose": 1,
-                "min": {"$arrayElemAt": ["$samplesSorted", 0]},
-                "max": {"$arrayElemAt": ["$samplesSorted", -1]},
-                "5th_percentile": {
-                    "$arrayElemAt": [
-                        "$samplesSorted",
+                "avg_glucose_mg_per_dL": {"$round": ["$avg_glucose", 2]},
+                "min": {"$round": [{"$arrayElemAt": ["$samplesSorted", 0]}, 2]},
+                "max": {"$round": [{"$arrayElemAt": ["$samplesSorted", -1]}, 2]},
+                "percentile_5th": {
+                    "$round": [
                         {
-                            "$cond": {
-                                "if": {
-                                    "$gt": [
-                                        {
-                                            "$round": {
-                                                "$subtract": [
-                                                    {"$multiply": ["$count", 0.05]},
-                                                    1,
-                                                ]
-                                            }
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$cond": {
+                                        "if": {
+                                            "$gt": [
+                                                {
+                                                    "$round": {
+                                                        "$subtract": [
+                                                            {"$multiply": ["$count", 0.05]},
+                                                            1,
+                                                        ]
+                                                    }
+                                                },
+                                                0,
+                                            ]
                                         },
-                                        0,
-                                    ]
+                                        "then": {
+                                            "$round": [
+                                                {
+                                                    "$subtract": [
+                                                        {"$multiply": ["$count", 0.05]},
+                                                        1,
+                                                    ]
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "else": 0,
+                                    }
                                 },
-                                "then": {
-                                    "$round": [
-                                        {"$subtract": [{"$multiply": ["$count", 0.05]}, 1]},
-                                        0,
-                                    ]
-                                },
-                                "else": 0,
-                            }
+                            ]
                         },
+                        2,
                     ]
                 },
-                "25th_percentile": {
-                    "$arrayElemAt": [
-                        "$samplesSorted",
+                "percentile_25th": {
+                    "$round": [
                         {
-                            "$cond": {
-                                "if": {
-                                    "$gt": [
-                                        {
-                                            "$round": {
-                                                "$subtract": [
-                                                    {"$multiply": ["$count", 0.25]},
-                                                    1,
-                                                ]
-                                            }
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$cond": {
+                                        "if": {
+                                            "$gt": [
+                                                {
+                                                    "$round": {
+                                                        "$subtract": [
+                                                            {"$multiply": ["$count", 0.25]},
+                                                            1,
+                                                        ]
+                                                    }
+                                                },
+                                                0,
+                                            ]
                                         },
-                                        0,
-                                    ]
+                                        "then": {
+                                            "$round": [
+                                                {
+                                                    "$subtract": [
+                                                        {"$multiply": ["$count", 0.25]},
+                                                        1,
+                                                    ]
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "else": 0,
+                                    }
                                 },
-                                "then": {
-                                    "$round": [
-                                        {"$subtract": [{"$multiply": ["$count", 0.25]}, 1]},
-                                        0,
-                                    ]
-                                },
-                                "else": 0,
-                            }
+                            ]
                         },
+                        2,
                     ]
                 },
-                "50th_percentile": {
-                    "$arrayElemAt": [
-                        "$samplesSorted",
-                        {"$round": [{"$subtract": [{"$multiply": ["$count", 0.50]}, 1]}, 0]},
+                "percentile_50th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.50]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
                     ]
                 },
-                "75th_percentile": {
-                    "$arrayElemAt": [
-                        "$samplesSorted",
-                        {"$round": [{"$subtract": [{"$multiply": ["$count", 0.75]}, 1]}, 0]},
+                "percentile_75th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.75]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
                     ]
                 },
-                "95th_percentile": {
-                    "$arrayElemAt": [
-                        "$samplesSorted",
-                        {"$round": [{"$subtract": [{"$multiply": ["$count", 0.95]}, 1]}, 0]},
+                "percentile_95th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.95]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
                     ]
                 },
             }
         }
+        
         cursor = mongo.db.wearables.aggregate(
             [
             stage_1_match_user_id_and_wearable,
@@ -1412,16 +1465,16 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             stage_7_sort_samples,
             stage_8_calculate_percentiles
             ])
-
+        
 
         data = list(cursor)
 
         # Build and return payload
         payload = {
-            'user_id': user_id,
-            'wearable': wearable,
-            'percentiles': data
+            "user_id": user_id,
+            "wearable": wearable,
+            "data": data,
+            "bin_size_mins": increments,
         }
-        breakpoint()
 
-        return
+        return payload
