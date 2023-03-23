@@ -23,7 +23,7 @@ BEGIN
         gender,
         dob)
     VALUES (
-        'fitbit@modobio.com',
+        'oura@modobio.com',
         'TCOUJASDFF12',
         'Terra',
         'Oura',
