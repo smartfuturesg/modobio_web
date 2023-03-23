@@ -87,7 +87,7 @@ blood_glucose_data_1 = {
             }
         }
     },
-    "date" : datetime.utcnow()
+    "timestamp" : datetime.utcnow()
 }
 
 blood_glucose_data_2 = {
@@ -112,7 +112,7 @@ blood_glucose_data_2 = {
             }
         }
     },
-    "date" : (datetime.utcnow() - timedelta(weeks=3))
+    "timestamp" : (datetime.utcnow() - timedelta(weeks=3))
 }
 
 blood_pressure_data_1 = {
@@ -193,4 +193,51 @@ blood_pressure_data_2 = {
         }
     },
     "date" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
+}
+
+wearables_fitbit_data_1 = {
+  "user_id": 17,
+  "wearable": "FITBIT",
+  "data": {
+    "Activity": {
+      "calories_data": {
+        "net_intake_calories": 200,
+        "BMR_calories": 1000,
+        "total_burned_calories": 30,
+        "net_activity_calories": 92
+      },
+      "heart_rate_data": {
+        "summary": {
+          "max_hr_bpm": 20,
+          "resting_hr_bpm": 11,
+          "avg_hrv_rmssd": 3,
+          "min_hr_bpm": 4,
+          "user_max_hr_bpm": 5,
+          "avg_hrv_sdnn": 6,
+          "avg_hr_bpm": 6
+        }
+      }
+    }
+  },
+  "timestamp": datetime.utcnow()
+}
+
+wearables_fitbit_data_2 = {
+  "user_id": 17,
+  "wearable": "FITBIT",
+  "data": {
+    "Athlete": {
+      "age": 10,
+      "country": "US",
+      "bio": "None",
+      "state": "TX",
+      "last_name": "Focker",
+      "sex": "M",
+      "city": "Houston",
+      "email": "test_email@email.com",
+      "date_of_birth": "01/20/1964",
+      "first_name": "Bernie"
+    }
+  },
+  "timestamp": (datetime.utcnow() - timedelta(weeks=2))
 }

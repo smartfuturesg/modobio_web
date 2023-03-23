@@ -1025,6 +1025,7 @@ MAX_VALID_PULSE = 300
 
 VALID_SOURCES = ('manual', 'device')
 
+# Map block start time to block name
 START_TIME_TO_THREE_HOUR_TIME_BLOCKS = {
     0: 'block_one',
     3: 'block_two',
@@ -1036,4 +1037,21 @@ START_TIME_TO_THREE_HOUR_TIME_BLOCKS = {
     21: 'block_eight',
 }
 
+# List of three hour time block start times
 THREE_HOUR_TIME_BLOCK_START_TIMES_LIST = [0, 3, 6, 8, 12, 15, 18, 21, 24]
+
+# Key - String representation of wearable from terra
+# Value - String representation of tag name stored in Active Campaign
+WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES = {
+    'APPLE' : 'Device - Apple Watch',
+    'COROS' : 'Device - Coros',
+    'DEXCOM' : 'Device - Dexcom',
+    'FITBIT' : 'Device - Fitbit',
+    'FREESTYLELIBRESDK' : 'Device - FreeStyle Libre',
+    'GARMIN' : 'Device - Garmin',
+    'OMRON' : 'Device - Omron',
+    'OURA' : 'Device - Oura Ring',
+    'POLAR' : 'Device - Polar',
+    'SUUNTO' : 'Device - Suunto',
+    'WITHINGS' : 'Device - Withings'
+}
