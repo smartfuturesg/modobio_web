@@ -1256,7 +1256,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
 
         # Filter documents on user_id, wearable, and date range
-        stage_match_user_id_and_wearable = {
+        stage_1_match_user_id_and_wearable = {
             "$match": {
                 "user_id": user_id,
                 "wearable": wearable,
@@ -1264,84 +1264,154 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             }
         }
 
-        # unwind the data in data
-        stage_unwind = {"$unwind": {"path": "$data.blood_glucose_samples"}}
+        # bring just the glucose samples up
+        stage_2_project_glucose_sample_only = {"$project": {"_id": 0, "samples": "$data.blood_glucose_samples"}}
 
-        # match again on sample timestamp
-    
+        # unwind the samples
+        stage_3_unwind = {"$unwind": "$samples"}
 
-        # project just the blood_glucose_samples
-        stage_project = {
+        # project the timestamp and glucose sample into their own fields
+        stage_4_project_samples_parse_timestamp = {
             "$project": {
-                "sample": "$data.blood_glucose_samples.blood_glucose_mg_per_dL",
-                '24hr_minute': {'$add' : [{'$multiply': [{'$hour': '$data.blood_glucose_samples.timestamp' }, 60]} , {'$minute': '$data.blood_glucose_samples.timestamp'} ]},
+                "timestamp": "$samples.timestamp",
+                "sample": "$samples.blood_glucose_mg_per_dL",
+                "24hr_minute": {
+                    "$add": [
+                        {"$multiply": [{"$hour": "$samples.timestamp"}, 60]},
+                        {"$minute": "$samples.timestamp"},
+                    ]
+                },
             }
         }
 
-        stage_bucket = {
+
+        # match on sample timestamp
+        stage_5_match_on_samples = {
+            "$match": {
+                "timestamp": {
+                    "$gte": start_date,
+                    "$lte": end_date,
+                }
+            }
+        }
+
+        # bucket by minute in 24 hr day     
+        stage_6_bucket = {
             "$bucket": {
                 "groupBy": "$24hr_minute",
                 "boundaries": boundaries,
                 "output": {
-                    "count": {"$toInt": {{"$sum": 1}}},
+                    "count": {"$sum": 1},
                     "avg_glucose": {"$avg": "$sample"},
                     "samples": {"$push": "$sample"},
                 },
             }
         }
 
-        stage_sort_samples = {
+        # sort samples in each bucket
+        stage_7_sort_samples = {
             "$project": {
                 "samplesSorted": {"$sortArray": {"input": "$samples", "sortBy": 1}},
-                "count": 1,
+                "count": {"$toInt": '$count'},
                 "avg_glucose": 1,
             },
         }
 
-        stage_calculate_percentiles = {
+        stage_8_calculate_percentiles = {
             "$project": {
-                "avg_glucose": 1,
                 "count": 1,
-                "min": {
-                    "$arrayElemAt": ["$samplesSorted", 0]
-                },
-                "max": {
-                    "$arrayElemAt": ["$samplesSorted", -1]
-                },
+                "avg_glucose": 1,
+                "min": {"$arrayElemAt": ["$samplesSorted", 0]},
+                "max": {"$arrayElemAt": ["$samplesSorted", -1]},
                 "5th_percentile": {
                     "$arrayElemAt": [
                         "$samplesSorted",
-                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.05]}, 1]}},
+                        {
+                            "$cond": {
+                                "if": {
+                                    "$gt": [
+                                        {
+                                            "$round": {
+                                                "$subtract": [
+                                                    {"$multiply": ["$count", 0.05]},
+                                                    1,
+                                                ]
+                                            }
+                                        },
+                                        0,
+                                    ]
+                                },
+                                "then": {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.05]}, 1]},
+                                        0,
+                                    ]
+                                },
+                                "else": 0,
+                            }
+                        },
                     ]
                 },
                 "25th_percentile": {
                     "$arrayElemAt": [
                         "$samplesSorted",
-                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.25]}, 1]}},
+                        {
+                            "$cond": {
+                                "if": {
+                                    "$gt": [
+                                        {
+                                            "$round": {
+                                                "$subtract": [
+                                                    {"$multiply": ["$count", 0.25]},
+                                                    1,
+                                                ]
+                                            }
+                                        },
+                                        0,
+                                    ]
+                                },
+                                "then": {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.25]}, 1]},
+                                        0,
+                                    ]
+                                },
+                                "else": 0,
+                            }
+                        },
                     ]
                 },
                 "50th_percentile": {
                     "$arrayElemAt": [
                         "$samplesSorted",
-                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.50]}, 1]}},
+                        {"$round": [{"$subtract": [{"$multiply": ["$count", 0.50]}, 1]}, 0]},
                     ]
                 },
                 "75th_percentile": {
                     "$arrayElemAt": [
                         "$samplesSorted",
-                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.75]}, 1]}},
+                        {"$round": [{"$subtract": [{"$multiply": ["$count", 0.75]}, 1]}, 0]},
                     ]
                 },
                 "95th_percentile": {
                     "$arrayElemAt": [
                         "$samplesSorted",
-                        {"$round": {"$subtract": [{"$multiply": ["$count", 0.95]}, 1]}},
+                        {"$round": [{"$subtract": [{"$multiply": ["$count", 0.95]}, 1]}, 0]},
                     ]
                 },
             }
         }
-
-        cursor = mongo.db.wearables.aggregate([stage_match_user_id_and_wearable, stage_unwind, stage_project, stage_bucket, stage_sort_samples, stage_calculate_percentiles])
+        cursor = mongo.db.wearables.aggregate(
+            [
+            stage_1_match_user_id_and_wearable,
+            stage_2_project_glucose_sample_only,
+            stage_3_unwind,
+            stage_4_project_samples_parse_timestamp,
+            stage_5_match_on_samples,
+            stage_6_bucket,
+            stage_7_sort_samples,
+            stage_8_calculate_percentiles
+            ])
 
 
         data = list(cursor)
