@@ -59,6 +59,11 @@ wearables_freestyle_duplicate_data = {
         '2020-04-05T07:00:00.000']}
 
 BLOOD_GLUCOSE_WEARABLE = 'FREESTYLELIBRE'
+BLOOD_PRESSURE_WEARABLE = 'OMRON'
+DATETIME_NOW = datetime.utcnow()
+DATETIME_NOW_HOUR_18 = DATETIME_NOW.replace(hour=18)
+DATETIME_MINUS_THREE_WEEKS = (datetime.utcnow() - timedelta(weeks=3))
+DATETIME_MINUS_THREE_WEEKS_HOUR_7 = DATETIME_MINUS_THREE_WEEKS.replace(hour=7)
 
 blood_glucose_data_1 = {
     "user_id" : 17,
@@ -108,4 +113,84 @@ blood_glucose_data_2 = {
         }
     },
     "date" : (datetime.utcnow() - timedelta(weeks=3))
+}
+
+blood_pressure_data_1 = {
+    "user_id" : 17,
+    "wearable" : BLOOD_PRESSURE_WEARABLE,
+    "data" : {
+        "body" : {
+            "testField" : 1.0,
+            "testFieldAgain" : 2.0,
+            "heart_data" : {
+                "detailed" : {
+                    "hr_samples" : [
+                        {
+                            "bpm" : 90.0,
+                            "timestamp" : DATETIME_NOW_HOUR_18
+                        },
+                        {
+                            "bpm" : 155.0,
+                            "timestamp" : DATETIME_NOW_HOUR_18
+                        }
+                    ]
+                }
+            },
+            "blood_pressure_data" : {
+                "blood_pressure_samples" : [
+                    {
+                        "systolic_bp" : 70.0,
+                        "diastolic_bp" : 140.0,
+                        "timestamp" : DATETIME_NOW_HOUR_18
+                    },
+                    {
+                        "systolic_bp" : 85.0,
+                        "diastolic_bp" : 135.0,
+                        "timestamp" : DATETIME_NOW_HOUR_18
+                    }
+                ]
+            }
+        }
+    },
+    "date" : DATETIME_NOW_HOUR_18
+}
+
+blood_pressure_data_2 = {
+    "user_id" : 17,
+    "wearable" : BLOOD_PRESSURE_WEARABLE,
+    "data" : {
+        "body" : {
+            "testField" : 1.0,
+            "testFieldAgain" : 2.0,
+            "heart_data" : {
+                "detailed" : {
+                    "hr_samples" : [
+                        {
+                            "bpm" : 100.0,
+                            "timestamp" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
+                        },
+                        {
+                            "bpm" : 120.0,
+                            "timestamp" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
+                        }
+                    ]
+                }
+            },
+            "blood_pressure_data" : {
+                "blood_pressure_samples" : [
+                    {
+                        "systolic_bp" : 90.0,
+                        "diastolic_bp" : 120.0,
+                        "timestamp" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
+                    },
+                    {
+                        "systolic_bp" : 80.0,
+                        "diastolic_bp" : 130.0,
+                        "timestamp" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
+                    }
+                ]
+            }
+        }
+    },
+    "date" : DATETIME_MINUS_THREE_WEEKS_HOUR_7
 }

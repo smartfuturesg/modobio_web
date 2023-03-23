@@ -1024,3 +1024,16 @@ MIN_VALID_PULSE = 10
 MAX_VALID_PULSE = 300
 
 VALID_SOURCES = ('manual', 'device')
+
+START_TIME_TO_THREE_HOUR_TIME_BLOCKS = {
+    0: 'block_one',
+    3: 'block_two',
+    6: 'block_three',
+    9: 'block_four',
+    12: 'block_five',
+    15: 'block_six',
+    18: 'block_seven',
+    21: 'block_eight',
+}
+
+THREE_HOUR_TIME_BLOCK_START_TIMES_LIST = [0, 3, 6, 8, 12, 15, 18, 21, 24]
