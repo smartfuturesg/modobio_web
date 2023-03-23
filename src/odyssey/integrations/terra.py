@@ -7,6 +7,7 @@ from terra.api.api_responses import TerraApiResponse, ConnectionErrorHookRespons
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db, mongo
+from odyssey.api.doctor.models import MedicalBloodPressures
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.utils.constants import WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
@@ -295,6 +296,26 @@ class TerraClient(terra.Terra):
         for data in response.get_json()['data']:
             # Update existing or create new doc (upsert).
             result = mongo.db.wearables.update_one(
+                # TODO: should this be response.get_json()['data']['metadate']?
                 {'user_id': user_id, 'wearable': wearable, 'timestamp': data['metadata']['start_time']},
                 {'$set': {f'data.{data_type}': data}},
                 upsert=True)
+
+            # check for OMRON data
+            if response.get_json()['user']['provider'] == 'OMRON':  # if so, there is bp data
+                # loop through each individual sample
+                for sample in data['body']['blood_pressure_data']['blood_pressure_samples']:
+                    mbps = MedicalBloodPressures(
+                        datetime_taken=sample['timestamp'],
+                        user_id=user_id,
+                        report_id=user_id,
+                        device_name=response.get_json()['user']['provider'],
+                        source='Device',
+                        systolic=sample['systolic_bp'],
+                        diastolic=sample['diastolic_bp'],
+                        pulse=None,
+                    )
+                    db.session.add(mbps)
+
+                db.session.commit()  # only commit once
+                # db.session.flush()  # do I have to flush too?
