@@ -66,53 +66,134 @@ DATETIME_MINUS_THREE_WEEKS = (datetime.utcnow() - timedelta(weeks=3))
 DATETIME_MINUS_THREE_WEEKS_HOUR_7 = DATETIME_MINUS_THREE_WEEKS.replace(hour=7)
 
 blood_glucose_data_1 = {
-    "user_id" : 17,
-    "wearable" : BLOOD_GLUCOSE_WEARABLE,
-    "data" : {
-        "body" : {
-            "testField" : 1.0,
-            "testFieldAgain" : 2.0,
-            "glucose_data" : {
-                "day_avg_blood_glucose_mg_per_dL" : 120.0,
-                "blood_glucose_samples" : [
+    "user_id": 17,
+    "wearable": BLOOD_GLUCOSE_WEARABLE,
+    "data": {
+        "body": {
+            "testField": 1.0,
+            "testFieldAgain": 2.0,
+            "glucose_data": {
+                "day_avg_blood_glucose_mg_per_dL": 120.0,
+                "blood_glucose_samples": [
                     {
-                        "timestamp" : datetime.utcnow(),
-                        "blood_glucose_mg_per_dL" : 100.0
+                        "timestamp": datetime.utcnow(),
+                        "blood_glucose_mg_per_dL": 100.0
                     },
                     {
-                        "timestamp" : datetime.utcnow(),
-                        "blood_glucose_mg_per_dL" : 150.0
+                        "timestamp": datetime.utcnow(),
+                        "blood_glucose_mg_per_dL": 150.0
                     }
                 ]
             }
         }
     },
-    "timestamp" : datetime.utcnow()
+    "timestamp": datetime.utcnow()
 }
 
 blood_glucose_data_2 = {
-    "user_id" : 17,
-    "wearable" : BLOOD_GLUCOSE_WEARABLE,
-    "data" : {
-        "body" : {
-            "testField" : 1.0,
-            "testFieldAgain" : 2.0,
-            "glucose_data" : {
-                "day_avg_blood_glucose_mg_per_dL" : 90.0,
-                "blood_glucose_samples" : [
+    "user_id": 17,
+    "wearable": BLOOD_GLUCOSE_WEARABLE,
+    "data": {
+        "body": {
+            "testField": 1.0,
+            "testFieldAgain": 2.0,
+            "glucose_data": {
+                "day_avg_blood_glucose_mg_per_dL": 90.0,
+                "blood_glucose_samples": [
                     {
-                        "timestamp" : (datetime.utcnow() - timedelta(weeks=3)),
-                        "blood_glucose_mg_per_dL" : 90.0
+                        "timestamp": (datetime.utcnow() - timedelta(weeks=3)),
+                        "blood_glucose_mg_per_dL": 90.0
                     },
                     {
-                        "timestamp" : (datetime.utcnow() - timedelta(weeks=3)),
-                        "blood_glucose_mg_per_dL" : 110.0
+                        "timestamp": (datetime.utcnow() - timedelta(weeks=3)),
+                        "blood_glucose_mg_per_dL": 110.0
                     }
                 ]
             }
         }
     },
-    "timestamp" : (datetime.utcnow() - timedelta(weeks=3))
+    "timestamp": (datetime.utcnow() - timedelta(weeks=3))
+}
+
+
+BLOOD_PRESSURE_WEARABLE = 'OMRON'
+
+now = datetime.utcnow()
+one_hour_ago = now - timedelta(hours=1)
+one_day_ago = now - timedelta(days=1)
+two_days_ago = now - timedelta(days=2)
+three_days_ago = now - timedelta(days=3)
+five_weeks_ago = now - timedelta(weeks=5)
+six_weeks_ago = now - timedelta(weeks=6)
+seven_weeks_ago = now - timedelta(weeks=7)
+eight_weeks_ago = now - timedelta(weeks=8)
+
+test_8100_data_past_week = {
+    "user_id": None,
+    "wearable": BLOOD_PRESSURE_WEARABLE,
+    "timestamp": three_days_ago,
+    "data": {
+        "body": {
+            "blood_pressure_data": {
+                "blood_pressure_samples": [
+                    {
+                        "timestamp": three_days_ago,
+                        "diastolic_bp": 68,
+                        "systolic_bp": 119
+                    },
+                    {
+                        "timestamp": two_days_ago,
+                        "diastolic_bp": 78,
+                        "systolic_bp": 127
+                    },
+                    {
+                        "timestamp": one_day_ago,
+                        "diastolic_bp": 71,
+                        "systolic_bp": 137
+                    },
+                    {
+                        "timestamp": one_hour_ago,
+                        "diastolic_bp": 69,
+                        "systolic_bp": 142
+                    },
+                ]
+            },
+        }
+    }
+}
+
+test_8100_data_week_to_month_ago = {
+    "user_id": None,
+    "wearable": BLOOD_PRESSURE_WEARABLE,
+    "timestamp": five_weeks_ago,
+    "data": {
+        "body": {
+            "blood_pressure_data": {
+                "blood_pressure_samples": [
+                    {
+                        "timestamp": eight_weeks_ago,
+                        "diastolic_bp": 68,
+                        "systolic_bp": 107
+                    },
+                    {
+                        "timestamp": seven_weeks_ago,
+                        "diastolic_bp": 87,
+                        "systolic_bp": 124
+                    },
+                    {
+                        "timestamp": six_weeks_ago,
+                        "diastolic_bp": 67,
+                        "systolic_bp": 128
+                    },
+                    {
+                        "timestamp": five_weeks_ago,
+                        "diastolic_bp": 96,
+                        "systolic_bp": 146
+                    },
+                ]
+            },
+        }
+    }
 }
 
 blood_pressure_data_1 = {
