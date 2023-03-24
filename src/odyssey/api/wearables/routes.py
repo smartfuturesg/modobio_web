@@ -1239,7 +1239,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         }
 
         # bring just the glucose samples up
-        stage_2_project_glucose_sample_only = {"$project": {"_id": 0, "samples": "$data.blood_glucose_samples"}}
+        stage_2_project_glucose_sample_only = {"$project": {"_id": 0, "samples": "$data.body.glucose_data.blood_glucose_samples"}}
 
         # unwind the samples
         stage_3_unwind = {"$unwind": "$samples"}
