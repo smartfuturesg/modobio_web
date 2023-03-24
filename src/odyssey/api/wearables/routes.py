@@ -1260,8 +1260,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         # Default dates
         end_date = datetime.utcnow() + timedelta(seconds=2)
         start_date = end_date - THIRTY_DAYS
-        end_date = end_date
-        start_date = start_date
 
         if request.args.get('start_date') and request.args.get('end_date'):
             start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
