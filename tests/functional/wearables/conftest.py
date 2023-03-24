@@ -47,10 +47,15 @@ def add_cgm_data(test_client):
                 "wearable": BLOOD_GLUCOSE_WEARABLE,
                 "timestamp": cgm_samples[0]["timestamp"],
                 "data": {
-                    "day_avg_blood_glucose_mg_per_dL": cgm_sum/len(cgm_samples),
-                    "blood_glucose_samples": cgm_samples
+                    "body": {
+                        "glucose_data": {
+                            "blood_glucose_samples": cgm_samples,
+                            "day_avg_blood_glucose_mg_per_dL": cgm_sum/len(cgm_samples)
+                        }
+                    }
+               
                 }
-                }
+            }
             )
             dat["timestamp"] = parse(dat["timestamp"])
             dat["blood_glucose_mg_per_dL"] = float(dat["blood_glucose_mg_per_dL"])

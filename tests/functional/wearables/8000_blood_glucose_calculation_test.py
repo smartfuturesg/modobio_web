@@ -78,6 +78,7 @@ def test_blood_glucose_calculations_start_and_end_date_param(test_client, add_bl
     assert response.json.get('glucose_management_indicator') == 5.7
 
 def test_cgm_percentiles_calculation(test_client, add_cgm_data):
+
     start_time = add_cgm_data["data_start_time"]
     end_time = add_cgm_data["data_end_time"]
 
