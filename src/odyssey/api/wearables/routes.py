@@ -1147,7 +1147,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                     '$avg': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
                     },
                 'standard_deviation': {
-                    '$stdDevPop': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
+                    '$stdDevSamp': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
                 }
             }
         }
@@ -1277,6 +1277,23 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round averages
+        stage_round_averages_bp = {
+            '$project': {
+                'total_bp_readings': '$total_bp_readings',
+                'average_systolic': { 
+                    '$round': ['$average_systolic', 0]
+                    },
+                'average_diastolic': { 
+                    '$round': ['$average_diastolic', 0]
+                    },
+                'min_systolic': '$min_systolic',
+                'min_diastolic': '$min_diastolic',
+                'max_systolic': '$max_systolic',
+                'max_diastolic': '$max_diastolic'
+            }
+        }
+
 
         # Stages for pulse - making another call because the location of the pulse data is nested in another part of the Terra schema
 
@@ -1317,6 +1334,16 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round averages
+        stage_round_averages_pulse = {
+            '$project': {
+                'total_pulse_readings': '$total_pulse_readings',
+                'average_pulse': { 
+                    '$round': ['$average_pulse', 0]
+                    }
+            }
+        }
+
         # Build blood pressure pipeline
         blood_pressure_pipeline = [
             stage_match_user_id_and_wearable,
@@ -1324,7 +1351,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             stage_match_date_range_bp,
             stage_add_hour_bp,
             stage_bucket_and_calculate_bp,
-            #stage_round_averages
+            stage_round_averages
         ]
 
         # Build pulse pipeline
@@ -1333,7 +1360,8 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             stage_unwind_hr_samples,
             stage_match_date_range_pulse,
             stage_add_hour_pulse,
-            stage_bucket_and_calculate_pulse
+            stage_bucket_and_calculate_pulse,
+            stage_round_averages_pulse
         ]
 
         # Store blood pressure data
