@@ -179,3 +179,31 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
             in_data['glucose_variability'] = round(in_data.get('glucose_variability'), 1)
 
         return in_data
+
+
+class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
+    user_id = fields.Integer(required=True)
+    wearable = fields.String(required=True)
+    diastolic_bp_avg = fields.Float(default=None)
+    systolic_bp_avg = fields.Float(default=None)
+    diastolic_standard_deviation = fields.Float(default=None)
+    systolic_standard_deviation = fields.Float(default=None)
+    diastolic_bp_coefficient_of_variation = fields.Float(default=None)
+    systolic_bp_coefficient_of_variation = fields.Float(default=None)
+
+    @post_dump
+    def make_object(self, data, **kwargs):
+        # Round the calculations if they are not null
+        data_points = [
+            'diastolic_bp_avg',
+            'systolic_bp_avg',
+            'diastolic_standard_deviation',
+            'systolic_standard_deviation',
+            'diastolic_bp_coefficient_of_variation',
+            'systolic_bp_coefficient_of_variation',
+        ]
+        for datum in data_points:
+            if data.get(datum):
+                data[datum] = int(round(data.get(datum), 0))
+
+        return data
