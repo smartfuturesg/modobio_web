@@ -1104,6 +1104,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         dict
             JSON encoded dict containing:
             - user_id
+            - wearable
             - average_glucose - mg/dL
             - standard_deviation
             - glucose_management_indicator - percentage
@@ -1197,14 +1198,61 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         return payload
 
 
-@ns_v2.route('/calculations/blood-pressure/<int:user_id>/<string:wearable>')
+@ns_v2.route('/calculations/blood-pressure/30-day-hourly/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
     @token_auth.login_required
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
                 'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
     @responds(schema=WearablesV2BloodPressureCalculationOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
-        """ Get calculated values related to blood pressure wearable data. """
+        """ Get calculated values related to hourly blood pressure wearable data.
+
+        This route will return hourly blood pressure data for a particular user_id, wearable, and timestamp range with the default date being the previous 30 days.
+        The data is grouped into 8 time blocks with each being 3 hours long (0-3, 3-6, 6-9, etc...). See below for exact calculations being returned.
+
+        Path Parameters
+        ----------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood pressure data
+
+        Query Parameters
+        ----------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 30 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+            - user_id
+            - wearable
+            - block_one - Data for the first time block - (0-3)
+            - block_two - Data for the second time block - (3-6)
+            - block_three - Data for the third time block - (6-9)
+            - block_four - Data for the fourth time block - (9-12)
+            - block_five - Data for the fifth time block - (12-15)
+            - block_six - Data for the sixth time block - (15-18)
+            - block_seven - Data for the seventh time block - (18-21)
+            - block_eight - Data for the eighth time block - (21-24)
+
+            Each time block will be a dict containing:
+            - total_bp_readings - Number of blood pressure readings
+            - total_pulse_readings - Number of heart rate readings
+            - average_systolic - average systolic value in mmHg
+            - average_diastolic - average diastolic value in mmHg
+            - min_systolic - Min systolic value
+            - min_diastolic - Min diastolic value
+            - max_systolic - Max systolic value
+            - max_diastolic - Max diastolic value
+            - average_pulse - average pulse value in bpm
+        """
+        
         payload = {}
         wearable = parse_wearable(wearable)
 
@@ -1351,7 +1399,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             stage_match_date_range_bp,
             stage_add_hour_bp,
             stage_bucket_and_calculate_bp,
-            stage_round_averages
+            stage_round_averages_bp
         ]
 
         # Build pulse pipeline
