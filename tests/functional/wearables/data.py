@@ -61,7 +61,7 @@ wearables_freestyle_duplicate_data = {
 BLOOD_GLUCOSE_WEARABLE = 'FREESTYLELIBRE'
 BLOOD_PRESSURE_WEARABLE = 'OMRON'
 DATETIME_NOW = datetime.utcnow()
-DATETIME_NOW_HOUR_18 = DATETIME_NOW.replace(hour=18)
+DATETIME_NOW_HOUR_0 = DATETIME_NOW.replace(hour=0)
 DATETIME_MINUS_THREE_WEEKS = (datetime.utcnow() - timedelta(weeks=3))
 DATETIME_MINUS_THREE_WEEKS_HOUR_7 = DATETIME_MINUS_THREE_WEEKS.replace(hour=7)
 
@@ -127,11 +127,11 @@ blood_pressure_data_1 = {
                     "hr_samples" : [
                         {
                             "bpm" : 90.0,
-                            "timestamp" : DATETIME_NOW_HOUR_18
+                            "timestamp" : DATETIME_NOW_HOUR_0
                         },
                         {
                             "bpm" : 155.0,
-                            "timestamp" : DATETIME_NOW_HOUR_18
+                            "timestamp" : DATETIME_NOW_HOUR_0
                         }
                     ]
                 }
@@ -141,18 +141,18 @@ blood_pressure_data_1 = {
                     {
                         "systolic_bp" : 70.0,
                         "diastolic_bp" : 140.0,
-                        "timestamp" : DATETIME_NOW_HOUR_18
+                        "timestamp" : DATETIME_NOW_HOUR_0
                     },
                     {
                         "systolic_bp" : 85.0,
                         "diastolic_bp" : 135.0,
-                        "timestamp" : DATETIME_NOW_HOUR_18
+                        "timestamp" : DATETIME_NOW_HOUR_0
                     }
                 ]
             }
         }
     },
-    "timestamp" : DATETIME_NOW_HOUR_18
+    "timestamp" : DATETIME_NOW_HOUR_0
 }
 
 blood_pressure_data_2 = {

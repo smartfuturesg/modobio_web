@@ -1262,7 +1262,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             - max_diastolic - Max diastolic value
             - average_pulse - average pulse value in bpm
         """
-        
+
         payload = {}
         wearable = parse_wearable(wearable)
 
