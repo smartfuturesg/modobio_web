@@ -3,7 +3,17 @@ import csv
 from dateutil.parser import parse
 import pytest
 
-from .data import blood_glucose_data_1, blood_glucose_data_2, BLOOD_GLUCOSE_WEARABLE, wearables_fitbit_data_1, wearables_fitbit_data_2
+from .data import (
+    blood_glucose_data_1,
+    blood_glucose_data_2,
+    BLOOD_GLUCOSE_WEARABLE,
+    wearables_fitbit_data_1,
+    wearables_fitbit_data_2,
+    test_8100_data_past_week,
+    test_8100_data_week_to_month_ago,
+    BLOOD_PRESSURE_WEARABLE,
+)
+
 
 @pytest.fixture(scope='function')
 def add_blood_glucose_data(test_client):
@@ -85,3 +95,15 @@ def fitbit_data(test_client):
 
     query = {'user_id': test_client.client_id, 'wearable': 'FITBIT'}
     test_client.mongo.db.wearables.delete_many(query)
+
+
+@pytest.fixture(scope='function')
+def bp_data_fixture(test_client):
+    test_8100_data_past_week['user_id'] = test_client.client_id
+    test_8100_data_week_to_month_ago['user_id'] = test_client.client_id
+    test_client.mongo.db.wearables.insert_many([test_8100_data_past_week, test_8100_data_week_to_month_ago])
+
+    yield [test_8100_data_past_week, test_8100_data_week_to_month_ago]
+
+    del_query = {'user_id': test_client.client_id, 'wearable': BLOOD_PRESSURE_WEARABLE}
+    test_client.mongo.db.wearables.delete_many(del_query)
