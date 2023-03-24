@@ -1,9 +1,6 @@
 import base64
-<<<<<<< HEAD
 import logging
 from math import ceil
-=======
->>>>>>> 14bea99c93c841ddc737f85be30ddcfa9503f3cf
 import secrets
 from datetime import time, timedelta
 
