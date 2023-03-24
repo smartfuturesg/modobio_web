@@ -1181,8 +1181,8 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             }
         }
 
-        # Round averages
-        stage_round_averages = {
+        # Round values
+        stage_round_values = {
             '$project': {
                 'average_glucose': { 
                     '$round': ['$average_glucose', 0]
@@ -1207,7 +1207,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             stage_group_average_and_std_dev,
             stage_add_gmi,
             stage_add_glucose_variability,
-            stage_round_averages
+            stage_round_values
         ]
 
         # MongoDB pipelines return a cursor
@@ -1351,6 +1351,30 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round values
+        stage_round_values = {
+            '$project': {
+                'diastolic_bp_avg': { 
+                    '$round': ['$diastolic_bp_avg', 0]
+                    },
+                'systolic_bp_avg': { 
+                    '$round': ['$systolic_bp_avg', 0]
+                    },
+                'diastolic_standard_deviation': { 
+                    '$round': ['$diastolic_standard_deviation', 0]
+                    },
+                'systolic_standard_deviation': { 
+                    '$round': ['$systolic_standard_deviation', 0]
+                    },
+                'diastolic_bp_coefficient_of_variation': { 
+                    '$round': ['$diastolic_bp_coefficient_of_variation', 0]
+                    },
+                'systolic_bp_coefficient_of_variation': { 
+                    '$round': ['$systolic_bp_coefficient_of_variation', 0]
+                    }
+                }
+        }
+
         # Assemble pipeline
         pipeline = [
             stage_match_user_id_and_wearable,
@@ -1358,6 +1382,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
+            stage_round_values
         ]
 
         # MongoDB pipelines return a cursor
