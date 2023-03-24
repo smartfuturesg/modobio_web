@@ -18,9 +18,10 @@ from odyssey import mongo
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
 from odyssey.integrations.terra import TerraClient
+from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import WEARABLE_DEVICE_TYPES
+from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import date_validator, lru_cache_with_ttl, iso_string_to_iso_datetime, create_wearables_filter_query
 from requests_oauthlib import OAuth2Session
@@ -768,6 +769,7 @@ def supported_wearables() -> dict:
         'EIGHT',
         'FATSECRET',
         'FINALSURGE',
+        'FREESTYLELIBRESDK',
         'GOOGLE',
         'GOOGLEFIT',
         'HAMMERHEAD',
@@ -783,6 +785,7 @@ def supported_wearables() -> dict:
         'MYFITNESSPAL',
         'NOLIO',
         'NUTRACHECK',
+        'OMRONUS',
         'PELOTON',
         'PUL',
         'REALTIME',
@@ -790,12 +793,15 @@ def supported_wearables() -> dict:
         'RIDEWITHGPS',
         'ROUVY',
         'SAMSUNG',
+        'STRAVA',
         'TECHNOGYM',
         'TEMPO',
         'TODAYSPLAN',
+        'TRAINASONE',
         'TRAINERROAD',
         'TRAININGPEAKS',
         'TRAINXHALE',
+        'TREDICT',
         'TRIDOT',
         'UNDERARMOUR',
         'VELOHERO',
@@ -1008,6 +1014,10 @@ class WearablesV2DataEndpoint(BaseResource):
         db.session.commit()
         logger.audit(
             f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
+        
+        #Removes device tag association from users active campaign account
+        ac = ActiveCampaign()
+        ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
 @ns_v2.route('/terra')
 class WearablesV2TerraWebHookEndpoint(BaseResource):
