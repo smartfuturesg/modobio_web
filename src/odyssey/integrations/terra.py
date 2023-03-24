@@ -296,13 +296,12 @@ class TerraClient(terra.Terra):
         for data in response.get_json()['data']:
             # Update existing or create new doc (upsert).
             result = mongo.db.wearables.update_one(
-                # TODO: should this be response.get_json()['data']['metadate']?
                 {'user_id': user_id, 'wearable': wearable, 'timestamp': data['metadata']['start_time']},
                 {'$set': {f'data.{data_type}': data}},
                 upsert=True)
 
             # check for OMRON data
-            if response.get_json()['user']['provider'] == 'OMRON':  # if so, there is bp data
+            if wearable == 'OMRON':  # if so, there is bp data
                 # loop through each individual sample
                 for sample in data['body']['blood_pressure_data']['blood_pressure_samples']:
                     mbps = MedicalBloodPressures(
