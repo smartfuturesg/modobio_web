@@ -1135,17 +1135,23 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         stage_match_user_id_and_wearable = {
             '$match': {
                 'user_id': user_id,
-                'wearable': wearable,
-                'timestamp': {
-                    '$gte': start_date,
-                    '$lte': end_date
-                }
+                'wearable': wearable
             }
         }
 
         # Unwind the blood_glucose_samples array so that we can operate on each individual sample
         stage_unwind_blood_glucose_samples = {
             '$unwind': '$data.body.glucose_data.blood_glucose_samples'
+        }
+
+        # Filter on the timestamp of each blood glucose sample
+        stage_match_date_range = {
+            '$match': {
+                'data.body.glucose_data.blood_glucose_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
         }
 
         # Group all of these documents together and calculate average glucose and standard deviation for the group
@@ -1175,13 +1181,33 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round averages
+        stage_round_averages = {
+            '$project': {
+                'average_glucose': { 
+                    '$round': ['$average_glucose', 0]
+                    },
+                'standard_deviation': { 
+                    '$round': ['$standard_deviation', 1]
+                    },
+                'glucose_management_indicator': { 
+                    '$round': ['$glucose_management_indicator', 1]
+                    },
+                'glucose_variability': { 
+                    '$round': ['$glucose_variability', 1]
+                    }
+            }
+        }
+
         # Assemble pipeline
         pipeline = [
             stage_match_user_id_and_wearable,
             stage_unwind_blood_glucose_samples,
+            stage_match_date_range,
             stage_group_average_and_std_dev,
             stage_add_gmi,
-            stage_add_glucose_variability
+            stage_add_glucose_variability,
+            stage_round_averages
         ]
 
         # MongoDB pipelines return a cursor

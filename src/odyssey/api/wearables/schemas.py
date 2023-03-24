@@ -168,19 +168,6 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     glucose_management_indicator = fields.Float(missing=None)
     glucose_variability = fields.Float(missing=None)
 
-    @post_dump
-    def make_object(self, in_data, **kwargs):
-        # Round the calculations if they are not null
-        if in_data.get('standard_deviation'):
-            in_data['standard_deviation'] = round(in_data.get('standard_deviation'), 1)
-        if in_data.get('glucose_management_indicator'):
-            in_data['glucose_management_indicator'] = round(in_data.get('glucose_management_indicator'), 1)
-        if in_data.get('glucose_variability'):
-            in_data['glucose_variability'] = round(in_data.get('glucose_variability'), 1)
-
-        return in_data
-
-
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
