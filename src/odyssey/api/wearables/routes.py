@@ -1,33 +1,33 @@
 import base64
 import secrets
-
-from datetime import datetime, date, time, timedelta
+from datetime import time, timedelta
 
 import boto3
 from boto3.dynamodb.conditions import Key
-
 from flask import current_app, jsonify, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy import select
 from sqlalchemy.sql import text
-from werkzeug.exceptions import BadRequest, Unauthorized
+from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import Unauthorized
 
 from odyssey import mongo
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
-from odyssey.integrations.terra import TerraClient
 from odyssey.integrations.active_campaign import ActiveCampaign
+from odyssey.integrations.terra import TerraClient
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
 from odyssey.utils.json import JSONProvider
-from odyssey.utils.misc import date_validator, lru_cache_with_ttl, iso_string_to_iso_datetime, create_wearables_filter_query
-from requests_oauthlib import OAuth2Session
-from sqlalchemy import select
-from sqlalchemy.sql import text
-from werkzeug.exceptions import BadRequest
+from odyssey.utils.misc import (
+    date_validator,
+    lru_cache_with_ttl,
+    iso_string_to_iso_datetime,
+    create_wearables_filter_query,
+)
 
 logger = logging.getLogger(__name__)
 
