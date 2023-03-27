@@ -577,9 +577,9 @@ class LookupKeys(BaseResource):
     @responds(schema=LookupKeysOutputSchema, status_code=200, api=ns)
     def get(self):
         
-        output = [
-            {'terra_developer_id' : current_app.config.get('TERRA_DEV_ID')},
-            {'google_captcha_site_key' : current_app.config.get('GOOGLE_RECAPTCHA_SECRET')}
-        ]
+        output = {
+            'terra_dev_id' : current_app.config.get('TERRA_DEV_ID'),
+            'google_captcha_site_key' : current_app.config.get('GOOGLE_RECAPTCHA_SECRET')
+        }
         
         return {'keys': output}
