@@ -1017,9 +1017,10 @@ class WearablesV2DataEndpoint(BaseResource):
         logger.audit(
             f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
         
-        #Removes device tag association from users active campaign account
-        ac = ActiveCampaign()
-        ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
+        if not current_app.debug:
+            #Removes device tag association from users active campaign account
+            ac = ActiveCampaign()
+            ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
 @ns_v2.route('/terra')
 class WearablesV2TerraWebHookEndpoint(BaseResource):
