@@ -1135,7 +1135,11 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         stage_match_user_id_and_wearable = {
             '$match': {
                 'user_id': user_id,
-                'wearable': wearable
+                'wearable': wearable,
+                'timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
             }
         }
 
