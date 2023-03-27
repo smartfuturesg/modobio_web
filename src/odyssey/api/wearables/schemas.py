@@ -180,7 +180,6 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
 
         return in_data
 
-
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
@@ -207,3 +206,44 @@ class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
                 data[datum] = int(round(data.get(datum), 0))
 
         return data
+    
+class WearablesV2BloodGlucoseTimeInRangesSchema(Schema):
+    very_low_percentage = fields.Float(load_default=None)
+    very_low_total_time = fields.String(load_default=None)
+    low_percentage = fields.Float(load_default=None)
+    low_total_time = fields.String(load_default=None) 
+    target_range_percentage = fields.Float(load_default=None)
+    target_range_total_time = fields.String(load_default=None)
+    high_percentage = fields.Float(load_default=None)
+    high_total_time = fields.String(load_default=None)
+    very_high_percentage = fields.Float(load_default=None)
+    very_high_total_time = fields.String(load_default=None)
+
+    @post_dump
+    def make_object(self, data, **kwargs):
+        if data.get('very_low_total_time'):
+            data['very_low_total_time'] = self.format_to_hour_min(data.get('very_low_total_time'))
+        if data.get('low_total_time'):
+            data['low_total_time'] = self.format_to_hour_min(data.get('low_total_time'))
+        if data.get('target_range_total_time'):
+            data['target_range_total_time'] = self.format_to_hour_min(data.get('target_range_total_time'))
+        if data.get('high_total_time'):
+            data['high_total_time'] = self.format_to_hour_min(data.get('high_total_time'))
+        if data.get('very_high_total_time'):
+            data['very_high_total_time'] = self.format_to_hour_min(data.get('very_high_total_time'))
+
+        return data
+    
+    def format_to_hour_min(self, total_minutes):
+        hours = int(float(total_minutes)) // 60
+        minutes = int(float(total_minutes)) % 60
+
+        if hours != 0:
+            return f'{str(hours)} h {str(minutes)} min'
+        else:
+            return f'{str(minutes)} min'
+        
+class WearablesV2BloodGlucoseTimeInRangesOutputSchema(Schema):
+    wearable = fields.String(required=True)
+    user_id = fields.Integer(required=True)
+    results = fields.Nested(WearablesV2BloodGlucoseTimeInRangesSchema)

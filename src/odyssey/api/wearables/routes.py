@@ -1206,6 +1206,266 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 
         return payload
         
+@ns_v2.route('/calculations/blood-gulcose/cgm/time-in-ranges/<int:user_id>/<string:wearable>')
+class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
+    @token_auth.login_required(user_type=('client', 'provider'))
+    @ns_v2.doc(params={
+        'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+        'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+    })
+    @responds(schema=WearablesV2BloodGlucoseTimeInRangesOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        """ Get time in ranges for continuous blood glucose readings."""
+        payload = {}
+        wearable = parse_wearable(wearable)
+
+        # Default dates
+        start_date = datetime.utcnow()
+        end_date = start_date + THIRTY_DAYS
+
+        #Override default dates if requested dates are passed in
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
+
+        # Filter documents on user_id, wearable
+        stage_match_user_id_and_wearable = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                "timestamp": {"$gte": start_date - timedelta(days=1), "$lte": end_date},
+            }
+        }
+
+        # Project out glucose samples to filter start and end time precisely on samples timestamps
+        stage_project_bp_samples = {
+            '$project': {
+                '_id': 0, 
+                'samples': '$data.body.glucose_data.blood_glucose_samples'
+            }
+        }
+        # Unwind the blood_glucose_samples array so that we can operate on each individual sample
+        stage_unwind_bp_samples = {
+            '$unwind': {'path': '$samples'}
+        }
+
+        # Filter on the timestamp of each blood glucose sample
+        stage_match_date_range_bp_samples = {
+            '$match': {
+                'samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Runs multiple stages. Groups samples in buckets by glucose range, 
+        # gets the total count of glucose samples, and creates array of just
+        # samples timestamps. 
+        stage_facet = {
+            '$facet': {
+                'samples_buckets': [
+                    {
+                        '$bucket': {
+                            'groupBy': '$samples.blood_glucose_mg_per_dL', 
+                            'boundaries': [ 0, 54, 70, 181, 251, 10000], 
+                            'output': {'count': { '$sum': 1}}
+                        }
+                    }
+                ], 
+                'total_count': [{'$count': 'total_count'}], 
+                'reading_timestamps': [{'$project': {'timestamp': '$samples.timestamp'}}]
+            }
+        }
+
+        # Projects facet data to new document. 
+        # Sorts samples buckets and samples timestamps in accending order. 
+        stage_project_facet_data = {
+            '$project': {
+                'samples_sorted': {
+                    '$sortArray': {
+                        'input': '$samples_buckets', 
+                        'sortBy': 1
+                    }
+                }, 
+                'timestamp_sorted': {
+                    '$sortArray': {
+                        'input': '$reading_timestamps', 
+                        'sortBy': 1
+                    }
+                }, 
+                'total_samples': '$total_count'
+            }
+        }
+
+        #Starts calculations get percentages of total time in glucose ranges  
+        stage_calculate_percentages = {
+            '$addFields': {
+                'total_time_in_min': {
+                    '$dateDiff': {
+                        'startDate': {'$arrayElemAt': ['$timestamp_sorted.timestamp', 0]}, 
+                        'endDate': {'$arrayElemAt': ['$timestamp_sorted.timestamp', -1]}, 
+                        'unit': 'minute'
+                    }
+                }, 
+                'very_low_percentage': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': [
+                                        {'$arrayElemAt': ['$samples_sorted.count', 0]}, 
+                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
+                                    ]}, 
+                                100]
+                        }, 0
+                    ]
+                }, 
+                'low_percentage': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': [
+                                        {'$arrayElemAt': ['$samples_sorted.count', 1]}, 
+                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
+                                    ]}, 
+                                100]
+                        }, 0
+                    ]
+                }, 
+                'target_range_percentage': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': [
+                                        {'$arrayElemAt': ['$samples_sorted.count', 2]}, 
+                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
+                                    ]}, 
+                                100]
+                        }, 0
+                    ]
+                }, 
+                'high_percentage': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': [
+                                        {'$arrayElemAt': ['$samples_sorted.count', 3]}, 
+                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
+                                    ]}, 
+                                100]
+                        }, 0
+                    ]
+                }, 
+                'very_high_percentage': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': [
+                                        {'$arrayElemAt': ['$samples_sorted.count', 4]}, 
+                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
+                                    ]}, 
+                                100]
+                        }, 0
+                    ]
+                }
+            }
+        }
+
+        #Finally use calculated percentages to calculate total time in minutes 
+        stage_project_total_percentages_and_times = {
+            '$project': {
+                'very_low_percentage': '$very_low_percentage', 
+                'low_percentage': '$low_percentage', 
+                'target_range_percentage': '$target_range_percentage', 
+                'high_percentage': '$high_percentage', 
+                'very_high_percentage': '$very_high_percentage', 
+                'very_low_total_time': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': ['$very_low_percentage', 100]
+                                }, '$total_time_in_min'
+                            ]
+                        }
+                    ]
+                }, 
+                'low_total_time': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': ['$low_percentage', 100]
+                                }, '$total_time_in_min'
+                            ]
+                        }
+                    ]
+                }, 
+                'target_range_total_time': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': ['$target_range_percentage', 100]
+                                }, '$total_time_in_min'
+                            ]
+                        }
+                    ]
+                }, 
+                'high_total_time': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': ['$high_percentage', 100]
+                                }, '$total_time_in_min'
+                            ]
+                        }
+                    ]
+                }, 
+                'very_high_total_time': {
+                    '$round': [
+                        {
+                            '$multiply': [
+                                {
+                                    '$divide': ['$very_high_percentage', 100]
+                                }, '$total_time_in_min'
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    
+        #Build pipeline
+        time_in_ranges_pipeline = [
+            stage_match_user_id_and_wearable,
+            stage_project_bp_samples,
+            stage_unwind_bp_samples,
+            stage_match_date_range_bp_samples,
+            stage_facet,
+            stage_project_facet_data,
+            stage_calculate_percentages,
+            stage_project_total_percentages_and_times
+        ]
+        
+        cursor = mongo.db.wearables.aggregate(time_in_ranges_pipeline)
+        results = list(cursor)
+        
+        payload = {
+            'user_id': user_id,
+            'wearable': wearable,
+            'results' : results[0]
+        }
+    
+        return payload
 
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
