@@ -186,9 +186,10 @@ class TerraClient(terra.Terra):
             response = self.get_sleep_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
             self.status(response, raise_on_error=False)
 
-            #Add device tag to users active campaign account
-            ac = ActiveCampaign()
-            ac.add_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
+            if not current_app.debug:
+                #Add device tag to users active campaign account
+                ac = ActiveCampaign()
+                ac.add_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
         elif user_wearable.terra_user_id != terra_user_id:
             # User reauthentication
@@ -251,9 +252,10 @@ class TerraClient(terra.Terra):
         logger.audit(
             f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
         
-        #Removes device tag association from users active campaign account
-        ac = ActiveCampaign()
-        ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
+        if not current_app.debug:
+            #Removes device tag association from users active campaign account
+            ac = ActiveCampaign()
+            ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
     def store_data(self, response: TerraApiResponse):
         """ Store incoming data in Mongo.
