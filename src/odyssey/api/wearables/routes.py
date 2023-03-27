@@ -901,13 +901,17 @@ class WearablesV2DataEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        today = datetime.utcnow()
-        start = today - ONE_WEEK
+        start_date = datetime.utcnow()
+        end_date = start_date + ONE_WEEK
 
-        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
-        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+        #Override default dates if requested dates are passed in
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
+
         query_specification = request.args.getlist('query_specification', str)
-
         query = create_wearables_filter_query(user_id, wearable, start_date, end_date, query_specification)
         data = mongo.db.wearables.find(query[0], projection=query[1])
         
