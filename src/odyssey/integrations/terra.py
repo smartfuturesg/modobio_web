@@ -303,7 +303,7 @@ class TerraClient(terra.Terra):
                 upsert=True)
 
             # check for OMRON data
-            if wearable == 'OMRON':  # if so, there is bp data
+            if wearable == 'OMRONUS':  # if so, there is bp data
                 # loop through each individual sample
                 for sample in data['body']['blood_pressure_data']['blood_pressure_samples']:
                     mbps = MedicalBloodPressures(
