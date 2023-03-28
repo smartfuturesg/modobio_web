@@ -1140,7 +1140,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                 'user_id': user_id,
                 'wearable': wearable,
                 'timestamp': {
-                    '$gte': start_date,
+                    '$gte': start_date - timedelta(days=1),
                     '$lte': end_date
                 }
             }
