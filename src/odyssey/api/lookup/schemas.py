@@ -400,5 +400,9 @@ class LookupBloodGlucoseCGMDemographicsOutputSchema(Schema):
     total_items = fields.Integer()
 
 
+class LookupKeysSchema(Schema):
+    terra_dev_id = fields.String()
+    google_captcha_site_key = fields.String()
+
 class LookupKeysOutputSchema(Schema):
-    keys = fields.List(fields.Dict(keys=fields.String(), values=fields.String()))
+    keys = fields.Nested(LookupKeysSchema)

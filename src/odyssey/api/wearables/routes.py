@@ -751,6 +751,7 @@ def supported_wearables() -> dict:
         'GOOGLE': 'Google Fit',
         'GOOGLEFIT': 'Google Fit (SDK)',
         'IFIT': 'iFit',
+        'OMRONUS': 'Omron',
         'TEMPO': 'Tempo Fit',
         'TRAININGPEAKS': 'Training Peaks',
         'WEAROS': 'Wear OS'}
@@ -785,7 +786,7 @@ def supported_wearables() -> dict:
         'MYFITNESSPAL',
         'NOLIO',
         'NUTRACHECK',
-        'OMRONUS',
+        'OMRON',
         'PELOTON',
         'PUL',
         'REALTIME',
@@ -1015,9 +1016,10 @@ class WearablesV2DataEndpoint(BaseResource):
         logger.audit(
             f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
         
-        #Removes device tag association from users active campaign account
-        ac = ActiveCampaign()
-        ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
+        if not current_app.debug:
+            #Removes device tag association from users active campaign account
+            ac = ActiveCampaign()
+            ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
 @ns_v2.route('/terra')
 class WearablesV2TerraWebHookEndpoint(BaseResource):
