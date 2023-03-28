@@ -102,7 +102,7 @@ def test_cgm_percentiles_calculation(test_client, cgm_data_multi_range):
     end_time = cgm_data_multi_range[2]
 
     response = test_client.get(
-        f'/v2/wearables/calculations/blood-gulcose/cgm/time-in-ranges/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?start_date={start_time}&end_date={end_time}',
+        f'/v2/wearables/calculations/blood-glucose/cgm/time-in-ranges/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?start_date={start_time}&end_date={end_time}',
         headers=test_client.client_auth_header,
         content_type='application/json')
     

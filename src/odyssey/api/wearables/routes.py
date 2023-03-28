@@ -1212,7 +1212,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 
         return payload
         
-@ns_v2.route('/calculations/blood-gulcose/cgm/time-in-ranges/<int:user_id>/<string:wearable>')
+@ns_v2.route('/calculations/blood-glucose/cgm/time-in-ranges/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
     @token_auth.login_required(user_type=('client', 'provider'))
     @ns_v2.doc(params={
