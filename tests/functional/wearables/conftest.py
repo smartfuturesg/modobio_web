@@ -3,16 +3,7 @@ import csv
 from dateutil.parser import parse
 import pytest
 
-from .data import (
-    blood_glucose_data_1,
-    blood_glucose_data_2,
-    BLOOD_GLUCOSE_WEARABLE,
-    wearables_fitbit_data_1,
-    wearables_fitbit_data_2,
-    test_8100_data_past_week,
-    test_8100_data_week_to_month_ago,
-    BLOOD_PRESSURE_WEARABLE,
-)
+from .data import *
 
 
 @pytest.fixture(scope='function')
@@ -107,3 +98,19 @@ def bp_data_fixture(test_client):
 
     del_query = {'user_id': test_client.client_id, 'wearable': BLOOD_PRESSURE_WEARABLE}
     test_client.mongo.db.wearables.delete_many(del_query)
+
+
+@pytest.fixture(scope='function')
+def cgm_data_multi_range(test_client):
+    """
+    Adds test blood cgm data that falls between multiple level ranges
+    """
+    start_time = "2023-04-14T05:00:00.000Z"
+    end_time = "2023-04-15T04:00:00.000Z"
+
+    test_client.mongo.db.wearables.insert_one(sample_cmg_data)
+
+    yield sample_cmg_data, start_time, end_time
+
+    query = {'user_id': test_client.client_id, 'wearable': 'FREESTYLELIBRE'}
+    test_client.mongo.db.wearables.delete_many(query)

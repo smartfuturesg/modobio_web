@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from dateutil import parser
 
 wearables_data = {
     'has_freestyle': True,
@@ -236,4 +237,213 @@ wearables_fitbit_data_2 = {
     }
   },
   "timestamp": (datetime.utcnow() - timedelta(weeks=2))
+}
+
+
+sample_cmg_data = {
+    "timestamp": parser.parse("2023-04-14T05:00:00.000Z"),
+    "user_id": 17,
+    "wearable": "FREESTYLELIBRE",
+    "data": {
+        "body": {
+        "glucose_data": {
+            "detailed_blood_glucose_samples": [],
+            "blood_glucose_samples": [
+                {
+                    "blood_glucose_mg_per_dL": 40,
+                    "timestamp": parser.parse("2023-04-14T05:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 50,
+                    "timestamp": parser.parse("2023-04-14T05:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 51,
+                    "timestamp": parser.parse("2023-04-14T05:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 54,
+                    "timestamp": parser.parse("2023-04-14T06:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 59,
+                    "timestamp": parser.parse("2023-04-14T06:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 66,
+                    "timestamp": parser.parse("2023-04-14T07:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 70,
+                    "timestamp": parser.parse("2023-04-14T07:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 74,
+                    "timestamp": parser.parse("2023-04-14T08:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 79,
+                    "timestamp": parser.parse("2023-04-14T08:45:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 84,
+                    "timestamp": parser.parse("2023-04-14T09:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 99,
+                    "timestamp": parser.parse("2023-04-14T09:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 110,
+                    "timestamp": parser.parse("2023-04-14T10:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 120,
+                    "timestamp": parser.parse("2023-04-14T10:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 128,
+                    "timestamp": parser.parse("2023-04-14T11:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 135,
+                    "timestamp": parser.parse("2023-04-14T11:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 144,
+                    "timestamp": parser.parse("2023-04-14T11:45:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 151,
+                    "timestamp": parser.parse("2023-04-14T12:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 160,
+                    "timestamp": parser.parse("2023-04-14T12:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 166,
+                    "timestamp": parser.parse("2023-04-14T13:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 166,
+                    "timestamp": parser.parse("2023-04-14T13:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 170,
+                    "timestamp": parser.parse("2023-04-14T13:45:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 175,
+                    "timestamp": parser.parse("2023-04-14T14:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 179,
+                    "timestamp": parser.parse("2023-04-14T14:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 181,
+                    "timestamp": parser.parse("2023-04-14T15:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 183,
+                    "timestamp": parser.parse("2023-04-14T16:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 188,
+                    "timestamp": parser.parse("2023-04-14T16:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 190,
+                    "timestamp": parser.parse("2023-04-14T17:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 158,
+                    "timestamp": parser.parse("2023-04-14T17:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 151,
+                    "timestamp": parser.parse("2023-04-14T18:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 160,
+                    "timestamp": parser.parse("2023-04-14T18:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 166,
+                    "timestamp": parser.parse("2023-04-14T19:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 165,
+                    "timestamp": parser.parse("2023-04-14T19:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 159,
+                    "timestamp": parser.parse("2023-04-14T19:45:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 155,
+                    "timestamp": parser.parse("2023-04-14T20:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 151,
+                    "timestamp": parser.parse("1970-01-01T00:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 160,
+                    "timestamp": parser.parse("2023-04-14T21:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 170,
+                    "timestamp": parser.parse("2023-04-14T21:45:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 190,
+                    "timestamp": parser.parse("2023-04-14T22:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 199,
+                    "timestamp": parser.parse("2023-04-14T23:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 200,
+                    "timestamp": parser.parse("2023-04-14T23:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 220,
+                    "timestamp": parser.parse("2023-04-15T00:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 260,
+                    "timestamp": parser.parse("2023-04-15T00:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 270,
+                    "timestamp": parser.parse("2023-04-15T01:00:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 279,
+                    "timestamp": parser.parse("2023-04-15T01:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 278,
+                    "timestamp": parser.parse("2023-04-15T02:15:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 189,
+                    "timestamp": parser.parse("2023-04-15T03:30:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 177,
+                    "timestamp": parser.parse("2023-04-15T03:45:00.000Z")
+                },
+                {
+                    "blood_glucose_mg_per_dL": 160,
+                    "timestamp": parser.parse("2023-04-15T04:00:00.000Z")
+                }
+                ],
+                "day_avg_blood_glucose_mg_per_dL": 160.76710132786812
+            }
+        }
+    }
 }
