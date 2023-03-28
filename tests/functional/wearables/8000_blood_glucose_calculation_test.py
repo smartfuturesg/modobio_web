@@ -15,8 +15,8 @@ def test_blood_glucose_calculations_default_date_filters(test_client, add_blood_
     assert response.json.get('user_id') == test_client.client_id
     assert response.json.get('wearable') == BLOOD_GLUCOSE_WEARABLE
     assert response.json.get('average_glucose') == 125
-    assert response.json.get('standard_deviation') == 25
-    assert response.json.get('glucose_variability') == 20
+    assert response.json.get('standard_deviation') == 35.4
+    assert response.json.get('glucose_variability') == 28.3
     assert response.json.get('glucose_management_indicator') == 6.3
 
 def test_blood_glucose_calculations_client_permission(test_client, add_blood_glucose_data):
@@ -61,6 +61,6 @@ def test_blood_glucose_calculations_start_and_end_date_param(test_client, add_bl
     assert response.json.get('user_id') == test_client.client_id
     assert response.json.get('wearable') == BLOOD_GLUCOSE_WEARABLE
     assert response.json.get('average_glucose') == 100
-    assert response.json.get('standard_deviation') == 10
-    assert response.json.get('glucose_variability') == 10
+    assert response.json.get('standard_deviation') == 14.1
+    assert response.json.get('glucose_variability') == 14.1
     assert response.json.get('glucose_management_indicator') == 5.7

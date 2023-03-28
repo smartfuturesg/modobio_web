@@ -163,10 +163,34 @@ class WearablesV2UserAuthUrlInputSchema(Schema):
 class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    average_glucose = fields.Integer(missing=None)
+    average_glucose = fields.Float(missing=None)
     standard_deviation = fields.Float(missing=None)
     glucose_management_indicator = fields.Float(missing=None)
     glucose_variability = fields.Float(missing=None)
+
+
+class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
+    average_systolic = fields.Integer(default=None)
+    average_diastolic = fields.Integer(default=None)
+    average_pulse = fields.Integer(default=None)
+    min_systolic = fields.Integer(default=None)
+    max_systolic = fields.Integer(default=None)
+    min_diastolic = fields.Integer(default=None)
+    max_diastolic = fields.Integer(default=None)
+    total_bp_readings = fields.Integer(default=0)
+    total_pulse_readings = fields.Integer(default=0)
+
+class WearablesV2BloodPressureCalculationOutputSchema(Schema):
+    user_id = fields.Integer(required=True)
+    wearable = fields.String(required=True)
+    block_one = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_two = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_three = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_four = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_five = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_six = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_seven = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_eight = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
 
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
