@@ -1125,11 +1125,14 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        today = datetime.utcnow()
-        start = today - ONE_WEEK
-
-        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
-        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+        end_date = datetime.utcnow()
+        start_date = end_date - ONE_WEEK
+       
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date')) 
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date')) 
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
 
         # Calculate Average Glucose
         # Begin with defining each stage of the pipeline
@@ -1140,7 +1143,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                 'user_id': user_id,
                 'wearable': wearable,
                 'timestamp': {
-                    '$gte': start_date,
+                    '$gte': start_date - timedelta(days=1),
                     '$lte': end_date
                 }
             }
@@ -1149,6 +1152,16 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         # Unwind the blood_glucose_samples array so that we can operate on each individual sample
         stage_unwind_blood_glucose_samples = {
             '$unwind': '$data.body.glucose_data.blood_glucose_samples'
+        }
+
+        # Filter on the timestamp of each blood glucose sample
+        stage_match_date_range = {
+            '$match': {
+                'data.body.glucose_data.blood_glucose_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
         }
 
         # Group all of these documents together and calculate average glucose and standard deviation for the group
@@ -1178,13 +1191,33 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round values
+        stage_round_values = {
+            '$project': {
+                'average_glucose': { 
+                    '$round': ['$average_glucose', 0]
+                    },
+                'standard_deviation': { 
+                    '$round': ['$standard_deviation', 1]
+                    },
+                'glucose_management_indicator': { 
+                    '$round': ['$glucose_management_indicator', 1]
+                    },
+                'glucose_variability': { 
+                    '$round': ['$glucose_variability', 1]
+                    }
+            }
+        }
+
         # Assemble pipeline
         pipeline = [
             stage_match_user_id_and_wearable,
             stage_unwind_blood_glucose_samples,
+            stage_match_date_range,
             stage_group_average_and_std_dev,
             stage_add_gmi,
-            stage_add_glucose_variability
+            stage_add_glucose_variability,
+            stage_round_values
         ]
 
         # MongoDB pipelines return a cursor
@@ -1327,6 +1360,30 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round values
+        stage_round_values = {
+            '$project': {
+                'diastolic_bp_avg': { 
+                    '$round': ['$diastolic_bp_avg', 0]
+                    },
+                'systolic_bp_avg': { 
+                    '$round': ['$systolic_bp_avg', 0]
+                    },
+                'diastolic_standard_deviation': { 
+                    '$round': ['$diastolic_standard_deviation', 0]
+                    },
+                'systolic_standard_deviation': { 
+                    '$round': ['$systolic_standard_deviation', 0]
+                    },
+                'diastolic_bp_coefficient_of_variation': { 
+                    '$round': ['$diastolic_bp_coefficient_of_variation', 0]
+                    },
+                'systolic_bp_coefficient_of_variation': { 
+                    '$round': ['$systolic_bp_coefficient_of_variation', 0]
+                    }
+                }
+        }
+
         # Assemble pipeline
         pipeline = [
             stage_match_user_id_and_wearable,
@@ -1334,6 +1391,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
+            stage_round_values
         ]
 
         # MongoDB pipelines return a cursor

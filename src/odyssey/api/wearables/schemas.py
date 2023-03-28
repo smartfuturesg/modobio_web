@@ -168,19 +168,6 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     glucose_management_indicator = fields.Float(missing=None)
     glucose_variability = fields.Float(missing=None)
 
-    @post_dump
-    def make_object(self, in_data, **kwargs):
-        # Round the calculations if they are not null
-        if in_data.get('average_glucose'):
-            in_data['average_glucose'] = int(round(in_data.get('average_glucose'), 0))
-        if in_data.get('standard_deviation'):
-            in_data['standard_deviation'] = round(in_data.get('standard_deviation'), 1)
-        if in_data.get('glucose_management_indicator'):
-            in_data['glucose_management_indicator'] = round(in_data.get('glucose_management_indicator'), 1)
-        if in_data.get('glucose_variability'):
-            in_data['glucose_variability'] = round(in_data.get('glucose_variability'), 1)
-
-        return in_data
 
 class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
     average_systolic = fields.Integer(default=None)
@@ -208,26 +195,9 @@ class WearablesV2BloodPressureCalculationOutputSchema(Schema):
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    diastolic_bp_avg = fields.Float(default=None)
-    systolic_bp_avg = fields.Float(default=None)
-    diastolic_standard_deviation = fields.Float(default=None)
-    systolic_standard_deviation = fields.Float(default=None)
-    diastolic_bp_coefficient_of_variation = fields.Float(default=None)
-    systolic_bp_coefficient_of_variation = fields.Float(default=None)
-
-    @post_dump
-    def make_object(self, data, **kwargs):
-        # Round the calculations if they are not null
-        data_points = [
-            'diastolic_bp_avg',
-            'systolic_bp_avg',
-            'diastolic_standard_deviation',
-            'systolic_standard_deviation',
-            'diastolic_bp_coefficient_of_variation',
-            'systolic_bp_coefficient_of_variation',
-        ]
-        for datum in data_points:
-            if data.get(datum):
-                data[datum] = int(round(data.get(datum), 0))
-
-        return data
+    diastolic_bp_avg = fields.Integer(default=None)
+    systolic_bp_avg = fields.Integer(default=None)
+    diastolic_standard_deviation = fields.Integer(default=None)
+    systolic_standard_deviation = fields.Integer(default=None)
+    diastolic_bp_coefficient_of_variation = fields.Integer(default=None)
+    systolic_bp_coefficient_of_variation = fields.Integer(default=None)
