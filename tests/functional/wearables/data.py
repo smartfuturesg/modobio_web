@@ -116,7 +116,7 @@ blood_glucose_data_2 = {
 }
 
 
-BLOOD_PRESSURE_WEARABLE = 'OMRON'
+BLOOD_PRESSURE_WEARABLE = 'OMRONUS'
 
 now = datetime.utcnow()
 one_hour_ago = now - timedelta(hours=1)

@@ -1417,11 +1417,14 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        today = datetime.utcnow()
-        start = today - THIRTY_DAYS
+        end_date = datetime.utcnow()
+        start_date = end_date - THIRTY_DAYS
 
-        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
-        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
 
         # Stages for blood pressure calculations
 
@@ -1429,7 +1432,11 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         stage_match_user_id_and_wearable = {
             '$match': {
                 'user_id': user_id,
-                'wearable': wearable
+                'wearable': wearable,
+                'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
+                    '$gte': start_date - timedelta(days=1),
+                    '$lte': end_date
+                }
             }
         }
 
