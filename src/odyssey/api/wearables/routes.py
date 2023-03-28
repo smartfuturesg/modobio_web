@@ -20,7 +20,7 @@ from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.terra import TerraClient
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, START_TIME_TO_THREE_HOUR_TIME_BLOCKS, THREE_HOUR_TIME_BLOCK_START_TIMES_LIST, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
     date_validator,
@@ -1115,6 +1115,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         dict
             JSON encoded dict containing:
             - user_id
+            - wearable
             - average_glucose - mg/dL
             - standard_deviation
             - glucose_management_indicator - percentage
@@ -1130,8 +1131,8 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
         end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
 
-        """Calculate Average Glucose"""
-        #  Begin with defining each stage of the pipeline
+        # Calculate Average Glucose
+        # Begin with defining each stage of the pipeline
 
         # Filter documents on user_id, wearable, and date range
         stage_match_user_id_and_wearable = {
@@ -1158,7 +1159,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                     '$avg': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
                     },
                 'standard_deviation': {
-                    '$stdDevPop': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
+                    '$stdDevSamp': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
                 }
             }
         }
@@ -1206,7 +1207,6 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         }
 
         return payload
-        
 
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
@@ -1230,7 +1230,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         user_id : int
             User ID number.
         wearable: str
-            wearable used to measure blood glucose data
+            wearable used to measure blood pressure data
 
         Query Parameters
         ----------
@@ -1356,5 +1356,268 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             'diastolic_bp_coefficient_of_variation': data.get('diastolic_bp_coefficient_of_variation'),
             'systolic_bp_coefficient_of_variation': data.get('systolic_bp_coefficient_of_variation'),
         }
+
+        return payload
+
+
+@ns_v2.route('/calculations/blood-pressure/30-day-hourly/<int:user_id>/<string:wearable>')
+class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
+    @token_auth.login_required
+    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
+    @responds(schema=WearablesV2BloodPressureCalculationOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        """ Get calculated values related to hourly blood pressure wearable data.
+
+        This route will return hourly blood pressure data for a particular user_id, wearable, and timestamp range with the default date being the previous 30 days.
+        The data is grouped into 8 time blocks with each being 3 hours long (0-3, 3-6, 6-9, etc...). See below for exact calculations being returned.
+
+        Path Parameters
+        ----------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood pressure data
+
+        Query Parameters
+        ----------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 30 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+            - user_id
+            - wearable
+            - block_one - Data for the first time block - (0-3)
+            - block_two - Data for the second time block - (3-6)
+            - block_three - Data for the third time block - (6-9)
+            - block_four - Data for the fourth time block - (9-12)
+            - block_five - Data for the fifth time block - (12-15)
+            - block_six - Data for the sixth time block - (15-18)
+            - block_seven - Data for the seventh time block - (18-21)
+            - block_eight - Data for the eighth time block - (21-24)
+
+            Each time block will be a dict containing:
+            - total_bp_readings - Number of blood pressure readings
+            - total_pulse_readings - Number of heart rate readings
+            - average_systolic - average systolic value in mmHg
+            - average_diastolic - average diastolic value in mmHg
+            - min_systolic - Min systolic value
+            - min_diastolic - Min diastolic value
+            - max_systolic - Max systolic value
+            - max_diastolic - Max diastolic value
+            - average_pulse - average pulse value in bpm
+        """
+
+        payload = {}
+        wearable = parse_wearable(wearable)
+
+        # Default dates
+        end_date = datetime.utcnow()
+        start_date = end_date - THIRTY_DAYS
+
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
+
+        # Stages for blood pressure calculations
+
+        # Filter documents on user_id, wearable
+        stage_match_user_id_and_wearable = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
+                    '$gte': start_date - timedelta(days=1),
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Unwind the blood_pressure_samples array so that we can operate on each individual sample
+        stage_unwind_bp_samples = {
+            '$unwind': '$data.body.blood_pressure_data.blood_pressure_samples'
+        }
+
+        # Filter on the timestamp of each blood pressure sample
+        stage_match_date_range_bp = {
+            '$match': {
+                'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Add the hour field so that we can group all samples based on the hour they were taken
+        stage_add_hour_bp = {
+            '$addFields': {
+                'hour': { '$hour': '$data.body.blood_pressure_data.blood_pressure_samples.timestamp'}
+            }
+        }
+
+        # Place documents in buckets by time block. Each time block is three hours long starting with 0-3 and ending with 21-24
+        # After that, calculate total readings, averages, min, and max
+        stage_bucket_and_calculate_bp = {
+            '$bucket': {
+                'groupBy': '$hour',
+                'boundaries': THREE_HOUR_TIME_BLOCK_START_TIMES_LIST,
+                'output': {
+                    'total_bp_readings': {'$sum': 1},
+                'average_systolic': { 
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                    },
+                'average_diastolic': { 
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                    },
+                'min_systolic': {
+                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'min_diastolic': {
+                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                },
+                'max_systolic': {
+                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'max_diastolic': {
+                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                }
+                }
+            }
+        }
+
+        # Round averages
+        stage_round_averages_bp = {
+            '$project': {
+                'total_bp_readings': '$total_bp_readings',
+                'average_systolic': { 
+                    '$round': ['$average_systolic', 0]
+                    },
+                'average_diastolic': { 
+                    '$round': ['$average_diastolic', 0]
+                    },
+                'min_systolic': '$min_systolic',
+                'min_diastolic': '$min_diastolic',
+                'max_systolic': '$max_systolic',
+                'max_diastolic': '$max_diastolic'
+            }
+        }
+
+
+        # Stages for pulse - making another call because the location of the pulse data is nested in another part of the Terra schema
+
+        # Unwind the hr_samples array so that we can operate on each individual sample
+        stage_unwind_hr_samples = {
+            '$unwind': '$data.body.heart_data.detailed.hr_samples'
+        }
+
+        # Filter on the timestamp of each hr_sample
+        stage_match_date_range_pulse = {
+            '$match': {
+                'data.body.heart_data.detailed.hr_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Add the hour field so that we can group all samples based on the hour they were taken
+        stage_add_hour_pulse = {
+            '$addFields': {
+                'hour': { '$hour': '$data.body.heart_data.detailed.hr_samples.timestamp'}
+            }
+        }
+
+        # Place documents in buckets by time block. Each time block is three hours long starting with 0-3 and ending with 21-24
+        # After that, calculate average and total readings
+        stage_bucket_and_calculate_pulse = {
+            '$bucket': {
+                'groupBy': '$hour',
+                'boundaries': THREE_HOUR_TIME_BLOCK_START_TIMES_LIST,
+                'output': {
+                    'average_pulse': { 
+                            '$avg': '$data.body.heart_data.detailed.hr_samples.bpm'
+                        },
+                    'total_pulse_readings': {'$sum': 1}
+                }
+            }
+        }
+
+        # Round averages
+        stage_round_averages_pulse = {
+            '$project': {
+                'total_pulse_readings': '$total_pulse_readings',
+                'average_pulse': { 
+                    '$round': ['$average_pulse', 0]
+                    }
+            }
+        }
+
+        # Build blood pressure pipeline
+        blood_pressure_pipeline = [
+            stage_match_user_id_and_wearable,
+            stage_unwind_bp_samples,
+            stage_match_date_range_bp,
+            stage_add_hour_bp,
+            stage_bucket_and_calculate_bp,
+            stage_round_averages_bp
+        ]
+
+        # Build pulse pipeline
+        pulse_pipeline = [
+            stage_match_user_id_and_wearable,
+            stage_unwind_hr_samples,
+            stage_match_date_range_pulse,
+            stage_add_hour_pulse,
+            stage_bucket_and_calculate_pulse,
+            stage_round_averages_pulse
+        ]
+
+        # Store blood pressure data
+
+        # MongoDB pipelines return a cursor
+        cursor = mongo.db.wearables.aggregate(blood_pressure_pipeline)
+        bp_document_list = list(cursor)
+
+        # Loop through each document (time block bucket) and add blood pressuredata for that time block to the payload
+        if bp_document_list:
+            for doc in bp_document_list:
+                time_block = START_TIME_TO_THREE_HOUR_TIME_BLOCKS[doc.get('_id')]
+                time_block_data = {
+                    'total_bp_readings': doc.get('total_bp_readings'),
+                    'average_systolic': doc.get('average_systolic'),
+                    'average_diastolic': doc.get('average_diastolic'),
+                    'min_systolic': doc.get('min_systolic'),
+                    'min_diastolic': doc.get('min_diastolic'),
+                    'max_systolic': doc.get('max_systolic'),
+                    'max_diastolic': doc.get('max_diastolic')
+                }
+                payload[time_block] = time_block_data
+
+        # Store pulse data
+
+        # MongoDB pipelines return a cursor
+        cursor = mongo.db.wearables.aggregate(pulse_pipeline)
+        pulse_document_list = list(cursor)
+
+        # Loop through each document (time block bucket) and add pulse data for that time block to the payload
+        if pulse_document_list:
+            for doc in pulse_document_list:
+                time_block = START_TIME_TO_THREE_HOUR_TIME_BLOCKS[doc.get('_id')]
+
+                payload[time_block]['average_pulse'] = doc.get('average_pulse')
+                payload[time_block]['total_pulse_readings'] = doc.get('total_pulse_readings')
+
+        # Add user_id and wearable to payload and return
+        payload['user_id'] = user_id
+        payload['wearable'] = wearable
 
         return payload
