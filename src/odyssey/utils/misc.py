@@ -1274,3 +1274,39 @@ def create_wearables_filter_query(user_id: int, wearable: str, start_date: datet
 
     
     return filters, specification
+
+def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta(days = 7)):
+    """
+    Generate a start and end range for wearables data retrieval. 
+
+    Parameters
+    ----------
+    start_time : str, optional
+        ISO formatted date string
+    end_time : str, optional
+        ISO formatted date string
+    time_range : timedelta, default=timedelta(days=7)
+        A timedelta object representing the default duration of the data range.
+
+    Returns
+    -------
+    tuple
+        start_time and end_time datetime objects.
+    """
+    if start_time and end_time:
+        start_time = iso_string_to_iso_datetime(start_time) 
+        end_time = iso_string_to_iso_datetime(end_time) 
+        if start_time > end_time:
+            raise BadRequest("start_time must occur before end_time")
+    elif start_time:
+        start_time = iso_string_to_iso_datetime(start_time) 
+        end_time = start_time + time_range
+    elif end_time:
+        end_time = iso_string_to_iso_datetime(end_time) 
+        start_time = end_time - time_range
+    else:
+        end_time = datetime.utcnow()
+        start_time = end_time - time_range
+
+    return start_time, end_time
+    

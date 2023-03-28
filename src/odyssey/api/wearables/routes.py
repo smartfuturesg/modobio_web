@@ -25,6 +25,7 @@ from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, START_TIME_TO_THREE_HOUR_TIME_BLOCKS, THREE_HOUR_TIME_BLOCK_START_TIMES_LIST, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
+    date_range,
     date_validator,
     lru_cache_with_ttl,
     iso_string_to_iso_datetime,
@@ -1253,19 +1254,14 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     def get(self, user_id, wearable):
         wearable = parse_wearable(wearable)
 
-        # Default dates
-        today = datetime.utcnow()
-        start = today - timedelta(weeks=2)
+        start_date, end_date = date_range(
+            start_time = request.args.get('start_date'), 
+            end_time = request.args.get('end_date'),
+            time_range = timedelta(weeks=2))
         increments = request.args.get('increment_mins', 15, type=int)
         
         boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
         boundaries[-1] = 1440 # last index must be 1440
-
-        if not all([request.args.get('start_date'), request.args.get('end_date')]):
-            raise BadRequest("Start and end data required.")
-        
-        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) 
-        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) 
 
         # Filter documents on user_id, wearable, and date range
         stage_1_match_user_id_and_wearable = {
