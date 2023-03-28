@@ -1228,8 +1228,8 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        start_date = datetime.utcnow()
-        end_date = start_date + THIRTY_DAYS
+        end_date = datetime.utcnow()
+        start_date = end_date - THIRTY_DAYS
 
         #Override default dates if requested dates are passed in
         if request.args.get('start_date') and request.args.get('end_date'):
