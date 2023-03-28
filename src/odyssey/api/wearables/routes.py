@@ -1122,11 +1122,14 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        today = datetime.utcnow()
-        start = today - ONE_WEEK
-
-        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
-        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+        start_date = today - ONE_WEEK
+        end_date = datetime.utcnow()
+       
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date')) 
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date')) 
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
 
         """Calculate Average Glucose"""
         #  Begin with defining each stage of the pipeline
