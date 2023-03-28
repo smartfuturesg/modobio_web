@@ -31,35 +31,23 @@ def test_blood_glucose_calculations_client_permission(test_client, add_blood_glu
 
 def test_blood_glucose_calculations_start_date_param(test_client, add_blood_glucose_data):
 
-    # Test passing in a start_date of 4 weeks ago. This should pick up both of our blood glucose entries
+    # Test passing in a start_date of 4 weeks ago. This should fail because we didn't pass in both params or neither.
     response = test_client.get(
         f'/v2/wearables/calculations/blood-glucose/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?start_date={datetime.utcnow() - timedelta(weeks=4)}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
-    assert response.status_code == 200
-    assert response.json.get('user_id') == test_client.client_id
-    assert response.json.get('wearable') == BLOOD_GLUCOSE_WEARABLE
-    assert response.json.get('average_glucose') == 112
-    assert response.json.get('standard_deviation') == 22.8
-    assert response.json.get('glucose_variability') == 20.2
-    assert response.json.get('glucose_management_indicator') == 6.0
-
+    assert response.status_code == 400
+   
 def test_blood_glucose_calculations_end_date_param(test_client, add_blood_glucose_data):
 
-    # Test passing in an end date of 3 days ago. This shoudn't pick up any of our entries
+    # Test passing in an end date of 3 days ago. This should fail because we didn't pass in both params or neither.
     response = test_client.get(
         f'/v2/wearables/calculations/blood-glucose/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?end_date={datetime.utcnow() - timedelta(days=3)}',
         headers=test_client.staff_auth_header,
         content_type='application/json')
 
-    assert response.status_code == 200
-    assert response.json.get('user_id') == test_client.client_id
-    assert response.json.get('wearable') == BLOOD_GLUCOSE_WEARABLE
-    assert response.json.get('average_glucose') == None
-    assert response.json.get('standard_deviation') == None
-    assert response.json.get('glucose_variability') == None
-    assert response.json.get('glucose_management_indicator') == None
+    assert response.status_code == 400
 
 def test_blood_glucose_calculations_start_and_end_date_param(test_client, add_blood_glucose_data):
 
