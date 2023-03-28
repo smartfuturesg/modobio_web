@@ -751,6 +751,7 @@ def supported_wearables() -> dict:
         'GOOGLE': 'Google Fit',
         'GOOGLEFIT': 'Google Fit (SDK)',
         'IFIT': 'iFit',
+        'OMRONUS': 'Omron',
         'TEMPO': 'Tempo Fit',
         'TRAININGPEAKS': 'Training Peaks',
         'WEAROS': 'Wear OS'}
@@ -785,7 +786,7 @@ def supported_wearables() -> dict:
         'MYFITNESSPAL',
         'NOLIO',
         'NUTRACHECK',
-        'OMRONUS',
+        'OMRON',
         'PELOTON',
         'PUL',
         'REALTIME',
