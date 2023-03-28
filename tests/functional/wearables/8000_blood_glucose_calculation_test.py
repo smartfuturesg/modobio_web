@@ -76,3 +76,24 @@ def test_blood_glucose_calculations_start_and_end_date_param(test_client, add_bl
     assert response.json.get('standard_deviation') == 10
     assert response.json.get('glucose_variability') == 10
     assert response.json.get('glucose_management_indicator') == 5.7
+
+def test_cgm_percentiles_calculation(test_client, add_cgm_data):
+
+    start_time = add_cgm_data["data_start_time"]
+    end_time = add_cgm_data["data_end_time"]
+
+    response = test_client.get(
+        f'/v2/wearables/calculations/blood-glucose/cgm/percentiles/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?start_date={start_time}&end_date={end_time}',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+
+    assert response.status_code == 200
+    assert response.json["bin_size_mins"] == 15
+    assert response.json["data"][0]["minute"] == 0
+    assert response.json["data"][0]["count"] == 42
+    assert response.json["data"][0]["percentile_50th"] == 96.24
+    assert response.json["data"][-1]["count"] == 42
+    assert response.json["data"][-1]["percentile_75th"] == 114.09
+    assert response.json["data"][-1]["minute"] == 1425
+    assert len(response.json["data"]) == 96
+    

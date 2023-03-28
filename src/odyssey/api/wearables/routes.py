@@ -1,4 +1,6 @@
 import base64
+import logging
+from math import ceil
 import secrets
 from datetime import time, timedelta
 
@@ -1471,6 +1473,246 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
     
         return payload
 
+@ns_v2.route('/calculations/blood-glucose/cgm/percentiles/<int:user_id>/<string:wearable>')
+class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
+    @token_auth.login_required(user_type=('client', 'provider'))
+    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'increment_mins': 'bin sizes in minutes'})
+    @responds(schema=WearablesV2CGMPercentilesOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        wearable = parse_wearable(wearable)
+
+        # Default dates
+        today = datetime.utcnow()
+        start = today - timedelta(weeks=2)
+        increments = request.args.get('increment_mins', 15, type=int)
+        
+        boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
+        boundaries[-1] = 1440 # last index must be 1440
+
+        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
+        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+
+        # Filter documents on user_id, wearable, and date range
+        stage_1_match_user_id_and_wearable = {
+            "$match": {
+                "user_id": user_id,
+                "wearable": wearable,
+                "timestamp": {"$gte": start_date - timedelta(days=1), "$lte": end_date},
+            }
+        }
+
+        # bring just the glucose samples up
+        stage_2_project_glucose_sample_only = {"$project": {"_id": 0, "samples": "$data.body.glucose_data.blood_glucose_samples"}}
+
+        # unwind the samples
+        stage_3_unwind = {"$unwind": "$samples"}
+
+        # project the timestamp and glucose sample into their own fields
+        stage_4_project_samples_parse_timestamp = {
+            "$project": {
+                "timestamp": "$samples.timestamp",
+                "sample": "$samples.blood_glucose_mg_per_dL",
+                "24hr_minute": {
+                    "$add": [
+                        {"$multiply": [{"$hour": "$samples.timestamp"}, 60]},
+                        {"$minute": "$samples.timestamp"},
+                    ]
+                },
+            }
+        }
+
+
+        # match on sample timestamp
+        stage_5_match_on_samples = {
+            "$match": {
+                "timestamp": {
+                    "$gte": start_date,
+                    "$lte": end_date, }
+            }
+        }
+
+        # bucket by minute in 24 hr day     
+        stage_6_bucket = {
+                "$bucket": {
+                    "groupBy": "$24hr_minute",
+                    "boundaries": boundaries,
+                    "output": {
+                        "count": {"$sum": 1},
+                        "avg_glucose": {"$avg": "$sample"},
+                        "samples": {"$push": "$sample"},  },
+            }
+        }
+        # sort samples in each bucket
+        stage_7_sort_samples = {
+            "$project": {
+                "samplesSorted": {"$sortArray": {"input": "$samples", "sortBy": 1}},
+                "count": {"$toInt": '$count'},
+                "avg_glucose": 1,
+            },
+        }
+
+        stage_8_calculate_percentiles = {
+            "$project": {
+                "minute": "$_id",
+                "_id": 0,
+                "count": 1,
+                "avg_glucose_mg_per_dL": {"$round": ["$avg_glucose", 2]},
+                "min": {"$round": [{"$arrayElemAt": ["$samplesSorted", 0]}, 2]},
+                "max": {"$round": [{"$arrayElemAt": ["$samplesSorted", -1]}, 2]},
+                "percentile_5th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$cond": {
+                                        "if": {
+                                            "$gt": [
+                                                {
+                                                    "$round": {
+                                                        "$subtract": [
+                                                            {"$multiply": ["$count", 0.05]},
+                                                            1,
+                                                        ]
+                                                    }
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "then": {
+                                            "$round": [
+                                                {
+                                                    "$subtract": [
+                                                        {"$multiply": ["$count", 0.05]},
+                                                        1,
+                                                    ]
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "else": 0,
+                                    }
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_25th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$cond": {
+                                        "if": {
+                                            "$gt": [
+                                                {
+                                                    "$round": {
+                                                        "$subtract": [
+                                                            {"$multiply": ["$count", 0.25]},
+                                                            1,
+                                                        ]
+                                                    }
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "then": {
+                                            "$round": [
+                                                {
+                                                    "$subtract": [
+                                                        {"$multiply": ["$count", 0.25]},
+                                                        1,
+                                                    ]
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "else": 0,
+                                    }
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_50th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.50]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_75th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.75]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_95th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.95]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+            }
+        }
+        
+        cursor = mongo.db.wearables.aggregate(
+            [
+            stage_1_match_user_id_and_wearable,
+            stage_2_project_glucose_sample_only,
+            stage_3_unwind,
+            stage_4_project_samples_parse_timestamp,
+            stage_5_match_on_samples,
+            stage_6_bucket,
+            stage_7_sort_samples,
+            stage_8_calculate_percentiles
+            ])
+        
+
+        data = list(cursor)
+
+        # Build and return payload
+        payload = {
+            "user_id": user_id,
+            "wearable": wearable,
+            "data": data,
+            "bin_size_mins": increments,     }
+
+        return payload
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
     @token_auth.login_required
@@ -1621,3 +1863,4 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         }
 
         return payload
+
