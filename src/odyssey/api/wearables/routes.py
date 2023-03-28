@@ -1122,8 +1122,8 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        start_date = today - ONE_WEEK
         end_date = datetime.utcnow()
+        start_date = end_date - ONE_WEEK
        
         if request.args.get('start_date') and request.args.get('end_date'):
             start_date = iso_string_to_iso_datetime(request.args.get('start_date')) 
