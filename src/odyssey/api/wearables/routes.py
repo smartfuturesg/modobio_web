@@ -1252,6 +1252,31 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                 'increment_mins': 'bin sizes in minutes'})
     @responds(schema=WearablesV2CGMPercentilesOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
+        """
+        Calculates binned percentiles of CGM data for a specified date range. The glucose
+        samples are grouped by time they are taken in a 24 hour day. 
+
+        Path Parameters
+        ---------------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood glucose data
+
+        Query Parameters
+        ----------------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 7 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+        """
+
         wearable = parse_wearable(wearable)
 
         start_date, end_date = date_range(
