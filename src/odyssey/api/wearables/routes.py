@@ -1477,9 +1477,12 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         # Build and return payload
         payload = {
             "user_id": user_id,
+            "start_time": start_date,
+            "end_time": end_date,
             "wearable": wearable,
             "data": data,
-            "bin_size_mins": increments,     }
+            "bin_size_mins": increments,
+        }
 
         return payload
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')

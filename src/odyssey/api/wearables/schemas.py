@@ -187,6 +187,8 @@ class WearablesV2CGMPercentilesOutputSchema(Schema):
     data = fields.Nested(WearablesCGMPercentiles(many = True))
     wearable = fields.String(required=True)
     bin_size_mins = fields.Integer()
+    start_time = fields.DateTime()
+    end_time = fields.DateTime()
 class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
     average_systolic = fields.Integer(default=None)
     average_diastolic = fields.Integer(default=None)
