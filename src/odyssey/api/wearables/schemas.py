@@ -163,22 +163,11 @@ class WearablesV2UserAuthUrlInputSchema(Schema):
 class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    average_glucose = fields.Integer(missing=None)
+    average_glucose = fields.Float(missing=None)
     standard_deviation = fields.Float(missing=None)
     glucose_management_indicator = fields.Float(missing=None)
     glucose_variability = fields.Float(missing=None)
 
-    @post_dump
-    def make_object(self, in_data, **kwargs):
-        # Round the calculations if they are not null
-        if in_data.get('standard_deviation'):
-            in_data['standard_deviation'] = round(in_data.get('standard_deviation'), 1)
-        if in_data.get('glucose_management_indicator'):
-            in_data['glucose_management_indicator'] = round(in_data.get('glucose_management_indicator'), 1)
-        if in_data.get('glucose_variability'):
-            in_data['glucose_variability'] = round(in_data.get('glucose_variability'), 1)
-
-        return in_data
     
 class WearablesCGMPercentiles(Schema):
     count = fields.Integer()
@@ -198,30 +187,35 @@ class WearablesV2CGMPercentilesOutputSchema(Schema):
     data = fields.Nested(WearablesCGMPercentiles(many = True))
     wearable = fields.String(required=True)
     bin_size_mins = fields.Integer()
+class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
+    average_systolic = fields.Integer(default=None)
+    average_diastolic = fields.Integer(default=None)
+    average_pulse = fields.Integer(default=None)
+    min_systolic = fields.Integer(default=None)
+    max_systolic = fields.Integer(default=None)
+    min_diastolic = fields.Integer(default=None)
+    max_diastolic = fields.Integer(default=None)
+    total_bp_readings = fields.Integer(default=0)
+    total_pulse_readings = fields.Integer(default=0)
+
+class WearablesV2BloodPressureCalculationOutputSchema(Schema):
+    user_id = fields.Integer(required=True)
+    wearable = fields.String(required=True)
+    block_one = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_two = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_three = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_four = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_five = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_six = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_seven = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
+    block_eight = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
 
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    diastolic_bp_avg = fields.Float(default=None)
-    systolic_bp_avg = fields.Float(default=None)
-    diastolic_standard_deviation = fields.Float(default=None)
-    systolic_standard_deviation = fields.Float(default=None)
-    diastolic_bp_coefficient_of_variation = fields.Float(default=None)
-    systolic_bp_coefficient_of_variation = fields.Float(default=None)
-
-    @post_dump
-    def make_object(self, data, **kwargs):
-        # Round the calculations if they are not null
-        data_points = [
-            'diastolic_bp_avg',
-            'systolic_bp_avg',
-            'diastolic_standard_deviation',
-            'systolic_standard_deviation',
-            'diastolic_bp_coefficient_of_variation',
-            'systolic_bp_coefficient_of_variation',
-        ]
-        for datum in data_points:
-            if data.get(datum):
-                data[datum] = int(round(data.get(datum), 0))
-
-        return data
+    diastolic_bp_avg = fields.Integer(default=None)
+    systolic_bp_avg = fields.Integer(default=None)
+    diastolic_standard_deviation = fields.Integer(default=None)
+    systolic_standard_deviation = fields.Integer(default=None)
+    diastolic_bp_coefficient_of_variation = fields.Integer(default=None)
+    systolic_bp_coefficient_of_variation = fields.Integer(default=None)

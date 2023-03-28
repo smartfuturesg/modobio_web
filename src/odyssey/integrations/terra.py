@@ -1,15 +1,13 @@
-import logging
-
 from datetime import datetime
-
-import terra
-
 from flask import current_app
+import logging
 from sqlalchemy import select
+import terra
 from terra.api.api_responses import TerraApiResponse, ConnectionErrorHookResponse
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db, mongo
+from odyssey.api.doctor.models import MedicalBloodPressures
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.utils.constants import WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
@@ -35,10 +33,10 @@ class TerraClient(terra.Terra):
     """
 
     def __init__(
-        self,
-        terra_api_key: str = None,
-        terra_dev_id: str = None,
-        terra_api_secret: str = None
+            self,
+            terra_api_key: str = None,
+            terra_dev_id: str = None,
+            terra_api_secret: str = None
     ):
         """ Initialize :class:``TerraClient``.
 
@@ -66,7 +64,7 @@ class TerraClient(terra.Terra):
             terra_api_secret = current_app.config['TERRA_API_SECRET']
         super().__init__(terra_api_key, terra_dev_id, terra_api_secret)
 
-    def status(self, response: TerraApiResponse, raise_on_error: bool=True):
+    def status(self, response: TerraApiResponse, raise_on_error: bool = True):
         """ Handles various response status messages from Terra.
 
         If status is:
@@ -187,7 +185,7 @@ class TerraClient(terra.Terra):
             self.status(response, raise_on_error=False)
 
             if not current_app.debug:
-                #Add device tag to users active campaign account
+                # Add device tag to users active campaign account
                 ac = ActiveCampaign()
                 ac.add_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
@@ -253,7 +251,7 @@ class TerraClient(terra.Terra):
             f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
         
         if not current_app.debug:
-            #Removes device tag association from users active campaign account
+            # Removes device tag association from users active campaign account
             ac = ActiveCampaign()
             ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
@@ -289,8 +287,8 @@ class TerraClient(terra.Terra):
         user_id = (db.session.execute(
             select(WearablesV2.user_id)
             .filter_by(terra_user_id=terra_user_id))
-            .scalars()
-            .one_or_none())
+                   .scalars()
+                   .one_or_none())
 
         if not user_id:
             logger.error(f'User id not found for incoming data for Terra user id {terra_user_id}.')
@@ -303,3 +301,22 @@ class TerraClient(terra.Terra):
                 {'user_id': user_id, 'wearable': wearable, 'timestamp': data['metadata']['start_time']},
                 {'$set': {f'data.{data_type}': data}},
                 upsert=True)
+
+            # check for OMRON data
+            if wearable == 'OMRONUS':  # if so, there is bp data
+                # loop through each individual sample
+                for sample in data['body']['blood_pressure_data']['blood_pressure_samples']:
+                    mbps = MedicalBloodPressures(
+                        datetime_taken=sample['timestamp'],
+                        user_id=user_id,
+                        report_id=user_id,
+                        device_name=response.get_json()['user']['provider'],
+                        source='Device',
+                        systolic=sample['systolic_bp'],
+                        diastolic=sample['diastolic_bp'],
+                        pulse=None,
+                    )
+                    db.session.add(mbps)
+
+                db.session.commit()  # only commit once
+                # db.session.flush()  # do I have to flush too?
