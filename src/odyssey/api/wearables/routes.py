@@ -907,7 +907,7 @@ class WearablesV2DataEndpoint(BaseResource):
         start_date, end_date = date_range(
             start_time = request.args.get('start_date'), 
             end_time = request.args.get('end_date'),
-            time_range = timedelta(days=30))
+            time_range = timedelta(weeks=1))
 
         query_specification = request.args.getlist('query_specification', str)
         query = create_wearables_filter_query(user_id, wearable, start_date, end_date, query_specification)

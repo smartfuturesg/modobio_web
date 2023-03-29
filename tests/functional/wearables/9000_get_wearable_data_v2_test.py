@@ -24,7 +24,12 @@ def test_get_fitbit_document_with_start_date(test_client, fitbit_data):
         headers=test_client.staff_auth_header,
         content_type='application/json')
     
-    assert response.status_code == 400
+    data = response.json
+
+    assert len(data['results']) == 1
+    assert data['results'][0]['user_id'] == test_client.client_id
+    assert data['results'][0]['wearable'] == 'FITBIT'
+    assert 'Athlete' in data['results'][0]['data']
 
 def test_get_fitbit_document_with_start_and_end_date(test_client, fitbit_data):
 
