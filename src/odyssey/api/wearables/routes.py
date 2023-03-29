@@ -904,16 +904,10 @@ class WearablesV2DataEndpoint(BaseResource):
         """
         wearable = parse_wearable(wearable)
 
-        # Default dates
-        end_date = datetime.utcnow()
-        start_date = end_date - ONE_WEEK
-
-        #Override default dates if requested dates are passed in
-        if request.args.get('start_date') and request.args.get('end_date'):
-            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
-            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
-        elif request.args.get('start_date') or request.args.get('end_date'):
-            raise BadRequest('Provide both or neither start_date and end_date.')
+        start_date, end_date = date_range(
+            start_time = request.args.get('start_date'), 
+            end_time = request.args.get('end_date'),
+            time_range = timedelta(days=30))
 
         query_specification = request.args.getlist('query_specification', str)
         query = create_wearables_filter_query(user_id, wearable, start_date, end_date, query_specification)
@@ -1261,16 +1255,10 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
         payload = {}
         wearable = parse_wearable(wearable)
 
-        # Default dates
-        end_date = datetime.utcnow()
-        start_date = end_date - THIRTY_DAYS
-
-        #Override default dates if requested dates are passed in
-        if request.args.get('start_date') and request.args.get('end_date'):
-            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
-            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
-        elif request.args.get('start_date') or request.args.get('end_date'):
-            raise BadRequest('Provide both or neither start_date and end_date.')
+        start_date, end_date = date_range(
+            start_time = request.args.get('start_date'), 
+            end_time = request.args.get('end_date'),
+            time_range = timedelta(days=30))
 
         # Filter documents on user_id, wearable
         stage_match_user_id_and_wearable = {
