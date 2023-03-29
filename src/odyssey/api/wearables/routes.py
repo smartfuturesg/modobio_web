@@ -899,11 +899,37 @@ class WearablesV2DataEndpoint(BaseResource):
     })
     @responds(schema=WearablesV2UserDataGetSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
-        """ Get data for this combination of user and wearable device for the default date range. 
-            Optionally filters data by date range and allows to specify the fields of data to be returned.
         """
+        Gets the wearable data stored for an user.
+        Allows to specify the specific fields of data to be returned. 
+
+        Path Parameters
+        ---------------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood glucose data
+
+        Query Parameters
+        ----------------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 7 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+        query_specification: str
+            The specific field or object in the 'data' object to be returned. Ex. (data.daily.heart_rate_data)
+            Request multiple values by using multiple 'query_specification' params along with the value.
+
+        Returns
+        -------
+        dict
+        """
+
         wearable = parse_wearable(wearable)
 
+        #Gets start and end date ranges. Defaults to one week if one or none is provided
         start_date, end_date = date_range(
             start_time = request.args.get('start_date'), 
             end_time = request.args.get('end_date'),
@@ -1251,10 +1277,33 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
     })
     @responds(schema=WearablesV2BloodGlucoseTimeInRangesOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
-        """ Get time in ranges for continuous blood glucose readings."""
+        """
+        Calculates time in ranges for CGM data for a specified date range.
+
+        Path Parameters
+        ---------------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood glucose data
+
+        Query Parameters
+        ----------------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 7 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+        """
         payload = {}
         wearable = parse_wearable(wearable)
 
+        #Gets start and end dates ranges. Defaults to 30 days if one or none is provided
         start_date, end_date = date_range(
             start_time = request.args.get('start_date'), 
             end_time = request.args.get('end_date'),
