@@ -187,6 +187,8 @@ class WearablesV2CGMPercentilesOutputSchema(Schema):
     data = fields.Nested(WearablesCGMPercentiles(many = True))
     wearable = fields.String(required=True)
     bin_size_mins = fields.Integer()
+    start_time = fields.DateTime()
+    end_time = fields.DateTime()
 class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
     average_systolic = fields.Integer(default=None)
     average_diastolic = fields.Integer(default=None)
@@ -213,12 +215,12 @@ class WearablesV2BloodPressureCalculationOutputSchema(Schema):
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    diastolic_bp_avg = fields.Float(default=None)
-    systolic_bp_avg = fields.Float(default=None)
-    diastolic_standard_deviation = fields.Float(default=None)
-    systolic_standard_deviation = fields.Float(default=None)
-    diastolic_bp_coefficient_of_variation = fields.Float(default=None)
-    systolic_bp_coefficient_of_variation = fields.Float(default=None)
+    diastolic_bp_avg = fields.Integer(default=None)
+    systolic_bp_avg = fields.Integer(default=None)
+    diastolic_standard_deviation = fields.Integer(default=None)
+    systolic_standard_deviation = fields.Integer(default=None)
+    diastolic_bp_coefficient_of_variation = fields.Integer(default=None)
+    systolic_bp_coefficient_of_variation = fields.Integer(default=None)
     
 class WearablesV2BloodGlucoseTimeInRangesSchema(Schema):
     very_low_percentage = fields.Float(load_default=None)
