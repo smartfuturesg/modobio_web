@@ -25,6 +25,7 @@ from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, START_TIME_TO_THREE_HOUR_TIME_BLOCKS, THREE_HOUR_TIME_BLOCK_START_TIMES_LIST, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
+    date_range,
     date_validator,
     lru_cache_with_ttl,
     iso_string_to_iso_datetime,
@@ -1131,11 +1132,14 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        today = datetime.utcnow()
-        start = today - ONE_WEEK
-
-        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
-        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
+        end_date = datetime.utcnow()
+        start_date = end_date - ONE_WEEK
+       
+        if request.args.get('start_date') and request.args.get('end_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date')) 
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date')) 
+        elif request.args.get('start_date') or request.args.get('end_date'):
+            raise BadRequest('Provide both or neither start_date and end_date.')
 
         # Calculate Average Glucose
         # Begin with defining each stage of the pipeline
@@ -1146,7 +1150,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                 'user_id': user_id,
                 'wearable': wearable,
                 'timestamp': {
-                    '$gte': start_date,
+                    '$gte': start_date - timedelta(days=1),
                     '$lte': end_date
                 }
             }
@@ -1155,6 +1159,16 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         # Unwind the blood_glucose_samples array so that we can operate on each individual sample
         stage_unwind_blood_glucose_samples = {
             '$unwind': '$data.body.glucose_data.blood_glucose_samples'
+        }
+
+        # Filter on the timestamp of each blood glucose sample
+        stage_match_date_range = {
+            '$match': {
+                'data.body.glucose_data.blood_glucose_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
         }
 
         # Group all of these documents together and calculate average glucose and standard deviation for the group
@@ -1184,13 +1198,33 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round values
+        stage_round_values = {
+            '$project': {
+                'average_glucose': { 
+                    '$round': ['$average_glucose', 0]
+                    },
+                'standard_deviation': { 
+                    '$round': ['$standard_deviation', 1]
+                    },
+                'glucose_management_indicator': { 
+                    '$round': ['$glucose_management_indicator', 1]
+                    },
+                'glucose_variability': { 
+                    '$round': ['$glucose_variability', 1]
+                    }
+            }
+        }
+
         # Assemble pipeline
         pipeline = [
             stage_match_user_id_and_wearable,
             stage_unwind_blood_glucose_samples,
+            stage_match_date_range,
             stage_group_average_and_std_dev,
             stage_add_gmi,
-            stage_add_glucose_variability
+            stage_add_glucose_variability,
+            stage_round_values
         ]
 
         # MongoDB pipelines return a cursor
@@ -1483,18 +1517,41 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                 'increment_mins': 'bin sizes in minutes'})
     @responds(schema=WearablesV2CGMPercentilesOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
+        """
+        Calculates binned percentiles of CGM data for a specified date range. The glucose
+        samples are grouped by time they are taken in a 24 hour day. 
+
+        Path Parameters
+        ---------------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood glucose data
+
+        Query Parameters
+        ----------------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 7 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+        """
+
         wearable = parse_wearable(wearable)
 
-        # Default dates
-        today = datetime.utcnow()
-        start = today - timedelta(weeks=2)
+        start_date, end_date = date_range(
+            start_time = request.args.get('start_date'), 
+            end_time = request.args.get('end_date'),
+            time_range = timedelta(weeks=2))
         increments = request.args.get('increment_mins', 15, type=int)
         
         boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
         boundaries[-1] = 1440 # last index must be 1440
-
-        start_date = iso_string_to_iso_datetime(request.args.get('start_date')) if request.args.get('start_date') else start
-        end_date = iso_string_to_iso_datetime(request.args.get('end_date')) if request.args.get('end_date') else today
 
         # Filter documents on user_id, wearable, and date range
         stage_1_match_user_id_and_wearable = {
@@ -1710,9 +1767,12 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         # Build and return payload
         payload = {
             "user_id": user_id,
+            "start_time": start_date,
+            "end_time": end_date,
             "wearable": wearable,
             "data": data,
-            "bin_size_mins": increments,     }
+            "bin_size_mins": increments,
+        }
 
         return payload
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
@@ -1834,6 +1894,30 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             }
         }
 
+        # Round values
+        stage_round_values = {
+            '$project': {
+                'diastolic_bp_avg': { 
+                    '$round': ['$diastolic_bp_avg', 0]
+                    },
+                'systolic_bp_avg': { 
+                    '$round': ['$systolic_bp_avg', 0]
+                    },
+                'diastolic_standard_deviation': { 
+                    '$round': ['$diastolic_standard_deviation', 0]
+                    },
+                'systolic_standard_deviation': { 
+                    '$round': ['$systolic_standard_deviation', 0]
+                    },
+                'diastolic_bp_coefficient_of_variation': { 
+                    '$round': ['$diastolic_bp_coefficient_of_variation', 0]
+                    },
+                'systolic_bp_coefficient_of_variation': { 
+                    '$round': ['$systolic_bp_coefficient_of_variation', 0]
+                    }
+                }
+        }
+
         # Assemble pipeline
         pipeline = [
             stage_match_user_id_and_wearable,
@@ -1841,6 +1925,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
+            stage_round_values
         ]
 
         # MongoDB pipelines return a cursor
