@@ -168,7 +168,27 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     glucose_management_indicator = fields.Float(missing=None)
     glucose_variability = fields.Float(missing=None)
 
+    
+class WearablesCGMPercentiles(Schema):
+    count = fields.Integer()
+    minute = fields.Integer()
+    avg_glucose_mg_per_dL = fields.Float()
+    min = fields.Float()
+    max = fields.Float()
+    min = fields.Float()
+    percentile_5th = fields.Float()
+    percentile_25th = fields.Float()
+    percentile_50th = fields.Float()
+    percentile_75th = fields.Float()
+    percentile_95th = fields.Float()
 
+class WearablesV2CGMPercentilesOutputSchema(Schema):
+    user_id = fields.Integer(required=True)
+    data = fields.Nested(WearablesCGMPercentiles(many = True))
+    wearable = fields.String(required=True)
+    bin_size_mins = fields.Integer()
+    start_time = fields.DateTime()
+    end_time = fields.DateTime()
 class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
     average_systolic = fields.Integer(default=None)
     average_diastolic = fields.Integer(default=None)

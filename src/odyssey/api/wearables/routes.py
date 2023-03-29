@@ -1,4 +1,6 @@
 import base64
+import logging
+from math import ceil
 import secrets
 from datetime import time, timedelta
 
@@ -23,6 +25,7 @@ from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, START_TIME_TO_THREE_HOUR_TIME_BLOCKS, THREE_HOUR_TIME_BLOCK_START_TIMES_LIST, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
+    date_range,
     date_validator,
     lru_cache_with_ttl,
     iso_string_to_iso_datetime,
@@ -1241,6 +1244,272 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 
         return payload
 
+@ns_v2.route('/calculations/blood-glucose/cgm/percentiles/<int:user_id>/<string:wearable>')
+class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
+    @token_auth.login_required(user_type=('client', 'provider'))
+    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+                'increment_mins': 'bin sizes in minutes'})
+    @responds(schema=WearablesV2CGMPercentilesOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        """
+        Calculates binned percentiles of CGM data for a specified date range. The glucose
+        samples are grouped by time they are taken in a 24 hour day. 
+
+        Path Parameters
+        ---------------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood glucose data
+
+        Query Parameters
+        ----------------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 7 days if not specified 
+        end_date: str
+            End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date if not specified
+
+        Returns
+        -------
+        dict
+        """
+
+        wearable = parse_wearable(wearable)
+
+        start_date, end_date = date_range(
+            start_time = request.args.get('start_date'), 
+            end_time = request.args.get('end_date'),
+            time_range = timedelta(weeks=2))
+        increments = request.args.get('increment_mins', 15, type=int)
+        
+        boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
+        boundaries[-1] = 1440 # last index must be 1440
+
+        # Filter documents on user_id, wearable, and date range
+        stage_1_match_user_id_and_wearable = {
+            "$match": {
+                "user_id": user_id,
+                "wearable": wearable,
+                "timestamp": {"$gte": start_date - timedelta(days=1), "$lte": end_date},
+            }
+        }
+
+        # bring just the glucose samples up
+        stage_2_project_glucose_sample_only = {"$project": {"_id": 0, "samples": "$data.body.glucose_data.blood_glucose_samples"}}
+
+        # unwind the samples
+        stage_3_unwind = {"$unwind": "$samples"}
+
+        # project the timestamp and glucose sample into their own fields
+        stage_4_project_samples_parse_timestamp = {
+            "$project": {
+                "timestamp": "$samples.timestamp",
+                "sample": "$samples.blood_glucose_mg_per_dL",
+                "24hr_minute": {
+                    "$add": [
+                        {"$multiply": [{"$hour": "$samples.timestamp"}, 60]},
+                        {"$minute": "$samples.timestamp"},
+                    ]
+                },
+            }
+        }
+
+
+        # match on sample timestamp
+        stage_5_match_on_samples = {
+            "$match": {
+                "timestamp": {
+                    "$gte": start_date,
+                    "$lte": end_date, }
+            }
+        }
+
+        # bucket by minute in 24 hr day     
+        stage_6_bucket = {
+                "$bucket": {
+                    "groupBy": "$24hr_minute",
+                    "boundaries": boundaries,
+                    "output": {
+                        "count": {"$sum": 1},
+                        "avg_glucose": {"$avg": "$sample"},
+                        "samples": {"$push": "$sample"},  },
+            }
+        }
+        # sort samples in each bucket
+        stage_7_sort_samples = {
+            "$project": {
+                "samplesSorted": {"$sortArray": {"input": "$samples", "sortBy": 1}},
+                "count": {"$toInt": '$count'},
+                "avg_glucose": 1,
+            },
+        }
+
+        stage_8_calculate_percentiles = {
+            "$project": {
+                "minute": "$_id",
+                "_id": 0,
+                "count": 1,
+                "avg_glucose_mg_per_dL": {"$round": ["$avg_glucose", 2]},
+                "min": {"$round": [{"$arrayElemAt": ["$samplesSorted", 0]}, 2]},
+                "max": {"$round": [{"$arrayElemAt": ["$samplesSorted", -1]}, 2]},
+                "percentile_5th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$cond": {
+                                        "if": {
+                                            "$gt": [
+                                                {
+                                                    "$round": {
+                                                        "$subtract": [
+                                                            {"$multiply": ["$count", 0.05]},
+                                                            1,
+                                                        ]
+                                                    }
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "then": {
+                                            "$round": [
+                                                {
+                                                    "$subtract": [
+                                                        {"$multiply": ["$count", 0.05]},
+                                                        1,
+                                                    ]
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "else": 0,
+                                    }
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_25th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$cond": {
+                                        "if": {
+                                            "$gt": [
+                                                {
+                                                    "$round": {
+                                                        "$subtract": [
+                                                            {"$multiply": ["$count", 0.25]},
+                                                            1,
+                                                        ]
+                                                    }
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "then": {
+                                            "$round": [
+                                                {
+                                                    "$subtract": [
+                                                        {"$multiply": ["$count", 0.25]},
+                                                        1,
+                                                    ]
+                                                },
+                                                0,
+                                            ]
+                                        },
+                                        "else": 0,
+                                    }
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_50th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.50]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_75th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.75]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+                "percentile_95th": {
+                    "$round": [
+                        {
+                            "$arrayElemAt": [
+                                "$samplesSorted",
+                                {
+                                    "$round": [
+                                        {"$subtract": [{"$multiply": ["$count", 0.95]}, 1]},
+                                        0,
+                                    ]
+                                },
+                            ]
+                        },
+                        2,
+                    ]
+                },
+            }
+        }
+        
+        cursor = mongo.db.wearables.aggregate(
+            [
+            stage_1_match_user_id_and_wearable,
+            stage_2_project_glucose_sample_only,
+            stage_3_unwind,
+            stage_4_project_samples_parse_timestamp,
+            stage_5_match_on_samples,
+            stage_6_bucket,
+            stage_7_sort_samples,
+            stage_8_calculate_percentiles
+            ])
+        
+
+        data = list(cursor)
+
+        # Build and return payload
+        payload = {
+            "user_id": user_id,
+            "start_time": start_date,
+            "end_time": end_date,
+            "wearable": wearable,
+            "data": data,
+            "bin_size_mins": increments,
+        }
+
+        return payload
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
     @token_auth.login_required
