@@ -6,6 +6,7 @@ from datetime import datetime, date, time
 
 import dateutil
 import flask.json.provider
+import pytz
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -183,6 +184,13 @@ class JSONDecoder(json.JSONDecoder):
         # Full datetime, maybe with timezone.
         try:
             return dateutil.parser.parse(string)
+        except dateutil.parser.ParserError:
+            pass
+        
+        # Some timestamps from Terra have an H:M:S format for timezone offset
+        # e.g. 2023-03-19T00:39:35-07:00:00
+        try:
+            return dateutil.parser.parse(string[:-3]).replace(tzinfo=pytz.utc)
         except dateutil.parser.ParserError:
             # Not a datetime string
             return string
