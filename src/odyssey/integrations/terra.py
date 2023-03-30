@@ -293,7 +293,6 @@ class TerraClient(terra.Terra):
         if not user_id:
             logger.error(f'User id not found for incoming data for Terra user id {terra_user_id}.')
             return
-
         # Don't use parsed_response here, want to re-deserialize JSON with our JSONProvider.
         for data in response.get_json()['data']:
             # Update existing or create new doc (upsert).
@@ -303,13 +302,13 @@ class TerraClient(terra.Terra):
                 upsert=True)
 
             # check for OMRON data
-            if wearable == 'OMRONUS':  # if so, there is bp data
+            if wearable == 'OMRONUS' and data_type == 'body':  # if so, there is bp data
                 # loop through each individual sample
-                for sample in data['body']['blood_pressure_data']['blood_pressure_samples']:
+                for sample in data['blood_pressure_data']['blood_pressure_samples']:
                     mbps = MedicalBloodPressures(
                         datetime_taken=sample['timestamp'],
                         user_id=user_id,
-                        report_id=user_id,
+                        reporter_id=user_id,
                         device_name=response.get_json()['user']['provider'],
                         source='Device',
                         systolic=sample['systolic_bp'],
