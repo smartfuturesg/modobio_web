@@ -869,7 +869,23 @@ class WearablesV2Endpoint(BaseResource):
     @responds(schema=WearablesV2ProvidersGetSchema, api=ns_v2)
     def get(self):
         """ Get a list of all supported wearable devices. """
-        return supported_wearables()
+        return {
+            "sdk_providers": {
+                "APPLE": "Apple HealthKit"
+            },
+            "providers": {
+                "COROS": "Coros",
+                "DEXCOM": "Dexcom",
+                "FITBIT": "Fitbit",
+                "FREESTYLELIBRE": "Freestyle Libre",
+                "GARMIN": "Garmin",
+                "OMRONUS": "Omron",
+                "OURA": "Oura",
+                "POLAR": "Polar",
+                "SUUNTO": "Suunto",
+                "WITHINGS": "Withings",
+            }
+        }
 
 
 @ns_v2.route('/<int:user_id>')
@@ -1033,11 +1049,11 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
         request.json_module = JSONProvider()
 
         tc = TerraClient()
-
+        
         # For testing without TERRA_API_SECRET or the need to sign every request,
         # use the next line instead of the try-except block.
         # response = terra.api.api_responses.TerraWebhookResponse(request.get_json(), dtype='hook')
-
+        
         try:
             response = tc.handle_flask_webhook(request)
         except KeyError:
