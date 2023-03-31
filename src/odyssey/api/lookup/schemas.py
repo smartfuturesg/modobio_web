@@ -406,3 +406,12 @@ class LookupKeysSchema(Schema):
 
 class LookupKeysOutputSchema(Schema):
     keys = fields.Nested(LookupKeysSchema)
+
+class LookupEmotesSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = LookupEmotes
+        exclude = ('created_at', 'updated_at')
+
+class LookupEmotesOutputSchema(Schema):
+    items = fields.Nested(LookupEmotesSchema(many=True), missing=[])
+    total_items = fields.Integer()
