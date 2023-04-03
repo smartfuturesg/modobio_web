@@ -85,3 +85,25 @@ def test_cgm_percentiles_calculation(test_client, add_cgm_data):
     assert response.json["data"][-1]["minute"] == 1425
     assert len(response.json["data"]) == 96
     
+def test_cgm_percentiles_calculation(test_client, cgm_data_multi_range):
+    start_time = cgm_data_multi_range[1]
+    end_time = cgm_data_multi_range[2]
+
+    response = test_client.get(
+        f'/v2/wearables/calculations/blood-glucose/cgm/time-in-ranges/{test_client.client_id}/{BLOOD_GLUCOSE_WEARABLE}?start_date={start_time}&end_date={end_time}',
+        headers=test_client.client_auth_header,
+        content_type='application/json')
+    
+    assert response.status_code == 200
+    assert response.json['user_id'] == test_client.client_id
+    assert response.json['wearable'] == BLOOD_GLUCOSE_WEARABLE
+    assert response.json['results']['very_low_percentage'] == 6.0
+    assert response.json['results']['very_low_total_time'] == '1 h 23 min'
+    assert response.json['results']['low_percentage'] == 6.0
+    assert response.json['results']['low_total_time'] == '1 h 23 min'
+    assert response.json['results']['target_range_percentage'] == 60.0
+    assert response.json['results']['target_range_total_time'] == '13 h 48 min'
+    assert response.json['results']['high_percentage'] == 19.0
+    assert response.json['results']['high_total_time'] == '4 h 22 min'
+    assert response.json['results']['very_high_percentage'] == 9.0
+    assert response.json['results']['very_high_total_time'] == '2 h 4 min'

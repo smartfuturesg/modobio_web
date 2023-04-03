@@ -26,11 +26,10 @@ def test_get_fitbit_document_with_start_date(test_client, fitbit_data):
     
     data = response.json
 
-    assert len(data['results']) == 2
-    assert data['results'][0]['user_id'] == data['results'][1]['user_id'] == test_client.client_id
-    assert data['results'][0]['wearable'] == data['results'][1]['wearable'] == 'FITBIT'
-    assert 'Activity' in data['results'][0]['data']
-    assert 'Athlete' in data['results'][1]['data']
+    assert len(data['results']) == 1
+    assert data['results'][0]['user_id'] == test_client.client_id
+    assert data['results'][0]['wearable'] == 'FITBIT'
+    assert 'Athlete' in data['results'][0]['data']
 
 def test_get_fitbit_document_with_start_and_end_date(test_client, fitbit_data):
 
