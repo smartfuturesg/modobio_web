@@ -205,6 +205,39 @@ class WearablesV2BloodPressureCalculationOutputSchema(Schema):
     block_seven = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
     block_eight = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
 
+class WearablesV2BloodPressureCalculationClassificationSchema(Schema):
+    normal = fields.Integer(default=0)
+    elevated = fields.Integer(default=0)
+    hypertension_stage_1 = fields.Integer(default=0)
+    hypertension_stage_2 = fields.Integer(default=0)
+    hypertensive_crisis = fields.Integer(default=0)
+    normal_percentage = fields.Integer(default=0)
+    elevated_percentage = fields.Integer(default=0)
+    hypertension_stage_1_percentage = fields.Integer(default=0)
+    hypertension_stage_2_percentage = fields.Integer(default=0)
+    hypertensive_crisis_percentage = fields.Integer(default=0)
+
+class WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema(Schema):
+    average_systolic = fields.Integer(default=None)
+    average_diastolic = fields.Integer(default=None)
+    total_bp_readings = fields.Integer(default=0)
+    total_pulse_readings = fields.Integer(default=0)
+    average_pulse = fields.Integer(default=None)
+    average_readings_per_day = fields.Float(default=None)
+
+class WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema(Schema):
+    start_date = fields.DateTime()
+    end_date = fields.DateTime()
+    general_data = fields.Nested(WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema, default={})
+    classification_data = fields.Nested(WearablesV2BloodPressureCalculationClassificationSchema, default={})
+
+class WearablesV2BloodPressureMonitoringStatisticsOutputSchema(Schema):
+    user_id = fields.Integer(required=True)
+    wearable = fields.String(required=True)
+    current_block = fields.Nested(WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema, default={})
+    prev_block = fields.Nested(WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema, default={})
+    
+    
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
