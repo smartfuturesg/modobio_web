@@ -85,7 +85,7 @@ def test_cgm_percentiles_calculation(test_client, add_cgm_data):
     assert response.json["data"][-1]["minute"] == 1425
     assert len(response.json["data"]) == 96
     
-def test_cgm_percentiles_calculation(test_client, cgm_data_multi_range):
+def test_cgm_time_in_ranges_calculations(test_client, cgm_data_multi_range):
     start_time = cgm_data_multi_range[1]
     end_time = cgm_data_multi_range[2]
 
