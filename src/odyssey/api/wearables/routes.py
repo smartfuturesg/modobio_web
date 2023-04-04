@@ -1375,6 +1375,34 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
             }
         }
 
+        # In case there are buckets that dont get filled from samples, this stage aligns the arrays 
+        # so that there are always the same number of buckets to make calculations from. 
+        # Also carries over the ID and count of any previously filled buckets 
+        stage_align_buckets = {
+            '$addFields': {
+                'samples_buckets': {
+                    '$map': {
+                        'input': [0, 53, 70, 181, 251], 
+                        'as': 'i', 
+                        'in': {
+                            '_id': '$$i', 
+                            'count': {
+                                '$cond': [
+                                    { 
+                                        '$eq': [{'$indexOfArray': ['$samples_buckets._id', '$$i']}, -1]
+                                    }, 
+                                    0, 
+                                    { 
+                                        '$arrayElemAt': ['$samples_buckets.count', {'$indexOfArray': ['$samples_buckets._id', '$$i']}]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         # Projects facet data to new document. 
         # Sorts samples buckets and samples timestamps in accending order. 
         stage_project_facet_data = {
@@ -1546,6 +1574,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
             stage_unwind_bp_samples,
             stage_match_date_range_bp_samples,
             stage_facet,
+            stage_align_buckets,
             stage_project_facet_data,
             stage_calculate_percentages,
             stage_project_total_percentages_and_times
@@ -1553,6 +1582,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
         
         cursor = mongo.db.wearables.aggregate(time_in_ranges_pipeline)
         results = list(cursor)
+        print(results)
         
         payload = {
             'user_id': user_id,
