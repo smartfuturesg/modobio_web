@@ -1382,7 +1382,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
             '$addFields': {
                 'samples_buckets': {
                     '$map': {
-                        'input': [0, 53, 70, 181, 251], 
+                        'input': [0, 54, 70, 181, 251], 
                         'as': 'i', 
                         'in': {
                             '_id': '$$i', 
