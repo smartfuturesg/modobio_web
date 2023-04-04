@@ -1582,7 +1582,6 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
         
         cursor = mongo.db.wearables.aggregate(time_in_ranges_pipeline)
         results = list(cursor)
-        print(results)
         
         payload = {
             'user_id': user_id,
