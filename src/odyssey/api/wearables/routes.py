@@ -1770,7 +1770,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         # Project those previous calculations and then calculate average_readings_per_day
         stage_project_bp = {
             '$project': {
-                'average_readings_per_day': {'$round': [{'$divide': ['$total_bp_readings', days]}, 2]},
+                'average_readings_per_day': {'$round': [{'$divide': ['$total_bp_readings', days]}, 1]},
                 'total_bp_readings': '$total_bp_readings',
                 'average_systolic': '$average_systolic',
                 'average_diastolic': '$average_diastolic'

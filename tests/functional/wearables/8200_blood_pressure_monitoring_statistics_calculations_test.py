@@ -23,7 +23,7 @@ def test_blood_pressure_monitoring_statistics_default(test_client, add_blood_pre
     assert response.json.get('current_block').get('general_data').get('total_bp_readings') == 4
     assert response.json.get('current_block').get('general_data').get('total_pulse_readings') == 4
     assert response.json.get('current_block').get('general_data').get('average_pulse') == 116
-    assert response.json.get('current_block').get('general_data').get('average_readings_per_day') == 0.13
+    assert response.json.get('current_block').get('general_data').get('average_readings_per_day') == 0.1
 
     # Current block classification data
     assert response.json.get('current_block').get('classification_data').get('normal') == 0
@@ -61,7 +61,7 @@ def test_blood_pressure_monitoring_statistics_start_date_param(test_client, add_
     assert response.json.get('current_block').get('general_data').get('total_bp_readings') == 2
     assert response.json.get('current_block').get('general_data').get('total_pulse_readings') == 2
     assert response.json.get('current_block').get('general_data').get('average_pulse') == 122
-    assert response.json.get('current_block').get('general_data').get('average_readings_per_day') == 0.14
+    assert response.json.get('current_block').get('general_data').get('average_readings_per_day') == 0.1
 
     # Current block classification data
     assert response.json.get('current_block').get('classification_data').get('normal') == 0
@@ -81,7 +81,7 @@ def test_blood_pressure_monitoring_statistics_start_date_param(test_client, add_
     assert response.json.get('prev_block').get('general_data').get('total_bp_readings') == 2
     assert response.json.get('prev_block').get('general_data').get('total_pulse_readings') == 2
     assert response.json.get('prev_block').get('general_data').get('average_pulse') == 110
-    assert response.json.get('prev_block').get('general_data').get('average_readings_per_day') == 0.14
+    assert response.json.get('prev_block').get('general_data').get('average_readings_per_day') == 0.1
 
     # Previous block classification data
     assert response.json.get('prev_block').get('classification_data').get('normal') == 0
