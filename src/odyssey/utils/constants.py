@@ -1048,10 +1048,13 @@ WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES = {
     'DEXCOM' : 'Device - Dexcom',
     'FITBIT' : 'Device - Fitbit',
     'FREESTYLELIBRESDK' : 'Device - FreeStyle Libre',
+    'GOOGLEFIT': 'Device - Google Fit',
+    'GOOGLE': 'Device - Google Fit',
     'GARMIN' : 'Device - Garmin',
     'OMRON' : 'Device - Omron',
     'OURA' : 'Device - Oura Ring',
     'POLAR' : 'Device - Polar',
     'SUUNTO' : 'Device - Suunto',
+    'SAMSUNG': 'Device - Samsung Health',
     'WITHINGS' : 'Device - Withings'
 }
