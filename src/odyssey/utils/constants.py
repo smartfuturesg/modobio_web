@@ -1049,7 +1049,7 @@ WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES = {
     'FITBIT' : 'Device - Fitbit',
     'FREESTYLELIBRESDK' : 'Device - FreeStyle Libre',
     'GARMIN' : 'Device - Garmin',
-    'OMRON' : 'Device - Omron',
+    'OMRONUS' : 'Device - Omron',
     'OURA' : 'Device - Oura Ring',
     'POLAR' : 'Device - Polar',
     'SUUNTO' : 'Device - Suunto',
