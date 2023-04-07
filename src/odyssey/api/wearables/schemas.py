@@ -227,6 +227,10 @@ class WearablesV2BloodPressureCalculationClassificationSchema(Schema):
 class WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema(Schema):
     average_systolic = fields.Integer(default=None)
     average_diastolic = fields.Integer(default=None)
+    min_systolic = fields.Integer(default=None)
+    max_systolic = fields.Integer(default=None)
+    min_diastolic = fields.Integer(default=None)
+    max_diastolic = fields.Integer(default=None)
     total_bp_readings = fields.Integer(default=0)
     total_pulse_readings = fields.Integer(default=0)
     average_pulse = fields.Integer(default=None)
