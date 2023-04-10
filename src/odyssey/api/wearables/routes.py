@@ -2427,7 +2427,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             }
         }
 
-        # Group all bp samples to calculate total and averages
+        # Group all bp samples to calculate total, averages, min, and max
         stage_group_bp = {
             '$group': {
                 '_id': None,
@@ -2438,6 +2438,18 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 'average_diastolic': { 
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
                     },
+                'min_systolic': {
+                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'min_diastolic': {
+                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                },
+                'max_systolic': {
+                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'max_diastolic': {
+                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                }
             }
         }
 
@@ -2447,7 +2459,11 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 'average_readings_per_day': {'$round': [{'$divide': ['$total_bp_readings', days]}, 1]},
                 'total_bp_readings': '$total_bp_readings',
                 'average_systolic': '$average_systolic',
-                'average_diastolic': '$average_diastolic'
+                'average_diastolic': '$average_diastolic',
+                'min_systolic': '$min_systolic',
+                'min_diastolic': '$min_diastolic',
+                'max_systolic': '$max_systolic',
+                'max_diastolic': '$max_diastolic'
             }
         }
 
@@ -2618,6 +2634,10 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         payload['current_block']['general_data'] = {}
         payload['current_block']['general_data']['average_systolic'] = data.get('average_systolic')
         payload['current_block']['general_data']['average_diastolic'] = data.get('average_diastolic')
+        payload['current_block']['general_data']['min_systolic'] = data.get('min_systolic')
+        payload['current_block']['general_data']['max_systolic'] = data.get('max_systolic')
+        payload['current_block']['general_data']['min_diastolic'] = data.get('min_diastolic')
+        payload['current_block']['general_data']['max_diastolic'] = data.get('max_diastolic')
         payload['current_block']['general_data']['total_bp_readings'] = data.get('total_bp_readings')
         payload['current_block']['general_data']['average_readings_per_day'] = data.get('average_readings_per_day')
 
@@ -2662,6 +2682,10 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         payload['prev_block']['general_data'] = {}
         payload['prev_block']['general_data']['average_systolic'] = data.get('average_systolic')
         payload['prev_block']['general_data']['average_diastolic'] = data.get('average_diastolic')
+        payload['prev_block']['general_data']['min_systolic'] = data.get('min_systolic')
+        payload['prev_block']['general_data']['max_systolic'] = data.get('max_systolic')
+        payload['prev_block']['general_data']['min_diastolic'] = data.get('min_diastolic')
+        payload['prev_block']['general_data']['max_diastolic'] = data.get('max_diastolic')
         payload['prev_block']['general_data']['total_bp_readings'] = data.get('total_bp_readings')
         payload['prev_block']['general_data']['average_readings_per_day'] = data.get('average_readings_per_day')
 

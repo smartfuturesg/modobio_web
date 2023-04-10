@@ -20,6 +20,10 @@ def test_blood_pressure_monitoring_statistics_default(test_client, add_blood_pre
     # Current block general data
     assert response.json.get('current_block').get('general_data').get('average_systolic') == 81
     assert response.json.get('current_block').get('general_data').get('average_diastolic') == 131
+    assert response.json.get('current_block').get('general_data').get('min_systolic') == 70
+    assert response.json.get('current_block').get('general_data').get('min_diastolic') == 120
+    assert response.json.get('current_block').get('general_data').get('max_systolic') == 90
+    assert response.json.get('current_block').get('general_data').get('max_diastolic') == 140
     assert response.json.get('current_block').get('general_data').get('total_bp_readings') == 4
     assert response.json.get('current_block').get('general_data').get('total_pulse_readings') == 4
     assert response.json.get('current_block').get('general_data').get('average_pulse') == 116
@@ -58,6 +62,10 @@ def test_blood_pressure_monitoring_statistics_start_date_param(test_client, add_
     # Current block general data
     assert response.json.get('current_block').get('general_data').get('average_systolic') == 77
     assert response.json.get('current_block').get('general_data').get('average_diastolic') == 137
+    assert response.json.get('current_block').get('general_data').get('min_systolic') == 70
+    assert response.json.get('current_block').get('general_data').get('min_diastolic') == 135
+    assert response.json.get('current_block').get('general_data').get('max_systolic') == 85
+    assert response.json.get('current_block').get('general_data').get('max_diastolic') == 140
     assert response.json.get('current_block').get('general_data').get('total_bp_readings') == 2
     assert response.json.get('current_block').get('general_data').get('total_pulse_readings') == 2
     assert response.json.get('current_block').get('general_data').get('average_pulse') == 122
@@ -78,6 +86,10 @@ def test_blood_pressure_monitoring_statistics_start_date_param(test_client, add_
     # Previous block general data
     assert response.json.get('prev_block').get('general_data').get('average_systolic') == 85
     assert response.json.get('prev_block').get('general_data').get('average_diastolic') == 125
+    assert response.json.get('prev_block').get('general_data').get('min_systolic') == 80
+    assert response.json.get('prev_block').get('general_data').get('min_diastolic') == 120
+    assert response.json.get('prev_block').get('general_data').get('max_systolic') == 90
+    assert response.json.get('prev_block').get('general_data').get('max_diastolic') == 130
     assert response.json.get('prev_block').get('general_data').get('total_bp_readings') == 2
     assert response.json.get('prev_block').get('general_data').get('total_pulse_readings') == 2
     assert response.json.get('prev_block').get('general_data').get('average_pulse') == 110
