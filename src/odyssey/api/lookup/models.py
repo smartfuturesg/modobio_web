@@ -5,11 +5,7 @@ not to be edited at runtime.
 import logging
 logger = logging.getLogger(__name__)
 
-from sqlalchemy.orm import relationship
-from flask import current_app
-
 from odyssey import db
-from odyssey.utils.constants import DB_SERVER_TIME, ORG_TOKEN_LIFETIME
 from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 
@@ -72,36 +68,8 @@ class LookupProfessionalAppointmentConfirmationWindow(BaseModelWithIdx):
     from 1 hour to 24 hours in 30 minute increments
     
     :type: float
-    """    
-
-class LookupTransactionTypes(BaseModelWithIdx):
-    """ Stored transaction types in database. 
     """
 
-    category = db.Column(db.String)
-    """
-    Category
-    The overall category of the transaction type.
-    
-    :type: str
-    """
-
-    name = db.Column(db.String)
-    """
-    Name
-    The name or subcategory further describing the 
-    transaction type if any.
-    
-    :type: str
-    """
-
-    icon = db.Column(db.String)
-    """
-    icon
-    Referenced image name for the FE to use
-
-    :type: str
-    """        
 
 class LookupCountriesOfOperations(BaseModelWithIdx):
     """ Stored countries of operations in database. 
@@ -385,76 +353,76 @@ class LookupActivityTrackers(BaseModelWithIdx):
     :type: bool
     """
 
-class LookupDrinks(BaseModel):
-    """ Static list of drinks that a client can purchase or be recommended. 
-    """
-
-    drink_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    """
-    Id of this drink.
-
-    :type: integer, primary key, autoincrementing
-    """
-
-    primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'), nullable=False)
-    """
-    Id of the primary goal that is aided by this drink.
-
-    :type: string
-    """
-
-    color = db.Column(db.String)
-    """
-    Color of this drink.
-
-    :type: string
-    """
-
-class LookupDrinkIngredients(BaseModelWithIdx):
-    """ List of ingredients that a drink is made up of. 
-    """
-
-    drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id'), nullable=False)
-    """
-    Id of the drink this ingredient belongs to.
-
-    :type: int, foreign key(LookupDrinks.drink_id)
-    """
-
-    is_primary_ingredient = db.Column(db.Boolean)
-    """
-    Denotes if this ingredient is they primary ingredient in the drink.
-
-    :type: boolean
-    """
-
-    is_key_additive = db.Column(db.Boolean)
-    """
-    Denotes if this ingredient is a key additive in the drink.
-
-    :type: boolean
-    """
-
-    ingredient_name = db.Column(db.String)
-    """
-    Name of the ingredient.
-
-    :type: string
-    """
-
-    amount = db.Column(db.Float)
-    """
-    Numerical value of the measurement.
-
-    :type: float
-    """
-
-    unit = db.Column(db.String)
-    """
-    Unit of the measurement.
-
-    :type: string
-    """
+# class LookupDrinks(BaseModel):
+#     """ Static list of drinks that a client can purchase or be recommended.
+#     """
+#
+#     drink_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     """
+#     Id of this drink.
+#
+#     :type: integer, primary key, autoincrementing
+#     """
+#
+#     primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'), nullable=False)
+#     """
+#     Id of the primary goal that is aided by this drink.
+#
+#     :type: string
+#     """
+#
+#     color = db.Column(db.String)
+#     """
+#     Color of this drink.
+#
+#     :type: string
+#     """
+#
+# class LookupDrinkIngredients(BaseModelWithIdx):
+#     """ List of ingredients that a drink is made up of.
+#     """
+#
+#     drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id'), nullable=False)
+#     """
+#     Id of the drink this ingredient belongs to.
+#
+#     :type: int, foreign key(LookupDrinks.drink_id)
+#     """
+#
+#     is_primary_ingredient = db.Column(db.Boolean)
+#     """
+#     Denotes if this ingredient is they primary ingredient in the drink.
+#
+#     :type: boolean
+#     """
+#
+#     is_key_additive = db.Column(db.Boolean)
+#     """
+#     Denotes if this ingredient is a key additive in the drink.
+#
+#     :type: boolean
+#     """
+#
+#     ingredient_name = db.Column(db.String)
+#     """
+#     Name of the ingredient.
+#
+#     :type: string
+#     """
+#
+#     amount = db.Column(db.Float)
+#     """
+#     Numerical value of the measurement.
+#
+#     :type: float
+#     """
+#
+#     unit = db.Column(db.String)
+#     """
+#     Unit of the measurement.
+#
+#     :type: string
+#     """
 
 class LookupGoals(BaseModel):
     """ Static list of goals that a client can choose from. 
@@ -1146,7 +1114,7 @@ class LookupOrganizations(BaseModelWithIdx):
 
     :type: string
     """
-
+                                              
     practitioners_assigned = db.relationship('PractitionerOrganizationAffiliation', uselist=True, back_populates='org_info')
     """
     One to many relationship with pracitioner organization affiliation table
@@ -1380,14 +1348,13 @@ class LookupCredentialTypes(BaseModelWithIdx):
     credential_type = db.Column(db.String, unique=True)
     """
     Internal name of credential type used in ProviderCredentials.credential_type
-
     :type: string
     """
 
     display_name = db.Column(db.String)
     """
     Display name of this credential that should be presented in user-facing applications.
-
+    
     :type: string
     """
     
@@ -1403,4 +1370,228 @@ class LookupCredentialTypes(BaseModelWithIdx):
     Whether or not a sub-territory (US state) is required for this credential type
 
     :type: bool
+       """
+class LookupEmotes(BaseModelWithIdx):
     """
+    Lookup table of available emotes 
+    """
+
+    position = db.Column(db.Integer, unique=True)
+    """
+    The order that the frontend applications will rely on for ordering the emotes
+
+    :type: integer
+    """
+
+    icon_name = db.Column(db.String)
+    """
+    The filename for the icon that will be used as the emote button.
+    
+    :type: string
+    """ 
+ 
+    label = db.Column(db.String)
+    """
+    Label to be shown below each emote.
+
+    :type: string
+    """
+
+    title_text = db.Column(db.String)
+    """
+    The title on the notification or prompt that will be shown to the user.
+
+    :type: string
+    """
+
+    content_text = db.Column(db.String)
+    """
+    The text in the content section of notification or prompt that will be 
+    shown to the user.
+
+    :type: str
+    """
+    
+class LookupBloodPressureRanges(BaseModelWithIdx):
+    """ Medical Look Up Blood Pressure Ranges
+
+    This table will store the blood pressure categories
+    and ranges.
+
+    Chart found from heart.org/bplevels
+    """
+
+    category = db.Column(db.String)
+    """
+    Blood Pressure Category
+
+    :type: str
+    """
+    
+    systolic = db.Column(db.String)
+    """
+    Systolic mmHg is the upper number for the range
+
+    :type: str
+    """
+
+    and_or = db.Column(db.String)
+    """
+    and_or represents the union between systolic and diastolic
+    numbers
+
+    :type: str
+    """
+
+    diastolic = db.Column(db.String)
+    """
+    Diastolic mmHg is the lower number for the range
+
+    :type: str
+    """
+
+
+class LookupSTDs(BaseModel):
+    """ Medical Look Up STD
+
+    This table will store the sexual transmitted diseases
+    that ModoBio works with
+    """
+
+    std_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    std = db.Column(db.String)
+    """
+    Sexual Transmitted Disease
+
+    :type: str
+    """
+    
+class LookupBloodTestResultTypes(BaseModel):
+    """ Blood test evaluation limits.
+
+    Blood test values can be evaluated as lying in "normal" or "optimal"
+    ranges. What constitutes as a normal or optimal range depends on gender
+    and possibly other factors. The range limits are calculated for each
+    client and stored in this table.
+    """
+
+    result_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    result_name = db.Column(db.String)
+    """
+    ??? What name? Panel? Client? Any random name made up by doctor?
+
+    :type: str
+    """
+
+    normal_min = db.Column(db.Float)
+    """
+    Minimum of normal range for blood test.
+
+    :type: float
+    """
+
+    normal_max = db.Column(db.Float)
+    """
+    Maximum of normal range for blood test.
+
+    :type: float
+    """
+
+    optimal_min = db.Column(db.Float)
+    """
+    Minimum of optimal range for blood test.
+
+    :type: float
+    """
+
+    optimal_max = db.Column(db.Float)
+    """
+    Maximum of optimal range for blood test.
+
+    :type: float
+    """
+
+    unit = db.Column(db.String)
+    """
+    Measurement unit of the blood test.
+
+    :type: str
+    """
+
+    panel = db.Column(db.String)
+    """
+    Which panel does result belong to. ``None`` if not one of the standard tests.
+
+    :type: str
+    """
+    
+class LookupMedicalConditions(BaseModel):
+    """ Medical Conditions Table
+
+    This table will store the medical conditions
+    """
+
+    medical_condition_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    """
+    Unique ID number identifying the results.
+
+    :type: int, primary key, autoincrement
+    """
+
+    category = db.Column(db.String)
+    """
+    Category for the medical condition.
+
+    **Example**
+
+    * Autoimmune
+    * Cancer
+    * Cardiovascular
+
+    :type: str
+    """
+
+    subcategory = db.Column(db.String)
+    """
+    Sub category for medical conditions
+
+    **Example**
+
+    * Cardiovascular
+
+        * Bleeding disorder
+        * Anemia
+        * Chest pain
+
+    :type: str
+    """
+
+    condition = db.Column(db.String)
+    """
+    The medical condition.
+
+    **Example**
+
+    * Cardiovascular
+
+            * Heart murmur
+
+        * Anemia
+
+            * Sickle cell
+
+    :type: str
+    """
+ 
