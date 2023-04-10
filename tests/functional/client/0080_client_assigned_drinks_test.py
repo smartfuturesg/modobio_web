@@ -1,7 +1,8 @@
+import pytest
 from flask.json import dumps
 import pytest
 
-from tests.functional.client.data import clients_assigned_drinks
+# from tests.functional.client.data import clients_assigned_drinks
 
 # skip module
 pytest.skip('Skipping drink assignment tests', allow_module_level=True)
@@ -27,6 +28,8 @@ def test_post_client_assigned_drink(test_client):
 
     assert response.status_code == 400
 
+
+@pytest.mark.skip(reason="deprecated, will be removed entirely in later release version")
 def test_get_client_assigned_drinks(test_client):
     response = test_client.get(
         f'/client/drinks/{test_client.client_id}/',
@@ -35,6 +38,8 @@ def test_get_client_assigned_drinks(test_client):
 
     assert response.status_code == 200
 
+
+@pytest.mark.skip(reason="deprecated, will be removed entirely in later release version")
 def test_delete_client_assigned_drink(test_client):
     response = test_client.delete(
         f'/client/drinks/{test_client.client_id}/',

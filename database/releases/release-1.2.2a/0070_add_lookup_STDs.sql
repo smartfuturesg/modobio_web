@@ -1,20 +1,4 @@
------------------------------
--- Empty table and reset index. 
--- Rather than altering the table, this script inserts data 
--- So to avoid duplicates, we empty the table and reindex.
--- This is a solution that should be run only once on 
--- persistent databases. 
--- Further changes to this table will be done through the API
------------------------------
-
-
-delete from "MedicalLookUpSTD" 
-	where std_id >= 1;
-
-alter sequence "MedicalLookUpSTD_std_id_seq"
-			restart with 1;
-
-INSERT INTO "MedicalLookUpSTD" ("std_id","std") 
+INSERT INTO "LookupSTDs" ("std_id","std") 
 VALUES 
 (1,'Chancroid'),
 (2,'Chlamydia'),
