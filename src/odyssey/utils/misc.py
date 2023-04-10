@@ -847,19 +847,19 @@ def delete_client_data(user_id):
             fd.delete(path)
 
     # TelehealthBookingDetails.images and .voice are identified by booking_id,
-    # so filter TelehealthBookings table and use relationships.
-    bookings = (db.session.execute(
-        select(TelehealthBookings)
-        .filter_by(client_user_id=user_id))
-                .scalars()
-                .all())
-    for booking in bookings:
-        if booking.booking_details.voice:
-            fd.delete(booking.booking_details.voice)
-        if booking.booking_details.images:
-            for path in booking.booking_details.images:
-                if path:
-                    fd.delete(path)
+    # # so filter TelehealthBookings table and use relationships.
+    # bookings = (db.session.execute(
+    #     select(TelehealthBookings)
+    #     .filter_by(client_user_id=user_id))
+    #             .scalars()
+    #             .all())
+    # for booking in bookings:
+    #     if booking.booking_details.voice:
+    #         fd.delete(booking.booking_details.voice)
+    #     if booking.booking_details.images:
+    #         for path in booking.booking_details.images:
+    #             if path:
+    #                 fd.delete(path)
 
     # At this point, all files should be deleted from S3.
     # Double check that that's true, warn if not and delete rest.
