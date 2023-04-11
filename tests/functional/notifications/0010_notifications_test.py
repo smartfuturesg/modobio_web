@@ -1,11 +1,18 @@
 from flask.json import dumps
+from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
 
 from odyssey import db
 from odyssey.api.notifications.models import Notifications
+from odyssey.tasks.periodic import remove_past_notifications
+from odyssey.utils.misc import create_notification
 
 from .data import notification_type, notification_update
 
-def test_notifications_get_by_client_id(test_client):
+
+current_date = datetime.now(timezone.utc).date()
+
+def test_notifications_get(test_client):
         notification = {
             'user_id': test_client.client_id,
             'title': 'A nice title',
@@ -41,7 +48,7 @@ def test_notifications_get_by_client_id(test_client):
 
 def test_notifications_get_by_notification_id(test_client):
     _notification = Notifications.query.filter_by(user_id = test_client.client_id).first()
-
+    
     response = test_client.get(
             f'/notifications/test/{_notification.notification_id}/',
             headers=test_client.client_auth_header,
@@ -82,14 +89,66 @@ def test_notifications_put(test_client):
         assert notif.get('read') == notification_update['read']
         assert notif.get('deleted') == notification_update['deleted']
 
+def test_remove_past_notifications_deleted_flag(test_client):
+    # First check that a notification is there and the deleted flag is set to True
+    response = test_client.get(
+            f'/notifications/{test_client.client_id}/',
+            headers=test_client.client_auth_header,
+            content_type='application/json')
+    # breakpoint()
+    notif = response.json[0]
 
-def test_notifications_delete(test_client):
-    _notification = Notifications.query.filter_by(user_id = test_client.client_id).first()
+    assert response.status_code == 200
+    assert type(response.json) == list
+    assert len(response.json) == 1
+    assert notif.get('deleted') == True
 
-    response = test_client.delete(
-            f'/notifications/test/{_notification.notification_id}/',
+    # Run the code to remove past notifications
+    remove_past_notifications()
+
+    # Now make sure that the notification was removed
+    response = test_client.get(
+            f'/notifications/{test_client.client_id}/',
             headers=test_client.client_auth_header,
             content_type='application/json')
 
-    assert response.status_code == 204
+    assert response.status_code == 200
+    assert type(response.json) == list
+    assert len(response.json) == 0
 
+
+def test_remove_past_notifications_expires_timestamp(test_client):
+
+    create_notification(
+        test_client.client_id,
+        3,
+        1,
+        'A nice title',
+        'You have Spam!',
+        'Client',
+        str(current_date - relativedelta(days=1)) # Set the notification to be expired
+    )
+    db.session.commit()
+
+    # First check that a notification is there
+    response = test_client.get(
+            f'/notifications/{test_client.client_id}/',
+            headers=test_client.client_auth_header,
+            content_type='application/json')
+
+    assert response.status_code == 200
+    assert type(response.json) == list
+    assert len(response.json) == 1
+
+    # Run the code to remove past notifications
+    remove_past_notifications()
+
+    # Now make sure that the notification was removed
+    response = test_client.get(
+            f'/notifications/{test_client.client_id}/',
+            headers=test_client.client_auth_header,
+            content_type='application/json')
+
+    assert response.status_code == 200
+    assert type(response.json) == list
+    assert len(response.json) == 0
