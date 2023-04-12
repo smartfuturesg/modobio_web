@@ -774,8 +774,6 @@ def supported_wearables() -> dict:
         'FATSECRET',
         'FINALSURGE',
         'FREESTYLELIBRESDK',
-        'GOOGLE',
-        'GOOGLEFIT',
         'HAMMERHEAD',
         'HUAWEI',
         'IFIT',
@@ -796,7 +794,6 @@ def supported_wearables() -> dict:
         'RENPHO',
         'RIDEWITHGPS',
         'ROUVY',
-        'SAMSUNG',
         'STRAVA',
         'TECHNOGYM',
         'TEMPO',
@@ -870,20 +867,23 @@ class WearablesV2Endpoint(BaseResource):
     def get(self):
         """ Get a list of all supported wearable devices. """
         return {
-            "sdk_providers": {
-                "APPLE": "Apple HealthKit"
-            },
             "providers": {
                 "COROS": "Coros",
                 "DEXCOM": "Dexcom",
                 "FITBIT": "Fitbit",
                 "FREESTYLELIBRE": "Freestyle Libre",
                 "GARMIN": "Garmin",
+                "GOOGLE": "Google Fit",
                 "OMRONUS": "Omron",
                 "OURA": "Oura",
                 "POLAR": "Polar",
                 "SUUNTO": "Suunto",
                 "WITHINGS": "Withings",
+            },
+            "sdk_providers": {
+                "GOOGLEFIT": "Google Fit (SDK)",
+                "APPLE": "Apple HealthKit",
+                "SAMSUNG": "Samsung"
             }
         }
 
