@@ -1375,6 +1375,34 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
             }
         }
 
+        # In case there are buckets that dont get filled from samples, this stage aligns the arrays 
+        # so that there are always the same number of buckets to make calculations from. 
+        # Also carries over the ID and count of any previously filled buckets 
+        stage_align_buckets = {
+            '$addFields': {
+                'samples_buckets': {
+                    '$map': {
+                        'input': [0, 54, 70, 181, 251], 
+                        'as': 'i', 
+                        'in': {
+                            '_id': '$$i', 
+                            'count': {
+                                '$cond': [
+                                    { 
+                                        '$eq': [{'$indexOfArray': ['$samples_buckets._id', '$$i']}, -1]
+                                    }, 
+                                    0, 
+                                    { 
+                                        '$arrayElemAt': ['$samples_buckets.count', {'$indexOfArray': ['$samples_buckets._id', '$$i']}]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         # Projects facet data to new document. 
         # Sorts samples buckets and samples timestamps in accending order. 
         stage_project_facet_data = {
@@ -1546,6 +1574,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
             stage_unwind_bp_samples,
             stage_match_date_range_bp_samples,
             stage_facet,
+            stage_align_buckets,
             stage_project_facet_data,
             stage_calculate_percentages,
             stage_project_total_percentages_and_times
@@ -2266,3 +2295,424 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         payload['wearable'] = wearable
 
         return payload
+
+
+@ns_v2.route('/calculations/blood-pressure/monitoring-statistics/<int:user_id>/<string:wearable>')
+class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResource):
+    @token_auth.login_required
+    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
+    @responds(schema=WearablesV2BloodPressureMonitoringStatisticsOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id, wearable):
+        """ Get calculated values related to blood pressure monitoring statistics.
+
+        This route will return 2 blocks of general blood pressure data and classification info given a user_id, wearable, and an optional start_date. 
+        The first block of data will always be from the start_date (default is current date minus 30 days) to the current date. The second block will always be over
+        the same range (default 30 days) but will end at the given start_date and span X days (default 30) prior to that. For example, if the distance between start_date
+        and the current date is 7 days, both blocks will give data for 7 day blocks. The first will contain data from current date minus 7 days to the current date and the
+        second block will contain the 7 days prior to that. The length of blocks is determined by the delta between start_date and current date.
+
+        Path Parameters
+        ----------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood pressure data
+
+        Query Parameters
+        ----------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 30 days if not specified 
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+            - user_id - User ID number
+            - wearable - wearable used to measure blood pressure data
+            - current_block - data for most recent block
+            - prev_block - data for previous block
+
+            Each block will be a dict containing:
+            - start_date - start of time range
+            - end_date - end of time range
+            - general_data - general blood pressure data
+            - classification_data - blood pressure classification data
+
+            general_data will contain the following:
+            - average_systolic - average systolic value in mmHg
+            - average_diastolic - average diastolic value in mmHg
+            - total_bp_readings - total number of blood pressure readings
+            - total_pulse_readings - total number of pulse readings
+            - average_pulse - average pulse in bpm
+            - average_readings_per_day - average number of readings per day over the time period
+
+            classification_data will contain the following:
+            - normal - number of readings in the 'normal' range
+            - elevated - number of readings in the 'elevated' range
+            - hypertension_stage_1 - number of readings in the 'hypertension_stage_1' range
+            - hypertension_stage_2 - number of readings in the 'hypertension_stage_2' range
+            - hypertensive_crisis - number of readings in the 'hypertensive_crisis' range
+            - normal_percentage - percentage of total readings that are in the 'normal' range
+            - elevated_percentage - percentage of total readings that are in the 'elevated' range
+            - hypertension_stage_1_percentage - percentage of total readings that are in the 'hypertension_stage_1' range
+            - hypertension_stage_2_percentage - percentage of total readings that are in the 'hypertension_stage_2' range
+            - hypertensive_crisis_percentage - percentage of total readings that are in the 'hypertensive_crisis' range
+            
+        """
+
+        wearable = parse_wearable(wearable)
+
+        # Default dates
+        end_date = datetime.utcnow()
+        start_date = end_date - THIRTY_DAYS
+        days = 30
+
+        # For this endpoint, we just allow the user to start_date because end_date will always be the current_date. 
+        # We will then return data for start_date -> current date and then start_date minus the delta between orginal start_date and current_date -> start_date
+        if request.args.get('start_date'):
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
+            # Get time delta in days for average_readings_per_day calculation
+            duration = end_date - start_date
+            days = duration.days
+
+        ### Stages for blood pressure monitoring statistics calculations ###
+
+        # Filter documents on user_id, wearable, and current time block dates
+        stage_match_user_id_and_wearable = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
+                    '$gte': start_date - timedelta(days=1),
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Filter documents on user_id, wearable and prev time block dates
+        stage_match_user_id_and_wearable_prev = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
+                    '$gte': start_date - timedelta(days=days),
+                    '$lte': start_date
+                }
+            }
+        }
+
+        # Unwind the blood_pressure_samples array so that we can operate on each individual sample
+        stage_unwind_bp_samples = {
+            '$unwind': '$data.body.blood_pressure_data.blood_pressure_samples'
+        }
+
+        # Filter on the timestamp of each blood pressure sample
+        stage_match_date_range_bp = {
+            '$match': {
+                'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Filter on the timestamp of each blood pressure sample in prev time block
+        stage_match_date_range_bp_prev = {
+            '$match': {
+                'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+                    '$gte': start_date - timedelta(days=days),
+                    '$lte': start_date
+                }
+            }
+        }
+
+        # Group all bp samples to calculate total, averages, min, and max
+        stage_group_bp = {
+            '$group': {
+                '_id': None,
+                'total_bp_readings': {'$sum': 1},
+                'average_systolic': { 
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                    },
+                'average_diastolic': { 
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                    },
+                'min_systolic': {
+                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'min_diastolic': {
+                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                },
+                'max_systolic': {
+                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'max_diastolic': {
+                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                }
+            }
+        }
+
+        # Project those previous calculations and then calculate average_readings_per_day
+        stage_project_bp = {
+            '$project': {
+                'average_readings_per_day': {'$round': [{'$divide': ['$total_bp_readings', days]}, 1]},
+                'total_bp_readings': '$total_bp_readings',
+                'average_systolic': '$average_systolic',
+                'average_diastolic': '$average_diastolic',
+                'min_systolic': '$min_systolic',
+                'min_diastolic': '$min_diastolic',
+                'max_systolic': '$max_systolic',
+                'max_diastolic': '$max_diastolic'
+            }
+        }
+
+        ### Stages for blood pressure classification ###
+
+        # Add classification field to samples
+        stage_add_classification = {
+            '$addFields': {'classification': {'$switch': {
+            'branches': [
+                { 'case': {'$and': [{'$lt': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 120]}, {'$lt': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 80]}]}, 'then': 'normal' },
+                { 'case': {'$and': [{'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 120]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 129]}]}, {'$lt': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 80]}]}, 'then': 'elevated' },
+                { 'case': {'$or': [{'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 130]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 139]}]}, {'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 80]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 89]}]}]}, 'then': 'hypertension_stage_1' },
+                { 'case': {'$or': [{'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 140]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 180]}]}, {'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 90]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 120]}]}]}, 'then': 'hypertension_stage_2' },
+                { 'case': {'$or': [{'$gt': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 180]}, {'$gt': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 120]}]}, 'then': 'hypertensive_crisis' },
+            
+            ],
+            'default': None
+            }}}
+        }
+
+        # Group by classification and pass total count forward
+        stage_facet_classification = {
+            '$facet': {
+                'buckets': [
+                    {
+                        '$group': {
+                            '_id': '$classification',
+                            'count': { '$sum': 1},
+                        }
+                    }
+                ], 
+                'total_count': [{'$count': 'total_count'}]
+            }
+        }
+
+        # Unwind new buckets
+        stage_unwind_buckets = {
+            '$unwind': '$buckets'
+        }
+
+        # Pass forward bucket and count to calculate percentage for each classification
+        stage_project_classification = {
+            '$project': {
+                'percentage': {'$multiply': [{'$round': [{'$divide': ['$buckets.count', {'$arrayElemAt': ['$total_count.total_count', 0]}]}, 2]}, 100]},
+                'bucket': '$buckets._id',
+                'count': '$buckets.count'
+            }
+        }
+
+        ### Stages for heart rate calculations ###
+
+        # Unwind the hr_samples array so that we can operate on each individual sample
+        stage_unwind_hr_samples = {
+            '$unwind': '$data.body.heart_data.detailed.hr_samples'
+        }
+
+        # Filter on the timestamp of each hr_sample
+        stage_match_date_range_pulse = {
+            '$match': {
+                'data.body.heart_data.detailed.hr_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            }
+        }
+
+        # Filter on the timestamp of each prev hr_sample
+        stage_match_date_range_pulse_prev = {
+            '$match': {
+                'data.body.heart_data.detailed.hr_samples.timestamp': {
+                    '$gte': start_date - timedelta(days=days),
+                    '$lte': start_date
+                }
+            }
+        }
+        # Group all pulse and calculate total and average
+        stage_group_pulse = {
+            '$group': {
+                '_id': None,
+                'total_pulse_readings': {'$sum': 1},
+                'average_pulse': { 
+                        '$avg': '$data.body.heart_data.detailed.hr_samples.bpm'
+                    },
+            }
+        }
+
+        ### Current time block pipelines ###
+
+        # Build bp pipeline
+        pipeline = [
+            stage_match_user_id_and_wearable,
+            stage_unwind_bp_samples,
+            stage_match_date_range_bp,
+            stage_group_bp,
+            stage_project_bp
+        ]
+
+        # Build pulse pipeline
+        pulse_pipeline = [
+            stage_match_user_id_and_wearable,
+            stage_unwind_hr_samples,
+            stage_match_date_range_pulse,
+            stage_group_pulse
+        ]
+
+        # Build classification pipeline
+        classification_pipeline = [
+            stage_match_user_id_and_wearable,
+            stage_unwind_bp_samples,
+            stage_match_date_range_bp,
+            stage_add_classification,
+            stage_facet_classification,
+            stage_unwind_buckets,
+            stage_project_classification
+        ]
+
+        ### Previous time block pipelines ###
+
+        # Build prev bp pipeline
+        prev_pipeline = [
+            stage_match_user_id_and_wearable_prev,
+            stage_unwind_bp_samples,
+            stage_match_date_range_bp_prev,
+            stage_group_bp,
+            stage_project_bp
+        ]
+
+        # Build prev pulse pipeline
+        prev_pulse_pipeline = [
+            stage_match_user_id_and_wearable_prev,
+            stage_unwind_hr_samples,
+            stage_match_date_range_pulse_prev,
+            stage_group_pulse
+        ]
+
+        # Build prev classification pipeline
+        prev_classification_pipeline = [
+            stage_match_user_id_and_wearable_prev,
+            stage_unwind_bp_samples,
+            stage_match_date_range_bp_prev,
+            stage_add_classification,
+            stage_facet_classification,
+            stage_unwind_buckets,
+            stage_project_classification
+        ]
+
+
+        ### Add current time block data to payload ###
+
+        # General bp data
+        cursor = mongo.db.wearables.aggregate(pipeline)
+        document_list = list(cursor)
+        data = {}
+
+        if document_list:
+            data = document_list[0]
+
+        # Build general bp info for payload
+        payload = {
+            'user_id': user_id,
+            'wearable': wearable
+        }
+
+        # Add general info to current_block in the payload
+        payload['current_block'] = {}
+        payload['current_block']['start_date'] = start_date
+        payload['current_block']['end_date'] = end_date
+        payload['current_block']['general_data'] = {}
+        payload['current_block']['general_data']['average_systolic'] = data.get('average_systolic')
+        payload['current_block']['general_data']['average_diastolic'] = data.get('average_diastolic')
+        payload['current_block']['general_data']['min_systolic'] = data.get('min_systolic')
+        payload['current_block']['general_data']['max_systolic'] = data.get('max_systolic')
+        payload['current_block']['general_data']['min_diastolic'] = data.get('min_diastolic')
+        payload['current_block']['general_data']['max_diastolic'] = data.get('max_diastolic')
+        payload['current_block']['general_data']['total_bp_readings'] = data.get('total_bp_readings')
+        payload['current_block']['general_data']['average_readings_per_day'] = data.get('average_readings_per_day')
+
+        # Pulse data
+        cursor = mongo.db.wearables.aggregate(pulse_pipeline)
+        document_list = list(cursor)
+        pulse_data = {}
+
+        if document_list:
+            pulse_data = document_list[0]
+        
+        # Add pulse data to current_block in the payload
+        payload['current_block']['general_data']['average_pulse'] = pulse_data.get('average_pulse')
+        payload['current_block']['general_data']['total_pulse_readings'] = pulse_data.get('total_pulse_readings')
+
+        # Systolic classifications
+        cursor = mongo.db.wearables.aggregate(classification_pipeline)
+        classification_document_list = list(cursor)
+
+        if classification_document_list:
+            payload['current_block']['classification_data'] = {}
+            for doc in classification_document_list:
+                # Add classification data to current_block in the payload
+                payload['current_block']['classification_data'][doc.get('bucket')] = doc.get('count')
+                payload['current_block']['classification_data'][doc.get('bucket') + '_percentage'] = doc.get('percentage')
+
+
+        ### Add previous time block data to payload ###
+
+        # General bp data prev
+        cursor = mongo.db.wearables.aggregate(prev_pipeline)
+        document_list = list(cursor)
+        data = {}
+
+        if document_list:
+            data = document_list[0]
+
+        # Add general info to prev_block in the payload
+        payload['prev_block'] = {}
+        payload['prev_block']['start_date'] = start_date - timedelta(days=days)
+        payload['prev_block']['end_date'] = start_date
+        payload['prev_block']['general_data'] = {}
+        payload['prev_block']['general_data']['average_systolic'] = data.get('average_systolic')
+        payload['prev_block']['general_data']['average_diastolic'] = data.get('average_diastolic')
+        payload['prev_block']['general_data']['min_systolic'] = data.get('min_systolic')
+        payload['prev_block']['general_data']['max_systolic'] = data.get('max_systolic')
+        payload['prev_block']['general_data']['min_diastolic'] = data.get('min_diastolic')
+        payload['prev_block']['general_data']['max_diastolic'] = data.get('max_diastolic')
+        payload['prev_block']['general_data']['total_bp_readings'] = data.get('total_bp_readings')
+        payload['prev_block']['general_data']['average_readings_per_day'] = data.get('average_readings_per_day')
+
+        # Pulse data prev
+        cursor = mongo.db.wearables.aggregate(prev_pulse_pipeline)
+        document_list = list(cursor)
+        pulse_data = {}
+
+        if document_list:
+            pulse_data = document_list[0]
+
+        # Add pulse data to prev_block in the payload
+        payload['prev_block']['general_data']['average_pulse'] = pulse_data.get('average_pulse')
+        payload['prev_block']['general_data']['total_pulse_readings'] = pulse_data.get('total_pulse_readings')
+
+        # Systolic classifications prev
+        cursor = mongo.db.wearables.aggregate(prev_classification_pipeline)
+        classification_document_list = list(cursor)
+
+        if classification_document_list:
+            payload['prev_block']['classification_data'] = {}
+            for doc in classification_document_list:
+                # Add classification data to current_block in the payload
+                payload['prev_block']['classification_data'][doc.get('bucket')] = doc.get('count')
+                payload['prev_block']['classification_data'][doc.get('bucket') + '_percentage'] = doc.get('percentage')
+
+        # Return completed payload
+        return payload
+
+
