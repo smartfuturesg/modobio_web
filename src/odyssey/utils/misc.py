@@ -45,6 +45,7 @@ from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import (
     User,
+    UserLogin,
     UserSubscriptions,
     UserTokenHistory,
     UserRemovalRequests,
@@ -785,8 +786,12 @@ def delete_staff_data(user_id):
             db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
 
     # only delete staff subscription
-    db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=True")
-
+    user_subs = db.session.execute(select(UserSubscriptions).where(
+            UserSubscriptions.user_id==user_id, UserSubscriptions.is_staff==True)
+        ).scalars().all()
+    for sub in user_subs:
+        db.session.delete(sub)
+        
     db.session.commit()
 
 
@@ -913,8 +918,12 @@ def delete_client_data(user_id):
             db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
 
     # only delete client subscription
-    db.session.execute(f"DELETE FROM \"UserSubscriptions\" WHERE user_id={user_id} AND is_staff=False")
-
+    user_subs = db.session.execute(select(UserSubscriptions).where(
+            UserSubscriptions.user_id==user_id, UserSubscriptions.is_staff==False)
+        ).scalars().all()
+    for sub in user_subs:
+        db.session.delete(sub)
+        
     db.session.commit()
 
 
@@ -945,6 +954,7 @@ def delete_user(user_id, requestor_id, delete_type):
     db.session.add(removal_request)
     db.session.flush()
 
+    user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user_id)).scalars().one_or_none()
     if user.was_staff:
         # cases where the user is either only staff or client and staff
 
@@ -960,7 +970,7 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
 
             # since entire user is being deleted, we can delete the login info
-            db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+            db.session.delete(user_login)
 
             # remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
@@ -971,7 +981,7 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
             if not user.is_client:
                 # user was only staff, so we can delete the login info
-                db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+                db.session.delete(user_login)
                 user.phone_number = None
                 user.email = None
                 user.deleted = True
@@ -994,7 +1004,7 @@ def delete_user(user_id, requestor_id, delete_type):
             user.is_client = False
             delete_client_data(user_id)
 
-            db.session.execute(f"DELETE FROM \"UserLogin\" WHERE user_id={user_id};")
+            db.session.delete(user_login)
 
             # remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
