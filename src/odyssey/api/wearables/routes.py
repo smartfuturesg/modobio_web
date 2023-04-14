@@ -907,7 +907,7 @@ class WearablesV2UserEndpoint(BaseResource):
 
 @ns_v2.route('/<int:user_id>/<wearable>')
 class WearablesV2DataEndpoint(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @ns_v2.doc(params={
         'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp.',
         'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp.',
@@ -957,7 +957,7 @@ class WearablesV2DataEndpoint(BaseResource):
         
         return {'results' : list(data)}
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client',))
     @accepts(schema=WearablesV2UserAuthUrlInputSchema, api=ns_v2)
     @responds(schema=WearablesV2UserAuthUrlSchema, status_code=201, api=ns_v2)
     def post(self, user_id, wearable):
@@ -1018,7 +1018,7 @@ class WearablesV2DataEndpoint(BaseResource):
 
             return response_json
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client',))
     @responds(status_code=204, api=ns_v2)
     def delete(self, user_id, wearable):
         """ Revoke access for this wearable device. """
@@ -1128,7 +1128,7 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
 
 @ns_v2.route('/calculations/blood-glucose/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
                 'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
     @responds(schema=WearablesV2BloodGlucoseCalculationOutputSchema, status_code=200, api=ns_v2)
@@ -1286,7 +1286,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         
 @ns_v2.route('/calculations/blood-glucose/cgm/time-in-ranges/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client', 'provider'))
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @ns_v2.doc(params={
         'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
         'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
@@ -1593,7 +1593,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
 
 @ns_v2.route('/calculations/blood-glucose/cgm/percentiles/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client', 'provider'))
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
                 'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
                 'increment_mins': 'bin sizes in minutes'})
@@ -1857,9 +1857,10 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         }
 
         return payload
+
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @ns_v2.doc(params={
         'start_date': 'Start of specified date range. '
                       'Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
@@ -2036,7 +2037,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 
 @ns_v2.route('/calculations/blood-pressure/30-day-hourly/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
                 'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
     @responds(schema=WearablesV2BloodPressureCalculationOutputSchema, status_code=200, api=ns_v2)
@@ -2299,7 +2300,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
 
 @ns_v2.route('/calculations/blood-pressure/monitoring-statistics/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
     @responds(schema=WearablesV2BloodPressureMonitoringStatisticsOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
