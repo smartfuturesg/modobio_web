@@ -1051,7 +1051,7 @@ WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES = {
     'GOOGLEFIT': 'Device - Google Fit',
     'GOOGLE': 'Device - Google Fit',
     'GARMIN' : 'Device - Garmin',
-    'OMRON' : 'Device - Omron',
+    'OMRONUS' : 'Device - Omron',
     'OURA' : 'Device - Oura Ring',
     'POLAR' : 'Device - Polar',
     'SUUNTO' : 'Device - Suunto',

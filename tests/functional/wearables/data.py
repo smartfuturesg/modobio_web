@@ -526,7 +526,7 @@ sample_cmg_data = {
                     "timestamp": parser.parse("2023-04-15T04:00:00.000Z")
                 }
                 ],
-                "day_avg_blood_glucose_mg_per_dL": 160.76710132786812
+                "day_avg_blood_glucose_mg_per_dL": 151.8541667
             }
         }
     }
