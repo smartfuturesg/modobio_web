@@ -1089,7 +1089,7 @@ class ClientDataStorageTiers(BaseResource):
        Amount of data stored on each client and their storage tier
     """
 
-    @token_auth.login_required
+    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
     @responds(schema=AllClientsDataTier, api=ns)
     def get(self):
         """Returns the total data storage for each client along with their data storage tier"""

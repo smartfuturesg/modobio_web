@@ -9,7 +9,7 @@ def test_post_client_consent(test_client):
     payload = clients_consent_data
     response = test_client.post(
         f'/client/consent/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.client_auth_header,
         data=dumps(payload),
         content_type='application/json')
 
@@ -21,7 +21,7 @@ def test_post_client_consent(test_client):
 def test_get_client_consent(test_client):
     response = test_client.get(
         f'/client/consent/{test_client.client_id}/',
-        headers=test_client.staff_auth_header,
+        headers=test_client.client_auth_header,
         content_type='application/json')
 
     assert response.status_code == 200

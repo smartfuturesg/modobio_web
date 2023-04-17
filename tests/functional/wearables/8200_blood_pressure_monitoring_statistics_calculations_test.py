@@ -8,7 +8,7 @@ def test_blood_pressure_monitoring_statistics_default(test_client, add_blood_pre
     # Test default start_date - this should pick up all 4 of our test samples
     response = test_client.get(
         f'/v2/wearables/calculations/blood-pressure/monitoring-statistics/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     # The Length of the response should always be 4: user_id, wearable, current_block, and prev_block
@@ -50,7 +50,7 @@ def test_blood_pressure_monitoring_statistics_start_date_param(test_client, add_
     # Test default start_date - this should pick up all 4 of our test samples, but split them up 2 in current_block and 2 in prev_block
     response = test_client.get(
         f'/v2/wearables/calculations/blood-pressure/monitoring-statistics/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}?start_date={datetime.utcnow() - timedelta(weeks=2)}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     # The Length of the response should always be 4: user_id, wearable, current_block, and prev_block
@@ -114,7 +114,7 @@ def test_blood_pressure_monitoring_statistics_unauthorized(test_client, add_bloo
 
     response = test_client.get(
         f'/v2/wearables/calculations/blood-pressure/monitoring-statistics/{other_client_id}/{BLOOD_PRESSURE_WEARABLE}',
-        headers=test_client.client_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 401
