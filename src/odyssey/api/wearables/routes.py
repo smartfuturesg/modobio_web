@@ -3,6 +3,7 @@ import logging
 from math import ceil
 import secrets
 from datetime import time, timedelta
+from dateutil import parser
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -568,7 +569,8 @@ class WearablesFreeStyleEndpoint(BaseResource):
             tstamps = []
             glucose = []
             for t, g in temp:
-                tstamps.append(t)
+                formatted_timestamp = parser.parse(t).replace(tzinfo=None).isoformat()
+                tstamps.append(formatted_timestamp)
                 glucose.append(g)
 
         # Find index where new data starts
@@ -581,19 +583,25 @@ class WearablesFreeStyleEndpoint(BaseResource):
         if n == len(tstamps):
             return
 
-        # Use array concatenation here, don't use:
-        #    cgm.glucose = cgm.glucose + request.parsed_obj.glucose
-        # See ... confluence page
-        stmt = text('''
-            UPDATE "WearablesFreeStyle"
-            SET glucose = glucose || cast(:gluc as double precision[]),
-                timestamps = timestamps || cast(:tstamps as timestamp without time zone[])
-            WHERE user_id = :cid;
-        ''').bindparams(
-            gluc=glucose[n:],
-            tstamps=tstamps[n:],
-            cid=user_id)
-        db.session.execute(stmt)
+        # Concatenate new array values to previous values, removing duplicates. 
+        # {array_name}.copy() is used here because sqlalchemy ARRAY fields are 
+        # immutable, so we need to make a new copy of the previous values in order
+        # to concatenate the new values and remove the duplicates
+        if cgm.glucose:
+            glucose_copy = cgm.glucose.copy()
+            glucose_copy.extend(x for x in glucose[n:] if x not in glucose_copy)
+            glucose_update =glucose_copy
+        else:
+            glucose_update = glucose[n:]
+
+        if cgm.timestamps:
+            tstamps_copy = cgm.timestamps.copy()
+            tstamps_copy.extend(x for x in tstamps[n:] if x not in tstamps_copy)
+            tstamps_update = tstamps_copy
+        else:
+            tstamps_update = tstamps[n:]
+
+        cgm.update(dict(glucose=glucose_update, timestamps=tstamps_update))
         db.session.commit()
 
 
