@@ -32,7 +32,7 @@ class BasicAuth(object):
             This method decorates each CRUD request and verifies the person
             making the request has the appropriate credentials
             
-            user_type, and staff_role are expected to be lists. 
+            user_type, and staff_role are expected to be tuples. 
 
             NOTE: Some methods have overrides depending if it is a 
                   BasicAuth or TokenAuth object
@@ -137,7 +137,6 @@ class BasicAuth(object):
         # user is logged in as a modobio user, they may access the endpoint
         if 'modobio' in self.user_type:
             return
-
         # User is logged in, claims staff in token (user_context),
         # user is registered as staff member (user.is_staff),
         # and endpoint requests staff or staff_self (user_type).
@@ -148,8 +147,10 @@ class BasicAuth(object):
                 raise Unauthorized('Your staff account has been blocked. Please contact '
                                    'client_services@modobio.com to resolve the issue.')
             # Check staff roles and access.
-            if self.staff_role or 'staff_self' in self.user_type or len(self.resources) > 0:
+            elif self.staff_role or 'staff_self' in self.user_type or len(self.resources) > 0:
                 self.staff_access_check(user)
+            else:
+                logger.debug(f'Staff user granted access to endpoint without checks: {request.path}')
 
         # User is logged in, claims client in token (user_context),
         # user is registered as client (user.is_client),

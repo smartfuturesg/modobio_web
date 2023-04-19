@@ -8,7 +8,7 @@ def test_blood_pressure_calculations_default_date_filters(test_client, add_blood
     # Test default date params. This should pick up both entries
     response = test_client.get(
         f'/v2/wearables/calculations/blood-pressure/30-day-hourly/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     # The Length of the response should always be 10. user_id, wearable, and 8 time_blocks
@@ -61,7 +61,7 @@ def test_blood_pressure_calculations_start_date_param(test_client, add_blood_pre
     # Test start date params. This should fail because we provide only 1 date param when we require both or neither
     response = test_client.get(
         f'/v2/wearables/calculations/blood-pressure/30-day-hourly/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}?start_date={datetime.utcnow() - timedelta(weeks=2)}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 400
@@ -71,7 +71,7 @@ def test_blood_pressure_calculations_end_date_param(test_client, add_blood_press
     # Test start date params. This should pick up only block_three data
     response = test_client.get(
         f'/v2/wearables/calculations/blood-pressure/30-day-hourly/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}?end_date={datetime.utcnow() - timedelta(weeks=2)}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     assert response.status_code == 400
@@ -81,7 +81,7 @@ def test_blood_pressure_calculations_start_and_end_date_params(test_client, add_
     # Test start date params. This should pick up no data
     response = test_client.get(
         f'/v2/wearables/calculations/blood-pressure/30-day-hourly/{test_client.client_id}/{BLOOD_PRESSURE_WEARABLE}?start_date={datetime.utcnow() - timedelta(weeks=4)}&end_date={datetime.utcnow() - timedelta(weeks=4)}',
-        headers=test_client.staff_auth_header,
+        headers=test_client.provider_auth_header,
         content_type='application/json')
 
     # The Length of the response should always be 10. user_id, wearable, and 8 time_blocks
