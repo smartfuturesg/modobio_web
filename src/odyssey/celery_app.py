@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from odyssey import init_celery, conf
-
+from celery import signals
 app = init_celery()
 
 # So celery workers can discover tasks, add import paths to the modules which contain tasks
@@ -27,6 +27,15 @@ if conf.FLASK_DEBUG or conf.TESTING:
     app.conf.mongodb_backend_settings = {'database': 'modobio-dev'}
 else:
     app.conf.mongodb_backend_settings = {'database': 'modobio_prd'}
+
+
+# Celery uses the billiard logger for multiprocessing which they override our custom
+# Audit Log level (25) name. This signal sets the logging level name back to AUDIT after the
+# celery logging system has been setup.
+audit_level = 25
+@signals.after_setup_logger.connect()
+def override_level_name(*args, **kwargs):
+    logging.addLevelName(audit_level, 'AUDIT')
 
 # force celery app to verify tasks
 app.finalize()
