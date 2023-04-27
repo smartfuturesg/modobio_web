@@ -9,6 +9,17 @@ import flask.json.provider
 import pytz
 
 
+def remove_timezone_from_timestamps(data):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key in ("timestamp", "start_time", "end_time") or isinstance(value, datetime):
+                data[key] = value.replace(tzinfo=None)
+            else:
+                remove_timezone_from_timestamps(value)
+    elif isinstance(data, list):
+        for item in data:
+            remove_timezone_from_timestamps(item)
+
 class JSONEncoder(json.JSONEncoder):
     """ Serialize a Python object into a JSON string.
 
@@ -190,7 +201,7 @@ class JSONDecoder(json.JSONDecoder):
         # Some timestamps from Terra have an H:M:S format for timezone offset
         # e.g. 2023-03-19T00:39:35-07:00:00
         try:
-            return dateutil.parser.parse(string[:-3]).replace(tzinfo=pytz.utc)
+            return dateutil.parser.parse(string[:-3])
         except dateutil.parser.ParserError:
             # Not a datetime string
             return string
@@ -220,6 +231,34 @@ class JSONProvider(flask.json.provider.JSONProvider):
     def __init__(self, app=None, **kwargs):
         if app:
             super().__init__(app=app, **kwargs)
+
+    @staticmethod
+    def extract_timezone(start_time):
+        import re
+        # Check for malformed date format and correct it
+        pattern = re.compile(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{2}:\d{2}):\d{2}$")
+        corrected_start_time = pattern.sub(r"\1", start_time)
+
+        try:
+            dt = dateutil.parse(corrected_start_time)
+            return dt.tzname()
+        except ValueError:
+            # Handle date parsing errors, return None or a default value
+            return None
+
+    @staticmethod
+    def process_terra_data(data):
+        if "data" in data:
+            for item in data["data"]:
+                if "metadata" in item and "start_time" in item["metadata"]:
+                    start_time = item["metadata"]["start_time"]
+                    if isinstance(start_time, datetime):
+                        tz_offset_seconds = start_time.tzinfo.utcoffset(start_time).total_seconds()
+                        item["metadata"]["tz_offset"] = tz_offset_seconds
+                        
+                # Remove timezone from all "timestamp" fields
+                remove_timezone_from_timestamps(item)
+        return data
 
     def dumps(self, obj, **kwargs) -> str:
         """ Serialize data to a JSON string.
@@ -257,4 +296,10 @@ class JSONProvider(flask.json.provider.JSONProvider):
             A Python dict containing the converted data.
         """
         kwargs['cls'] = JSONDecoder
-        return json.loads(s, **kwargs)
+
+        data = json.loads(s, **kwargs)
+
+        # Process the data after deserialization
+        processed_data = JSONProvider.process_terra_data(data)
+
+        return processed_data
