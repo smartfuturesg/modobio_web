@@ -250,14 +250,15 @@ class JSONProvider(flask.json.provider.JSONProvider):
     def process_terra_data(data):
         if "data" in data:
             for item in data["data"]:
-                if "metadata" in item and "start_time" in item["metadata"]:
+                if ("metadata" in item and "start_time" in item["metadata"] 
+                    and isinstance(item["metadata"]["start_time"], datetime)):
                     start_time = item["metadata"]["start_time"]
                     if isinstance(start_time, datetime):
                         tz_offset_seconds = start_time.tzinfo.utcoffset(start_time).total_seconds()
                         item["metadata"]["tz_offset"] = tz_offset_seconds
                         
-                # Remove timezone from all "timestamp" fields
-                remove_timezone_from_timestamps(item)
+                    # Remove timezone from all "timestamp" fields
+                    remove_timezone_from_timestamps(item)
         return data
 
     def dumps(self, obj, **kwargs) -> str:
