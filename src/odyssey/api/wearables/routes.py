@@ -890,7 +890,7 @@ class WearablesV2Endpoint(BaseResource):
 
 @ns_v2.route('/<int:user_id>')
 class WearablesV2UserEndpoint(BaseResource):
-    @token_auth.login_required
+    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
     @responds(schema=WearablesV2UserGetSchema, status_code=200, api=ns_v2)
     def get(self, user_id):
         """ Get a list of wearable devices registered to this user. """
