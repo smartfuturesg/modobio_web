@@ -233,20 +233,6 @@ class JSONProvider(flask.json.provider.JSONProvider):
             super().__init__(app=app, **kwargs)
 
     @staticmethod
-    def extract_timezone(start_time):
-        import re
-        # Check for malformed date format and correct it
-        pattern = re.compile(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d{2}:\d{2}):\d{2}$")
-        corrected_start_time = pattern.sub(r"\1", start_time)
-
-        try:
-            dt = dateutil.parse(corrected_start_time)
-            return dt.tzname()
-        except ValueError:
-            # Handle date parsing errors, return None or a default value
-            return None
-
-    @staticmethod
     def process_terra_data(data):
         if "data" in data:
             for item in data["data"]:
