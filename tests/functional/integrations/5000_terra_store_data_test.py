@@ -46,6 +46,14 @@ def test_store_data(test_client):
     # create a terra library object that can be passed into out own client
     terra_response = TerraApiResponse(resp=response, dtype='activity')
 
+    # if there are no samples for this data, the metadata will be empty
+    for data in terra_response.get_json()['data']:
+        if data['metadata']['start_time'] is None:
+            data['metadata'] = {
+                'start_time': '2022-06-01T00:00:00Z',
+                'end_time': '2022-06-02T00:00:00Z',
+            }
+
     # we need to inject into Wearables
     user_wearable = WearablesV2(
         user_id=test_client.client_id,
