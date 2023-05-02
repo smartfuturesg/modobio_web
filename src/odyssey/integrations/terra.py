@@ -133,7 +133,7 @@ class TerraClient(terra.Terra):
         Parameters
         ----------
         response : :class:`terra.api.api_responses.TerraApiResponse`
-            The repsonse object returned from :func:`terra.Terra.handle_flask_webhook`.
+            The response object returned from :func:`terra.Terra.handle_flask_webhook`.
         """
         user_id = response.parsed_response.reference_id
         wearable = response.parsed_response.user.provider
