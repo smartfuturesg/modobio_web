@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------------------------------
--- Apply an automamtic interpretation of blood test results 
+-- Apply an automatic interpretation of blood test results 
 -- Based optimal and normal ranges for test results from
 -- American Board of Internal Medicine: 
--- Labratory Test Reference Ranges
+-- Laboratory Test Reference Ranges
 -- rev. January 2020
 ---------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.blood_test_eval(result_idx int, result_id int, test_value float)
@@ -24,7 +24,7 @@ begin
 					when ' || test_value || ' <= normal_max  and normal_min is null then ''normal''
 					else ''abnormal''
 				end as assessment
-			from "MedicalBloodTestResultTypes" rt
+			from "LookupBloodTestResultTypes" rt
 			where rt.result_id =' || result_id || '';
   execute query into assessment;
  
