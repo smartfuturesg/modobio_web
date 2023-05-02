@@ -12,7 +12,7 @@ import pytz
 def remove_timezone_from_timestamps(data):
     if isinstance(data, dict):
         for key, value in data.items():
-            if key in ("timestamp", "start_time", "end_time") or isinstance(value, datetime):
+            if isinstance(value, datetime):
                 data[key] = value.replace(tzinfo=None)
             else:
                 remove_timezone_from_timestamps(value)
@@ -239,9 +239,8 @@ class JSONProvider(flask.json.provider.JSONProvider):
                 if ("metadata" in item and "start_time" in item["metadata"] 
                     and isinstance(item["metadata"]["start_time"], datetime)):
                     start_time = item["metadata"]["start_time"]
-                    if isinstance(start_time, datetime):
-                        tz_offset_seconds = start_time.tzinfo.utcoffset(start_time).total_seconds()
-                        item["metadata"]["tz_offset"] = tz_offset_seconds
+                    tz_offset_seconds = start_time.tzinfo.utcoffset(start_time).total_seconds()
+                    item["metadata"]["tz_offset"] = tz_offset_seconds
                         
                     # Remove timezone from all "timestamp" fields
                     remove_timezone_from_timestamps(item)
