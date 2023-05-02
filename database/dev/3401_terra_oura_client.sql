@@ -77,7 +77,7 @@ BEGIN
         (
          _user_id,
          'OURA',
-         '29992054-1f5a-432c-aed8-f5c22b1a1249'
+         '3a47e28e-f544-4ab1-8bea-39f84bcada34'
         );
 
     -- Create a care team with two staff members.
