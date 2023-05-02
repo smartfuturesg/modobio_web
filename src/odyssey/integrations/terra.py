@@ -295,6 +295,9 @@ class TerraClient(terra.Terra):
             return
         # Don't use parsed_response here, want to re-deserialize JSON with our JSONProvider.
         for data in response.get_json()['data']:
+            if data["metadata"]["start_time"] is None:
+                continue
+            
             # Update existing or create new doc (upsert).
             result = mongo.db.wearables.update_one(
                 {'user_id': user_id, 'wearable': wearable, 'timestamp': data['metadata']['start_time']},
