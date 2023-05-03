@@ -524,6 +524,13 @@ class LookupSubscriptions(BaseModel):
     :type: string
     """
 
+    google_product_id = db.Column(db.String)
+    """
+    Product ID assigned by the Google Play store
+
+    :type: string
+    """
+
     
     user_subscriptions = db.relationship("UserSubscriptions", back_populates = 'subscription_type_information', uselist = False )
     """
