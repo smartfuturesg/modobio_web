@@ -1,20 +1,5 @@
 
------------------------------
--- Empty table and reset index. 
--- Rather than altering the table, this script inserts data 
--- So to avoid duplicates, we empty the table and reindex.
--- This is a solution that should be run only once on 
--- persistent databases. 
--- Further changes to this table will be done through the API
------------------------------
-
-DELETE FROM "MedicalBloodTestResultTypes"
-    WHERE result_id >= 1;
-
-ALTER SEQUENCE "MedicalBloodTestResultTypes_result_id_seq"
-		RESTART WITH 1;
-
-INSERT INTO "MedicalBloodTestResultTypes" ("result_name", "normal_min", "normal_max", "optimal_min", "optimal_max", "unit", "panel" ) 
+INSERT INTO "LookupBloodTestResultTypes" ("result_name", "normal_min", "normal_max", "optimal_min", "optimal_max", "unit", "panel" ) 
 VALUES 
 ('dihydroxyvitaminD',15,60,null,null,'pg/mL',null),
 ('hydroxyprogesteroneSerumFemaleFollicular',0,80,null,null,'ng/dL',null),
