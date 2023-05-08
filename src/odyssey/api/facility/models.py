@@ -1,15 +1,16 @@
 """
-Database tables for supporting miscellaneous functionality. 
+Database tables for supporting miscellaneous functionality.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+
 class MedicalInstitutions(db.Model):
-    """ Medical institutions associated with client external medical records. 
-    """
+    """Medical institutions associated with client external medical records."""
 
     __tablename__ = 'MedicalInstitutions'
 
@@ -27,7 +28,7 @@ class MedicalInstitutions(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    institute_id = db.Column(db.Integer, primary_key=True, autoincrement=True )
+    institute_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     medical institute id 
 
@@ -41,9 +42,10 @@ class MedicalInstitutions(db.Model):
     :type: str
     """
 
+
 class RegisteredFacilities(db.Model):
-    """ Facilities registered in the modobio system. These can be internal(Modobio facilities) 
-        or external(doctor's offices, hospitals, etc.)
+    """Facilities registered in the modobio system. These can be internal(Modobio facilities)
+    or external(doctor's offices, hospitals, etc.)
     """
 
     __tablename__ = 'RegisteredFacilities'

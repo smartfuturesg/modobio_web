@@ -1,21 +1,28 @@
 """
 Database tables for supporting lookup tables. These tables should be static tables only used for reference,
-not to be edited at runtime. 
+not to be edited at runtime.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from sqlalchemy import UniqueConstraint
 
 from odyssey import db
-from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModel
+from odyssey.utils.constants import DB_SERVER_TIME
+
 
 class SystemTelehealthSessionCosts(BaseModel):
-    """ Teleheath session costs that can be changed by a system administrator
-    """
+    """Teleheath session costs that can be changed by a system administrator"""
 
-    __table_args__ = (UniqueConstraint('currency_id', 'profession_type', name='telehealth_costs_unique_resource_currency_id_profession'),)
+    __table_args__ = (
+        UniqueConstraint(
+            'currency_id',
+            'profession_type',
+            name='telehealth_costs_unique_resource_currency_id_profession',
+        ),
+    )
 
     cost_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -38,30 +45,31 @@ class SystemTelehealthSessionCosts(BaseModel):
     :type: string
     """
 
-    session_cost = db.Column(db.Numeric(10,2), nullable=False)
+    session_cost = db.Column(db.Numeric(10, 2), nullable=False)
     """
     Cost of this teleheatlh session in this country's currency.
 
     :type: Numeric
     """
 
-    session_min_cost = db.Column(db.Numeric(10,2), nullable=False)
+    session_min_cost = db.Column(db.Numeric(10, 2), nullable=False)
     """
     Minimum cost allowed of this teleheatlh session in this country's currency.
 
     :type: Numeric
     """
-    
-    session_max_cost = db.Column(db.Numeric(10,2), nullable=False)
+
+    session_max_cost = db.Column(db.Numeric(10, 2), nullable=False)
     """
     Maximum cost allowed of this teleheatlh session in this country's currency.
 
     :type: Numeric
     """
 
+
 class SystemVariables(db.Model):
-    """ Holds various system-wide variables that can be viewed and edited by the sys_admin.
-        The value is always stored as a string and will need to be cast into its proper type where used.
+    """Holds various system-wide variables that can be viewed and edited by the sys_admin.
+    The value is always stored as a string and will need to be cast into its proper type where used.
     """
 
     __tablename__ = 'SystemVariables'
@@ -93,7 +101,7 @@ class SystemVariables(db.Model):
 
     :type: string
     """
-    
+
     var_value = db.Column(db.String)
     """
     Current value of this variable. Must be stored as a string and cast to the needed type in code.

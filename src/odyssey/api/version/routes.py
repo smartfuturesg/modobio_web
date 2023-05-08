@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from flask import current_app
@@ -10,16 +11,24 @@ from odyssey.utils.base.resources import BaseResource
 
 ns = Namespace('version', description='Endpoint for API version.')
 
+
 @ns.route('/')
 class VersionEndpoint(BaseResource):
     @ns.doc(security=None)
     @responds(
-        {'name': 'version', 'type': str},
-        {'name': 'db_version', 'type': str},
+        {
+            'name': 'version',
+            'type': str
+        },
+        {
+            'name': 'db_version',
+            'type': str
+        },
         status_code=200,
-        api=ns)
+        api=ns,
+    )
     def get(self):
-        """ Returns API version in response to a GET request.
+        """Returns API version in response to a GET request.
 
         Alembic, the database migration tool, stores a version stamp in the
         database. The stamp is not a sequential version number, but a unique
@@ -32,5 +41,8 @@ class VersionEndpoint(BaseResource):
             Dict with keys "version" and "db_version".
         """
         db_version = db.session.execute('select version_num from alembic_version;').scalar()
-        
-        return {'version': current_app.config['VERSION_STRING'], 'db_version': db_version}
+
+        return {
+            'version': current_app.config['VERSION_STRING'],
+            'db_version': db_version,
+        }
