@@ -3,6 +3,7 @@ Database tables for the trainer's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``Trainer``.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
@@ -12,7 +13,7 @@ from odyssey.utils.constants import DB_SERVER_TIME
 
 
 class PowerAssessment(db.Model):
-    """ Power assessment table.
+    """Power assessment table.
 
     In the power assessment, the average maximum power a client
     can generate is measured relative to body mass. This is measured
@@ -50,7 +51,11 @@ class PowerAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
@@ -72,7 +77,7 @@ class PowerAssessment(db.Model):
     :type: int
     :unit: W
     """
-    
+
     keiser_upper_r_attempt_2 = db.Column(db.Integer)
     """
     Keiser push/pull max power generated, right, attempt 2 of 3.
@@ -238,21 +243,21 @@ class PowerAssessment(db.Model):
 
 
 class StrengthAssessment(db.Model):
-    """ Strength assessment table.
+    """Strength assessment table.
 
     In the strength assessment, the maximum weight a client can lift
     is measured for the upper and lower body.
     """
 
     __tablename__ = 'TrainerStrengthAssessment'
-    
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
 
     :type: int, primary key, autoincrement
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
@@ -274,7 +279,11 @@ class StrengthAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
@@ -311,7 +320,7 @@ class StrengthAssessment(db.Model):
     :type: int
     :unit: reps
     """
-    
+
     upper_push_l_attempt_2 = db.Column(db.Integer)
     """
     Number of reps the weight in :attr:`upper_push_l_weight` is pushed
@@ -358,7 +367,7 @@ class StrengthAssessment(db.Model):
     :type: int
     :unit:
     """
-    
+
     upper_push_r_attempt_2 = db.Column(db.Integer)
     """
     Number of reps the weight in :attr:`upper_push_r_weight` is pushed
@@ -405,7 +414,7 @@ class StrengthAssessment(db.Model):
     :type: int
     :unit: reps
     """
-    
+
     upper_push_bi_attempt_2 = db.Column(db.Integer)
     """
     Number of reps the weight in :attr:`upper_push_bi_weight` is pushed
@@ -452,7 +461,7 @@ class StrengthAssessment(db.Model):
     :type: int
     :unit: reps
     """
-    
+
     upper_pull_l_attempt_2 = db.Column(db.Integer)
     """
     Number of reps the weight in :attr:`upper_pull_l_weight` is pulled
@@ -499,7 +508,7 @@ class StrengthAssessment(db.Model):
     :type: int
     :unit: reps
     """
-    
+
     upper_pull_r_attempt_2 = db.Column(db.Integer)
     """
     Number of reps the weight in :attr:`upper_pull_r_weight` is pulled
@@ -546,7 +555,7 @@ class StrengthAssessment(db.Model):
     :type: int
     :unit: reps
     """
-    
+
     upper_pull_bi_attempt_2 = db.Column(db.Integer)
     """
     Number of reps the weight in :attr:`upper_pull_bi_weight` is pulled
@@ -579,20 +588,20 @@ class StrengthAssessment(db.Model):
 
 
 class MovementAssessment(db.Model):
-    """ Movement assessment table.
+    """Movement assessment table.
 
     This set of tests assesses movement through squats and forward bends.
     """
 
     __tablename__ = 'TrainerMovementAssessment'
-    
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
 
     :type: int, primary key, autoincrement
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
@@ -614,7 +623,11 @@ class MovementAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
@@ -680,7 +693,11 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_pelvis_movement = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'Even Bilaterally'}")
+    toe_touch_pelvis_movement = db.Column(
+        db.ARRAY(db.String),
+        nullable=True,
+        server_default="{'Even Bilaterally'}",
+    )
     """
     Describes pelvis movement during toe touch test.
     Can be any of the following (multiple allowed):
@@ -694,7 +711,11 @@ class MovementAssessment(db.Model):
     :type: str
     """
 
-    toe_touch_ribcage_movement = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'Even Bilaterally'}")
+    toe_touch_ribcage_movement = db.Column(
+        db.ARRAY(db.String),
+        nullable=True,
+        server_default="{'Even Bilaterally'}",
+    )
     """
     Describes ribcage movement during toe touch test.
     Can be any of the following (multiple allowed):
@@ -713,25 +734,25 @@ class MovementAssessment(db.Model):
     Toe touch test notes.
 
     :type: str
-    """ 
+    """
 
     standing_rotation_r_notes = db.Column(db.String)
     """
     Standing rotation right notes.
 
     :type: str
-    """ 
+    """
 
     standing_rotation_l_notes = db.Column(db.String)
     """
     Standing rotation right notes.
 
     :type: str
-    """ 
+    """
 
 
 class HeartAssessment(db.Model):
-    """ Heart assessment table.
+    """Heart assessment table.
 
     Assessment of heartrate and breathing capabilities.
     """
@@ -744,7 +765,7 @@ class HeartAssessment(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
@@ -766,7 +787,11 @@ class HeartAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
@@ -788,7 +813,7 @@ class HeartAssessment(db.Model):
     :type: int
     :unit: bpm
     """
-   
+
     theoretical_max_hr = db.Column(db.Integer)
     """
     Theoretical maximum heartrate. This is calculated with:
@@ -797,7 +822,7 @@ class HeartAssessment(db.Model):
 
     :type: int
     :unit: bpm
-    """ 
+    """
 
     avg_eval_hr = db.Column(db.Integer)
     """
@@ -845,8 +870,8 @@ class HeartAssessment(db.Model):
 
 
 class MoxyAssessment(db.Model):
-    """ Moxy assessment table.
-    
+    """Moxy assessment table.
+
     A moxy sensor is a device that measures muscle oxygen concentration. It
     is used to determine a client's capacity for short duration full power
     exercise (the size of their "gas tank") and the speed of recovery afterwards.
@@ -865,7 +890,7 @@ class MoxyAssessment(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
@@ -887,7 +912,11 @@ class MoxyAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
@@ -923,7 +952,7 @@ class MoxyAssessment(db.Model):
     
     :type: int
     :unit: %
-    """    
+    """
 
     gas_tank_size = db.Column(db.Integer)
     """
@@ -932,7 +961,7 @@ class MoxyAssessment(db.Model):
     :type: int
     :unit: %
     """
-    
+
     starting_sm_o2 = db.Column(db.Integer)
     """
     Starting value for muscle oxygen level.
@@ -958,7 +987,7 @@ class MoxyAssessment(db.Model):
     - respiratory
 
     :type: str
-    """    
+    """
 
     intervention = db.Column(db.String)
     """
@@ -1000,7 +1029,7 @@ class MoxyAssessment(db.Model):
     - foot/min
 
     :type: str
-    """   
+    """
 
     performance_metric_2_value = db.Column(db.Integer)
     """
@@ -1016,7 +1045,7 @@ class MoxyAssessment(db.Model):
 
 
 class MoxyRipTest(db.Model):
-    """ Moxy rip test table.
+    """Moxy rip test table.
 
     A moxy sensor is a device that measures muscle oxygen concentration. It
     is used to determine a client's capacity for short duration full power
@@ -1035,7 +1064,7 @@ class MoxyRipTest(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
@@ -1057,13 +1086,17 @@ class MoxyRipTest(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
-       
+
     vl_side = db.Column(db.String)
     """
     Which vastus lateralus (VL, part of quadriceps in upper leg) the moxy
@@ -1071,7 +1104,7 @@ class MoxyRipTest(db.Model):
 
     :type: str
     """
-    
+
     performance_smo2_1 = db.Column(db.Integer)
     """
     Muscle oxygen saturation level (SmO2) after sprint 1.
@@ -1167,7 +1200,7 @@ class MoxyRipTest(db.Model):
     :type: int
     :unit: bpm
     """
-    
+
     performance_smo2_4 = db.Column(db.Integer)
     """
     Muscle oxygen saturation level (SmO2) after sprint 4.
@@ -1293,7 +1326,7 @@ class MoxyRipTest(db.Model):
     :type: int
     :unit: bpm
     """
-    
+
     recovery_smo2_4 = db.Column(db.Integer)
     """
     Muscle oxygen saturation level (SmO2) after recovery period 4.
@@ -1404,7 +1437,7 @@ class MoxyRipTest(db.Model):
     :type: int
     :unit: s
     """
-    
+
     limiter = db.Column(db.String)
     """
     Limiting factor to the "gas tank" size. Must be one of:
@@ -1414,7 +1447,7 @@ class MoxyRipTest(db.Model):
     - respiratory
 
     :type: str
-    """    
+    """
 
     intervention = db.Column(db.String)
     """
@@ -1425,7 +1458,7 @@ class MoxyRipTest(db.Model):
 
 
 class LungAssessment(db.Model):
-    """ Lung capacity assessment table.
+    """Lung capacity assessment table.
 
     The lung capacity of a client is measured using a SpiroTiger device.
     The SpiroTiger has an elastic bag which has to be filled by the client
@@ -1444,7 +1477,7 @@ class LungAssessment(db.Model):
 
     :type: int, primary key, autoincrement
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.
@@ -1466,7 +1499,11 @@ class LungAssessment(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
@@ -1522,7 +1559,7 @@ class LungAssessment(db.Model):
 
 
 class FitnessQuestionnaire(db.Model):
-    """ Fitness questionnaire.
+    """Fitness questionnaire.
 
     The fitness questionnaire is filled in by the client on
     first sign up to Modo Bio.
@@ -1539,13 +1576,17 @@ class FitnessQuestionnaire(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the assessment.

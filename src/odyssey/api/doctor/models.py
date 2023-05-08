@@ -3,19 +3,23 @@ Database tables for the doctor's portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``Medical``.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from sqlalchemy import text
 
-from odyssey.utils.constants import DB_SERVER_TIME, BLOODTEST_EVAL
 from odyssey import db
-from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
+from odyssey.utils.base.models import (
+    BaseModel, BaseModelWithIdx, ReporterIdFkeyMixin, UserIdFkeyMixin
+)
+from odyssey.utils.constants import BLOODTEST_EVAL, DB_SERVER_TIME
+
 
 class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
-    """ Blood Pressure Table
-    
+    """Blood Pressure Table
+
     This table is used for storing the client's blood pressures.
-    """    
+    """
 
     systolic = db.Column(db.Float)
     """
@@ -61,24 +65,29 @@ class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMix
 
 
 class MedicalSTDHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Medical STD History
+    """Medical STD History
 
     This table stores the client's STD history
     """
 
-    std_id = db.Column(db.Integer, db.ForeignKey('LookupSTDs.std_id',ondelete="CASCADE"), nullable=False)
+    std_id = db.Column(
+        db.Integer,
+        db.ForeignKey('LookupSTDs.std_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Disease ID
 
     :type: int, foreign key to :attr: LookupSTDs.std_id
     """
 
-class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Medical Social History
 
-    This table is used for client onboarding. It is used for 
+class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
+    """Medical Social History
+
+    This table is used for client onboarding. It is used for
     storing the client's medical social information.
-    """    
+    """
 
     displayname = 'Medical General Info - Social History'
 
@@ -87,7 +96,7 @@ class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
     Has the client ever smoked
 
     :type: bool
-    """   
+    """
 
     currently_smoke = db.Column(db.Boolean)
     """
@@ -101,7 +110,7 @@ class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
     Date when client last smoked.
 
     :type: :class:`datetime.date`
-    """    
+    """
 
     last_smoke = db.Column(db.Integer)
     """
@@ -144,7 +153,7 @@ class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: int
     """
-    
+
     avg_weekly_workouts = db.Column(db.Integer)
     """
     Average number of times client worksout a week
@@ -173,16 +182,21 @@ class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Personal and Family Medical History
 
-    This table is used for client onboarding. It is used for 
+class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
+    """Personal and Family Medical History
+
+    This table is used for client onboarding. It is used for
     storing the client's general medical information.
-    """    
+    """
 
     displayname = 'Medical General Info - Family History'
 
-    medical_condition_id = db.Column(db.Integer, db.ForeignKey('LookupMedicalConditions.medical_condition_id',ondelete="CASCADE"), nullable=False)
+    medical_condition_id = db.Column(
+        db.Integer,
+        db.ForeignKey('LookupMedicalConditions.medical_condition_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Disease ID
 
@@ -226,11 +240,12 @@ class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
 
 
 class MedicalGeneralInfoMedicationAllergy(BaseModelWithIdx, UserIdFkeyMixin):
-    """ General Medical Information.
+    """General Medical Information.
 
-    This table is used for client onboarding. It is used for 
+    This table is used for client onboarding. It is used for
     storing the client's general medical information.
-    """    
+    """
+
     displayname = 'Medical General Info - Medication Allergies'
 
     medication_name = db.Column(db.String)
@@ -247,12 +262,14 @@ class MedicalGeneralInfoMedicationAllergy(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-class MedicalGeneralInfoMedications(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
-    """ General Medical Information.
 
-    This table is used for client onboarding. It is used for 
+class MedicalGeneralInfoMedications(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
+    """General Medical Information.
+
+    This table is used for client onboarding. It is used for
     storing the client's general medical information.
-    """    
+    """
+
     displayname = 'Medical General Info - Medications'
 
     medication_name = db.Column(db.Text)
@@ -312,11 +329,12 @@ class MedicalGeneralInfoMedications(BaseModelWithIdx, UserIdFkeyMixin, ReporterI
 
 
 class MedicalGeneralInfo(BaseModelWithIdx, UserIdFkeyMixin):
-    """ General Medical Information.
+    """General Medical Information.
 
-    This table is used for client onboarding. It is used for 
+    This table is used for client onboarding. It is used for
     storing the client's general medical information.
-    """    
+    """
+
     displayname = displayname = 'Medical General Info'
 
     primary_doctor_contact_name = db.Column(db.String(50))
@@ -347,7 +365,7 @@ class MedicalGeneralInfo(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: str
     """
-    
+
     blood_type_positive = db.Column(db.Boolean)
     """
     Client's blood type sign:
@@ -356,10 +374,11 @@ class MedicalGeneralInfo(BaseModelWithIdx, UserIdFkeyMixin):
     :type: bool
     """
 
-class MedicalImaging(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
-    """ Medical Imaging table.
 
-    This table stores the medical imaging history of a client. 
+class MedicalImaging(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
+    """Medical Imaging table.
+
+    This table stores the medical imaging history of a client.
     As long as the user_id exists, we can add images to this table and search by user_id
     """
 
@@ -386,7 +405,7 @@ class MedicalImaging(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
     :type: str, max length 1024
     """
-    
+
     image_read = db.Column(db.Text)
     """
     Doctor's diagnosis or notes of the image.
@@ -402,7 +421,7 @@ class MedicalImaging(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
     :type: str
     """
-    
+
     image_path = db.Column(db.Text)
     """
     Path where image is stored.
@@ -420,8 +439,9 @@ class MedicalImaging(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     :type: int
     """
 
+
 class MedicalHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Medical history table.
+    """Medical history table.
         Deprecated 7.26.21
 
         MedicalGeneralInfo, MedicalGeneralInfoMedications used instead
@@ -431,6 +451,7 @@ class MedicalHistory(BaseModelWithIdx, UserIdFkeyMixin):
     This table stores the medical history of a client. The information is taken
     only once, during the initial consult.
     """
+
     displayname = 'Medical history'
 
     last_examination_date = db.Column(db.Date)
@@ -533,11 +554,12 @@ class MedicalHistory(BaseModelWithIdx, UserIdFkeyMixin):
 
 
 class MedicalPhysicalExam(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
-    """ Medical physical exam table.
+    """Medical physical exam table.
 
     This table stores the results of the physical exam of a client. The
     information is taken only once, during the initial consult.
     """
+
     displayname = 'Medical physical examination'
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
@@ -546,7 +568,7 @@ class MedicalPhysicalExam(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
     :type: :class:`datetime.datetime`, primary key
     """
-    
+
     vital_heartrate = db.Column(db.Integer)
     """
     Resting heart rate.
@@ -604,7 +626,6 @@ class MedicalPhysicalExam(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
     :type: str, max length 20
     :unit: TBD
     """
-
 
     vital_height_inches = db.Column(db.Float)
     """
@@ -735,7 +756,7 @@ class MedicalPhysicalExam(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
 
 
 class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
-    """ Blood test table.
+    """Blood test table.
 
     This table stores metadata for blood tests.
     """
@@ -760,7 +781,7 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
     :type: str
     """
-    
+
     image_path = db.Column(db.String)
     """
     Optional image uploaded alongside blood test results.
@@ -777,34 +798,38 @@ class MedicalBloodTests(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
 
 
 class MedicalBloodTestResults(BaseModelWithIdx):
-    """ Blood test result data.
+    """Blood test result data.
 
     This table holds the value of a single blood test and the
     evaluation of that value given the normal and critical ranges
     stored in :class:`LookupBloodTestRanges`.
     """
 
-    test_id = db.Column(db.Integer, db.ForeignKey('MedicalBloodTests.test_id', ondelete="CASCADE"), nullable=False)
+    test_id = db.Column(
+        db.Integer,
+        db.ForeignKey('MedicalBloodTests.test_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Unique test ID number.
 
     :type: int, foreign key to :attr:`MedicalBloodTests.testid`
     """
-    
+
     modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
     """
     Modobio Test Code for this result type.
     
     :type: str, foreign key to :attr:'LookupBloodTests.modobio_test_id
     """
-    
+
     age = db.Column(db.Integer)
     """
     Client age at the time the blood test was administered.
     
     :type: int
     """
-    
+
     race = db.Column(db.String)
     """
     Client's race for the purpose of blood chemistry analysis. In the case a client has multiple races
@@ -813,7 +838,7 @@ class MedicalBloodTestResults(BaseModelWithIdx):
         
     :type: string
     """
-    
+
     menstrual_cycle = db.Column(db.String)
     """
     Stage of the menstrual cycle the client was in at the time of the blood test. Null if the client's
@@ -821,7 +846,7 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     
     :type: string
     """
-    
+
     biological_sex_male = db.Column(db.Boolean)
     """
     Biological sex of the client for the purpose of blood chemistry analysis.
@@ -829,7 +854,11 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     :type: bool
     """
 
-    result_id = db.Column(db.Integer, db.ForeignKey('LookupBloodTestResultTypes.result_id', ondelete="SET NULL"), nullable=True)
+    result_id = db.Column(
+        db.Integer,
+        db.ForeignKey('LookupBloodTestResultTypes.result_id', ondelete='SET NULL'),
+        nullable=True,
+    )
     """
     Deprecated field that was used to track result types before modobio_test_id was developed
     
@@ -859,10 +888,11 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     """
 
     # 1-1 relationship with LookupBloodTests
-    test_type = db.relationship("LookupBloodTests")
+    test_type = db.relationship('LookupBloodTests')
+
 
 class MedicalSurgeries(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
-    """ 
+    """
     History of client surgeries.
     """
 
@@ -908,15 +938,15 @@ class MedicalSurgeries(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
     :type: string
     """
 
+
 class MedicalExternalMR(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
+    """
     External medical records table.
 
-    This table stores medical record ID numbers from external medical institutes. 
+    This table stores medical record ID numbers from external medical institutes.
     """
 
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'med_record_id', 'institute_id'),)
+    __table_args__ = (db.UniqueConstraint('user_id', 'med_record_id', 'institute_id'), )
 
     med_record_id = db.Column(db.String, nullable=False)
     """
@@ -927,7 +957,11 @@ class MedicalExternalMR(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str, non-null, unique
     """
 
-    institute_id = db.Column(db.Integer, db.ForeignKey('MedicalInstitutions.institute_id', ondelete="CASCADE"), nullable=False)
+    institute_id = db.Column(
+        db.Integer,
+        db.ForeignKey('MedicalInstitutions.institute_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Medical institute id.
 

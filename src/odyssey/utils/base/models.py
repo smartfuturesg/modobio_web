@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from sqlalchemy.ext.declarative import declared_attr
@@ -6,12 +7,14 @@ from sqlalchemy.ext.declarative import declared_attr
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+
 class BaseModel(db.Model):
     """
     SQLAlchemy base model used to create all other models.
     Models that are declared with this base will automatically have "created_at" and "updated_at" columns.
     They will also have a __tablename__ that is identical to their class name.
     """
+
     __abstract__ = True
 
     @declared_attr
@@ -32,11 +35,13 @@ class BaseModel(db.Model):
     :type: :class:`datetime.datetime`
     """
 
+
 class BaseModelWithIdx(BaseModel):
     """
     Base model for tables that use the generic index name (idx)
     Inherits the attributes from the above base model but adds in an 'idx' column
     """
+
     __abstract__ = True
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -46,6 +51,7 @@ class BaseModelWithIdx(BaseModel):
     :type: int, primary key, autoincrement
     """
 
+
 class UserIdFkeyMixin:
     """
     Mixin for tables that require a foriegn key to the User.user_id column
@@ -53,12 +59,17 @@ class UserIdFkeyMixin:
     """
     @declared_attr
     def user_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+        return db.Column(
+            db.Integer,
+            db.ForeignKey('User.user_id', ondelete='CASCADE'),
+            nullable=False,
+        )
         """
         User ID number, foreign key to User.user_id
 
         :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
         """
+
 
 class UserIdFkeyPKMixin:
     """
@@ -66,12 +77,17 @@ class UserIdFkeyPKMixin:
     """
     @declared_attr
     def user_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True)
+        return db.Column(
+            db.Integer,
+            db.ForeignKey('User.user_id', ondelete='CASCADE'),
+            primary_key=True,
+        )
         """
         User ID number, primary key and foreign key to User.user_id
 
         :type: int, primary key, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
         """
+
 
 class ReporterIdFkeyMixin:
     """

@@ -3,32 +3,44 @@ Database tables staff member information for the Modo Bio Staff application.
 All tables in this module are prefixed with ``Staff``.
 """
 import logging
+
 from sqlalchemy.sql.expression import except_all
+
 logger = logging.getLogger(__name__)
 
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from odyssey import db
-from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
 from odyssey.api.lookup.models import LookupRoles
 from odyssey.api.provider.models import ProviderCredentials
+from odyssey.utils.base.models import (BaseModel, BaseModelWithIdx, UserIdFkeyMixin)
+from odyssey.utils.constants import DB_SERVER_TIME
+
 
 class StaffProfile(BaseModel):
-    """ Staff member profile information table.
+    """Staff member profile information table.
 
     This table stores information regarding Modo Bio
     staff member profiles.
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        primary_key=True,
+        nullable=False,
+    )
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
 
-    user_info = db.relationship('User', back_populates='staff_profile', foreign_keys='StaffProfile.user_id')
+    user_info = db.relationship(
+        'User',
+        back_populates='staff_profile',
+        foreign_keys='StaffProfile.user_id',
+    )
     """
     One-to-One relatinoship with User
 
@@ -51,12 +63,15 @@ class StaffProfile(BaseModel):
     :type: string
     """
 
-    profile_pictures = db.relationship('UserProfilePictures', uselist=True, back_populates='staff_profile')
+    profile_pictures = db.relationship(
+        'UserProfilePictures', uselist=True, back_populates='staff_profile'
+    )
     """
     One to many relationship with UserProfilePictures
 
     :type: :class:`UserProfilePicture` instance
     """
+
 
 class StaffRecentClients(db.Model):
     """this table stores the last 10 clients that a staff member has loaded"""
@@ -70,14 +85,22 @@ class StaffRecentClients(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    staff_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     User_id of the staff member that loaded the client
 
     :type: int, foreign key
     """
 
-    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    client_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     User_id of the client that was loaded
 
@@ -91,12 +114,13 @@ class StaffRecentClients(db.Model):
     :type: datetime
     """
 
+
 class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Stores informaiton on staff role assignments. 
+    """Stores informaiton on staff role assignments.
 
     Roles must be verified either by a manual or automatic internal review process.
     Some roles will be location based where verification is required for each locality
-    (state, country etc.). 
+    (state, country etc.).
     """
 
     role = db.Column(db.String, db.ForeignKey('LookupRoles.role_name'), nullable=False)
@@ -117,25 +141,32 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    role_info = db.relationship('LookupRoles', uselist=False, back_populates='professionals_assigned', foreign_keys='StaffRoles.role')
+    role_info = db.relationship(
+        'LookupRoles',
+        uselist=False,
+        back_populates='professionals_assigned',
+        foreign_keys='StaffRoles.role',
+    )
     """
     Many to one relationship with Lookup Roles table
     :type: :class:`LookupRoles` instance 
     """
 
-    operational_territories = db.relationship('StaffOperationalTerritories', uselist=True, back_populates='role')
+    operational_territories = db.relationship(
+        'StaffOperationalTerritories', uselist=True, back_populates='role'
+    )
     """
     One to many relationship with staff's opeartional territories
 
     :type: :class:`StaffOperationalTerritories` instance list
-    """ 
+    """
 
     credentials = db.relationship('ProviderCredentials', uselist=True, back_populates='role')
     """
     One to many relationship with staff's credentials
 
     :type: :class:`ProviderCredentials` instance list
-    """            
+    """
 
     granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=True)
     """
@@ -148,22 +179,25 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key(User.user_id)
     """
 
-    consult_rate = db.Column(db.Numeric(10,2))
+    consult_rate = db.Column(db.Numeric(10, 2))
     """
     Consultation rate for the practitioner
 
     :type: Numeric
     """
 
+
 class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
-    Locations where staff members operate. Each entry is tied to a role in the StaffRoles table. 
+    """
+    Locations where staff members operate. Each entry is tied to a role in the StaffRoles table.
     Depending on the profession, the role-territory paid must be verified with an active identification number
-    or some other internal process. Verifications will be stored in another table. 
+    or some other internal process. Verifications will be stored in another table.
 
     """
 
-    operational_territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
+    operational_territory_id = db.Column(
+        db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx')
+    )
     """
     Operational subterritory from the operational territories lookup table.
 
@@ -174,24 +208,35 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key to :attr:`LookupTerritoriesofOperation.idx <odyssey.models.lookup.LookupTerritoriesofOperation.idx>`
     """
 
-    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=False)
+    role_id = db.Column(
+        db.Integer,
+        db.ForeignKey('StaffRoles.idx', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Role from the StaffRoles table. 
 
     :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
     """
 
-    role = db.relationship('StaffRoles', uselist=False, back_populates='operational_territories', foreign_keys='StaffOperationalTerritories.role_id')
+    role = db.relationship(
+        'StaffRoles',
+        uselist=False,
+        back_populates='operational_territories',
+        foreign_keys='StaffOperationalTerritories.role_id',
+    )
     """
     Many to one relationship with staff roles table
 
     :type: :class:`StaffRoles` instance
     """
 
+
 class StaffCalendarEvents(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
-    Model for events to be saved to the professional's calendar 
     """
+    Model for events to be saved to the professional's calendar
+    """
+
     start_date = db.Column(db.Date, nullable=False)
     """
     If recurring, this is the recurrence start date,
@@ -278,6 +323,7 @@ class StaffCalendarEvents(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: str
     """
+
 
 class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
     """

@@ -3,13 +3,15 @@ Database tables for the practitioner system portion of the Modo Bio Staff applic
 All tables in this module are prefixed with 'Practitioner'.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from odyssey import db
 from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin
 
-class ProviderRoleRequests(BaseModelWithIdx,UserIdFkeyMixin):
-    """ Table for storing role requests made by prospective providers. """
+
+class ProviderRoleRequests(BaseModelWithIdx, UserIdFkeyMixin):
+    """Table for storing role requests made by prospective providers."""
 
     role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'), nullable=False)
 
@@ -27,23 +29,33 @@ class ProviderRoleRequests(BaseModelWithIdx,UserIdFkeyMixin):
     :type: string
     """
 
-    role_info = db.relationship('LookupRoles', uselist=False, foreign_keys='ProviderRoleRequests.role_id')
+    role_info = db.relationship(
+        'LookupRoles',
+        uselist=False,
+        foreign_keys='ProviderRoleRequests.role_id',
+    )
     """
     Many to one relationship with Lookup Roles table
     :type: :class:`LookupRoles` instance 
     """
 
-    reviewer_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="SET NULL"), nullable=True)
+    reviewer_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='SET NULL'),
+        nullable=True,
+    )
 
-    credentials = db.relationship('ProviderCredentials', uselist=False, back_populates='role_request')
+    credentials = db.relationship(
+        'ProviderCredentials', uselist=False, back_populates='role_request'
+    )
     """
     One to many relationship with ProviderCredentials table
     :type: :class:`ProviderCredentials`
     """
 
 
-class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
-    """ Licensing and other credentials for providers. """
+class ProviderCredentials(BaseModelWithIdx, UserIdFkeyMixin):
+    """Licensing and other credentials for providers."""
 
     country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
     """
@@ -80,14 +92,18 @@ class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     :type: str
     """
 
-    role_id = db.Column(db.Integer, db.ForeignKey('StaffRoles.idx', ondelete="CASCADE"), nullable=True)
+    role_id = db.Column(
+        db.Integer,
+        db.ForeignKey('StaffRoles.idx', ondelete='CASCADE'),
+        nullable=True,
+    )
     """
     Role from the StaffRoles table. 
 
     :type: int, foreign key to :attr:`StaffRoles.idx <odyssey.models.staff.StaffRoles.idx>`
 
     """
-    
+
     role = db.relationship('StaffRoles', uselist=False, back_populates='credentials')
     """
     Many to one relationship with staff roles table
@@ -102,14 +118,18 @@ class ProviderCredentials(BaseModelWithIdx,UserIdFkeyMixin):
     :type: date
     """
 
-    role_request_id = db.Column(db.Integer, db.ForeignKey('ProviderRoleRequests.idx'), nullable=True)
+    role_request_id = db.Column(
+        db.Integer, db.ForeignKey('ProviderRoleRequests.idx'), nullable=True
+    )
     """
     Role request ID number, foreign key to ProviderRoleRequests.idx
 
     :type: int, foreign key
     """
-    
-    role_request = db.relationship('ProviderRoleRequests', uselist=True, back_populates='credentials')
+
+    role_request = db.relationship(
+        'ProviderRoleRequests', uselist=True, back_populates='credentials'
+    )
     """
     One to many relationship with ProviderRoleRequests table
 

@@ -2,38 +2,37 @@
 This module handles the generation and storage of PDF files for signed documents.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
-import boto3
 import concurrent.futures
 import hashlib
 import io
 import pathlib
-
 from datetime import date
 from typing import Type
 
+import boto3
 from botocore.exceptions import ClientError
-from flask import render_template, current_app, _request_ctx_stack
+from flask import _request_ctx_stack, current_app, render_template
+
 # PyPDF2 has been renamed to pypdf with v3.
 try:
     from PyPDF2 import PdfFileMerger
 except ImportError:
     from pypdf import PdfFileMerger
 
-from weasyprint import HTML, CSS
 from flask_sqlalchemy import session
+from weasyprint import CSS, HTML
 
 from odyssey import db
 from odyssey.api.client.models import ClientInfo
 
 _executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
 
-def to_pdf(user_id: int,
-           table: Type[db.Model],
-           template: str=None,
-           form=None):
-    """ Generate and store a PDF file from a signed document.
+
+def to_pdf(user_id: int, table: Type[db.Model], template: str = None, form=None):
+    """Generate and store a PDF file from a signed document.
 
     PDF generation and storage is done in a separate thread in a 'fire-and-forget'
     style, so that this process is non-blocking.
@@ -77,11 +76,12 @@ def to_pdf(user_id: int,
         user_id,
         table,
         template=template,
-        form=form
+        form=form,
     )
 
+
 def _to_pdf(req_ctx, user_id, table, template=None, form=None):
-    """ Generate and store a PDF file from a signed document.
+    """Generate and store a PDF file from a signed document.
 
     Don't call this function directly, use :func:`to_pdf` for non-blocking,
     multi-threaded operation.
@@ -92,21 +92,17 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
     local_session = session.Session(db)
     with req_ctx:
         ### Load data and perform checks
-        client = local_session.query(ClientInfo).filter_by(user_id=user_id).one_or_none()
+        client = (local_session.query(ClientInfo).filter_by(user_id=user_id).one_or_none())
 
         if not client:
             # Calling thread has already finished, so raising errors here
             # has no effect. Print to stdout instead and hope somebody reads it.
             # TODO: logging
-            print(f'User ID {user_id} not found in table {ClientInfo.__tablename__}.')
+            print(f'User ID {user_id} not found in table'
+                  f' {ClientInfo.__tablename__}.')
             return
 
-        query = (
-            local_session
-            .query(table)
-            .filter_by(user_id=user_id)
-            .order_by(table.idx.desc())
-        )
+        query = (local_session.query(table).filter_by(user_id=user_id).order_by(table.idx.desc()))
         doc = query.first()
 
         if not doc:
@@ -120,7 +116,7 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
         ### Read HTML page
         if template:
 
-            cssfile = pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css'
+            cssfile = (pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css')
             css = CSS(filename=cssfile)
 
             html = render_template(template, form=form, pdf=True)
@@ -152,8 +148,9 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
 
     local_session.remove()
 
+
 def merge_pdfs(documents: list, user_id: int) -> str:
-    """ Merge multiple pdf files into a single pdf.
+    """Merge multiple pdf files into a single pdf.
 
     Generated document is stored in an S3 bucket with a temp prefix. It expires
     after 1 day. The link to the generated document expires after 10 minutes.
@@ -178,7 +175,8 @@ def merge_pdfs(documents: list, user_id: int) -> str:
         try:
             s3.download_fileobj(bucket_name, doc, doc_buf)
         except ClientError as e:
-            print(f'Could not download file {doc} from S3 bucket {bucket_name}: {e}')
+            print(f'Could not download file {doc} from S3 bucket'
+                  f' {bucket_name}: {e}')
             continue
         doc_buf.seek(0)
         bufs.append(doc_buf)
@@ -201,9 +199,7 @@ def merge_pdfs(documents: list, user_id: int) -> str:
     s3 = boto3.client('s3')
     s3.upload_fileobj(pdf_buf, bucket_name, fullname)
 
-    params = {
-        'Bucket': bucket_name,
-        'Key': fullname}
+    params = {'Bucket': bucket_name, 'Key': fullname}
     pdf_path = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
 
     return pdf_path

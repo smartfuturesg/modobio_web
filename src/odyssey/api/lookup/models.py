@@ -1,18 +1,21 @@
 """
 Database tables for supporting lookup tables. These tables should be static tables only used for reference,
-not to be edited at runtime. 
+not to be edited at runtime.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from odyssey import db
-from odyssey.utils.base.models import BaseModelWithIdx, BaseModel
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
+
 
 class LookupNotificationSeverity(BaseModelWithIdx):
     """
-        Lookup table containing notification severity
+    Lookup table containing notification severity
     """
+
     severity = db.Column(db.String)
     """
     Severity level
@@ -27,30 +30,32 @@ class LookupNotificationSeverity(BaseModelWithIdx):
     :type: str
     """
 
+
 class LookupTermsAndConditions(BaseModelWithIdx):
-    """ 
-        Holds the documententation for the terms and conditions
     """
-    
+    Holds the documententation for the terms and conditions
+    """
+
     terms_and_conditions = db.Column(db.String)
     """ 
     Terms and Conditions
 
     :type: str
-    """    
+    """
+
 
 class LookupBookingTimeIncrements(BaseModelWithIdx):
-    """ 
+    """
     Holds all time increment from 00:00 to 23:55 in increments of 5 minutes
     """
-    
+
     start_time = db.Column(db.Time)
     """ 
     start time
 
     :type: datetime.time
     """
-    
+
     end_time = db.Column(db.Time)
     """ 
     end time 
@@ -58,9 +63,9 @@ class LookupBookingTimeIncrements(BaseModelWithIdx):
     :type: datetime.time
     """
 
+
 class LookupProfessionalAppointmentConfirmationWindow(BaseModelWithIdx):
-    """ Stored appointment confirmation windows for professionals in database. 
-    """
+    """Stored appointment confirmation windows for professionals in database."""
 
     confirmation_window = db.Column(db.Float)
     """
@@ -72,8 +77,7 @@ class LookupProfessionalAppointmentConfirmationWindow(BaseModelWithIdx):
 
 
 class LookupCountriesOfOperations(BaseModelWithIdx):
-    """ Stored countries of operations in database. 
-    """
+    """Stored countries of operations in database."""
 
     country = db.Column(db.String)
     """
@@ -81,16 +85,17 @@ class LookupCountriesOfOperations(BaseModelWithIdx):
     
     :type: str
     """
-    
+
+
 class LookupTerritoriesOfOperations(BaseModelWithIdx):
-    """ 
+    """
     Territories of operaion are organized by country and then sub-territory,
     where a sub_territory is the highest level of governing region that can have
-    laws which will impact our business practices. 
+    laws which will impact our business practices.
 
     In the United States, the sub_territory will be at the state level.
 
-    Staff members are required to specify which territories they can operate in. 
+    Staff members are required to specify which territories they can operate in.
     """
 
     country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
@@ -121,9 +126,9 @@ class LookupTerritoriesOfOperations(BaseModelWithIdx):
     :type: bool
     """
 
+
 class LookupClientBookingWindow(BaseModelWithIdx):
-    """ Stored booking windows for the client in database. 
-    """
+    """Stored booking windows for the client in database."""
 
     booking_window = db.Column(db.Integer)
     """
@@ -133,9 +138,9 @@ class LookupClientBookingWindow(BaseModelWithIdx):
     :type: int
     """
 
+
 class LookupTelehealthSessionDuration(BaseModelWithIdx):
-    """ Stored telehealth session durations in database. 
-    """
+    """Stored telehealth session durations in database."""
 
     session_duration = db.Column(db.Integer)
     """
@@ -145,8 +150,9 @@ class LookupTelehealthSessionDuration(BaseModelWithIdx):
     :type: int
     """
 
+
 class LookupActivityTrackers(BaseModelWithIdx):
-    """ Look up table for activity trackers and their capabilities. """
+    """Look up table for activity trackers and their capabilities."""
 
     brand = db.Column(db.String)
     """
@@ -253,7 +259,7 @@ class LookupActivityTrackers(BaseModelWithIdx):
     + or - Time HH:MM
 
     :type: bool
-    """                            
+    """
 
     wake_consistency = db.Column(db.Boolean)
     """
@@ -267,35 +273,35 @@ class LookupActivityTrackers(BaseModelWithIdx):
     beats per minute
 
     :type: bool
-    """    
+    """
 
     rhr_lowest = db.Column(db.Boolean)
     """
     beats per minute
 
     :type: bool
-    """    
-    
+    """
+
     hr_walking = db.Column(db.Boolean)
     """
     beats per minute
 
     :type: bool
-    """     
+    """
 
     hr_24hr_avg = db.Column(db.Boolean)
     """
     beats per minute
 
     :type: bool
-    """ 
+    """
 
     hrv_avg = db.Column(db.Boolean)
     """
     milliseconds (ms)
 
     :type: bool
-    """    
+    """
 
     hrv_highest = db.Column(db.Boolean)
     """
@@ -338,7 +344,7 @@ class LookupActivityTrackers(BaseModelWithIdx):
 
     :type: bool
     """
-    
+
     walking_equivalency = db.Column(db.Boolean)
     """
     number miles
@@ -352,6 +358,7 @@ class LookupActivityTrackers(BaseModelWithIdx):
 
     :type: bool
     """
+
 
 # class LookupDrinks(BaseModel):
 #     """ Static list of drinks that a client can purchase or be recommended.
@@ -424,9 +431,9 @@ class LookupActivityTrackers(BaseModelWithIdx):
 #     :type: string
 #     """
 
+
 class LookupGoals(BaseModel):
-    """ Static list of goals that a client can choose from. 
-    """
+    """Static list of goals that a client can choose from."""
 
     goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -442,9 +449,9 @@ class LookupGoals(BaseModel):
     :type: string
     """
 
+
 class LookupMacroGoals(BaseModel):
-    """ Static list of pre-defined primary health goals available to a client 
-    """
+    """Static list of pre-defined primary health goals available to a client"""
 
     goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -460,9 +467,9 @@ class LookupMacroGoals(BaseModel):
     :type: string
     """
 
+
 class LookupRaces(BaseModel):
-    """ Static list of races that a client can choose from. 
-    """
+    """Static list of races that a client can choose from."""
 
     race_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -478,9 +485,9 @@ class LookupRaces(BaseModel):
     :type: string
     """
 
+
 class LookupSubscriptions(BaseModel):
-    """ Static list of subscription plans that a user can choose from. 
-    """
+    """Static list of subscription plans that a user can choose from."""
 
     sub_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -524,14 +531,18 @@ class LookupSubscriptions(BaseModel):
     :type: string
     """
 
-    
-    user_subscriptions = db.relationship("UserSubscriptions", back_populates = 'subscription_type_information', uselist = False )
+    user_subscriptions = db.relationship(
+        'UserSubscriptions',
+        back_populates='subscription_type_information',
+        uselist=False,
+    )
     """
     Relationship UserSubscriptions
     """
 
+
 class LookupNotifications(BaseModel):
-    """ Static list of notifications types that a user can receive. """
+    """Static list of notifications types that a user can receive."""
 
     notification_type_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -553,6 +564,7 @@ class LookupNotifications(BaseModel):
 
     :type: str, max length 50
     """
+
 
 class LookupClinicalCareTeamResources(BaseModel):
     """
@@ -596,14 +608,15 @@ class LookupClinicalCareTeamResources(BaseModel):
     :type: string
     """
 
+
 class LookupDefaultHealthMetrics(BaseModelWithIdx):
     """
     Health metric recommendations by sex and age category
     Most of this data may be obtained from one more more fitness trackers
 
     The intended use of this table is to show clients the types of goals and associated benchmarks
-    they shoudld strive for. We may also venture to use the data in this table to evaluate where 
-    clients stand among these metrics.  
+    they shoudld strive for. We may also venture to use the data in this table to evaluate where
+    clients stand among these metrics.
     """
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -717,7 +730,7 @@ class LookupDefaultHealthMetrics(BaseModelWithIdx):
 
     :type: integer
     """
-    
+
     sleep_deep_max_minutes = db.Column(db.Integer)
     """
     Total maximum minutes of deep sleep per night recommended
@@ -922,8 +935,9 @@ class LookupDefaultHealthMetrics(BaseModelWithIdx):
     :type: integer
     """
 
+
 class LookupEmergencyNumbers(BaseModelWithIdx):
-    """ Static list of emergency contact phone numbers """
+    """Static list of emergency contact phone numbers"""
 
     continent = db.Column(db.String)
     """
@@ -959,6 +973,7 @@ class LookupEmergencyNumbers(BaseModelWithIdx):
 
     :type: string
     """
+
 
 class LookupRoles(BaseModelWithIdx):
 
@@ -1059,13 +1074,14 @@ class LookupRoles(BaseModelWithIdx):
     One to many relationship with role groups
 
     :type: :class:`StaffRoleGroups` instance list
-    """ 
+    """
+
 
 class LookupRoleGroups(BaseModelWithIdx):
     """
     Lookup table for groups a particualr role can be part of.
     """
-    
+
     group_name = db.Column(db.String)
     """
     Full group name.
@@ -1086,13 +1102,15 @@ class LookupRoleGroups(BaseModelWithIdx):
 
     :type: int, foreign key
     """
- 
-    role = db.relationship("LookupRoles", back_populates="groups")
+
+    role = db.relationship('LookupRoles', back_populates='groups')
     """
     Many to one relationship with lookup role
 
     :type: :class:`LookupRoles` instance list
-    """ 
+    """
+
+
 class LookupLegalDocs(BaseModelWithIdx):
 
     name = db.Column(db.String)
@@ -1123,6 +1141,7 @@ class LookupLegalDocs(BaseModelWithIdx):
     :type: string
     """
 
+
 class LookupMedicalSymptoms(BaseModelWithIdx):
     """
     Lookup table for medical symptoms and their ICD-10 codes.
@@ -1141,6 +1160,8 @@ class LookupMedicalSymptoms(BaseModelWithIdx):
 
     :type: string
     """
+
+
 class LookupOrganizations(BaseModelWithIdx):
     """
     Lookup table for organizations affiliated with Modobio.
@@ -1166,12 +1187,17 @@ class LookupOrganizations(BaseModelWithIdx):
 
     :type: string
     """
-                                              
-    practitioners_assigned = db.relationship('PractitionerOrganizationAffiliation', uselist=True, back_populates='org_info')
+
+    practitioners_assigned = db.relationship(
+        'PractitionerOrganizationAffiliation',
+        uselist=True,
+        back_populates='org_info',
+    )
     """
     One to many relationship with pracitioner organization affiliation table
     :type: :class:`PractitionerOrganizationAffiliation` instance list
     """
+
 
 class LookupCurrencies(BaseModelWithIdx):
     """
@@ -1195,177 +1221,180 @@ class LookupCurrencies(BaseModelWithIdx):
     :type: string
     """
 
-    min_rate = db.Column(db.Numeric(10,2, asdecimal=False))
+    min_rate = db.Column(db.Numeric(10, 2, asdecimal=False))
     """
     Minimum HOURLY rate the practitioner can charge
     
     :type: Numeric
     """
 
-    max_rate = db.Column(db.Numeric(10,2, asdecimal=False))
+    max_rate = db.Column(db.Numeric(10, 2, asdecimal=False))
     """
     Maximum HOURLY rate the practitioner can charge
     
     :type: Numeric
     """
-    
+
     increment = db.Column(db.Integer)
     """
     Increment from min_rate up to max_rate
 
     :type: int
-    """    
+    """
+
 
 class LookupBloodTests(BaseModel):
     """
     Lookup table for blood tests
     """
-    
+
     modobio_test_code = db.Column(db.String, primary_key=True, nullable=False)
     """
     Internal test code
     
     :type: string, primary key
     """
-    
+
     display_name = db.Column(db.String)
     """
     Test display name
     
     :type: string
     """
-    
+
     quest_test_code = db.Column(db.String)
     """
     Quest Diagnostics test code
     
     :type: string
     """
-    
+
     cpt_test_code = db.Column(db.String)
     """
     Current Procedural Terminology (medical billing) code
     
     :type: string
     """
-    
+
     panel_display_name = db.Column(db.String)
     """
     Name of the blood panel where the test results come from
     
     :type: string
     """
-    
+
     tags = db.Column(db.String)
     """
     Tags relating the this test
     
     :type: string
     """
-    
+
     ranges = db.relationship('LookupBloodTestRanges')
     """
     Relation holding information on ranges that apply to this test type.
     
     :type: :class: LookupBloodTestRanges
     """
-    
+
+
 class LookupBloodTestRanges(BaseModelWithIdx):
     """
     Lookup table for blood test result optimal/critical ranges. One result may have multiple
     entries if it can be affected by age/race/fertility status/bioloical sex
     """
-    
+
     modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
     """
     Modobio Test Code for this result.
     
     :type: string, foreign key(LookupBloodTests.modobio_test_code)
     """
-    
-    test_info = db.relationship("LookupBloodTests", back_populates="ranges")
+
+    test_info = db.relationship('LookupBloodTests', back_populates='ranges')
     """
     Many to one relationship holding the non-range test information.
     
     :type: :class: LookupBloodTests
     """
-    
+
     biological_sex_male = db.Column(db.Boolean)
     """
     Biological sex this range applies to. If Null, the range applies to either biological sex.
     
     :type: bool
     """
-    
+
     menstrual_cycle = db.Column(db.String)
     """
     Stage of the menstrual cycle this range applies to. If Null, the range applies to any stage.
     
     :type: string
     """
-    
+
     age_min = db.Column(db.Integer)
     """
     Minimum age this range applies to.
     
     :type: int
     """
-    
+
     age_max = db.Column(db.Integer)
     """
     Maximum age this range applies to.
     
     :type: int
     """
-    
+
     race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
     """
     Race_id this range applies to. If Null, the range applies to all races.
     
     :type: int, foreign key(LookupRaces.race_id)
     """
-    
+
     units = db.Column(db.String)
     """
     Units used to measure this result.
     
     :type: string
     """
-    
+
     ratio = db.Column(db.String)
     """
     Ratio used to calculate this result if applicable
     
     :type: string
     """
-    
+
     critical_min = db.Column(db.Float)
     """
     Critical range minimum.
     
     :type: float    
     """
-    
+
     ref_min = db.Column(db.Float)
     """
     Reference (normal) range minimum
     
     :type: float
-    """ 
-    
+    """
+
     ref_max = db.Column(db.Float)
     """
     Reference (normal) range maximum
     
     :type: float
     """
-    
+
     critical_max = db.Column(db.Float)
     """
     Critical range maximum.
     
     :type: float
     """
+
 
 class LookupDevNames(BaseModelWithIdx):
     """
@@ -1378,7 +1407,8 @@ class LookupDevNames(BaseModelWithIdx):
     
     :type: string
     """
-    
+
+
 class LookupVisitReasons(BaseModelWithIdx):
     """
     Lookup table for visit reason ids
@@ -1400,7 +1430,11 @@ class LookupBloodGlucoseRanges(BaseModelWithIdx):
     Lookup table for blood glucose test ranges.
     """
 
-    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'), nullable=False,)
+    modobio_test_code = db.Column(
+        db.String,
+        db.ForeignKey('LookupBloodTests.modobio_test_code'),
+        nullable=False,
+    )
     """
     Internal test code
     
@@ -1454,6 +1488,8 @@ class LookupBloodGlucoseRanges(BaseModelWithIdx):
     
     :type: float    
     """
+
+
 class LookupCredentialTypes(BaseModelWithIdx):
 
     credential_type = db.Column(db.String, unique=True)
@@ -1468,13 +1504,13 @@ class LookupCredentialTypes(BaseModelWithIdx):
     
     :type: string
     """
-    
+
     country_required = db.Column(db.Boolean)
     """
     Whether or not a country is required for this credential type
 
     :type: bool
-    """ 
+    """
 
     sub_territory_required = db.Column(db.Boolean)
     """
@@ -1510,8 +1546,9 @@ class LookupCGMDemographics(BaseModelWithIdx):
     :type: :class: LookupBloodGlucoseCGM
     """
 
+
 class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
-    """ Lookup table of reference ranges for continuous glucose monitors (CGM)""" 
+    """Lookup table of reference ranges for continuous glucose monitors (CGM)"""
 
     demographic_id = db.Column(db.Integer, db.ForeignKey('LookupCGMDemographics.idx'))
 
@@ -1521,14 +1558,14 @@ class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
 
     :type: :class: LookupCGMDemographics
     """
-    
+
     classification = db.Column(db.String)
     """
     Classification of the range can be: very low, low, target, high, very high
 
     :type: string
     """
-    
+
     min_mg_dL = db.Column(db.Float, nullable=True)
     """
     Minimum of blood glucose in mg/dL for this range. Left null if there is no minimum.
@@ -1587,9 +1624,10 @@ class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
     :type: float
     """
 
+
 class LookupEmotes(BaseModelWithIdx):
     """
-    Lookup table of available emotes 
+    Lookup table of available emotes
     """
 
     position = db.Column(db.Integer, unique=True)
@@ -1627,9 +1665,10 @@ class LookupEmotes(BaseModelWithIdx):
 
     :type: str
     """
-    
+
+
 class LookupBloodPressureRanges(BaseModelWithIdx):
-    """ Medical Look Up Blood Pressure Ranges
+    """Medical Look Up Blood Pressure Ranges
 
     This table will store the blood pressure categories
     and ranges.
@@ -1643,7 +1682,7 @@ class LookupBloodPressureRanges(BaseModelWithIdx):
 
     :type: str
     """
-    
+
     systolic = db.Column(db.String)
     """
     Systolic mmHg is the upper number for the range
@@ -1668,7 +1707,7 @@ class LookupBloodPressureRanges(BaseModelWithIdx):
 
 
 class LookupSTDs(BaseModel):
-    """ Medical Look Up STD
+    """Medical Look Up STD
 
     This table will store the sexual transmitted diseases
     that ModoBio works with
@@ -1687,9 +1726,10 @@ class LookupSTDs(BaseModel):
 
     :type: str
     """
-    
+
+
 class LookupBloodTestResultTypes(BaseModel):
-    """ Blood test evaluation limits.
+    """Blood test evaluation limits.
 
     Blood test values can be evaluated as lying in "normal" or "optimal"
     ranges. What constitutes as a normal or optimal range depends on gender
@@ -1752,9 +1792,10 @@ class LookupBloodTestResultTypes(BaseModel):
 
     :type: str
     """
-    
+
+
 class LookupMedicalConditions(BaseModel):
-    """ Medical Conditions Table
+    """Medical Conditions Table
 
     This table will store the medical conditions
     """
@@ -1810,4 +1851,3 @@ class LookupMedicalConditions(BaseModel):
 
     :type: str
     """
- 

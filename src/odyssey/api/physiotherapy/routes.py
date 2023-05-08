@@ -1,18 +1,23 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from flask import request
-from flask_restx import Namespace, Api
-from flask_accepts import accepts , responds
+from flask_accepts import accepts, responds
+from flask_restx import Api, Namespace
 
+from odyssey import db
 from odyssey.api.physiotherapy.models import Chessboard, PTHistory
 from odyssey.api.physiotherapy.schemas import ChessboardSchema, PTHistorySchema
-from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_client_existence
 
-ns = Namespace('physiotherapy', description='Operations related to physical therapy services')
+ns = Namespace(
+    'physiotherapy',
+    description='Operations related to physical therapy services',
+)
+
 
 @ns.route('/history/<int:user_id>/')
 class ClientPTHistory(BaseResource):
@@ -35,12 +40,12 @@ class ClientPTHistory(BaseResource):
 
         data = request.get_json()
 
-        #check to see if there is already an entry for pt history
+        # check to see if there is already an entry for pt history
         current_pt_history = PTHistory.query.filter_by(user_id=user_id).first()
 
         data['user_id'] = user_id
 
-        #create a new entry into the pt history table
+        # create a new entry into the pt history table
         client_pt = PTHistorySchema().load(data)
 
         db.session.add(client_pt)
@@ -65,37 +70,43 @@ class ClientPTHistory(BaseResource):
 
         return client_pt
 
+
 @ns.route('/chessboard/<int:user_id>/')
 class ClientChessboard(BaseResource):
     """GET, POST for chessboard assesssment data
     note that clients will have multiple entries as they progress through the program
     Trainers may update some or all fields. The backend will store every update as a new row
     fields left blank will be left as null"""
-    @token_auth.login_required(user_type=('provider','client'))
+    @token_auth.login_required(user_type=('provider', 'client'))
     @responds(schema=ChessboardSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all chessboard entries for the specified client"""
         check_client_existence(user_id)
 
-        all_entries = Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.asc()).all()
-        
+        all_entries = (
+            Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.asc()).all()
+        )
+
         return all_entries
 
     @accepts(schema=ChessboardSchema, api=ns)
-    @token_auth.login_required(user_type=('provider','client'))
+    @token_auth.login_required(user_type=('provider', 'client'))
     @responds(schema=ChessboardSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create new chessboard entry"""
         check_client_existence(user_id)
-        
+
         data = request.get_json()
         data['user_id'] = user_id
 
         client_ma = ChessboardSchema().load(data)
-        
+
         db.session.add(client_ma)
         db.session.commit()
 
-        #return the most recent entry (this one)
-        most_recent =  Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.desc()).first()
+        # return the most recent entry (this one)
+        most_recent = (
+            Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.desc()
+                                                                ).first()
+        )
         return most_recent

@@ -3,14 +3,14 @@ Database tables for the wearable devices section of the Modo Bio API.
 All tables in this module are prefixed with 'Wearables'.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 from odyssey import db
-from odyssey.utils.constants import DB_SERVER_TIME
 from odyssey.utils.base.models import BaseModel, UserIdFkeyMixin
-
+from odyssey.utils.constants import DB_SERVER_TIME
 
 #############################
 #
@@ -20,8 +20,9 @@ from odyssey.utils.base.models import BaseModel, UserIdFkeyMixin
 
 # TODO: deprecated in V2 of the API. Remove when V1 of the API is no longer supported.
 
+
 class Wearables(db.Model):
-    """ Table that lists which supported wearables a client has. """
+    """Table that lists which supported wearables a client has."""
 
     __tablename__ = 'Wearables'
 
@@ -48,12 +49,10 @@ class Wearables(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-             'User.user_id',
-             ondelete="CASCADE"
-        ),
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
         nullable=False,
-        unique=True)
+        unique=True,
+    )
     """
     User ID number.
 
@@ -139,7 +138,7 @@ class Wearables(db.Model):
 
 
 class WearablesOura(db.Model):
-    """ Oura Ring specific information. """
+    """Oura Ring specific information."""
 
     __tablename__ = 'WearablesOura'
 
@@ -152,12 +151,10 @@ class WearablesOura(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-             'User.user_id',
-             ondelete="CASCADE"
-        ),
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
         nullable=False,
-        unique=True)
+        unique=True,
+    )
     """
     Client ID number.
 
@@ -220,12 +217,10 @@ class WearablesOura(db.Model):
 
     wearable_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-            'Wearables.idx',
-            ondelete='CASCADE'
-        ),
+        db.ForeignKey('Wearables.idx', ondelete='CASCADE'),
         nullable=False,
-        unique=True)
+        unique=True,
+    )
     """
     Wearable index this WearablesOura instance is linked to.
 
@@ -241,7 +236,7 @@ class WearablesOura(db.Model):
 
 
 class WearablesFitbit(db.Model):
-    """ Fitbit specific information. """
+    """Fitbit specific information."""
 
     __tablename__ = 'WearablesFitbit'
 
@@ -254,12 +249,10 @@ class WearablesFitbit(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-             'User.user_id',
-             ondelete="CASCADE"
-        ),
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
         nullable=False,
-        unique=True)
+        unique=True,
+    )
     """
     Client ID number.
 
@@ -324,12 +317,10 @@ class WearablesFitbit(db.Model):
 
     wearable_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-            'Wearables.idx',
-            ondelete='CASCADE'
-        ),
+        db.ForeignKey('Wearables.idx', ondelete='CASCADE'),
         nullable=False,
-        unique=True)
+        unique=True,
+    )
     """
     Wearable index this WearablesFitbit instance is linked to.
 
@@ -345,7 +336,7 @@ class WearablesFitbit(db.Model):
 
 
 class WearablesFreeStyle(db.Model):
-    """ FreeStyle Libre continuous glucose monitoring wearable specific information. """
+    """FreeStyle Libre continuous glucose monitoring wearable specific information."""
 
     __tablename__ = 'WearablesFreeStyle'
 
@@ -358,12 +349,10 @@ class WearablesFreeStyle(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-             'User.user_id',
-             ondelete="CASCADE"
-        ),
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
         nullable=False,
-        unique=True)
+        unique=True,
+    )
     """
     Client ID number.
 
@@ -411,12 +400,10 @@ class WearablesFreeStyle(db.Model):
 
     wearable_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-            'Wearables.idx',
-            ondelete='CASCADE'
-        ),
+        db.ForeignKey('Wearables.idx', ondelete='CASCADE'),
         nullable=False,
-        unique=True)
+        unique=True,
+    )
     """
     Wearable index this WearablesFreeStyle instance is linked to.
 
@@ -430,18 +417,20 @@ class WearablesFreeStyle(db.Model):
     :type: :class:`Wearables`
     """
 
+
 #############################
 #
 # V2 of the Wearables tables.
 #
 #############################
 
+
 class WearablesV2(BaseModel, UserIdFkeyMixin):
-    """ Table that lists which supported wearables a client has. """
+    """Table that lists which supported wearables a client has."""
 
     __tablename__ = 'WearablesV2'
 
-    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'wearable'),)
+    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'wearable'), )
 
     wearable = db.Column(db.String(64))
     """
