@@ -1,8 +1,7 @@
 import dataclasses
 import json
 import uuid
-
-from datetime import datetime, date, time
+from datetime import date, datetime, time
 
 import dateutil
 import flask.json.provider
@@ -20,8 +19,9 @@ def remove_timezone_from_timestamps(data):
         for item in data:
             remove_timezone_from_timestamps(item)
 
+
 class JSONEncoder(json.JSONEncoder):
-    """ Serialize a Python object into a JSON string.
+    """Serialize a Python object into a JSON string.
 
     :class:`json.JSONEncoder` only supports a small set of types that can be serialized into
     JSON strings. This class adds extends the default serializer to stringify more objects.
@@ -31,7 +31,7 @@ class JSONEncoder(json.JSONEncoder):
     Create a corresponding deserializer in :class:`JSONDecoder`.
     """
     def default(self, obj, **kwargs):
-        """ Serialize Python objects into a JSON string.
+        """Serialize Python objects into a JSON string.
 
         Parameters
         ----------
@@ -54,7 +54,7 @@ class JSONEncoder(json.JSONEncoder):
 
 
 class JSONDecoder(json.JSONDecoder):
-    """ Deserialize a JSON string into a dictionary of Python objects.
+    """Deserialize a JSON string into a dictionary of Python objects.
 
     :class:`json.JSONDecoder` only supports a small set of types that can be deserialized into
     Python objects. This class adds extra parsers that can convert JSON strings into their
@@ -89,10 +89,11 @@ class JSONDecoder(json.JSONDecoder):
         self.PARSERS = (
             self.parse_number,
             self.parse_uuid,
-            self.parse_datetime)
+            self.parse_datetime,
+        )
 
     def _parse(self, jsonobjs: list) -> dict:
-        """ Apply the registered parsers to a list of key, value pairs. """
+        """Apply the registered parsers to a list of key, value pairs."""
         ret = {}
         for key, val in jsonobjs:
             if isinstance(key, str):
@@ -105,7 +106,7 @@ class JSONDecoder(json.JSONDecoder):
         return ret
 
     def parse_number(self, string: str):
-        """ Convert a string into a number.
+        """Convert a string into a number.
 
         For JSON string '{"a": 2000, "b": "2000"}', the standard Python json module interprets
         "a" as a number and "b" as a string. "b" does not get converted to a number. This parser
@@ -137,7 +138,7 @@ class JSONDecoder(json.JSONDecoder):
                 return string
 
     def parse_datetime(self, string: str):
-        """ Convert a string to a :mod:`datetime` object.
+        """Convert a string to a :mod:`datetime` object.
 
         If the string contains just a date in ISO format (yyyy-mm-dd), a :class:`datetime.date`
         object is returned. If the string contains just a time in ISO format (HH:MM:SS.SSSSSS),
@@ -197,7 +198,7 @@ class JSONDecoder(json.JSONDecoder):
             return dateutil.parser.parse(string)
         except dateutil.parser.ParserError:
             pass
-        
+
         # Some timestamps from Terra have an H:M:S format for timezone offset
         # e.g. 2023-03-19T00:39:35-07:00:00
         try:
@@ -207,7 +208,7 @@ class JSONDecoder(json.JSONDecoder):
             return string
 
     def parse_uuid(self, string: str):
-        """ Convert a string into a :class:`uuid.UUID` object.
+        """Convert a string into a :class:`uuid.UUID` object.
 
         Parameters
         ----------
@@ -226,28 +227,29 @@ class JSONDecoder(json.JSONDecoder):
 
 
 class JSONProvider(flask.json.provider.JSONProvider):
-    """ Extends JSONProvider with better datetime and uuid (de)serialization. """
-
+    """Extends JSONProvider with better datetime and uuid (de)serialization."""
     def __init__(self, app=None, **kwargs):
         if app:
             super().__init__(app=app, **kwargs)
 
     @staticmethod
     def process_terra_data(data):
-        if "data" in data:
-            for item in data["data"]:
-                if ("metadata" in item and "start_time" in item["metadata"] 
-                    and isinstance(item["metadata"]["start_time"], datetime)):
-                    start_time = item["metadata"]["start_time"]
+        if 'data' in data:
+            for item in data['data']:
+                if (
+                    'metadata' in item and 'start_time' in item['metadata']
+                    and isinstance(item['metadata']['start_time'], datetime)
+                ):
+                    start_time = item['metadata']['start_time']
                     tz_offset_seconds = start_time.tzinfo.utcoffset(start_time).total_seconds()
-                    item["metadata"]["tz_offset"] = tz_offset_seconds
-                        
+                    item['metadata']['tz_offset'] = tz_offset_seconds
+
                     # Remove timezone from all "timestamp" fields
                     remove_timezone_from_timestamps(item)
         return data
 
     def dumps(self, obj, **kwargs) -> str:
-        """ Serialize data to a JSON string.
+        """Serialize data to a JSON string.
 
         Parameters
         ----------
@@ -266,7 +268,7 @@ class JSONProvider(flask.json.provider.JSONProvider):
         return json.dumps(obj, **kwargs)
 
     def loads(self, s: str, **kwargs):
-        """ Deserialize JSON as Python native data.
+        """Deserialize JSON as Python native data.
 
         Parameters
         ----------

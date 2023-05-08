@@ -3,30 +3,43 @@ Database tables for the user system portion of the Modo Bio Staff application.
 All tables in this module are prefixed with 'User'.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
+
 import jwt
+from flask import current_app
+from sqlalchemy import CheckConstraint, text
 from sqlalchemy.orm import relation
 from sqlalchemy.orm.attributes import get_history
 from werkzeug.security import generate_password_hash
 
-from flask import current_app
-from sqlalchemy import text, CheckConstraint
-
 from odyssey import db
-from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME
-from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
 from odyssey.api.client.models import ClientInfo
+from odyssey.api.community_manager.models import \
+    CommunityManagerSubscriptionGrants
 from odyssey.api.staff.models import StaffProfile
-from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
+from odyssey.utils.constants import (
+    ALPHANUMERIC, DB_SERVER_TIME, REFRESH_TOKEN_LIFETIME, TOKEN_LIFETIME
+)
 
 
 class User(db.Model):
-    """ 
+    """
     Stores details to relating to user account not related to the login system
     """
-    __searchable__ = ['modobio_id', 'email', 'phone_number', 'firstname', 'lastname', 'user_id', 'dob']
+
+    __searchable__ = [
+        'modobio_id',
+        'email',
+        'phone_number',
+        'firstname',
+        'lastname',
+        'user_id',
+        'dob',
+    ]
 
     __tablename__ = 'User'
 
@@ -199,12 +212,13 @@ class User(db.Model):
     """
 
 
-@db.event.listens_for(User, "after_update")
+@db.event.listens_for(User, 'after_update')
 def update_ES_index(mapper, connection, target):
     """
     Listens for any updates to the User table
     """
     from odyssey.utils.search import update_index
+
     user = {
         'firstname': target.firstname,
         'lastname': target.lastname,
@@ -214,11 +228,12 @@ def update_ES_index(mapper, connection, target):
         'user_id': target.user_id,
         'is_client': target.is_client,
         'is_staff': target.is_staff,
-        'dob': target.dob
+        'dob': target.dob,
     }
     update_index(user, False)
 
-@db.event.listens_for(User, "after_update")
+
+@db.event.listens_for(User, 'after_update')
 def update_active_campaign_contact_info(mapper, connection, target):
     """
     Listens for updates on User table
@@ -227,25 +242,28 @@ def update_active_campaign_contact_info(mapper, connection, target):
     modded_lname = get_history(target, 'lastname').added
     modded_email = get_history(target, 'email').added
     modded_dob = get_history(target, 'dob').added
-    #Check if there were any changes to user info 
+    # Check if there were any changes to user info
     if any(len(mod) > 0 for mod in [modded_fname, modded_lname, modded_email]):
         firstname = target.firstname if len(modded_fname) > 0 else None
         lastname = target.lastname if len(modded_lname) > 0 else None
         email = target.email if len(modded_email) > 0 else None
 
-        #Run active campaign operations in prod
+        # Run active campaign operations in prod
         if not current_app.debug:
             from odyssey.tasks.tasks import update_active_campaign_contact
+
             update_active_campaign_contact.delay(target.user_id, firstname, lastname, email)
-    #Check updates on dob 
-    if len(modded_dob) > 0 :
-        #Run active campaign operations in prod
+    # Check updates on dob
+    if len(modded_dob) > 0:
+        # Run active campaign operations in prod
         if not current_app.debug:
             from odyssey.tasks.tasks import add_age_tag
+
             add_age_tag.delay(target.user_id)
 
+
 class UserLogin(db.Model):
-    """ 
+    """
     Stores details to relating to user login and verification.
 
     The primary index of this table is the
@@ -275,7 +293,12 @@ class UserLogin(db.Model):
     :type: int, primary key
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False, unique=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+        unique=True,
+    )
     """
     User ID number, foreign key to User.user_id
 
@@ -388,7 +411,6 @@ class UserLogin(db.Model):
 
     :type: str, unique
     """
-
     def set_password(self, password):
         self.password = generate_password_hash(password)
         self.password_created_at = DB_SERVER_TIME
@@ -400,7 +422,7 @@ class UserLogin(db.Model):
         """
         if token_type not in ('access', 'refresh'):
             raise ValueError
-        
+
         secret = current_app.config['SECRET_KEY']
 
         # Handle token lifetime based on token type and params
@@ -411,25 +433,29 @@ class UserLogin(db.Model):
         else:
             lifetime = refresh_token_lifetime
 
-        
-        return jwt.encode({'exp': datetime.utcnow()+timedelta(hours=lifetime), 
-                            'ttl': lifetime,
-                            'uid': user_id,
-                            'utype': user_type,
-                            'x-hasura-allowed-roles': [user_type],
-                            'x-hasura-user-id': str(user_id),
-                            'ttype': token_type
-                            }, 
-                            secret, 
-                            algorithm='HS256')
+        return jwt.encode(
+            {
+                'exp': datetime.utcnow() + timedelta(hours=lifetime),
+                'ttl': lifetime,
+                'uid': user_id,
+                'utype': user_type,
+                'x-hasura-allowed-roles': [user_type],
+                'x-hasura-user-id': str(user_id),
+                'ttype': token_type,
+            },
+            secret,
+            algorithm='HS256',
+        )
+
 
 class UserRemovalRequests(db.Model):
-    """ User removal request table.
+    """User removal request table.
 
     Stores the history of user removal request by all Users.
     """
+
     __tablename__ = 'UserRemovalRequests'
-    
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -450,29 +476,36 @@ class UserRemovalRequests(db.Model):
 
     :type: :class:`datetime.datetime`
     """
-    
-    requester_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+
+    requester_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     user_id number, foreign key to User.user_id of the User requesting removal
 
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     user_id number, foreign key to User.user_id of the User to be removed
 
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
-    
+
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Timestamp of the removal request.
 
     :type: :class:`datetime.datetime`, primary key
     """
-    
+
     removal_type = db.Column(db.String)
     """
     Type of removal requested. Can be 'client', 'staff', 'or both.
@@ -480,8 +513,9 @@ class UserRemovalRequests(db.Model):
     :type: str
     """
 
+
 class UserSubscriptions(db.Model):
-    """ 
+    """
     Stores details to relating to user account not related to the subscription system
     """
 
@@ -508,7 +542,11 @@ class UserSubscriptions(db.Model):
     :type: integer, primary key, auto incrementing
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Id of the user that this subscription belongs to
 
@@ -574,20 +612,23 @@ class UserSubscriptions(db.Model):
 
     :type: datetime
     """
-    
-    sponsorship_id = db.Column(db.Integer, db.ForeignKey('CommunityManagerSubscriptionGrants.idx'), nullable=True)
+
+    sponsorship_id = db.Column(
+        db.Integer,
+        db.ForeignKey('CommunityManagerSubscriptionGrants.idx'),
+        nullable=True,
+    )
     """
     Subscription sponsorship id. 
 
     :type: str
     """
 
-    subscription_type_information = db.relationship("LookupSubscriptions")
+    subscription_type_information = db.relationship('LookupSubscriptions')
     """
     Relationship lookup subscriptions
     """
 
-   
     sponsorship = db.relationship('CommunityManagerSubscriptionGrants')
     """
     One to one relationship with CommunityManagerSubscriptionGrants
@@ -596,41 +637,44 @@ class UserSubscriptions(db.Model):
     """
 
 
-    
-@db.event.listens_for(UserSubscriptions, "after_insert")
+@db.event.listens_for(UserSubscriptions, 'after_insert')
 def add_active_campaign_sub_tag(mapper, connection, target):
     """
-    Listens for inserts on subscription table 
+    Listens for inserts on subscription table
     """
     modded_sub_status = get_history(target, 'subscription_status').added
     modded_sub_type = get_history(target, 'subscription_type_id').added
 
-    #Check if there were any changes to relevant fields
+    # Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
         if not current_app.debug:
             from odyssey.tasks.tasks import add_subscription_tag
+
             add_subscription_tag.delay(target.user_id)
 
-@db.event.listens_for(UserSubscriptions, "after_update")
+
+@db.event.listens_for(UserSubscriptions, 'after_update')
 def update_active_campaign_sub_tag(mapper, connection, target):
     """
-    Listens for updates on subscription table 
+    Listens for updates on subscription table
     """
     modded_sub_status = get_history(target, 'subscription_status').added
     modded_sub_type = get_history(target, 'subscription_type_id').added
 
-    #Check if there were any changes to relevant fields
+    # Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
         if not current_app.debug:
             from odyssey.tasks.tasks import add_subscription_tag
+
             add_subscription_tag.delay(target.user_id)
 
-class UserTokensBlacklist(db.Model):
-    """ 
-    API tokens for either refresh or access which have been revoked either by the 
-    user or the API. 
 
-    :attr:`token` 
+class UserTokensBlacklist(db.Model):
+    """
+    API tokens for either refresh or access which have been revoked either by the
+    user or the API.
+
+    :attr:`token`
     """
 
     __tablename__ = 'UserTokensBlacklist'
@@ -665,7 +709,7 @@ class UserTokensBlacklist(db.Model):
 
 
 class UserPendingEmailVerifications(db.Model):
-    """ 
+    """
     Holds information about user's who have not yet verified their email.
     """
 
@@ -692,7 +736,12 @@ class UserPendingEmailVerifications(db.Model):
     :type: int, primary key
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False, unique = True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+        unique=True,
+    )
     """
     Id of the user that this pending verification belongs to.
 
@@ -724,9 +773,9 @@ class UserPendingEmailVerifications(db.Model):
 
 
 class UserTokenHistory(db.Model):
-    """ 
+    """
     Stores details of user token generation events. This includes logging in through basic authorization
-    and when users request a new access token using a refresh token 
+    and when users request a new access token using a refresh token
 
     The primary index of this table is the
     :attr:`user_id` number.
@@ -786,6 +835,7 @@ class UserTokenHistory(db.Model):
     :type: str
     """
 
+
 class UserResetPasswordRequestHistory(db.Model):
     """
     Stores a history of password reset requests
@@ -814,7 +864,11 @@ class UserResetPasswordRequestHistory(db.Model):
     :type: str, max length 75
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=True,
+    )
     """
     user_id connected to email provided if it exists, otherwise blank
 
@@ -828,8 +882,9 @@ class UserResetPasswordRequestHistory(db.Model):
     :type: str
     """
 
+
 class UserLegalDocs(db.Model):
-    """ 
+    """
     Stores details of which legal docs users have seen and signed or attempted to ignore.
     If no entry exists for a given user_id and document id, that user has not yet viewed the document.
     If an entry exists and signed = False, the user has viewed the document but did not sign it.
@@ -861,14 +916,14 @@ class UserLegalDocs(db.Model):
     :type: int, primary key
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete='CASCADE'))
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
 
-    doc_id = db.Column(db.Integer, db.ForeignKey('LookupLegalDocs.idx', ondelete="CASCADE"))
+    doc_id = db.Column(db.Integer, db.ForeignKey('LookupLegalDocs.idx', ondelete='CASCADE'))
     """
     Document ID number, foreigh key to LookupLegalDocs.idx
 
@@ -882,8 +937,9 @@ class UserLegalDocs(db.Model):
     :type: boolean
     """
 
+
 class UserProfilePictures(BaseModelWithIdx):
-    """ 
+    """
     Stores S3 keys to profile pictures saved in aws s3
     """
 
@@ -891,30 +947,40 @@ class UserProfilePictures(BaseModelWithIdx):
     __table_args__ = (
         CheckConstraint(
             '(client_user_id IS NULL) != (staff_user_id IS NULL)',
-            name='UserProfilePictures_check_user_id'),)
+            name='UserProfilePictures_check_user_id',
+        ),
+    )
 
-    client_user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete="CASCADE"))
+    client_user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete='CASCADE'))
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
 
-    client_info = db.relationship('ClientInfo', back_populates='profile_pictures', foreign_keys=[client_user_id])
+    client_info = db.relationship(
+        'ClientInfo',
+        back_populates='profile_pictures',
+        foreign_keys=[client_user_id],
+    )
     """
     Many to one relationship with ClientInfo
 
     :type: :class:`ClientInfo` instance
     """
 
-    staff_user_id = db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete="CASCADE"))
+    staff_user_id = db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete='CASCADE'))
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
 
-    staff_profile = db.relationship('StaffProfile', back_populates='profile_pictures', foreign_keys=[staff_user_id])
+    staff_profile = db.relationship(
+        'StaffProfile',
+        back_populates='profile_pictures',
+        foreign_keys=[staff_user_id],
+    )
     """
     Many to one relationship with StaffProfile
 
@@ -941,7 +1007,7 @@ class UserProfilePictures(BaseModelWithIdx):
 
     :type: int
     """
-    
+
     original = db.Column(db.Boolean, server_default='f')
     """
     Boolean determining if the image is the original or not, false by default
@@ -949,16 +1015,17 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: bool
     """
 
-class UserActiveCampaign(BaseModelWithIdx):
-    "Stores the data related to Active Campaign"
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+class UserActiveCampaign(BaseModelWithIdx):
+    """Stores the data related to Active Campaign"""
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete='CASCADE'))
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
-    
+
     active_campaign_id = db.Column(db.Integer)
     """
     Contact ID from Active Campaign associated with the user
@@ -966,10 +1033,11 @@ class UserActiveCampaign(BaseModelWithIdx):
     :type: : int
     """
 
-class UserActiveCampaignTags(BaseModelWithIdx):
-    "Stores the tags the user is tagged with on Active Campaign"
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"))
+class UserActiveCampaignTags(BaseModelWithIdx):
+    """Stores the tags the user is tagged with on Active Campaign"""
+
+    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete='CASCADE'))
     """
     User ID number, foreign key to User.user_id
 

@@ -1,12 +1,15 @@
 from datetime import date
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateField, FloatField, HiddenField, RadioField, StringField, SelectField
+from wtforms import (
+    BooleanField, DateField, FloatField, HiddenField, RadioField, SelectField, StringField
+)
 
-from odyssey.constants import COUNTRIES, GENDERS, USSTATES, CONTACT_METHODS, YESNO, BOOLIFY
+from odyssey.constants import (BOOLIFY, CONTACT_METHODS, COUNTRIES, GENDERS, USSTATES, YESNO)
 
 today = date.today()
 next_year = date(year=today.year + 1, month=today.month, day=today.day)
+
 
 class ClientInfoForm(FlaskForm):
     firstname = StringField('First name')
@@ -25,7 +28,7 @@ class ClientInfoForm(FlaskForm):
     country = SelectField('Country', choices=COUNTRIES, default='US')
 
     s3 = HiddenField(id='spacer')
-    email = StringField('Email address') 
+    email = StringField('Email address')
     phone = StringField('Phone')
     preferred = SelectField('Preferred method of contact', choices=CONTACT_METHODS)
 
@@ -60,9 +63,7 @@ class ClientConsentForm(ClientSignForm):
 class ClientReleaseForm(ClientSignForm):
     release_by_other = StringField()
     release_to_other = StringField()
-    release_of_all = RadioField(choices=((1, 'all'), (0, 'other')),
-                        coerce=BOOLIFY,
-                        default=1)
+    release_of_all = RadioField(choices=((1, 'all'), (0, 'other')), coerce=BOOLIFY, default=1)
     release_of_other = StringField()
     release_date_from = DateField()
     release_date_to = DateField()

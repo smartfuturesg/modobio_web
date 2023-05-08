@@ -1,4 +1,4 @@
-from flask import flash, render_template, Blueprint, session, redirect, request, url_for
+from flask import (Blueprint, flash, redirect, render_template, request, session, url_for)
 
 from odyssey import db
 from odyssey.forms.pt import MobilityAssessmentForm, PTHistoryForm
@@ -18,8 +18,14 @@ def history():
         return render_template('pt/history.html', form=form)
 
     form = dict(request.form)
-    for k in ('has_pt', 'has_chiro', 'has_massage', 'has_surgery',
-              'has_medication', 'has_acupuncture'):
+    for k in (
+        'has_pt',
+        'has_chiro',
+        'has_massage',
+        'has_surgery',
+        'has_medication',
+        'has_acupuncture',
+    ):
         if k in form and form[k]:
             form[k] = True
         else:
@@ -35,6 +41,7 @@ def history():
 
     return redirect(url_for('.mobility'))
 
+
 @bp.route('/mobility', methods=('GET', 'POST'))
 def mobility():
     clientid = session['clientid']
@@ -45,7 +52,7 @@ def mobility():
         'left_shoulder': {},
         'right_shoulder': {},
         'left_hip': {},
-        'right_hip': {}
+        'right_hip': {},
     }
 
     if mb:
@@ -59,7 +66,10 @@ def mobility():
     form = MobilityAssessmentForm(obj=mb, **table2form)
 
     if request.method == 'GET':
-        flash('This needs some type of load/save functionality to recall previous assessments and scroll through them.')
+        flash(
+            'This needs some type of load/save functionality to recall'
+            ' previous assessments and scroll through them.'
+        )
         return render_template('pt/mobility.html', form=form)
 
     form = dict(request.form)

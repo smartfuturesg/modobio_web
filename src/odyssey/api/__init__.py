@@ -8,8 +8,10 @@ import pathlib
 # and should never have been used).
 # Code copied from werkzeug v2.1.2. Remove on next update of flask-restx.
 import werkzeug.routing
+
 if not hasattr(werkzeug.routing, 'parse_rule'):
     import re
+
     _rule_re = re.compile(
         r"""
         (?P<static>[^<]*)                           # static rule data
@@ -40,19 +42,19 @@ if not hasattr(werkzeug.routing, 'parse_rule'):
             if m is None:
                 break
             data = m.groupdict()
-            if data["static"]:
-                yield None, None, data["static"]
-            variable = data["variable"]
-            converter = data["converter"] or "default"
+            if data['static']:
+                yield None, None, data['static']
+            variable = data['variable']
+            converter = data['converter'] or 'default'
             if variable in used_names:
-                raise ValueError(f"variable name {variable!r} used twice.")
+                raise ValueError(f'variable name {variable!r} used twice.')
             used_names.add(variable)
-            yield converter, data["args"] or None, variable
+            yield converter, data['args'] or None, variable
             pos = m.end()
         if pos < end:
             remaining = rule[pos:]
-            if ">" in remaining or "<" in remaining:
-                raise ValueError(f"malformed url rule: {rule!r}")
+            if '>' in remaining or '<' in remaining:
+                raise ValueError(f'malformed url rule: {rule!r}')
             yield None, None, remaining
 
     werkzeug.routing.parse_rule = _parse_rule
@@ -94,68 +96,86 @@ authorizations = {
     },
     'password': {
         'type': 'basic'
-    }
+    },
 }
 
 bp = Blueprint('api', __name__)
 api = Api(bp, authorizations=authorizations, security='apikey')
 
 from odyssey.api.client_services.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.client.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.doctor.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.facility.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.lookup.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.maintenance.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.notifications.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.payment.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.physiotherapy.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.practitioner.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.staff.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.system.routes import ns
+
 api.add_namespace(ns)
 
-#TODO Telehealth on the Shelf - removed the telehealth namespace from api - add back when changes reversed
+# TODO Telehealth on the Shelf - removed the telehealth namespace from api - add back when changes reversed
 # from odyssey.api.telehealth.routes import ns
 # api.add_namespace(ns)
 
 from odyssey.api.trainer.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.user.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.version.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.wearables.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.community_manager.routes import ns
+
 api.add_namespace(ns)
 
 from odyssey.api.provider.routes import ns
+
 api.add_namespace(ns)
 
 # V2 of the API, only wearables for now, expand for release 2.0.0.

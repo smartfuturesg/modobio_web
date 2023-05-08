@@ -1,11 +1,12 @@
-from flask import render_template, Blueprint, session, redirect, request, url_for
+from flask import (Blueprint, redirect, render_template, request, session, url_for)
 
 from odyssey import db
 from odyssey.forms.doctor import MedicalHistoryForm, MedicalPhysicalExamForm
-from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 from odyssey.models.client import ClientInfo
+from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 
 bp = Blueprint('doctor', __name__)
+
 
 @bp.route('/history', methods=('GET', 'POST'))
 def history():
@@ -39,7 +40,7 @@ def history():
         obj=md,
         dob=ci.dob,
         healthcare_contact=ci.healthcare_contact,
-        healthcare_phone=ci.healthcare_phone
+        healthcare_phone=ci.healthcare_phone,
     )
 
     if request.method == 'GET':
@@ -62,6 +63,7 @@ def history():
     db.session.commit()
 
     return redirect(url_for('.physical'))
+
 
 @bp.route('/physical', methods=('GET', 'POST'))
 def physical():

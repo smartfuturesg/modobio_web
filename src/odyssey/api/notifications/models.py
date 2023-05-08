@@ -3,6 +3,7 @@ Database tables for the notifications section of the Modo Bio API.
 All tables in this module are prefixed with 'Notifications'.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
@@ -10,8 +11,9 @@ from datetime import datetime, timedelta
 from odyssey import db
 from odyssey.utils.constants import DB_SERVER_TIME
 
+
 class Notifications(db.Model):
-    """ General information about notifications. """
+    """General information about notifications."""
 
     __tablename__ = 'Notifications'
 
@@ -38,12 +40,10 @@ class Notifications(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-             'User.user_id',
-             ondelete="CASCADE"
-        ),
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
         nullable=False,
-        unique=False)
+        unique=False,
+    )
     """
     User ID number.
 
@@ -77,8 +77,11 @@ class Notifications(db.Model):
 
     :type: :class:`LookupNotificationSeverity <odyssey.api.lookup.models.LookupNotificationSeverity>` instance
     """
-    
-    severity_id = db.Column(db.Integer, db.ForeignKey('LookupNotificationSeverity.idx', ondelete='SET NULL'))
+
+    severity_id = db.Column(
+        db.Integer,
+        db.ForeignKey('LookupNotificationSeverity.idx', ondelete='SET NULL'),
+    )
     """
     Id of the severity type of this notification.
     
@@ -118,11 +121,10 @@ class Notifications(db.Model):
 
     notification_type_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-            'LookupNotifications.notification_type_id',
-            ondelete='cascade'),
+        db.ForeignKey('LookupNotifications.notification_type_id', ondelete='cascade'),
         nullable=False,
-        unique=False)
+        unique=False,
+    )
     """
     Foreign key to notification_type_id in the LookupNotifications table.
 
@@ -130,9 +132,7 @@ class Notifications(db.Model):
     """
 
     # Should have been called notification_type, but that needs to be set in schema.
-    notification_type_obj = db.relationship(
-        'LookupNotifications',
-        uselist=False)
+    notification_type_obj = db.relationship('LookupNotifications', uselist=False)
     """
     LookupNotification instance holding notification type data linked to this notification.
 
@@ -163,7 +163,7 @@ class Notifications(db.Model):
 
 
 class NotificationsPushRegistration(db.Model):
-    """ Table for registering devices for push notifications. """
+    """Table for registering devices for push notifications."""
 
     __tablename__ = 'NotificationsPushRegistration'
 
@@ -190,12 +190,10 @@ class NotificationsPushRegistration(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey(
-             'User.user_id',
-             ondelete="CASCADE"
-        ),
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
         nullable=False,
-        unique=False)
+        unique=False,
+    )
     """
     User ID number.
 

@@ -6,19 +6,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from odyssey.utils.base.models import  BaseModel
 from odyssey import db
+from odyssey.utils.base.models import BaseModel
+
 
 class CommunityManagerSubscriptionGrants(BaseModel):
     """Community Manager Subscription Grants. Stores details related to subscription grant requests"""
 
-    __tablename__ = "CommunityManagerSubscriptionGrants"
+    __tablename__ = 'CommunityManagerSubscriptionGrants'
 
-    idx = db.Column(db.Integer, primary_key=True, autoincrement=True, unique = True)
+    idx = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey("User.user_id", ondelete="CASCADE"),
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
         primary_key=True,
         nullable=False,
     )
@@ -31,7 +32,9 @@ class CommunityManagerSubscriptionGrants(BaseModel):
     """
 
     subscription_grantee_user_id = db.Column(
-        db.Integer, db.ForeignKey("User.user_id", ondelete="CASCADE"), nullable=True
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=True,
     )
     """
     ModoBio ID of the user being granted a subscription. 
@@ -39,9 +42,7 @@ class CommunityManagerSubscriptionGrants(BaseModel):
     :type: string
     """
 
-    subscription_type_id = db.Column(
-        db.Integer, db.ForeignKey("LookupSubscriptions.sub_id")
-    )
+    subscription_type_id = db.Column(db.Integer, db.ForeignKey('LookupSubscriptions.sub_id'))
     """
     Id of this subscription plan. Comes from the LookupSubscriptions table.
 
@@ -60,16 +61,17 @@ class CommunityManagerSubscriptionGrants(BaseModel):
     Whether or not this subscription grant has been activated.
     :type: bool
     """
-    
-    subscription = db.relationship(
-        "UserSubscriptions", back_populates="sponsorship", uselist=False
-    )
 
-    subscription_type_information = db.relationship("LookupSubscriptions")
+    subscription = db.relationship('UserSubscriptions', back_populates='sponsorship', uselist=False)
+
+    subscription_type_information = db.relationship('LookupSubscriptions')
     """
     Relationship lookup subscriptions
     """
-
-
     def __repr__(self):
-        return f"<CommunityManagerSubscriptionGrants(user_id={self.user_id}, email={self.email}, subscription_type_id={self.subscription_type_id}, sponsor={self.sponsor}, activated={self.activated})>"
+        return (
+            f'<CommunityManagerSubscriptionGrants(user_id={self.user_id},'
+            f' email={self.email},'
+            f' subscription_type_id={self.subscription_type_id},'
+            f' sponsor={self.sponsor}, activated={self.activated})>'
+        )

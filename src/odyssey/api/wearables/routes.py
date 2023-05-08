@@ -1,8 +1,8 @@
 import base64
 import logging
-from math import ceil
 import secrets
 from datetime import time, timedelta
+from math import ceil
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -12,8 +12,7 @@ from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy import select
 from sqlalchemy.sql import text
-from werkzeug.exceptions import BadRequest
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import mongo
 from odyssey.api.wearables.models import *
@@ -22,18 +21,17 @@ from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.terra import TerraClient
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import WEARABLE_DEVICE_TYPES, START_TIME_TO_THREE_HOUR_TIME_BLOCKS, THREE_HOUR_TIME_BLOCK_START_TIMES_LIST, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+from odyssey.utils.constants import (
+    START_TIME_TO_THREE_HOUR_TIME_BLOCKS, THREE_HOUR_TIME_BLOCK_START_TIMES_LIST,
+    WEARABLE_DEVICE_TYPES, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+)
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
-    date_range,
-    date_validator,
-    lru_cache_with_ttl,
-    iso_string_to_iso_datetime,
-    create_wearables_filter_query,
+    create_wearables_filter_query, date_range, date_validator, iso_string_to_iso_datetime,
+    lru_cache_with_ttl
 )
 
 logger = logging.getLogger(__name__)
-
 
 #########################
 #
@@ -43,13 +41,14 @@ logger = logging.getLogger(__name__)
 
 ns = Namespace('wearables', description='Endpoints for registering wearable devices.')
 
+
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',))
+    @token_auth.login_required(user_type=('client', 'staff'), resources=('wearable_data', ))
     @responds(schema=WearablesSchema, status_code=200, api=ns)
     def get(self, user_id):
-        """ Wearable device information for client ``user_id`` in response to a GET request.
+        """Wearable device information for client ``user_id`` in response to a GET request.
 
         This endpoint returns information on which wearables a client has. For
         each supported wearable device, two keys exist in the returned dictionary:
@@ -67,18 +66,15 @@ class WearablesEndpoint(BaseResource):
         dict
             JSON encoded dict.
         """
-        wearables = (
-            Wearables.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        wearables = Wearables.query.filter_by(user_id=user_id).one_or_none()
 
         return wearables
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @accepts(schema=WearablesSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """ Create new wearables information for client ``user_id`` in reponse to a POST request.
+        """Create new wearables information for client ``user_id`` in reponse to a POST request.
 
         Parameters
         ----------
@@ -94,11 +90,11 @@ class WearablesEndpoint(BaseResource):
         db.session.add(request.parsed_obj)
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @accepts(schema=WearablesSchema, api=ns)
     @responds(status_code=204, api=ns)
     def put(self, user_id):
-        """ Update wearables information for client ``user_id`` in reponse to a PUT request.
+        """Update wearables information for client ``user_id`` in reponse to a PUT request.
 
         Parameters
         ----------
@@ -114,10 +110,10 @@ class WearablesEndpoint(BaseResource):
 @ns.route('/oura/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesOuraAuthEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @responds(schema=WearablesOAuthGetSchema, status_code=200, api=ns)
     def get(self, user_id):
-        """ Oura OAuth2 parameters to initialize the access grant process.
+        """Oura OAuth2 parameters to initialize the access grant process.
 
         Use these parameters to initiate the OAuth2 access grant process with
         Oura. You must replace the value for ``redirect_uri`` with a
@@ -144,15 +140,13 @@ class WearablesOuraAuthEndpoint(BaseResource):
         if not info:
             raise BadRequest(
                 f'user_id {user_id} not found in Wearables table. '
-                f'Connect to POST /wearables first.')
+                'Connect to POST /wearables first.'
+            )
 
         state = secrets.token_urlsafe(24)
 
         # Store state in database
-        oura = (
-            WearablesOura.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
 
         if not oura:
             oura = WearablesOura(user_id=user_id, oauth_state=state, wearable_id=info.idx)
@@ -171,13 +165,14 @@ class WearablesOuraAuthEndpoint(BaseResource):
             'redirect_uri': 'replace-this',
             'response_type': 'code',
             'scope': scope,
-            'state': state}
+            'state': state,
+        }
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @accepts(schema=WearablesOAuthPostSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """ Oura OAuth2 access grant code exchange.
+        """Oura OAuth2 access grant code exchange.
 
         Post OAuth2 parameters here after user clicks 'allow' on the Oura homepage.
         This endpoint will reach out to Oura for the second part of the OAuth2
@@ -203,7 +198,8 @@ class WearablesOuraAuthEndpoint(BaseResource):
         if not oura:
             raise BadRequest(
                 f'user_id {user_id} not found in WearablesOura table. '
-                f'Connect to GET /wearables/oura/auth first.')
+                'Connect to GET /wearables/oura/auth first.'
+            )
 
         if request.parsed_obj['state'] != oura.oauth_state:
             raise BadRequest('OAuth state changed between requests.')
@@ -225,13 +221,15 @@ class WearablesOuraAuthEndpoint(BaseResource):
         oauth_session = OAuth2Session(
             client_id,
             state=request.parsed_obj['state'],
-            redirect_uri=request.parsed_obj['redirect_uri'])
+            redirect_uri=request.parsed_obj['redirect_uri'],
+        )
         try:
             oauth_reply = oauth_session.fetch_token(
                 token_url,
                 code=request.parsed_obj['code'],
                 include_client_id=True,
-                client_secret=client_secret)
+                client_secret=client_secret,
+            )
         except Exception as e:
             raise BadRequest(f'Error while exchanging grant code for access token: {e}')
 
@@ -245,20 +243,17 @@ class WearablesOuraAuthEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
-        """ Revoke Oura OAuth2 data sharing permissions.
+        """Revoke Oura OAuth2 data sharing permissions.
 
         Parameters
         ----------
         user_id : str
             Modo Bio user ID.
         """
-        oura = (
-            WearablesOura.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        oura = WearablesOura.query.filter_by(user_id=user_id).one_or_none()
 
         if oura:
             oura.access_token = None
@@ -270,10 +265,10 @@ class WearablesOuraAuthEndpoint(BaseResource):
 @ns.route('/fitbit/auth/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFitbitAuthEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @responds(schema=WearablesOAuthGetSchema, status_code=200, api=ns)
     def get(self, user_id):
-        """ Fitbit OAuth2 parameters to initialize the access grant process.
+        """Fitbit OAuth2 parameters to initialize the access grant process.
 
         Use these parameters to initiate the OAuth2 access grant process with
         Fitbit. You must replace the value for ``redirect_uri`` with a
@@ -300,15 +295,13 @@ class WearablesFitbitAuthEndpoint(BaseResource):
         if not info:
             raise BadRequest(
                 f'user_id {user_id} not found in Wearables table. '
-                f'Connect to POST /wearables first.')
+                'Connect to POST /wearables first.'
+            )
 
         state = secrets.token_urlsafe(24)
 
         # Store state in database
-        fitbit = (
-            WearablesFitbit.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        fitbit = WearablesFitbit.query.filter_by(user_id=user_id).one_or_none()
 
         if not fitbit:
             fitbit = WearablesFitbit(user_id=user_id, oauth_state=state, wearable_id=info.idx)
@@ -327,13 +320,14 @@ class WearablesFitbitAuthEndpoint(BaseResource):
             'redirect_uri': 'replace-this',
             'response_type': 'code',
             'scope': scope,
-            'state': state}
+            'state': state,
+        }
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @accepts(schema=WearablesOAuthPostSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """ Fitbit OAuth2 access grant code exchange.
+        """Fitbit OAuth2 access grant code exchange.
 
         Post OAuth2 parameters here after user clicks 'allow' on the Fitbit homepage.
         This endpoint will reach out to Fitbit for the second part of the OAuth2
@@ -359,7 +353,8 @@ class WearablesFitbitAuthEndpoint(BaseResource):
         if not fitbit:
             raise BadRequest(
                 f'user_id {user_id} not found in WearablesFitbit table. '
-                f'Connect to GET /wearables/fitbit/auth first.')
+                'Connect to GET /wearables/fitbit/auth first.'
+            )
 
         if request.parsed_obj['state'] != fitbit.oauth_state:
             raise BadRequest('OAuth state changed between requests.')
@@ -370,19 +365,22 @@ class WearablesFitbitAuthEndpoint(BaseResource):
         token_url = current_app.config['FITBIT_TOKEN_URL']
 
         # Fitbit requires client ID and client secret as basic auth in header.
-        auth_str = base64.urlsafe_b64encode(f'{client_id}:{client_secret}'.encode('utf-8')).decode('utf-8')
+        auth_str = base64.urlsafe_b64encode(f'{client_id}:{client_secret}'.encode('utf-8')
+                                           ).decode('utf-8')
 
         oauth_session = OAuth2Session(
             client_id,
             state=request.parsed_obj['state'],
-            redirect_uri=request.parsed_obj['redirect_uri'])
+            redirect_uri=request.parsed_obj['redirect_uri'],
+        )
         try:
             oauth_reply = oauth_session.fetch_token(
                 token_url,
                 code=request.parsed_obj['code'],
                 include_client_id=True,
                 client_secret=client_secret,
-                headers = {'Authorization': f'Basic {auth_str}'})
+                headers={'Authorization': f'Basic {auth_str}'},
+            )
         except Exception as e:
             raise BadRequest(f'Error while exchanging grant code for access token: {e}')
 
@@ -409,20 +407,17 @@ class WearablesFitbitAuthEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
-        """ Revoke Fitbit OAuth2 data sharing permissions.
+        """Revoke Fitbit OAuth2 data sharing permissions.
 
         Parameters
         ----------
         user_id : str
             Modo Bio user ID.
         """
-        fitbit = (
-            WearablesFitbit.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        fitbit = WearablesFitbit.query.filter_by(user_id=user_id).one_or_none()
 
         if fitbit:
             fitbit.access_token = None
@@ -434,10 +429,10 @@ class WearablesFitbitAuthEndpoint(BaseResource):
 @ns.route('/freestyle/activate/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFreeStyleActivateEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @responds(schema=WearablesFreeStyleActivateSchema, status_code=200, api=ns)
     def get(self, user_id):
-        """ Returns CGM activation timestamp for client ``user_id`` in reponse to a GET request.
+        """Returns CGM activation timestamp for client ``user_id`` in reponse to a GET request.
 
         Time data on the CGM sensor is stored as minutes since activation and as full
         timestamps in the database. Time data must be converted before it can be
@@ -454,18 +449,15 @@ class WearablesFreeStyleActivateEndpoint(BaseResource):
         str
             JSON encoded, ISO 8601 formatted datetime string.
         """
-        cgm = (
-            WearablesFreeStyle.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        cgm = WearablesFreeStyle.query.filter_by(user_id=user_id).one_or_none()
 
         return cgm
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @accepts(schema=WearablesFreeStyleActivateSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """ Set new activation timestamp for client ``user_id`` in response to POST request.
+        """Set new activation timestamp for client ``user_id`` in response to POST request.
 
         When a new CGM is activated, the activation timestamp must be stored in the database.
 
@@ -477,10 +469,7 @@ class WearablesFreeStyleActivateEndpoint(BaseResource):
         timestamp : str
             ISO 8601 formatted datetime string.
         """
-        cgm = (
-            WearablesFreeStyle.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        cgm = WearablesFreeStyle.query.filter_by(user_id=user_id).one_or_none()
 
         if not cgm:
             info = Wearables.query.filter_by(user_id=user_id).one_or_none()
@@ -501,10 +490,10 @@ class WearablesFreeStyleActivateEndpoint(BaseResource):
 @ns.route('/freestyle/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class WearablesFreeStyleEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @responds(schema=WearablesFreeStyleSchema, status_code=200, api=ns)
     def get(self, user_id):
-        """ Return FreeStyle CGM data for client ``user_id`` in reponse to a GET request.
+        """Return FreeStyle CGM data for client ``user_id`` in reponse to a GET request.
 
         Parameters
         ----------
@@ -516,38 +505,35 @@ class WearablesFreeStyleEndpoint(BaseResource):
         str
             JSON encoded dictionary
         """
-        cgm = (
-            WearablesFreeStyle.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        cgm = WearablesFreeStyle.query.filter_by(user_id=user_id).one_or_none()
 
         return cgm
 
-    @token_auth.login_required(user_type=('client',))
+    @token_auth.login_required(user_type=('client', ))
     @accepts(schema=WearablesFreeStyleSchema, api=ns)
     @responds(status_code=204, api=ns)
     def patch(self, user_id):
-        """ Add CGM data for client ``user_id`` in reponse to a PATCH request.
+        """Add CGM data for client ``user_id`` in reponse to a PATCH request.
 
         Parameters
         ----------
         user_id : int
             User ID number.
         """
-        cgm = (
-            WearablesFreeStyle.query
-            .filter_by(user_id=user_id)
-            .one_or_none())
+        cgm = WearablesFreeStyle.query.filter_by(user_id=user_id).one_or_none()
 
         if not cgm:
-            msg =  f'FreeStyle Libre for client {user_id} has not yet been activated. '
-            msg += f'Send a POST request to /wearables/freestyle/activate/ first.'
+            msg = (f'FreeStyle Libre for client {user_id} has not yet been'
+                   ' activated. ')
+            msg += (f'Send a POST request to /wearables/freestyle/activate/ first.')
             raise BadRequest(msg)
 
         if cgm.activation_timestamp != request.parsed_obj.activation_timestamp:
-            msg =  f'Activation timestamp {request.parsed_obj.activation_timestamp} does not '
-            msg += f'match current activation timestamp {cgm.activation_timestamp}. '
-            msg += f'Send a GET request to /wearables/freestyle/activate/ first.'
+            msg = ('Activation timestamp'
+                   f' {request.parsed_obj.activation_timestamp} does not ')
+            msg += ('match current activation timestamp'
+                    f' {cgm.activation_timestamp}. ')
+            msg += (f'Send a GET request to /wearables/freestyle/activate/ first.')
             raise BadRequest(msg)
 
         tstamps = request.parsed_obj.timestamps
@@ -584,31 +570,34 @@ class WearablesFreeStyleEndpoint(BaseResource):
         # Use array concatenation here, don't use:
         #    cgm.glucose = cgm.glucose + request.parsed_obj.glucose
         # See ... confluence page
-        stmt = text('''
+        stmt = text(
+            """
             UPDATE "WearablesFreeStyle"
             SET glucose = glucose || cast(:gluc as double precision[]),
                 timestamps = timestamps || cast(:tstamps as timestamp without time zone[])
             WHERE user_id = :cid;
-        ''').bindparams(
-            gluc=glucose[n:],
-            tstamps=tstamps[n:],
-            cid=user_id)
+        """
+        ).bindparams(
+            gluc=glucose[n:], tstamps=tstamps[n:], cid=user_id
+        )
         db.session.execute(stmt)
         db.session.commit()
 
 
 @ns.route('/data/<string:device_type>/<int:user_id>/')
-@ns.doc(params={
-    'user_id': 'User ID number',
-    'device_type': 'fitbit, applewatch, oura, freestyle',
-    'start_date': '(optional) iso formatted date. start of date range',
-    'end_date': '(optional) iso formatted date. end of date range'
-    })
+@ns.doc(
+    params={
+        'user_id': 'User ID number',
+        'device_type': 'fitbit, applewatch, oura, freestyle',
+        'start_date': '(optional) iso formatted date. start of date range',
+        'end_date': '(optional) iso formatted date. end of date range',
+    }
+)
 class WearablesData(BaseResource):
-    @token_auth.login_required(user_type=('client','staff'), resources=('wearable_data',))
+    @token_auth.login_required(user_type=('client', 'staff'), resources=('wearable_data', ))
     @responds(status_code=200, api=ns)
     def get(self, user_id, device_type):
-        """ Retrieve wearables data from dynamodb.
+        """Retrieve wearables data from dynamodb.
 
         Parameters
         ----------
@@ -630,7 +619,7 @@ class WearablesData(BaseResource):
 
         # validate device_type request
         if device_type not in WEARABLE_DEVICE_TYPES:
-            raise BadRequest(f"wearable device type, {device_type}, not supported")
+            raise BadRequest(f'wearable device type, {device_type}, not supported')
 
         # configure date range expression
         # Four cases:
@@ -638,27 +627,48 @@ class WearablesData(BaseResource):
         #   - only start date specified: return start_date + WEARABLE_DATA_DEFAULT_RANGE_DAYS
         #   - only end date specified: return end_date - WEARABLE_DATA_DEFAULT_RANGE_DAYS
         #   - no dates specified: return last WEARABLE_DATA_DEFAULT_RANGE_DAYS days of data
-        start_date = date_validator(request.values.get('start_date')) if request.values.get('start_date') else None
-        end_date =  date_validator(request.values.get('end_date')) if request.values.get('end_date') else None
+        start_date = (
+            date_validator(request.values.get('start_date'))
+            if request.values.get('start_date') else None
+        )
+        end_date = (
+            date_validator(request.values.get('end_date'))
+            if request.values.get('end_date') else None
+        )
         if start_date and end_date:
             date_condition = Key('date').between(start_date, end_date)
         elif start_date:
-            end_date = (datetime.fromisoformat(start_date) + timedelta(days=current_app.config['WEARABLE_DATA_DEFAULT_RANGE_DAYS'])).date().isoformat()
+            end_date = ((
+                datetime.fromisoformat(start_date)
+                + timedelta(days=current_app.config['WEARABLE_DATA_DEFAULT_RANGE_DAYS'])
+            ).date().isoformat())
             date_condition = Key('date').between(start_date, end_date)
         elif end_date:
-            start_date = (datetime.fromisoformat(end_date) - timedelta(days=current_app.config['WEARABLE_DATA_DEFAULT_RANGE_DAYS'])).date().isoformat()
+            start_date = ((
+                datetime.fromisoformat(end_date)
+                - timedelta(days=current_app.config['WEARABLE_DATA_DEFAULT_RANGE_DAYS'])
+            ).date().isoformat())
             date_condition = Key('date').between(start_date, end_date)
         else:
-            start_date = (datetime.now() - timedelta(days=current_app.config['WEARABLE_DATA_DEFAULT_RANGE_DAYS'])).date().isoformat()
-            end_date = datetime.now().date().isoformat() 
-            date_condition =  Key('date').gte(start_date)
+            start_date = ((
+                datetime.now()
+                - timedelta(days=current_app.config['WEARABLE_DATA_DEFAULT_RANGE_DAYS'])
+            ).date().isoformat())
+            end_date = datetime.now().date().isoformat()
+            date_condition = Key('date').gte(start_date)
 
         # make reqeust for data
         response = table.query(
-            KeyConditionExpression= Key('user_id').eq(user_id) & date_condition,
-            FilterExpression = Key('wearable').eq(device_type))
+            KeyConditionExpression=Key('user_id').eq(user_id) & date_condition,
+            FilterExpression=Key('wearable').eq(device_type),
+        )
 
-        payload = {'start_date': start_date, 'end_date': end_date, 'total_items': len(response.get('Items', [])), 'items': []}
+        payload = {
+            'start_date': start_date,
+            'end_date': end_date,
+            'total_items': len(response.get('Items', [])),
+            'items': [],
+        }
 
         # only provide the data that is required
         payload['items'] = response.get('Items', [])
@@ -679,18 +689,12 @@ class WearablesData(BaseResource):
 
 import requests
 import terra
-
 from terra.api.api_responses import (
-    HOOK_TYPES,
-    HOOK_RESPONSE,
-    USER_DATATYPES,
-    ConnectionErrorHookResponse,
-    RequestProcessingHookResponse,
-    RequestCompletedHookResponse)
+    HOOK_RESPONSE, HOOK_TYPES, USER_DATATYPES, ConnectionErrorHookResponse,
+    RequestCompletedHookResponse, RequestProcessingHookResponse
+)
 
-ns_v2 = Namespace(
-    'wearables',
-    description='Endpoints for registering wearable devices.')
+ns_v2 = Namespace('wearables', description='Endpoints for registering wearable devices.')
 
 # Fix mistakes in terra-python wrappers:
 # - misspelled connexion_error instead of connection_error (v0.0.7)
@@ -719,7 +723,7 @@ WEBHOOK_RESPONSES.update(set(USER_DATATYPES))
 
 @lru_cache_with_ttl(maxsize=1, ttl=86400)
 def supported_wearables() -> dict:
-    """ Get the list of supported wearables from Terra.
+    """Get the list of supported wearables from Terra.
 
     Terra's API provides a list of supported wearable devices. This function fetches that
     list and caches the result. It is updated once per day.
@@ -757,7 +761,8 @@ def supported_wearables() -> dict:
         'OMRONUS': 'Omron',
         'TEMPO': 'Tempo Fit',
         'TRAININGPEAKS': 'Training Peaks',
-        'WEAROS': 'Wear OS'}
+        'WEAROS': 'Wear OS',
+    }
 
     # These devices are not supported at the moment.
     # That's a business decision, there is no technical reason not to support them.
@@ -816,7 +821,8 @@ def supported_wearables() -> dict:
         'WHOOP',
         'XERT',
         'XOSS',
-        'ZWIFT'}
+        'ZWIFT',
+    }
 
     result = {}
     for provider_type in ('providers', 'sdk_providers'):
@@ -832,8 +838,9 @@ def supported_wearables() -> dict:
 
     return result
 
+
 def parse_wearable(wearable: str) -> str:
-    """ Parse wearable path parameter.
+    """Parse wearable path parameter.
 
     Clean up path parameter and check against list of supported devices.
     Cleaning up consists of converting to all-caps and removing spaces.
@@ -857,8 +864,7 @@ def parse_wearable(wearable: str) -> str:
     """
     wearable_clean = wearable.upper().replace(' ', '')
     supported = supported_wearables()
-    if (wearable_clean in supported['providers']
-        or wearable_clean in supported['sdk_providers']):
+    if (wearable_clean in supported['providers'] or wearable_clean in supported['sdk_providers']):
         return wearable_clean
     raise BadRequest(f'Unknown wearable {wearable}')
 
@@ -868,56 +874,66 @@ class WearablesV2Endpoint(BaseResource):
     @token_auth.login_required
     @responds(schema=WearablesV2ProvidersGetSchema, api=ns_v2)
     def get(self):
-        """ Get a list of all supported wearable devices. """
+        """Get a list of all supported wearable devices."""
         return {
-            "sdk_providers": {
-                "APPLE": "Apple HealthKit"
+            'sdk_providers': {
+                'APPLE': 'Apple HealthKit'
             },
-            "providers": {
-                "COROS": "Coros",
-                "DEXCOM": "Dexcom",
-                "FITBIT": "Fitbit",
-                "FREESTYLELIBRE": "Freestyle Libre",
-                "GARMIN": "Garmin",
-                "OMRONUS": "Omron",
-                "OURA": "Oura",
-                "POLAR": "Polar",
-                "SUUNTO": "Suunto",
-                "WITHINGS": "Withings",
-            }
+            'providers': {
+                'COROS': 'Coros',
+                'DEXCOM': 'Dexcom',
+                'FITBIT': 'Fitbit',
+                'FREESTYLELIBRE': 'Freestyle Libre',
+                'GARMIN': 'Garmin',
+                'OMRONUS': 'Omron',
+                'OURA': 'Oura',
+                'POLAR': 'Polar',
+                'SUUNTO': 'Suunto',
+                'WITHINGS': 'Withings',
+            },
         }
 
 
 @ns_v2.route('/<int:user_id>')
 class WearablesV2UserEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
     @responds(schema=WearablesV2UserGetSchema, status_code=200, api=ns_v2)
     def get(self, user_id):
-        """ Get a list of wearable devices registered to this user. """
+        """Get a list of wearable devices registered to this user."""
         # user_id = self.check_user(uid, user_type='client').user_id
 
-        wearables = (db.session.execute(
-            select(WearablesV2.wearable)
-            .filter_by(user_id=user_id))
-            .scalars()
-            .all())
+        wearables = (
+            db.session.execute(select(WearablesV2.wearable).filter_by(user_id=user_id)
+                              ).scalars().all()
+        )
 
         return {'wearables': wearables}
 
 
 @ns_v2.route('/<int:user_id>/<wearable>')
 class WearablesV2DataEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
-    @ns_v2.doc(params={
-        'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp.',
-        'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp.',
-        'query_specification': 'Specifies the wearable data fields that gets returned. Parsed as a array. Use the same key to pass multiple values.'
-    })
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp.'
+            ),
+            'end_date': (
+                'End of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp.'
+            ),
+            'query_specification': (
+                'Specifies the wearable data fields that gets returned. Parsed'
+                ' as a array. Use the same key to pass multiple values.'
+            ),
+        }
+    )
     @responds(schema=WearablesV2UserDataGetSchema, status_code=200, api=ns_v2)
     def get(self, user_id, wearable):
         """
         Gets the wearable data stored for an user.
-        Allows to specify the specific fields of data to be returned. 
+        Allows to specify the specific fields of data to be returned.
 
         Path Parameters
         ---------------
@@ -930,7 +946,7 @@ class WearablesV2DataEndpoint(BaseResource):
         ----------------
         start_date : str
             Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
-            Default will be current date - 7 days if not specified 
+            Default will be current date - 7 days if not specified
         end_date: str
             End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
             Default will be current date if not specified
@@ -945,23 +961,26 @@ class WearablesV2DataEndpoint(BaseResource):
 
         wearable = parse_wearable(wearable)
 
-        #Gets start and end date ranges. Defaults to one week if one or none is provided
+        # Gets start and end date ranges. Defaults to one week if one or none is provided
         start_date, end_date = date_range(
-            start_time = request.args.get('start_date'), 
-            end_time = request.args.get('end_date'),
-            time_range = timedelta(weeks=1))
+            start_time=request.args.get('start_date'),
+            end_time=request.args.get('end_date'),
+            time_range=timedelta(weeks=1),
+        )
 
         query_specification = request.args.getlist('query_specification', str)
-        query = create_wearables_filter_query(user_id, wearable, start_date, end_date, query_specification)
+        query = create_wearables_filter_query(
+            user_id, wearable, start_date, end_date, query_specification
+        )
         data = mongo.db.wearables.find(query[0], projection=query[1])
-        
-        return {'results' : list(data)}
 
-    @token_auth.login_required(user_type = ('client',))
+        return {'results': list(data)}
+
+    @token_auth.login_required(user_type=('client', ))
     @accepts(schema=WearablesV2UserAuthUrlInputSchema, api=ns_v2)
     @responds(schema=WearablesV2UserAuthUrlSchema, status_code=201, api=ns_v2)
     def post(self, user_id, wearable):
-        """ Register a new wearable device for this user. """
+        """Register a new wearable device for this user."""
         # user_id = self.check_user(uid, user_type='client').user_id
         wearable = parse_wearable(wearable)
 
@@ -985,9 +1004,10 @@ class WearablesV2DataEndpoint(BaseResource):
             tc = TerraClient()
             response = tc.generate_authentication_url(
                 resource=wearable,
-                auth_success_redirect_url=f'{redirect_url_scheme}://{success_path}',
-                auth_failure_redirect_url=f'{redirect_url_scheme}://{failure_path}',
-                reference_id=user_id)
+                auth_success_redirect_url=(f'{redirect_url_scheme}://{success_path}'),
+                auth_failure_redirect_url=(f'{redirect_url_scheme}://{failure_path}'),
+                reference_id=user_id,
+            )
             tc.status(response)
 
             # Not stored in the database at this point.
@@ -1003,7 +1023,8 @@ class WearablesV2DataEndpoint(BaseResource):
             headers = {
                 'accept': 'application/json',
                 'dev-id': current_app.config['TERRA_DEV_ID'],
-                'x-api-key': current_app.config['TERRA_API_KEY']}
+                'x-api-key': current_app.config['TERRA_API_KEY'],
+            }
 
             response = requests.post(url, headers=headers)
             response_json = response.json()
@@ -1018,10 +1039,10 @@ class WearablesV2DataEndpoint(BaseResource):
 
             return response_json
 
-    @token_auth.login_required(user_type = ('client',))
+    @token_auth.login_required(user_type=('client', ))
     @responds(status_code=204, api=ns_v2)
     def delete(self, user_id, wearable):
-        """ Revoke access for this wearable device. """
+        """Revoke access for this wearable device."""
         # user_id = self.check_user(uid, user_type='client').user_id
         wearable = parse_wearable(wearable)
 
@@ -1050,34 +1071,35 @@ class WearablesV2DataEndpoint(BaseResource):
             response = tc.deauthenticate_user(terra_user)
             tc.status(response)
 
-        mongo.db.wearables.delete_many({
-            'user_id': user_id,
-            'wearable': wearable})
+        mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable})
 
         db.session.delete(user_wearable)
         db.session.commit()
         logger.audit(
-            f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
-        
+            f'User {user_id} revoked access to wearable {wearable}. Info and'
+            ' data deleted.'
+        )
+
         if not current_app.debug:
-            #Removes device tag association from users active campaign account
+            # Removes device tag association from users active campaign account
             ac = ActiveCampaign()
             ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
+
 
 @ns_v2.route('/terra')
 class WearablesV2TerraWebHookEndpoint(BaseResource):
     @accepts(api=ns_v2)
     def post(self):
-        """ Webhook for incoming notifications from Terra. """
+        """Webhook for incoming notifications from Terra."""
         # Override JSON handling for this request.
         request.json_module = JSONProvider()
 
         tc = TerraClient()
-        
+
         # For testing without TERRA_API_SECRET or the need to sign every request,
         # use the next line instead of the try-except block.
         # response = terra.api.api_responses.TerraWebhookResponse(request.get_json(), dtype='hook')
-        
+
         try:
             response = tc.handle_flask_webhook(request)
         except KeyError:
@@ -1093,8 +1115,9 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
 
         if response.dtype not in WEBHOOK_RESPONSES:
             logger.error(
-                f'Terra webhook response with unknown type "{response.dtype}". '
-                f'Full message: {response.json}')
+                f'Terra webhook response with unknown type "{response.dtype}".'
+                f' Full message: {response.json}'
+            )
         elif response.dtype == 'auth':
             # Completion of new wearable registration for user,
             # or reauthentication by existing user.
@@ -1119,7 +1142,8 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
             'request_processing',
             'request_completed',
             'large_request_processing',
-            'large_request_sending'):
+            'large_request_sending',
+        ):
             # Terra is letting us know that they're working on it. Great.
             pass
         elif response.dtype in USER_DATATYPES:
@@ -1128,12 +1152,26 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
 
 @ns_v2.route('/calculations/blood-glucose/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
-    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
-                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
-    @responds(schema=WearablesV2BloodGlucoseCalculationOutputSchema, status_code=200, api=ns_v2)
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+            'end_date': (
+                'End of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+        }
+    )
+    @responds(
+        schema=WearablesV2BloodGlucoseCalculationOutputSchema,
+        status_code=200,
+        api=ns_v2,
+    )
     def get(self, user_id, wearable):
-        """ Get calculated values related to blood glucose wearable data.
+        """Get calculated values related to blood glucose wearable data.
 
         This route will return all calculated values related to blood glucose data for a particular user_id, wearable, and timestamp range.
 
@@ -1148,7 +1186,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         ----------
         start_date : str
             Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
-            Default will be current date - 7 days if not specified 
+            Default will be current date - 7 days if not specified
         end_date: str
             End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
             Default will be current date if not specified
@@ -1170,10 +1208,10 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         # Default dates
         end_date = datetime.utcnow()
         start_date = end_date - ONE_WEEK
-       
+
         if request.args.get('start_date') and request.args.get('end_date'):
-            start_date = iso_string_to_iso_datetime(request.args.get('start_date')) 
-            end_date = iso_string_to_iso_datetime(request.args.get('end_date')) 
+            start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
+            end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
         elif request.args.get('start_date') or request.args.get('end_date'):
             raise BadRequest('Provide both or neither start_date and end_date.')
 
@@ -1187,8 +1225,8 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                 'wearable': wearable,
                 'timestamp': {
                     '$gte': start_date - timedelta(days=1),
-                    '$lte': end_date
-                }
+                    '$lte': end_date,
+                },
             }
         }
 
@@ -1202,7 +1240,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             '$match': {
                 'data.body.glucose_data.blood_glucose_samples.timestamp': {
                     '$gte': start_date,
-                    '$lte': end_date
+                    '$lte': end_date,
                 }
             }
         }
@@ -1211,44 +1249,62 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         stage_group_average_and_std_dev = {
             '$group': {
                 '_id': None,
-                'average_glucose': { 
+                'average_glucose': {
                     '$avg': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
-                    },
+                },
                 'standard_deviation': {
-                    '$stdDevSamp': '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
-                }
+                    '$stdDevSamp':
+                        '$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL'
+                },
             }
         }
 
-        # Add field for GMI and calculate it. Calculated as 3.31 + 0.02392 x (mean glucose in mg/dL) 
+        # Add field for GMI and calculate it. Calculated as 3.31 + 0.02392 x (mean glucose in mg/dL)
         stage_add_gmi = {
             '$addFields': {
-                'glucose_management_indicator': { '$add': [{'$multiply': ['$average_glucose', 0.02392]}, 3.31] }
+                'glucose_management_indicator': {
+                    '$add': [
+                        {
+                            '$multiply': ['$average_glucose', 0.02392]
+                        },
+                        3.31,
+                    ]
+                }
             }
         }
 
         # Add field for glucose variability and calculate it. Calculated as 100 * (Standard Deviation / Mean Glucose)
         stage_add_glucose_variability = {
             '$addFields': {
-                'glucose_variability': { '$multiply': [100, {'$divide': ['$standard_deviation', '$average_glucose']}] }
+                'glucose_variability': {
+                    '$multiply': [
+                        100,
+                        {
+                            '$divide': [
+                                '$standard_deviation',
+                                '$average_glucose',
+                            ]
+                        },
+                    ]
+                }
             }
         }
 
         # Round values
         stage_round_values = {
             '$project': {
-                'average_glucose': { 
+                'average_glucose': {
                     '$round': ['$average_glucose', 0]
-                    },
-                'standard_deviation': { 
+                },
+                'standard_deviation': {
                     '$round': ['$standard_deviation', 1]
-                    },
-                'glucose_management_indicator': { 
+                },
+                'glucose_management_indicator': {
                     '$round': ['$glucose_management_indicator', 1]
-                    },
-                'glucose_variability': { 
+                },
+                'glucose_variability': {
                     '$round': ['$glucose_variability', 1]
-                    }
+                },
             }
         }
 
@@ -1260,7 +1316,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             stage_group_average_and_std_dev,
             stage_add_gmi,
             stage_add_glucose_variability,
-            stage_round_values
+            stage_round_values,
         ]
 
         # MongoDB pipelines return a cursor
@@ -1279,19 +1335,32 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             'average_glucose': data.get('average_glucose'),
             'standard_deviation': data.get('standard_deviation'),
             'glucose_management_indicator': data.get('glucose_management_indicator'),
-            'glucose_variability': data.get('glucose_variability')
+            'glucose_variability': data.get('glucose_variability'),
         }
 
         return payload
-        
+
+
 @ns_v2.route('/calculations/blood-glucose/cgm/time-in-ranges/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
-    @ns_v2.doc(params={
-        'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
-        'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
-    })
-    @responds(schema=WearablesV2BloodGlucoseTimeInRangesOutputSchema, status_code=200, api=ns_v2)
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+            'end_date': (
+                'End of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+        }
+    )
+    @responds(
+        schema=WearablesV2BloodGlucoseTimeInRangesOutputSchema,
+        status_code=200,
+        api=ns_v2,
+    )
     def get(self, user_id, wearable):
         """
         Calculates time in ranges for CGM data for a specified date range.
@@ -1307,7 +1376,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
         ----------------
         start_date : str
             Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
-            Default will be current date - 7 days if not specified 
+            Default will be current date - 7 days if not specified
         end_date: str
             End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
             Default will be current date if not specified
@@ -1319,32 +1388,34 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
         payload = {}
         wearable = parse_wearable(wearable)
 
-        #Gets start and end dates ranges. Defaults to 30 days if one or none is provided
+        # Gets start and end dates ranges. Defaults to 30 days if one or none is provided
         start_date, end_date = date_range(
-            start_time = request.args.get('start_date'), 
-            end_time = request.args.get('end_date'),
-            time_range = timedelta(days=30))
+            start_time=request.args.get('start_date'),
+            end_time=request.args.get('end_date'),
+            time_range=timedelta(days=30),
+        )
 
         # Filter documents on user_id, wearable
         stage_match_user_id_and_wearable = {
             '$match': {
                 'user_id': user_id,
                 'wearable': wearable,
-                "timestamp": {"$gte": start_date - timedelta(days=1), "$lte": end_date},
+                'timestamp': {
+                    '$gte': start_date - timedelta(days=1),
+                    '$lte': end_date,
+                },
             }
         }
 
         # Project out glucose samples to filter start and end time precisely on samples timestamps
         stage_project_bp_samples = {
             '$project': {
-                '_id': 0, 
-                'samples': '$data.body.glucose_data.blood_glucose_samples'
+                '_id': 0,
+                'samples': '$data.body.glucose_data.blood_glucose_samples',
             }
         }
         # Unwind the blood_glucose_samples array so that we can operate on each individual sample
-        stage_unwind_bp_samples = {
-            '$unwind': {'path': '$samples'}
-        }
+        stage_unwind_bp_samples = {'$unwind': {'path': '$samples'}}
 
         # Filter on the timestamp of each blood glucose sample
         stage_match_date_range_bp_samples = {
@@ -1356,218 +1427,306 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
             }
         }
 
-        # Runs multiple stages. Groups samples in buckets by glucose range, 
+        # Runs multiple stages. Groups samples in buckets by glucose range,
         # gets the total count of glucose samples, and creates array of just
-        # samples timestamps. 
+        # samples timestamps.
         stage_facet = {
             '$facet': {
-                'samples_buckets': [
-                    {
-                        '$bucket': {
-                            'groupBy': '$samples.blood_glucose_mg_per_dL', 
-                            'boundaries': [ 0, 54, 70, 181, 251, 10000], 
-                            'output': {'count': { '$sum': 1}}
-                        }
+                'samples_buckets': [{
+                    '$bucket': {
+                        'groupBy': '$samples.blood_glucose_mg_per_dL',
+                        'boundaries': [0, 54, 70, 181, 251, 10000],
+                        'output': {
+                            'count': {
+                                '$sum': 1
+                            }
+                        },
                     }
-                ], 
-                'total_count': [{'$count': 'total_count'}], 
-                'reading_timestamps': [{'$project': {'timestamp': '$samples.timestamp'}}]
+                }],
+                'total_count': [{
+                    '$count': 'total_count'
+                }],
+                'reading_timestamps': [{
+                    '$project': {
+                        'timestamp': '$samples.timestamp'
+                    }
+                }],
             }
         }
 
-        # In case there are buckets that dont get filled from samples, this stage aligns the arrays 
-        # so that there are always the same number of buckets to make calculations from. 
-        # Also carries over the ID and count of any previously filled buckets 
+        # In case there are buckets that dont get filled from samples, this stage aligns the arrays
+        # so that there are always the same number of buckets to make calculations from.
+        # Also carries over the ID and count of any previously filled buckets
         stage_align_buckets = {
             '$addFields': {
                 'samples_buckets': {
                     '$map': {
-                        'input': [0, 54, 70, 181, 251], 
-                        'as': 'i', 
+                        'input': [0, 54, 70, 181, 251],
+                        'as': 'i',
                         'in': {
-                            '_id': '$$i', 
+                            '_id': '$$i',
                             'count': {
                                 '$cond': [
-                                    { 
-                                        '$eq': [{'$indexOfArray': ['$samples_buckets._id', '$$i']}, -1]
-                                    }, 
-                                    0, 
-                                    { 
-                                        '$arrayElemAt': ['$samples_buckets.count', {'$indexOfArray': ['$samples_buckets._id', '$$i']}]
-                                    }
+                                    {
+                                        '$eq': [
+                                            {
+                                                '$indexOfArray': [
+                                                    '$samples_buckets._id',
+                                                    '$$i',
+                                                ]
+                                            },
+                                            -1,
+                                        ]
+                                    },
+                                    0,
+                                    {
+                                        '$arrayElemAt': [
+                                            '$samples_buckets.count',
+                                            {
+                                                '$indexOfArray': [
+                                                    '$samples_buckets._id',
+                                                    '$$i',
+                                                ]
+                                            },
+                                        ]
+                                    },
                                 ]
-                            }
-                        }
+                            },
+                        },
                     }
                 }
             }
         }
 
-        # Projects facet data to new document. 
-        # Sorts samples buckets and samples timestamps in accending order. 
+        # Projects facet data to new document.
+        # Sorts samples buckets and samples timestamps in accending order.
         stage_project_facet_data = {
             '$project': {
                 'samples_sorted': {
                     '$sortArray': {
-                        'input': '$samples_buckets', 
+                        'input': '$samples_buckets',
                         'sortBy': 1
                     }
-                }, 
+                },
                 'timestamp_sorted': {
                     '$sortArray': {
-                        'input': '$reading_timestamps', 
+                        'input': '$reading_timestamps',
                         'sortBy': 1
                     }
-                }, 
-                'total_samples': '$total_count'
+                },
+                'total_samples': '$total_count',
             }
         }
 
-        #Starts calculations get percentages of total time in glucose ranges  
+        # Starts calculations get percentages of total time in glucose ranges
         stage_calculate_percentages = {
             '$addFields': {
                 'total_time_in_min': {
                     '$dateDiff': {
-                        'startDate': {'$arrayElemAt': ['$timestamp_sorted.timestamp', 0]}, 
-                        'endDate': {'$arrayElemAt': ['$timestamp_sorted.timestamp', -1]}, 
-                        'unit': 'minute'
+                        'startDate': {
+                            '$arrayElemAt': ['$timestamp_sorted.timestamp', 0]
+                        },
+                        'endDate': {
+                            '$arrayElemAt': ['$timestamp_sorted.timestamp', -1]
+                        },
+                        'unit': 'minute',
                     }
-                }, 
+                },
                 'very_low_percentage': {
                     '$round': [
                         {
                             '$multiply': [
                                 {
                                     '$divide': [
-                                        {'$arrayElemAt': ['$samples_sorted.count', 0]}, 
-                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
-                                    ]}, 
-                                100]
-                        }, 0
+                                        {
+                                            '$arrayElemAt': [
+                                                '$samples_sorted.count',
+                                                0,
+                                            ]
+                                        },
+                                        {
+                                            '$arrayElemAt': [
+                                                '$total_samples.total_count',
+                                                0,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                100,
+                            ]
+                        },
+                        0,
                     ]
-                }, 
+                },
                 'low_percentage': {
                     '$round': [
                         {
                             '$multiply': [
                                 {
                                     '$divide': [
-                                        {'$arrayElemAt': ['$samples_sorted.count', 1]}, 
-                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
-                                    ]}, 
-                                100]
-                        }, 0
+                                        {
+                                            '$arrayElemAt': [
+                                                '$samples_sorted.count',
+                                                1,
+                                            ]
+                                        },
+                                        {
+                                            '$arrayElemAt': [
+                                                '$total_samples.total_count',
+                                                0,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                100,
+                            ]
+                        },
+                        0,
                     ]
-                }, 
+                },
                 'target_range_percentage': {
                     '$round': [
                         {
                             '$multiply': [
                                 {
                                     '$divide': [
-                                        {'$arrayElemAt': ['$samples_sorted.count', 2]}, 
-                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
-                                    ]}, 
-                                100]
-                        }, 0
+                                        {
+                                            '$arrayElemAt': [
+                                                '$samples_sorted.count',
+                                                2,
+                                            ]
+                                        },
+                                        {
+                                            '$arrayElemAt': [
+                                                '$total_samples.total_count',
+                                                0,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                100,
+                            ]
+                        },
+                        0,
                     ]
-                }, 
+                },
                 'high_percentage': {
                     '$round': [
                         {
                             '$multiply': [
                                 {
                                     '$divide': [
-                                        {'$arrayElemAt': ['$samples_sorted.count', 3]}, 
-                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
-                                    ]}, 
-                                100]
-                        }, 0
+                                        {
+                                            '$arrayElemAt': [
+                                                '$samples_sorted.count',
+                                                3,
+                                            ]
+                                        },
+                                        {
+                                            '$arrayElemAt': [
+                                                '$total_samples.total_count',
+                                                0,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                100,
+                            ]
+                        },
+                        0,
                     ]
-                }, 
+                },
                 'very_high_percentage': {
                     '$round': [
                         {
                             '$multiply': [
                                 {
                                     '$divide': [
-                                        {'$arrayElemAt': ['$samples_sorted.count', 4]}, 
-                                        {'$arrayElemAt': ['$total_samples.total_count', 0]}
-                                    ]}, 
-                                100]
-                        }, 0
+                                        {
+                                            '$arrayElemAt': [
+                                                '$samples_sorted.count',
+                                                4,
+                                            ]
+                                        },
+                                        {
+                                            '$arrayElemAt': [
+                                                '$total_samples.total_count',
+                                                0,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                100,
+                            ]
+                        },
+                        0,
                     ]
-                }
+                },
             }
         }
 
-        #Finally use calculated percentages to calculate total time in minutes 
+        # Finally use calculated percentages to calculate total time in minutes
         stage_project_total_percentages_and_times = {
             '$project': {
-                'very_low_percentage': '$very_low_percentage', 
-                'low_percentage': '$low_percentage', 
-                'target_range_percentage': '$target_range_percentage', 
-                'high_percentage': '$high_percentage', 
-                'very_high_percentage': '$very_high_percentage', 
+                'very_low_percentage': '$very_low_percentage',
+                'low_percentage': '$low_percentage',
+                'target_range_percentage': '$target_range_percentage',
+                'high_percentage': '$high_percentage',
+                'very_high_percentage': '$very_high_percentage',
                 'very_low_total_time': {
-                    '$round': [
-                        {
-                            '$multiply': [
-                                {
-                                    '$divide': ['$very_low_percentage', 100]
-                                }, '$total_time_in_min'
-                            ]
-                        }
-                    ]
-                }, 
+                    '$round': [{
+                        '$multiply': [
+                            {
+                                '$divide': ['$very_low_percentage', 100]
+                            },
+                            '$total_time_in_min',
+                        ]
+                    }]
+                },
                 'low_total_time': {
-                    '$round': [
-                        {
-                            '$multiply': [
-                                {
-                                    '$divide': ['$low_percentage', 100]
-                                }, '$total_time_in_min'
-                            ]
-                        }
-                    ]
-                }, 
+                    '$round': [{
+                        '$multiply': [
+                            {
+                                '$divide': ['$low_percentage', 100]
+                            },
+                            '$total_time_in_min',
+                        ]
+                    }]
+                },
                 'target_range_total_time': {
-                    '$round': [
-                        {
-                            '$multiply': [
-                                {
-                                    '$divide': ['$target_range_percentage', 100]
-                                }, '$total_time_in_min'
-                            ]
-                        }
-                    ]
-                }, 
+                    '$round': [{
+                        '$multiply': [
+                            {
+                                '$divide': ['$target_range_percentage', 100]
+                            },
+                            '$total_time_in_min',
+                        ]
+                    }]
+                },
                 'high_total_time': {
-                    '$round': [
-                        {
-                            '$multiply': [
-                                {
-                                    '$divide': ['$high_percentage', 100]
-                                }, '$total_time_in_min'
-                            ]
-                        }
-                    ]
-                }, 
+                    '$round': [{
+                        '$multiply': [
+                            {
+                                '$divide': ['$high_percentage', 100]
+                            },
+                            '$total_time_in_min',
+                        ]
+                    }]
+                },
                 'very_high_total_time': {
-                    '$round': [
-                        {
-                            '$multiply': [
-                                {
-                                    '$divide': ['$very_high_percentage', 100]
-                                }, '$total_time_in_min'
-                            ]
-                        }
-                    ]
-                }
+                    '$round': [{
+                        '$multiply': [
+                            {
+                                '$divide': ['$very_high_percentage', 100]
+                            },
+                            '$total_time_in_min',
+                        ]
+                    }]
+                },
             }
         }
-    
-        #Build pipeline
+
+        # Build pipeline
         time_in_ranges_pipeline = [
             stage_match_user_id_and_wearable,
             stage_project_bp_samples,
@@ -1577,31 +1736,46 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
             stage_align_buckets,
             stage_project_facet_data,
             stage_calculate_percentages,
-            stage_project_total_percentages_and_times
+            stage_project_total_percentages_and_times,
         ]
-        
+
         cursor = mongo.db.wearables.aggregate(time_in_ranges_pipeline)
         results = list(cursor)
-        
+
         payload = {
             'user_id': user_id,
             'wearable': wearable,
-            'results' : results[0]
+            'results': results[0],
         }
-    
+
         return payload
+
 
 @ns_v2.route('/calculations/blood-glucose/cgm/percentiles/<int:user_id>/<string:wearable>')
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
-    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
-                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
-                'increment_mins': 'bin sizes in minutes'})
-    @responds(schema=WearablesV2CGMPercentilesOutputSchema, status_code=200, api=ns_v2)
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+            'end_date': (
+                'End of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+            'increment_mins': 'bin sizes in minutes',
+        }
+    )
+    @responds(
+        schema=WearablesV2CGMPercentilesOutputSchema,
+        status_code=200,
+        api=ns_v2,
+    )
     def get(self, user_id, wearable):
         """
         Calculates binned percentiles of CGM data for a specified date range. The glucose
-        samples are grouped by time they are taken in a 24 hour day. 
+        samples are grouped by time they are taken in a 24 hour day.
 
         Path Parameters
         ---------------
@@ -1614,7 +1788,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         ----------------
         start_date : str
             Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
-            Default will be current date - 7 days if not specified 
+            Default will be current date - 7 days if not specified
         end_date: str
             End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
             Default will be current date if not specified
@@ -1627,94 +1801,138 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         start_date, end_date = date_range(
-            start_time = request.args.get('start_date'), 
-            end_time = request.args.get('end_date'),
-            time_range = timedelta(weeks=2))
+            start_time=request.args.get('start_date'),
+            end_time=request.args.get('end_date'),
+            time_range=timedelta(weeks=2),
+        )
         increments = request.args.get('increment_mins', 15, type=int)
-        
-        boundaries = [i*increments for i in range( ceil(1440/increments) +1)]
-        boundaries[-1] = 1440 # last index must be 1440
+
+        boundaries = [i * increments for i in range(ceil(1440 / increments) + 1)]
+        boundaries[-1] = 1440  # last index must be 1440
 
         # Filter documents on user_id, wearable, and date range
         stage_1_match_user_id_and_wearable = {
-            "$match": {
-                "user_id": user_id,
-                "wearable": wearable,
-                "timestamp": {"$gte": start_date - timedelta(days=1), "$lte": end_date},
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'timestamp': {
+                    '$gte': start_date - timedelta(days=1),
+                    '$lte': end_date,
+                },
             }
         }
 
         # bring just the glucose samples up
-        stage_2_project_glucose_sample_only = {"$project": {"_id": 0, "samples": "$data.body.glucose_data.blood_glucose_samples"}}
+        stage_2_project_glucose_sample_only = {
+            '$project': {
+                '_id': 0,
+                'samples': '$data.body.glucose_data.blood_glucose_samples',
+            }
+        }
 
         # unwind the samples
-        stage_3_unwind = {"$unwind": "$samples"}
+        stage_3_unwind = {'$unwind': '$samples'}
 
         # project the timestamp and glucose sample into their own fields
         stage_4_project_samples_parse_timestamp = {
-            "$project": {
-                "timestamp": "$samples.timestamp",
-                "sample": "$samples.blood_glucose_mg_per_dL",
-                "24hr_minute": {
-                    "$add": [
-                        {"$multiply": [{"$hour": "$samples.timestamp"}, 60]},
-                        {"$minute": "$samples.timestamp"},
+            '$project': {
+                'timestamp': '$samples.timestamp',
+                'sample': '$samples.blood_glucose_mg_per_dL',
+                '24hr_minute': {
+                    '$add': [
+                        {
+                            '$multiply': [{
+                                '$hour': '$samples.timestamp'
+                            }, 60]
+                        },
+                        {
+                            '$minute': '$samples.timestamp'
+                        },
                     ]
                 },
             }
         }
 
-
         # match on sample timestamp
         stage_5_match_on_samples = {
-            "$match": {
-                "timestamp": {
-                    "$gte": start_date,
-                    "$lte": end_date, }
+            '$match': {
+                'timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date,
+                }
             }
         }
 
-        # bucket by minute in 24 hr day     
+        # bucket by minute in 24 hr day
         stage_6_bucket = {
-                "$bucket": {
-                    "groupBy": "$24hr_minute",
-                    "boundaries": boundaries,
-                    "output": {
-                        "count": {"$sum": 1},
-                        "avg_glucose": {"$avg": "$sample"},
-                        "samples": {"$push": "$sample"},  },
+            '$bucket': {
+                'groupBy': '$24hr_minute',
+                'boundaries': boundaries,
+                'output': {
+                    'count': {
+                        '$sum': 1
+                    },
+                    'avg_glucose': {
+                        '$avg': '$sample'
+                    },
+                    'samples': {
+                        '$push': '$sample'
+                    },
+                },
             }
         }
         # sort samples in each bucket
         stage_7_sort_samples = {
-            "$project": {
-                "samplesSorted": {"$sortArray": {"input": "$samples", "sortBy": 1}},
-                "count": {"$toInt": '$count'},
-                "avg_glucose": 1,
+            '$project': {
+                'samplesSorted': {
+                    '$sortArray': {
+                        'input': '$samples',
+                        'sortBy': 1
+                    }
+                },
+                'count': {
+                    '$toInt': '$count'
+                },
+                'avg_glucose': 1,
             },
         }
 
         stage_8_calculate_percentiles = {
-            "$project": {
-                "minute": "$_id",
-                "_id": 0,
-                "count": 1,
-                "avg_glucose_mg_per_dL": {"$round": ["$avg_glucose", 2]},
-                "min": {"$round": [{"$arrayElemAt": ["$samplesSorted", 0]}, 2]},
-                "max": {"$round": [{"$arrayElemAt": ["$samplesSorted", -1]}, 2]},
-                "percentile_5th": {
-                    "$round": [
+            '$project': {
+                'minute': '$_id',
+                '_id': 0,
+                'count': 1,
+                'avg_glucose_mg_per_dL': {
+                    '$round': ['$avg_glucose', 2]
+                },
+                'min': {
+                    '$round': [{
+                        '$arrayElemAt': ['$samplesSorted', 0]
+                    }, 2]
+                },
+                'max': {
+                    '$round': [{
+                        '$arrayElemAt': ['$samplesSorted', -1]
+                    }, 2]
+                },
+                'percentile_5th': {
+                    '$round': [
                         {
-                            "$arrayElemAt": [
-                                "$samplesSorted",
+                            '$arrayElemAt': [
+                                '$samplesSorted',
                                 {
-                                    "$cond": {
-                                        "if": {
-                                            "$gt": [
+                                    '$cond': {
+                                        'if': {
+                                            '$gt': [
                                                 {
-                                                    "$round": {
-                                                        "$subtract": [
-                                                            {"$multiply": ["$count", 0.05]},
+                                                    '$round': {
+                                                        '$subtract': [
+                                                            {
+                                                                '$multiply': [
+                                                                    '$count',
+                                                                    0.05,
+                                                                ]
+                                                            },
                                                             1,
                                                         ]
                                                     }
@@ -1722,18 +1940,23 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                                                 0,
                                             ]
                                         },
-                                        "then": {
-                                            "$round": [
+                                        'then': {
+                                            '$round': [
                                                 {
-                                                    "$subtract": [
-                                                        {"$multiply": ["$count", 0.05]},
+                                                    '$subtract': [
+                                                        {
+                                                            '$multiply': [
+                                                                '$count',
+                                                                0.05,
+                                                            ]
+                                                        },
                                                         1,
                                                     ]
                                                 },
                                                 0,
                                             ]
                                         },
-                                        "else": 0,
+                                        'else': 0,
                                     }
                                 },
                             ]
@@ -1741,19 +1964,24 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                         2,
                     ]
                 },
-                "percentile_25th": {
-                    "$round": [
+                'percentile_25th': {
+                    '$round': [
                         {
-                            "$arrayElemAt": [
-                                "$samplesSorted",
+                            '$arrayElemAt': [
+                                '$samplesSorted',
                                 {
-                                    "$cond": {
-                                        "if": {
-                                            "$gt": [
+                                    '$cond': {
+                                        'if': {
+                                            '$gt': [
                                                 {
-                                                    "$round": {
-                                                        "$subtract": [
-                                                            {"$multiply": ["$count", 0.25]},
+                                                    '$round': {
+                                                        '$subtract': [
+                                                            {
+                                                                '$multiply': [
+                                                                    '$count',
+                                                                    0.25,
+                                                                ]
+                                                            },
                                                             1,
                                                         ]
                                                     }
@@ -1761,18 +1989,23 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                                                 0,
                                             ]
                                         },
-                                        "then": {
-                                            "$round": [
+                                        'then': {
+                                            '$round': [
                                                 {
-                                                    "$subtract": [
-                                                        {"$multiply": ["$count", 0.25]},
+                                                    '$subtract': [
+                                                        {
+                                                            '$multiply': [
+                                                                '$count',
+                                                                0.25,
+                                                            ]
+                                                        },
                                                         1,
                                                     ]
                                                 },
                                                 0,
                                             ]
                                         },
-                                        "else": 0,
+                                        'else': 0,
                                     }
                                 },
                             ]
@@ -1780,14 +2013,24 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                         2,
                     ]
                 },
-                "percentile_50th": {
-                    "$round": [
+                'percentile_50th': {
+                    '$round': [
                         {
-                            "$arrayElemAt": [
-                                "$samplesSorted",
+                            '$arrayElemAt': [
+                                '$samplesSorted',
                                 {
-                                    "$round": [
-                                        {"$subtract": [{"$multiply": ["$count", 0.50]}, 1]},
+                                    '$round': [
+                                        {
+                                            '$subtract': [
+                                                {
+                                                    '$multiply': [
+                                                        '$count',
+                                                        0.50,
+                                                    ]
+                                                },
+                                                1,
+                                            ]
+                                        },
                                         0,
                                     ]
                                 },
@@ -1796,14 +2039,24 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                         2,
                     ]
                 },
-                "percentile_75th": {
-                    "$round": [
+                'percentile_75th': {
+                    '$round': [
                         {
-                            "$arrayElemAt": [
-                                "$samplesSorted",
+                            '$arrayElemAt': [
+                                '$samplesSorted',
                                 {
-                                    "$round": [
-                                        {"$subtract": [{"$multiply": ["$count", 0.75]}, 1]},
+                                    '$round': [
+                                        {
+                                            '$subtract': [
+                                                {
+                                                    '$multiply': [
+                                                        '$count',
+                                                        0.75,
+                                                    ]
+                                                },
+                                                1,
+                                            ]
+                                        },
                                         0,
                                     ]
                                 },
@@ -1812,14 +2065,24 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                         2,
                     ]
                 },
-                "percentile_95th": {
-                    "$round": [
+                'percentile_95th': {
+                    '$round': [
                         {
-                            "$arrayElemAt": [
-                                "$samplesSorted",
+                            '$arrayElemAt': [
+                                '$samplesSorted',
                                 {
-                                    "$round": [
-                                        {"$subtract": [{"$multiply": ["$count", 0.95]}, 1]},
+                                    '$round': [
+                                        {
+                                            '$subtract': [
+                                                {
+                                                    '$multiply': [
+                                                        '$count',
+                                                        0.95,
+                                                    ]
+                                                },
+                                                1,
+                                            ]
+                                        },
                                         0,
                                     ]
                                 },
@@ -1830,9 +2093,8 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
                 },
             }
         }
-        
-        cursor = mongo.db.wearables.aggregate(
-            [
+
+        cursor = mongo.db.wearables.aggregate([
             stage_1_match_user_id_and_wearable,
             stage_2_project_glucose_sample_only,
             stage_3_unwind,
@@ -1840,37 +2102,46 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
             stage_5_match_on_samples,
             stage_6_bucket,
             stage_7_sort_samples,
-            stage_8_calculate_percentiles
-            ])
-        
+            stage_8_calculate_percentiles,
+        ])
 
         data = list(cursor)
 
         # Build and return payload
         payload = {
-            "user_id": user_id,
-            "start_time": start_date,
-            "end_time": end_date,
-            "wearable": wearable,
-            "data": data,
-            "bin_size_mins": increments,
+            'user_id': user_id,
+            'start_time': start_date,
+            'end_time': end_date,
+            'wearable': wearable,
+            'data': data,
+            'bin_size_mins': increments,
         }
 
         return payload
 
+
 @ns_v2.route('/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
-    @ns_v2.doc(params={
-        'start_date': 'Start of specified date range. '
-                      'Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
-        'end_date': 'End of specified date range. '
-                    'Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+            'end_date': (
+                'End of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
         }
     )
-    @responds(schema=WearablesV2BloodPressureVariationCalculationOutputSchema, status_code=200, api=ns_v2)
+    @responds(
+        schema=WearablesV2BloodPressureVariationCalculationOutputSchema,
+        status_code=200,
+        api=ns_v2,
+    )
     def get(self, user_id, wearable):
-        """ Get calculated blood pressure wearable data.
+        """Get calculated blood pressure wearable data.
 
         This route will return the average for blood pressure readings from a start to end date for a particular
         user_id and wearable.
@@ -1918,7 +2189,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
         elif request.args.get('start_date') or request.args.get('end_date'):
             raise BadRequest('Provide both or neither start_date and end_date.')
-
         """Calculate Average Blood Pressures"""
         # Define each stage of the pipeline
         # Filter documents on user_id, wearable, and date range
@@ -1928,8 +2198,8 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'wearable': wearable,
                 'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
                     '$gte': start_date - timedelta(days=1),
-                    '$lte': end_date
-                }
+                    '$lte': end_date,
+                },
             }
         }
 
@@ -1940,10 +2210,12 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 
         # Filter now again at the sample level to round out objects that overlap the tips of the desired range
         stage_match_date_range = {
-            '$match': {'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
-                '$gte': start_date,
-                '$lte': end_date
-            }}
+            '$match': {
+                'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date,
+                }
+            }
         }
 
         # Group all of these documents together and calculate average pressures and standard deviations for the group
@@ -1957,10 +2229,12 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
                 'diastolic_standard_deviation': {
-                    '$stdDevSamp': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                    '$stdDevSamp':
+                        '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
                 },
                 'systolic_standard_deviation': {
-                    '$stdDevSamp': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                    '$stdDevSamp':
+                        '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
             }
         }
@@ -1969,10 +2243,26 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         stage_add_coefficient_of_variation = {
             '$addFields': {
                 'diastolic_bp_coefficient_of_variation': {
-                    '$multiply': [100, {'$divide': ['$diastolic_standard_deviation', '$diastolic_bp_avg']}]
+                    '$multiply': [
+                        100,
+                        {
+                            '$divide': [
+                                '$diastolic_standard_deviation',
+                                '$diastolic_bp_avg',
+                            ]
+                        },
+                    ]
                 },
                 'systolic_bp_coefficient_of_variation': {
-                    '$multiply': [100, {'$divide': ['$systolic_standard_deviation', '$systolic_bp_avg']}]
+                    '$multiply': [
+                        100,
+                        {
+                            '$divide': [
+                                '$systolic_standard_deviation',
+                                '$systolic_bp_avg',
+                            ]
+                        },
+                    ]
                 },
             }
         }
@@ -1980,25 +2270,25 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         # Round values
         stage_round_values = {
             '$project': {
-                'diastolic_bp_avg': { 
+                'diastolic_bp_avg': {
                     '$round': ['$diastolic_bp_avg', 0]
-                    },
-                'systolic_bp_avg': { 
+                },
+                'systolic_bp_avg': {
                     '$round': ['$systolic_bp_avg', 0]
-                    },
-                'diastolic_standard_deviation': { 
+                },
+                'diastolic_standard_deviation': {
                     '$round': ['$diastolic_standard_deviation', 0]
-                    },
-                'systolic_standard_deviation': { 
+                },
+                'systolic_standard_deviation': {
                     '$round': ['$systolic_standard_deviation', 0]
-                    },
-                'diastolic_bp_coefficient_of_variation': { 
+                },
+                'diastolic_bp_coefficient_of_variation': {
                     '$round': ['$diastolic_bp_coefficient_of_variation', 0]
-                    },
-                'systolic_bp_coefficient_of_variation': { 
+                },
+                'systolic_bp_coefficient_of_variation': {
                     '$round': ['$systolic_bp_coefficient_of_variation', 0]
-                    }
-                }
+                },
+            }
         }
 
         # Assemble pipeline
@@ -2008,7 +2298,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
-            stage_round_values
+            stage_round_values,
         ]
 
         # MongoDB pipelines return a cursor
@@ -2022,14 +2312,22 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 
         # Build and return payload
         payload = {
-            'user_id': user_id,
-            'wearable': wearable,
-            'diastolic_bp_avg': data.get('diastolic_bp_avg'),
-            'systolic_bp_avg': data.get('systolic_bp_avg'),
-            'diastolic_standard_deviation': data.get('diastolic_standard_deviation'),
-            'systolic_standard_deviation': data.get('systolic_standard_deviation'),
-            'diastolic_bp_coefficient_of_variation': data.get('diastolic_bp_coefficient_of_variation'),
-            'systolic_bp_coefficient_of_variation': data.get('systolic_bp_coefficient_of_variation'),
+            'user_id':
+                user_id,
+            'wearable':
+                wearable,
+            'diastolic_bp_avg':
+                data.get('diastolic_bp_avg'),
+            'systolic_bp_avg':
+                data.get('systolic_bp_avg'),
+            'diastolic_standard_deviation':
+                data.get('diastolic_standard_deviation'),
+            'systolic_standard_deviation':
+                data.get('systolic_standard_deviation'),
+            'diastolic_bp_coefficient_of_variation':
+                data.get('diastolic_bp_coefficient_of_variation'),
+            'systolic_bp_coefficient_of_variation':
+                data.get('systolic_bp_coefficient_of_variation'),
         }
 
         return payload
@@ -2037,12 +2335,26 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 
 @ns_v2.route('/calculations/blood-pressure/30-day-hourly/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
-    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)',
-                'end_date': 'End of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
-    @responds(schema=WearablesV2BloodPressureCalculationOutputSchema, status_code=200, api=ns_v2)
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+            'end_date': (
+                'End of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+        }
+    )
+    @responds(
+        schema=WearablesV2BloodPressureCalculationOutputSchema,
+        status_code=200,
+        api=ns_v2,
+    )
     def get(self, user_id, wearable):
-        """ Get calculated values related to hourly blood pressure wearable data.
+        """Get calculated values related to hourly blood pressure wearable data.
 
         This route will return hourly blood pressure data for a particular user_id, wearable, and timestamp range with the default date being the previous 30 days.
         The data is grouped into 8 time blocks with each being 3 hours long (0-3, 3-6, 6-9, etc...). See below for exact calculations being returned.
@@ -2058,7 +2370,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         ----------
         start_date : str
             Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
-            Default will be current date - 30 days if not specified 
+            Default will be current date - 30 days if not specified
         end_date: str
             End of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
             Default will be current date if not specified
@@ -2112,8 +2424,8 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
                 'wearable': wearable,
                 'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
                     '$gte': start_date - timedelta(days=1),
-                    '$lte': end_date
-                }
+                    '$lte': end_date,
+                },
             }
         }
 
@@ -2127,7 +2439,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             '$match': {
                 'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
                     '$gte': start_date,
-                    '$lte': end_date
+                    '$lte': end_date,
                 }
             }
         }
@@ -2135,7 +2447,9 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         # Add the hour field so that we can group all samples based on the hour they were taken
         stage_add_hour_bp = {
             '$addFields': {
-                'hour': { '$hour': '$data.body.blood_pressure_data.blood_pressure_samples.timestamp'}
+                'hour': {
+                    '$hour': '$data.body.blood_pressure_data.blood_pressure_samples.timestamp'
+                }
             }
         }
 
@@ -2146,26 +2460,28 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
                 'groupBy': '$hour',
                 'boundaries': THREE_HOUR_TIME_BLOCK_START_TIMES_LIST,
                 'output': {
-                    'total_bp_readings': {'$sum': 1},
-                'average_systolic': { 
-                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                    'total_bp_readings': {
+                        '$sum': 1
                     },
-                'average_diastolic': { 
-                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                    'average_systolic': {
+                        '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                     },
-                'min_systolic': {
-                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                    'average_diastolic': {
+                        '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                    },
+                    'min_systolic': {
+                        '$min': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                    },
+                    'min_diastolic': {
+                        '$min': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                    },
+                    'max_systolic': {
+                        '$max': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                    },
+                    'max_diastolic': {
+                        '$max': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                    },
                 },
-                'min_diastolic': {
-                    '$min': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
-                },
-                'max_systolic': {
-                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
-                },
-                'max_diastolic': {
-                    '$max': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
-                }
-                }
             }
         }
 
@@ -2173,33 +2489,30 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         stage_round_averages_bp = {
             '$project': {
                 'total_bp_readings': '$total_bp_readings',
-                'average_systolic': { 
+                'average_systolic': {
                     '$round': ['$average_systolic', 0]
-                    },
-                'average_diastolic': { 
+                },
+                'average_diastolic': {
                     '$round': ['$average_diastolic', 0]
-                    },
+                },
                 'min_systolic': '$min_systolic',
                 'min_diastolic': '$min_diastolic',
                 'max_systolic': '$max_systolic',
-                'max_diastolic': '$max_diastolic'
+                'max_diastolic': '$max_diastolic',
             }
         }
-
 
         # Stages for pulse - making another call because the location of the pulse data is nested in another part of the Terra schema
 
         # Unwind the hr_samples array so that we can operate on each individual sample
-        stage_unwind_hr_samples = {
-            '$unwind': '$data.body.heart_data.detailed.hr_samples'
-        }
+        stage_unwind_hr_samples = {'$unwind': '$data.body.heart_data.detailed.hr_samples'}
 
         # Filter on the timestamp of each hr_sample
         stage_match_date_range_pulse = {
             '$match': {
                 'data.body.heart_data.detailed.hr_samples.timestamp': {
                     '$gte': start_date,
-                    '$lte': end_date
+                    '$lte': end_date,
                 }
             }
         }
@@ -2207,7 +2520,9 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         # Add the hour field so that we can group all samples based on the hour they were taken
         stage_add_hour_pulse = {
             '$addFields': {
-                'hour': { '$hour': '$data.body.heart_data.detailed.hr_samples.timestamp'}
+                'hour': {
+                    '$hour': ('$data.body.heart_data.detailed.hr_samples.timestamp')
+                }
             }
         }
 
@@ -2218,11 +2533,13 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
                 'groupBy': '$hour',
                 'boundaries': THREE_HOUR_TIME_BLOCK_START_TIMES_LIST,
                 'output': {
-                    'average_pulse': { 
-                            '$avg': '$data.body.heart_data.detailed.hr_samples.bpm'
-                        },
-                    'total_pulse_readings': {'$sum': 1}
-                }
+                    'average_pulse': {
+                        '$avg': '$data.body.heart_data.detailed.hr_samples.bpm'
+                    },
+                    'total_pulse_readings': {
+                        '$sum': 1
+                    },
+                },
             }
         }
 
@@ -2230,9 +2547,9 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         stage_round_averages_pulse = {
             '$project': {
                 'total_pulse_readings': '$total_pulse_readings',
-                'average_pulse': { 
+                'average_pulse': {
                     '$round': ['$average_pulse', 0]
-                    }
+                },
             }
         }
 
@@ -2243,7 +2560,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             stage_match_date_range_bp,
             stage_add_hour_bp,
             stage_bucket_and_calculate_bp,
-            stage_round_averages_bp
+            stage_round_averages_bp,
         ]
 
         # Build pulse pipeline
@@ -2253,7 +2570,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
             stage_match_date_range_pulse,
             stage_add_hour_pulse,
             stage_bucket_and_calculate_pulse,
-            stage_round_averages_pulse
+            stage_round_averages_pulse,
         ]
 
         # Store blood pressure data
@@ -2273,7 +2590,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
                     'min_systolic': doc.get('min_systolic'),
                     'min_diastolic': doc.get('min_diastolic'),
                     'max_systolic': doc.get('max_systolic'),
-                    'max_diastolic': doc.get('max_diastolic')
+                    'max_diastolic': doc.get('max_diastolic'),
                 }
                 payload[time_block] = time_block_data
 
@@ -2300,13 +2617,24 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
 
 @ns_v2.route('/calculations/blood-pressure/monitoring-statistics/<int:user_id>/<string:wearable>')
 class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResource):
-    @token_auth.login_required(user_type = ('client', 'provider'), resources = ('wearable_data',))
-    @ns_v2.doc(params={'start_date': 'Start of specified date range. Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'})
-    @responds(schema=WearablesV2BloodPressureMonitoringStatisticsOutputSchema, status_code=200, api=ns_v2)
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            )
+        }
+    )
+    @responds(
+        schema=WearablesV2BloodPressureMonitoringStatisticsOutputSchema,
+        status_code=200,
+        api=ns_v2,
+    )
     def get(self, user_id, wearable):
-        """ Get calculated values related to blood pressure monitoring statistics.
+        """Get calculated values related to blood pressure monitoring statistics.
 
-        This route will return 2 blocks of general blood pressure data and classification info given a user_id, wearable, and an optional start_date. 
+        This route will return 2 blocks of general blood pressure data and classification info given a user_id, wearable, and an optional start_date.
         The first block of data will always be from the start_date (default is current date minus 30 days) to the current date. The second block will always be over
         the same range (default 30 days) but will end at the given start_date and span X days (default 30) prior to that. For example, if the distance between start_date
         and the current date is 7 days, both blocks will give data for 7 day blocks. The first will contain data from current date minus 7 days to the current date and the
@@ -2323,7 +2651,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         ----------
         start_date : str
             Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
-            Default will be current date - 30 days if not specified 
+            Default will be current date - 30 days if not specified
 
         Returns
         -------
@@ -2359,7 +2687,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             - hypertension_stage_1_percentage - percentage of total readings that are in the 'hypertension_stage_1' range
             - hypertension_stage_2_percentage - percentage of total readings that are in the 'hypertension_stage_2' range
             - hypertensive_crisis_percentage - percentage of total readings that are in the 'hypertensive_crisis' range
-            
+
         """
 
         wearable = parse_wearable(wearable)
@@ -2369,7 +2697,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         start_date = end_date - THIRTY_DAYS
         days = 30
 
-        # For this endpoint, we just allow the user to start_date because end_date will always be the current_date. 
+        # For this endpoint, we just allow the user to start_date because end_date will always be the current_date.
         # We will then return data for start_date -> current date and then start_date minus the delta between orginal start_date and current_date -> start_date
         if request.args.get('start_date'):
             start_date = iso_string_to_iso_datetime(request.args.get('start_date'))
@@ -2386,8 +2714,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 'wearable': wearable,
                 'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
                     '$gte': start_date - timedelta(days=1),
-                    '$lte': end_date
-                }
+                    '$lte': end_date,
+                },
             }
         }
 
@@ -2398,8 +2726,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 'wearable': wearable,
                 'timestamp': {  # search just outside of range to make sure we get objects that encompass the start_date
                     '$gte': start_date - timedelta(days=days),
-                    '$lte': start_date
-                }
+                    '$lte': start_date,
+                },
             }
         }
 
@@ -2413,7 +2741,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             '$match': {
                 'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
                     '$gte': start_date,
-                    '$lte': end_date
+                    '$lte': end_date,
                 }
             }
         }
@@ -2423,7 +2751,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             '$match': {
                 'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
                     '$gte': start_date - timedelta(days=days),
-                    '$lte': start_date
+                    '$lte': start_date,
                 }
             }
         }
@@ -2432,13 +2760,15 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         stage_group_bp = {
             '$group': {
                 '_id': None,
-                'total_bp_readings': {'$sum': 1},
-                'average_systolic': { 
+                'total_bp_readings': {
+                    '$sum': 1
+                },
+                'average_systolic': {
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
-                    },
-                'average_diastolic': { 
+                },
+                'average_diastolic': {
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
-                    },
+                },
                 'min_systolic': {
                     '$min': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
@@ -2450,21 +2780,25 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 },
                 'max_diastolic': {
                     '$max': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
-                }
+                },
             }
         }
 
         # Project those previous calculations and then calculate average_readings_per_day
         stage_project_bp = {
             '$project': {
-                'average_readings_per_day': {'$round': [{'$divide': ['$total_bp_readings', days]}, 1]},
+                'average_readings_per_day': {
+                    '$round': [{
+                        '$divide': ['$total_bp_readings', days]
+                    }, 1]
+                },
                 'total_bp_readings': '$total_bp_readings',
                 'average_systolic': '$average_systolic',
                 'average_diastolic': '$average_diastolic',
                 'min_systolic': '$min_systolic',
                 'min_diastolic': '$min_diastolic',
                 'max_systolic': '$max_systolic',
-                'max_diastolic': '$max_diastolic'
+                'max_diastolic': '$max_diastolic',
             }
         }
 
@@ -2472,61 +2806,222 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Add classification field to samples
         stage_add_classification = {
-            '$addFields': {'classification': {'$switch': {
-            'branches': [
-                { 'case': {'$and': [{'$lt': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 120]}, {'$lt': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 80]}]}, 'then': 'normal' },
-                { 'case': {'$and': [{'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 120]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 129]}]}, {'$lt': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 80]}]}, 'then': 'elevated' },
-                { 'case': {'$or': [{'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 130]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 139]}]}, {'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 80]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 89]}]}]}, 'then': 'hypertension_stage_1' },
-                { 'case': {'$or': [{'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 140]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 180]}]}, {'$and': [{'$gte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 90]}, {'$lte': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 120]}]}]}, 'then': 'hypertension_stage_2' },
-                { 'case': {'$or': [{'$gt': ['$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp', 180]}, {'$gt': ['$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp', 120]}]}, 'then': 'hypertensive_crisis' },
-            
-            ],
-            'default': None
-            }}}
+            '$addFields': {
+                'classification': {
+                    '$switch': {
+                        'branches': [
+                            {
+                                'case': {
+                                    '$and': [
+                                        {
+                                            '$lt': [
+                                                '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                120,
+                                            ]
+                                        },
+                                        {
+                                            '$lt': [
+                                                '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp',
+                                                80,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                'then': 'normal',
+                            },
+                            {
+                                'case': {
+                                    '$and': [
+                                        {
+                                            '$and': [
+                                                {
+                                                    '$gte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                        120,
+                                                    ]
+                                                },
+                                                {
+                                                    '$lte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                        129,
+                                                    ]
+                                                },
+                                            ]
+                                        },
+                                        {
+                                            '$lt': [
+                                                '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp',
+                                                80,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                'then': 'elevated',
+                            },
+                            {
+                                'case': {
+                                    '$or': [
+                                        {
+                                            '$and': [
+                                                {
+                                                    '$gte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                        130,
+                                                    ]
+                                                },
+                                                {
+                                                    '$lte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                        139,
+                                                    ]
+                                                },
+                                            ]
+                                        },
+                                        {
+                                            '$and': [
+                                                {
+                                                    '$gte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp',
+                                                        80,
+                                                    ]
+                                                },
+                                                {
+                                                    '$lte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp',
+                                                        89,
+                                                    ]
+                                                },
+                                            ]
+                                        },
+                                    ]
+                                },
+                                'then': 'hypertension_stage_1',
+                            },
+                            {
+                                'case': {
+                                    '$or': [
+                                        {
+                                            '$and': [
+                                                {
+                                                    '$gte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                        140,
+                                                    ]
+                                                },
+                                                {
+                                                    '$lte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                        180,
+                                                    ]
+                                                },
+                                            ]
+                                        },
+                                        {
+                                            '$and': [
+                                                {
+                                                    '$gte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp',
+                                                        90,
+                                                    ]
+                                                },
+                                                {
+                                                    '$lte': [
+                                                        '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp',
+                                                        120,
+                                                    ]
+                                                },
+                                            ]
+                                        },
+                                    ]
+                                },
+                                'then': 'hypertension_stage_2',
+                            },
+                            {
+                                'case': {
+                                    '$or': [
+                                        {
+                                            '$gt': [
+                                                '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp',
+                                                180,
+                                            ]
+                                        },
+                                        {
+                                            '$gt': [
+                                                '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp',
+                                                120,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                'then': 'hypertensive_crisis',
+                            },
+                        ],
+                        'default': None,
+                    }
+                }
+            }
         }
 
         # Group by classification and pass total count forward
         stage_facet_classification = {
             '$facet': {
-                'buckets': [
-                    {
-                        '$group': {
-                            '_id': '$classification',
-                            'count': { '$sum': 1},
-                        }
+                'buckets': [{
+                    '$group': {
+                        '_id': '$classification',
+                        'count': {
+                            '$sum': 1
+                        },
                     }
-                ], 
-                'total_count': [{'$count': 'total_count'}]
+                }],
+                'total_count': [{
+                    '$count': 'total_count'
+                }],
             }
         }
 
         # Unwind new buckets
-        stage_unwind_buckets = {
-            '$unwind': '$buckets'
-        }
+        stage_unwind_buckets = {'$unwind': '$buckets'}
 
         # Pass forward bucket and count to calculate percentage for each classification
         stage_project_classification = {
             '$project': {
-                'percentage': {'$multiply': [{'$round': [{'$divide': ['$buckets.count', {'$arrayElemAt': ['$total_count.total_count', 0]}]}, 2]}, 100]},
+                'percentage': {
+                    '$multiply': [
+                        {
+                            '$round': [
+                                {
+                                    '$divide': [
+                                        '$buckets.count',
+                                        {
+                                            '$arrayElemAt': [
+                                                '$total_count.total_count',
+                                                0,
+                                            ]
+                                        },
+                                    ]
+                                },
+                                2,
+                            ]
+                        },
+                        100,
+                    ]
+                },
                 'bucket': '$buckets._id',
-                'count': '$buckets.count'
+                'count': '$buckets.count',
             }
         }
 
         ### Stages for heart rate calculations ###
 
         # Unwind the hr_samples array so that we can operate on each individual sample
-        stage_unwind_hr_samples = {
-            '$unwind': '$data.body.heart_data.detailed.hr_samples'
-        }
+        stage_unwind_hr_samples = {'$unwind': '$data.body.heart_data.detailed.hr_samples'}
 
         # Filter on the timestamp of each hr_sample
         stage_match_date_range_pulse = {
             '$match': {
                 'data.body.heart_data.detailed.hr_samples.timestamp': {
                     '$gte': start_date,
-                    '$lte': end_date
+                    '$lte': end_date,
                 }
             }
         }
@@ -2536,7 +3031,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             '$match': {
                 'data.body.heart_data.detailed.hr_samples.timestamp': {
                     '$gte': start_date - timedelta(days=days),
-                    '$lte': start_date
+                    '$lte': start_date,
                 }
             }
         }
@@ -2544,10 +3039,12 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         stage_group_pulse = {
             '$group': {
                 '_id': None,
-                'total_pulse_readings': {'$sum': 1},
-                'average_pulse': { 
-                        '$avg': '$data.body.heart_data.detailed.hr_samples.bpm'
-                    },
+                'total_pulse_readings': {
+                    '$sum': 1
+                },
+                'average_pulse': {
+                    '$avg': '$data.body.heart_data.detailed.hr_samples.bpm'
+                },
             }
         }
 
@@ -2559,7 +3056,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             stage_unwind_bp_samples,
             stage_match_date_range_bp,
             stage_group_bp,
-            stage_project_bp
+            stage_project_bp,
         ]
 
         # Build pulse pipeline
@@ -2567,7 +3064,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             stage_match_user_id_and_wearable,
             stage_unwind_hr_samples,
             stage_match_date_range_pulse,
-            stage_group_pulse
+            stage_group_pulse,
         ]
 
         # Build classification pipeline
@@ -2578,7 +3075,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             stage_add_classification,
             stage_facet_classification,
             stage_unwind_buckets,
-            stage_project_classification
+            stage_project_classification,
         ]
 
         ### Previous time block pipelines ###
@@ -2589,7 +3086,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             stage_unwind_bp_samples,
             stage_match_date_range_bp_prev,
             stage_group_bp,
-            stage_project_bp
+            stage_project_bp,
         ]
 
         # Build prev pulse pipeline
@@ -2597,7 +3094,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             stage_match_user_id_and_wearable_prev,
             stage_unwind_hr_samples,
             stage_match_date_range_pulse_prev,
-            stage_group_pulse
+            stage_group_pulse,
         ]
 
         # Build prev classification pipeline
@@ -2608,9 +3105,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             stage_add_classification,
             stage_facet_classification,
             stage_unwind_buckets,
-            stage_project_classification
+            stage_project_classification,
         ]
-
 
         ### Add current time block data to payload ###
 
@@ -2623,10 +3119,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             data = document_list[0]
 
         # Build general bp info for payload
-        payload = {
-            'user_id': user_id,
-            'wearable': wearable
-        }
+        payload = {'user_id': user_id, 'wearable': wearable}
 
         # Add general info to current_block in the payload
         payload['current_block'] = {}
@@ -2634,13 +3127,19 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         payload['current_block']['end_date'] = end_date
         payload['current_block']['general_data'] = {}
         payload['current_block']['general_data']['average_systolic'] = data.get('average_systolic')
-        payload['current_block']['general_data']['average_diastolic'] = data.get('average_diastolic')
+        payload['current_block']['general_data']['average_diastolic'] = data.get(
+            'average_diastolic'
+        )
         payload['current_block']['general_data']['min_systolic'] = data.get('min_systolic')
         payload['current_block']['general_data']['max_systolic'] = data.get('max_systolic')
         payload['current_block']['general_data']['min_diastolic'] = data.get('min_diastolic')
         payload['current_block']['general_data']['max_diastolic'] = data.get('max_diastolic')
-        payload['current_block']['general_data']['total_bp_readings'] = data.get('total_bp_readings')
-        payload['current_block']['general_data']['average_readings_per_day'] = data.get('average_readings_per_day')
+        payload['current_block']['general_data']['total_bp_readings'] = data.get(
+            'total_bp_readings'
+        )
+        payload['current_block']['general_data']['average_readings_per_day'] = data.get(
+            'average_readings_per_day'
+        )
 
         # Pulse data
         cursor = mongo.db.wearables.aggregate(pulse_pipeline)
@@ -2649,10 +3148,12 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         if document_list:
             pulse_data = document_list[0]
-        
+
         # Add pulse data to current_block in the payload
         payload['current_block']['general_data']['average_pulse'] = pulse_data.get('average_pulse')
-        payload['current_block']['general_data']['total_pulse_readings'] = pulse_data.get('total_pulse_readings')
+        payload['current_block']['general_data']['total_pulse_readings'] = pulse_data.get(
+            'total_pulse_readings'
+        )
 
         # Systolic classifications
         cursor = mongo.db.wearables.aggregate(classification_pipeline)
@@ -2662,9 +3163,10 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             payload['current_block']['classification_data'] = {}
             for doc in classification_document_list:
                 # Add classification data to current_block in the payload
-                payload['current_block']['classification_data'][doc.get('bucket')] = doc.get('count')
-                payload['current_block']['classification_data'][doc.get('bucket') + '_percentage'] = doc.get('percentage')
-
+                payload['current_block']['classification_data'][doc.get('bucket')
+                                                               ] = doc.get('count')
+                payload['current_block']['classification_data'][
+                    doc.get('bucket') + '_percentage'] = doc.get('percentage')
 
         ### Add previous time block data to payload ###
 
@@ -2688,7 +3190,9 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         payload['prev_block']['general_data']['min_diastolic'] = data.get('min_diastolic')
         payload['prev_block']['general_data']['max_diastolic'] = data.get('max_diastolic')
         payload['prev_block']['general_data']['total_bp_readings'] = data.get('total_bp_readings')
-        payload['prev_block']['general_data']['average_readings_per_day'] = data.get('average_readings_per_day')
+        payload['prev_block']['general_data']['average_readings_per_day'] = data.get(
+            'average_readings_per_day'
+        )
 
         # Pulse data prev
         cursor = mongo.db.wearables.aggregate(prev_pulse_pipeline)
@@ -2700,7 +3204,9 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Add pulse data to prev_block in the payload
         payload['prev_block']['general_data']['average_pulse'] = pulse_data.get('average_pulse')
-        payload['prev_block']['general_data']['total_pulse_readings'] = pulse_data.get('total_pulse_readings')
+        payload['prev_block']['general_data']['total_pulse_readings'] = pulse_data.get(
+            'total_pulse_readings'
+        )
 
         # Systolic classifications prev
         cursor = mongo.db.wearables.aggregate(prev_classification_pipeline)
@@ -2711,9 +3217,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
             for doc in classification_document_list:
                 # Add classification data to current_block in the payload
                 payload['prev_block']['classification_data'][doc.get('bucket')] = doc.get('count')
-                payload['prev_block']['classification_data'][doc.get('bucket') + '_percentage'] = doc.get('percentage')
+                payload['prev_block']['classification_data'][doc.get('bucket') +
+                                                             '_percentage'] = doc.get('percentage')
 
         # Return completed payload
         return payload
-
-

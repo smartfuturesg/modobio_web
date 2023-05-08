@@ -1,7 +1,7 @@
-""" A staff application for the Modo Bio client journey.
+"""A staff application for the Modo Bio client journey.
 
-This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff. 
-The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_ 
+This is a `Flask <https://flask.palletsprojects.com>`_ based app that serves webpages to the `ModoBio <https://modobio.com>`_ staff.
+The pages contain the intake and data gathering forms for the *client journey*. The `Odyssey <https://en.wikipedia.org/wiki/Odyssey>`_
 is of course the most famous journey of all time! 🤓
 """
 import logging
@@ -16,7 +16,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
-from flask_pymongo import PyMongo, ASCENDING, DESCENDING
+from flask_pymongo import ASCENDING, DESCENDING, PyMongo
 from flask_sqlalchemy import SQLAlchemy
 from pymongo.errors import CollectionInvalid
 from sqlalchemy.exc import ProgrammingError
@@ -24,12 +24,11 @@ from sqlalchemy.orm import class_mapper
 from werkzeug.exceptions import HTTPException
 
 import odyssey.utils.converters
-
-from odyssey.utils.errors import exception_handler, http_exception_handler
-from odyssey.utils.logging import JsonFormatter
-from odyssey.utils.json import JSONProvider
-
 from odyssey.config import Config
+from odyssey.utils.errors import exception_handler, http_exception_handler
+from odyssey.utils.json import JSONProvider
+from odyssey.utils.logging import JsonFormatter
+
 conf = Config()
 
 # Configure logging before Flask() is called.
@@ -88,33 +87,34 @@ mongo = PyMongo()
 
 celery = Celery(__name__, broker=conf.broker_url, backend=conf.result_backend)
 
+
 def create_app():
-    """ Initialize an instance of the Flask app.
+    """Initialize an instance of the Flask app.
 
-        This function is an 'app factory'. It creates an instance of :class:`flask.Flask`.
-        It is the main function to call to get the program started.
+    This function is an 'app factory'. It creates an instance of :class:`flask.Flask`.
+    It is the main function to call to get the program started.
 
-        Returns
-        -------
-        An instance of :class:`flask.Flask`, with appropriate configuration.
+    Returns
+    -------
+    An instance of :class:`flask.Flask`, with appropriate configuration.
 
-        Examples
-        --------
-        Running the flask builtin test server from the command line:
+    Examples
+    --------
+    Running the flask builtin test server from the command line:
 
-        .. code-block:: shell
+    .. code-block:: shell
 
-            $ export FLASK_APP=odyssey:create_app()
-            $ flask run
+        $ export FLASK_APP=odyssey:create_app()
+        $ flask run
 
-        See Also
-        --------
-        :mod:`odyssey.config` and :mod:`odyssey.defaults`.
+    See Also
+    --------
+    :mod:`odyssey.config` and :mod:`odyssey.defaults`.
     """
     # Temporarily quiet login function
     logging.getLogger(name='odyssey.utils.auth').setLevel(logging.INFO)
 
-    app = Flask(__name__, static_folder="static") 
+    app = Flask(__name__, static_folder='static')
 
     # Extended JSON (de)serialization.
     # TODO: not yet ready for primetime. Breaks too many things.
@@ -140,7 +140,7 @@ def create_app():
         app.url_map.converters[converter.name] = converter
 
     # Load the API.
-    from odyssey.api import bp, api, bp_v2, api_v2
+    from odyssey.api import api, api_v2, bp, bp_v2
 
     # Register error handlers
     #
@@ -174,9 +174,11 @@ def create_app():
     # Register development-only endpoints.
     if app.debug:
         from odyssey.api.misc.postman import ns_dev
+
         api.add_namespace(ns_dev)
 
-        from odyssey.api.notifications.routes import ns_dev_push, ns_dev_notif
+        from odyssey.api.notifications.routes import ns_dev_notif, ns_dev_push
+
         api.add_namespace(ns_dev_push)
         api.add_namespace(ns_dev_notif)
 
@@ -195,6 +197,7 @@ def create_app():
                 # which disallows use of wildcards or _all.
                 app.elasticsearch.indices.delete(index='clients,staff', ignore_unavailable=True)
                 from odyssey.utils import search
+
                 try:
                     search.build_es_indices()
                 except ProgrammingError as err:
@@ -211,7 +214,8 @@ def create_app():
         co = CodecOptions(
             tz_aware=True,
             datetime_conversion=DatetimeConversion.DATETIME,
-            uuid_representation=UuidRepresentation.STANDARD)
+            uuid_representation=UuidRepresentation.STANDARD,
+        )
 
         try:
             mongo.db.create_collection('wearables', codec_options=co)
@@ -221,12 +225,15 @@ def create_app():
 
         # Wearables index, only needs to be created once.
         # Does not fail if already exists.
-        mongo.db.wearables.create_index([
-            ('user_id', ASCENDING),
-            ('wearable', ASCENDING),
-            ('timestamp', DESCENDING)],
+        mongo.db.wearables.create_index(
+            [
+                ('user_id', ASCENDING),
+                ('wearable', ASCENDING),
+                ('timestamp', DESCENDING),
+            ],
             name='user_id-wearable-timestamp-index',
-            unique=True)
+            unique=True,
+        )
 
     # Reset login function log level
     logging.getLogger(name='odyssey.utils.auth').setLevel(conf.LOG_LEVEL)
@@ -241,7 +248,7 @@ def create_app():
 # TODO: this should be moved to utils/base/models.py once all models derive
 # from our custom base model.
 def _update(self, other):
-    """ Update a table instance.
+    """Update a table instance.
 
     Update a table instance with values from a dict or another instance
     of the same table class. Values not present in :attr:`other` are not
@@ -278,19 +285,22 @@ def _update(self, other):
             raise TypeError(f'{other!r} is not a dict or sqlalchemy model.')
 
         if self_type != other_type:
-            raise ValueError(f'Trying to update an instance of {self_type.class_} '
-                            f'with an instance of {other_type.class_}')
+            raise ValueError(
+                f'Trying to update an instance of {self_type.class_} '
+                f'with an instance of {other_type.class_}'
+            )
 
         for k, v in other.__dict__.items():
             if k.startswith('_sa'):
                 continue
             setattr(self, k, v)
 
+
 def init_celery(app=None):
     """
     Function to prepare a celery instance. Requires the flask app instance
 
-    This is called from both create_app and celery_app 
+    This is called from both create_app and celery_app
     """
 
     app = app or create_app()
