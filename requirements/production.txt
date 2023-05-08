@@ -32,6 +32,7 @@ Flask-PyMongo==2.3.0
 flask-restx==1.0.6
 Flask-SQLAlchemy==3.0.3
 fonttools==4.38.0
+google-api-python-client==2.86.0
 greenlet==2.0.2
 html5lib==1.1
 idna==3.4

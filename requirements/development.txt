@@ -12,6 +12,7 @@ Flask-Migrate
 Flask-PyMongo
 flask-restx
 Flask-SQLAlchemy
+google-api-python-client
 idna
 marshmallow
 marshmallow-dataclass
