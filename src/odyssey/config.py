@@ -1,4 +1,4 @@
-""" 
+"""
 Flask app configuration
 =======================
 
@@ -95,12 +95,10 @@ import re
 import secrets
 import sys
 import textwrap
-
 from typing import Any, Callable
 
-from flask import current_app
-
 import packaging
+from flask import current_app
 
 import odyssey.defaults
 
@@ -108,8 +106,9 @@ import odyssey.defaults
 # that do not start with underscore, surrounded by @
 _repl_rx = re.compile(r'@([A-Z][A-Z0-9_]*)@')
 
+
 class Config:
-    """ Main configuration class.
+    """Main configuration class.
 
     This class needs to be instantiated before it can be loaded by Flask.
     Load this class in the :func:`odyssey.create_app` app factory using
@@ -123,7 +122,6 @@ class Config:
             app = Flask(__name__)
             app.config.from_object(Config())
     """
-
     def __init__(self):
         # Debug has already been enabled by Flask at startup, but we don't
         # have access to current_app here. We still need to know what
@@ -150,14 +148,14 @@ class Config:
             self.FLASK_DEBUG = False
 
         # Are we running flask db ...?
-        migrate = (len(sys.argv) > 1 and sys.argv[1] == 'db')
+        migrate = len(sys.argv) > 1 and sys.argv[1] == 'db'
 
         # Load defaults.
         for var in odyssey.defaults.__dict__.keys():
             if var.startswith('__') or not var.isupper():
                 continue
 
-            # Celery expects configuration variables to be lower case and without 
+            # Celery expects configuration variables to be lower case and without
             # the celery_ prefix. That means that they will not be picked up by flask.
             # That is fine, because they are not relevant to Flask. If there is ever a
             # need to access these variables from Flask, simply remove 'continue' and
@@ -187,12 +185,12 @@ class Config:
             if self.TESTING:
                 name = self.DB_NAME_TESTING
 
-            self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'        
+            self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'
 
         self.SQLALCHEMY_DATABASE_URI = self.DB_URI
 
         # S3 prefix
-        if self.FLASK_DEBUG and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX:
+        if (self.FLASK_DEBUG and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX):
             if self.TESTING:
                 rand = secrets.token_hex(3)
                 self.AWS_S3_PREFIX = f'temp/pytest-{rand}'
@@ -207,10 +205,11 @@ class Config:
 
         # Look for values that need replacement.
         for var, val in self.__dict__.items():
-            if (var.startswith('__')
-                or not var.isupper()
+            if (
+                var.startswith('__') or not var.isupper()
                 # replacement only makes sense with strings
-                or not isinstance(val, str)):
+                or not isinstance(val, str)
+            ):
                 continue
 
             replacements = re.findall(_repl_rx, val)
@@ -221,7 +220,7 @@ class Config:
                 setattr(self, var, val)
 
     def getvar(self, var: str) -> Any:
-        """ Get a configuration setting.
+        """Get a configuration setting.
 
         Order of lookup:
 
@@ -270,7 +269,7 @@ class Config:
         return getattr(odyssey.defaults, var, None)
 
     def dump(self) -> str:
-        """ Pretty print all config variables into a string.
+        """Pretty print all config variables into a string.
 
         Returns
         -------
@@ -285,7 +284,7 @@ class Config:
         return '\n'.join(conf)
 
     def get_version(self):
-        """ Get and parse version string.
+        """Get and parse version string.
 
         This function will try to obtain a version string from the following sources:
 
@@ -331,12 +330,12 @@ class Config:
             self.VERSION_STRING = version
         else:
             self.VERSION.prefix = prefix
-            self.VERSION_BRANCH = f'{prefix}{self.VERSION.major}.{self.VERSION.minor}'
+            self.VERSION_BRANCH = (f'{prefix}{self.VERSION.major}.{self.VERSION.minor}')
             self.VERSION_STRING = prefix + self.VERSION.public
 
 
 def config_wrapper(key: str) -> Callable:
-    """ Returns current_app.config[key].
+    """Returns current_app.config[key].
 
     In some situations ``current_app.config`` is used to define new functions and classes,
     e.g. default parameters in Marshmallow schemas. If that happens on import, Flask is still
@@ -355,10 +354,12 @@ def config_wrapper(key: str) -> Callable:
     """
     def wrapper():
         return current_app.config[key]
+
     return wrapper
 
+
 def database_parser() -> argparse.ArgumentParser:
-    """ Return CLI parser for database arguments.
+    """Return CLI parser for database arguments.
 
     For use in scripts that need to access the database, but are not under control
     of Flask. Use this function for full control over and extension of command line
@@ -390,16 +391,19 @@ def database_parser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(
         description=textwrap.dedent(help_text),
-        formatter_class=argparse.RawDescriptionHelpFormatter)
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument(
         '--db_uri',
         default=conf.DB_URI,
-        help='Database URI postgres://<user>:<pass>@<host>/<db>')
+        help='Database URI postgres://<user>:<pass>@<host>/<db>',
+    )
 
     return parser
 
+
 def database_uri() -> str:
-    """ Database URI as a string.
+    """Database URI as a string.
 
     For use in scripts that need to access the database, but are not under control
     of Flask. For more control over the options and an extendible command line

@@ -3,26 +3,32 @@ Database tables for the client intake portion of the Modo Bio Staff application.
 All tables in this module are prefixed with ``Client``.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 import pytz
-
-from sqlalchemy import  UniqueConstraint
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm.query import Query
-from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin, BaseModel
+
 from odyssey import db
+from odyssey.utils.base.models import (BaseModel, BaseModelWithIdx, UserIdFkeyMixin)
+from odyssey.utils.constants import DB_SERVER_TIME
 
 phx_tz = pytz.timezone('America/Phoenix')
 
 
 class ClientInfo(BaseModel):
-    """ Client information table
+    """Client information table
 
     This table stores general information of a client.
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), primary_key=True, nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        primary_key=True,
+        nullable=False,
+    )
     """
     User ID number, foreign key to User.user_id
 
@@ -35,7 +41,7 @@ class ClientInfo(BaseModel):
 
     :type: :class: `User` instance
     """
-    
+
     membersince = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
     Member since date
@@ -170,7 +176,7 @@ class ClientInfo(BaseModel):
 
     :type: bool
     """
-    
+
     primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'))
     """
     The client's stated primary goal for using modobio. Must be an option in the LookupGoals table.
@@ -178,7 +184,9 @@ class ClientInfo(BaseModel):
     :type: int, foreign key('LookupGoal.goal_id')
     """
 
-    primary_macro_goal_id = db.Column(db.Integer, db.ForeignKey('LookupMacroGoals.goal_id'), nullable=True)
+    primary_macro_goal_id = db.Column(
+        db.Integer, db.ForeignKey('LookupMacroGoals.goal_id'), nullable=True
+    )
     """
     The client's primary goal for using modobio. Must be an option in the LookupMacroGoals table.
 
@@ -206,17 +214,17 @@ class ClientInfo(BaseModel):
     :type: str
     """
 
-    profile_pictures = db.relationship('UserProfilePictures', uselist=True, back_populates='client_info')
+    profile_pictures = db.relationship(
+        'UserProfilePictures', uselist=True, back_populates='client_info'
+    )
     """
     One to many relationship with UserProfilePictures
 
     :type: :class:`UserProfilePicture` instance
     """
-
-
     def client_info_search_dict(self, user) -> dict:
-        """ Searchable client info.
-        
+        """Searchable client info.
+
         Returns a subset of the data in this row object.
         The returned dict contains the following keys:
 
@@ -238,14 +246,14 @@ class ClientInfo(BaseModel):
             'lastname': user.lastname,
             'dob': user.dob,
             'phone': user.phone_number,
-            'email': user.email
+            'email': user.email,
         }
         return data
 
     @staticmethod
     def all_clients_dict(query: Query, page: int, per_page: int, **kwargs) -> tuple:
-        """ Paginate a search in this table.
-        
+        """Paginate a search in this table.
+
         Given a search query in this table, return the results for page ``page``
         with ``per_page`` results per page. The returned result itmes are generated
         by :meth:`client_info_search_dict`.
@@ -277,14 +285,14 @@ class ClientInfo(BaseModel):
                 'page': page,
                 'per_page': per_page,
                 'total_pages': resources.pages,
-                'total_items': resources.total
-                }
-            }
+                'total_items': resources.total,
+            },
+        }
         return data, resources
 
 
 class ClientRaceAndEthnicity(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Holds information about the race and ethnicity of a client's parents """
+    """Holds information about the race and ethnicity of a client's parents"""
 
     is_client_mother = db.Column(db.Boolean, nullable=False)
     """
@@ -293,25 +301,33 @@ class ClientRaceAndEthnicity(BaseModelWithIdx, UserIdFkeyMixin):
     :type: boolean
     """
 
-    race_id = db.Column(db.ForeignKey('LookupRaces.race_id', ondelete="CASCADE"), nullable=False)
+    race_id = db.Column(
+        db.ForeignKey('LookupRaces.race_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Foreign key from LookupRaces table.
 
     :type: int, foreign key to :attr:'LookupRaces.race_id <odyssey.models.lookup.LookupRaces.race_id>'
     """
 
+
 class ClientFacilities(BaseModelWithIdx, UserIdFkeyMixin):
-    """ A mapping of client ID number to registered facility ID numbers. """
-    
-    facility_id = db.Column(db.ForeignKey('RegisteredFacilities.facility_id',ondelete="CASCADE"), nullable=False)
+    """A mapping of client ID number to registered facility ID numbers."""
+
+    facility_id = db.Column(
+        db.ForeignKey('RegisteredFacilities.facility_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     RegisteredFacilities ID number.
 
     :type: int, foreign key to :attr:`RegisteredFacilities.facility_id`
     """
 
+
 class ClientConsent(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Client consent form table
+    """Client consent form table
 
     This table stores the signature and related information of the consent form.
     """
@@ -381,8 +397,9 @@ class ClientConsent(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str, max length 40
     """
 
+
 class ClientRelease(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Client release of information table
+    """Client release of information table
 
     This table stores the signature and related information of the
     release of information form.
@@ -481,8 +498,9 @@ class ClientRelease(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str, max length 40
     """
 
+
 class ClientPolicies(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Client policies table
+    """Client policies table
 
     This table stores the signature and related information of the
     Modo Bio policies form.
@@ -546,8 +564,9 @@ class ClientPolicies(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str, max length 40
     """
 
+
 class ClientConsultContract(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Client initial consultation contract table
+    """Client initial consultation contract table
 
     This table stores the signature and related information for the
     initial consultation contract.
@@ -611,8 +630,9 @@ class ClientConsultContract(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str, max length 40
     """
 
+
 class ClientSubscriptionContract(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Client subscription contract table
+    """Client subscription contract table
 
     This table stores the signature and related information for the
     subscription contract.
@@ -675,6 +695,7 @@ class ClientSubscriptionContract(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: str, max length 40
     """
+
 
 class ClientIndividualContract(BaseModelWithIdx, UserIdFkeyMixin):
 
@@ -764,13 +785,18 @@ class ClientIndividualContract(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str, max length 40
     """
 
+
 class ClientReleaseContacts(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Contact information for the release form.
+    """Contact information for the release form.
 
     This table stores contact information for :attr:`ClientRelease.release_to`.
     """
 
-    release_contract_id = db.Column(db.Integer, db.ForeignKey('ClientRelease.idx',ondelete="CASCADE"), nullable=False)
+    release_contract_id = db.Column(
+        db.Integer,
+        db.ForeignKey('ClientRelease.idx', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Index of the :class:``ClientRelease`` table.
 
@@ -816,17 +842,22 @@ class ClientReleaseContacts(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
+
 class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
+    """
     Stores emails and user_ids of clinical care team members.
-    Each client may have a maximum of 6 clinical care team members. These are 
-    individuals who are authorized on behalf of the client to view 
-    certain clinical data.     
+    Each client may have a maximum of 6 clinical care team members. These are
+    individuals who are authorized on behalf of the client to view
+    certain clinical data.
     """
 
-    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id'),)
+    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id'), )
 
-    team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=True)
+    team_member_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=True,
+    )
     """
     User ID number
 
@@ -926,7 +957,8 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: boolean
     """
-    
+
+
 # class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
 #     """
 #     Stores information about what nutrional beverages a client has been assigned.
@@ -942,8 +974,9 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
 #     :type: int, foreign key('LookupDrinks.drink_id)
 #     """
 
+
 class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Stores height measurements of clients. """
+    """Stores height measurements of clients."""
 
     # precision = total number of digits.
     # scale = number of digits behind decimal point.
@@ -964,8 +997,9 @@ class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
     :type: float
     """
 
+
 class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Stores weight measurements of clients. """
+    """Stores weight measurements of clients."""
 
     # See comments at ClientHeight
     weight = db.Column(db.Numeric(precision=15, scale=11, asdecimal=False))
@@ -980,8 +1014,9 @@ class ClientWeight(BaseModelWithIdx, UserIdFkeyMixin):
     :type: float
     """
 
+
 class ClientWaistSize(BaseModelWithIdx, UserIdFkeyMixin):
-    """ Stores waist size measurements of clients. """
+    """Stores waist size measurements of clients."""
 
     # See comments at ClientHeight
     waist_size = db.Column(db.Numeric(precision=10, scale=6, asdecimal=False))
@@ -994,17 +1029,29 @@ class ClientWaistSize(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: float
     """
-    
+
+
 class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
+    """
     Stores clinical care team authorizations.
-    One line per user, team memmber, resource combinaiton. Resource IDs come from 
-    the LookupCareTeamTables table    
+    One line per user, team memmber, resource combinaiton. Resource IDs come from
+    the LookupCareTeamTables table
     """
 
-    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id', 'resource_id', name='care_team_auth_unique_resource_user_team_member_ids'),)
+    __table_args__ = (
+        UniqueConstraint(
+            'user_id',
+            'team_member_user_id',
+            'resource_id',
+            name='care_team_auth_unique_resource_user_team_member_ids',
+        ),
+    )
 
-    team_member_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    team_member_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     User ID number of the clinical care team member. Only modobio users may be entered into this table. With that, team members must
     be signed up as a user in order to recieve care team data from modobio. 
@@ -1012,7 +1059,11 @@ class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    resource_id = db.Column(db.Integer, db.ForeignKey('LookupClinicalCareTeamResources.resource_id',ondelete="CASCADE"), nullable=False)
+    resource_id = db.Column(
+        db.Integer,
+        db.ForeignKey('LookupClinicalCareTeamResources.resource_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Resource ID refers back to the care team resources table which stores the tables that can be accessed by care team members
 
@@ -1060,17 +1111,22 @@ class ClientNotificationSettings(BaseModelWithIdx, UserIdFkeyMixin):
     # Final note: this system is not integrated with notifications at all. Settings are ignored
     # on both front and backend (as of 2021-11-19). At some point, actually start using them.
 
-    notification_type_id = db.Column(db.Integer, db.ForeignKey('LookupNotifications.notification_type_id', ondelete="CASCADE"), nullable=False)
+    notification_type_id = db.Column(
+        db.Integer,
+        db.ForeignKey('LookupNotifications.notification_type_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Denotes what type of notification this is as defined in the LookupNotifications table.
 
     :type: int, foreign key to LookupNotifications.notification_type_id
     """
 
+
 class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
-    """ 
+    """
     Details on how much data storage each client is using
-      
+
     """
 
     storage_tier = db.Column(db.String)
@@ -1087,20 +1143,21 @@ class ClientDataStorage(BaseModelWithIdx, UserIdFkeyMixin):
     :type: float
     """
 
+
 class ClientFertility(BaseModelWithIdx, UserIdFkeyMixin):
     """
-    Details on the fertility status of a client. Should only exist if the client's 
+    Details on the fertility status of a client. Should only exist if the client's
     sex_at_birth is female.
 
     """
-    
+
     pregnant = db.Column(db.Boolean)
     """
     Denotes if the client is pregnant.
     
     :type: boolean
     """
-    
+
     status = db.Column(db.String)
     """
     Fertility status. Can be one of:

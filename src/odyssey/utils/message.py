@@ -1,12 +1,10 @@
 import enum
 import logging
 import pathlib
-
 from dataclasses import dataclass
 
 import boto3
 import idna
-
 from botocore.exceptions import ClientError
 from flask import current_app, render_template
 from flask.json import dumps
@@ -15,10 +13,9 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey.api.notifications.models import NotificationsPushRegistration
 from odyssey.api.notifications.schemas import (
-    ApplePushNotificationAlertSchema,
-    ApplePushNotificationBackgroundSchema,
-    ApplePushNotificationBadgeSchema,
-    ApplePushNotificationVoipSchema)
+    ApplePushNotificationAlertSchema, ApplePushNotificationBackgroundSchema,
+    ApplePushNotificationBadgeSchema, ApplePushNotificationVoipSchema
+)
 from odyssey.utils.constants import DEV_EMAIL_DOMAINS
 
 logger = logging.getLogger(__name__)
@@ -26,8 +23,9 @@ logger = logging.getLogger(__name__)
 # Cache value
 _blacklisted_email_domains = None
 
+
 def email_domain_blacklisted(email_address: str):
-    """ Check whether the domain of an email address is blacklisted.
+    """Check whether the domain of an email address is blacklisted.
 
     Loads a list with blacklisted domainnames and checks whether or not the
     provided email address is blacklisted or not. Email address may be
@@ -47,7 +45,7 @@ def email_domain_blacklisted(email_address: str):
     global _blacklisted_email_domains
 
     if not _blacklisted_email_domains:
-        blacklist_file = pathlib.Path(current_app.static_folder) / 'email-domain-blacklist.txt'
+        blacklist_file = (pathlib.Path(current_app.static_folder) / 'email-domain-blacklist.txt')
         _blacklisted_email_domains = blacklist_file.read_text().split('\n')
 
     parts = email_address.split('@')
@@ -65,13 +63,15 @@ def email_domain_blacklisted(email_address: str):
     if domain in _blacklisted_email_domains:
         raise BadRequest(f'Email adresses from "{parts[1]}" are not allowed.')
 
+
 def send_email(
     template: str,
     to: str,
-    sender: str='Modo Bio No Reply <no-reply@modobio.com>',
-    _internal: str=None,
-    **kwargs):
-    """ Send an email.
+    sender: str = 'Modo Bio No Reply <no-reply@modobio.com>',
+    _internal: str = None,
+    **kwargs,
+):
+    """Send an email.
 
     Send an email using Amazon SES service. The body text is based on 3 email
     templates in '/templates': template.html for HTML formatted emails,
@@ -119,7 +119,7 @@ def send_email(
 
     # Route emails to AWS mailbox simulator when in DEV environment,
     # unless domain is in the accepted domains list.
-    if (current_app.debug and domain[1] not in DEV_EMAIL_DOMAINS):
+    if current_app.debug and domain[1] not in DEV_EMAIL_DOMAINS:
         to = 'success@simulator.amazonses.com'
 
     if template.endswith('.html'):
@@ -135,14 +135,19 @@ def send_email(
     message = {
         'Subject': {
             'Charset': 'utf-8',
-            'Data': subject},
+            'Data': subject
+        },
         'Body': {
             'Html': {
                 'Charset': 'utf-8',
-                'Data': body_html},
+                'Data': body_html
+            },
             'Text': {
                 'Charset': 'utf-8',
-                'Data': body_text}}}
+                'Data': body_text
+            },
+        },
+    }
 
     # Create a new SES resource; use default region.
     client = boto3.client('ses')
@@ -151,11 +156,15 @@ def send_email(
     except ClientError as err:
         # Log extra info to error log, info we don't want in message to end user.
         msg = err.response['Error']['Message']
-        logger.error(f'Email based on template "{template}" to "{to}" failed with error: {msg}')
+        logger.error(
+            f'Email based on template "{template}" to "{to}" failed with'
+            f' error: {msg}'
+        )
         raise BadRequest('Email failed to send.')
     else:
         mid = response['MessageId']
-        logger.info(f'Email based on template "{template}" sent to "{to}", message ID: {mid}')
+        logger.info(f'Email based on template "{template}" sent to "{to}", message ID:'
+                    f' {mid}')
 
 
 ####################
@@ -164,9 +173,10 @@ def send_email(
 #
 ####################
 
+
 @dataclass
 class EndpointARN:
-    """ AWS Resource Number (ARN) for SNS application platforms and endpoints.
+    """AWS Resource Number (ARN) for SNS application platforms and endpoints.
 
     This class takes a string representation of an ARN and parses it into endpoint
     parameters. Each parameter can be set individually. When the ARN is accessed
@@ -199,85 +209,84 @@ class EndpointARN:
         arn:aws:sns:us-west-1:393511634479:app/APNS_VOIP_SANDBOX/ModoBioClient
     """
 
-    prefix: str='arn'
+    prefix: str = 'arn'
     """ The prefix of the ARN, always the literal string "arn".
 
     :type: str
     :default: "arn"
     """
 
-    main: str='aws'
+    main: str = 'aws'
     """ The main part of the ARN, always the literal string "aws".
 
     :type: str
     :default: "aws"
     """
 
-    resource: str=''
+    resource: str = ''
     """ The resource part of the ARN, the name of the AWS resource this ARN belongs to.
 
     :type: str
     :default: *empty string*
     """
 
-    region: str=''
+    region: str = ''
     """ The region part of the ARN, the AWS region this ARN operates in.
 
     :type: str
     :default: *empty string*
     """
 
-    account_id: str=''
+    account_id: str = ''
     """ The account ID part of the ARN, the account number of the user this ARN belongs to.
 
     :type: str
     :default: *empty string*
     """
 
-    type: str=''
+    type: str = ''
     """ The type part of SNS endpoint, either "app" for Platform Application, or "endpoint" for an Endpoint.
 
     :type: str
     :default: *empty string*
     """
 
-    label: str=''
+    label: str = ''
     """ The label part of the ARN. This is usually set to the name of the app receiving the push notifications.
 
     :type: str
     :default: *empty string*
     """
 
-    device: str=''
+    device: str = ''
     """ The device part of the ARN, a UUID generated by AWS when the device endpoint was created.
 
     :type: str
     :default: *empty string*
     """
 
-    is_app: bool=False
+    is_app: bool = False
     """ Whether this is an application platform. If not, this is a device endpoint.
 
     :type: bool
     :default: False
     """
 
-    is_voip: bool=False
+    is_voip: bool = False
     """ Whether or not the ARN represents a VoIP application platform or endpoint.
 
     :type: bool
     :default: False
     """
 
-    is_sandbox: bool=False
+    is_sandbox: bool = False
     """ Whether or not the ARN represents a sandboxed (development, testing) application platform or endpoint.
 
     :type: bool
     :default: False
     """
-
-    def __init__(self, arn: str=''):
-        """ Instantiate an EndpointARN from an ARN string.
+    def __init__(self, arn: str = ''):
+        """Instantiate an EndpointARN from an ARN string.
 
         Keyword Arguments
         -----------------
@@ -289,7 +298,7 @@ class EndpointARN:
 
     @property
     def arn(self) -> str:
-        """ Returns the ARN as a string.
+        """Returns the ARN as a string.
 
         Returns
         -------
@@ -300,12 +309,14 @@ class EndpointARN:
         if not self.is_app:
             device = f'/{self.device}'
 
-        return (f'{self.prefix}:{self.main}:{self.resource}:{self.region}:{self.account_id}:'
-                f'{self.type}/{self.channel}/{self.label}{device}')
+        return (
+            f'{self.prefix}:{self.main}:{self.resource}:{self.region}:{self.account_id}:'
+            f'{self.type}/{self.channel}/{self.label}{device}'
+        )
 
     @arn.setter
     def arn(self, arn: str):
-        """ Extract endpoint parameters from an ARN string.
+        """Extract endpoint parameters from an ARN string.
 
         Parameters
         ----------
@@ -316,7 +327,13 @@ class EndpointARN:
             return
 
         aws_part, sns_part = arn.rsplit(':', maxsplit=1)
-        self.prefix, self.main, self.resource, self.region, self.account_id = aws_part.split(':')
+        (
+            self.prefix,
+            self.main,
+            self.resource,
+            self.region,
+            self.account_id,
+        ) = aws_part.split(':')
         self.is_app = sns_part.startswith('app')
 
         if self.is_app:
@@ -326,7 +343,7 @@ class EndpointARN:
 
     @property
     def channel(self) -> str:
-        """ Returns the push notification channel.
+        """Returns the push notification channel.
 
         Returns
         -------
@@ -343,7 +360,7 @@ class EndpointARN:
 
     @channel.setter
     def channel(self, channel: str):
-        """ Extract endpoint setting from the channel.
+        """Extract endpoint setting from the channel.
 
         Parameters
         ----------
@@ -364,14 +381,16 @@ class EndpointARN:
 
 
 class PushNotificationPlatform(enum.Enum):
-    """ Enumerates push notification platforms and maps them to channels. """
+    """Enumerates push notification platforms and maps them to channels."""
+
     apple = 'APNS'
     android = 'FCM'
     debug = 'arn:aws::::app/DEBUG/LOG'
 
 
 class PushNotificationType(enum.Enum):
-    """ Enumerates the type of push notification that can be send. """
+    """Enumerates the type of push notification that can be send."""
+
     alert = 'A standard notification with a title and a body.'
     background = 'Trigger the app to reload data in the background.'
     badge = 'ONLY set the app badge to the specified number, no alert.'
@@ -379,7 +398,7 @@ class PushNotificationType(enum.Enum):
 
 
 class PushNotification:
-    """ A class for handling push notifications.
+    """A class for handling push notifications.
 
     To send push notifications, first register a device with :meth:`register_device`. Once
     one or more devices are registered, a push notification can be send. Select which type
@@ -522,19 +541,18 @@ class PushNotification:
                 'action-loc-key': None,
                 'loc-key': None,
                 'loc-args': None,
-                'launch-image': None},
+                'launch-image': None,
+            },
             'category': None,
             'thread-id': None,
             'badge': None,
-            'sound': None}}
+            'sound': None,
+        }
+    }
 
-    apple_background_tmpl = {
-        'aps': {'content-available': 1}}
+    apple_background_tmpl = {'aps': {'content-available': 1}}
 
-    apple_badge_tmpl = {
-        'aps': {
-            'badge': None,
-            'sound': None}}
+    apple_badge_tmpl = {'aps': {'badge': None, 'sound': None}}
 
     apple_voip_tmpl = {
         'aps': {},
@@ -547,10 +565,12 @@ class PushNotification:
             'staff_middle_name': None,
             'staff_last_name': None,
             'staff_profile_picture': None,
-            'booking_uid': None }}
+            'booking_uid': None,
+        },
+    }
 
     def __init__(self):
-        """ Initiate the push notification system.
+        """Initiate the push notification system.
 
         Loads the AWS Simple Notification Service (SNS) as part of initialization process.
         """
@@ -564,11 +584,11 @@ class PushNotification:
         self,
         device_token: str,
         device_platform: PushNotificationPlatform,
-        device_info: dict={},
-        current_endpoint: str=None,
-        voip: bool=False
+        device_info: dict = {},
+        current_endpoint: str = None,
+        voip: bool = False,
     ) -> str:
-        """ Register a device for push notifications.
+        """Register a device for push notifications.
 
         Parameters
         ----------
@@ -615,8 +635,10 @@ class PushNotification:
             endpoint = self.sns.PlatformEndpoint(arn=current_endpoint)
             try:
                 endpoint.load()
-            except (self.sns.meta.client.exceptions.NotFoundException,
-                    self.sns.meta.client.exceptions.InvalidParameterException):
+            except (
+                self.sns.meta.client.exceptions.NotFoundException,
+                self.sns.meta.client.exceptions.InvalidParameterException,
+            ):
                 # Endpoint was deleted or has different parameters.
                 endpoint.delete()
             else:
@@ -645,8 +667,8 @@ class PushNotification:
         app = self.channel_platapp[channel]
         try:
             new_endpoint = app.create_platform_endpoint(
-                Token=device_token,
-                CustomUserData=device_description)
+                Token=device_token, CustomUserData=device_description
+            )
         # Boto3 errors are incredibly stupid. You cannot import them, they are generated on the fly.
         except self.sns.meta.client.exceptions.InvalidParameterException as err:
             # "Endpoint xxx already exists with the same Token, but different attributes."
@@ -666,14 +688,15 @@ class PushNotification:
                         # Now try again
                         new_endpoint = app.create_platform_endpoint(
                             Token=device_token,
-                            CustomUserData=device_description)
+                            CustomUserData=device_description,
+                        )
 
                         break
 
         return new_endpoint.arn
 
     def unregister_device(self, arn: str):
-        """ Delete endpoint.
+        """Delete endpoint.
 
         Parameters
         ----------
@@ -688,8 +711,13 @@ class PushNotification:
         endpoint = self.sns.PlatformEndpoint(arn=arn)
         endpoint.delete()
 
-    def send(self, user_id: int, notification_type: PushNotificationType, content: dict) -> dict:
-        """ Send a push notification to the user.
+    def send(
+        self,
+        user_id: int,
+        notification_type: PushNotificationType,
+        content: dict,
+    ) -> dict:
+        """Send a push notification to the user.
 
         Parameters
         ----------
@@ -719,16 +747,13 @@ class PushNotification:
         if isinstance(notification_type, str):
             notification_type = PushNotificationType[notification_type]
 
-        registered = (
-            NotificationsPushRegistration
-            .query
-            .filter_by(user_id=user_id)
-            .all())
+        registered = NotificationsPushRegistration.query.filter_by(user_id=user_id).all()
 
         if not registered:
             raise BadRequest(
-                f'User {user_id} does not have any registered devices.'
-                f'Connect with POST /notifications/push/register/{user_id}/ first.')
+                f'User {user_id} does not have any registered devices.Connect'
+                f' with POST /notifications/push/register/{user_id}/ first.'
+            )
 
         for device in registered:
             arn = EndpointARN(device.arn)
@@ -739,12 +764,15 @@ class PushNotification:
             elif arn.channel == 'DEBUG':
                 message = self._send_log(notification_type, content)
             else:
-                raise BadRequest(f'Unknown push notification channel {arn.channel} for user {user_id}')
+                raise BadRequest(
+                    f'Unknown push notification channel {arn.channel} for user'
+                    f' {user_id}'
+                )
 
         return message
 
     def _send_apple(self, device, notification_type: PushNotificationType, content: dict) -> dict:
-        """ Send a push notification to an Apple device.
+        """Send a push notification to an Apple device.
 
         Do not call this function directly, use :meth:`send` instead.
         """
@@ -778,7 +806,9 @@ class PushNotification:
         message_attr = {
             'AWS.SNS.MOBILE.APNS.PUSH_TYPE': {
                 'DataType': 'String',
-                'StringValue': push_type}}
+                'StringValue': push_type,
+            }
+        }
 
         message = {endp.channel: processed}
 
@@ -789,19 +819,20 @@ class PushNotification:
             TargetArn=endp.arn,
             Message=dumps(message),
             MessageStructure='json',
-            MessageAttributes=message_attr)
+            MessageAttributes=message_attr,
+        )
 
         return message
 
     def _send_android(self, device, notification_type: PushNotificationType, content: dict) -> dict:
-        """ Send a push notification to an Android device.
+        """Send a push notification to an Android device.
 
         Do not call this function directly, use :meth:`send` instead.
         """
         return content
 
     def _send_log(self, notification_type: PushNotificationType, content: dict) -> dict:
-        """ Send a push notification to a debug log.
+        """Send a push notification to a debug log.
 
         Do not call this function directly, use :math:`send` instead.
         """
