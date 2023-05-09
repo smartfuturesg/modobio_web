@@ -244,6 +244,15 @@ class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
         metadata={'description': 'optional timezone selection, defaults to UTC'},
         missing='UTC',
     )
+    availability_horizon = fields.Integer(
+        validate=validate.Range(0, 52),
+        metadata={
+            'description': (
+                'how many weeks in advance the practitioner can be booked. If'
+                ' 0, the practitioner cannot be booked'
+            )
+        },
+    )
 
     @post_load
     def make_object(self, data, **kwargs):

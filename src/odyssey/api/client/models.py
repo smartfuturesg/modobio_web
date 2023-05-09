@@ -738,12 +738,12 @@ class ClientIndividualContract(BaseModelWithIdx, UserIdFkeyMixin):
     :type: bool
     """
 
-    drinks = db.Column(db.Boolean, default=False)
-    """
-    Indicates whether or not client wants to buy nutritional supplements.
-
-    :type: bool
-    """
+    # drinks = db.Column(db.Boolean, default=False)
+    # """
+    # Indicates whether or not client wants to buy nutritional supplements.
+    #
+    # :type: bool
+    # """
 
     signdate = db.Column(db.Date)
     """
@@ -959,24 +959,21 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
 
-class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores information about what nutrional beverages a client has been assigned.
-    Clients will only see drinks that have been assigned to them when viewing
-    the selection of nutritional beverages. Drinks can be assigned to a client
-    either automatically based on their goals or manually by staff members.
-    """
+# class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
+#     """
+#     Stores information about what nutrional beverages a client has been assigned.
+#     Clients will only see drinks that have been assigned to them when viewing
+#     the selection of nutritional beverages. Drinks can be assigned to a client
+#     either automatically based on their goals or manually by staff members.
+#     """
+#
+#     drink_id = db.Column(db.Integer, db.ForeignKey('LookupDrinks.drink_id', ondelete="CASCADE"), nullable=False)
+#     """
+#     Id of the drink for this assignment.
+#
+#     :type: int, foreign key('LookupDrinks.drink_id)
+#     """
 
-    drink_id = db.Column(
-        db.Integer,
-        db.ForeignKey('LookupDrinks.drink_id', ondelete='CASCADE'),
-        nullable=False,
-    )
-    """
-    Id of the drink for this assignment.
-
-    :type: int, foreign key('LookupDrinks.drink_id)
-    """
 
 
 class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
@@ -1082,54 +1079,6 @@ class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
     NOTE: "rejected" is not in the list above because rejected would just be deleted
 
     :type: str
-    """
-
-
-class ClientTransactionHistory(BaseModelWithIdx, UserIdFkeyMixin):
-    """
-    Stores history of client transactions
-    """
-
-    date = db.Column(db.DateTime, default=DB_SERVER_TIME)
-    """
-    Date of this transaction.
-
-    :type: :class:'datetime.datetime'
-    """
-
-    category = db.Column(db.String)
-    """
-    Transaction category, comes from LookupTransactionTypes table.
-
-    :type: string
-    """
-
-    name = db.Column(db.String)
-    """
-    Transaction name, comes from LookupTransactionTypes table.
-
-    :type: string
-    """
-
-    price = db.Column(db.Float)
-    """
-    Price of this transaction, comes from LookupTransactionTypes table.
-
-    :type: float
-    """
-
-    currency = db.Column(db.String)
-    """
-    Name of the currency used for this transaction.
-
-    :type: string
-    """
-
-    payment_method = db.Column(db.String)
-    """
-    Method that the client used to pay for this transaction. Card type (Visa, Mastercard etc.) and last 4 digits.
-
-    :type: string
     """
 
 

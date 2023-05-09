@@ -3,36 +3,24 @@ import secrets
 from datetime import date, datetime
 
 from dateutil.relativedelta import relativedelta
-from flask import current_app, g, request, url_for
+from flask import current_app, g, redirect, request, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from sqlalchemy import and_, or_, select
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
+from odyssey.api.client.models import *
 from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
-from odyssey.api.doctor.models import (
-    MedicalBloodPressures, MedicalBloodTestResults, MedicalBloodTestResultTypes, MedicalBloodTests,
-    MedicalConditions, MedicalExternalMR, MedicalFamilyHistory, MedicalGeneralInfo,
-    MedicalGeneralInfoMedicationAllergy, MedicalGeneralInfoMedications, MedicalHistory,
-    MedicalImaging, MedicalLookUpBloodPressureRange, MedicalLookUpSTD, MedicalPhysicalExam,
-    MedicalSocialHistory, MedicalSTDHistory, MedicalSurgeries
-)
-from odyssey.api.doctor.schemas import (
-    AllMedicalBloodTestSchema, BloodTestsByTestIDSchema, CheckBoxArrayDeleteSchema,
-    MedicalAllergiesInfoInputSchema, MedicalBloodPressuresOutputSchema, MedicalBloodPressuresSchema,
-    MedicalBloodTestResultsOutputSchema, MedicalBloodTestResultTypesSchema, MedicalBloodTestSchema,
-    MedicalBloodTestsInputSchema, MedicalConditionsOutputSchema, MedicalExternalMREntrySchema,
-    MedicalExternalMRSchema, MedicalFamilyHistInputSchema, MedicalFamilyHistOutputSchema,
-    MedicalGeneralInfoInputSchema, MedicalGeneralInfoSchema, MedicalHistorySchema,
-    MedicalImagingOutputSchema, MedicalImagingSchema, MedicalInstitutionsSchema,
-    MedicalLookUpBloodPressureRangesOutputSchema, MedicalLookUpSTDOutputSchema,
-    MedicalMedicationsInfoInputSchema, MedicalPhysicalExamSchema, MedicalSocialHistoryOutputSchema,
-    MedicalSurgeriesSchema
-)
+from odyssey.api.doctor.models import *
+from odyssey.api.doctor.schemas import *
 from odyssey.api.facility.models import MedicalInstitutions
-from odyssey.api.lookup.models import (LookupBloodTestRanges, LookupBloodTests, LookupRaces)
-from odyssey.api.user.models import User, UserProfilePictures
+from odyssey.api.lookup.models import (
+    LookupBloodTestRanges, LookupBloodTests, LookupRaces, LookupSTDs
+)
+from odyssey.api.practitioner.models import PractitionerCredentials
+from odyssey.api.staff.models import StaffRoles
+from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (ALLOWED_MEDICAL_IMAGE_TYPES, MEDICAL_IMAGE_MAX_SIZE)
@@ -131,27 +119,6 @@ class MedBloodPressures(BaseResource):
         else:
             raise BadRequest('idx must be an integer.')
 
-
-@ns.route('/lookupbloodpressureranges/')
-class MedicalLookUpBloodPressureResource(BaseResource):
-    """Returns blood pressure ranges stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(
-        schema=MedicalLookUpBloodPressureRangesOutputSchema,
-        status_code=200,
-        api=ns,
-    )
-    def get(self):
-        bp_ranges = MedicalLookUpBloodPressureRange.query.all()
-        payload = {'items': bp_ranges, 'total_items': len(bp_ranges)}
-
-        return payload
 
 
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
@@ -713,24 +680,6 @@ class MedicalAllergiesInformation(BaseResource):
         return
 
 
-@ns.route('/lookupstd/')
-class MedicalLookUpSTDResource(BaseResource):
-    """Returns STD list stored in the database in response to a GET request.
-
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @token_auth.login_required
-    @responds(schema=MedicalLookUpSTDOutputSchema, status_code=200, api=ns)
-    def get(self):
-        std_types = MedicalLookUpSTD.query.all()
-        payload = {'items': std_types, 'total_items': len(std_types)}
-
-        return payload
-
-
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(BaseResource):
@@ -853,7 +802,7 @@ class MedicalSocialHist(BaseResource):
         ):
 
             stds_current = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
-            possible_stds = (db.session.execute(select(MedicalLookUpSTD.std_id)).scalars().all())
+            possible_stds = (db.session.execute(select(LookupSTDs.std_id)).scalars().all())
 
             # Maps std_ids to instances, for both existing and requested
             existing = {s.std_id: s for s in stds_current}
@@ -874,22 +823,6 @@ class MedicalSocialHist(BaseResource):
                 db.session.add(req)
 
         db.session.commit()
-
-
-@ns.route('/medicalconditions/')
-class MedicalCondition(BaseResource):
-    """
-    Returns the medical conditions currently documented in the DB
-    """
-    @token_auth.login_required(
-        user_type=('client', 'provider'),
-    )
-    @responds(schema=MedicalConditionsOutputSchema, status_code=200, api=ns)
-    def get(self):
-        medcon_types = MedicalConditions.query.all()
-        payload = {'items': medcon_types, 'total_items': len(medcon_types)}
-
-        return payload
 
 
 @ns.route('/familyhistory/<int:user_id>/')
@@ -1556,7 +1489,7 @@ class MedBloodTestResults(BaseResource):
         Returns details of the test denoted by test_id as well as
         the actual results submitted.
         """
-        # query for join of MedicalBloodTestResults and MedicalBloodTestResultTypes table
+        # query for join of MedicalBloodTestResults and LookupBloodTestResultTypes table
 
         results = (
             db.session.query(
@@ -2254,3 +2187,25 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
 
         db.session.delete(result)
         db.session.commit()
+
+
+# The below endpoints have been moved to the lookup namespace. They were deprecated in release 1.2.0
+@ns.route('/lookupstd/')
+class MedicalLookupSTDsApi(BaseResource):
+    @token_auth.login_required
+    def get(self):
+        return redirect('/lookup/stds/', 301)
+
+
+@ns.route('/lookupbloodpressureranges/')
+class MedicalLookupBloodPressureRangesApi(BaseResource):
+    @token_auth.login_required
+    def get(self):
+        return redirect('/lookup/bloodpressureranges/', 301)
+
+
+@ns.route('/medicalconditions/')
+class MedicalMedicalConditionsApi(BaseResource):
+    @token_auth.login_required
+    def get(self):
+        return redirect('/lookup/medicalconditions/', 301)

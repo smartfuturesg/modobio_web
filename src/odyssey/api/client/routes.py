@@ -12,37 +12,37 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
-from odyssey.api.client.models import (
-    ClientAssignedDrinks, ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations,
-    ClientConsent, ClientConsultContract, ClientDataStorage, ClientFacilities, ClientFertility,
-    ClientHeight, ClientIndividualContract, ClientInfo, ClientMobileSettings,
-    ClientNotificationSettings, ClientPolicies, ClientRaceAndEthnicity, ClientRelease,
-    ClientSubscriptionContract, ClientTransactionHistory, ClientWaistSize, ClientWeight
-)
-from odyssey.api.client.schemas import (
+from odyssey.api.client.models import (  # ClientAssignedDrinks,
+    ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations,
+    ClientConsent, ClientConsultContract, ClientDataStorage, ClientFacilities,
+    ClientFertility, ClientHeight, ClientIndividualContract, ClientInfo,
+    ClientMobileSettings, ClientNotificationSettings, ClientPolicies,
+    ClientRaceAndEthnicity, ClientRelease, ClientSubscriptionContract,
+    ClientWaistSize, ClientWeight)
+from odyssey.api.client.schemas import (  # ClientAssignedDrinksSchema,; ClientAssignedDrinksDeleteSchema,
     AllClientsDataTier, ClientAndUserInfoPutSchema, ClientAndUserInfoSchema,
-    ClientAssignedDrinksDeleteSchema, ClientAssignedDrinksSchema,
-    ClientClinicalCareTeamDeleteSchema, ClientClinicalCareTeamSchema, ClientCloseAccountSchema,
-    ClientConsentSchema, ClientConsultContractSchema, ClientFertilitySchema, ClientHeightSchema,
-    ClientIndividualContractSchema, ClientInfoSchema, ClientMobileSettingsSchema,
-    ClientPoliciesContractSchema, ClientRaceAndEthnicityEditSchema, ClientRaceAndEthnicitySchema,
-    ClientRegistrationStatusSchema, ClientReleaseContactsSchema, ClientReleaseSchema,
-    ClientSearchItemsSchema, ClientSearchOutSchema, ClientSubscriptionContractSchema,
-    ClientTokenRequestSchema, ClientTransactionHistorySchema, ClientWaistSizeSchema,
-    ClientWeightSchema, ClinicalCareTeamAuthorizationNestedSchema, ClinicalCareTeamMemberOfSchema,
-    ClinicalCareTeamTemporaryMembersSchema, SignAndDateSchema, SignedDocumentsSchema
-)
+    ClientClinicalCareTeamDeleteSchema, ClientClinicalCareTeamSchema,
+    ClientCloseAccountSchema, ClientConsentSchema, ClientConsultContractSchema,
+    ClientFertilitySchema, ClientHeightSchema, ClientIndividualContractSchema,
+    ClientInfoSchema, ClientMobileSettingsSchema, ClientPoliciesContractSchema,
+    ClientRaceAndEthnicityEditSchema, ClientRaceAndEthnicitySchema,
+    ClientRegistrationStatusSchema, ClientReleaseContactsSchema,
+    ClientReleaseSchema, ClientSearchItemsSchema, ClientSearchOutSchema,
+    ClientSubscriptionContractSchema, ClientTokenRequestSchema,
+    ClientWaistSizeSchema, ClientWeightSchema,
+    ClinicalCareTeamAuthorizationNestedSchema, ClinicalCareTeamMemberOfSchema,
+    ClinicalCareTeamTemporaryMembersSchema, SignAndDateSchema,
+    SignedDocumentsSchema)
 from odyssey.api.doctor.models import (
     MedicalFamilyHistory, MedicalGeneralInfo, MedicalGeneralInfoMedicationAllergy,
     MedicalGeneralInfoMedications, MedicalHistory, MedicalPhysicalExam, MedicalSocialHistory
 )
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.facility.schemas import ClientSummarySchema
-from odyssey.api.lookup.models import (
-    LookupClinicalCareTeamResources, LookupCountriesOfOperations, LookupDefaultHealthMetrics,
-    LookupDrinks, LookupGoals, LookupMacroGoals, LookupNotifications, LookupRaces,
-    LookupTerritoriesOfOperations
-)
+from odyssey.api.lookup.models import (  # LookupDrinks,
+    LookupClinicalCareTeamResources, LookupCountriesOfOperations,
+    LookupDefaultHealthMetrics, LookupGoals, LookupMacroGoals,
+    LookupNotifications, LookupRaces, LookupTerritoriesOfOperations)
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.physiotherapy.models import PTHistory
 from odyssey.api.staff.models import (StaffProfile, StaffRecentClients, StaffRoles)
@@ -59,7 +59,8 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.message import email_domain_blacklisted, send_email
-from odyssey.utils.misc import (check_client_existence, check_drink_existence, create_notification)
+from odyssey.utils.misc import (  # check_drink_existence,
+    check_client_existence, create_notification)
 from odyssey.utils.pdf import merge_pdfs, to_pdf
 
 logger = logging.getLogger(__name__)
@@ -341,7 +342,6 @@ class Client(BaseResource):
 
         if not client_data or not user_data:
             raise BadRequest(f'Client {user_id} not found.')
-
         # validate primary_macro_goal_id
         if 'primary_macro_goal_id' in request.parsed_obj['client_info'].keys():
             primary_macro_goal_id = request.parsed_obj['client_info']['primary_macro_goal_id']
@@ -350,22 +350,18 @@ class Client(BaseResource):
             if not macro_goal:
                 raise BadRequest(f'Primary macro goal {primary_macro_goal_id} not found.')
 
-        # validate primary_goal_id if supplied and automatically create drink recommendation
+        # validate primary_goal_id if supplied
         if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
             primary_goal_id = request.parsed_obj['client_info']['primary_goal_id']
             goal = LookupGoals.query.filter_by(goal_id=primary_goal_id).one_or_none()
             if not goal:
                 raise BadRequest(f'Primary goal {primary_goal_id} not found.')
 
-            # make automatic drink recommendation
-            drink_id = (
-                LookupDrinks.query.filter_by(
-                    primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']
-                ).one_or_none().drink_id
-            )
-            recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
-            recommendation.user_id = user_id
-            db.session.add(recommendation)
+            # # make automatic drink recommendation
+            # drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
+            # recommendation = ClientAssignedDrinksSchema().load({'drink_id': drink_id})
+            # recommendation.user_id = user_id
+            # db.session.add(recommendation)
 
         # update both tables with request data
         client_info = request.parsed_obj['client_info']
@@ -1979,61 +1975,55 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         db.session.commit()
 
 
-@ns.route('/drinks/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-@ns.deprecated
-class ClientDrinksApi(BaseResource):
-    """
-    Endpoints related to nutritional beverages that are assigned to clients.
-    """
-
-    # Multiple drinks per user, allow multiple POSTs
-    __check_resource__ = False
-
-    @token_auth.login_required(
-        user_type=('provider', ), staff_role=('medical_doctor', 'nutritionist')
-    )
-    @accepts(schema=ClientAssignedDrinksSchema, api=ns)
-    @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
-    def post(self, user_id):
-        """
-        Add an assigned drink to the client designated by user_id.
-        """
-        self.check_user(user_id, user_type='client')
-        check_drink_existence(request.parsed_obj.drink_id)
-
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-        return request.parsed_obj
-
-    @token_auth.login_required
-    @responds(schema=ClientAssignedDrinksSchema(many=True), api=ns, status_code=200)
-    def get(self, user_id):
-        """
-        Returns the list of drinks assigned to the user designated by user_id.
-        """
-        self.check_user(user_id, user_type='client')
-
-        return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
-
-    @token_auth.login_required(
-        user_type=('provider', ), staff_role=('medical_doctor', 'nutritionist')
-    )
-    @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
-    def delete(self, user_id):
-        """
-        Delete a drink assignemnt for a user with user_id and drink_id
-        """
-        self.check_user(user_id, user_type='client')
-
-        for drink_id in request.parsed_obj['drink_ids']:
-            drinks = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).all()
-            for drink in drinks:
-                db.session.delete(drink)
-
-        db.session.commit()
+# @ns.route('/drinks/<int:user_id>/')
+# @ns.doc(params={'user_id': 'User ID number'})
+# class ClientDrinksApi(BaseResource):
+#     """
+#     Endpoints related to nutritional beverages that are assigned to clients.
+#     """
+#     # Multiple drinks per user, allow multiple POSTs
+#     __check_resource__ = False
+#
+#     @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
+#     @accepts(schema=ClientAssignedDrinksSchema, api=ns)
+#     @responds(schema=ClientAssignedDrinksSchema, api=ns, status_code=201)
+#     def post(self, user_id):
+#         """
+#         Add an assigned drink to the client designated by user_id.
+#         """
+#         self.check_user(user_id, user_type='client')
+#         check_drink_existence(request.parsed_obj.drink_id)
+#
+#         request.parsed_obj.user_id = user_id
+#         db.session.add(request.parsed_obj)
+#         db.session.commit()
+#
+#         return request.parsed_obj
+#
+#     @token_auth.login_required
+#     @responds(schema=ClientAssignedDrinksSchema(many=True), api=ns, status_code=200)
+#     def get(self, user_id):
+#         """
+#         Returns the list of drinks assigned to the user designated by user_id.
+#         """
+#         self.check_user(user_id, user_type='client')
+#
+#         return ClientAssignedDrinks.query.filter_by(user_id=user_id).all()
+#
+#     @token_auth.login_required(user_type=('staff',), staff_role=('medical_doctor', 'nutritionist'))
+#     @accepts(schema=ClientAssignedDrinksDeleteSchema, api=ns)
+#     def delete(self, user_id):
+#         """
+#         Delete a drink assignemnt for a user with user_id and drink_id
+#         """
+#         self.check_user(user_id, user_type='client')
+#
+#         for drink_id in request.parsed_obj['drink_ids']:
+#             drinks = ClientAssignedDrinks.query.filter_by(user_id=user_id, drink_id=drink_id).all()
+#             for drink in drinks:
+#                 db.session.delete(drink)
+#
+#         db.session.commit()
 
 
 @ns.route('/mobile-settings/<int:user_id>/')
@@ -2345,79 +2335,6 @@ class ClientWeightEndpoint(BaseResource):
         self.check_user(user_id, user_type='client')
 
         return ClientFertility.query.filter_by(user_id=user_id).all()
-
-
-@ns.route('/transaction/history/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClientTransactionHistoryApi(BaseResource):
-    """
-    Endpoints related to viewing a client's transaction history.
-    """
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services', ))
-    @responds(
-        schema=ClientTransactionHistorySchema(many=True),
-        api=ns,
-        status_code=200,
-    )
-    def get(self, user_id):
-        """
-        Returns a list of all transactions for the given user_id.
-        """
-        self.check_user(user_id, user_type='client')
-
-        return ClientTransactionHistory.query.filter_by(user_id=user_id).all()
-
-
-@ns.route('/transaction/<int:transaction_id>/')
-@ns.doc(params={'transaction_id': 'Transaction ID number'})
-class ClientTransactionApi(BaseResource):
-    """
-    Viewing and editing transactions
-    """
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services', ))
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=200)
-    def get(self, transaction_id):
-        """
-        Returns information about the transaction identified by transaction_id.
-        """
-        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
-        return transaction
-
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services', ))
-    @accepts(schema=ClientTransactionHistorySchema, api=ns)
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
-    def put(self, transaction_id):
-        """
-        Updates the transaction identified by transaction_id.
-        """
-        transaction = ClientTransactionHistory.query.filter_by(idx=transaction_id).one_or_none()
-
-        transaction.update(request.json)
-        db.session.commit()
-
-        return request.parsed_obj
-
-
-@ns.route('/transaction/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
-class ClientTransactionPutApi(BaseResource):
-    """
-    Viewing and editing transactions
-    """
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services', ))
-    @accepts(schema=ClientTransactionHistorySchema, api=ns)
-    @responds(schema=ClientTransactionHistorySchema, api=ns, status_code=201)
-    def post(self, user_id):
-        """
-        Submits a transaction for the client identified by user_id.
-        """
-        self.check_user(user_id, user_type='client')
-
-        request.parsed_obj.user_id = user_id
-        db.session.add(request.parsed_obj)
-        db.session.commit()
-
-        return request.parsed_obj
 
 
 @ns.route('/default-health-metrics/<int:user_id>/')
