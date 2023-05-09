@@ -120,7 +120,6 @@ class MedBloodPressures(BaseResource):
             raise BadRequest('idx must be an integer.')
 
 
-
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGenInformation(BaseResource):

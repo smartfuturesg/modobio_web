@@ -517,7 +517,6 @@ class ClientMobileSettingsSchema(Schema):
 #     drink_ids = fields.List(fields.Integer)
 
 
-
 class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientHeight

@@ -975,7 +975,6 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
 #     """
 
 
-
 class ClientHeight(BaseModelWithIdx, UserIdFkeyMixin):
     """Stores height measurements of clients."""
 
