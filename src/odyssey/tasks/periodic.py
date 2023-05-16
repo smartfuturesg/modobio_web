@@ -355,7 +355,9 @@ def deploy_subscription_update_tasks(interval:int):
 
     subscriptions = db.session.execute(
         select(UserSubscriptions). 
-        where(UserSubscriptions.expire_date < expired_by, UserSubscriptions.subscription_status == 'subscribed'
+        where(UserSubscriptions.expire_date < expired_by, 
+              UserSubscriptions.subscription_status == 'subscribed',
+              UserSubscriptions.is_staff == False
             )).scalars().all()
     
     for subscription in subscriptions:
