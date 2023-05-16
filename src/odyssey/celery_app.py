@@ -23,11 +23,13 @@ app.conf.task_routes = {"odyssey.tasks.periodic.deploy_webhook_tasks": {'queue':
 app.conf.beat_max_loop_interval = 120 # max time between beat ticks
 app.conf.redbeat_lock_timeout = app.conf.beat_max_loop_interval * 5
 app.conf.redbeat_redis_url = conf.redbeat_redis_url
+
 if conf.FLASK_DEBUG or conf.TESTING:
     app.conf.mongodb_backend_settings = {'database': 'modobio-dev'}
 else:
     app.conf.mongodb_backend_settings = {'database': 'modobio_prd'}
 
+app.conf.beat_scheduler = 'redbeat.RedBeatScheduler'
 
 # Celery uses the billiard logger for multiprocessing which they override our custom
 # Audit Log level (25) name. This signal sets the logging level name back to AUDIT after the
