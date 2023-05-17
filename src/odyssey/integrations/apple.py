@@ -90,20 +90,27 @@ class AppStore:
             try:
                 response.raise_for_status()
             except:
-                # continue if transaction_id not found in production appstore 
+                # continue if transaction_id not found in production appstore
                 if url == APPLE_APPSTORE_BASE_URLS[-1]:
-                    raise BadRequest(f'Apple AppStore returned the following error: {response.text}')
+                    raise BadRequest(
+                        'Apple AppStore returned the following error:'
+                        f' {response.text}'
+                    )
                 else:
                     continue
 
             # in some cases bad transaction_ids don't return anything but a successful request
             try:
                 if response.json().get('data') == []:
-                    raise BadRequest(f"Something went wrong while trying to verify Apple AppStore subscription for transaction_id: {original_transaction_id}")
+                    raise BadRequest(
+                        'Something went wrong while trying to verify Apple'
+                        ' AppStore subscription for transaction_id:'
+                        f' {original_transaction_id}'
+                    )
             except json.decoder.JSONDecodeError:
-                continue # try the next url in the list if the response is not json
+                continue  # try the next url in the list if the response is not json
 
-            break # validation was successful
+            break  # validation was successful
 
         payload = response.json()
 

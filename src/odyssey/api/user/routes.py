@@ -785,7 +785,6 @@ class UserSubscriptionApi(BaseResource):
                 ).filter(UserSubscriptions.user_id != user_id).first()
             ):
                 raise BadRequest('This original transaction ID is already in use.')
-
             update_client_subscription(
                 user_id=user_id,
                 apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id,

@@ -7,7 +7,8 @@ from celery.schedules import crontab
 from celery.signals import worker_process_init, worker_ready
 from celery.utils.log import get_task_logger
 from flask import current_app
-from sqlalchemy import and_, delete, distinct, func,  or_, select, text
+from sqlalchemy import and_, delete, distinct, func, or_, select, text
+
 from odyssey import celery, db, mongo
 from odyssey.api.client.models import (
     ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations, ClientDataStorage
@@ -397,35 +398,27 @@ def deploy_subscription_update_tasks(interval: int):
     # check for subscriptions expiring in the near future
     expired_by = datetime.utcnow() + timedelta(minutes=interval)
 
-    subscriptions = (
-        db.session.execute(
-            select(UserSubscriptions).where(
-                UserSubscriptions.expire_date < expired_by,
-                UserSubscriptions.subscription_status == 'subscribed',
-            )
-        ).scalars().all()
+    # Subquery to find the latest entry for each user_id
+    latest_entries = (
+        db.session.query(
+            UserSubscriptions.user_id,
+            func.max(UserSubscriptions.idx).label('max_idx'),
+        ).filter(UserSubscriptions.is_staff == False).group_by(UserSubscriptions.user_id).subquery()
     )
 
-    # Subquery to find the latest entry for each user_id
-    latest_entries = db.session.query(
-        UserSubscriptions.user_id, 
-        func.max(UserSubscriptions.idx).label('max_idx')
-    ).filter(
-        UserSubscriptions.is_staff == False
-    ).group_by(UserSubscriptions.user_id).subquery()
-
     # Main query to get the UserSubscriptions rows that match the latest entries
-    subscriptions = db.session.query(UserSubscriptions).join(
-        latest_entries, 
-        (UserSubscriptions.user_id == latest_entries.c.user_id) & 
-        (UserSubscriptions.idx == latest_entries.c.max_idx)
-    ).filter(
-        UserSubscriptions.expire_date < expired_by, 
-        UserSubscriptions.subscription_status == 'subscribed',
-        UserSubscriptions.is_staff == False
-    ).all()
-  
-    
+    subscriptions = (
+        db.session.query(UserSubscriptions).join(
+            latest_entries,
+            (UserSubscriptions.user_id == latest_entries.c.user_id) &
+            (UserSubscriptions.idx == latest_entries.c.max_idx),
+        ).filter(
+            UserSubscriptions.expire_date < expired_by,
+            UserSubscriptions.subscription_status == 'subscribed',
+            UserSubscriptions.is_staff == False,
+        ).all()
+    )
+
     for subscription in subscriptions:
         logger.info(
             'Deploying task to update subscription for user_id:'
@@ -649,8 +642,8 @@ celery.conf.beat_schedule = {
     # update active subscriptions
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
-        'args': (60, ),
-        'schedule': crontab(minute='*/60'),
+        'args': (1, ),
+        'schedule': crontab(minute='*/1'),
     },
     # scheduled maintenances
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {

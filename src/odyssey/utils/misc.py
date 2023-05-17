@@ -1116,9 +1116,12 @@ def update_client_subscription(
         raise BadRequest('User email is not verified.')
 
     if not latest_subscription:
-        latest_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
-            UserSubscriptions.idx.desc()).first()
-    
+        latest_subscription = (
+            UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
+                UserSubscriptions.idx.desc()
+            ).first()
+        )
+
     new_sub_data = {}
     utc_time_now = datetime.utcnow()
     welcome_email = False
@@ -1152,7 +1155,7 @@ def update_client_subscription(
         # Status options from https://developer.apple.com/documentation/appstoreserverapi/status
         # 1 The auto-renewable subscription is active. -- subscription has either been renewed or unchanged
         # 2 The auto-renewable subscription is expired. -- subscription has been expired. Add new unsubscribed entry to UserSubscriptions
-        # 3 The auto-renewable subscription is in a billing retry period. -- keep user subscribed. 
+        # 3 The auto-renewable subscription is in a billing retry period. -- keep user subscribed.
         # 4 The auto-renewable subscription is in a billing grace period. -- keep user subscribed.
         # 5 The auto-renewable subscription is revoked. -- Add new unsubscribed entry to UserSubscriptions
         if status == 1:
@@ -1169,9 +1172,10 @@ def update_client_subscription(
                         ).one_or_none().sub_id,
                     'is_staff':
                         False,
-                    'apple_original_transaction_id':
+                    'apple_original_transaction_id': (
                         apple_original_transaction_id if apple_original_transaction_id else
-                        request.parsed_obj.apple_original_transaction_id,
+                        latest_subscription.apple_original_transaction_id
+                    ),
                     'last_checked_date':
                         utc_time_now.isoformat(),
                     'expire_date':
@@ -1189,16 +1193,15 @@ def update_client_subscription(
                 welcome_email = True  # user was previously unsubscribed and now has a subscription
 
         # if status in grace period or retry period, update subscription status to subscribed to keep current subscription
-        elif status in [3, 4] and latest_subscription.subscription_status == 'unsubscribed':
+        elif (status in [3, 4] and latest_subscription.subscription_status == 'unsubscribed'):
             latest_subscription.update({
-            'end_date': None,
-            'subscription_status': 'subscribed',
+                'end_date': None,
+                'subscription_status': 'subscribed',
             })
-            
+
             new_sub_data = {}
 
-
-        elif status == 5 and latest_subscription.subscription_status == 'subscribed':
+        elif (status == 5 and latest_subscription.subscription_status == 'subscribed'):
             # update current subscription to unsubscribed
             latest_subscription.update({
                 'end_date': utc_time_now.isoformat(),

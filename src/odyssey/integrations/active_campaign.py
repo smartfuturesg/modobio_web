@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 class ActiveCampaign:
     """Active Campaign integration class"""
+
+
+class ActiveCampaign:
+    """Active Campaign integration class"""
     def __init__(self):
         self.url = current_app.config.get('ACTIVE_CAMPAIGN_BASE_URL')
         logger.info(f'ACTIVE_CAMPAIGN_BASE_URL: {self.url}')
