@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateField, FloatField, \
-                    IntegerField, StringField, TextAreaField
+from wtforms import (BooleanField, DateField, FloatField, IntegerField, StringField, TextAreaField)
 
 
 class MedicalHistoryForm(FlaskForm):
@@ -9,7 +8,7 @@ class MedicalHistoryForm(FlaskForm):
     healthcare_contact = StringField('Primary healthcare provider name')
     healthcare_phone = StringField('Primary healthcare provider phone')
 
-    last_examination_date = DateField('Last doctor\'s visit')
+    last_examination_date = DateField("Last doctor's visit")
     last_examination_reason = StringField('Reason for last visit')
 
     goals = TextAreaField('Goals')

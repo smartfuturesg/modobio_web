@@ -1,28 +1,32 @@
 import logging
 import time
-import pytz
 import uuid
+from datetime import datetime, time, timedelta
+
 import boto3
+import pytz
 from boto3.dynamodb.conditions import Key
-from datetime import datetime, timedelta, time
 from flask import current_app, request
 from flask_accepts import accepts, responds
+from sqlalchemy import and_, or_, select
+from werkzeug.exceptions import BadRequest
+
 from odyssey.api import api
-from odyssey.api.maintenance.schemas import MaintenanceBlocksDeleteSchema
-from odyssey.api.maintenance.schemas import MaintenanceBlocksCreateSchema
+from odyssey.api.maintenance.schemas import (
+    MaintenanceBlocksCreateSchema, MaintenanceBlocksDeleteSchema
+)
 from odyssey.api.telehealth.models import TelehealthBookings
+from odyssey.tasks.tasks import cancel_telehealth_appointment
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from werkzeug.exceptions import BadRequest
-from sqlalchemy import and_, or_, select
 from odyssey.utils.misc import get_time_index
-from odyssey.tasks.tasks import cancel_telehealth_appointment
 
 logger = logging.getLogger(__name__)
 
-
 ns = api.namespace(
-    'maintenance', description='Endpoints for functions related to maintenance scheduling.')
+    'maintenance',
+    description='Endpoints for functions related to maintenance scheduling.',
+)
 
 
 @ns.route('/schedule/')
@@ -63,19 +67,24 @@ class MaintenanceApi(BaseResource):
                 # If the defined business hours time window goes over midnight...
                 if business_end_hr < business_start_hr:
                     # ...add a day to the business end datetime
-                    business_end = datetime.combine(end + timedelta(days=1), time(hour=business_end_hr)).replace(tzinfo=zone)
+                    business_end = datetime.combine(
+                        end + timedelta(days=1), time(hour=business_end_hr)
+                    ).replace(tzinfo=zone)
                 else:
                     # Business start and end are the same day
-                    business_end = datetime.combine(end, time(hour=business_end_hr)).replace(tzinfo=zone)
+                    business_end = datetime.combine(end, time(hour=business_end_hr
+                                                             )).replace(tzinfo=zone)
 
                 # If neither 'start' nor 'end' is in business hours, the requested maintenenace block is allowed
-                if not business_start < start < business_end and not business_start < end < business_end:
+                if (
+                    not business_start < start < business_end
+                    and not business_start < end < business_end
+                ):
                     return True
         # If all else fails
         return False
 
-
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required(user_type=('staff', ), staff_role=('system_admin', ))
     def get(self):
         """
         Get a list of all maintenance block from DynamoDB.
@@ -84,12 +93,15 @@ class MaintenanceApi(BaseResource):
         table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
 
         response = table.scan()
-        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
+        if response['ResponseMetadata']['HTTPStatusCode'] != 200:
+            raise BadRequest(
+                'AWS returned the following error:'
+                f' {response["ResponseMetadata"]["Message"]}'
+            )
 
         return response['Items']
 
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required(user_type=('staff', ), staff_role=('system_admin', ))
     @accepts(schema=MaintenanceBlocksCreateSchema, api=ns)
     def post(self):
         """
@@ -108,11 +120,18 @@ class MaintenanceApi(BaseResource):
         zone = pytz.timezone(current_app.config['MAINTENANCE_TIMEZONE'])
 
         # Set start and end times to the designated timezone for DB storage
-        start = datetime.fromisoformat(request.json['start_time']).replace(tzinfo=zone).astimezone(zone)
-        end = datetime.fromisoformat(request.json['end_time']).replace(tzinfo=zone).astimezone(zone)
+        start = (
+            datetime.fromisoformat(request.json['start_time']).replace(tzinfo=zone
+                                                                      ).astimezone(zone)
+        )
+        end = (
+            datetime.fromisoformat(request.json['end_time']).replace(tzinfo=zone).astimezone(zone)
+        )
 
         # Check if reason_id exists
-        reason_response = reasons_table.query(KeyConditionExpression=Key('id').eq(request.json['reason_id']))
+        reason_response = reasons_table.query(
+            KeyConditionExpression=Key('id').eq(request.json['reason_id'])
+        )
         if not reason_response['Items']:
             raise BadRequest(f"Reason ID {request.json['reason_id']} does not exist.")
 
@@ -126,21 +145,24 @@ class MaintenanceApi(BaseResource):
             'end_time': end.isoformat(),
             'created_by': user_id,
             'created_at': datetime.now(tz=zone).isoformat(),
-            'deleted': "False",
+            'deleted': 'False',
             'updated_by': None,
             'updated_at': None,
             'comments': request.json['comments'],
             'reason_id': request.json['reason_id'],
-            'notified': "False",
+            'notified': 'False',
         }
 
         response = table.put_item(Item=data)
         # If the request to DynamoDB wasn't successful, print out the entire response to help diagnose
-        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}')
+        if response['ResponseMetadata']['HTTPStatusCode'] != 200:
+            raise BadRequest(
+                'AWS returned the following error:'
+                f' {response["ResponseMetadata"]["Message"]}'
+            )
 
-        sm_start = request.json["start_time"]
-        sm_end = request.json["end_time"]
+        sm_start = request.json['start_time']
+        sm_end = request.json['end_time']
         sm_start = datetime.fromisoformat(sm_start)
         sm_end = datetime.fromisoformat(sm_end)
         target_time_window_start = get_time_index(sm_start)
@@ -151,42 +173,47 @@ class MaintenanceApi(BaseResource):
         if target_time_window_start > target_time_window_end:
             # this will happen from 22:00 to 23:55
             # in this case, we have to query across two dates
-            bookings_to_cancel = \
-                bookings_to_cancel.filter(
-                    or_(
-                        and_(
-                            TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
-                            TelehealthBookings.target_date_utc == sm_start.date()
-                        ),
-                        and_(
-                            TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
-                            TelehealthBookings.target_date_utc == sm_end.date()
-                        )
-                    )
-                ).all()
+            bookings_to_cancel = bookings_to_cancel.filter(
+                or_(
+                    and_(
+                        TelehealthBookings.booking_window_id_start_time_utc
+                        >= target_time_window_start,
+                        TelehealthBookings.target_date_utc == sm_start.date(),
+                    ),
+                    and_(
+                        TelehealthBookings.booking_window_id_start_time_utc
+                        <= target_time_window_end,
+                        TelehealthBookings.target_date_utc == sm_end.date(),
+                    ),
+                )
+            ).all()
         else:
             # otherwise just query for bookings whose start id falls between the target times on for today
-            bookings_to_cancel = \
-                bookings_to_cancel.filter(
-                    and_(
-                        TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
-                        TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
-                        TelehealthBookings.target_date_utc == sm_end.date()
-                    )
-                ).all()
+            bookings_to_cancel = bookings_to_cancel.filter(
+                and_(
+                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.target_date_utc == sm_end.date(),
+                )
+            ).all()
 
         # cancel each of them
         for booking in bookings_to_cancel:
-            cancel_telehealth_appointment(booking, 'Conflicted with newly scheduled server maintenance')
+            cancel_telehealth_appointment(
+                booking, 'Conflicted with newly scheduled server maintenance'
+            )
 
-        logger.info(f'Scheduled maintenance for {request.json["start_time"]} to {request.json["end_time"]}')
+        logger.info(
+            f'Scheduled maintenance for {request.json["start_time"]} to'
+            f' {request.json["end_time"]}'
+        )
 
         # If it was successful, return the newly created block
         # Returning data since it allows the user to see the block_id that was created without having to perform a
         # subsequent scan request on the database
-        return {"block_id": data["block_id"]}
+        return {'block_id': data['block_id']}
 
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    @token_auth.login_required(user_type=('staff', ), staff_role=('system_admin', ))
     @accepts(schema=MaintenanceBlocksDeleteSchema, api=ns)
     @responds(status_code=200, api=ns)
     def delete(self):
@@ -207,25 +234,32 @@ class MaintenanceApi(BaseResource):
         # Query using the primary index 'block_id'
         # Add a 'deleted' flag to the block along with update info
         response = table.update_item(
-            Key={
-                'block_id': request.json['block_id']
-            },
-            UpdateExpression="set #deleted = :deleted, #updated_by = :updated_by, #updated_at = :updated_at",
+            Key={'block_id': request.json['block_id']},
+            UpdateExpression=(
+                'set #deleted = :deleted, #updated_by = :updated_by,'
+                ' #updated_at = :updated_at'
+            ),
             ExpressionAttributeNames={
                 '#deleted': 'deleted',
                 '#updated_by': 'updated_by',
-                '#updated_at': 'updated_at'
+                '#updated_at': 'updated_at',
             },
             ExpressionAttributeValues={
-                ':deleted': "True",
+                ':deleted': 'True',
                 ':updated_by': user_id,
-                ':updated_at': datetime.now(tz=zone).isoformat()
+                ':updated_at': datetime.now(tz=zone).isoformat(),
             },
-            ReturnValues="UPDATED_NEW"
+            ReturnValues='UPDATED_NEW',
         )
 
         # If the request to DynamoDB wasn't successful, print out the entire response to help diagnose
-        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            raise BadRequest(f'AWS returned the following error: {response["ResponseMetadata"]["Message"]}.')
+        if response['ResponseMetadata']['HTTPStatusCode'] != 200:
+            raise BadRequest(
+                'AWS returned the following error:'
+                f' {response["ResponseMetadata"]["Message"]}.'
+            )
 
-        logger.info(f'Scheduled maintenance with block_id: {request.json["block_id"]} was deleted.')
+        logger.info(
+            'Scheduled maintenance with block_id:'
+            f' {request.json["block_id"]} was deleted.'
+        )

@@ -6,12 +6,12 @@ from functools import wraps
 
 from flask import request
 from flask_restx import Resource
-from sqlalchemy.exc import InvalidRequestError, ArgumentError
+from sqlalchemy.exc import ArgumentError, InvalidRequestError
 from werkzeug.exceptions import BadRequest, Unauthorized
 
+from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.misc import find_decorator_value
-from odyssey.api.user.models import User
 
 
 class BaseResource(Resource):
@@ -28,8 +28,8 @@ class BaseResource(Resource):
         super().__init__(*args, **kwargs)
         self.method_decorators = [self.check_resource]
 
-    def check_user(self, user_id: int, user_type: str=None):
-        """ Check that user ``user_id`` exists in the database.
+    def check_user(self, user_id: int, user_type: str = None):
+        """Check that user ``user_id`` exists in the database.
 
         Fetch user with :attr:`User.user_id` from the database. It will only fetch
         not-deleted (:attr:`User.deleted` = False) users. If ``user_type``='client',
@@ -57,11 +57,15 @@ class BaseResource(Resource):
             the additional check requested with ``user_type``.
         """
         if user_type == 'client':
-            user = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
+            user = User.query.filter_by(
+                user_id=user_id, is_client=True, deleted=False
+            ).one_or_none()
         elif user_type == 'staff':
             user = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
         elif user_type == 'provider':
-            user = User.query.filter_by(user_id=user_id, is_provider=True, deleted=False).one_or_none()
+            user = User.query.filter_by(
+                user_id=user_id, is_provider=True, deleted=False
+            ).one_or_none()
         else:
             user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
 
@@ -82,10 +86,12 @@ class BaseResource(Resource):
         of edit/delete permissions on that data.
         """
         if data.reporter_id != token_auth.current_user()[0].user_id:
-            raise Unauthorized(description='Only the reporter of this record can edit or delete it.')
+            raise Unauthorized(
+                description=('Only the reporter of this record can edit or delete it.')
+            )
 
     def check_resource(self, func):
-        """ Check whether a resource exists.
+        """Check whether a resource exists.
 
         This decorator will check for the existence of a resource before proceeding
         with the POST, PUT, or PATCH request (:attr:`func`). To determine which
@@ -135,47 +141,68 @@ class BaseResource(Resource):
         @wraps(func)
         def wrapped(*args, **kwargs):
             if not self.__check_resource__:
-                logger.debug('Not running check_resource() because __check_resource__ is False.')
+                logger.debug(
+                    'Not running check_resource() because __check_resource__'
+                    ' is False.'
+                )
                 return func(*args, **kwargs)
 
             # Only works if URL contains one or more path arguments:
             # /some/path/<int:user_id> or similar
             if len(request.view_args) == 0:
-                logger.debug(f'Not running check_resource() because no path argument in URL of {func}.')
+                logger.debug(
+                    'Not running check_resource() because no path argument in'
+                    f' URL of {func}.'
+                )
                 return func(*args, **kwargs)
 
             try:
                 schema = find_decorator_value(func, 'accepts', keyword='schema')
             except TypeError:
-                logger.debug(f'Not running check_resource() because no @accepts decorator on {func}.')
+                logger.debug(
+                    'Not running check_resource() because no @accepts'
+                    f' decorator on {func}.'
+                )
                 return func(*args, **kwargs)
 
             if not schema:
-                logger.debug(f'Not running check_resource() because no schema declared in @accepts '
-                             f'decorator of {func}.')
+                logger.debug(
+                    'Not running check_resource() because no schema declared'
+                    f' in @accepts decorator of {func}.'
+                )
                 return func(*args, **kwargs)
 
             # Schema not based on a table, nothing to check.
             if not hasattr(schema.Meta, 'model'):
-                logger.debug(f'Not running check_resource() because schema {schema} is not based '
-                             f'on a table model.')
+                logger.debug(
+                    f'Not running check_resource() because schema {schema} is'
+                    ' not based on a table model.'
+                )
                 return func(*args, **kwargs)
 
             table = schema.Meta.model
             try:
                 exists = table.query.filter_by(**request.view_args).one_or_none()
             except (InvalidRequestError, ArgumentError, AttributeError):
-                logger.debug(f'Not running check_resource() because table {table} can not be '
-                             f'filtered by any of the path arguments in the URL.')
+                logger.debug(
+                    f'Not running check_resource() because table {table} can'
+                    ' not be filtered by any of the path arguments in the'
+                    ' URL.'
+                )
                 return func(*args, **kwargs)
 
-            if exists and request.method.lower() in ('post',):
-                raise BadRequest('The resource you are trying to create (POST) already exists. '
-                                 'Please use PUT or PATCH instead.')
+            if exists and request.method.lower() in ('post', ):
+                raise BadRequest(
+                    'The resource you are trying to create (POST) already'
+                    ' exists. Please use PUT or PATCH instead.'
+                )
             elif not exists and request.method.lower() in ('put', 'patch'):
-                raise BadRequest('The resource you are trying to change (PUT/PATCH) does not exist. '
-                                 'Please use POST first.')
+                raise BadRequest(
+                    'The resource you are trying to change (PUT/PATCH) does'
+                    ' not exist. Please use POST first.'
+                )
 
             logger.debug(f'Running check_resource() for {func}.')
             return func(*args, **kwargs)
+
         return wrapped

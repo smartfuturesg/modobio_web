@@ -7,8 +7,9 @@ from werkzeug.http import HTTP_STATUS_CODES
 
 logger = logging.getLogger(__name__)
 
+
 def http_exception_handler(error: HTTPException) -> tuple:
-    """ Turn a HTTPException into a response.
+    """Turn a HTTPException into a response.
 
     :class:`werkzeug.exceptions.HTTPException`s are handled by default by flask,
     but this handler adds extra information to the error response. It also logs the
@@ -73,8 +74,9 @@ def http_exception_handler(error: HTTPException) -> tuple:
 
     return response, error.code
 
+
 def exception_handler(error: Exception) -> tuple:
-    """ Turn Exception into a response.
+    """Turn Exception into a response.
 
     Flask usually turns any unhandled :class:`Exception` into a
     :class:`werkzeug.exceptions.InternalServerError`, but does not provide any further

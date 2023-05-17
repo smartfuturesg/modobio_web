@@ -1,17 +1,16 @@
 import logging
 import pathlib
-import pytz
 import random
 
+import pytz
 from flask import current_app, request
 from flask_accepts import responds
 from flask_restx import Namespace
-
 from werkzeug.exceptions import BadRequest
 
+from odyssey import db
 from odyssey.api.lookup.models import *
 from odyssey.api.lookup.schemas import *
-from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_drink_existence
@@ -20,42 +19,46 @@ logger = logging.getLogger(__name__)
 
 ns = Namespace('lookup', description='Endpoints for lookup tables.')
 
+
 @ns.route('/notifications/severity/')
 class LookupNotificationSeverityResource(BaseResource):
     """
-        Returns notification severity and their respective color
+    Returns notification severity and their respective color
     """
-    @responds(schema=LookupNotificationSeverityOutputSchema,status_code=200,api=ns)
+    @responds(schema=LookupNotificationSeverityOutputSchema, status_code=200, api=ns)
     def get(self):
         severity = LookupNotificationSeverity.query.all()
-        payload = {'items': severity,
-                   'total_items': len(severity)}
+        payload = {'items': severity, 'total_items': len(severity)}
 
         return payload
+
 
 @ns.route('/states/')
 class LookupUSStatesResource(BaseResource):
     """
     Returns United States' states and their abbreviations
     """
-    @responds(schema=LookupUSStatesOutputSchema,status_code=200,api=ns)
+    @responds(schema=LookupUSStatesOutputSchema, status_code=200, api=ns)
     def get(self):
         states = LookupTerritoriesOfOperations.query.all()
-        payload = {'items': [ 
-                        {'abbreviation': state.sub_territory_abbreviation,
-                        'state': state.sub_territory,
-                        'territory_id': state.idx,
-                        'idx': state.idx ,
-                        'active': state.active} for state in states ],
-                   'total_items': len(states)}
+        payload = {
+            'items': [{
+                'abbreviation': state.sub_territory_abbreviation,
+                'state': state.sub_territory,
+                'territory_id': state.idx,
+                'idx': state.idx,
+                'active': state.active,
+            } for state in states],
+            'total_items': len(states),
+        }
 
         return payload
 
+
 @ns.route('/terms-and-conditions/')
 class LookupTermsAndConditionResource(BaseResource):
-    """ Returns the Terms and Conditions
-    """
-    @responds(schema=LookupTermsAndConditionsOutputSchema,status_code=200,api=ns)
+    """Returns the Terms and Conditions"""
+    @responds(schema=LookupTermsAndConditionsOutputSchema, status_code=200, api=ns)
     def get(self):
         lookup_ts = LookupTermsAndConditions.query.one_or_none()
         payload = {}
@@ -65,56 +68,62 @@ class LookupTermsAndConditionResource(BaseResource):
             payload['terms_and_conditions'] = 'Terms and Conditions'
         return payload
 
+
 @ns.route('/telehealth/booking-increments/')
 class LookupTelehealthBookingIncrements(BaseResource):
-    """ Returns stored booking increments.
+    """Returns stored booking increments.
     Returns
     -------
     dict
         JSON encoded dict.
     """
-    @responds(schema=LookupBookingTimeIncrementsOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupBookingTimeIncrementsOutputSchema, status_code=200, api=ns)
     def get(self):
-                
+
         booking_increments = LookupBookingTimeIncrements.query.all()
-        
-        payload = {'items': booking_increments,
-                   'total_items': len(booking_increments)}
+
+        payload = {
+            'items': booking_increments,
+            'total_items': len(booking_increments),
+        }
 
         return payload
+
 
 @ns.route('/timezones/')
 class LookupTimezones(BaseResource):
     @token_auth.login_required
-    @responds(schema=LookupTimezones,status_code=200,api=ns)
+    @responds(schema=LookupTimezones, status_code=200, api=ns)
     def get(self):
         varArr = pytz.country_timezones['us']
-        payload = {'items': varArr,
-                   'total_items': len(varArr) }
+        payload = {'items': varArr, 'total_items': len(varArr)}
         return payload
+
 
 @ns.route('/business/transaction-types/')
 class LookupTransactionTypesResource(BaseResource):
-    """ Returns stored transaction types in database by GET request.
+    """Returns stored transaction types in database by GET request.
     Returns
     -------
     dict
         JSON encoded dict.
     """
-    @responds(schema=LookupTransactionTypesOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupTransactionTypesOutputSchema, status_code=200, api=ns)
     def get(self):
-                
+
         transaction_types = LookupTransactionTypes.query.all()
-        
-        payload = {'items': transaction_types,
-                   'total_items': len(transaction_types)}
+
+        payload = {
+            'items': transaction_types,
+            'total_items': len(transaction_types),
+        }
 
         return payload
 
 
 @ns.route('/business/countries-of-operations/')
 class LookupCountryOfOperationResource(BaseResource):
-    """ Returns stored countries of operations in database by GET request.
+    """Returns stored countries of operations in database by GET request.
 
     Returns
     -------
@@ -122,42 +131,44 @@ class LookupCountryOfOperationResource(BaseResource):
         JSON encoded dict.
     """
     @token_auth.login_required
-    @responds(schema=LookupCountriesOfOperationsOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupCountriesOfOperationsOutputSchema, status_code=200, api=ns)
     def get(self):
-                
+
         countries = LookupCountriesOfOperations.query.all()
-        
-        payload = {'items': countries,
-                   'total_items': len(countries)}
+
+        payload = {'items': countries, 'total_items': len(countries)}
 
         return payload
 
+
 @ns.route('/business/telehealth-settings/')
 class LookupTelehealthSettingsApi(BaseResource):
-    """ Endpoints related to the telehealth lookup tables """
-
-    @token_auth.login_required(user_type=('staff',), staff_role=('system_admin',))
+    """Endpoints related to the telehealth lookup tables"""
+    @token_auth.login_required(user_type=('staff', ), staff_role=('system_admin', ))
     @responds(schema=LookupTelehealthSettingsSchema, status_code=200, api=ns)
     def get(self):
-        
+
         durations = {'items': LookupTelehealthSessionDuration.query.all()}
         durations['total_items'] = len(durations['items'])
 
         booking_windows = {'items': LookupClientBookingWindow.query.all()}
         booking_windows['total_items'] = len(booking_windows['items'])
 
-        confirmation_windows = {'items': LookupProfessionalAppointmentConfirmationWindow.query.all()}
+        confirmation_windows = {
+            'items': LookupProfessionalAppointmentConfirmationWindow.query.all()
+        }
         confirmation_windows['total_items'] = len(confirmation_windows['items'])
 
         return {
             'session_durations': durations,
-            'booking_windows' : booking_windows,
+            'booking_windows': booking_windows,
             'confirmation_windows': confirmation_windows,
         }
 
+
 @ns.route('/activity-trackers/misc/')
 class WearablesLookUpFitbitActivityTrackersResource(BaseResource):
-    """ Returns misc activity trackers stored in the database in response to a GET request.
+    """Returns misc activity trackers stored in the database in response to a GET request.
 
     Returns
     -------
@@ -165,21 +176,26 @@ class WearablesLookUpFitbitActivityTrackersResource(BaseResource):
         JSON encoded dict.
     """
     @token_auth.login_required
-    @responds(schema=LookupActivityTrackersOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupActivityTrackersOutputSchema, status_code=200, api=ns)
     def get(self):
-        
+
         delete_brands = ['Apple', 'Fitbit', 'Garmin', 'Samsung']
-        
-        activity_trackers = LookupActivityTrackers.query.filter(LookupActivityTrackers.brand.notin_(delete_brands)).all()
-        
-        payload = {'items': activity_trackers,
-                   'total_items': len(activity_trackers)}
+
+        activity_trackers = LookupActivityTrackers.query.filter(
+            LookupActivityTrackers.brand.notin_(delete_brands)
+        ).all()
+
+        payload = {
+            'items': activity_trackers,
+            'total_items': len(activity_trackers),
+        }
 
         return payload
+
 
 @ns.route('/activity-trackers/fitbit/')
 class WearablesLookUpFitbitActivityTrackersResource(BaseResource):
-    """ Returns Fitbit activity trackers stored in the database in response to a GET request.
+    """Returns Fitbit activity trackers stored in the database in response to a GET request.
 
     Returns
     -------
@@ -187,17 +203,20 @@ class WearablesLookUpFitbitActivityTrackersResource(BaseResource):
         JSON encoded dict.
     """
     @token_auth.login_required
-    @responds(schema=LookupActivityTrackersOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupActivityTrackersOutputSchema, status_code=200, api=ns)
     def get(self):
         activity_trackers = LookupActivityTrackers.query.filter_by(brand='Fitbit').all()
-        payload = {'items': activity_trackers,
-                   'total_items': len(activity_trackers)}
+        payload = {
+            'items': activity_trackers,
+            'total_items': len(activity_trackers),
+        }
 
         return payload
+
 
 @ns.route('/activity-trackers/apple/')
 class WearablesLookUpAppleActivityTrackersResource(BaseResource):
-    """ Returns activity Apple trackers stored in the database in response to a GET request.
+    """Returns activity Apple trackers stored in the database in response to a GET request.
 
     Returns
     -------
@@ -205,17 +224,20 @@ class WearablesLookUpAppleActivityTrackersResource(BaseResource):
         JSON encoded dict.
     """
     @token_auth.login_required
-    @responds(schema=LookupActivityTrackersOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupActivityTrackersOutputSchema, status_code=200, api=ns)
     def get(self):
         activity_trackers = LookupActivityTrackers.query.filter_by(brand='Apple').all()
-        payload = {'items': activity_trackers,
-                   'total_items': len(activity_trackers)}
+        payload = {
+            'items': activity_trackers,
+            'total_items': len(activity_trackers),
+        }
 
         return payload
+
 
 @ns.route('/activity-trackers/all/')
 class WearablesLookUpAllActivityTrackersResource(BaseResource):
-    """ Returns activity trackers stored in the database in response to a GET request.
+    """Returns activity trackers stored in the database in response to a GET request.
 
     Returns
     -------
@@ -223,32 +245,40 @@ class WearablesLookUpAllActivityTrackersResource(BaseResource):
         JSON encoded dict.
     """
     @token_auth.login_required
-    @responds(schema=LookupActivityTrackersOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupActivityTrackersOutputSchema, status_code=200, api=ns)
     def get(self):
         activity_trackers = LookupActivityTrackers.query.all()
-        payload = {'items': activity_trackers,
-                   'total_items': len(activity_trackers)}
+        payload = {
+            'items': activity_trackers,
+            'total_items': len(activity_trackers),
+        }
 
         return payload
 
+
 @ns.route('/drinks/')
 class LookupDrinksApi(BaseResource):
-    
     @token_auth.login_required
     @responds(schema=LookupDrinksOutputSchema, api=ns)
     def get(self):
         """get contents of drinks lookup table"""
         res = []
         for drink in LookupDrinks.query.all():
-            drink.primary_ingredient = LookupDrinkIngredients.query.filter_by(drink_id=drink.drink_id).filter_by(is_primary_ingredient=True).first().ingredient_name
-            drink.goal = LookupGoals.query.filter_by(goal_id=drink.primary_goal_id).first().goal_name
+            drink.primary_ingredient = (
+                LookupDrinkIngredients.query.filter_by(drink_id=drink.drink_id
+                                                      ).filter_by(is_primary_ingredient=True
+                                                                 ).first().ingredient_name
+            )
+            drink.goal = (
+                LookupGoals.query.filter_by(goal_id=drink.primary_goal_id).first().goal_name
+            )
             res.append(drink)
         return {'total_items': len(res), 'items': res}
+
 
 @ns.route('/drinks/ingredients/<int:drink_id>/')
 @ns.doc('Id of the desired drink')
 class LookupDrinkIngredientsApi(BaseResource):
-
     @token_auth.login_required
     @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
     def get(self, drink_id):
@@ -258,9 +288,9 @@ class LookupDrinkIngredientsApi(BaseResource):
         res = LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/goals/')
 class LookupGoalsApi(BaseResource):
-
     @token_auth.login_required
     @responds(schema=LookupGoalsOutputSchema, api=ns)
     def get(self):
@@ -268,9 +298,9 @@ class LookupGoalsApi(BaseResource):
         res = LookupGoals.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/macro-goals/')
 class LookupMacroGoalsApi(BaseResource):
-
     @token_auth.login_required
     @responds(schema=LookupMacroGoalsOutputSchema, api=ns)
     def get(self):
@@ -278,9 +308,9 @@ class LookupMacroGoalsApi(BaseResource):
         res = LookupMacroGoals.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/races/')
 class LookupRacesApi(BaseResource):
-
     @token_auth.login_required
     @responds(schema=LookupRacesOutputSchema, api=ns)
     def get(self):
@@ -288,10 +318,9 @@ class LookupRacesApi(BaseResource):
         res = LookupRaces.query.all()
         return {'total_items': len(res), 'items': res}
 
-        
+
 @ns.route('/subscriptions/')
 class LookupSubscriptionsApi(BaseResource):
-
     @token_auth.login_required
     @responds(schema=LookupSubscriptionsOutputSchema, api=ns)
     def get(self):
@@ -299,9 +328,9 @@ class LookupSubscriptionsApi(BaseResource):
         res = LookupSubscriptions.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/notifications/')
 class LookupNotificationsApi(BaseResource):
-
     @token_auth.login_required
     @responds(schema=LookupNotificationsOutputSchema, api=ns)
     def get(self):
@@ -309,12 +338,12 @@ class LookupNotificationsApi(BaseResource):
         res = LookupNotifications.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/default-health-metrics/')
 class LookupDefaultHealthMetricsApi(BaseResource):
     """
     Endpoint for handling requests for all default health metrics
     """
-
     @token_auth.login_required
     @responds(schema=LookupDefaultHealthMetricsOutputSchema, status_code=200, api=ns)
     def get(self):
@@ -322,17 +351,25 @@ class LookupDefaultHealthMetricsApi(BaseResource):
         res = LookupDefaultHealthMetrics.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/operational-territories/')
 class LookupTerritoriesOfOperationsApi(BaseResource):
     """
     Endpoint for handling requests for all territories of operation
     """
     @token_auth.login_required
-    @responds(schema=LookupTerritoriesOfOperationsOutputSchema, status_code=200, api=ns)
+    @responds(
+        schema=LookupTerritoriesOfOperationsOutputSchema,
+        status_code=200,
+        api=ns,
+    )
     def get(self):
         """get contents of operational territories lookup table"""
-        res = LookupTerritoriesOfOperations.query.order_by(LookupTerritoriesOfOperations.sub_territory.asc()).all()
+        res = LookupTerritoriesOfOperations.query.order_by(
+            LookupTerritoriesOfOperations.sub_territory.asc()
+        ).all()
         return {'total_items': len(res), 'items': res}
+
 
 @ns.route('/emergency-numbers/')
 class LookupEmergencyNumbersApi(BaseResource):
@@ -346,6 +383,7 @@ class LookupEmergencyNumbersApi(BaseResource):
         res = LookupEmergencyNumbers.query.filter_by(service='Ambulance').all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/roles/')
 class LookupRolesApi(BaseResource):
     """
@@ -357,6 +395,7 @@ class LookupRolesApi(BaseResource):
         """get contents of active roles in lookup table"""
         res = LookupRoles.query.filter_by(active=True).all()
         return {'total_items': len(res), 'items': res}
+
 
 @ns.route('/legal-docs/')
 class LookupLegalDocsApi(BaseResource):
@@ -374,6 +413,7 @@ class LookupLegalDocsApi(BaseResource):
                 doc.content = fh.read()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/medical-symptoms/')
 class LookupMedicalSymptomssApi(BaseResource):
     """
@@ -385,6 +425,7 @@ class LookupMedicalSymptomssApi(BaseResource):
         """get contents of medical symptoms lookup table"""
         res = LookupMedicalSymptoms.query.all()
         return {'total_items': len(res), 'items': res}
+
 
 @ns.route('/organizations/')
 class LookupOrganizationsApi(BaseResource):
@@ -398,6 +439,7 @@ class LookupOrganizationsApi(BaseResource):
         res = LookupOrganizations.query.all()
         return {'total_items': len(res), 'items': res}
 
+
 @ns.route('/currencies/')
 class LookupCurrenciesApi(BaseResource):
     """
@@ -409,7 +451,8 @@ class LookupCurrenciesApi(BaseResource):
         """get contents of medical symptoms lookup table"""
         res = LookupCurrencies.query.all()
         return {'total_items': len(res), 'items': res}
-    
+
+
 @ns.route('/bloodtests/')
 class LookupBloodTestsApi(BaseResource):
     """
@@ -421,7 +464,8 @@ class LookupBloodTestsApi(BaseResource):
         """get contents of blood tests lookup table"""
         res = LookupBloodTests.query.all()
         return {'total_items': len(res), 'items': res}
-    
+
+
 @ns.route('/bloodtests/ranges/<string:modobio_test_code>/')
 @ns.doc(params={'modobio_test_code': 'Modobio Test Code for desired test'})
 class LookupBloodTestRangesApi(BaseResource):
@@ -435,11 +479,14 @@ class LookupBloodTestRangesApi(BaseResource):
         res = LookupBloodTestRanges.query.filter_by(modobio_test_code=modobio_test_code).all()
         for range in res:
             if range.race_id:
-                range.race = LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+                range.race = (
+                    LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+                )
             else:
                 range.race = None
         return {'total_items': len(res), 'items': res}
-    
+
+
 @ns.route('/bloodtests/ranges/all/')
 class LookupBloodTestRangesAllApi(BaseResource):
     """
@@ -449,18 +496,23 @@ class LookupBloodTestRangesAllApi(BaseResource):
     @responds(schema=LookupBloodTestRangesAllOutputSchema, status_code=200, api=ns)
     def get(self):
         """get all ranges for the all blood tests"""
-        tests = db.session.query(LookupBloodTests, LookupBloodTestRanges
-                ).filter(LookupBloodTestRanges.modobio_test_code == LookupBloodTests.modobio_test_code
-                ).all()
-        
+        tests = (
+            db.session.query(LookupBloodTests, LookupBloodTestRanges).filter(
+                LookupBloodTestRanges.modobio_test_code == LookupBloodTests.modobio_test_code
+            ).all()
+        )
+
         res = []
         for test, range in tests:
             if range.race_id:
-                range.race = LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+                range.race = (
+                    LookupRaces.query.filter_by(race_id=range.race_id).one_or_none().race_name
+                )
             else:
                 range.race = None
             res.append({'test': test, 'range': range})
         return {'total_items': len(res), 'items': res}
+
 
 @ns.route('/developers/')
 class LookupDevNamesApi(BaseResource):
@@ -469,14 +521,14 @@ class LookupDevNamesApi(BaseResource):
     """
     @token_auth.login_required
     @responds(schema=LookupDevNamesOutputSchema, status_code=200, api=ns)
-    def get(self): 
+    def get(self):
         names = LookupDevNames.query.all()
-        
+
         random.shuffle(names)
 
         return {'total_items': len(names), 'items': names}
-    
-    
+
+
 @ns.route('/visit-reasons/')
 @ns.doc(params={'role': 'role for which some of all visit reasons apply'})
 class LookupVisitReasonsApi(BaseResource):
@@ -491,7 +543,7 @@ class LookupVisitReasonsApi(BaseResource):
         if role_param == None:
             reasons = LookupVisitReasons.query.all()
         else:
-            role = LookupRoles.query.filter_by(role_name = role_param).one_or_none()
+            role = LookupRoles.query.filter_by(role_name=role_param).one_or_none()
             if not role:
                 raise BadRequest(f'Role:{role_param} not found.')
             reasons = LookupVisitReasons.query.filter_by(role_id=role.idx).all()
@@ -509,8 +561,12 @@ class LookupBloodGlucoseEndpoint(BaseResource):
     def get(self):
         """get contents of blood glucose lookup table"""
 
-        query = db.session.query(LookupBloodGlucoseRanges, LookupBloodTests.display_name)\
-            .join(LookupBloodTests, LookupBloodGlucoseRanges.modobio_test_code == LookupBloodTests.modobio_test_code).all()
+        query = (
+            db.session.query(LookupBloodGlucoseRanges, LookupBloodTests.display_name).join(
+                LookupBloodTests,
+                LookupBloodGlucoseRanges.modobio_test_code == LookupBloodTests.modobio_test_code,
+            ).all()
+        )
 
         res = []
         for result, display_name in query:
@@ -518,7 +574,8 @@ class LookupBloodGlucoseEndpoint(BaseResource):
             res.append(result)
 
         return {'total_items': len(res), 'items': res}
-        
+
+
 @ns.route('/credential-types/')
 class LookupCredentialTypesEndpoint(BaseResource):
     """
@@ -529,7 +586,11 @@ class LookupCredentialTypesEndpoint(BaseResource):
     def get(self):
         credential_types = LookupCredentialTypes.query.all()
 
-        return {'total_items': len(credential_types), 'items': credential_types}
+        return {
+            'total_items': len(credential_types),
+            'items': credential_types,
+        }
+
 
 @ns.route('/team/phr-resources/')
 class LookupClinicalCareTeamResourcesApi(BaseResource):
@@ -542,7 +603,11 @@ class LookupClinicalCareTeamResourcesApi(BaseResource):
         """get contents of clinical care team resources lookup table"""
         care_team_resources = LookupClinicalCareTeamResources.query.all()
 
-        return {'total_items': len(care_team_resources), 'items': care_team_resources}
+        return {
+            'total_items': len(care_team_resources),
+            'items': care_team_resources,
+        }
+
 
 @ns.route('/blood-glucose/cgm/ranges/')
 class LookupCGMRangesEndpoint(BaseResource):
@@ -556,17 +621,26 @@ class LookupCGMRangesEndpoint(BaseResource):
 
         return {'total_items': len(cgm_ranges), 'items': cgm_ranges}
 
+
 @ns.route('/blood-glucose/cgm/demographics/')
 class LookupCGMDemographicsEndpoint(BaseResource):
     """
     Endpoint that returns CGM demographics
     """
     @token_auth.login_required
-    @responds(schema=LookupBloodGlucoseCGMDemographicsOutputSchema, status_code=200, api=ns)
+    @responds(
+        schema=LookupBloodGlucoseCGMDemographicsOutputSchema,
+        status_code=200,
+        api=ns,
+    )
     def get(self):
         cgm_demographics = LookupCGMDemographics.query.all()
 
-        return {'total_items': len(cgm_demographics), 'items': cgm_demographics}
+        return {
+            'total_items': len(cgm_demographics),
+            'items': cgm_demographics,
+        }
+
 
 @ns.route('/keys/')
 class LookupKeys(BaseResource):
@@ -576,14 +650,15 @@ class LookupKeys(BaseResource):
     @token_auth.login_required
     @responds(schema=LookupKeysOutputSchema, status_code=200, api=ns)
     def get(self):
-        
+
         output = {
-            'terra_dev_id' : current_app.config.get('TERRA_DEV_ID'),
-            'google_captcha_site_key' : current_app.config.get('GOOGLE_RECAPTCHA_SECRET')
+            'terra_dev_id': current_app.config.get('TERRA_DEV_ID'),
+            'google_captcha_site_key': current_app.config.get('GOOGLE_RECAPTCHA_SECRET'),
         }
-        
+
         return {'keys': output}
-    
+
+
 @ns.route('/emotes/')
 class LookupEmotesApi(BaseResource):
     """
@@ -593,5 +668,5 @@ class LookupEmotesApi(BaseResource):
     @responds(schema=LookupEmotesOutputSchema, status_code=200, api=ns)
     def get(self):
         emotes = LookupEmotes.query.order_by('position').all()
-        
+
         return {'total_items': len(emotes), 'items': emotes}

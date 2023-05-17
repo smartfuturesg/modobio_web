@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields, validate
@@ -17,7 +18,8 @@ class CSUserSchema(ma.SQLAlchemyAutoSchema):
             'updated_at',
             'staff_profile',
             'client_info',
-            'is_internal')
+            'is_internal',
+        )
 
 
 class CSUserLoginSchema(ma.SQLAlchemyAutoSchema):
@@ -30,7 +32,8 @@ class CSUserLoginSchema(ma.SQLAlchemyAutoSchema):
             'user_id',
             'password',
             'last_login',
-            'refresh_token')
+            'refresh_token',
+        )
 
 
 class CSAccountBlockSchema(Schema):
@@ -40,4 +43,3 @@ class CSAccountBlockSchema(Schema):
 
 class CSAccountUnblockSchema(Schema):
     staff = fields.Boolean(required=True)
-

@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from flask import request
@@ -8,53 +9,46 @@ from sqlalchemy import or_
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
-from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
+from odyssey.api.notifications.models import (Notifications, NotificationsPushRegistration)
 from odyssey.api.notifications.schemas import (
-    NotificationSchema,
-    PushRegistrationDeleteSchema,
-    PushRegistrationGetSchema,
-    PushRegistrationPostSchema,
-    ApplePushNotificationAlertTestSchema,
-    ApplePushNotificationBackgroundTestSchema,
-    ApplePushNotificationBadgeTestSchema,
-    ApplePushNotificationVoipTestSchema)
+    ApplePushNotificationAlertTestSchema, ApplePushNotificationBackgroundTestSchema,
+    ApplePushNotificationBadgeTestSchema, ApplePushNotificationVoipTestSchema, NotificationSchema,
+    PushRegistrationDeleteSchema, PushRegistrationGetSchema, PushRegistrationPostSchema
+)
+from odyssey.api.user.models import UserProfilePictures
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.message import PushNotification
 from odyssey.utils.files import FileDownload, get_profile_pictures
-from odyssey.api.user.models import UserProfilePictures
+from odyssey.utils.message import PushNotification
 
 ns = Namespace('notifications', description='Endpoints for all types of notifications.')
+
 
 @ns.route('/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class NotificationsEndpoint(BaseResource):
-
     @token_auth.login_required
     @responds(schema=NotificationSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
-        """ Returns a list of notifications for the given user_id. """
+        """Returns a list of notifications for the given user_id."""
         return Notifications.query.filter_by(user_id=user_id).all()
+
 
 @ns.route('/<int:user_id>/<int:notification_id>/')
 @ns.doc(params={
     'user_id': 'User ID number',
-    'notification_id': 'Notification ID number'})
+    'notification_id': 'Notification ID number',
+})
 class NotificationsUpdateEndpoint(BaseResource):
-
     @token_auth.login_required
     @accepts(schema=NotificationSchema, api=ns)
     @responds(status_code=200, api=ns)
     def put(self, user_id, notification_id):
-        """ Updates the notification specified by the given id number. """
+        """Updates the notification specified by the given id number."""
 
-        notification = (
-            Notifications
-            .query
-            .filter_by(
-                user_id=user_id,
-                notification_id=notification_id)
-            .one_or_none())
+        notification = Notifications.query.filter_by(
+            user_id=user_id, notification_id=notification_id
+        ).one_or_none()
 
         if not notification:
             raise BadRequest('Wrong notification_id or user_id.')
@@ -74,14 +68,14 @@ class PushRegistrationEndpoint(BaseResource):
     @token_auth.login_required
     @responds(schema=PushRegistrationGetSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
-        """ Get all device tokens for user. """
+        """Get all device tokens for user."""
         return NotificationsPushRegistration.query.filter_by(user_id=user_id).all()
 
     @token_auth.login_required
     @accepts(schema=PushRegistrationPostSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
-        """ Register a new device.
+        """Register a new device.
 
         Parameters
         ----------
@@ -112,18 +106,15 @@ class PushRegistrationEndpoint(BaseResource):
         device_info = {
             'user_id': user_id,
             'device_id': device_id,
-            'description': device_description}
+            'description': device_description,
+        }
 
         pn = PushNotification()
 
-        device = (
-            NotificationsPushRegistration
-            .query
-            .filter_by(
-                user_id=user_id,
-                device_id=device_id)
-            .one_or_none())
-            
+        device = NotificationsPushRegistration.query.filter_by(
+            user_id=user_id, device_id=device_id
+        ).one_or_none()
+
         if device:
             # Token may have changed with existing device. Even if token is the same,
             # the endpoint may have been disabled or settings may have changed.
@@ -132,29 +123,29 @@ class PushRegistrationEndpoint(BaseResource):
                 device_token,
                 device_platform,
                 device_info=device_info,
-                current_endpoint=device.arn)
+                current_endpoint=device.arn,
+            )
             if device_voip_token:
                 device.voip_arn = pn.register_device(
                     device_voip_token,
                     device_platform,
                     device_info=device_info,
                     current_endpoint=device.voip_arn,
-                    voip=True)
+                    voip=True,
+                )
             device.device_token = device_token
             device.device_voip_token = device_voip_token
             device.device_description = device_description
         else:
             device = NotificationsPushRegistration(user_id=user_id)
-            device.arn = pn.register_device(
-                device_token,
-                device_platform,
-                device_info=device_info)
+            device.arn = pn.register_device(device_token, device_platform, device_info=device_info)
             if device_voip_token:
                 device.voip_arn = pn.register_device(
                     device_voip_token,
                     device_platform,
                     device_info=device_info,
-                    voip=True)
+                    voip=True,
+                )
             device.device_token = device_token
             device.device_voip_token = device_voip_token
             device.device_id = device_id
@@ -167,7 +158,7 @@ class PushRegistrationEndpoint(BaseResource):
     @accepts(schema=PushRegistrationDeleteSchema, api=ns)
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
-        """ Delete device token.
+        """Delete device token.
 
         Unregisters device token, not entire device, from the AWS SNS service
         for all topics. Then deletes device token entries from database.
@@ -184,15 +175,13 @@ class PushRegistrationEndpoint(BaseResource):
         device_token = request.json['device_token']
 
         device = (
-            NotificationsPushRegistration
-            .query
-            .filter_by(
-                user_id=user_id)
-            .filter(
+            NotificationsPushRegistration.query.filter_by(user_id=user_id).filter(
                 or_(
                     NotificationsPushRegistration.device_token == device_token,
-                    NotificationsPushRegistration.device_voip_token == device_token))
-            .one_or_none())
+                    NotificationsPushRegistration.device_voip_token == device_token,
+                )
+            ).one_or_none()
+        )
 
         if device:
             pn = PushNotification()
@@ -209,16 +198,21 @@ class PushRegistrationEndpoint(BaseResource):
 ns_dev_push = Namespace(
     'notifications',
     path='/notifications/push/test',
-    description='[DEV ONLY] Endpoints for testing sending of push notifications.')
+    description=('[DEV ONLY] Endpoints for testing sending of push notifications.'),
+)
+
 
 @ns_dev_push.route('/alert/<int:user_id>/')
 class ApplePushNotificationAlertTestEndpoint(BaseResource):
-
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationAlertTestSchema, api=ns_dev_push)
-    @responds(schema=ApplePushNotificationAlertTestSchema, status_code=201, api=ns_dev_push)
+    @responds(
+        schema=ApplePushNotificationAlertTestSchema,
+        status_code=201,
+        api=ns_dev_push,
+    )
     def post(self, user_id):
-        """ [DEV ONLY] Send an alert notification to the user.
+        """[DEV ONLY] Send an alert notification to the user.
 
         Note
         ----
@@ -241,12 +235,15 @@ class ApplePushNotificationAlertTestEndpoint(BaseResource):
 
 @ns_dev_push.route('/background/<int:user_id>/')
 class ApplePushNotificationBackgroundTestEndpoint(BaseResource):
-
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationBackgroundTestSchema, api=ns_dev_push)
-    @responds(schema=ApplePushNotificationBackgroundTestSchema, status_code=201, api=ns_dev_push)
+    @responds(
+        schema=ApplePushNotificationBackgroundTestSchema,
+        status_code=201,
+        api=ns_dev_push,
+    )
     def post(self, user_id):
-        """ [DEV ONLY] Send a background update notification to the user.
+        """[DEV ONLY] Send a background update notification to the user.
 
         Note
         ----
@@ -269,12 +266,15 @@ class ApplePushNotificationBackgroundTestEndpoint(BaseResource):
 
 @ns_dev_push.route('/badge/<int:user_id>/')
 class ApplePushNotificationBadgeTestEndpoint(BaseResource):
-
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationBadgeTestSchema, api=ns_dev_push)
-    @responds(schema=ApplePushNotificationBadgeTestSchema, status_code=201, api=ns_dev_push)
+    @responds(
+        schema=ApplePushNotificationBadgeTestSchema,
+        status_code=201,
+        api=ns_dev_push,
+    )
     def post(self, user_id):
-        """ [DEV ONLY] Send a badge update notification to the user.
+        """[DEV ONLY] Send a badge update notification to the user.
 
         Note
         ----
@@ -297,12 +297,15 @@ class ApplePushNotificationBadgeTestEndpoint(BaseResource):
 
 @ns_dev_push.route('/voip/<int:user_id>/')
 class ApplePushNotificationVoipTestEndpoint(BaseResource):
-
     @token_auth.login_required
     @accepts(schema=ApplePushNotificationVoipTestSchema, api=ns_dev_push)
-    @responds(schema=ApplePushNotificationVoipTestSchema, status_code=201, api=ns_dev_push)
+    @responds(
+        schema=ApplePushNotificationVoipTestSchema,
+        status_code=201,
+        api=ns_dev_push,
+    )
     def post(self, user_id):
-        """ [DEV ONLY] Send a voip initiation notification to the user.
+        """[DEV ONLY] Send a voip initiation notification to the user.
 
         Note
         ----
@@ -322,7 +325,9 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
         content = request.json.get('content', {})
 
         if content:
-            content['data']['staff_profile_picture'] = get_profile_pictures(content['data']['staff_id'], True)
+            content['data']['staff_profile_picture'] = get_profile_pictures(
+                content['data']['staff_id'], True
+            )
 
         msg = pn.send(user_id, 'voip', content)
         return {'message': msg}
@@ -332,37 +337,33 @@ class ApplePushNotificationVoipTestEndpoint(BaseResource):
 ns_dev_notif = Namespace(
     'notifications',
     path='/notifications/test',
-    description='[DEV ONLY] Endpoints for testing and interacting with notifications directly.')
+    description=(
+        '[DEV ONLY] Endpoints for testing and interacting with notifications'
+        ' directly.'
+    ),
+)
+
 
 @ns_dev_notif.route('/<int:notification_id>/')
 @ns_dev_notif.doc(params={'notification_id': 'Notification ID number'})
 class NotificationsTestEndpoint(BaseResource):
-
     @token_auth.login_required
     @responds(schema=NotificationSchema, api=ns_dev_notif, status_code=200)
     def get(self, notification_id):
-        """[DEV ONLY] Returns the notification with the given notification_id. """
-        notification =  (
-                        Notifications.query
-                        .filter_by(notification_id=notification_id)
-                        .one_or_none()
-                        )
-        
+        """[DEV ONLY] Returns the notification with the given notification_id."""
+        notification = Notifications.query.filter_by(notification_id=notification_id).one_or_none()
+
         if not notification:
             raise BadRequest('No notification with given notification_id.')
 
         return notification
-    
+
     @token_auth.login_required
     @responds(api=ns_dev_notif, status_code=204)
     def delete(self, notification_id):
-        """[DEV ONLY] Deletes the notification with the given notification_id. """
-        notification =  (
-                        Notifications.query
-                        .filter_by(notification_id=notification_id)
-                        .one_or_none()
-                        )
-        
+        """[DEV ONLY] Deletes the notification with the given notification_id."""
+        notification = Notifications.query.filter_by(notification_id=notification_id).one_or_none()
+
         if not notification:
             raise BadRequest('No notification with given notification_id.')
 

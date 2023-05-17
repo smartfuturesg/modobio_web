@@ -1,4 +1,4 @@
-""" Configuration defaults
+"""Configuration defaults
 
 This file defines the configuration defaults for the entire API. It is loaded by
 :mod:`odyssey.config`.
@@ -191,20 +191,20 @@ Note that files will be kept for only 24 hours after a pytest run, unless
 
 .. seealso:: :const:`AWS_S3_PREFIX`
 """
-#TODO Telehealth on the Shelf - removed twilio access key defaults - should be added back when we
+# TODO Telehealth on the Shelf - removed twilio access key defaults - should be added back when we
 # reactivate a Twilio enabled telehealth feature.
 
 # Twilio settings
-#TWILIO_ACCOUNT_SID = ''
+# TWILIO_ACCOUNT_SID = ''
 """ Twilio account ID number. """
 
-#TWILIO_API_KEY_SID = ''
+# TWILIO_API_KEY_SID = ''
 """ Twilio API access key ID number. """
 
-#TWILIO_API_KEY_SECRET = ''
+# TWILIO_API_KEY_SECRET = ''
 """ Twilio API access key secret. """
 
-#CONVERSATION_SERVICE_SID = ''
+# CONVERSATION_SERVICE_SID = ''
 """ Twilio conversation serive ID number. """
 
 TELEHEALTH_BOOKING_LEAD_TIME_HRS = 2
@@ -284,7 +284,7 @@ WHEEL_NP_CONSULT_RATE = '9c36e5c6-ed91-4546-a847-c649c81db265'
 # mongo db
 MONGO_URI = ''
 
-# Calling host base uri 
+# Calling host base uri
 FRONT_END_DOMAIN_NAME = ''
 """ Default name of calling domain
 
@@ -293,7 +293,7 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 """
 
 # Google ReCaptcha api secret
-GOOGLE_RECAPTCHA_SECRET = ""
+GOOGLE_RECAPTCHA_SECRET = ''
 
 WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-3-1'
 """ Name of the table in AWS DynamoDB where wearables data is stored.
@@ -313,7 +313,7 @@ When no date range is specified when requesting wearable data,
 this many days of data is returned.
 """
 
-# Apple app store 
+# Apple app store
 APPLE_APPSTORE_API_KEY = ''
 
 APPLE_APPSTORE_API_KEY_ID = 'C9PC58MRPT'
@@ -326,22 +326,21 @@ APPLE_APPSTORE_BUNDLE_ID = 'com.modobio.ModoBioClient'
 
 APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'
 
-MAINTENANCE_DYNAMO_TABLE='dev_maintenance_v02'
+MAINTENANCE_DYNAMO_TABLE = 'dev_maintenance_v02'
 
-MAINTENANCE_REASONS_TABLE='prod_maintenance_reasons'
+MAINTENANCE_REASONS_TABLE = 'prod_maintenance_reasons'
 
-MAINTENANCE_TIMEZONE='UTC'
+MAINTENANCE_TIMEZONE = 'UTC'
 
 # Maintenance Business Hours Time Window In UTC
-BUSINESS_HRS_START=13
+BUSINESS_HRS_START = 13
 
-BUSINESS_HRS_END=6
+BUSINESS_HRS_END = 6
 
 # Maintenance Notice Periods (in days)
 MAINT_SHORT_NOTICE = 2
 
 MAINT_STD_NOTICE = 14
-
 
 SERVER_NAME = '127.0.0.1:5000'
 """
@@ -350,7 +349,7 @@ url generation outside of the Flask request context. This is useful for
 creating urls as part of celery tasks. 
 """
 
-# Active Campaign 
+# Active Campaign
 ACTIVE_CAMPAIGN_BASE_URL = 'https://modobio.api-us1.com/api/3/'
 ACTIVE_CAMPAIGN_LIST = ''
 ACTIVE_CAMPAIGN_API_KEY = ''

@@ -1,20 +1,14 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from marshmallow import (
-    fields,
-    INCLUDE,
-    EXCLUDE,
-    pre_dump,
-    pre_load,
-    post_dump,
-    post_load,
-    Schema,
-    validate,
-    ValidationError)
+    EXCLUDE, INCLUDE, Schema, ValidationError, fields, post_dump, post_load, pre_dump, pre_load,
+    validate
+)
 
 from odyssey import ma
-from odyssey.api.notifications.models import Notifications, NotificationsPushRegistration
+from odyssey.api.notifications.models import (Notifications, NotificationsPushRegistration)
 
 
 class NotificationSchema(ma.SQLAlchemyAutoSchema):
@@ -22,13 +16,14 @@ class NotificationSchema(ma.SQLAlchemyAutoSchema):
         model = Notifications
         include_fk = True
         load_instance = True
-        exclude = ('updated_at',)
+        exclude = ('updated_at', )
         dump_only = ('notification_id', 'user_id')
 
     # Remove these if not needed by frontend. I don't think they use this information at all.
     @post_dump(pass_original=True)
     def make_object(self, notification_dict, notification_obj, **kwargs):
-        notification_dict['notification_type'] = notification_obj.notification_type_obj.notification_type
+        notification_dict['notification_type'
+                         ] = notification_obj.notification_type_obj.notification_type
         notification_dict['is_staff'] = notification_obj.user.is_staff
         return notification_dict
 
@@ -47,7 +42,9 @@ class PushRegistrationPostSchema(Schema):
     device_description = fields.String(required=True)
     # I want to use PushNotificationPlatform here, but cannot import
     # from odyssey.utils.message because of circular dependency.
-    device_platform = fields.String(required=True, validate=validate.OneOf(['apple', 'android', 'debug']))
+    device_platform = fields.String(
+        required=True, validate=validate.OneOf(['apple', 'android', 'debug'])
+    )
 
 
 class PushRegistrationDeleteSchema(Schema):
@@ -56,8 +53,8 @@ class PushRegistrationDeleteSchema(Schema):
 
 class SkipNoneSchema(Schema):
     @pre_dump
-    def skip_none(self, data: dict, many: bool=False) -> dict:
-        """ Removes all keys with values = None from dict.
+    def skip_none(self, data: dict, many: bool = False) -> dict:
+        """Removes all keys with values = None from dict.
 
         Also removes empty dicts and empty lists.
 
@@ -91,7 +88,7 @@ class SkipNoneSchema(Schema):
 
 class HyphenSchema(Schema):
     def hyphenate(self, string: str) -> str:
-        """ Convert underscores to hyphens in a string.
+        """Convert underscores to hyphens in a string.
 
         Parameters
         ----------
@@ -106,7 +103,7 @@ class HyphenSchema(Schema):
         return string.replace('_', '-')
 
     def on_bind_field(self, field_name: str, field_obj: fields.Field):
-        """ Change field name.
+        """Change field name.
 
         On field creation, convert underscored fieldnames (valid Python) to hyphenated
         names (required output). This method will be called automatically by the
@@ -126,7 +123,7 @@ class HyphenSchema(Schema):
 
 class CamelCaseSchema(Schema):
     def camelcase(self, string: str) -> str:
-        """ Convert underscores to a camelCase string.
+        """Convert underscores to a camelCase string.
 
         Parameters
         ----------
@@ -142,7 +139,7 @@ class CamelCaseSchema(Schema):
         return next(parts) + ''.join(p.title() for p in parts)
 
     def on_bind_field(self, field_name: str, field_obj: fields.Field):
-        """ Change field name.
+        """Change field name.
 
         On field creation, convert underscored fieldnames to camelCase names.
         This method will be called automatically by the :mod:`marshmallow` field
@@ -273,7 +270,11 @@ class ApplePushNotificationVoipSchema(Schema):
 
     # aps entry must be present, can be empty.
     aps = fields.Dict(required=True)
-    type = fields.String(default='incoming-call', required=True, validate=validate.Equal('incoming-call'))
+    type = fields.String(
+        default='incoming-call',
+        required=True,
+        validate=validate.Equal('incoming-call'),
+    )
     data = fields.Nested(ApplePushNotificationVoipDataSchema, required=True)
 
 

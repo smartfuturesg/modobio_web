@@ -1,12 +1,13 @@
-from flask import render_template, Blueprint, session, redirect, request, url_for, flash
+from flask import (Blueprint, flash, redirect, render_template, request, session, url_for)
 from werkzeug.security import check_password_hash
 
 from odyssey import db
-from odyssey.forms.main import StaffLoginForm, ClientSearchForm
-from odyssey.models.staff import Staff
+from odyssey.forms.main import ClientSearchForm, StaffLoginForm
 from odyssey.models.client import ClientInfo
+from odyssey.models.staff import Staff
 
 bp = Blueprint('main', __name__)
+
 
 @bp.route('/')
 def index():
@@ -35,10 +36,12 @@ def login():
 
     return render_template('main/login.html', form=StaffLoginForm())
 
+
 @bp.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('.index'))
+
 
 @bp.route('/clientsearch', methods=('GET', 'POST'))
 def clientsearch():
@@ -56,14 +59,15 @@ def clientsearch():
         clauses.append(ClientInfo.email.ilike(f'%{request.form["email"]}%'))
 
     clients = ClientInfo.query.filter(db.and_(*clauses)).all()
-    
+
     if not clients:
         flash('Client not found, please try again.')
         return render_template('main/clientsearch.html', form=ClientSearchForm())
 
     return render_template('main/clientselect.html', clients=clients)
 
-@bp.route('/clientload', methods=('POST',))
+
+@bp.route('/clientload', methods=('POST', ))
 def clientload():
     clientid = request.form['clientid']
     ci = ClientInfo.query.filter_by(clientid=clientid).one()

@@ -1,11 +1,13 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields, post_load
 
 from odyssey import ma
-from odyssey.api.user.models import User
 from odyssey.api.facility.models import RegisteredFacilities
+from odyssey.api.user.models import User
+
 
 class RegisteredFacilitiesSchema(Schema):
     facility_id = fields.Integer(required=False)
@@ -16,6 +18,7 @@ class RegisteredFacilitiesSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return RegisteredFacilities(**data)
+
 
 class ClientSummarySchema(Schema):
 
