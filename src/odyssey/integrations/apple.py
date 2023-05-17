@@ -75,7 +75,6 @@ class AppStore:
         # query Apple Storekit for subscription status and details
         #   as per apple recommendation, use the production url first, then try the 
         #   storekit url if the transaction_id is not found: error code 4040005
-
         access_token = self._generate_auth_jwt()
         headers = {'Authorization': f'Bearer {access_token}'}
 
@@ -85,15 +84,18 @@ class AppStore:
             try:
                 response.raise_for_status()
             except:
-                # continue if transaction_id not found in production appstore or for any errors when using sandbox 
-                if response.json().get('errorCode') != 4040005 or url == APPLE_APPSTORE_BASE_URLS[-1]:
+                # continue if transaction_id not found in production appstore 
+                if url == APPLE_APPSTORE_BASE_URLS[-1]:
                     raise BadRequest(f'Apple AppStore returned the following error: {response.text}')
                 else:
                     continue
 
             # in some cases bad transaction_ids don't return anything but a successful request
-            if response.json().get('data') == []:
-                raise BadRequest(f"Something went wrong while trying to verify Apple AppStore subscription for transaction_id: {original_transaction_id} ")
+            try:
+                if response.json().get('data') == []:
+                    raise BadRequest(f"Something went wrong while trying to verify Apple AppStore subscription for transaction_id: {original_transaction_id}")
+            except json.decoder.JSONDecodeError:
+                continue # try the next url in the list if the response is not json
 
             break # validation was successful
 
