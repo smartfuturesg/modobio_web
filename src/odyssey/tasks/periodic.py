@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime, time, timedelta, timezone
+from random import randrange
 
 import boto3
 from boto3.dynamodb.conditions import Attr
@@ -7,9 +8,10 @@ from celery.schedules import crontab
 from celery.signals import worker_process_init, worker_ready
 from celery.utils.log import get_task_logger
 from flask import current_app
+import redis
 from sqlalchemy import and_, delete, distinct, func, or_, select, text
 
-from odyssey import celery, db, mongo
+from odyssey import celery, conf, db, mongo
 from odyssey.api.client.models import (
     ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations, ClientDataStorage
 )
@@ -419,16 +421,24 @@ def deploy_subscription_update_tasks(interval: int):
         ).all()
     )
 
+    # connect to redis using CELERY_BROKER_URL
+    redis_conn = redis.from_url(conf.broker_url)
+
     for subscription in subscriptions:
         logger.info(
             'Deploying task to update subscription for user_id:'
             f' {subscription.user_id}'
         )
-        # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
-        task_eta = subscription.expire_date
-        if task_eta < datetime.utcnow():
-            update_client_subscription_task.delay(subscription.user_id)
-        else:
+
+        # check that subscription update task is not already in the redis queue
+        # if it is, do not deploy another task
+        if not redis_conn.get(f"task_subscription_update_{subscription.user_id}"):
+            # set redis key to indicate that a task has been deployed for this user_id
+            # the key is set to expire in 1 hour
+            redis_conn.set(f'task_subscription_update_{subscription.user_id}', 1, ex=3600)
+            
+            # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
+            task_eta = subscription.expire_date + timedelta(seconds = 5) 
             update_client_subscription_task.apply_async((subscription.user_id, ), eta=task_eta)
 
     return

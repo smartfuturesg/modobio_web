@@ -4,17 +4,18 @@ from datetime import datetime, time, timedelta
 from io import BytesIO
 
 from flask_migrate import current_app
+import redis
 from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
 
-from odyssey import celery, db, mongo
+from odyssey import celery, conf, db, mongo
 from odyssey.api.client.models import (ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations)
 from odyssey.api.lookup.models import (LookupBookingTimeIncrements, LookupClinicalCareTeamResources)
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
-from odyssey.api.user.models import User
+from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry, IntegrationsBaseTaskWithRetry
 from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID)
@@ -390,10 +391,22 @@ def update_client_subscription_task(user_id: int):
     user_id : int
         used to grab the latest subscription
     """
+    latest_subscription = (
+            UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
+                UserSubscriptions.idx.desc()
+            ).first()
+        )
 
-    update_client_subscription(user_id=user_id)
+    if latest_subscription.subscription_status == 'unsubscribed':
+        return
+    else:
+        update_client_subscription(user_id=user_id, latest_subscription=latest_subscription)
 
     db.session.commit()
+
+    # connect to redis and delete task key
+    redis_conn = redis.Redis.from_url(conf.broker_url)
+    redis_conn.delete(f'task_subscription_update_{user_id}')
     return
 
 
