@@ -154,6 +154,7 @@ class SystemDeleteUserTestEndpoint(BaseResource):
     def get(self):
 
         from odyssey.tasks.tasks import test_task
+
         test_task.delay()
 
         test_task.apply_async(countdown=5)

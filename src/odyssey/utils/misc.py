@@ -1107,20 +1107,19 @@ def update_client_subscription(
         Check the app store to see if the subscription has been revoked.
 
     """
-
-    # verify the user is a client and has a verified email
-    user = User.query.filter_by(user_id=user_id).one_or_none()
-    if not user.is_client:
-        raise BadRequest('User is not a client.')
-    if not user.email_verified:
-        raise BadRequest('User email is not verified.')
-
     if not latest_subscription:
         latest_subscription = (
             UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
                 UserSubscriptions.idx.desc()
             ).first()
         )
+
+        # verify the user is a client and has a verified email
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        if not user.is_client:
+            raise BadRequest('User is not a client.')
+        if not user.email_verified:
+            raise BadRequest('User email is not verified.')
 
     new_sub_data = {}
     utc_time_now = datetime.utcnow()
@@ -1189,8 +1188,8 @@ def update_client_subscription(
                     'end_date': utc_time_now.isoformat(),
                     'last_checked_date': utc_time_now.isoformat(),
                 })
-
-                welcome_email = True  # user was previously unsubscribed and now has a subscription
+                if latest_subscription.subscription_type_id == None:
+                    welcome_email = True  # user was previously unsubscribed and now has a subscription
 
         # if status in grace period or retry period, update subscription status to subscribed to keep current subscription
         elif (status in [3, 4] and latest_subscription.subscription_status == 'unsubscribed'):
@@ -1256,7 +1255,8 @@ def update_client_subscription(
                 'end_date': utc_time_now.isoformat(),
                 'last_checked_date': utc_time_now.isoformat(),
             })
-            welcome_email = True  # user was previously unsubscribed and now has a subscription
+            if latest_subscription.subscription_type_id == None:
+                welcome_email = True  # user was previously unsubscribed and now has a subscription
     else:
         # user is subscribed and hasn't expired yet
         latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
