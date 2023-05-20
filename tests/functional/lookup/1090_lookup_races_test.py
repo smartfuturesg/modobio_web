@@ -1,7 +1,8 @@
 from flask.json import dumps
 
+
 def test_get_lookup_races(test_client):
-    # send get request for drinks lookup table
+    # send get request for races lookup table
     response = test_client.get(
         '/lookup/races/',
         headers=test_client.client_auth_header,

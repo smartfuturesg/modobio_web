@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from flask_restx.fields import String
-from sqlalchemy import insert, text
+from sqlalchemy import CheckConstraint, insert, text
 from sqlalchemy.sql.expression import true
 
 from odyssey import db
@@ -788,8 +788,14 @@ class TelehealthChatRooms(BaseModel):
 class TelehealthStaffSettings(BaseModel):
     """
     Holds staff preferred settings for Telehealth appointments
-
     """
+
+    __table_args__ = (
+        CheckConstraint(
+            '0 <= availability_horizon <= 52',
+            name='availability_horizon_range',
+        ),
+    )
 
     user_id = db.Column(
         db.Integer,
@@ -815,6 +821,14 @@ class TelehealthStaffSettings(BaseModel):
     Staff's timezone setting for the current telehealth availability submisison
 
     :type: str
+    """
+
+    availability_horizon = db.Column(db.Integer, nullable=False, server_default='2')
+    """
+    How far out from the current week the practitioner wants to be available to be booked. An integer
+    representing weeks. Must be 0-52. If set to 0, the practitioner cannot be booked.
+    
+    :type: int
     """
 
     availability = db.relationship(

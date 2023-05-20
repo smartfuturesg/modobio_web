@@ -27,21 +27,11 @@ from odyssey.api.client.models import (
 )
 from odyssey.api.community_manager.models import \
     CommunityManagerSubscriptionGrants
-from odyssey.api.doctor.models import (
-    MedicalBloodTestResultTypes, MedicalBloodTests, MedicalConditions, MedicalImaging,
-    MedicalLookUpSTD
-)
+from odyssey.api.doctor.models import *
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import *
-from odyssey.api.lookup.models import (
-    LookupBookingTimeIncrements, LookupDrinks, LookupSubscriptions
-)
 from odyssey.api.notifications.models import Notifications
-from odyssey.api.telehealth.models import TelehealthBookings
-from odyssey.api.user.models import (
-    User, UserPendingEmailVerifications, UserProfilePictures, UserRemovalRequests,
-    UserSubscriptions, UserTokenHistory
-)
+from odyssey.api.user.models import *
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.apple import AppStore
@@ -149,7 +139,7 @@ def check_blood_test_existence(test_id):
 
 def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
-    result = MedicalBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
+    result = LookupBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
     if not result:
         raise BadRequest(f'Blood test result {result_name} not found.')
 
@@ -170,19 +160,19 @@ def check_client_facility_relation_existence(user_id, facility_id):
 
 
 def check_medical_condition_existence(medcon_id):
-    medcon = MedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
+    medcon = LookupMedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
     if not medcon:
         raise BadRequest(f'Medical condition {medcon_id} not found.')
 
 
-def check_drink_existence(drink_id):
-    drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
-    if not drink:
-        raise BadRequest(f'Drink {drink_id} not found.')
+# def check_drink_existence(drink_id):
+#     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
+#     if not drink:
+#         raise BadRequest(f'Drink {drink_id} not found.')
 
 
 def check_std_existence(std_id):
-    std = MedicalLookUpSTD.query.filter_by(std_id=std_id).one_or_none()
+    std = LookupSTDs.query.filter_by(std_id=std_id).one_or_none()
     if not std:
         raise BadRequest(f'STD {std_id} not found.')
 
@@ -816,10 +806,16 @@ def delete_staff_data(user_id):
             )
 
     # only delete staff subscription
-    db.session.execute(
-        f'DELETE FROM "UserSubscriptions" WHERE user_id={user_id} AND'
-        ' is_staff=True'
+    user_subs = (
+        db.session.execute(
+            select(UserSubscriptions).where(
+                UserSubscriptions.user_id == user_id,
+                UserSubscriptions.is_staff == True,
+            )
+        ).scalars().all()
     )
+    for sub in user_subs:
+        db.session.delete(sub)
 
     db.session.commit()
 
@@ -898,18 +894,19 @@ def delete_client_data(user_id):
             fd.delete(path)
 
     # TelehealthBookingDetails.images and .voice are identified by booking_id,
-    # so filter TelehealthBookings table and use relationships.
-    bookings = (
-        db.session.execute(select(TelehealthBookings).filter_by(client_user_id=user_id)
-                          ).scalars().all()
-    )
-    for booking in bookings:
-        if booking.booking_details.voice:
-            fd.delete(booking.booking_details.voice)
-        if booking.booking_details.images:
-            for path in booking.booking_details.images:
-                if path:
-                    fd.delete(path)
+    # # so filter TelehealthBookings table and use relationships.
+    # bookings = (db.session.execute(
+    #     select(TelehealthBookings)
+    #     .filter_by(client_user_id=user_id))
+    #             .scalars()
+    #             .all())
+    # for booking in bookings:
+    #     if booking.booking_details.voice:
+    #         fd.delete(booking.booking_details.voice)
+    #     if booking.booking_details.images:
+    #         for path in booking.booking_details.images:
+    #             if path:
+    #                 fd.delete(path)
 
     # At this point, all files should be deleted from S3.
     # Double check that that's true, warn if not and delete rest.
@@ -959,10 +956,16 @@ def delete_client_data(user_id):
             )
 
     # only delete client subscription
-    db.session.execute(
-        f'DELETE FROM "UserSubscriptions" WHERE user_id={user_id} AND'
-        ' is_staff=False'
+    user_subs = (
+        db.session.execute(
+            select(UserSubscriptions).where(
+                UserSubscriptions.user_id == user_id,
+                UserSubscriptions.is_staff == False,
+            )
+        ).scalars().all()
     )
+    for sub in user_subs:
+        db.session.delete(sub)
 
     db.session.commit()
 
@@ -995,6 +998,10 @@ def delete_user(user_id, requestor_id, delete_type):
     db.session.add(removal_request)
     db.session.flush()
 
+    user_login = (
+        db.session.execute(select(UserLogin).filter(UserLogin.user_id == user_id)
+                          ).scalars().one_or_none()
+    )
     if user.was_staff:
         # cases where the user is either only staff or client and staff
 
@@ -1010,7 +1017,7 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
 
             # since entire user is being deleted, we can delete the login info
-            db.session.execute(f'DELETE FROM "UserLogin" WHERE user_id={user_id};')
+            db.session.delete(user_login)
 
             # remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
@@ -1021,7 +1028,7 @@ def delete_user(user_id, requestor_id, delete_type):
             delete_staff_data(user_id)
             if not user.is_client:
                 # user was only staff, so we can delete the login info
-                db.session.execute(f'DELETE FROM "UserLogin" WHERE user_id={user_id};')
+                db.session.delete(user_login)
                 user.phone_number = None
                 user.email = None
                 user.deleted = True
@@ -1044,7 +1051,7 @@ def delete_user(user_id, requestor_id, delete_type):
             user.is_client = False
             delete_client_data(user_id)
 
-            db.session.execute(f'DELETE FROM "UserLogin" WHERE user_id={user_id};')
+            db.session.delete(user_login)
 
             # remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)

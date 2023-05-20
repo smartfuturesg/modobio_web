@@ -17,6 +17,7 @@ from odyssey.api.client.models import (
     ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations, ClientDataStorage
 )
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
+from odyssey.api.notifications.models import Notifications
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.telehealth.models import (
     TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailabilityExceptions
@@ -476,11 +477,25 @@ def remove_expired_availability_exceptions():
     logger.info('Completed remove expired exceptions task')
 
 
-@worker_process_init.connect
-def close_previous_db_connection(**kwargs):
-    if db.session:
-        db.session.close()
-        db.engine.dispose()
+@celery.task()
+def remove_past_notifications():
+    """
+    Simple cleanup task for the Notifications table. If the notification has been marked
+    as "deleted" or if the current time past the "expires" time, the notification will
+    be removed from the table.
+    """
+
+    current_time = datetime.now(timezone.utc).date()
+
+    logger.info('Removing past notifications...')
+    notifications = Notifications.query.filter(
+        or_(Notifications.expires < current_time, Notifications.deleted == True)
+    ).all()
+
+    for notification in notifications:
+        db.session.delete(notification)
+    db.session.commit()
+    logger.info('Completed remove past notifications task.')
 
 
 @celery.task()
@@ -656,6 +671,13 @@ def update_ac_age_tags():
     logger.info(f'Age group tags have been updated')
 
 
+@worker_process_init.connect
+def close_previous_db_connection(**kwargs):
+    if db.session:
+        db.session.close()
+        db.engine.dispose()
+
+
 celery.conf.beat_schedule = {
     # temporary member cleanup
     'cleanup_temporary_care_team': {
@@ -667,6 +689,11 @@ celery.conf.beat_schedule = {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
         'args': (60, ),
         'schedule': crontab(minute='*/60'),
+    },
+    # remove past notifications
+    'remove_past_notifications': {
+        'task': 'odyssey.tasks.periodic.remove_past_notifications',
+        'schedule': crontab(hour=0, minute=42),
     },
     # scheduled maintenances
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {

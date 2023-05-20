@@ -245,9 +245,14 @@ class TelehealthBookingsRoomAccessTokenApi(BaseResource):
     }
 )  # Add all other required params
 class TelehealthClientTimeSelectApi(BaseResource):
-    @token_auth.login_required(check_staff_telehealth_access=True)
-    @responds(schema=TelehealthTimeSelectOutputSchema, api=ns, status_code=200)
-    def get(self, user_id):
+
+    # in the case of the same client being added to queue twice, the original entry is overwritten
+    __check_resource__ = False
+
+    @token_auth.login_required
+    @accepts(schema=TelehealthQueueClientPoolSchema, api=ns)
+    @responds(schema=TelehealthTimeSelectOutputSchema, api=ns, status_code=201)
+    def post(self, user_id):
         """
         Checks the booking requirements stored in the client queue
         Removes times so that appointments end 0.5 hours before scheduled maintenance
@@ -255,6 +260,14 @@ class TelehealthClientTimeSelectApi(BaseResource):
         Responds with available booking times localized to the client's timezone
         """
         check_client_existence(user_id)
+
+        # Verify target date is client's local today or in the future
+        client_tz = request.parsed_obj.timezone
+        target_date = datetime.combine(
+            request.parsed_obj.target_date.date(),
+            time(0, tzinfo=tz.gettz(client_tz)),
+        )
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz))
 
         client_in_queue = (
             TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(
@@ -304,13 +317,8 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
         time_inc = LookupBookingTimeIncrements.query.all()
 
-        local_target_date = client_in_queue.target_date
-        client_tz = client_in_queue.timezone
-        duration = client_in_queue.duration
-        profession_type = client_in_queue.profession_type
-
         utc_target_datetime, _, _, _ = telehealth_utils.get_utc_start_day_time(
-            local_target_date, client_tz
+            queue.target_date, queue.timezone
         )
 
         # list of dicts, dicts have two datetime start_time and end_time
@@ -321,25 +329,12 @@ class TelehealthClientTimeSelectApi(BaseResource):
             )
         )  # minus a day and 15 not 14 to be on the safe side of things
 
-        # days_available =
-        # {local_target_date(datetime.date):
-        #   {start_time_idx_1:
-        #       {'date_start_utc': datetime.date,
-        #         'practitioner_ids': {user_id, user_id (set)}
-        #       }
-        #   },
-        #   {start_time_idx_2:
-        #       {'date_start_utc': datetime.date,
-        #         'practitioner_ids':  {user_id, user_id (set)}
-        #       }
-        #   }
-        # }
         days_available = {}
         days_out = 0
         times_available = 0
         # limit 10 here still but since one pass here can produce as many as 96, it must still be limited to 10 below
         while days_out <= 14 and times_available < 10:
-            local_target_date2 = local_target_date + timedelta(days=days_out)
+            local_target_date2 = queue.target_date + timedelta(days=days_out)
 
             (
                 day_start_utc,
@@ -354,7 +349,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 start_time_window_utc.idx,
                 day_end_utc.weekday(),
                 end_time_window_utc.idx,
-                duration,
+                queue.duration,
             )
 
             # available_times_with_practitioners =
@@ -376,7 +371,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                     + timedelta(minutes=((time_blocks[block][0][2] - 1) * 5))
                 )  # not zeo indexed so minus one there
                 conflict_window_datetime_end_utc = (
-                    conflict_window_datetime_start_utc + timedelta(minutes=duration)
+                    conflict_window_datetime_start_utc + timedelta(minutes=queue.duration)
                 )
 
                 and_continue = False
@@ -434,24 +429,27 @@ class TelehealthClientTimeSelectApi(BaseResource):
         if not days_available:
             raise BadRequest('No staff available for the upcoming two weeks.')
 
+        # commit queue data once final point of failure is cleared
+        db.session.commit()
+
         # get practitioners details only once
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
         practitioners_info = telehealth_utils.get_practitioner_details(
-            practitioner_ids_set, profession_type, duration
+            practitioner_ids_set, queue.profession_type, queue.duration
         )
 
         # buffer not taken into consideration here because that only matters to practitioner not client
         final_dict = []
         for day in days_available:
-            for time in days_available[day]:
-                target_date_utc = days_available[day][time]['date_start_utc']
-                client_window_id_start_time_utc = time
+            for time1 in days_available[day]:
+                target_date_utc = days_available[day][time1]['date_start_utc']
+                client_window_id_start_time_utc = time1
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
 
                 # client localize target_date_utc + utc_start_time + timezone
                 datetime_start = datetime.combine(target_date_utc, start_time_utc,
                                                   tz.UTC).astimezone(tz.gettz(client_tz))
-                datetime_end = datetime_start + timedelta(minutes=duration)
+                datetime_end = datetime_start + timedelta(minutes=queue.duration)
                 localized_window_start = (
                     LookupBookingTimeIncrements.query.filter_by(start_time=datetime_start.time()
                                                                ).first().idx
@@ -463,7 +461,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
 
                 final_dict.append({
                     'practitioners_available_ids':
-                        list(days_available[day][time]['practitioner_ids']),
+                        list(days_available[day][time1]['practitioner_ids']),
                     'target_date':
                         datetime_start.date(),
                     'start_time':
@@ -1522,6 +1520,7 @@ class TelehealthSettingsStaffAvailabilityApi(BaseResource):
             'settings': {
                 'timezone': availability[0][0].settings.timezone,
                 'auto_confirm': availability[0][0].settings.auto_confirm,
+                'availability_horizon': availability[0][0].settings.availability_horizon,
             },
             'availability': [],
         }
