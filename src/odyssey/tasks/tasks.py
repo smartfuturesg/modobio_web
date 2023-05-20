@@ -3,8 +3,8 @@ import secrets
 from datetime import datetime, time, timedelta
 from io import BytesIO
 
-from flask_migrate import current_app
 import redis
+from flask_migrate import current_app
 from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
 
@@ -392,10 +392,10 @@ def update_client_subscription_task(user_id: int):
         used to grab the latest subscription
     """
     latest_subscription = (
-            UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
-                UserSubscriptions.idx.desc()
-            ).first()
-        )
+        UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
+            UserSubscriptions.idx.desc()
+        ).first()
+    )
 
     if latest_subscription.subscription_status == 'unsubscribed':
         return
