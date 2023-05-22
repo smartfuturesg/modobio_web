@@ -330,7 +330,7 @@ class TerraClient(terra.Terra):
                         source='Device',
                         systolic=sample['systolic_bp'],
                         diastolic=sample['diastolic_bp'],
-                        pulse=None,
+                        pulse=sample.get('pulse', None),  # not always present
                     )
                     db.session.add(mbps)
 
