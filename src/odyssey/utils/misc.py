@@ -1151,13 +1151,8 @@ def update_client_subscription(
             apple_original_transaction_id if apple_original_transaction_id else latest_subscription.
             apple_original_transaction_id
         )
-        # Status options from https://developer.apple.com/documentation/appstoreserverapi/status
-        # 1 The auto-renewable subscription is active. -- subscription has either been renewed or unchanged
-        # 2 The auto-renewable subscription is expired. -- subscription has been expired. Add new unsubscribed entry to UserSubscriptions
-        # 3 The auto-renewable subscription is in a billing retry period. -- keep user subscribed.
-        # 4 The auto-renewable subscription is in a billing grace period. -- keep user subscribed.
-        # 5 The auto-renewable subscription is revoked. -- Add new unsubscribed entry to UserSubscriptions
-        if status == 1:
+
+        if status == 'ACTIVE':
             if latest_subscription.subscription_status == 'subscribed':
                 # subscription is active and hasn't expired yet
                 latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
@@ -1192,7 +1187,10 @@ def update_client_subscription(
                     welcome_email = True  # user was previously unsubscribed and now has a subscription
 
         # if status in grace period or retry period, update subscription status to subscribed to keep current subscription
-        elif (status in [3, 4] and latest_subscription.subscription_status == 'unsubscribed'):
+        elif (
+            status in ('RETRY', 'GRACE_PERIOD')
+            and latest_subscription.subscription_status == 'unsubscribed'
+        ):
             latest_subscription.update({
                 'end_date': None,
                 'subscription_status': 'subscribed',
@@ -1200,7 +1198,10 @@ def update_client_subscription(
 
             new_sub_data = {}
 
-        elif (status == 5 and latest_subscription.subscription_status == 'subscribed'):
+        elif (
+            status in ('REVOKED', 'EXPIRED')
+            and latest_subscription.subscription_status == 'subscribed'
+        ):
             # update current subscription to unsubscribed
             latest_subscription.update({
                 'end_date': utc_time_now.isoformat(),

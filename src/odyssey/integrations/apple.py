@@ -19,7 +19,7 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.user.models import UserSubscriptions
 from odyssey.api.user.schemas import UserSubscriptionsSchema
-from odyssey.utils.constants import APPLE_APPSTORE_BASE_URLS
+from odyssey.utils.constants import (APPLE_APPSTORE_BASE_URLS, APPLE_SUBSCRIPTION_STATUS_DICT)
 
 
 class AppStore:
@@ -121,6 +121,7 @@ class AppStore:
         renewal_jws = (payload.get('data')[0].get('lastTransactions')[0].get('signedRenewalInfo'))
 
         status = (payload.get('data')[0].get('lastTransactions')[0].get('status'))
+        status = APPLE_SUBSCRIPTION_STATUS_DICT.get(status, 'UNKNOWN')
 
         # decode JWS payload, check the subscription product
         transaction_info = base64_decode(transaction_jws.split('.')[1])
