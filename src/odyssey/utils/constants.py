@@ -1063,3 +1063,18 @@ WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES = {
     'SAMSUNG': 'Device - Samsung Health',
     'WITHINGS': 'Device - Withings',
 }
+
+APPLE_SUBSCRIPTION_STATUS_DICT = {
+    1: 'ACTIVE',
+    2: 'EXPIRED',
+    3: 'RETRY',
+    4: 'GRACE_PERIOD',
+    5: 'REVOKED',
+}
+"""Status options from https://developer.apple.com/documentation/appstoreserverapi/status
+    - 1 The auto-renewable subscription is active. -- subscription has either been renewed or unchanged
+    - 2 The auto-renewable subscription is expired. -- subscription has been expired. Add new unsubscribed entry to UserSubscriptions
+    - 3 The auto-renewable subscription is in a billing retry period. -- keep user subscribed.
+    - 4 The auto-renewable subscription is in a billing grace period. -- keep user subscribed.
+    - 5 The auto-renewable subscription is revoked. -- Add new unsubscribed entry to UserSubscriptions
+"""
