@@ -319,7 +319,7 @@ class TerraClient(terra.Terra):
             )
 
             # check for OMRON data
-            if (wearable == 'OMRONUS' and data_type == 'body'):  # if so, there is bp data
+            if (data_type == 'body' and data['blood_pressure_data']['blood_pressure_samples']):  # if so, there is bp data
                 # loop through each individual sample
                 for bp_sample, hr_sample in zip(
                     data['blood_pressure_data']['blood_pressure_samples'],
