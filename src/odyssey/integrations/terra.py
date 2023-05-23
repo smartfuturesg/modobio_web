@@ -321,7 +321,10 @@ class TerraClient(terra.Terra):
             # check for OMRON data
             if (wearable == 'OMRONUS' and data_type == 'body'):  # if so, there is bp data
                 # loop through each individual sample
-                for bp_sample, hr_sample in zip(data['blood_pressure_data']['blood_pressure_samples'], data['heart_data']['heart_rate_data']['detailed']['hr_samples']):
+                for bp_sample, hr_sample in zip(
+                    data['blood_pressure_data']['blood_pressure_samples'],
+                    data['heart_data']['heart_rate_data']['detailed']['hr_samples'],
+                ):
                     mbps = MedicalBloodPressures(
                         datetime_taken=bp_sample['timestamp'],
                         user_id=user_id,
