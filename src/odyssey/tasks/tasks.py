@@ -382,11 +382,11 @@ def store_telehealth_transcript(booking_id: int):
 
 @celery.task(base=BaseTaskWithRetry)
 def update_client_subscription_task(user_id: int):
-    """Updates the user's subscription by checking the subscription status with apple, google playstore, 
+    """Updates the user's subscription by checking the subscription status with apple, google playstore,
     and UserSubscriptionGrants.
 
     This task is intended to be scheduled right after the current subscription expires according to
-    :attr:`UserSubscriptions.expire_date`. 
+    :attr:`UserSubscriptions.expire_date`.
 
     Parameters
     ----------

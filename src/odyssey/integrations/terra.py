@@ -319,11 +319,17 @@ class TerraClient(terra.Terra):
             )
 
             # check for bp data
-            if data_type == 'body' and data['blood_pressure_data']['blood_pressure_samples']:
+            if (data_type == 'body' and data['blood_pressure_data']['blood_pressure_samples']):
                 # loop through each individual sample
-                for i, bp_sample in enumerate(data['blood_pressure_data']['blood_pressure_samples']):
-                    if data['heart_data']['heart_rate_data']['detailed']['hr_samples'][i]['timestamp'] == bp_sample['timestamp']:
-                        hr_sample = data['heart_data']['heart_rate_data']['detailed']['hr_samples'][i]['bpm']
+                for i, bp_sample in enumerate(
+                    data['blood_pressure_data']['blood_pressure_samples']
+                ):
+                    if (
+                        data['heart_data']['heart_rate_data']['detailed']['hr_samples'][i]
+                        ['timestamp'] == bp_sample['timestamp']
+                    ):
+                        hr_sample = data['heart_data']['heart_rate_data']['detailed']['hr_samples'][
+                            i]['bpm']
                     else:
                         hr_sample = None
                     mbps = MedicalBloodPressures(
