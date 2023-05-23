@@ -38,7 +38,7 @@ def test_store_data(test_client):
 
     # build url for getting body for user
     url = 'https://api.tryterra.co/v2/body?user_id=' + str(terra_user_id)
-    url += '&start_date=2022-06-01&end_date=2022-06-27&to_webhook=false&with_samples=true'
+    url += '&start_date=2022-04-01&end_date=2022-04-09&to_webhook=false&with_samples=true'
 
     # send terra the get request
     response = requests.get(url=url, headers=headers)
