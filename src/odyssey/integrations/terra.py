@@ -318,8 +318,8 @@ class TerraClient(terra.Terra):
                 upsert=True,
             )
 
-            # check for OMRON data
-            if (data_type == 'body' and data['blood_pressure_data']['blood_pressure_samples']):  # if so, there is bp data
+            # check for bp data
+            if (data_type == 'body' and data['blood_pressure_data']['blood_pressure_samples']):
                 # loop through each individual sample
                 for bp_sample, hr_sample in zip(
                     data['blood_pressure_data']['blood_pressure_samples'],
