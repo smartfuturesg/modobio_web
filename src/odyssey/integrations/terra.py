@@ -321,16 +321,16 @@ class TerraClient(terra.Terra):
             # check for OMRON data
             if (wearable == 'OMRONUS' and data_type == 'body'):  # if so, there is bp data
                 # loop through each individual sample
-                for sample in data['blood_pressure_data']['blood_pressure_samples']:
+                for bp_sample, hr_sample in zip(data['blood_pressure_data']['blood_pressure_samples'], data['heart_data']['heart_rate_data']['detailed']['hr_samples']):
                     mbps = MedicalBloodPressures(
-                        datetime_taken=sample['timestamp'],
+                        datetime_taken=bp_sample['timestamp'],
                         user_id=user_id,
                         reporter_id=user_id,
                         device_name=response.get_json()['user']['provider'],
                         source='Device',
-                        systolic=sample['systolic_bp'],
-                        diastolic=sample['diastolic_bp'],
-                        pulse=sample.get('pulse', None),  # not always present
+                        systolic=bp_sample['systolic_bp'],
+                        diastolic=bp_sample['diastolic_bp'],
+                        pulse=hr_sample.get('bpm', None),  # not always present
                     )
                     db.session.add(mbps)
 
