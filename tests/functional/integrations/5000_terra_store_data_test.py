@@ -44,7 +44,7 @@ def test_store_data(test_client):
     response = requests.get(url=url, headers=headers)
 
     # create a terra library object that can be passed into out own client
-    terra_response = TerraApiResponse(resp=response, dtype='activity')
+    terra_response = TerraApiResponse(resp=response, dtype='body')
 
     # if there are no samples for this data, the metadata will be empty
     for data in terra_response.get_json()['data']:
