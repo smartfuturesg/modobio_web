@@ -29,7 +29,7 @@ def test_store_data(test_client):
     terra_user_id = None
 
     for u in response['users']:
-        if u['provider'] == 'OURA':
+        if u['provider'] == 'OMRONUS':
             terra_user_id = u['user_id']
             break
 
