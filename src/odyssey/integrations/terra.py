@@ -319,12 +319,13 @@ class TerraClient(terra.Terra):
             )
 
             # check for bp data
-            if (data_type == 'body' and data['blood_pressure_data']['blood_pressure_samples']):
+            if data_type == 'body' and data['blood_pressure_data']['blood_pressure_samples']:
                 # loop through each individual sample
-                for bp_sample, hr_sample in zip(
-                    data['blood_pressure_data']['blood_pressure_samples'],
-                    data['heart_data']['heart_rate_data']['detailed']['hr_samples'],
-                ):
+                for i, bp_sample in enumerate(data['blood_pressure_data']['blood_pressure_samples']):
+                    if data['heart_data']['heart_rate_data']['detailed']['hr_samples'][i]['timestamp'] == bp_sample['timestamp']:
+                        hr_sample = data['heart_data']['heart_rate_data']['detailed']['hr_samples'][i]['bpm']
+                    else:
+                        hr_sample = None
                     mbps = MedicalBloodPressures(
                         datetime_taken=bp_sample['timestamp'],
                         user_id=user_id,
@@ -333,7 +334,7 @@ class TerraClient(terra.Terra):
                         source='Device',
                         systolic=bp_sample['systolic_bp'],
                         diastolic=bp_sample['diastolic_bp'],
-                        pulse=hr_sample.get('bpm', None),  # not always present
+                        pulse=hr_sample,  # not always present
                     )
                     db.session.add(mbps)
 
