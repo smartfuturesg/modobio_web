@@ -1114,20 +1114,19 @@ def update_client_subscription(
         Check the app store to see if the subscription has been revoked.
 
     """
-
-    # verify the user is a client and has a verified email
-    user = User.query.filter_by(user_id=user_id).one_or_none()
-    if not user.is_client:
-        raise BadRequest('User is not a client.')
-    if not user.email_verified:
-        raise BadRequest('User email is not verified.')
-
     if not latest_subscription:
         latest_subscription = (
             UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
                 UserSubscriptions.idx.desc()
             ).first()
         )
+
+        # verify the user is a client and has a verified email
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        if not user.is_client:
+            raise BadRequest('User is not a client.')
+        if not user.email_verified:
+            raise BadRequest('User email is not verified.')
 
     new_sub_data = {}
     utc_time_now = datetime.utcnow()
@@ -1159,13 +1158,8 @@ def update_client_subscription(
             apple_original_transaction_id if apple_original_transaction_id else latest_subscription.
             apple_original_transaction_id
         )
-        # Status options from https://developer.apple.com/documentation/appstoreserverapi/status
-        # 1 The auto-renewable subscription is active. -- subscription has either been renewed or unchanged
-        # 2 The auto-renewable subscription is expired. -- subscription has been expired. Add new unsubscribed entry to UserSubscriptions
-        # 3 The auto-renewable subscription is in a billing retry period. -- do nothing.
-        # 4 The auto-renewable subscription is in a billing grace period. -- do nothing.
-        # 5 The auto-renewable subscription is revoked. -- Add new unsubscribed entry to UserSubscriptions
-        if status == 1:
+
+        if status == 'ACTIVE':
             if latest_subscription.subscription_status == 'subscribed':
                 # subscription is active and hasn't expired yet
                 latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
@@ -1179,9 +1173,10 @@ def update_client_subscription(
                         ).one_or_none().sub_id,
                     'is_staff':
                         False,
-                    'apple_original_transaction_id':
+                    'apple_original_transaction_id': (
                         apple_original_transaction_id if apple_original_transaction_id else
-                        request.parsed_obj.apple_original_transaction_id,
+                        latest_subscription.apple_original_transaction_id
+                    ),
                     'last_checked_date':
                         utc_time_now.isoformat(),
                     'expire_date':
@@ -1195,10 +1190,25 @@ def update_client_subscription(
                     'end_date': utc_time_now.isoformat(),
                     'last_checked_date': utc_time_now.isoformat(),
                 })
+                if latest_subscription.subscription_type_id == None:
+                    welcome_email = True  # user was previously unsubscribed and now has a subscription
 
-                welcome_email = True  # user was previously unsubscribed and now has a subscription
+        # if status in grace period or retry period, update subscription status to subscribed to keep current subscription
+        elif (
+            status in ('RETRY', 'GRACE_PERIOD')
+            and latest_subscription.subscription_status == 'unsubscribed'
+        ):
+            latest_subscription.update({
+                'end_date': None,
+                'subscription_status': 'subscribed',
+            })
 
-        elif (status == 5 and latest_subscription.subscription_status == 'subscribed'):
+            new_sub_data = {}
+
+        elif (
+            status in ('REVOKED', 'EXPIRED')
+            and latest_subscription.subscription_status == 'subscribed'
+        ):
             # update current subscription to unsubscribed
             latest_subscription.update({
                 'end_date': utc_time_now.isoformat(),
@@ -1253,7 +1263,8 @@ def update_client_subscription(
                 'end_date': utc_time_now.isoformat(),
                 'last_checked_date': utc_time_now.isoformat(),
             })
-            welcome_email = True  # user was previously unsubscribed and now has a subscription
+            if latest_subscription.subscription_type_id == None:
+                welcome_email = True  # user was previously unsubscribed and now has a subscription
     else:
         # user is subscribed and hasn't expired yet
         latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})

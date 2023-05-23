@@ -785,7 +785,6 @@ class UserSubscriptionApi(BaseResource):
                 ).filter(UserSubscriptions.user_id != user_id).first()
             ):
                 raise BadRequest('This original transaction ID is already in use.')
-
             update_client_subscription(
                 user_id=user_id,
                 apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id,
@@ -820,7 +819,9 @@ class UserSubscriptionHistoryApi(BaseResource):
         check_user_existence(user_id)
 
         client_history = (
-            UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).all()
+            UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).order_by(
+                UserSubscriptions.idx.desc()
+            ).all()
         )
         for i, client_subscription in enumerate(client_history):
             if client_subscription.sponsorship:

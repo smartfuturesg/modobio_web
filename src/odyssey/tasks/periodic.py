@@ -1,15 +1,18 @@
 import logging
 from datetime import date, datetime, time, timedelta, timezone
+from random import randrange
 
 import boto3
+import redis
 from boto3.dynamodb.conditions import Attr
 from celery.schedules import crontab
 from celery.signals import worker_process_init, worker_ready
 from celery.utils.log import get_task_logger
 from flask import current_app
-from sqlalchemy import and_, delete, or_, select, text
+from redis.lock import Lock
+from sqlalchemy import and_, delete, distinct, func, or_, select, text
 
-from odyssey import celery, db, mongo
+from odyssey import celery, conf, db, mongo
 from odyssey.api.client.models import (
     ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations, ClientDataStorage
 )
@@ -396,29 +399,61 @@ def deploy_subscription_update_tasks(interval: int):
         to the frequency of this periodic task.
 
     """
-    # check for subscriptions expiring in the near future
-    expired_by = datetime.utcnow() + timedelta(minutes=interval)
+    # connect to redis using CELERY_BROKER_URL
+    redis_conn = redis.from_url(conf.broker_url)
 
-    subscriptions = (
-        db.session.execute(
-            select(UserSubscriptions).where(
-                UserSubscriptions.expire_date < expired_by,
-                UserSubscriptions.subscription_status == 'subscribed',
+    # Use a lock to ensure only one instance of the task is running at a time
+    lock = redis_conn.lock('deploy_subscription_update_tasks_lock', blocking_timeout=10)
+    if lock.acquire(blocking=False):
+        try:
+            # check for subscriptions expiring in the near future
+            expired_by = datetime.utcnow() + timedelta(minutes=interval)
+
+            # Subquery to find the latest entry for each user_id
+            latest_entries = (
+                db.session.query(
+                    UserSubscriptions.user_id,
+                    func.max(UserSubscriptions.idx).label('max_idx'),
+                ).filter(UserSubscriptions.is_staff == False).group_by(UserSubscriptions.user_id
+                                                                      ).subquery()
             )
-        ).scalars().all()
-    )
 
-    for subscription in subscriptions:
-        logger.info(
-            'Deploying task to update subscription for user_id:'
-            f' {subscription.user_id}'
-        )
-        # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
-        task_eta = subscription.expire_date
-        if task_eta < datetime.utcnow():
-            update_client_subscription_task.delay(subscription.user_id)
-        else:
-            update_client_subscription_task.apply_async((subscription.user_id, ), eta=task_eta)
+            # Main query to get the UserSubscriptions rows that match the latest entries
+            subscriptions = (
+                db.session.query(UserSubscriptions).join(
+                    latest_entries,
+                    (UserSubscriptions.user_id == latest_entries.c.user_id) &
+                    (UserSubscriptions.idx == latest_entries.c.max_idx),
+                ).filter(
+                    UserSubscriptions.expire_date < expired_by,
+                    UserSubscriptions.subscription_status == 'subscribed',
+                    UserSubscriptions.is_staff == False,
+                ).all()
+            )
+
+            for subscription in subscriptions:
+                logger.info(
+                    'Deploying task to update subscription for user_id:'
+                    f' {subscription.user_id}'
+                )
+
+                # check that subscription update task is not already in the redis queue
+                # if it is, do not deploy another task
+                if not redis_conn.get(f'task_subscription_update_{subscription.user_id}'):
+                    # set redis key to indicate that a task has been deployed for this user_id
+                    # the key is set to expire in 1 hour
+                    redis_conn.set(
+                        f'task_subscription_update_{subscription.user_id}',
+                        1,
+                        ex=3600,
+                    )
+
+                    # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
+                    task_eta = subscription.expire_date + timedelta(seconds=5)
+                    update_client_subscription_task.apply_async((subscription.user_id, ),
+                                                                eta=task_eta)
+        finally:
+            lock.release()
 
     return
 

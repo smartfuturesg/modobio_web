@@ -152,6 +152,7 @@ class SystemDeleteUserTestEndpoint(BaseResource):
     """Send a test task"""
     @token_auth.login_required
     def get(self):
+
         from odyssey.tasks.tasks import test_task
 
         test_task.delay()
