@@ -29,7 +29,7 @@ def test_store_data(test_client):
     terra_user_id = None
 
     for u in response['users']:
-        if u['provider'] == 'OURA':
+        if u['provider'] == 'OMRONUS':
             terra_user_id = u['user_id']
             break
 
@@ -38,13 +38,13 @@ def test_store_data(test_client):
 
     # build url for getting body for user
     url = 'https://api.tryterra.co/v2/body?user_id=' + str(terra_user_id)
-    url += '&start_date=2022-06-01&end_date=2022-06-27&to_webhook=false&with_samples=true'
+    url += '&start_date=2023-04-01&end_date=2023-04-09&to_webhook=false&with_samples=true'
 
     # send terra the get request
     response = requests.get(url=url, headers=headers)
 
     # create a terra library object that can be passed into out own client
-    terra_response = TerraApiResponse(resp=response, dtype='activity')
+    terra_response = TerraApiResponse(resp=response, dtype='body')
 
     # if there are no samples for this data, the metadata will be empty
     for data in terra_response.get_json()['data']:
@@ -57,7 +57,7 @@ def test_store_data(test_client):
     # we need to inject into Wearables
     user_wearable = WearablesV2(
         user_id=test_client.client_id,
-        wearable='OURA',
+        wearable='OMRONUS',
         terra_user_id=terra_user_id,
     )
     test_client.db.session.add(user_wearable)
