@@ -665,8 +665,8 @@ celery.conf.beat_schedule = {
     # update active subscriptions
     'update_active_subscriptions': {
         'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
-        'args': (60, ),
-        'schedule': crontab(minute='*/60'),
+        'args': (conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS, ),
+        'schedule': crontab(minute=f'*/{conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS}'),
     },
     # scheduled maintenances
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {

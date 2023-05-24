@@ -378,3 +378,9 @@ Secret password for Terra API.
 
 See :const:`TERRA_DEV_ID`
 """
+
+SUBSCRIPTION_UPDATE_FREQUENCY_MINS = 5
+"""Controls how often to run the subscription update periodic task.
+
+:type: int
+"""
