@@ -537,7 +537,7 @@ class LookupSubscriptions(BaseModel):
 
     :type: string
     """
-    
+
     user_subscriptions = db.relationship(
         'UserSubscriptions',
         back_populates='subscription_type_information',
