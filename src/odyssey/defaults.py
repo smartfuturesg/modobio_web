@@ -379,12 +379,6 @@ Secret password for Terra API.
 See :const:`TERRA_DEV_ID`
 """
 
-GOOGLE_PLAYSTORE_PACKAGE_NAME = 'com.modobio.modobioclient'
-"""Unique identifier for modobio Android app."""
-
-GOOGLE_PLAYSTORE_API_KEY = ''
-"""API key for Google Play Store API."""
-
 SUBSCRIPTION_UPDATE_FREQUENCY_MINS = 5
 """Controls how often to run the subscription update periodic task.
 
