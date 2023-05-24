@@ -342,7 +342,7 @@ class TerraClient(terra.Terra):
                         user_id=user_id,
                         reporter_id=user_id,
                         device_name=response.get_json()['user']['provider'],
-                        source='Device',
+                        source='device',
                         systolic=bp_sample['systolic_bp'],
                         diastolic=bp_sample['diastolic_bp'],
                         pulse=hr_sample,  # not always present
