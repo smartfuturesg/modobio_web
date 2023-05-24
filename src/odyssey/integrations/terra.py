@@ -1,9 +1,10 @@
-from datetime import datetime
-from flask import current_app
 import logging
-from sqlalchemy import select
+from datetime import datetime
+
 import terra
-from terra.api.api_responses import TerraApiResponse, ConnectionErrorHookResponse
+from flask import current_app
+from sqlalchemy import select
+from terra.api.api_responses import (ConnectionErrorHookResponse, TerraApiResponse)
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db, mongo
@@ -18,7 +19,7 @@ WAY_BACK_WHEN = datetime(2010, 1, 1)
 
 
 class TerraClient(terra.Terra):
-    """ Subclass of :class:`terra.Terra` with extra response handling functions.
+    """Subclass of :class:`terra.Terra` with extra response handling functions.
 
     Terra uses different names for variables than we do in our API. Below is a
     mapping of variable names.
@@ -31,14 +32,13 @@ class TerraClient(terra.Terra):
     wearable       provider
     =============  ============
     """
-
     def __init__(
-            self,
-            terra_api_key: str = None,
-            terra_dev_id: str = None,
-            terra_api_secret: str = None
+        self,
+        terra_api_key: str = None,
+        terra_dev_id: str = None,
+        terra_api_secret: str = None,
     ):
-        """ Initialize :class:``TerraClient``.
+        """Initialize :class:``TerraClient``.
 
         The connection with Terra requires 3 tokens: the API key, the
         API secret, and a developer ID. By default they are taken from
@@ -65,7 +65,7 @@ class TerraClient(terra.Terra):
         super().__init__(terra_api_key, terra_dev_id, terra_api_secret)
 
     def status(self, response: TerraApiResponse, raise_on_error: bool = True):
-        """ Handles various response status messages from Terra.
+        """Handles various response status messages from Terra.
 
         If status is:
 
@@ -123,7 +123,7 @@ class TerraClient(terra.Terra):
                 raise BadRequest(f'Terra returned an unknown response.')
 
     def auth_response(self, response: TerraApiResponse):
-        """ Handle authentication and reauthentication webhook responses.
+        """Handle authentication and reauthentication webhook responses.
 
         This function is called by the webhook in response to user authentication or
         reauthentication messages. It adds a new user + wearable combination to the WearablesV2
@@ -145,15 +145,15 @@ class TerraClient(terra.Terra):
         if not user_wearable:
             # New user
             user_wearable = WearablesV2(
-                user_id=user_id,
-                wearable=wearable,
-                terra_user_id=terra_user_id)
+                user_id=user_id, wearable=wearable, terra_user_id=terra_user_id
+            )
             db.session.add(user_wearable)
             db.session.commit()
 
             logger.audit(
                 f'User {user_id} successfully registered wearable '
-                f'device {wearable} (Terra ID {terra_user_id})')
+                f'device {wearable} (Terra ID {terra_user_id})'
+            )
 
             # Fetch historical data. Data is send to webhook.
             now = datetime.utcnow()
@@ -187,7 +187,10 @@ class TerraClient(terra.Terra):
             if not current_app.debug:
                 # Add device tag to users active campaign account
                 ac = ActiveCampaign()
-                ac.add_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
+                ac.add_tag(
+                    user_id,
+                    WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable],
+                )
 
         elif user_wearable.terra_user_id != terra_user_id:
             # User reauthentication
@@ -196,10 +199,11 @@ class TerraClient(terra.Terra):
 
             logger.audit(
                 f'User {user_id} reauthenticated wearable device {wearable} '
-                f'(new Terra ID {terra_user_id})')
+                f'(new Terra ID {terra_user_id})'
+            )
 
     def access_revoked_response(self, response: TerraApiResponse):
-        """ Handle deauthentication webhook responses.
+        """Handle deauthentication webhook responses.
 
         This function is called by the webhook in response to user deauthentication messages.
         The user can revoke access in three ways:
@@ -231,8 +235,9 @@ class TerraClient(terra.Terra):
 
         if not user_wearable:
             logger.warn(
-                f'Access revoke requested for user_id {user_id} and wearable {wearable}, '
-                f'but was not found in the DB. Ignoring.')
+                f'Access revoke requested for user_id {user_id} and wearable'
+                f' {wearable}, but was not found in the DB. Ignoring.'
+            )
             return
 
         if isinstance(response, ConnectionErrorHookResponse):
@@ -240,23 +245,23 @@ class TerraClient(terra.Terra):
             resp = self.deauthenticate_user(terra_user)
             self.status(resp, raise_on_error=False)
 
-        mongo.db.wearables.delete_many({
-            'user_id': user_id,
-            'wearable': wearable})
+        mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable})
 
         db.session.delete(user_wearable)
         db.session.commit()
 
         logger.audit(
-            f'User {user_id} revoked access to wearable {wearable}. Info and data deleted.')
-        
+            f'User {user_id} revoked access to wearable {wearable}. Info and'
+            ' data deleted.'
+        )
+
         if not current_app.debug:
             # Removes device tag association from users active campaign account
             ac = ActiveCampaign()
             ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
 
     def store_data(self, response: TerraApiResponse):
-        """ Store incoming data in Mongo.
+        """Store incoming data in Mongo.
 
         Data is stored as::
 
@@ -284,39 +289,63 @@ class TerraClient(terra.Terra):
         wearable = response.parsed_response.user.provider
         data_type = response.parsed_response.type
 
-        user_id = (db.session.execute(
-            select(WearablesV2.user_id)
-            .filter_by(terra_user_id=terra_user_id))
-                   .scalars()
-                   .one_or_none())
+        user_id = (
+            db.session.execute(select(WearablesV2.user_id).filter_by(terra_user_id=terra_user_id)
+                              ).scalars().one_or_none()
+        )
 
         if not user_id:
-            logger.error(f'User id not found for incoming data for Terra user id {terra_user_id}.')
+            logger.error(
+                'User id not found for incoming data for Terra user id'
+                f' {terra_user_id}.'
+            )
             return
         # Don't use parsed_response here, want to re-deserialize JSON with our JSONProvider.
         for data in response.get_json()['data']:
-            if data["metadata"]["start_time"] is None:
+            if data['metadata']['start_time'] is None:
                 continue
-            
+
             # Update existing or create new doc (upsert).
             result = mongo.db.wearables.update_one(
-                {'user_id': user_id, 'wearable': wearable, 'timestamp': data['metadata']['start_time']},
-                {'$set': {f'data.{data_type}': data}},
-                upsert=True)
+                {
+                    'user_id': user_id,
+                    'wearable': wearable,
+                    'timestamp': data['metadata']['start_time'],
+                },
+                {'$set': {
+                    f'data.{data_type}': data
+                }},
+                upsert=True,
+            )
 
-            # check for OMRON data
-            if wearable == 'OMRONUS' and data_type == 'body':  # if so, there is bp data
+            # check for bp data
+            if (
+                data_type == 'body'
+                and len(data['blood_pressure_data']['blood_pressure_samples']) > 0
+            ):
                 # loop through each individual sample
-                for sample in data['blood_pressure_data']['blood_pressure_samples']:
+                for i, bp_sample in enumerate(
+                    data['blood_pressure_data']['blood_pressure_samples']
+                ):
+                    try:
+                        if (
+                            data['heart_data']['heart_rate_data']['detailed']['hr_samples'][i]
+                            ['timestamp'] == bp_sample['timestamp']
+                        ):
+                            hr_sample = data['heart_data']['heart_rate_data']['detailed'][
+                                'hr_samples'][i]['bpm']
+                    except IndexError:
+                        hr_sample = None
+
                     mbps = MedicalBloodPressures(
-                        datetime_taken=sample['timestamp'],
+                        datetime_taken=bp_sample['timestamp'],
                         user_id=user_id,
                         reporter_id=user_id,
                         device_name=response.get_json()['user']['provider'],
-                        source='Device',
-                        systolic=sample['systolic_bp'],
-                        diastolic=sample['diastolic_bp'],
-                        pulse=None,
+                        source='device',
+                        systolic=bp_sample['systolic_bp'],
+                        diastolic=bp_sample['diastolic_bp'],
+                        pulse=hr_sample,  # not always present
                     )
                     db.session.add(mbps)
 

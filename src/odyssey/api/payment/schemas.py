@@ -1,11 +1,13 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.payment.models import PaymentMethods, PaymentRefunds, PaymentHistory
+from odyssey.api.payment.models import (PaymentHistory, PaymentMethods, PaymentRefunds)
 from odyssey.utils.base.schemas import BaseSchema
+
 
 class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -21,8 +23,7 @@ class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
 class PaymentHistorySchema(BaseSchema):
     class Meta:
         model = PaymentHistory
-        exclude = ('created_at', 'updated_at' )
-
+        exclude = ('created_at', 'updated_at')
 
     transaction_amount = fields.String()
     transaction_descriptor = fields.String()
@@ -34,6 +35,7 @@ class PaymentHistorySchema(BaseSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return PaymentHistory(**data)
+
 
 class TransactionHistorySchema(Schema):
     items = fields.Nested(PaymentHistorySchema(many=True))
@@ -48,13 +50,15 @@ class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
     payment_id = fields.Integer(required=True)
     refund_amount = fields.String()
     refund_reason = fields.String(validate=validate.Length(min=21))
-    
+
     @post_load
     def make_object(self, data, **kwargs):
         return PaymentRefunds(**data)
 
+
 class PaymentTestChargeVoidSchema(Schema):
     booking_id = fields.Integer(required=True)
+
 
 class PaymentTestRefundSchema(Schema):
     transaction_id = fields.String(required=True)

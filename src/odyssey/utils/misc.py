@@ -1,4 +1,4 @@
-""" Utility functions for the odyssey package. """
+"""Utility functions for the odyssey package."""
 
 import ast
 import functools
@@ -9,47 +9,44 @@ import re
 import statistics
 import textwrap
 import typing as t
-from datetime import datetime, timedelta, time
-from dateutil import parser
+from datetime import datetime, time, timedelta
 from time import monotonic
 
 import jwt
 import terra
+from dateutil import parser
 from flask import current_app, request, url_for
+from pytz import utc
+from sqlalchemy import select
+from werkzeug.exceptions import BadRequest, Unauthorized
+
 from odyssey import db, mongo
 from odyssey.api.client.models import (
-    ClientConsent,
-    ClientConsultContract,
-    ClientIndividualContract,
-    ClientPolicies,
-    ClientRelease,
-    ClientSubscriptionContract,
-    ClientFacilities,
+    ClientConsent, ClientConsultContract, ClientFacilities, ClientIndividualContract,
+    ClientPolicies, ClientRelease, ClientSubscriptionContract
 )
-from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
+from odyssey.api.community_manager.models import \
+    CommunityManagerSubscriptionGrants
 from odyssey.api.doctor.models import *
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import *
-from odyssey.api.user.models import *
 from odyssey.api.notifications.models import Notifications
+from odyssey.api.user.models import *
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.apple import AppStore
 from odyssey.integrations.terra import TerraClient
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import ALPHANUMERIC, EMAIL_TOKEN_LIFETIME, DB_SERVER_TIME
+from odyssey.utils.constants import (ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME)
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
-from pytz import utc
-from sqlalchemy import select
-from werkzeug.exceptions import BadRequest, Unauthorized
 
 logger = logging.getLogger(__name__)
 
 
 def generate_modobio_id(user_id: int, firstname: str = None, lastname: str = None) -> str:
-    """ Generate the user's mdobio_id.
+    """Generate the user's mdobio_id.
 
     The modo bio identifier is used as a public user id, it
     can also be exported to other healthcare providers (clients only).
@@ -72,7 +69,7 @@ def generate_modobio_id(user_id: int, firstname: str = None, lastname: str = Non
     str
         Medical record ID
     """
-    rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
+    rli_hash = ''.join([random.choice(ALPHANUMERIC) for i in range(10)])
 
     if all((firstname, lastname)):
         salt = firstname[0] + lastname[0]
@@ -155,7 +152,9 @@ def fetch_facility_existence(facility_id):
 
 
 def check_client_facility_relation_existence(user_id, facility_id):
-    relation = ClientFacilities.query.filter_by(user_id=user_id, facility_id=facility_id).one_or_none()
+    relation = ClientFacilities.query.filter_by(
+        user_id=user_id, facility_id=facility_id
+    ).one_or_none()
     if relation:
         raise BadRequest(f'Client already associated with facility {facility_id}.')
 
@@ -170,14 +169,15 @@ def check_medical_condition_existence(medcon_id):
 #     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
 #     if not drink:
 #         raise BadRequest(f'Drink {drink_id} not found.')
-        
+
+
 def check_std_existence(std_id):
     std = LookupSTDs.query.filter_by(std_id=std_id).one_or_none()
     if not std:
         raise BadRequest(f'STD {std_id} not found.')
 
 
-def verify_jwt(token, error_message="", refresh=False):
+def verify_jwt(token, error_message='', refresh=False):
     """
     Ensure token is signed correctly and is not yet expired
     Returns the token's payload
@@ -189,9 +189,13 @@ def verify_jwt(token, error_message="", refresh=False):
         # log the refresh attempt
         if refresh:
             token_payload = jwt.decode(token, options={'verify_signature': False})
-            db.session.add(UserTokenHistory(user_id=token_payload.get('uid'),
-                                            event='refresh',
-                                            ua_string=request.headers.get('User-Agent')))
+            db.session.add(
+                UserTokenHistory(
+                    user_id=token_payload.get('uid'),
+                    event='refresh',
+                    ua_string=request.headers.get('User-Agent'),
+                )
+            )
             db.session.commit()
 
         raise Unauthorized(error_message)
@@ -200,25 +204,26 @@ def verify_jwt(token, error_message="", refresh=False):
 
 
 class DecoratorVisitor(ast.NodeVisitor):
-    """ Find decorators placed on functions or classes. """
+    """Find decorators placed on functions or classes."""
+
     decorators = []
 
     def visit_FunctionDef(self, node):
-        """ For a node that is a :class:`ast.FunctionDef`, collect its decorators. """
+        """For a node that is a :class:`ast.FunctionDef`, collect its decorators."""
         self.decorators.extend(node.decorator_list)
 
     def visit_ClassDef(self, node):
-        """ For a node that is a :class:`ast.ClassDef`, collect its decorators. """
+        """For a node that is a :class:`ast.ClassDef`, collect its decorators."""
         self.decorators.extend(node.decorator_list)
 
 
 def find_decorator_value(
-        function: t.Callable,
-        decorator: str,
-        argument: int = None,
-        keyword: str = None
+    function: t.Callable,
+    decorator: str,
+    argument: int = None,
+    keyword: str = None,
 ) -> t.Any:
-    """ Return the value of an argument or keyword passed to a decorator placed on a function or class.
+    """Return the value of an argument or keyword passed to a decorator placed on a function or class.
 
     For example, in the code
 
@@ -310,7 +315,7 @@ def find_decorator_value(
 
             # It is legal to intersperse decorators with empty lines and comments.
             # Keep searching in that case.
-            if (not line or line.startswith('#')):
+            if not line or line.startswith('#'):
                 lineno -= 1
                 continue
 
@@ -438,6 +443,7 @@ def date_validator(date_string: str):
     str: date specified if it is valid, otherwise raises an error
     """
     import re
+
     regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])'
     match_iso8601 = re.compile(regex).match
     try:
@@ -445,9 +451,15 @@ def date_validator(date_string: str):
             return date_string
         else:
             # string does not match requirements
-            raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
+            raise BadRequest(
+                'date requested is not formatted properly. Please use ISO'
+                ' format YYYY-MM-DD'
+            )
     except TypeError:
-        raise BadRequest("date requested is not formatted properly. Please use ISO format YYYY-MM-DD")
+        raise BadRequest(
+            'date requested is not formatted properly. Please use ISO format'
+            ' YYYY-MM-DD'
+        )
 
 
 def iso_string_to_iso_datetime(date_string: str):
@@ -465,6 +477,7 @@ def iso_string_to_iso_datetime(date_string: str):
         Converted datetime object
     """
     import re
+
     regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$'
     match_iso8601 = re.compile(regex).match
 
@@ -481,26 +494,27 @@ def iso_string_to_iso_datetime(date_string: str):
 
 def get_time_index(target_time: datetime):
     """
-    This function will return the index of the time window corresponding to the provided target_time 
+    This function will return the index of the time window corresponding to the provided target_time
     as defined in the LookupBookingTimeIncrements table.
-    
+
     In order to do this, we query to find the index where the current time falls in the range of
     start time <= current time < end time
     """
     if target_time.hour == 23 and target_time.minute >= 55:
         return LookupBookingTimeIncrements.query.all()[-1].idx
     else:
-        return LookupBookingTimeIncrements.query.filter(
-            LookupBookingTimeIncrements.start_time <= target_time.time(),
-            LookupBookingTimeIncrements.end_time > target_time.time()
-        ).one_or_none().idx
+        return (
+            LookupBookingTimeIncrements.query.filter(
+                LookupBookingTimeIncrements.start_time <= target_time.time(),
+                LookupBookingTimeIncrements.end_time > target_time.time(),
+            ).one_or_none().idx
+        )
 
 
-class EmailVerification():
+class EmailVerification:
     """
     Class for handling email verification routines
     """
-
     def __init__(self) -> None:
         self.secret = current_app.config['SECRET_KEY']
 
@@ -512,12 +526,15 @@ class EmailVerification():
 
         secret = current_app.config['SECRET_KEY']
 
-        return jwt.encode({'exp': datetime.utcnow() + timedelta(hours=EMAIL_TOKEN_LIFETIME),
-                           'uid': user_id,
-                           'ttype': 'email_verification'
-                           },
-                          secret,
-                          algorithm='HS256')
+        return jwt.encode(
+            {
+                'exp': datetime.utcnow() + timedelta(hours=EMAIL_TOKEN_LIFETIME),
+                'uid': user_id,
+                'ttype': 'email_verification',
+            },
+            secret,
+            algorithm='HS256',
+        )
 
     @staticmethod
     def generate_code() -> str:
@@ -529,7 +546,7 @@ class EmailVerification():
     def begin_email_verification(self, user: User, updating: bool, email: str = None) -> dict:
         """
         Email verification process creates an entry into the UserPendingEmailVerification table which stores
-        the code and token used to verify new emails. If a user is updating their email address, the new email 
+        the code and token used to verify new emails. If a user is updating their email address, the new email
         is temporarily stored in this table until the email is verified.
 
         Params
@@ -540,7 +557,7 @@ class EmailVerification():
             for the first time (false)
         email : str
             if provided, this email is stored in the UserPendingEmailVerifications entry
-        
+
         Returns
         ------
         dict: email verification code, token, email, and user_id
@@ -548,10 +565,11 @@ class EmailVerification():
         # Check if email is already in use
         if email:
             if User.query.filter_by(email=email).one_or_none():
-                raise BadRequest("Email in use")
+                raise BadRequest('Email in use')
 
         # check if there is already a Pending email verification entry
-        pending_verification = UserPendingEmailVerifications.query.filter_by(user_id=user.user_id).one_or_none()
+        pending_verification = UserPendingEmailVerifications.query.filter_by(user_id=user.user_id
+                                                                            ).one_or_none()
 
         # if there is a pending verification, remove it and create a new one
         if pending_verification:
@@ -567,7 +585,7 @@ class EmailVerification():
             'user_id': user.user_id,
             'token': token,
             'code': code,
-            'email': email
+            'email': email,
         }
 
         verification = UserPendingEmailVerifications(**email_verification_data)
@@ -584,14 +602,16 @@ class EmailVerification():
         link = url_for(
             'api.user_user_pending_email_verifications_token_api',
             token=token,
-            _external=True)
+            _external=True,
+        )
 
         send_email(
             template,
             user.email,
             name=user.firstname,
             verification_link=link,
-            verification_code=code)
+            verification_code=code,
+        )
 
         db.session.commit()
 
@@ -599,13 +619,13 @@ class EmailVerification():
 
     def check_token(self, token: str) -> UserPendingEmailVerifications:
         """
-        checks email verification token (JWT) 
+        checks email verification token (JWT)
 
         Params
         ------
         token : str
             JWT for email verification session
-        
+
         Returns
         ------
         UserPendingEmailVerifications
@@ -625,13 +645,13 @@ class EmailVerification():
     def check_code(self, user_id: int, code: str) -> UserPendingEmailVerifications:
         """
         checks provided email verification code and then validates token stored in UserPendingEmailVerifications
-        
+
         Params
         ------
         user_id: int
         code : str
             code provided to user by email
-        
+
         Returns
         ------
         UserPendingEmailVerifications
@@ -650,14 +670,16 @@ class EmailVerification():
 
         return verification
 
-    def complete_email_verification(self, token: str = None, code: str = None, user_id: int = None) -> None:
+    def complete_email_verification(
+        self, token: str = None, code: str = None, user_id: int = None
+    ) -> None:
         """
-        Check the provided token or code to validate new emails. If the account is new, a modobio_id is generated and 
-        User.email_verified is set to True. 
+        Check the provided token or code to validate new emails. If the account is new, a modobio_id is generated and
+        User.email_verified is set to True.
 
         Verification occurs through one of two methods
         1. Token is provided. This token is emailed to the user as part of the email verification url. Using just the token validates the
-        email, the user's identity, and checks that the user has completed this step within the time allotted. 
+        email, the user's identity, and checks that the user has completed this step within the time allotted.
         2.Verification using the provided code. Users will also revieve a code in their email to verify their emails. We use this code
         and the user's user_id to verify they are the owner of the email. We then check the token (stored in UserPendingEmailVerifications)
         to ensure the process is completed within the token's TTL
@@ -665,7 +687,7 @@ class EmailVerification():
         Params
         ------
         token : str
-            JWT encoding the TTL of the email verification routine and the identity of the user.  
+            JWT encoding the TTL of the email verification routine and the identity of the user.
         code:
             Short code provided to the user's email. This code, the user's id, and the TTL on the token provide the verification
         user_id:
@@ -688,6 +710,7 @@ class EmailVerification():
             # Only run active campaign operations in prod
             if not current_app.debug:
                 from odyssey.tasks.tasks import update_active_campaign_tags
+
                 tags = []
                 # Add user type tags
                 if user.is_client:
@@ -703,7 +726,9 @@ class EmailVerification():
             user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
 
             # check for pending subscription grants on this email, add new user_id to subscription grant entries
-        subscription_grants = CommunityManagerSubscriptionGrants.query.filter_by(email=user.email.lower()).all()
+        subscription_grants = (
+            CommunityManagerSubscriptionGrants.query.filter_by(email=user.email.lower()).all()
+        )
         for grant in subscription_grants:
             grant.subscription_grantee_user_id = user.user_id
 
@@ -722,8 +747,8 @@ class EmailVerification():
 
 
 def delete_staff_data(user_id):
-    """ Delete staff specific data.
-    
+    """Delete staff specific data.
+
     This function is called by :func:`delete_user` to delete staff specific files
     from S3 and rows in staff specific tables.
 
@@ -734,50 +759,70 @@ def delete_staff_data(user_id):
     """
     # Delete all staff profile pictures from S3.
     fd = FileDownload(user_id)
-    paths = (db.session.execute(
-        select(UserProfilePictures.image_path)
-        .filter_by(staff_user_id=user_id))
-             .scalars()
-             .all())
+    paths = (
+        db.session.execute(select(UserProfilePictures.image_path).filter_by(staff_user_id=user_id)
+                          ).scalars().all()
+    )
     for path in paths:
         fd.delete(path)
 
     # Get a list of all tables in database that have fields: client_user_id & staff_user_id
-    # NOTE - Order matters, must delete these tables before those with user_id 
+    # NOTE - Order matters, must delete these tables before those with user_id
     # to avoid problems while deleting payment methods
-    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-            WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+    tableList = db.session.execute(
+        'SELECT distinct(table_name) from information_schema.columns          '
+        "  WHERE column_name='staff_user_id' OR column_name='client_user_id';"
+    ).fetchall()
 
     for table in tableList:
         # Do not delete from TelehealthBookings when deleting staff data
         if table.table_name == 'TelehealthBookings':
             continue
         else:
-            db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE staff_user_id={user_id};")
+            db.session.execute(
+                f'DELETE FROM "{table.table_name}" WHERE'
+                f' staff_user_id={user_id};'
+            )
 
     # Get a list of all staff-specific tables in database that have field: user_id
-    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-            WHERE column_name='user_id' and (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
+    tableList = db.session.execute(
+        'SELECT distinct(table_name) from information_schema.columns          '
+        "  WHERE column_name='user_id' and (table_name LIKE '%Staff%' or"
+        " table_name LIKE '%Practitioner');"
+    ).fetchall()
 
     # delete from staff specific tables where user_id is the user to be deleted
     for table in tableList:
         # added data_per_client table due to issues with the testing database
-        if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
-            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+        if table.table_name not in (
+            'User',
+            'UserRemovalRequests',
+            'UserLogin',
+            'UserSubscriptions',
+            'data_per_client',
+        ):
+            db.session.execute(
+                'DELETE FROM "{}" WHERE user_id={};'.format(table.table_name, user_id)
+            )
 
     # only delete staff subscription
-    user_subs = db.session.execute(select(UserSubscriptions).where(
-            UserSubscriptions.user_id==user_id, UserSubscriptions.is_staff==True)
+    user_subs = (
+        db.session.execute(
+            select(UserSubscriptions).where(
+                UserSubscriptions.user_id == user_id,
+                UserSubscriptions.is_staff == True,
+            )
         ).scalars().all()
+    )
     for sub in user_subs:
         db.session.delete(sub)
-        
+
     db.session.commit()
 
 
 def delete_client_data(user_id):
-    """ Delete client specific data.
-    
+    """Delete client specific data.
+
     This function is called by :func:`delete_user` to delete client specific files
     from S3, telehealth booking details, status history, and rows in client specific
     tables.
@@ -812,11 +857,12 @@ def delete_client_data(user_id):
             response = tc.deauthenticate_user(terra_user)
             tc.status(response)
 
-        mongo.db.wearables.delete_many({
-            'user_id': user_id,
-            'wearable': each_wearable})
+        mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': each_wearable})
 
-        logger.audit(f'User {user_id} account deleted, wearable {each_wearable} info and data deleted.')
+        logger.audit(
+            f'User {user_id} account deleted, wearable {each_wearable} info'
+            ' and data deleted.'
+        )
 
     fd = FileDownload(user_id)
 
@@ -828,24 +874,21 @@ def delete_client_data(user_id):
         ClientRelease.pdf_path,
         ClientSubscriptionContract.pdf_path,
         ClientIndividualContract.pdf_path,
-        MedicalImaging.image_path)
+        MedicalImaging.image_path,
+    )
     for col in cols:
-        results = (db.session.execute(
-            select(col)
-            .filter_by(user_id=user_id))
-                   .scalars()
-                   .all())
+        results = (db.session.execute(select(col).filter_by(user_id=user_id)).scalars().all())
 
         for path in results:
             if path:
                 fd.delete(path)
 
     # This one is special, because it is identified by client_user_id
-    paths = (db.session.execute(
-        select(UserProfilePictures.image_path)
-        .filter_by(client_user_id=user_id))
-             .scalars()
-             .all())
+    paths = (
+        db.session.execute(
+            select(UserProfilePictures.image_path).filter_by(client_user_id=user_id)
+        ).scalars().all()
+    )
     for path in paths:
         if path:
             fd.delete(path)
@@ -871,39 +914,59 @@ def delete_client_data(user_id):
     if remaining:
         files = (r.key for r in remaining)
         files = '\n'.join(files)
-        logger.warning(f'Found the following files remaining in S3 bucket {fd.bucket.name} '
-                       f'after deleting all registered files for user {user_id}:\n'
-                       f'{files}')
+        logger.warning(
+            'Found the following files remaining in S3 bucket'
+            f' {fd.bucket.name} after deleting all registered files for user'
+            f' {user_id}:\n{files}'
+        )
         for f in files:
             fd.delete(f)
 
     # Get a list of all tables in database that have fields: client_user_id & staff_user_id
-    # NOTE - Order matters, must delete these tables before those with user_id 
+    # NOTE - Order matters, must delete these tables before those with user_id
     # to avoid problems while deleting payment methods
-    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-            WHERE column_name='staff_user_id' OR column_name='client_user_id';").fetchall()
+    tableList = db.session.execute(
+        'SELECT distinct(table_name) from information_schema.columns          '
+        "  WHERE column_name='staff_user_id' OR column_name='client_user_id';"
+    ).fetchall()
 
     # Delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
     for table in tableList:
-        db.session.execute(f"DELETE FROM \"{table.table_name}\" WHERE client_user_id={user_id};")
+        db.session.execute(f'DELETE FROM "{table.table_name}" WHERE client_user_id={user_id};')
 
     # Get a list of all client-specific tables in database that have field: user_id
-    tableList = db.session.execute("SELECT distinct(table_name) from information_schema.columns\
-            WHERE column_name='user_id' and NOT (table_name LIKE '%Staff%' or table_name LIKE '%Practitioner');").fetchall()
+    tableList = db.session.execute(
+        'SELECT distinct(table_name) from information_schema.columns          '
+        "  WHERE column_name='user_id' and NOT (table_name LIKE '%Staff%' or"
+        " table_name LIKE '%Practitioner');"
+    ).fetchall()
 
     # Delete lines with user_id in all other tables except "User", "UserLogin", "UserRemovalRequests", and "data_per_client"
     for table in tableList:
         # added data_per_client table due to issues with the testing database
-        if table.table_name not in ('User', 'UserRemovalRequests', 'UserLogin', "UserSubscriptions", "data_per_client"):
-            db.session.execute("DELETE FROM \"{}\" WHERE user_id={};".format(table.table_name, user_id))
+        if table.table_name not in (
+            'User',
+            'UserRemovalRequests',
+            'UserLogin',
+            'UserSubscriptions',
+            'data_per_client',
+        ):
+            db.session.execute(
+                'DELETE FROM "{}" WHERE user_id={};'.format(table.table_name, user_id)
+            )
 
     # only delete client subscription
-    user_subs = db.session.execute(select(UserSubscriptions).where(
-            UserSubscriptions.user_id==user_id, UserSubscriptions.is_staff==False)
+    user_subs = (
+        db.session.execute(
+            select(UserSubscriptions).where(
+                UserSubscriptions.user_id == user_id,
+                UserSubscriptions.is_staff == False,
+            )
         ).scalars().all()
+    )
     for sub in user_subs:
         db.session.delete(sub)
-        
+
     db.session.commit()
 
 
@@ -912,7 +975,7 @@ def delete_user(user_id, requestor_id, delete_type):
     This function is used to delete a user and any relevant user date. It is leveraged by the system
     admin delete user endpoint and (in the future) the task that automatically deletes accounts that have
     been marked as 'closed' for at least 30 days.
-    
+
     Args:
         user_id (int): int id of the user to be deleted
         requestor_id (int): id of the user requesting to delete this user
@@ -929,12 +992,16 @@ def delete_user(user_id, requestor_id, delete_type):
     removal_request = UserRemovalRequests(
         requester_user_id=requester.user_id,
         user_id=user.user_id,
-        removal_type=delete_type)
+        removal_type=delete_type,
+    )
 
     db.session.add(removal_request)
     db.session.flush()
 
-    user_login = db.session.execute(select(UserLogin).filter(UserLogin.user_id == user_id)).scalars().one_or_none()
+    user_login = (
+        db.session.execute(select(UserLogin).filter(UserLogin.user_id == user_id)
+                          ).scalars().one_or_none()
+    )
     if user.was_staff:
         # cases where the user is either only staff or client and staff
 
@@ -998,152 +1065,211 @@ def delete_user(user_id, requestor_id, delete_type):
     send_email('account-deleted', user_email, user_email=user_email)
 
 
-def create_notification(user_id, severity_id, notification_type_id, title, content, persona_type, expires=None):
+def create_notification(
+    user_id,
+    severity_id,
+    notification_type_id,
+    title,
+    content,
+    persona_type,
+    expires=None,
+):
     # used to create a notification
 
-    notification = Notifications(**{
-        'user_id': user_id,
-        'title': title,
-        'content': content,
-        'severity_id': severity_id,
-        'notification_type_id': notification_type_id,
-        'persona_type': persona_type,
-        'expires': expires
-    })
+    notification = Notifications(
+        **{
+            'user_id': user_id,
+            'title': title,
+            'content': content,
+            'severity_id': severity_id,
+            'notification_type_id': notification_type_id,
+            'persona_type': persona_type,
+            'expires': expires,
+        }
+    )
 
     db.session.add(notification)
 
 
-def update_client_subscription(user_id: int, latest_subscription: UserSubscriptions = None,
-                               apple_original_transaction_id: str = None):
+def update_client_subscription(
+    user_id: int,
+    latest_subscription: UserSubscriptions = None,
+    apple_original_transaction_id: str = None,
+):
     """
     Handles logic around updating a user's subscription.
 
     Subscriptions may originate from the app store or have been granted to the user by a community manager. We
     need to check both sources of subscriptions when updating a client subscription status. If both subscriptions
-    exist, we take the app store subscription first before activating a subscription grant. Grants will remain in the 
+    exist, we take the app store subscription first before activating a subscription grant. Grants will remain in the
     CommunityManagerSubscriptionGrants table indefinitely and can be activated at any time by inserting a row into the
     UserSubscriptions table referring the subscription grant entry (UserSubscriptions.sponsorship_id).
 
     When updating a user's subscription status, we first bring up the latest subscription. Here are the possible cases:
-    
-    1. User is currently unsubscribed or their subscription has just expired. 
-        Create new subscription entry using details from the app store or internal subscription grants. If there are no 
+
+    1. User is currently unsubscribed or their subscription has just expired.
+        Create new subscription entry using details from the app store or internal subscription grants. If there are no
         subscriptions available then create and entry into the UserSubscriptions table with a status of 'unsubscribed'.
     2. User currently subscribed
-        Check the app store to see if the subscription has been revoked. 
+        Check the app store to see if the subscription has been revoked.
 
     """
-
-    # verify the user is a client and has a verified email
-    user = User.query.filter_by(user_id=user_id).one_or_none()
-    if not user.is_client:
-        raise BadRequest('User is not a client.')
-    if not user.email_verified:
-        raise BadRequest('User email is not verified.')
-
     if not latest_subscription:
-        latest_subscription = UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
-            UserSubscriptions.idx.desc()).first()
+        latest_subscription = (
+            UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
+                UserSubscriptions.idx.desc()
+            ).first()
+        )
+
+        # verify the user is a client and has a verified email
+        user = User.query.filter_by(user_id=user_id).one_or_none()
+        if not user.is_client:
+            raise BadRequest('User is not a client.')
+        if not user.email_verified:
+            raise BadRequest('User email is not verified.')
 
     new_sub_data = {}
     utc_time_now = datetime.utcnow()
     welcome_email = False
 
-    if latest_subscription.subscription_status == 'subscribed' and latest_subscription.expire_date < utc_time_now:
+    if (
+        latest_subscription.subscription_status == 'subscribed'
+        and latest_subscription.expire_date < utc_time_now
+    ):
         # update current subscription to unsubscribed
         latest_subscription.update({
             'end_date': utc_time_now.isoformat(),
             'subscription_status': 'unsubscribed',
-            'last_checked_date': utc_time_now.isoformat()})
-        # new subscription entry for unsubscribed status. 
+            'last_checked_date': utc_time_now.isoformat(),
+        })
+        # new subscription entry for unsubscribed status.
         # Can be overwritten if a subscription is found in the app store or subscription grants
         new_sub_data = {
             'subscription_status': 'unsubscribed',
             'is_staff': False,
-            'start_date': utc_time_now.isoformat()
+            'start_date': utc_time_now.isoformat(),
         }
 
     # check appstore first
-    if apple_original_transaction_id or latest_subscription.apple_original_transaction_id:
+    if (apple_original_transaction_id or latest_subscription.apple_original_transaction_id):
         appstore = AppStore()
         # use transaction_id provided if exists else the transaction_id used previously
         transaction_info, renewal_info, status = appstore.latest_transaction(
-            apple_original_transaction_id if apple_original_transaction_id else latest_subscription.apple_original_transaction_id)
-        # Status options from https://developer.apple.com/documentation/appstoreserverapi/status    
-        # 1 The auto-renewable subscription is active. -- subscription has either been renewed or unchanged
-        # 2 The auto-renewable subscription is expired. -- subscription has been expired. Add new unsubscribed entry to UserSubscriptions
-        # 3 The auto-renewable subscription is in a billing retry period. -- do nothing. 
-        # 4 The auto-renewable subscription is in a billing grace period. -- do nothing.
-        # 5 The auto-renewable subscription is revoked. -- Add new unsubscribed entry to UserSubscriptions
-        if status == 1:
+            apple_original_transaction_id if apple_original_transaction_id else latest_subscription.
+            apple_original_transaction_id
+        )
+
+        if status == 'ACTIVE':
             if latest_subscription.subscription_status == 'subscribed':
                 # subscription is active and hasn't expired yet
                 latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
             else:
                 new_sub_data = {
-                    'subscription_status': 'subscribed',
-                    'subscription_type_id': LookupSubscriptions.query.filter_by(
-                        ios_product_id=transaction_info.get('productId')).one_or_none().sub_id,
-                    'is_staff': False,
-                    'apple_original_transaction_id': apple_original_transaction_id if apple_original_transaction_id else request.parsed_obj.apple_original_transaction_id,
-                    'last_checked_date': utc_time_now.isoformat(),
-                    'expire_date': datetime.fromtimestamp(transaction_info['expiresDate'] / 1000, utc).replace(
-                        tzinfo=None).isoformat(),
-                    'start_date': datetime.fromtimestamp(transaction_info['purchaseDate'] / 1000, utc).replace(
-                        tzinfo=None).isoformat()
+                    'subscription_status':
+                        'subscribed',
+                    'subscription_type_id':
+                        LookupSubscriptions.query.filter_by(
+                            ios_product_id=transaction_info.get('productId')
+                        ).one_or_none().sub_id,
+                    'is_staff':
+                        False,
+                    'apple_original_transaction_id': (
+                        apple_original_transaction_id if apple_original_transaction_id else
+                        latest_subscription.apple_original_transaction_id
+                    ),
+                    'last_checked_date':
+                        utc_time_now.isoformat(),
+                    'expire_date':
+                        datetime.fromtimestamp(transaction_info['expiresDate'] / 1000,
+                                               utc).replace(tzinfo=None).isoformat(),
+                    'start_date':
+                        datetime.fromtimestamp(transaction_info['purchaseDate'] / 1000,
+                                               utc).replace(tzinfo=None).isoformat(),
                 }
                 latest_subscription.update({
                     'end_date': utc_time_now.isoformat(),
-                    'last_checked_date': utc_time_now.isoformat()})
+                    'last_checked_date': utc_time_now.isoformat(),
+                })
+                if latest_subscription.subscription_type_id == None:
+                    welcome_email = True  # user was previously unsubscribed and now has a subscription
 
-                welcome_email = True  # user was previously unsubscribed and now has a subscription
+        # if status in grace period or retry period, update subscription status to subscribed to keep current subscription
+        elif (
+            status in ('RETRY', 'GRACE_PERIOD')
+            and latest_subscription.subscription_status == 'unsubscribed'
+        ):
+            latest_subscription.update({
+                'end_date': None,
+                'subscription_status': 'subscribed',
+            })
 
-        elif status == 5 and latest_subscription.subscription_status == 'subscribed':
+            new_sub_data = {}
+
+        elif (
+            status in ('REVOKED', 'EXPIRED')
+            and latest_subscription.subscription_status == 'subscribed'
+        ):
             # update current subscription to unsubscribed
             latest_subscription.update({
                 'end_date': utc_time_now.isoformat(),
                 'subscription_status': 'unsubscribed',
-                'last_checked_date': utc_time_now.isoformat()})
+                'last_checked_date': utc_time_now.isoformat(),
+            })
             # subscription has been revoked. Add new unsubscribed entry to UserSubscriptions
             new_sub_data = {
                 'subscription_status': 'unsubscribed',
                 'is_staff': False,
-                'start_date': datetime.utcnow().isoformat()
+                'start_date': datetime.utcnow().isoformat(),
             }
 
-        logger.info(f"Apple subscription updated for user_id: {user_id}")
+        logger.info(f'Apple subscription updated for user_id: {user_id}')
 
-    if latest_subscription.subscription_status == 'unsubscribed' and new_sub_data.get(
-            "subscription_status") != 'subscribed':
+    if (
+        latest_subscription.subscription_status == 'unsubscribed'
+        and new_sub_data.get('subscription_status') != 'subscribed'
+    ):
         # check if the user has a subscription granted to them
-        #  - bring up earliest unused subscription grant 
+        #  - bring up earliest unused subscription grant
         #  - if an unused sponsorship is found and the user is unsubscribed, add new subscription entry to UserSubscriptions
         #  - if an unused sponsorship is found and the user is subscribed, do nothing.
-        subscription_grant = CommunityManagerSubscriptionGrants.query.filter_by(
-            subscription_grantee_user_id=user_id, activated=False).order_by(
-            CommunityManagerSubscriptionGrants.idx.asc()).first()
+        subscription_grant = (
+            CommunityManagerSubscriptionGrants.query.filter_by(
+                subscription_grantee_user_id=user_id, activated=False
+            ).order_by(CommunityManagerSubscriptionGrants.idx.asc()).first()
+        )
         if subscription_grant:
             subscription_grant.activated = True
             new_sub_data = {
-                'sponsorship_id': subscription_grant.idx,
-                'subscription_status': 'subscribed',
-                'subscription_type_id': subscription_grant.subscription_type_id,
-                'is_staff': False,
-                'last_checked_date': utc_time_now.isoformat(),
-                'expire_date': (utc_time_now + timedelta(
-                    days=31 if subscription_grant.subscription_type_information.frequency == 'Month' else 365)).isoformat(),
-                'start_date': utc_time_now.isoformat()
+                'sponsorship_id':
+                    subscription_grant.idx,
+                'subscription_status':
+                    'subscribed',
+                'subscription_type_id':
+                    subscription_grant.subscription_type_id,
+                'is_staff':
+                    False,
+                'last_checked_date':
+                    utc_time_now.isoformat(),
+                'expire_date': (
+                    utc_time_now + timedelta(
+                        days=31 if subscription_grant.subscription_type_information.frequency ==
+                        'Month' else 365
+                    )
+                ).isoformat(),
+                'start_date':
+                    utc_time_now.isoformat(),
             }
             latest_subscription.update({
                 'end_date': utc_time_now.isoformat(),
-                'last_checked_date': utc_time_now.isoformat()})
-            welcome_email = True  # user was previously unsubscribed and now has a subscription
+                'last_checked_date': utc_time_now.isoformat(),
+            })
+            if latest_subscription.subscription_type_id == None:
+                welcome_email = True  # user was previously unsubscribed and now has a subscription
     else:
         # user is subscribed and hasn't expired yet
         latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
 
-    if new_sub_data.get("subscription_status"):
+    if new_sub_data.get('subscription_status'):
         new_sub = UserSubscriptionsSchema().load(new_sub_data)
         new_sub.user_id = user_id
         db.session.add(new_sub)
@@ -1192,7 +1318,9 @@ def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
             value = func(*args, **kwargs)
             expire = monotonic() + ttl
             logger.debug(
-                f'Loading "{func!r}" ttl cache expire "{expire}" with value "{value}"')
+                f'Loading "{func!r}" ttl cache expire "{expire}" with value'
+                f' "{value}"'
+            )
             return {'value': value, 'expire': expire}
 
         @functools.wraps(func)
@@ -1202,8 +1330,9 @@ def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
                 result['value'] = func(*args, **kwargs)
                 result['expire'] = monotonic() + ttl
                 logger.debug(
-                    f'Reloading "{func!r}" expired ttl cache new expire "{result["expire"]}"'
-                    f'with value "{result["value"]}"')
+                    f'Reloading "{func!r}" expired ttl cache new expire'
+                    f' "{result["expire"]}"with value "{result["value"]}"'
+                )
             return result['value']
 
         wrapper.cache_clear = cached_func.cache_clear
@@ -1211,63 +1340,76 @@ def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
 
     return decorator
 
-def create_wearables_filter_query(user_id: int, wearable: str, start_date: datetime, end_date: datetime, query_specificaiton: list):
+
+def create_wearables_filter_query(
+    user_id: int,
+    wearable: str,
+    start_date: datetime,
+    end_date: datetime,
+    query_specificaiton: list,
+):
     """
     Creates and formats the query to be passed into mongo to filter and specify the data wanting to be returned.
 
     Ex query :) db.wearables.find(
-        {   //Filters the query 
-            'user_id': 1, 
-            "wearable": "FITBIT", 
+        {   //Filters the query
+            'user_id': 1,
+            "wearable": "FITBIT",
             'timestamp': {
                 '$gte': start_date, '$lte': end_date
             },
-            "data.Activity.heart_rate_data": { "$exists": true }, 
+            "data.Activity.heart_rate_data": { "$exists": true },
             "data.Activity.calories_data": { "$exists": true }
-        }, 
+        },
         {   //Specifies what fields or/or data should be returned
-            "user_id": 1, 
-            "timestamp": 1, 
-            "data.Activity.heart_rate_data": 1, 
+            "user_id": 1,
+            "timestamp": 1,
+            "data.Activity.heart_rate_data": 1,
             "data.Activity.calories_data": 1
         })
     """
 
     filters = {
-        "user_id" : user_id,
-        "wearable" : wearable,
-        "timestamp" : {"$gte": start_date, "$lte": end_date}
+        'user_id': user_id,
+        'wearable': wearable,
+        'timestamp': {
+            '$gte': start_date,
+            '$lte': end_date
+        },
     }
     # Data that should or shouldn't be included in final result.
     # Defaults to all fields
     specification = {}
 
     if len(query_specificaiton) > 0:
-        #Validate
+        # Validate
         valid_query_specification = re.compile(r'^[A-Za-z_.]*$')
-        #must manually include these fields to be returned if specifying data
+        # must manually include these fields to be returned if specifying data
         specification['user_id'] = specification['timestamp'] = specification['wearable'] = 1
 
         for field in query_specificaiton:
-            # validate only allowed characters are in the query specifcation.  
+            # validate only allowed characters are in the query specifcation.
             if not valid_query_specification.match(field):
-                raise BadRequest('Invalid character in query_specification. Only letters, underscores, and periods allowed.')
-            
-            #Format to filter if requested field exists in document
+                raise BadRequest(
+                    'Invalid character in query_specification. Only letters,'
+                    ' underscores, and periods allowed.'
+                )
+
+            # Format to filter if requested field exists in document
             if '$or' not in filters:
-                filters["$or"] = [{field : {"$exists": True}}]
+                filters['$or'] = [{field: {'$exists': True}}]
             else:
-                filters["$or"].append({field : {"$exists": True}})
-            
-            #Set field to be included in result
+                filters['$or'].append({field: {'$exists': True}})
+
+            # Set field to be included in result
             specification[field] = 1
 
-    
     return filters, specification
 
-def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta(days = 7)):
+
+def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta(days=7)):
     """
-    Generate a start and end range for wearables data retrieval. 
+    Generate a start and end range for wearables data retrieval.
 
     Parameters
     ----------
@@ -1284,19 +1426,18 @@ def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta
         start_time and end_time datetime objects.
     """
     if start_time and end_time:
-        start_time = iso_string_to_iso_datetime(start_time) 
-        end_time = iso_string_to_iso_datetime(end_time) 
+        start_time = iso_string_to_iso_datetime(start_time)
+        end_time = iso_string_to_iso_datetime(end_time)
         if start_time > end_time:
-            raise BadRequest("start_time must occur before end_time")
+            raise BadRequest('start_time must occur before end_time')
     elif start_time:
-        start_time = iso_string_to_iso_datetime(start_time) 
+        start_time = iso_string_to_iso_datetime(start_time)
         end_time = start_time + time_range
     elif end_time:
-        end_time = iso_string_to_iso_datetime(end_time) 
+        end_time = iso_string_to_iso_datetime(end_time)
         start_time = end_time - time_range
     else:
         end_time = datetime.utcnow()
         start_time = end_time - time_range
 
     return start_time, end_time
-    

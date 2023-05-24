@@ -1,11 +1,14 @@
 from datetime import datetime
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, FormField, HiddenField, IntegerField, StringField, TextAreaField
+from wtforms import (BooleanField, FormField, HiddenField, IntegerField, StringField, TextAreaField)
 
 
 class PTHistoryForm(FlaskForm):
-    exercise = TextAreaField('Please describe your current exercise routine, how often, and where/with whom. Leave empty if you do not exercise.')
+    exercise = TextAreaField(
+        'Please describe your current exercise routine, how often, and'
+        ' where/with whom. Leave empty if you do not exercise.'
+    )
 
     has_pt = BooleanField('Physical therapy')
     has_chiro = BooleanField('Chiropractor')

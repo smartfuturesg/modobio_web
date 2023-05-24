@@ -3,6 +3,7 @@ Database tables for the physical therapist's portion of the Modo Bio Staff appli
 All tables in this module are prefixed with ``PT``.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
 from odyssey import db
@@ -10,7 +11,7 @@ from odyssey.utils.constants import DB_SERVER_TIME
 
 
 class PTHistory(db.Model):
-    """ Physical therapy history table.
+    """Physical therapy history table.
 
     This table stores the physical therapy history of a client. The information
     is taken only once, during the initial consult.
@@ -41,7 +42,11 @@ class PTHistory(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     User ID number
 
@@ -122,7 +127,7 @@ class PTHistory(db.Model):
 
     :type: int
     """
-    
+
     current_pain = db.Column(db.Integer)
     """
     Numerical score of client's current pain level.
@@ -146,7 +151,7 @@ class PTHistory(db.Model):
 
 
 class Chessboard(db.Model):
-    """ Mobility assessment table a.k.a the chessboard.
+    """Mobility assessment table a.k.a the chessboard.
 
     This table stores the repeated mobility assessment measurements. The measurements
     are indexed by :attr:`user_id` and assessment :attr:`timestamp`. All values in
@@ -154,7 +159,7 @@ class Chessboard(db.Model):
     """
 
     __tablename__ = 'PTChessboard'
-    
+
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Table index.
@@ -162,7 +167,11 @@ class Chessboard(db.Model):
     :type: int, primary key, autoincrement
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id',ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Client ID number.
 
@@ -429,8 +438,9 @@ class Chessboard(db.Model):
     :type: str
     """
 
+
 class MobilityAssessment(db.Model):
-    """ Mobility assessment table.
+    """Mobility assessment table.
 
     The previous version of the mobility assessment table.
     Superceded by :class:`Chessboard`.
@@ -440,13 +450,17 @@ class MobilityAssessment(db.Model):
     This table stores the repeated mobility assessment measurements. The measurements
     are indexed by :attr:`user_id` and assessment :attr:`timestamp`. All values in
     this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
-    
+
     .. seealso:: :class:`Chessboard`
     """
 
     __tablename__ = 'MobilityAssessment'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     User ID number
 

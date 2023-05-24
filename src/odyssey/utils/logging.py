@@ -4,18 +4,21 @@ This module handles logging for the API. It should be called before :class:`Flas
 
 import logging
 import time
+
 from flask.json import dumps
 
 # INFO = 20, CRITICAL = 30
 audit_level = 25
 
+
 def audit(self, msg, *args, **kwargs):
-    """ Log a message with severity AUDIT.
+    """Log a message with severity AUDIT.
 
     Use this logger to send messages to a special log
     which is filtered out and preserved for auditing.
     """
     logging.Logger.log(self, audit_level, msg, *args, **kwargs)
+
 
 logging.Logger.audit = audit
 logging.addLevelName(audit_level, 'AUDIT')
@@ -25,14 +28,13 @@ logging.Formatter.default_msec_format = '%s.%03dZ'
 
 
 class JsonFormatter(logging.Formatter):
-    """ Format log messages as JSON. """
-
+    """Format log messages as JSON."""
     def __init__(self):
         super().__init__(fmt='%(message)s')
 
     def usesTime(self) -> bool:
-        """ Returns whether ``format()`` uses time.
-        
+        """Returns whether ``format()`` uses time.
+
         Returns
         -------
         bool
@@ -41,7 +43,7 @@ class JsonFormatter(logging.Formatter):
         return True
 
     def format(self, record: logging.LogRecord) -> str:
-        """ Format :class:`logging.LogRecord` as a JSON string.
+        """Format :class:`logging.LogRecord` as a JSON string.
 
         Parameters
         ----------
@@ -79,5 +81,6 @@ class JsonFormatter(logging.Formatter):
             'path': record.pathname,
             'line': record.lineno,
             'error': error,
-            'trace': trace}
+            'trace': trace,
+        }
         return dumps(out, separators=(',', ':'))

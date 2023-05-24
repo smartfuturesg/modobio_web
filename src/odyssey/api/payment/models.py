@@ -1,19 +1,21 @@
 """
-Database tables for supporting miscellaneous functionality. 
+Database tables for supporting miscellaneous functionality.
 """
 import logging
+
 logger = logging.getLogger(__name__)
 
-from sqlalchemy.orm import relationship
 from sqlalchemy import CheckConstraint
+from sqlalchemy.orm import relationship
 
 from odyssey import db
+from odyssey.utils.base.models import (BaseModelWithIdx, ReporterIdFkeyMixin, UserIdFkeyMixin)
 from odyssey.utils.constants import DB_SERVER_TIME
-from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
+
 
 class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
     """
-    This table links user with their saved payment methods. 
+    This table links user with their saved payment methods.
     """
 
     payment_type = db.Column(db.String)
@@ -36,7 +38,7 @@ class PaymentMethods(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: string
     """
-    
+
     cardholder_name = db.Column(db.String)
     """
     Cardholder name for this payment method.
@@ -57,19 +59,21 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     This keeps track of payments that have been charged to users.
     """
 
-    payment_method = relationship("PaymentMethods", backref="PaymentHistory")
+    payment_method = relationship('PaymentMethods', backref='PaymentHistory')
     """
     Relationship to PaymentMethods
     """
 
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx', ondelete='SET NULL'))
+    payment_method_id = db.Column(
+        db.Integer, db.ForeignKey('PaymentMethods.idx', ondelete='SET NULL')
+    )
     """
     Foreign key to the payment method used for this payment.
 
     :type: int, foreignkey(PaymentMethods.idx)
     """
 
-    transaction_amount = db.Column(db.Numeric(10,2), nullable=False)
+    transaction_amount = db.Column(db.Numeric(10, 2), nullable=False)
     """
     Amount of this transaction in USD.
 
@@ -90,7 +94,7 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     :type: string
     """
 
-    transaction_descriptor = db.Column(db.String, nullable = True)
+    transaction_descriptor = db.Column(db.String, nullable=True)
     """
     Description of the transaction
 
@@ -100,16 +104,15 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
 
 class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """
-    This table keeps track of refunds that have been issued as well as the staff member who 
+    This table keeps track of refunds that have been issued as well as the staff member who
     issued the refund.
     """
 
     __table_args__ = (
-        CheckConstraint('char_length(refund_reason) > 20',
-                        name='refund_reason_min_length'),
+        CheckConstraint('char_length(refund_reason) > 20', name='refund_reason_min_length'),
     )
 
-    payment = relationship("PaymentHistory", backref="PaymentRefunds")
+    payment = relationship('PaymentHistory', backref='PaymentRefunds')
     """
     Relationship to the payment that was refunded in the PaymentHistory table.
     """
@@ -121,8 +124,7 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     :type: int, foreignkey(PaymentHistory.idx)
     """
 
-
-    refund_amount = db.Column(db.Numeric(10,2), nullable=False)
+    refund_amount = db.Column(db.Numeric(10, 2), nullable=False)
     """
     Amount that was refunded in USD. Note that refunds can be partial, so they may not always be
     the full amount as seen in the original payment.

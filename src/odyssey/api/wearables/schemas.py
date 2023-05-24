@@ -1,14 +1,15 @@
-""" Schemas for the wearables API """
+"""Schemas for the wearables API"""
 import logging
+
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
-from marshmallow import Schema, fields, EXCLUDE, post_dump, validate, pre_dump
+
+from marshmallow import EXCLUDE, Schema, fields, post_dump, pre_dump, validate
 
 from odyssey import ma
 from odyssey.api.user.models import User
 from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
-
 
 ##############################
 #
@@ -17,6 +18,7 @@ from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 ##############################
 
 # TODO: deprecated in V2 of the API. Remove when V1 of the API is no longer supported.
+
 
 class WearablesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -53,11 +55,13 @@ class WearablesFreeStyleSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         exclude = ('idx', 'user_id', 'created_at', 'updated_at')
 
+
 class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WearablesFreeStyle
         load_instance = True
-        fields = ('activation_timestamp',)
+        fields = ('activation_timestamp', )
+
 
 ##############################
 #
@@ -66,9 +70,8 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
 ##############################
 
 import terra.api.api_responses
-
 from marshmallow_dataclass import class_schema
-
+from terra.models.user import User
 from terra.models.v2.activity import Activity
 from terra.models.v2.athlete import Athlete
 from terra.models.v2.body import Body
@@ -76,12 +79,13 @@ from terra.models.v2.daily import Daily
 from terra.models.v2.menstruation import Menstruation
 from terra.models.v2.nutrition import Nutrition
 from terra.models.v2.sleep import Sleep
-from terra.models.user import User
+
 
 class WearablesV2BaseSchema(Schema):
     class Meta:
         unknown = EXCLUDE
         load_only = ('status', 'user_id')
+
 
 # Automatically convert all Terra classes to marshmallow schemas.
 # Terra defines all responses as dataclasses.dataclass. Use the
@@ -105,7 +109,9 @@ WearablesV2SleepSchema = class_schema(Sleep, WearablesV2BaseSchema)
 WearablesV2UserSchema = class_schema(User, WearablesV2BaseSchema)
 
 # Add extra field
-WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict({'token': fields.String(default=None)})
+WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict({
+    'token': fields.String(default=None)
+})
 
 
 # Additional schemas
@@ -117,6 +123,7 @@ class WearablesV2ProvidersGetSchema(Schema):
     providers = fields.Dict(keys=fields.String(), values=fields.String())
     sdk_providers = fields.Dict(keys=fields.String(), values=fields.String())
 
+
 class WearablesV2UserDataSchema(Schema):
     user_id = fields.Integer()
     wearable = fields.String()
@@ -126,7 +133,7 @@ class WearablesV2UserDataSchema(Schema):
     @pre_dump
     def handle_datetime_fields(self, data, **kwargs):
         """
-        Converts datetime objects to the string representation in the 'data' 
+        Converts datetime objects to the string representation in the 'data'
         part of the mongo documents in order to serialize the object correctly
         """
         result = self.convert_datetime(data['data'])
@@ -135,8 +142,8 @@ class WearablesV2UserDataSchema(Schema):
 
     def convert_datetime(self, data):
         """
-        Recursive function that iterates through nested dictionaries and 
-        replaces datetime object with string time format. 
+        Recursive function that iterates through nested dictionaries and
+        replaces datetime object with string time format.
         """
         for key, value in data.items():
             if isinstance(value, datetime):
@@ -153,11 +160,13 @@ class WearablesV2UserDataSchema(Schema):
 class WearablesV2UserDataGetSchema(Schema):
     results = fields.List(fields.Nested(WearablesV2UserDataSchema))
 
+
 class WearablesV2UserAuthUrlInputSchema(Schema):
     platform = fields.String(
         required=False,
         load_default='ios',
-        validate=validate.OneOf(('ios', 'android')))
+        validate=validate.OneOf(('ios', 'android')),
+    )
 
 
 class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
@@ -168,7 +177,7 @@ class WearablesV2BloodGlucoseCalculationOutputSchema(Schema):
     glucose_management_indicator = fields.Float(missing=None)
     glucose_variability = fields.Float(missing=None)
 
-    
+
 class WearablesCGMPercentiles(Schema):
     count = fields.Integer()
     minute = fields.Integer()
@@ -182,13 +191,16 @@ class WearablesCGMPercentiles(Schema):
     percentile_75th = fields.Float()
     percentile_95th = fields.Float()
 
+
 class WearablesV2CGMPercentilesOutputSchema(Schema):
     user_id = fields.Integer(required=True)
-    data = fields.Nested(WearablesCGMPercentiles(many = True))
+    data = fields.Nested(WearablesCGMPercentiles(many=True))
     wearable = fields.String(required=True)
     bin_size_mins = fields.Integer()
     start_time = fields.DateTime()
     end_time = fields.DateTime()
+
+
 class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
     average_systolic = fields.Integer(default=None)
     average_diastolic = fields.Integer(default=None)
@@ -199,6 +211,7 @@ class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
     max_diastolic = fields.Integer(default=None)
     total_bp_readings = fields.Integer(default=0)
     total_pulse_readings = fields.Integer(default=0)
+
 
 class WearablesV2BloodPressureCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
@@ -212,6 +225,7 @@ class WearablesV2BloodPressureCalculationOutputSchema(Schema):
     block_seven = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
     block_eight = fields.Nested(WearablesV2BloodPressureCalculationTimeBlockSchema, default={})
 
+
 class WearablesV2BloodPressureCalculationClassificationSchema(Schema):
     normal = fields.Integer(default=0)
     elevated = fields.Integer(default=0)
@@ -223,6 +237,7 @@ class WearablesV2BloodPressureCalculationClassificationSchema(Schema):
     hypertension_stage_1_percentage = fields.Integer(default=0)
     hypertension_stage_2_percentage = fields.Integer(default=0)
     hypertensive_crisis_percentage = fields.Integer(default=0)
+
 
 class WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema(Schema):
     average_systolic = fields.Integer(default=None)
@@ -236,19 +251,30 @@ class WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema(Schema):
     average_pulse = fields.Integer(default=None)
     average_readings_per_day = fields.Float(default=None)
 
+
 class WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema(Schema):
     start_date = fields.DateTime()
     end_date = fields.DateTime()
-    general_data = fields.Nested(WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema, default={})
-    classification_data = fields.Nested(WearablesV2BloodPressureCalculationClassificationSchema, default={})
+    general_data = fields.Nested(
+        WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema,
+        default={},
+    )
+    classification_data = fields.Nested(
+        WearablesV2BloodPressureCalculationClassificationSchema, default={}
+    )
+
 
 class WearablesV2BloodPressureMonitoringStatisticsOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    current_block = fields.Nested(WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema, default={})
-    prev_block = fields.Nested(WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema, default={})
-    
-    
+    current_block = fields.Nested(
+        WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema, default={}
+    )
+    prev_block = fields.Nested(
+        WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema, default={}
+    )
+
+
 class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
@@ -258,12 +284,13 @@ class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     systolic_standard_deviation = fields.Integer(default=None)
     diastolic_bp_coefficient_of_variation = fields.Integer(default=None)
     systolic_bp_coefficient_of_variation = fields.Integer(default=None)
-    
+
+
 class WearablesV2BloodGlucoseTimeInRangesSchema(Schema):
     very_low_percentage = fields.Float(load_default=None)
     very_low_total_time = fields.String(load_default=None)
     low_percentage = fields.Float(load_default=None)
-    low_total_time = fields.String(load_default=None) 
+    low_total_time = fields.String(load_default=None)
     target_range_percentage = fields.Float(load_default=None)
     target_range_total_time = fields.String(load_default=None)
     high_percentage = fields.Float(load_default=None)
@@ -278,14 +305,16 @@ class WearablesV2BloodGlucoseTimeInRangesSchema(Schema):
         if data.get('low_total_time'):
             data['low_total_time'] = self.format_to_hour_min(data.get('low_total_time'))
         if data.get('target_range_total_time'):
-            data['target_range_total_time'] = self.format_to_hour_min(data.get('target_range_total_time'))
+            data['target_range_total_time'] = self.format_to_hour_min(
+                data.get('target_range_total_time')
+            )
         if data.get('high_total_time'):
             data['high_total_time'] = self.format_to_hour_min(data.get('high_total_time'))
         if data.get('very_high_total_time'):
             data['very_high_total_time'] = self.format_to_hour_min(data.get('very_high_total_time'))
 
         return data
-    
+
     def format_to_hour_min(self, total_minutes):
         hours = int(float(total_minutes)) // 60
         minutes = int(float(total_minutes)) % 60
@@ -294,7 +323,8 @@ class WearablesV2BloodGlucoseTimeInRangesSchema(Schema):
             return f'{str(hours)} h {str(minutes)} min'
         else:
             return f'{str(minutes)} min'
-        
+
+
 class WearablesV2BloodGlucoseTimeInRangesOutputSchema(Schema):
     wearable = fields.String(required=True)
     user_id = fields.Integer(required=True)
