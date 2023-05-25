@@ -255,6 +255,11 @@ class TelehealthClientTimeSelectApi(BaseResource):
         Responds with available booking times localized to the client's timezone
         """
         check_client_existence(user_id)
+        
+        # Verify target date is client's local today or in the future 
+        client_tz = request.parsed_obj.timezone
+        target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
+        client_local_datetime_now = datetime.now(tz.gettz(client_tz))
 
         client_in_queue = (
             TelehealthQueueClientPool.query.filter_by(user_id=user_id).order_by(
@@ -339,7 +344,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
         times_available = 0
         # limit 10 here still but since one pass here can produce as many as 96, it must still be limited to 10 below
         while days_out <= 14 and times_available < 10:
-            local_target_date2 = local_target_date + timedelta(days=days_out)
+            local_target_date2 = queue.target_date + timedelta(days=days_out)
 
             (
                 day_start_utc,
@@ -354,7 +359,7 @@ class TelehealthClientTimeSelectApi(BaseResource):
                 start_time_window_utc.idx,
                 day_end_utc.weekday(),
                 end_time_window_utc.idx,
-                duration,
+                queue.duration,
             )
 
             # available_times_with_practitioners =
@@ -434,6 +439,9 @@ class TelehealthClientTimeSelectApi(BaseResource):
         if not days_available:
             raise BadRequest('No staff available for the upcoming two weeks.')
 
+        # commit queue data once final point of failure is cleared
+        db.session.commit()
+
         # get practitioners details only once
         # dict {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
         practitioners_info = telehealth_utils.get_practitioner_details(
@@ -443,9 +451,9 @@ class TelehealthClientTimeSelectApi(BaseResource):
         # buffer not taken into consideration here because that only matters to practitioner not client
         final_dict = []
         for day in days_available:
-            for time in days_available[day]:
-                target_date_utc = days_available[day][time]['date_start_utc']
-                client_window_id_start_time_utc = time
+            for time1 in days_available[day]:
+                target_date_utc = days_available[day][time1]['date_start_utc']
+                client_window_id_start_time_utc = time1
                 start_time_utc = time_inc[client_window_id_start_time_utc - 1].start_time
 
                 # client localize target_date_utc + utc_start_time + timezone

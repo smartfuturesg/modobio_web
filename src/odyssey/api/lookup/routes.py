@@ -13,7 +13,6 @@ from odyssey.api.lookup.models import *
 from odyssey.api.lookup.schemas import *
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.misc import check_drink_existence
 
 logger = logging.getLogger(__name__)
 
@@ -97,27 +96,6 @@ class LookupTimezones(BaseResource):
     def get(self):
         varArr = pytz.country_timezones['us']
         payload = {'items': varArr, 'total_items': len(varArr)}
-        return payload
-
-
-@ns.route('/business/transaction-types/')
-class LookupTransactionTypesResource(BaseResource):
-    """Returns stored transaction types in database by GET request.
-    Returns
-    -------
-    dict
-        JSON encoded dict.
-    """
-    @responds(schema=LookupTransactionTypesOutputSchema, status_code=200, api=ns)
-    def get(self):
-
-        transaction_types = LookupTransactionTypes.query.all()
-
-        payload = {
-            'items': transaction_types,
-            'total_items': len(transaction_types),
-        }
-
         return payload
 
 
@@ -255,38 +233,32 @@ class WearablesLookUpAllActivityTrackersResource(BaseResource):
 
         return payload
 
-
-@ns.route('/drinks/')
-class LookupDrinksApi(BaseResource):
-    @token_auth.login_required
-    @responds(schema=LookupDrinksOutputSchema, api=ns)
-    def get(self):
-        """get contents of drinks lookup table"""
-        res = []
-        for drink in LookupDrinks.query.all():
-            drink.primary_ingredient = (
-                LookupDrinkIngredients.query.filter_by(drink_id=drink.drink_id
-                                                      ).filter_by(is_primary_ingredient=True
-                                                                 ).first().ingredient_name
-            )
-            drink.goal = (
-                LookupGoals.query.filter_by(goal_id=drink.primary_goal_id).first().goal_name
-            )
-            res.append(drink)
-        return {'total_items': len(res), 'items': res}
-
-
-@ns.route('/drinks/ingredients/<int:drink_id>/')
-@ns.doc('Id of the desired drink')
-class LookupDrinkIngredientsApi(BaseResource):
-    @token_auth.login_required
-    @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
-    def get(self, drink_id):
-        """get recipe of the drink denoted by drink_id"""
-        check_drink_existence(drink_id)
-
-        res = LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
-        return {'total_items': len(res), 'items': res}
+# @ns.route('/drinks/')
+# class LookupDrinksApi(BaseResource):
+#
+#     @token_auth.login_required
+#     @responds(schema=LookupDrinksOutputSchema, api=ns)
+#     def get(self):
+#         """get contents of drinks lookup table"""
+#         res = []
+#         for drink in LookupDrinks.query.all():
+#             drink.primary_ingredient = LookupDrinkIngredients.query.filter_by(drink_id=drink.drink_id).filter_by(is_primary_ingredient=True).first().ingredient_name
+#             drink.goal = LookupGoals.query.filter_by(goal_id=drink.primary_goal_id).first().goal_name
+#             res.append(drink)
+#         return {'total_items': len(res), 'items': res}
+#
+# @ns.route('/drinks/ingredients/<int:drink_id>/')
+# @ns.doc('Id of the desired drink')
+# class LookupDrinkIngredientsApi(BaseResource):
+#
+#     @token_auth.login_required
+#     @responds(schema=LookupDrinkIngredientsOutputSchema, api=ns)
+#     def get(self, drink_id):
+#         """get recipe of the drink denoted by drink_id"""
+#         check_drink_existence(drink_id)
+#
+#         res = LookupDrinkIngredients.query.filter_by(drink_id=drink_id).all()
+#         return {'total_items': len(res), 'items': res}
 
 
 @ns.route('/goals/')
@@ -670,3 +642,47 @@ class LookupEmotesApi(BaseResource):
         emotes = LookupEmotes.query.order_by('position').all()
 
         return {'total_items': len(emotes), 'items': emotes}
+        
+
+@ns.route('/medicalconditions/')
+class LookupMedicalConditionsApi(BaseResource):
+    """
+    Returns the medical conditions currently documented in the DB
+    """
+    @token_auth.login_required
+    @responds(schema=LookupMedicalConditionsOutputSchema,status_code=200, api=ns)
+    def get(self):
+        medcon_types = LookupMedicalConditions.query.all()
+        payload = {'items': medcon_types,
+                   'total_items': len(medcon_types)}
+
+        return payload
+    
+@ns.route('/stds/')
+class LookupSTDsApi(BaseResource):
+    """
+    Returns the STDs currently documented in the db
+    """
+    @token_auth.login_required
+    @responds(schema=LookupSTDsOutputSchema, status_code=200, api=ns)
+    def get(self):
+        stds = LookupSTDs.query.all()
+        return {
+            'items': stds,
+            'total_items': len(stds)
+        }
+        
+
+@ns.route('/bloodpressureranges/')
+class LookupBloodPressureRangesApi(BaseResource):
+    """
+    Returns the blood pressure ranges currently documented in the db
+    """
+    @token_auth.login_required
+    @responds(schema=LookupBloodPressureRangesOutputSchema, status_code=200, api=ns)
+    def get(self):
+        press = LookupBloodPressureRanges.query.all()
+        return {
+            'items': press,
+            'total_items': len(press)
+        }

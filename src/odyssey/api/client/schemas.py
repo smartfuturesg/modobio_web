@@ -8,11 +8,11 @@ from marshmallow import (Schema, ValidationError, fields, post_load, pre_dump, v
 
 from odyssey import ma
 from odyssey.api.client.models import (
-    ClientAssignedDrinks, ClientClinicalCareTeamAuthorizations, ClientConsent,
+    ClientClinicalCareTeamAuthorizations, ClientConsent,
     ClientConsultContract, ClientDataStorage, ClientFacilities, ClientFertility, ClientHeight,
     ClientIndividualContract, ClientInfo, ClientMobileSettings, ClientNotificationSettings,
     ClientPolicies, ClientRaceAndEthnicity, ClientRelease, ClientReleaseContacts,
-    ClientSubscriptionContract, ClientTransactionHistory, ClientWaistSize, ClientWeight
+    ClientSubscriptionContract, ClientWaistSize, ClientWeight
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 from odyssey.utils.base.schemas import BaseSchema
@@ -502,20 +502,19 @@ class ClientMobileSettingsSchema(Schema):
     notification_type_ids = fields.List(fields.Integer, missing=[])
 
 
-class ClientAssignedDrinksSchema(BaseSchema):
-    class Meta:
-        model = ClientAssignedDrinks
-
-    user_id = fields.Integer(dump_only=True)
-    drink_id = fields.Integer()
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientAssignedDrinks(**data)
-
-
-class ClientAssignedDrinksDeleteSchema(Schema):
-    drink_ids = fields.List(fields.Integer)
+# class ClientAssignedDrinksSchema(BaseSchema):
+#     class Meta:
+#         model = ClientAssignedDrinks
+#
+#     user_id = fields.Integer(dump_only=True)
+#     drink_id = fields.Integer()
+#
+#     @post_load
+#     def make_object(self, data, **kwargs):
+#         return ClientAssignedDrinks(**data)
+#
+# class ClientAssignedDrinksDeleteSchema(Schema):
+#     drink_ids = fields.List(fields.Integer)
 
 
 class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
@@ -554,19 +553,6 @@ class ClientTokenRequestSchema(Schema):
 
 class ClientCloseAccountSchema(Schema):
     reason = fields.String(required=False, missing=None, validate=validate.Length(max=500))
-
-
-class ClientTransactionHistorySchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = ClientTransactionHistory
-        exclude = ('created_at', 'updated_at')
-        dump_only = 'idx'
-
-    user_id = fields.Integer(dump_only=True)
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return ClientTransactionHistory(**data)
 
 
 class ClientFertilitySchema(ma.SQLAlchemyAutoSchema):
