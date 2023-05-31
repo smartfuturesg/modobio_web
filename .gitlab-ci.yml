@@ -2,9 +2,31 @@ variables:
   GIT_DEPTH: 0
 
 stages:
+  - check-formatting
   - test
   - pages
   - deploy
+
+check-formatting:
+  stage: check-formatting
+  tags:
+    - shared
+  before_script:
+    - python3 --version
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip3 install yapf==0.33.0 blue==0.9.1 isort==5.11.5 pylint==2.17.2 --cache-dir deps_cache
+
+  script:
+    - blue --preview src/
+    - isort src/
+    - yapf -i src/ --recursive
+    - git add ./src/
+    - if [[ -n $(git diff --cached --name-only) ]]; then exit 1; fi
+
+  allow_failure: true
+  only:
+    - merge_requests
 
 test:
   stage: test
