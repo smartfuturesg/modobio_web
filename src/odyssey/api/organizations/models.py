@@ -1,6 +1,7 @@
 import logging
-from sqlalchemy.sql import text
+
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import text
 
 from odyssey import db
 from odyssey.utils.base.models import BaseModel
@@ -14,7 +15,11 @@ class Organizations(BaseModel):
     This table stores information regarding organizations.
     """
 
-    uuid = db.Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
+    uuid = db.Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text('gen_random_uuid()'),
+    )
     """
     Organization uuid.
 
@@ -42,16 +47,18 @@ class Organizations(BaseModel):
     :type: int, not null
     """
 
-    owner = db.Column(db.Integer, db.ForeignKey('Admins.admin_id', ondelete='RESTRICT'), nullable=False)
+    owner = db.Column(
+        db.Integer,
+        db.ForeignKey('Admins.admin_id', ondelete='RESTRICT'),
+        nullable=False,
+    )
     """
     Organization owner modobio_id.
     
     :type: int, foreign key to :attr:`Admins.admin_id <odyssey.api.organizations.models.Admins.admin_id>`, not null
     """
 
-    __table_args__ = (
-        db.UniqueConstraint('name'),
-    )
+    __table_args__ = (db.UniqueConstraint('name'), )
 
 
 class Members(BaseModel):
@@ -67,23 +74,29 @@ class Members(BaseModel):
     :type: int, primary key, autoincrement
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     User ID number, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`.
     
     :type: int, foreign key, not null
     """
 
-    organization_id = db.Column(UUID, db.ForeignKey('Organizations.uuid', ondelete='CASCADE'), nullable=False)
+    organization_id = db.Column(
+        UUID,
+        db.ForeignKey('Organizations.uuid', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Organization ID number, foreign key to :attr:`Organizations.uuid <odyssey.api.organizations.models.Organizations.uuid>`.
     
     :type: UUID, foreign key, not null
     """
 
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'organization_id'),
-    )
+    __table_args__ = (db.UniqueConstraint('user_id', 'organization_id'), )
 
 
 class Admins(BaseModel):
@@ -99,20 +112,26 @@ class Admins(BaseModel):
     :type: int, primary key, autoincrement
     """
 
-    member_id = db.Column(db.Integer, db.ForeignKey('Members.member_id', ondelete='CASCADE'), nullable=False)
+    member_id = db.Column(
+        db.Integer,
+        db.ForeignKey('Members.member_id', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Member ID number, foreign key to :attr:`Members.member_id <odyssey.api.organizations.models.Members.member_id>`.
     
     :type: int, foreign key, not null
     """
 
-    organization_id = db.Column(UUID, db.ForeignKey('Organizations.uuid', ondelete='CASCADE'), nullable=False)
+    organization_id = db.Column(
+        UUID,
+        db.ForeignKey('Organizations.uuid', ondelete='CASCADE'),
+        nullable=False,
+    )
     """
     Organization ID number, foreign key to :attr:`Organizations.uuid <odyssey.api.organizations.models.Organizations.uuid>`.
     
     :type: UUID, foreign key, not null
     """
 
-    __table_args__ = (
-        db.UniqueConstraint('member_id', 'organization_id'),
-    )
+    __table_args__ = (db.UniqueConstraint('member_id', 'organization_id'), )

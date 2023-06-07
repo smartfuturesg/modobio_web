@@ -5,7 +5,9 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.organizations.models import Organizations
-from odyssey.api.organizations.schemas import PostOrganizationInputSchema, PostOrganizationOutputSchema
+from odyssey.api.organizations.schemas import (
+    PostOrganizationInputSchema, PostOrganizationOutputSchema
+)
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -16,7 +18,7 @@ ns = Namespace('organizations', description='Endpoints for member organizations'
 @ns.route('/')
 @ns.doc(params={'user_id': 'User ID number'})
 class OrganizationsEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('staff',), staff_role=('community_manager',))
+    @token_auth.login_required(user_type=('staff', ), staff_role=('community_manager', ))
     @accepts(schema=PostOrganizationInputSchema, api=ns)
     @responds(schema=PostOrganizationOutputSchema, api=ns, status_code=201)
     def post(self):
