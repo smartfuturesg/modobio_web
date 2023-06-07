@@ -165,7 +165,7 @@ class TerraClient(terra.Terra):
             # Request last 7 days of user data
             seven_days_ago = now - timedelta(days=7)
             self.get_terra_data(terra_user, seven_days_ago, now)
-            
+
             if not current_app.debug:
                 # Add device tag to users active campaign account
                 ac = ActiveCampaign()
@@ -173,7 +173,7 @@ class TerraClient(terra.Terra):
                     user_id,
                     WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable],
                 )
-                
+
             # Request the rest of the users data
             self.get_terra_data(terra_user, WAY_BACK_WHEN, seven_days_ago)
 
@@ -338,7 +338,7 @@ class TerraClient(terra.Terra):
                 # db.session.flush()  # do I have to flush too?
 
     def get_terra_data(self, terra_user, start_date, end_date):
-        """ Sends request to terra to get users terra data.
+        """Sends request to terra to get users terra data.
 
         Parameters
         ----------
