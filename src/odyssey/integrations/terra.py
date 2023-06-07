@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import terra
 from flask import current_app
@@ -162,28 +162,10 @@ class TerraClient(terra.Terra):
             # but it is not connected to the client (here: self).
             terra_user._client = self
 
-            response = self.get_activity_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            # We already have biographical info.
-            # response = self.get_athlete_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            # self.status(response, raise_on_error=False)
-
-            response = self.get_body_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_daily_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_menstruation_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_nutrition_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_sleep_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
+            # Request last 7 days of user data
+            seven_days_ago = now - timedelta(days=7)
+            self.get_terra_data(terra_user, seven_days_ago, now)
+            
             if not current_app.debug:
                 # Add device tag to users active campaign account
                 ac = ActiveCampaign()
@@ -191,6 +173,9 @@ class TerraClient(terra.Terra):
                     user_id,
                     WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable],
                 )
+                
+            # Request the rest of the users data
+            self.get_terra_data(terra_user, WAY_BACK_WHEN, seven_days_ago)
 
         elif user_wearable.terra_user_id != terra_user_id:
             # User reauthentication
@@ -351,3 +336,37 @@ class TerraClient(terra.Terra):
 
                 db.session.commit()  # only commit once
                 # db.session.flush()  # do I have to flush too?
+
+    def get_terra_data(self, terra_user, start_date, end_date):
+        """ Sends request to terra to get users terra data.
+
+        Parameters
+        ----------
+        terra_user : obj
+            Terra User
+        start_date : datetime
+            Start date of requested data
+        end_date : datetime
+            End date of requested data
+        """
+        response = self.get_activity_for_user(terra_user, start_date, end_date=end_date)
+        self.status(response, raise_on_error=False)
+
+        # We already have biographical info.
+        # response = self.get_athlete_for_user(terra_user, start_date, end_date=end_date)
+        # self.status(response, raise_on_error=False)
+
+        response = self.get_body_for_user(terra_user, start_date, end_date=end_date)
+        self.status(response, raise_on_error=False)
+
+        response = self.get_daily_for_user(terra_user, start_date, end_date=end_date)
+        self.status(response, raise_on_error=False)
+
+        response = self.get_menstruation_for_user(terra_user, start_date, end_date=end_date)
+        self.status(response, raise_on_error=False)
+
+        response = self.get_nutrition_for_user(terra_user, start_date, end_date=end_date)
+        self.status(response, raise_on_error=False)
+
+        response = self.get_sleep_for_user(terra_user, start_date, end_date=end_date)
+        self.status(response, raise_on_error=False)
