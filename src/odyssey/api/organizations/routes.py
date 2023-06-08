@@ -62,7 +62,7 @@ class OrganizationsEndpoint(BaseResource):
 
         # Check for invalid owner
         if not owner:
-            raise BadRequest('Invalid request.')  # We do not want to leak information users
+            raise BadRequest('Organization owner must be a valid user email or modobio_id.')
 
         # Check for invalid organization name
         if not 3 <= len(name) <= 100:
