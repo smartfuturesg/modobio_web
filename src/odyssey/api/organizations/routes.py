@@ -32,9 +32,11 @@ class OrganizationsEndpoint(BaseResource):
             The maximum number of members allowed in the organization.
         max-admins: int
             The maximum number of admins allowed in the organization. All admins are members.
-        owner : int
-            The user ID of the owner of the organization. Must be a valid user ID.
+        owner : str
+            The  owner of the organization. Must be a valid modobio ID or email. Must be a user.
             Owner is also an admin and member.
+        owner_email_provided : bool
+            Whether the owner was provided as an email or modobio ID.
 
         Returns
         -------
@@ -51,9 +53,16 @@ class OrganizationsEndpoint(BaseResource):
             If the organization owner is not a user.
         """
         name = request.json['name']
-        max_members = request.json['max-members']
-        max_admins = request.json['max-admins']
-        owner = request.json['owner']
+        max_members = request.json['max_members']
+        max_admins = request.json['max_admins']
+        if request.json['owner_email_provided'] is True:
+            owner = User.query.filter_by(email=request.json['owner']).one_or_none()
+        else:
+            owner = User.query.filter_by(modobio_id=request.json['owner']).one_or_none()
+
+        # Check for invalid owner
+        if not owner:
+            raise BadRequest('Invalid request.')  # We do not want to leak information users
 
         # Check for invalid organization name
         if not 3 <= len(name) <= 100:
@@ -64,20 +73,15 @@ class OrganizationsEndpoint(BaseResource):
         if duplicate:
             raise BadRequest('Organization name already in use.')
 
-        # Check for invalid owner
-        owner = User.query.filter_by(modobio_id=owner).one_or_none()
-        if not owner:
-            raise BadRequest('Owner must be a valid user.')
-
         # Create the organization
         organization = Organizations(
             name=name,
             max_members=max_members,
             max_admins=max_admins,
-            owner=owner,
+            owner=owner.user_id,
         )
         db.session.add(organization)
         db.session.commit()
 
         # Return the organization
-        return {'organization': organization}, 200
+        return organization

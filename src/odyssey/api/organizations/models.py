@@ -49,7 +49,7 @@ class Organizations(BaseModel):
 
     owner = db.Column(
         db.Integer,
-        db.ForeignKey('Admins.admin_id', ondelete='RESTRICT'),
+        db.ForeignKey('User.user_id', ondelete='RESTRICT'),
         nullable=False,
     )
     """

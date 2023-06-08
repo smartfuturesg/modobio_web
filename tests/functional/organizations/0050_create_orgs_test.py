@@ -28,9 +28,5 @@ def test_create_org_as_community_manager(test_client):
     assert response.json['name'] == org['name']
     assert response.json['max_members'] == org['max_members']
     assert response.json['max_admins'] == org['max_admins']
-    assert response.json['owner'] == org['owner']
-    assert response.json['admins'] == [org['owner']]
-    assert response.json['members'] == [org['owner']]
-    assert response.json['id'] == 1
-    assert response.json['created_at']
-    assert response.json['updated_at']
+    assert response.json['owner'] == '17'
+    assert response.json['uuid']

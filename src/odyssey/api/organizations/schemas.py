@@ -8,6 +8,7 @@ class PostOrganizationInputSchema(ma.SQLAlchemyAutoSchema):
     max_members = fields.Integer(required=True, validate=validate.Range(min=1, max=10000))
     max_admins = fields.Integer(required=True, validate=validate.Range(min=1, max=10000))
     owner = fields.String(required=True)
+    owner_email_provided = fields.Boolean(required=True)
 
 
 class PostOrganizationOutputSchema(ma.SQLAlchemyAutoSchema):
