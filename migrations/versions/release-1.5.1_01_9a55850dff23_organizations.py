@@ -1,4 +1,4 @@
-"""empty message
+"""Create organizations table
 
 Revision ID: 9a55850dff23
 Revises: b26e574b59f8
