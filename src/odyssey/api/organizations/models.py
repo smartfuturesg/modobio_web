@@ -1,7 +1,6 @@
 import logging
 
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import text
 
 from odyssey import db
 from odyssey.utils.base.models import BaseModel
@@ -15,11 +14,7 @@ class Organizations(BaseModel):
     This table stores information regarding organizations.
     """
 
-    uuid = db.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        server_default=text('gen_random_uuid()'),
-    )
+    organization_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
     Organization uuid.
 
@@ -49,7 +44,7 @@ class Organizations(BaseModel):
 
     owner = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='RESTRICT'),
+        db.ForeignKey('OrganizationAdmins.admin_id', ondelete='RESTRICT', deferrable=True),
         nullable=False,
     )
     """
@@ -86,8 +81,8 @@ class OrganizationMembers(BaseModel):
     """
 
     organization_id = db.Column(
-        UUID,
-        db.ForeignKey('Organizations.uuid', ondelete='CASCADE'),
+        db.Integer,
+        db.ForeignKey('Organizations.organization_id', ondelete='CASCADE'),
         nullable=False,
     )
     """
@@ -124,8 +119,8 @@ class OrganizationAdmins(BaseModel):
     """
 
     organization_id = db.Column(
-        UUID,
-        db.ForeignKey('Organizations.uuid', ondelete='CASCADE'),
+        db.Integer,
+        db.ForeignKey('Organizations.organization_id', ondelete='CASCADE'),
         nullable=False,
     )
     """
