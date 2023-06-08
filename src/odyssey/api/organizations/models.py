@@ -61,7 +61,7 @@ class Organizations(BaseModel):
     __table_args__ = (db.UniqueConstraint('name'), )
 
 
-class Members(BaseModel):
+class OrganizationMembers(BaseModel):
     """Organization member information table.
 
     This table stores information regarding organization members.
@@ -99,7 +99,7 @@ class Members(BaseModel):
     __table_args__ = (db.UniqueConstraint('user_id', 'organization_id'), )
 
 
-class Admins(BaseModel):
+class OrganizationAdmins(BaseModel):
     """Organization admin information table.
 
     This table stores information regarding organization admins.
@@ -114,7 +114,7 @@ class Admins(BaseModel):
 
     member_id = db.Column(
         db.Integer,
-        db.ForeignKey('Members.member_id', ondelete='CASCADE'),
+        db.ForeignKey('OrganizationMembers.member_id', ondelete='CASCADE'),
         nullable=False,
     )
     """
