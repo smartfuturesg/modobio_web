@@ -4,7 +4,9 @@ from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
-from odyssey.api.organizations.models import Organizations, OrganizationAdmins, OrganizationMembers
+from odyssey.api.organizations.models import (
+    OrganizationAdmins, OrganizationMembers, Organizations
+)
 from odyssey.api.organizations.schemas import (
     PostOrganizationInputSchema, PostOrganizationOutputSchema
 )
