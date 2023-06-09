@@ -33,11 +33,8 @@ class OrganizationsEndpoint(BaseResource):
             The maximum number of members allowed in the organization.
         max-admins: int
             The maximum number of admins allowed in the organization. All admins are members.
-        owner : str
-            The  owner of the organization. Must be a valid modobio ID or email. Must be a user.
-            Owner is also an admin and member.
-        owner_email_provided : bool
-            Whether the owner was provided as an email or modobio ID.
+        owner : int
+            The user_id of the modobio user that will be the organization owner.
 
         Returns
         -------
@@ -47,23 +44,21 @@ class OrganizationsEndpoint(BaseResource):
         Raises
         ------
         BadRequest
-            If the organization name is already in use.
-        BadRequest
             If the organization name is not between 3 and 100 chars long.
         BadRequest
             If the organization owner is not a user.
+        BadRequest
+            If the organization name is already in use.
         """
         name = request.json['name']
         max_members = request.json['max_members']
         max_admins = request.json['max_admins']
-        if request.json['owner_email_provided'] is True:
-            owner = User.query.filter_by(email=request.json['owner']).one_or_none()
-        else:
-            owner = User.query.filter_by(modobio_id=request.json['owner']).one_or_none()
+
+        owner = User.query.filter_by(user_id=request.json['owner']).one_or_none()
 
         # Check for invalid owner
         if not owner:
-            raise BadRequest('Organization owner must be a valid user email or modobio_id.')
+            raise BadRequest('Organization owner must be a valid user.')
 
         # Check for invalid organization name
         if not 3 <= len(name) <= 100:
@@ -83,7 +78,7 @@ class OrganizationsEndpoint(BaseResource):
             owner=0,  # Placeholder for the foreign key cycle, will be updated later
         )
         db.session.add(org)
-        db.session.flush()
+        db.session.flush()  # Flush to get the organization_id, does not complete the transaction
 
         mem = OrganizationMembers(
             user_id=owner.user_id,
@@ -99,9 +94,8 @@ class OrganizationsEndpoint(BaseResource):
         db.session.add(admin)
         db.session.flush()
 
-        org.owner = admin.admin_id
+        org.owner = admin.admin_id  # Update the owner foreign key from the placeholder
 
-        db.session.commit()
+        db.session.commit()  # Constraints are checked here
 
-        # Return the organization
-        return org
+        return org  # Return the organization, schema will be applied by @responds
