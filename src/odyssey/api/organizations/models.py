@@ -113,7 +113,7 @@ class OrganizationAdmins(BaseModel):
         nullable=False,
     )
     """
-    Member ID number, foreign key to :attr:`Members.member_id <odyssey.api.organizations.models.Members.member_id>`.
+    Member ID number, foreign key to :attr:`OrganizationMembers.member_id <odyssey.api.organizations.models.OrganizationMembers.member_id>`.
     
     :type: int, foreign key, not null
     """
