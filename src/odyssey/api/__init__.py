@@ -178,6 +178,10 @@ from odyssey.api.provider.routes import ns
 
 api.add_namespace(ns)
 
+from odyssey.api.organizations.routes import ns
+
+api.add_namespace(ns)
+
 # V2 of the API, only wearables for now, expand for release 2.0.0.
 # Loading mechanism backported from release 2.0.0.
 
