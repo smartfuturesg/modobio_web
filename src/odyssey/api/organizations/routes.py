@@ -4,7 +4,7 @@ from flask_restx import Namespace
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
-from odyssey.api.organizations.models import Organizations
+from odyssey.api.organizations.models import Organizations, OrganizationAdmins, OrganizationMembers
 from odyssey.api.organizations.schemas import (
     PostOrganizationInputSchema, PostOrganizationOutputSchema
 )
@@ -73,14 +73,33 @@ class OrganizationsEndpoint(BaseResource):
             raise BadRequest('Organization name already in use.')
 
         # Create the organization
-        organization = Organizations(
+        db.session.execute('SET CONSTRAINTS ALL DEFERRED')
+        org = Organizations(
             name=name,
             max_members=max_members,
             max_admins=max_admins,
-            owner=owner.user_id,
+            owner=0,  # Placeholder for the foreign key cycle, will be updated later
         )
-        db.session.add(organization)
+        db.session.add(org)
+        db.session.flush()
+
+        mem = OrganizationMembers(
+            user_id=owner.user_id,
+            organization_id=org.organization_id,
+        )
+        db.session.add(mem)
+        db.session.flush()
+
+        admin = OrganizationAdmins(
+            member_id=mem.member_id,
+            organization_id=org.organization_id,
+        )
+        db.session.add(admin)
+        db.session.flush()
+
+        org.owner = admin.admin_id
+
         db.session.commit()
 
         # Return the organization
-        return organization
+        return org
