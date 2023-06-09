@@ -7,9 +7,7 @@ from odyssey import db
 from odyssey.api.organizations.models import (
     OrganizationAdmins, OrganizationMembers, Organizations
 )
-from odyssey.api.organizations.schemas import (
-    PostOrganizationInputSchema, PostOrganizationOutputSchema
-)
+from odyssey.api.organizations.schemas import OrganizationsSchema
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -20,8 +18,8 @@ ns = Namespace('organizations', description='Endpoints for member organizations'
 @ns.route('/')
 class OrganizationsEndpoint(BaseResource):
     @token_auth.login_required(user_type=('staff', ), staff_role=('community_manager', ))
-    @accepts(schema=PostOrganizationInputSchema, api=ns)
-    @responds(schema=PostOrganizationOutputSchema, api=ns, status_code=201)
+    @accepts(schema=OrganizationsSchema, api=ns)
+    @responds(schema=OrganizationsSchema, api=ns, status_code=201)
     def post(self):
         """Create a new organization.
 
@@ -44,39 +42,27 @@ class OrganizationsEndpoint(BaseResource):
         Raises
         ------
         BadRequest
-            If the organization name is not between 3 and 100 chars long.
-        BadRequest
             If the organization owner is not a user.
+        SchemaValidationError
+            If the organization name is not between 3 and 100 chars long.
         BadRequest
             If the organization name is already in use.
         """
-        name = request.json['name']
-        max_members = request.json['max_members']
-        max_admins = request.json['max_admins']
+        org = request.parsed_obj
 
-        owner = User.query.filter_by(user_id=request.json['owner']).one_or_none()
+        owner = db.session.get(User, org.owner)
 
         # Check for invalid owner
         if not owner:
             raise BadRequest('Organization owner must be a valid user.')
 
-        # Check for invalid organization name
-        if not 3 <= len(name) <= 100:
-            raise BadRequest('Organization name must be between 3 and 100 chars long.')
-
         # Check for duplicate organization name
-        duplicate = Organizations.query.filter_by(name=name).one_or_none()
+        duplicate = Organizations.query.filter_by(name=org.name).one_or_none()
         if duplicate:
             raise BadRequest('Organization name already in use.')
 
         # Create the organization
         db.session.execute('SET CONSTRAINTS ALL DEFERRED')
-        org = Organizations(
-            name=name,
-            max_members=max_members,
-            max_admins=max_admins,
-            owner=0,  # Placeholder for the foreign key cycle, will be updated later
-        )
         db.session.add(org)
         db.session.flush()  # Flush to get the organization_id, does not complete the transaction
 
