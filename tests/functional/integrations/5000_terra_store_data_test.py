@@ -1,4 +1,5 @@
 import requests
+import pytest
 
 from flask import current_app
 from terra.api.api_responses import TerraApiResponse
