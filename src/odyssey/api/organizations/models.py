@@ -16,16 +16,16 @@ class Organizations(BaseModel):
 
     organization_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
-    Organization uuid.
+    Organization ID.
 
-    :type: db.UUID, primary key, default=uuid4
+    :type: int, primary key, autoincrement
     """
 
     name = db.Column(db.String(100), nullable=False)
     """
     Organization name.
     
-    :type: string, max length=100, not null
+    :type: string, max length=100, not nullable
     """
 
     max_members = db.Column(db.Integer, nullable=False)
@@ -77,7 +77,7 @@ class OrganizationMembers(BaseModel):
     """
     User ID number, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`.
     
-    :type: int, foreign key, not null
+    :type: int, foreign key, not nullable
     """
 
     organization_id = db.Column(
@@ -86,9 +86,9 @@ class OrganizationMembers(BaseModel):
         nullable=False,
     )
     """
-    Organization ID number, foreign key to :attr:`Organizations.uuid <odyssey.api.organizations.models.Organizations.uuid>`.
+    Organization ID number, foreign key to :attr:`Organizations.organization_id <odyssey.api.organizations.models.Organizations.organization_id>`.
     
-    :type: UUID, foreign key, not null
+    :type: int, foreign key, not null
     """
 
     __table_args__ = (db.UniqueConstraint('user_id', 'organization_id'), )
@@ -124,9 +124,9 @@ class OrganizationAdmins(BaseModel):
         nullable=False,
     )
     """
-    Organization ID number, foreign key to :attr:`Organizations.uuid <odyssey.api.organizations.models.Organizations.uuid>`.
+    Organization ID number, foreign key to :attr:`Organizations.organization_id <odyssey.api.organizations.models.Organizations.organization_id>`.
     
-    :type: UUID, foreign key, not null
+    :type: int, foreign key, not null
     """
 
     __table_args__ = (db.UniqueConstraint('member_id', 'organization_id'), )
