@@ -12,7 +12,7 @@ class PostOrganizationInputSchema(ma.SQLAlchemyAutoSchema):
 
 
 class PostOrganizationOutputSchema(ma.SQLAlchemyAutoSchema):
-    uuid = fields.UUID()
+    organization_id = fields.UUID()
     name = fields.String()
     max_members = fields.Integer()
     max_admins = fields.Integer()
