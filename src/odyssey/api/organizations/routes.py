@@ -80,9 +80,9 @@ class OrganizationsEndpoint(BaseResource):
         db.session.add(admin)
         db.session.flush()
 
-        org.owner = (admin.admin_id)  # Update the owner foreign key from the placeholder
+        org.owner = admin.admin_id  # Update the owner foreign key from the placeholder
 
         db.session.commit()  # Constraints are checked here
 
-        return (org  # Return the organization, schema will be applied by @responds
-               )
+        return org  # Return the organization, schema will be applied by @responds
+
