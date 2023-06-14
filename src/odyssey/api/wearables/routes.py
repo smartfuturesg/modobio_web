@@ -29,7 +29,7 @@ from odyssey.utils.constants import (
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
     create_wearables_filter_query, date_range, date_validator, iso_string_to_iso_datetime,
-    lru_cache_with_ttl
+    lru_cache_with_ttl, deauthenticate_terra_user_and_delete_data
 )
 
 logger = logging.getLogger(__name__)
@@ -1059,39 +1059,8 @@ class WearablesV2DataEndpoint(BaseResource):
         if not user_wearable:
             logger.debug(f'Nothing to delete for user {user_id} and wearable {wearable}')
             return
-
-        tc = TerraClient()
-        try:
-            terra_user = tc.from_user_id(str(user_wearable.terra_user_id))
-        except (terra.exceptions.NoUserInfoException, KeyError):
-            # Terra-python (at least v0.0.7) should fail with NoUserInfoException
-            # if terra_user_id does not exist in their system. However, it checks
-            # whether response.json is empty, which is not empty in the case of an
-            # error (it holds the error message and status). The next step in
-            # terra.models.user.User.fill_in_user_info() is to access
-            # response.json["user"] which does not exist and fails with KeyError.
-            # In any case, we don't care that the terra_user_id is invalid, we
-            # were going to delete it anyway.
-            # 2023-01-10: Terra has been notified of this bug.
-            pass
-        else:
-            response = tc.deauthenticate_user(terra_user)
-            tc.status(response)
-
-        mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable})
-
-        db.session.delete(user_wearable)
-        db.session.commit()
-        logger.audit(
-            f'User {user_id} revoked access to wearable {wearable}. Info and'
-            ' data deleted.'
-        )
-
-        if not current_app.debug:
-            # Removes device tag association from users active campaign account
-            ac = ActiveCampaign()
-            ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
-
+        
+        deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=user_wearable, delete_data=True)
 
 @ns_v2.route('/terra')
 class WearablesV2TerraWebHookEndpoint(BaseResource):
