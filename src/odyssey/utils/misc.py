@@ -38,7 +38,9 @@ from odyssey.integrations.apple import AppStore
 from odyssey.integrations.terra import TerraClient
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import (ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES)
+from odyssey.utils.constants import (
+    ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+)
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
 
@@ -1199,7 +1201,7 @@ def update_client_subscription(
                 'start_date': datetime.utcnow().isoformat(),
             }
 
-            #Deauthenticate terra user to stop receiving data
+            # Deauthenticate terra user to stop receiving data
             deauthenticate_terra_user_and_delete_data(user_id, delete_data=False)
 
         logger.info(f'Apple subscription updated for user_id: {user_id}')
@@ -1424,14 +1426,14 @@ def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta
 
 
 def deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=None, delete_data=False):
-    """ Deregister Terra user and delete terra data.
+    """Deregister Terra user and delete terra data.
 
     Parameters
     ----------
     user_id : int
         User ID number.
     wearable_obj : `WearablesV2 <odyssey.api.wearables.models.WearablesV2>`
-        Wearable sqlalchemy object. 
+        Wearable sqlalchemy object.
     delete_data : bool
         Denotes whether or not to delete collected terra data
 
@@ -1439,17 +1441,17 @@ def deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=None, delete
     -----
     The `wearable_obj` should be a sqlalchemy object which represents a row
     from the the db. It will then be stored in a list so the logic can be the same
-    as if `wearable_obj` isn't passed in and we query all wearables belonging to 
+    as if `wearable_obj` isn't passed in and we query all wearables belonging to
     the user.
     """
-    #Imported here to avoid circular imports
+    # Imported here to avoid circular imports
     from odyssey.integrations.active_campaign import ActiveCampaign
 
     tc = TerraClient()
     ac = ActiveCampaign()
 
-    #If an wearable is not passed in, query all wearables.
-    #Else transform passed in object to a list so logic can be the same.
+    # If an wearable is not passed in, query all wearables.
+    # Else transform passed in object to a list so logic can be the same.
     if not wearable_obj:
         wearables = WearablesV2.query.filter_by(user_id=user_id).all()
     else:
@@ -1474,20 +1476,25 @@ def deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=None, delete
             response = tc.deauthenticate_user(terra_user)
             tc.status(response)
 
-        #Delete terra data stored in mongo and wearable entry in postgres
+        # Delete terra data stored in mongo and wearable entry in postgres
         if delete_data:
             mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable.wearable})
             db.session.delete(wearable)
 
             # Removes device tag association from users active campaign account
             if not current_app.debug:
-                ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable.wearable])
-        
+                ac.remove_tag(
+                    user_id,
+                    WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable.wearable],
+                )
+
             logger.audit(
-                f'User {user_id} revoked access to wearable {wearable.wearable}. Info and'
-                ' data deleted. Info and data deleted.'
+                f'User {user_id} revoked access to wearable'
+                f' {wearable.wearable}. Info and data deleted. Info and data'
+                ' deleted.'
             )
         else:
-            logger.audit(f'User {user_id} revoked access to wearable {wearable.wearable}.')
+            logger.audit(f'User {user_id} revoked access to wearable'
+                         f' {wearable.wearable}.')
 
     db.session.commit()

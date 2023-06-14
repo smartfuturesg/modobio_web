@@ -28,8 +28,8 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
-    create_wearables_filter_query, date_range, date_validator, iso_string_to_iso_datetime,
-    lru_cache_with_ttl, deauthenticate_terra_user_and_delete_data
+    create_wearables_filter_query, date_range, date_validator,
+    deauthenticate_terra_user_and_delete_data, iso_string_to_iso_datetime, lru_cache_with_ttl
 )
 
 logger = logging.getLogger(__name__)
@@ -1059,8 +1059,11 @@ class WearablesV2DataEndpoint(BaseResource):
         if not user_wearable:
             logger.debug(f'Nothing to delete for user {user_id} and wearable {wearable}')
             return
-        
-        deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=user_wearable, delete_data=True)
+
+        deauthenticate_terra_user_and_delete_data(
+            user_id, wearable_obj=user_wearable, delete_data=True
+        )
+
 
 @ns_v2.route('/terra')
 class WearablesV2TerraWebHookEndpoint(BaseResource):
