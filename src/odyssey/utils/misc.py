@@ -1490,8 +1490,7 @@ def deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=None, delete
 
             logger.audit(
                 f'User {user_id} revoked access to wearable'
-                f' {wearable.wearable}. Info and data deleted. Info and data'
-                ' deleted.'
+                f' {wearable.wearable}. Info and data deleted.'
             )
         else:
             logger.audit(f'User {user_id} revoked access to wearable'
