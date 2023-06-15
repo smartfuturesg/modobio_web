@@ -1455,7 +1455,7 @@ def deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=None, delete
     if not wearable_obj:
         wearables = WearablesV2.query.filter_by(user_id=user_id).all()
     else:
-        wearables = list(wearable_obj)
+        wearables = [wearable_obj]
 
     # loop through each wearable the user has registered
     for wearable in wearables:
