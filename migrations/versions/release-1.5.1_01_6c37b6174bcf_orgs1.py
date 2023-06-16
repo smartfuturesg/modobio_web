@@ -1,4 +1,4 @@
-"""empty message
+"""Create org models, commented out FK constraint for cycle
 
 Revision ID: 6c37b6174bcf
 Revises: b26e574b59f8
