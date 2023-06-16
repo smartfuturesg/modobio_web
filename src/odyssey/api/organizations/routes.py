@@ -7,7 +7,9 @@ from odyssey import db
 from odyssey.api.organizations.models import (
     OrganizationAdmins, OrganizationMembers, Organizations
 )
-from odyssey.api.organizations.schemas import OrganizationsSchema, OrganizationMembersPostInputSchema, OrganizationMembersPostOutputSchema
+from odyssey.api.organizations.schemas import (
+    OrganizationMembersPostInputSchema, OrganizationMembersPostOutputSchema, OrganizationsSchema
+)
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -152,7 +154,10 @@ class OrganizationMembersEndpoint(BaseResource):
             organization_uuid=organization_uuid,
         ).count()
         if len(members) + num_current_members > technical_max_members:
-            raise BadRequest(f'Adding {len(members)} members would exceed the organization\'s max_members limit, {org.max_members}.')
+            raise BadRequest(
+                f'Adding {len(members)} members would exceed the'
+                f" organization's max_members limit, {org.max_members}."
+            )
 
         added_members = []
         invalid_members = []
