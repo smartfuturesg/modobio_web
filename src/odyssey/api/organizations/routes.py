@@ -94,7 +94,7 @@ class OrganizationMembersEndpoint(BaseResource):
     @token_auth.login_required(user_type=('staff', ), staff_role=('community_manager', ))
     @accepts(schema=OrganizationMembersPostInputSchema, api=ns)
     @responds(schema=OrganizationMembersPostOutputSchema, api=ns, status_code=201)
-    def post(self, organization_uuid):
+    def post(self):
         """Add a list of members to an organization.
 
         Parameters
@@ -180,6 +180,7 @@ class OrganizationMembersEndpoint(BaseResource):
                 organization_uuid=organization_uuid,
             )
             db.session.add(mem)
+            added_members.append(member)
 
         db.session.commit()
 
