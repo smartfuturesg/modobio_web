@@ -41,10 +41,10 @@ class OrganizationsEndpoint(BaseResource):
 
         Raises
         ------
-        BadRequest
-            If the organization owner is not a user.
         SchemaValidationError
             If the organization name is not between 3 and 100 chars long.
+        BadRequest
+            If the organization owner is not a valid user.
         BadRequest
             If the organization name is already in use.
         """
