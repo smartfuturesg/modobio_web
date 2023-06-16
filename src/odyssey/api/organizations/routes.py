@@ -68,20 +68,20 @@ class OrganizationsEndpoint(BaseResource):
 
         mem = OrganizationMembers(
             user_id=owner.user_id,
-            organization_id=org.organization_id,
+            organization_uuid=org.organization_uuid,
         )
         db.session.add(mem)
         db.session.flush()
 
         admin = OrganizationAdmins(
-            member_id=mem.member_id,
-            organization_id=org.organization_id,
+            user_id=mem.user_id,
+            organization_uuid=org.organization_uuid,
         )
         db.session.add(admin)
         db.session.flush()
 
         # Update the owner foreign key from the placeholder
-        org.owner = admin.admin_id
+        org.owner = admin.user_id
 
         db.session.commit()  # Constraints are checked here
 
