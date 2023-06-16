@@ -100,7 +100,6 @@ class OrganizationAdmins(BaseModel):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('OrganizationMembers.user_id', ondelete='CASCADE'),
         nullable=False,
     )
     """
@@ -111,7 +110,6 @@ class OrganizationAdmins(BaseModel):
 
     organization_uuid = db.Column(
         UUID(as_uuid=True),
-        db.ForeignKey('Organizations.organization_uuid', ondelete='CASCADE'),
         nullable=False,
     )
     """
@@ -120,4 +118,14 @@ class OrganizationAdmins(BaseModel):
     :type: int, foreign key, not null
     """
 
-    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'organization_uuid'), )
+    __table_args__ = (
+        db.PrimaryKeyConstraint('user_id', 'organization_uuid'),
+        db.ForeignKeyConstraint(
+            ['user_id', 'organization_uuid'],
+            [
+                'OrganizationMembers.user_id',
+                'OrganizationMembers.organization_uuid',
+            ],
+            ondelete='CASCADE',
+        ),
+    )
