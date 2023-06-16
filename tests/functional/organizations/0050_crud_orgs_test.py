@@ -96,7 +96,7 @@ def test_add_members_to_org(test_client):
     o = Organizations.query.filter_by(name=org['name']).first()
     org_uuid = o.organization_uuid
 
-    # Update the members_post dict with the organization_uuid
+    # Create a post body to add members to the organization
     members_post = {
         'organization_uuid': str(org_uuid),
         'members': [0, 17, 1, 2, 3],
@@ -110,7 +110,7 @@ def test_add_members_to_org(test_client):
     )
 
     assert response.status_code == 201
-    # assert response.json['organization_uuid'] == str(org_uuid)
-    # assert response.json['added_members'] == [1, 2, 3]
-    # assert response.json['invalid_members'] == [0]
-    # assert response.json['prior_members'] == [17]
+    assert response.json['organization_uuid'] == str(org_uuid)
+    assert response.json['added_members'] == [1, 2, 3]
+    assert response.json['invalid_members'] == [0]
+    assert response.json['prior_members'] == [17]
