@@ -30,3 +30,15 @@ def test_create_org_as_community_manager(test_client):
     assert response.json['max_admins'] == org['max_admins']
     assert response.json['owner'] == org['owner']
     assert response.json['organization_uuid']  # UUID so just check that it exists
+
+
+def test_create_org_with_existing_name(test_client):
+    """ Test that a community manager can NOT create an organization with an existing name. """
+
+    response = test_client.post(
+        '/organizations/',
+        headers=test_client.staff_auth_header,
+        data=dumps(org),
+        content_type='application/json')
+
+    assert response.status_code == 400
