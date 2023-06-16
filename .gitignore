@@ -52,3 +52,5 @@ celerybeat.pid
 tags
 .tags
 
+# formatting script
+formatting.sh 
