@@ -76,7 +76,7 @@ class OrganizationMembers(BaseModel):
     """
     User ID number, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`.
     
-    :type: int, foreign key, not nullable
+    :type: int, primary key, foreign key, not nullable
     """
 
     organization_uuid = db.Column(
@@ -108,7 +108,7 @@ class OrganizationAdmins(BaseModel):
     """
     Member ID number, foreign key to :attr:`OrganizationMembers.member_id <odyssey.api.organizations.models.OrganizationMembers.member_id>`.
     
-    :type: int, foreign key, not null
+    :type: int, primary key, foreign key, not null
     """
 
     organization_uuid = db.Column(
