@@ -7,7 +7,7 @@ from odyssey import db
 from odyssey.api.organizations.models import (
     OrganizationAdmins, OrganizationMembers, Organizations
 )
-from odyssey.api.organizations.schemas import OrganizationsSchema
+from odyssey.api.organizations.schemas import OrganizationsSchema, OrganizationMembersPostInputSchema, OrganizationMembersPostOutputSchema
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
@@ -87,3 +87,106 @@ class OrganizationsEndpoint(BaseResource):
 
         # Return the organization, schema will be applied by @responds
         return org
+
+
+@ns.route('/members/')
+class OrganizationMembersEndpoint(BaseResource):
+    @token_auth.login_required(user_type=('staff', ), staff_role=('community_manager', ))
+    @accepts(schema=OrganizationMembersPostInputSchema, api=ns)
+    @responds(schema=OrganizationMembersPostOutputSchema, api=ns, status_code=201)
+    def post(self, organization_uuid):
+        """Add a list of members to an organization.
+
+        Parameters
+        ----------
+        organization_uuid : uuid
+            The organization to add the member to.
+        members : list of ints
+            A list of user_ids to add to the organization.
+
+        Returns
+        -------
+        dict
+            organization_uuid : uuid
+                The organization the members were added to.
+            added_members : list of ints
+                A list of user_ids that were successfully added to the organization.
+            invalid_members : list of ints
+                A list of user_ids that were not added to the organization because they are not valid users.
+            prior_members : list of ints
+
+
+        Raises
+        ------
+        BadRequest
+            If the organization does not exist.
+        BadRequest
+            If more than 100 members were provided.
+        BadRequest
+            If adding this many members would exceed the organization's max_members.
+        """
+        organization_uuid = request.json['organization_uuid']
+        members = request.json['members']
+
+        # Remove duplicates from members
+        members = list(set(members))
+
+        # Check for valid organization
+        org = db.session.get(Organizations, organization_uuid)
+        if not org:
+            raise BadRequest('Organization does not exist.')
+
+        # Check for too many members
+        if len(members) > 100:
+            raise BadRequest('Cannot add more than 100 members at once.')
+
+        # Create technical maximums due to owner being admin, admins being members
+        num_current_admins = OrganizationAdmins.query.filter_by(
+            organization_uuid=organization_uuid,
+        ).count()
+        technical_max_members = 1 + num_current_admins + org.max_members
+        # 1 for owner, +1 for each admin currently in org, + apparent max_members
+
+        # Check for too many members
+        num_current_members = OrganizationMembers.query.filter_by(
+            organization_uuid=organization_uuid,
+        ).count()
+        if len(members) + num_current_members > technical_max_members:
+            raise BadRequest(f'Adding {len(members)} members would exceed the organization\'s max_members limit, {org.max_members}.')
+
+        added_members = []
+        invalid_members = []
+        prior_members = []
+        # Add the members
+        for member in members:
+            user = db.session.get(User, member)
+
+            # Invalid members
+            if not user:
+                invalid_members.append(member)
+                continue
+
+            # Already members
+            if OrganizationMembers.query.filter_by(
+                user_id=member,
+                organization_uuid=organization_uuid,
+            ).one_or_none():
+                prior_members.append(member)
+                continue
+
+            # Valid new member
+            mem = OrganizationMembers(
+                user_id=member,
+                organization_uuid=organization_uuid,
+            )
+            db.session.add(mem)
+
+        db.session.commit()
+
+        # Return the organization_uuid, members added, invalid members, and prior members
+        return {
+            'organization_uuid': organization_uuid,
+            'added_members': added_members,
+            'invalid_members': invalid_members,
+            'prior_members': prior_members,
+        }
