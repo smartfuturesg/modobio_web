@@ -7,7 +7,7 @@ from odyssey.api.organizations.models import Organizations
 class OrganizationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Organizations
-        dump_only = ('organization_id', )
+        dump_only = ('organization_uuid', )
         load_instance = True
 
     name = fields.String(required=True, validate=validate.Length(min=3, max=100))
