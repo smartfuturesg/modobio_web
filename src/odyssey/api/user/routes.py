@@ -793,13 +793,13 @@ class UserSubscriptionApi(BaseResource):
 
         elif request.parsed_obj.google_transaction_id:
             # placeholder for subscription validation. Add new subscription to db with google_transaction_id
-            
+
             # add subscription to db
             request.parsed_obj.user_id = user_id
             request.parsed_obj.is_staff = False
             request.parsed_obj.subscription_status = 'subscribed'
             request.parsed_obj.subscription_type_id = 2
-            
+
             db.session.add(request.parsed_obj)
             db.session.commit()
 
