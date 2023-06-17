@@ -61,7 +61,10 @@ class Organizations(BaseModel):
         db.UniqueConstraint('name'),
         db.ForeignKeyConstraint(
             ['owner', 'organization_uuid'],
-            ['OrganizationAdmins.user_id', 'OrganizationAdmins.organization_uuid'],
+            [
+                'OrganizationAdmins.user_id',
+                'OrganizationAdmins.organization_uuid',
+            ],
             ondelete='RESTRICT',
             deferrable=True,
         ),
@@ -130,7 +133,10 @@ class OrganizationAdmins(BaseModel):
     __table_args__ = (
         db.ForeignKeyConstraint(
             ['user_id', 'organization_uuid'],
-            ['OrganizationMembers.user_id', 'OrganizationMembers.organization_uuid'],
+            [
+                'OrganizationMembers.user_id',
+                'OrganizationMembers.organization_uuid',
+            ],
             ondelete='CASCADE',
         ),
     )
