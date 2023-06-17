@@ -49,7 +49,6 @@ class Organizations(BaseModel):
 
     owner = db.Column(
         db.Integer,
-        db.ForeignKey('OrganizationAdmins.user_id', ondelete='RESTRICT', deferrable=True),
         nullable=False,
     )
     """
@@ -58,7 +57,15 @@ class Organizations(BaseModel):
     :type: int, foreign key to :attr:`OrganizationAdmins.user_id <odyssey.api.organizations.models.OrganizationAdmins.user_id>`, not nullable
     """
 
-    __table_args__ = (db.UniqueConstraint('name'), )
+    __table_args__ = (
+        db.UniqueConstraint('name'),
+        db.ForeignKeyConstraint(
+            ['owner', 'organization_uuid'],
+            ['OrganizationAdmins.user_id', 'OrganizationAdmins.organization_uuid'],
+            ondelete='RESTRICT',
+            deferrable=True,
+        ),
+    )
 
 
 class OrganizationMembers(BaseModel):
@@ -70,6 +77,7 @@ class OrganizationMembers(BaseModel):
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        primary_key=True,
         nullable=False,
     )
     """
@@ -81,15 +89,14 @@ class OrganizationMembers(BaseModel):
     organization_uuid = db.Column(
         UUID(as_uuid=True),
         db.ForeignKey('Organizations.organization_uuid', ondelete='CASCADE'),
+        primary_key=True,
         nullable=False,
     )
     """
     Organization ID number, foreign key to :attr:`Organizations.organization_id <odyssey.api.organizations.models.Organizations.organization_id>`.
     
-    :type: int, foreign key, not null
+    :type: UUID, foreign key, not null
     """
-
-    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'organization_uuid'), )
 
 
 class OrganizationAdmins(BaseModel):
@@ -100,6 +107,7 @@ class OrganizationAdmins(BaseModel):
 
     user_id = db.Column(
         db.Integer,
+        primary_key=True,
         nullable=False,
     )
     """
@@ -110,6 +118,7 @@ class OrganizationAdmins(BaseModel):
 
     organization_uuid = db.Column(
         UUID(as_uuid=True),
+        primary_key=True,
         nullable=False,
     )
     """
@@ -119,13 +128,9 @@ class OrganizationAdmins(BaseModel):
     """
 
     __table_args__ = (
-        db.PrimaryKeyConstraint('user_id', 'organization_uuid'),
         db.ForeignKeyConstraint(
             ['user_id', 'organization_uuid'],
-            [
-                'OrganizationMembers.user_id',
-                'OrganizationMembers.organization_uuid',
-            ],
+            ['OrganizationMembers.user_id', 'OrganizationMembers.organization_uuid'],
             ondelete='CASCADE',
         ),
     )
