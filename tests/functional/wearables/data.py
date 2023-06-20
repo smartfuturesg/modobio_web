@@ -159,6 +159,30 @@ test_8100_data_past_week = {
                     },
                 ]
             },
+            "heart_data": {
+                "heart_rate_data": {
+                    "detailed": {
+                        "hr_samples": [
+                            {
+                                "bpm": 65,
+                                "timestamp": three_days_ago
+                            },
+                            {
+                                "bpm": 61,
+                                "timestamp": two_days_ago
+                            },
+                            {
+                                "bpm": 63,
+                                "timestamp": one_day_ago
+                            },
+                            {
+                                "bpm": 61,
+                                "timestamp": one_hour_ago
+                            },
+                        ]
+                    },
+                },
+            },
         }
     }
 }
@@ -192,6 +216,30 @@ test_8100_data_week_to_month_ago = {
                         "systolic_bp": 146
                     },
                 ]
+            },
+            "heart_data": {
+                "heart_rate_data": {
+                    "detailed": {
+                        "hr_samples": [
+                            {
+                                "bpm": 63,
+                                "timestamp": eight_weeks_ago
+                            },
+                            {
+                                "bpm": 59,
+                                "timestamp": seven_weeks_ago
+                            },
+                            {
+                                "bpm": 69,
+                                "timestamp": six_weeks_ago
+                            },
+                            {
+                                "bpm": 72,
+                                "timestamp": five_weeks_ago
+                            },
+                        ]
+                    },
+                },
             },
         }
     }
