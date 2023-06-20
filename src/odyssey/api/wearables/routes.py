@@ -2199,7 +2199,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
         elif request.args.get('start_date') or request.args.get('end_date'):
             raise BadRequest('Provide both or neither start_date and end_date.')
-
         """Calculate Average Blood Pressures"""
         # Define each stage of the pipeline
         # Filter documents on user_id, wearable, and date range
@@ -2324,7 +2323,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         # Build the second pipeline for pulse data
         # Unwind the bpm data array so that we can operate on each individual sample
         stage_unwind_bpm_samples = {
-            '$unwind': '$data.body.heart_data.heart_rate_data.detailed.hr_samples'
+            '$unwind': ('$data.body.heart_data.heart_rate_data.detailed.hr_samples')
         }
 
         stage_match_date_range_bpm = {
