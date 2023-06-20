@@ -2179,10 +2179,13 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             - wearable
             - diastolic_bp_avg
             - systolic_bp_avg
+            - pulse_avg
             - diastolic_standard_deviation
             - systolic_standard_deviation
+            - pulse_standard_deviation
             - diastolic_bp_coefficient_of_variation
             - systolic_bp_coefficient_of_variation
+            - pulse_coefficient_of_variation
         """
 
         wearable = parse_wearable(wearable)
@@ -2196,6 +2199,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             end_date = iso_string_to_iso_datetime(request.args.get('end_date'))
         elif request.args.get('start_date') or request.args.get('end_date'):
             raise BadRequest('Provide both or neither start_date and end_date.')
+
         """Calculate Average Blood Pressures"""
         # Define each stage of the pipeline
         # Filter documents on user_id, wearable, and date range
@@ -2210,15 +2214,24 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             }
         }
 
-        # Unwind the samples array so that we can operate on each individual sample
+        # Unwind the bp samples array so that we can operate on each individual sample
         stage_unwind_blood_pressure_samples = {
             '$unwind': '$data.body.blood_pressure_data.blood_pressure_samples'
+        }
+
+        # Unwind the bpm data array so that we can operate on each individual sample
+        stage_unwind_bpm_samples = {
+            '$unwind': '$data.body.heart_data.heart_rate_data.detailed.hr_samples'
         }
 
         # Filter now again at the sample level to round out objects that overlap the tips of the desired range
         stage_match_date_range = {
             '$match': {
                 'data.body.blood_pressure_data.blood_pressure_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date,
+                },
+                'data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp': {
                     '$gte': start_date,
                     '$lte': end_date,
                 }
@@ -2235,6 +2248,9 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'systolic_bp_avg': {
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
+                'pulse_avg': {
+                    '$avg': '$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm'
+                },
                 'diastolic_standard_deviation': {
                     '$stdDevSamp':
                         '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
@@ -2242,6 +2258,9 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'systolic_standard_deviation': {
                     '$stdDevSamp':
                         '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'pulse_standard_deviation': {
+                    '$stdDevSamp': '$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm'
                 },
             }
         }
@@ -2271,7 +2290,18 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                         },
                     ]
                 },
-            }
+            },
+            'pulse_coefficient_of_variation': {
+                '$multiply': [
+                    100,
+                    {
+                        '$divide': [
+                            '$pulse_standard_deviation',
+                            '$pulse_avg',
+                        ]
+                    },
+                ]
+            },
         }
 
         # Round values
@@ -2295,6 +2325,15 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'systolic_bp_coefficient_of_variation': {
                     '$round': ['$systolic_bp_coefficient_of_variation', 0]
                 },
+                'pulse_avg': {
+                    '$round': ['$pulse_avg', 0]
+                },
+                'pulse_standard_deviation': {
+                    '$round': ['$pulse_standard_deviation', 0]
+                },
+                'pulse_coefficient_of_variation': {
+                    '$round': ['$pulse_coefficient_of_variation', 0]
+                },
             }
         }
 
@@ -2302,6 +2341,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         pipeline = [
             stage_match_user_id_and_wearable,
             stage_unwind_blood_pressure_samples,
+            stage_unwind_bpm_samples,
             stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
@@ -2335,6 +2375,12 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 data.get('diastolic_bp_coefficient_of_variation'),
             'systolic_bp_coefficient_of_variation':
                 data.get('systolic_bp_coefficient_of_variation'),
+            'pulse_avg':
+                data.get('pulse_avg'),
+            'pulse_standard_deviation':
+                data.get('pulse_standard_deviation'),
+            'pulse_coefficient_of_variation':
+                data.get('pulse_coefficient_of_variation'),
         }
 
         return payload
