@@ -284,6 +284,9 @@ class WearablesV2BloodPressureVariationCalculationOutputSchema(Schema):
     systolic_standard_deviation = fields.Integer(default=None)
     diastolic_bp_coefficient_of_variation = fields.Integer(default=None)
     systolic_bp_coefficient_of_variation = fields.Integer(default=None)
+    pulse_avg = fields.Integer(default=None)
+    pulse_standard_deviation = fields.Integer(default=None)
+    pulse_coefficient_of_variation = fields.Integer(default=None)
 
 
 class WearablesV2BloodGlucoseTimeInRangesSchema(Schema):

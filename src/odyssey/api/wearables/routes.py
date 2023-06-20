@@ -2219,11 +2219,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             '$unwind': '$data.body.blood_pressure_data.blood_pressure_samples'
         }
 
-        # Unwind the bpm data array so that we can operate on each individual sample
-        stage_unwind_bpm_samples = {
-            '$unwind': '$data.body.heart_data.heart_rate_data.detailed.hr_samples'
-        }
-
         # Filter now again at the sample level to round out objects that overlap the tips of the desired range
         stage_match_date_range = {
             '$match': {
@@ -2231,10 +2226,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                     '$gte': start_date,
                     '$lte': end_date,
                 },
-                'data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp': {
-                    '$gte': start_date,
-                    '$lte': end_date,
-                }
             }
         }
 
@@ -2248,9 +2239,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'systolic_bp_avg': {
                     '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
                 },
-                'pulse_avg': {
-                    '$avg': '$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm'
-                },
                 'diastolic_standard_deviation': {
                     '$stdDevSamp':
                         '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
@@ -2258,9 +2246,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'systolic_standard_deviation': {
                     '$stdDevSamp':
                         '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
-                },
-                'pulse_standard_deviation': {
-                    '$stdDevSamp': '$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm'
                 },
             }
         }
@@ -2291,17 +2276,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                     ]
                 },
             },
-            'pulse_coefficient_of_variation': {
-                '$multiply': [
-                    100,
-                    {
-                        '$divide': [
-                            '$pulse_standard_deviation',
-                            '$pulse_avg',
-                        ]
-                    },
-                ]
-            },
         }
 
         # Round values
@@ -2325,15 +2299,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
                 'systolic_bp_coefficient_of_variation': {
                     '$round': ['$systolic_bp_coefficient_of_variation', 0]
                 },
-                'pulse_avg': {
-                    '$round': ['$pulse_avg', 0]
-                },
-                'pulse_standard_deviation': {
-                    '$round': ['$pulse_standard_deviation', 0]
-                },
-                'pulse_coefficient_of_variation': {
-                    '$round': ['$pulse_coefficient_of_variation', 0]
-                },
             }
         }
 
@@ -2341,7 +2306,6 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         pipeline = [
             stage_match_user_id_and_wearable,
             stage_unwind_blood_pressure_samples,
-            stage_unwind_bpm_samples,
             stage_match_date_range,
             stage_group_pressure_average_and_std_dev,
             stage_add_coefficient_of_variation,
@@ -2356,6 +2320,79 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         # We need to grab the document that we want from that cursor so we can format the data in a payload
         if document_list:
             data = document_list[0]
+
+        # Build the second pipeline for pulse data
+        # Unwind the bpm data array so that we can operate on each individual sample
+        stage_unwind_bpm_samples = {
+            '$unwind': '$data.body.heart_data.heart_rate_data.detailed.hr_samples'
+        }
+
+        stage_match_date_range_bpm = {
+            '$match': {
+                'data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date,
+                },
+            }
+        }
+
+        stage_group_pressure_average_and_std_dev_bpm = {
+            '$group': {
+                '_id': None,
+                'bpm_avg': {
+                    '$avg': '$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm'
+                },
+                'bpm_standard_deviation': {
+                    '$stdDevSamp': '$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm'
+                },
+            }
+        }
+
+        stage_add_coefficient_of_variation_bpm = {
+            '$addFields': {
+                'bpm_coefficient_of_variation': {
+                    '$multiply': [
+                        100,
+                        {
+                            '$divide': [
+                                '$bpm_standard_deviation',
+                                '$bpm_avg',
+                            ]
+                        },
+                    ]
+                },
+            },
+        }
+
+        stage_round_values_bpm = {
+            '$project': {
+                'bpm_avg': {
+                    '$round': ['$bpm_avg', 0]
+                },
+                'bpm_standard_deviation': {
+                    '$round': ['$bpm_standard_deviation', 0]
+                },
+                'bpm_coefficient_of_variation': {
+                    '$round': ['$bpm_coefficient_of_variation', 0]
+                },
+            }
+        }
+
+        # Run the second pipeline for pulse data
+        pipeline2 = [
+            stage_match_user_id_and_wearable,
+            stage_unwind_bpm_samples,
+            stage_match_date_range_bpm,
+            stage_group_pressure_average_and_std_dev_bpm,
+            stage_add_coefficient_of_variation_bpm,
+            stage_round_values_bpm,
+        ]
+        cursor2 = mongo.db.wearables.aggregate(pipeline2)
+        document_list2 = list(cursor2)
+        data2 = {}
+
+        if document_list2:
+            data2 = document_list2[0]
 
         # Build and return payload
         payload = {
@@ -2376,11 +2413,11 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             'systolic_bp_coefficient_of_variation':
                 data.get('systolic_bp_coefficient_of_variation'),
             'pulse_avg':
-                data.get('pulse_avg'),
+                data2.get('bpm_avg'),
             'pulse_standard_deviation':
-                data.get('pulse_standard_deviation'),
+                data2.get('bpm_standard_deviation'),
             'pulse_coefficient_of_variation':
-                data.get('pulse_coefficient_of_variation'),
+                data2.get('bpm_coefficient_of_variation'),
         }
 
         return payload
