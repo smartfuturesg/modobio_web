@@ -841,7 +841,7 @@ def delete_client_data(user_id):
 
     # loop through each wearable the user has registered
     for wearable in wearables:
-        deauthenticate_terra_user_and_delete_data(user_id, wearable, delete_data=True)
+        deauthenticate_terra_user(user_id, wearable, delete_data=True)
 
     fd = FileDownload(user_id)
 
@@ -1201,9 +1201,6 @@ def update_client_subscription(
                 'start_date': datetime.utcnow().isoformat(),
             }
 
-            # Deauthenticate terra user to stop receiving data
-            deauthenticate_terra_user_and_delete_data(user_id, delete_data=False)
-
         logger.info(f'Apple subscription updated for user_id: {user_id}')
 
     if (
@@ -1425,7 +1422,7 @@ def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta
     return start_time, end_time
 
 
-def deauthenticate_terra_user_and_delete_data(user_id, wearable_obj=None, delete_data=False):
+def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
     """Deregister Terra user and delete terra data.
 
     Parameters
