@@ -161,43 +161,27 @@ test_8100_data_past_week = {
             },
             "heart_data": {
                 "heart_rate_data": {
-                    "summary": {
-                        "avg_hr_bpm": 113.15306229921325,
-                        "max_hr_bpm": 71.6568694683044,
-                        "avg_hrv_sdnn": None,
-                        "user_max_hr_bpm": None,
-                        "hr_zone_data": [],
-                        "min_hr_bpm": 114.30124842191826,
-                        "resting_hr_bpm": None,
-                        "avg_hrv_rmssd": None
-                    },
                     "detailed": {
-                        "hrv_samples_rmssd": [],
-                        "hrv_samples_sdnn": [],
                         "hr_samples": [
                             {
-                                "bpm": 95,
+                                "bpm": 60,
                                 "timestamp": three_days_ago
                             },
                             {
-                                "bpm": 68,
+                                "bpm": 60,
                                 "timestamp": two_days_ago
                             },
                             {
-                                "bpm": 103,
+                                "bpm": 60,
                                 "timestamp": one_day_ago
                             },
                             {
-                                "bpm": 68,
+                                "bpm": 60,
                                 "timestamp": one_hour_ago
                             },
                         ]
                     },
                 },
-                "rr_interval_samples": [],
-                "ecg_signal": [],
-                "afib_classification_samples": [],
-                "pulse_wave_velocity_samples": []
             },
         }
     }
@@ -232,6 +216,30 @@ test_8100_data_week_to_month_ago = {
                         "systolic_bp": 146
                     },
                 ]
+            },
+            "heart_data": {
+                "heart_rate_data": {
+                    "detailed": {
+                        "hr_samples": [
+                            {
+                                "bpm": 60,
+                                "timestamp": eight_weeks_ago
+                            },
+                            {
+                                "bpm": 60,
+                                "timestamp": seven_weeks_ago
+                            },
+                            {
+                                "bpm": 60,
+                                "timestamp": six_weeks_ago
+                            },
+                            {
+                                "bpm": 60,
+                                "timestamp": five_weeks_ago
+                            },
+                        ]
+                    },
+                },
             },
         }
     }
