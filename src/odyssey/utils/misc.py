@@ -13,7 +13,6 @@ from datetime import datetime, time, timedelta
 from time import monotonic
 
 import jwt
-import terra
 from dateutil import parser
 from flask import current_app, request, url_for
 from pytz import utc
@@ -35,11 +34,11 @@ from odyssey.api.user.models import *
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.apple import AppStore
-from odyssey.integrations.terra import TerraClient
+from odyssey.tasks.tasks import deauthenticate_terra_user
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import (
-    ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+    ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME,
 )
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
@@ -1420,77 +1419,3 @@ def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta
         start_time = end_time - time_range
 
     return start_time, end_time
-
-
-def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
-    """Deregister Terra user and delete terra data.
-
-    Parameters
-    ----------
-    user_id : int
-        User ID number.
-    wearable_obj : `WearablesV2 <odyssey.api.wearables.models.WearablesV2>`
-        Wearable sqlalchemy object.
-    delete_data : bool
-        Denotes whether or not to delete collected terra data
-
-    Notes
-    -----
-    The `wearable_obj` should be a sqlalchemy object which represents a row
-    from the the db. It will then be stored in a list so the logic can be the same
-    as if `wearable_obj` isn't passed in and we query all wearables belonging to
-    the user.
-    """
-    # Imported here to avoid circular imports
-    from odyssey.integrations.active_campaign import ActiveCampaign
-
-    tc = TerraClient()
-    ac = ActiveCampaign()
-
-    # If an wearable is not passed in, query all wearables.
-    # Else transform passed in object to a list so logic can be the same.
-    if not wearable_obj:
-        wearables = WearablesV2.query.filter_by(user_id=user_id).all()
-    else:
-        wearables = [wearable_obj]
-
-    # loop through each wearable the user has registered
-    for wearable in wearables:
-        try:
-            terra_user = tc.from_user_id(str(wearable.terra_user_id))
-        except (terra.exceptions.NoUserInfoException, KeyError):
-            # Terra-python (at least v0.0.7) should fail with NoUserInfoException
-            # if terra_user_id does not exist in their system. However, it checks
-            # whether response.json is empty, which is not empty in the case of an
-            # error (it holds the error message and status). The next step in
-            # terra.models.user.User.fill_in_user_info() is to access
-            # response.json["user"] which does not exist and fails with KeyError.
-            # In any case, we don't care that the terra_user_id is invalid, we
-            # were going to delete it anyway.
-            # 2023-01-10: Terra has been notified of this bug.
-            pass
-        else:
-            response = tc.deauthenticate_user(terra_user)
-            tc.status(response)
-
-        # Delete terra data stored in mongo and wearable entry in postgres
-        if delete_data:
-            mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable.wearable})
-            db.session.delete(wearable)
-
-            # Removes device tag association from users active campaign account
-            if not current_app.debug:
-                ac.remove_tag(
-                    user_id,
-                    WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable.wearable],
-                )
-
-            logger.audit(
-                f'User {user_id} revoked access to wearable'
-                f' {wearable.wearable}. Info and data deleted.'
-            )
-        else:
-            logger.audit(f'User {user_id} revoked access to wearable'
-                         f' {wearable.wearable}.')
-
-    db.session.commit()

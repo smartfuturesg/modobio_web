@@ -20,6 +20,7 @@ from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.terra import TerraClient
+from odyssey.tasks.tasks import deauthenticate_terra_user
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (
@@ -28,7 +29,7 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
-    create_wearables_filter_query, date_range, date_validator, deauthenticate_terra_user,
+    create_wearables_filter_query, date_range, date_validator,
     iso_string_to_iso_datetime, lru_cache_with_ttl
 )
 

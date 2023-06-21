@@ -26,7 +26,7 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
-    cancel_noshow_appointment, cancel_telehealth_appointment,
+    cancel_noshow_appointment, cancel_telehealth_appointment, deauthenticate_terra_user,
     notify_client_of_imminent_scheduled_maintenance, notify_staff_of_imminent_scheduled_maintenance,
     store_telehealth_transcript, upcoming_appointment_care_team_permissions,
     upcoming_appointment_notification_2hr, upcoming_booking_payment_notification,
@@ -34,7 +34,7 @@ from odyssey.tasks.tasks import (
 )
 from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID)
 from odyssey.utils.message import send_email
-from odyssey.utils.misc import (create_notification, deauthenticate_terra_user, get_time_index)
+from odyssey.utils.misc import (create_notification, get_time_index)
 
 logger = get_task_logger(__name__)
 
@@ -688,7 +688,7 @@ def deauthenticate_unsubscribed_terra_users():
     )
 
     for sub in subscriptions:
-        deauthenticate_terra_user(sub.user_id, delete_data=False)
+        deauthenticate_terra_user.delay(sub.user_id, delete_data=False)
 
 
 @worker_process_init.connect
