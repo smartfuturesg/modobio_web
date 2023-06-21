@@ -34,7 +34,6 @@ from odyssey.api.user.models import *
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.apple import AppStore
-from odyssey.tasks.tasks import deauthenticate_terra_user
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import (ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME)
@@ -834,6 +833,10 @@ def delete_client_data(user_id):
     # wearablesV2 mongoDB deletion
     # do this first because we need some info from tables that are deleted below
     # get the wearables the user has registered
+
+    # Imported here to avoid circular imports
+    from odyssey.tasks.tasks import deauthenticate_terra_user
+
     wearables = WearablesV2.query.filter_by(user_id=user_id).all()
 
     # loop through each wearable the user has registered
