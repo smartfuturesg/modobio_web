@@ -605,6 +605,13 @@ class UserSubscriptions(db.Model):
     :type: String
     """
 
+    google_transaction_id = db.Column(db.String)
+    """
+    Google playstore transaction ID related to a subscription purchase.
+
+    :type: String
+    """
+
     expire_date = db.Column(db.DateTime)
     """
     Date and time the subscription will expire. If subscription is renewed, there will be a new entry for the 
