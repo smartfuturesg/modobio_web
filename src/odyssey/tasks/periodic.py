@@ -30,7 +30,7 @@ from odyssey.tasks.tasks import (
     notify_client_of_imminent_scheduled_maintenance, notify_staff_of_imminent_scheduled_maintenance,
     store_telehealth_transcript, upcoming_appointment_care_team_permissions,
     upcoming_appointment_notification_2hr, upcoming_booking_payment_notification,
-    update_client_subscription_task
+    update_client_subscription_task, update_subscription_auto_renewal_status
 )
 from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID)
 from odyssey.utils.message import send_email
@@ -670,6 +670,24 @@ def update_ac_age_tags():
 
     logger.info(f'Age group tags have been updated')
 
+@celery.task()
+def check_users_auto_renewal_status():
+    """ Checks subscribed users apple auto renewal status to keep it updated."""
+
+    # Get the latest apple subscription entries for each user with a subscribed status 
+    subquery = db.session.query(UserSubscriptions.user_id, func.max(UserSubscriptions.created_at).label('latest_created_at')) \
+                  .group_by(UserSubscriptions.user_id).subquery()
+
+    query = db.session.query(User, UserSubscriptions) \
+                .join(subquery, User.user_id == subquery.c.user_id) \
+                .join(UserSubscriptions, UserSubscriptions.user_id == User.user_id) \
+                .filter(UserSubscriptions.subscription_status == 'subscribed', UserSubscriptions.apple_original_transaction_id != None)\
+                .filter(UserSubscriptions.created_at == subquery.c.latest_created_at).all()
+
+    for _, subscription in query:
+        update_subscription_auto_renewal_status.delay(subscription.idx)
+
+    logger.info(f'Apple auto renewal statuses updated.')
 
 @worker_process_init.connect
 def close_previous_db_connection(**kwargs):
@@ -705,7 +723,12 @@ celery.conf.beat_schedule = {
     # Active campaign tags (age group)
     'update_ac_age_tags': {
         'task': 'odyssey.tasks.periodic.update_ac_age_tags',
-        'schedule': crontab(day_of_week=0),  # Run every sunday
+        'schedule': crontab(minute=0, hour=0, day_of_week=0),  # Run every sunday
+    },
+    # Check subscription auto_renewal status
+    'check_users_auto_renewal_status': {
+        'task': 'odyssey.tasks.periodic.check_users_auto_renewal_status',
+        'schedule': crontab(minute=0, hour=6),  # Run every day at 6am
     },
 }
 

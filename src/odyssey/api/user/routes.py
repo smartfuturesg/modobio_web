@@ -734,21 +734,6 @@ class UserSubscriptionApi(BaseResource):
             ).order_by(UserSubscriptions.idx.desc()).first()
         )
 
-        renewal_info = None
-        if (
-            current_subscription.apple_original_transaction_id
-            and current_subscription.subscription_status == 'subscribed'
-        ):
-            appstore = AppStore()
-            _, renewal_info, _ = appstore.latest_transaction(
-                current_subscription.apple_original_transaction_id
-            )
-
-        if renewal_info:
-            current_subscription.auto_renew_status = (
-                True if renewal_info.get('autoRenewStatus') == 1 else False
-            )
-
         if current_subscription.sponsorship:
             sponsoring_user = User.query.filter_by(
                 user_id=current_subscription.sponsorship.user_id
