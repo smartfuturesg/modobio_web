@@ -1096,7 +1096,7 @@ class WearablesV2DataEndpoint(BaseResource):
 @ns_v2.route('/sync/<int:user_id>')
 class WearablesV2ResyncEndpoint(BaseResource):
     @ns_v2.doc(params={'wearable': 'The wearable device to resync'})
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=('client', 'staff' ), staff_role = ('community_manager', ))
     @responds(status_code=200, api=ns_v2)
     def get(self, user_id):
         """
@@ -1131,14 +1131,16 @@ class WearablesV2ResyncEndpoint(BaseResource):
         now = datetime.utcnow()
         twenty_four_hours_ago = now - timedelta(hours=24)
         seven_days_ago = now - timedelta(days=7)
-
+        
         for wearable in wearables:
-            if wearable.last_sync_date > twenty_four_hours_ago:
+            if wearable.last_sync_date != None and wearable.last_sync_date > twenty_four_hours_ago:
                 continue
 
             terra_user = tc.from_user_id(wearable.terra_user_id)
             tc.get_terra_data(terra_user, seven_days_ago, now)
             tc.get_terra_data(terra_user, WAY_BACK_WHEN, seven_days_ago)
+            wearable.last_sync_date = datetime.utcnow()
+            db.session.commit()
 
         return
 
