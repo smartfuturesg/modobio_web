@@ -34,7 +34,7 @@ from odyssey.tasks.tasks import (
 )
 from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID)
 from odyssey.utils.message import send_email
-from odyssey.utils.misc import (create_notification, get_time_index)
+from odyssey.utils.misc import create_notification, get_time_index
 
 logger = get_task_logger(__name__)
 

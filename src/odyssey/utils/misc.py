@@ -37,9 +37,7 @@ from odyssey.integrations.apple import AppStore
 from odyssey.tasks.tasks import deauthenticate_terra_user
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import (
-    ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME,
-)
+from odyssey.utils.constants import (ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME)
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
 

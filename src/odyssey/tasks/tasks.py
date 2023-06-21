@@ -4,9 +4,9 @@ from datetime import datetime, time, timedelta
 from io import BytesIO
 
 import redis
+import terra
 from flask_migrate import current_app
 from sqlalchemy import select
-import terra
 from werkzeug.exceptions import BadRequest
 
 from odyssey import celery, conf, db, mongo
@@ -18,10 +18,12 @@ from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.api.wearables.models import WearablesV2
-from odyssey.integrations.twilio import Twilio
 from odyssey.integrations.terra import TerraClient
+from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry, IntegrationsBaseTaskWithRetry
-from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES)
+from odyssey.utils.constants import (
+    NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+)
 from odyssey.utils.files import FileUpload
 from odyssey.utils.misc import create_notification, update_client_subscription
 from odyssey.utils.telehealth import complete_booking
@@ -616,6 +618,7 @@ def update_active_campaign_tags(user_id: int, tags: list):
     for tag in tags:
         ac.add_tag(user.user_id, tag)
 
+
 @celery.task(base=IntegrationsBaseTaskWithRetry)
 def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
     """Deregister Terra user and delete terra data.
@@ -689,4 +692,3 @@ def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
                          f' {wearable.wearable}.')
 
     db.session.commit()
-

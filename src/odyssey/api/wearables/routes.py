@@ -29,8 +29,8 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
-    create_wearables_filter_query, date_range, date_validator,
-    iso_string_to_iso_datetime, lru_cache_with_ttl
+    create_wearables_filter_query, date_range, date_validator, iso_string_to_iso_datetime,
+    lru_cache_with_ttl
 )
 
 logger = logging.getLogger(__name__)
