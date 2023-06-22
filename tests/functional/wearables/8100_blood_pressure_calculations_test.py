@@ -15,10 +15,13 @@ def test_blood_pressure_calculations_default_date_filters(test_client, bp_data_f
     assert response.json.get('wearable') == BLOOD_PRESSURE_WEARABLE
     assert response.json.get('diastolic_bp_avg') == 72
     assert response.json.get('systolic_bp_avg') == 131
+    assert response.json.get('pulse_avg') == 62
     assert response.json.get('diastolic_standard_deviation') == 5
     assert response.json.get('systolic_standard_deviation') == 10
+    assert response.json.get('pulse_standard_deviation') == 2
     assert response.json.get('diastolic_bp_coefficient_of_variation') == 6
     assert response.json.get('systolic_bp_coefficient_of_variation') == 8
+    assert response.json.get('pulse_coefficient_of_variation') == 3
 
 
 def test_blood_pressure_calculations_extended_date_filters(test_client, bp_data_fixture):
@@ -34,7 +37,10 @@ def test_blood_pressure_calculations_extended_date_filters(test_client, bp_data_
     assert response.json.get('wearable') == BLOOD_PRESSURE_WEARABLE
     assert response.json.get('diastolic_bp_avg') == 76
     assert response.json.get('systolic_bp_avg') == 129
+    assert response.json.get('pulse_avg') == 64
     assert response.json.get('diastolic_standard_deviation') == 11
     assert response.json.get('systolic_standard_deviation') == 13
+    assert response.json.get('pulse_standard_deviation') == 4
     assert response.json.get('diastolic_bp_coefficient_of_variation') == 14
     assert response.json.get('systolic_bp_coefficient_of_variation') == 10
+    assert response.json.get('pulse_coefficient_of_variation') == 7
