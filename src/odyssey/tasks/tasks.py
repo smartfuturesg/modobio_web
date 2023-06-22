@@ -4,6 +4,7 @@ from datetime import datetime, time, timedelta
 from io import BytesIO
 
 import redis
+import terra
 from flask_migrate import current_app
 from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
@@ -16,9 +17,13 @@ from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
+from odyssey.api.wearables.models import WearablesV2
+from odyssey.integrations.terra import TerraClient
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry, IntegrationsBaseTaskWithRetry
-from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID)
+from odyssey.utils.constants import (
+    NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+)
 from odyssey.utils.files import FileUpload
 from odyssey.utils.misc import create_notification, update_client_subscription
 from odyssey.utils.telehealth import complete_booking
@@ -612,3 +617,78 @@ def update_active_campaign_tags(user_id: int, tags: list):
 
     for tag in tags:
         ac.add_tag(user.user_id, tag)
+
+
+@celery.task(base=IntegrationsBaseTaskWithRetry)
+def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
+    """Deregister Terra user and delete terra data.
+
+    Parameters
+    ----------
+    user_id : int
+        User ID number.
+    wearable_obj : `WearablesV2 <odyssey.api.wearables.models.WearablesV2>`
+        Wearable sqlalchemy object.
+    delete_data : bool
+        Denotes whether or not to delete collected terra data
+
+    Notes
+    -----
+    The `wearable_obj` should be a sqlalchemy object which represents a row
+    from the the db. It will then be stored in a list so the logic can be the same
+    as if `wearable_obj` isn't passed in and we query all wearables belonging to
+    the user.
+    """
+    # Imported here to avoid circular imports
+    from odyssey.integrations.active_campaign import ActiveCampaign
+
+    tc = TerraClient()
+    ac = ActiveCampaign()
+
+    # If an wearable is not passed in, query all wearables.
+    # Else transform passed in object to a list so logic can be the same.
+    if not wearable_obj:
+        wearables = WearablesV2.query.filter_by(user_id=user_id).all()
+    else:
+        wearables = [wearable_obj]
+
+    # loop through each wearable the user has registered
+    for wearable in wearables:
+        try:
+            terra_user = tc.from_user_id(str(wearable.terra_user_id))
+        except (terra.exceptions.NoUserInfoException, KeyError):
+            # Terra-python (at least v0.0.7) should fail with NoUserInfoException
+            # if terra_user_id does not exist in their system. However, it checks
+            # whether response.json is empty, which is not empty in the case of an
+            # error (it holds the error message and status). The next step in
+            # terra.models.user.User.fill_in_user_info() is to access
+            # response.json["user"] which does not exist and fails with KeyError.
+            # In any case, we don't care that the terra_user_id is invalid, we
+            # were going to delete it anyway.
+            # 2023-01-10: Terra has been notified of this bug.
+            pass
+        else:
+            response = tc.deauthenticate_user(terra_user)
+            tc.status(response)
+
+        # Delete terra data stored in mongo and wearable entry in postgres
+        if delete_data:
+            mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable.wearable})
+            db.session.delete(wearable)
+
+            # Removes device tag association from users active campaign account
+            if not current_app.debug:
+                ac.remove_tag(
+                    user_id,
+                    WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable.wearable],
+                )
+
+            logger.audit(
+                f'User {user_id} revoked access to wearable'
+                f' {wearable.wearable}. Info and data deleted.'
+            )
+        else:
+            logger.audit(f'User {user_id} revoked access to wearable'
+                         f' {wearable.wearable}.')
+
+    db.session.commit()

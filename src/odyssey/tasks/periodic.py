@@ -26,7 +26,7 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
-    cancel_noshow_appointment, cancel_telehealth_appointment,
+    cancel_noshow_appointment, cancel_telehealth_appointment, deauthenticate_terra_user,
     notify_client_of_imminent_scheduled_maintenance, notify_staff_of_imminent_scheduled_maintenance,
     store_telehealth_transcript, upcoming_appointment_care_team_permissions,
     upcoming_appointment_notification_2hr, upcoming_booking_payment_notification,
@@ -671,6 +671,26 @@ def update_ac_age_tags():
     logger.info(f'Age group tags have been updated')
 
 
+@celery.task()
+def deauthenticate_unsubscribed_terra_users():
+    """Deauthenticates unsubscribed users from terra."""
+
+    start_date = datetime.utcnow() - timedelta(days=3)
+
+    # Bring up expired subscriptions that have been unsubscribed for 3 days.
+    subscriptions = (
+        db.session.execute(
+            select(UserSubscriptions).where(
+                UserSubscriptions.start_date < start_date,
+                UserSubscriptions.subscription_status == 'unsubscribed',
+            )
+        ).scalars().all()
+    )
+
+    for sub in subscriptions:
+        deauthenticate_terra_user.delay(sub.user_id, delete_data=False)
+
+
 @worker_process_init.connect
 def close_previous_db_connection(**kwargs):
     if db.session:
@@ -706,6 +726,11 @@ celery.conf.beat_schedule = {
     'update_ac_age_tags': {
         'task': 'odyssey.tasks.periodic.update_ac_age_tags',
         'schedule': crontab(day_of_week=0),  # Run every sunday
+    },
+    # Deauthenticate terra users
+    'deauthenticate_unsubscribed_terra_users': {
+        'task': ('odyssey.tasks.periodic.deauthenticate_unsubscribed_terra_users'),
+        'schedule': crontab(hour='*/1'),  # Runs every hour
     },
 }
 
