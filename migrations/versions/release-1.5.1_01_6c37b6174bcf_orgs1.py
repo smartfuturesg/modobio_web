@@ -2,12 +2,12 @@
 
 Revision ID: 6c37b6174bcf
 Revises: b26e574b59f8
-Create Date: 2023-06-08 16:10:09.535730
+Create Date: 2023-06-16 19:19:36.742549
 
 """
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '6c37b6174bcf'
@@ -21,37 +21,31 @@ def upgrade():
     op.create_table('Organizations',
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
-    sa.Column('organization_id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('organization_uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('max_members', sa.Integer(), nullable=False),
     sa.Column('max_admins', sa.Integer(), nullable=False),
     sa.Column('owner', sa.Integer(), nullable=False),
-    # regenerated in following migration
-    # sa.ForeignKeyConstraint(['owner'], ['OrganizationAdmins.admin_id'], ondelete='RESTRICT', deferrable=True),
-    sa.PrimaryKeyConstraint('organization_id'),
+    # sa.ForeignKeyConstraint(['owner', 'organization_uuid'], ['OrganizationAdmins.user_id', 'OrganizationAdmins.organization_uuid'], ondelete='RESTRICT', deferrable=True),
+    sa.PrimaryKeyConstraint('organization_uuid'),
     sa.UniqueConstraint('name')
     )
     op.create_table('OrganizationMembers',
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
-    sa.Column('member_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('organization_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['organization_id'], ['Organizations.organization_id'], ondelete='CASCADE'),
+    sa.Column('organization_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['organization_uuid'], ['Organizations.organization_uuid'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['User.user_id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('member_id'),
-    sa.UniqueConstraint('user_id', 'organization_id')
+    sa.PrimaryKeyConstraint('user_id', 'organization_uuid')
     )
     op.create_table('OrganizationAdmins',
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('clock_timestamp()'), nullable=True),
-    sa.Column('admin_id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('member_id', sa.Integer(), nullable=False),
-    sa.Column('organization_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['member_id'], ['OrganizationMembers.member_id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['organization_id'], ['Organizations.organization_id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('admin_id'),
-    sa.UniqueConstraint('member_id', 'organization_id')
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('organization_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['user_id', 'organization_uuid'], ['OrganizationMembers.user_id', 'OrganizationMembers.organization_uuid'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('user_id', 'organization_uuid')
     )
     # ### end Alembic commands ###
 
