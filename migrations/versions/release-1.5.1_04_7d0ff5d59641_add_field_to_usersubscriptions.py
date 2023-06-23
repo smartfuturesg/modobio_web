@@ -1,7 +1,7 @@
 """Add field to UserSubscriptions
 
 Revision ID: 7d0ff5d59641
-Revises: 915b200cbb9b
+Revises: e3f798f467ca
 Create Date: 2023-06-21 15:48:17.541979
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '7d0ff5d59641'
-down_revision = '915b200cbb9b'
+down_revision = 'e3f798f467ca'
 branch_labels = None
 depends_on = None
 
