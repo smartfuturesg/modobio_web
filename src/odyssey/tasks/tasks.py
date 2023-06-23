@@ -16,8 +16,8 @@ from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
-from odyssey.integrations.twilio import Twilio
 from odyssey.integrations.apple import AppStore
+from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry, IntegrationsBaseTaskWithRetry
 from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID)
 from odyssey.utils.files import FileUpload
@@ -614,6 +614,7 @@ def update_active_campaign_tags(user_id: int, tags: list):
     for tag in tags:
         ac.add_tag(user.user_id, tag)
 
+
 @celery.task(base=IntegrationsBaseTaskWithRetry)
 def update_subscription_auto_renewal_status(subscription_idx):
     """Check and update Apple auto renewal for subscriptions.
@@ -623,14 +624,12 @@ def update_subscription_auto_renewal_status(subscription_idx):
     subscription_idx : int
        Subscription ID
     """
-    
+
     subscription = UserSubscriptions.query.filter_by(idx=subscription_idx).one_or_none()
 
     renewal_info = None
     appstore = AppStore()
-    _, renewal_info, _ = appstore.latest_transaction(
-        subscription.apple_original_transaction_id
-    )
+    _, renewal_info, _ = appstore.latest_transaction(subscription.apple_original_transaction_id)
 
     if renewal_info:
         subscription.apple_auto_renew = (
@@ -638,4 +637,3 @@ def update_subscription_auto_renewal_status(subscription_idx):
         )
 
     db.session.commit()
-

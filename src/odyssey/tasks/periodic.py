@@ -670,24 +670,33 @@ def update_ac_age_tags():
 
     logger.info(f'Age group tags have been updated')
 
+
 @celery.task()
 def check_users_auto_renewal_status():
-    """ Checks subscribed users apple auto renewal status to keep it updated."""
+    """Checks subscribed users apple auto renewal status to keep it updated."""
 
-    # Get the latest apple subscription entries for each user with a subscribed status 
-    subquery = db.session.query(UserSubscriptions.user_id, func.max(UserSubscriptions.created_at).label('latest_created_at')) \
-                  .group_by(UserSubscriptions.user_id).subquery()
+    # Get the latest apple subscription entries for each user with a subscribed status
+    subquery = (
+        db.session.query(
+            UserSubscriptions.user_id,
+            func.max(UserSubscriptions.created_at).label('latest_created_at'),
+        ).group_by(UserSubscriptions.user_id).subquery()
+    )
 
-    query = db.session.query(User, UserSubscriptions) \
-                .join(subquery, User.user_id == subquery.c.user_id) \
-                .join(UserSubscriptions, UserSubscriptions.user_id == User.user_id) \
-                .filter(UserSubscriptions.subscription_status == 'subscribed', UserSubscriptions.apple_original_transaction_id != None)\
-                .filter(UserSubscriptions.created_at == subquery.c.latest_created_at).all()
+    query = (
+        db.session.query(User, UserSubscriptions).join(
+            subquery, User.user_id == subquery.c.user_id
+        ).join(UserSubscriptions, UserSubscriptions.user_id == User.user_id).filter(
+            UserSubscriptions.subscription_status == 'subscribed',
+            UserSubscriptions.apple_original_transaction_id != None,
+        ).filter(UserSubscriptions.created_at == subquery.c.latest_created_at).all()
+    )
 
     for _, subscription in query:
         update_subscription_auto_renewal_status.delay(subscription.idx)
 
     logger.info(f'Apple auto renewal statuses updated.')
+
 
 @worker_process_init.connect
 def close_previous_db_connection(**kwargs):
