@@ -18,8 +18,8 @@ from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.api.wearables.models import WearablesV2
-from odyssey.integrations.terra import TerraClient
 from odyssey.integrations.apple import AppStore
+from odyssey.integrations.terra import TerraClient
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry, IntegrationsBaseTaskWithRetry
 from odyssey.utils.constants import (
@@ -642,8 +642,9 @@ def update_subscription_auto_renewal_status(subscription_idx):
         )
 
     db.session.commit()
-    
-@celery.task(base=IntegrationsBaseTaskWithRetry)    
+
+
+@celery.task(base=IntegrationsBaseTaskWithRetry)
 def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
     """Deregister Terra user and delete terra data.
 

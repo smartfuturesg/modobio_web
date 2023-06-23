@@ -696,7 +696,8 @@ def check_users_auto_renewal_status():
         update_subscription_auto_renewal_status.delay(subscription.idx)
 
     logger.info(f'Apple auto renewal statuses updated.')
-    
+
+
 @celery.task()
 def deauthenticate_unsubscribed_terra_users():
     """Deauthenticates unsubscribed users from terra."""
