@@ -20,6 +20,7 @@ from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.terra import TerraClient
+from odyssey.tasks.tasks import deauthenticate_terra_user
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (
@@ -1060,37 +1061,61 @@ class WearablesV2DataEndpoint(BaseResource):
             logger.debug(f'Nothing to delete for user {user_id} and wearable {wearable}')
             return
 
+        deauthenticate_terra_user(user_id, wearable_obj=user_wearable, delete_data=True)
+
+
+@ns_v2.route('/sync/<int:user_id>')
+class WearablesV2ResyncEndpoint(BaseResource):
+    @ns_v2.doc(params={'wearable': 'The wearable device to resync'})
+    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('community_manager', ))
+    @responds(status_code=200, api=ns_v2)
+    def get(self, user_id):
+        """
+        Resync data for a wearable device.
+
+        If no wearable is specified, resync all wearables for this user.
+        A resync will first request all data from the last 7 days and
+        then request data from WAY_BACK_WHEN up to 7 days ago.
+        Each wearable can be resynced once every 24 hours.
+
+        Parameters
+        ----------
+        user_id : int
+            The user ID of the user to resync data for.
+
+        Query Parameters
+        ----------------
+        wearable : str, optional
+            The wearable device to resync. If not specified, all wearables
+        """
+
+        wearables_query = WearablesV2().query.filter_by(user_id=user_id)
+
+        if 'wearable' in request.args:
+            wearable = parse_wearable(request.args['wearable'])
+            wearables_query = wearables_query.filter_by(wearable=wearable)
+
+        wearables = wearables_query.all()
+
         tc = TerraClient()
-        try:
-            terra_user = tc.from_user_id(str(user_wearable.terra_user_id))
-        except (terra.exceptions.NoUserInfoException, KeyError):
-            # Terra-python (at least v0.0.7) should fail with NoUserInfoException
-            # if terra_user_id does not exist in their system. However, it checks
-            # whether response.json is empty, which is not empty in the case of an
-            # error (it holds the error message and status). The next step in
-            # terra.models.user.User.fill_in_user_info() is to access
-            # response.json["user"] which does not exist and fails with KeyError.
-            # In any case, we don't care that the terra_user_id is invalid, we
-            # were going to delete it anyway.
-            # 2023-01-10: Terra has been notified of this bug.
-            pass
-        else:
-            response = tc.deauthenticate_user(terra_user)
-            tc.status(response)
 
-        mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable})
+        now = datetime.utcnow()
+        twenty_four_hours_ago = now - timedelta(hours=24)
+        seven_days_ago = now - timedelta(days=7)
 
-        db.session.delete(user_wearable)
-        db.session.commit()
-        logger.audit(
-            f'User {user_id} revoked access to wearable {wearable}. Info and'
-            ' data deleted.'
-        )
+        for wearable in wearables:
+            if (
+                wearable.last_sync_date != None and wearable.last_sync_date > twenty_four_hours_ago
+            ):
+                continue
 
-        if not current_app.debug:
-            # Removes device tag association from users active campaign account
-            ac = ActiveCampaign()
-            ac.remove_tag(user_id, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable])
+            terra_user = tc.from_user_id(wearable.terra_user_id)
+            tc.get_terra_data(terra_user, seven_days_ago, now)
+            tc.get_terra_data(terra_user, WAY_BACK_WHEN, seven_days_ago)
+            wearable.last_sync_date = datetime.utcnow()
+            db.session.commit()
+
+        return
 
 
 @ns_v2.route('/terra')

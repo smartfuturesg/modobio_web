@@ -13,7 +13,6 @@ from datetime import datetime, time, timedelta
 from time import monotonic
 
 import jwt
-import terra
 from dateutil import parser
 from flask import current_app, request, url_for
 from pytz import utc
@@ -35,7 +34,6 @@ from odyssey.api.user.models import *
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.apple import AppStore
-from odyssey.integrations.terra import TerraClient
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import (ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME)
@@ -835,34 +833,15 @@ def delete_client_data(user_id):
     # wearablesV2 mongoDB deletion
     # do this first because we need some info from tables that are deleted below
     # get the wearables the user has registered
+
+    # Imported here to avoid circular imports
+    from odyssey.tasks.tasks import deauthenticate_terra_user
+
     wearables = WearablesV2.query.filter_by(user_id=user_id).all()
 
     # loop through each wearable the user has registered
-    tc = TerraClient()
-    for each_wearable in wearables:
-        try:
-            terra_user = tc.from_user_id(str(each_wearable.terra_user_id))
-        except (terra.exceptions.NoUserInfoException, KeyError):
-            # Terra-python (at least v0.0.7) should fail with NoUserInfoException
-            # if terra_user_id does not exist in their system. However, it checks
-            # whether response.json is empty, which is not empty in the case of an
-            # error (it holds the error message and status). The next step in
-            # terra.models.user.User.fill_in_user_info() is to access
-            # response.json["user"] which does not exist and fails with KeyError.
-            # In any case, we don't care that the terra_user_id is invalid, we
-            # were going to delete it anyway.
-            # 2023-01-10: Terra has been notified of this bug.
-            pass
-        else:
-            response = tc.deauthenticate_user(terra_user)
-            tc.status(response)
-
-        mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': each_wearable})
-
-        logger.audit(
-            f'User {user_id} account deleted, wearable {each_wearable} info'
-            ' and data deleted.'
-        )
+    for wearable in wearables:
+        deauthenticate_terra_user(user_id, wearable, delete_data=True)
 
     fd = FileDownload(user_id)
 

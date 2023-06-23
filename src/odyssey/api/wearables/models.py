@@ -446,3 +446,10 @@ class WearablesV2(BaseModel, UserIdFkeyMixin):
 
     :type: :class:`uuid.UUID`, not-null, indexed
     """
+
+    last_sync_date = db.Column(db.DateTime)
+    """
+    Date and time of last sync with Terra.
+
+    :type: :class:`datetime.datetime`
+    """

@@ -26,7 +26,7 @@ from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
-    cancel_noshow_appointment, cancel_telehealth_appointment,
+    cancel_noshow_appointment, cancel_telehealth_appointment, deauthenticate_terra_user,
     notify_client_of_imminent_scheduled_maintenance, notify_staff_of_imminent_scheduled_maintenance,
     store_telehealth_transcript, upcoming_appointment_care_team_permissions,
     upcoming_appointment_notification_2hr, upcoming_booking_payment_notification,
@@ -696,6 +696,25 @@ def check_users_auto_renewal_status():
         update_subscription_auto_renewal_status.delay(subscription.idx)
 
     logger.info(f'Apple auto renewal statuses updated.')
+    
+@celery.task()
+def deauthenticate_unsubscribed_terra_users():
+    """Deauthenticates unsubscribed users from terra."""
+
+    start_date = datetime.utcnow() - timedelta(days=3)
+
+    # Bring up expired subscriptions that have been unsubscribed for 3 days.
+    subscriptions = (
+        db.session.execute(
+            select(UserSubscriptions).where(
+                UserSubscriptions.start_date < start_date,
+                UserSubscriptions.subscription_status == 'unsubscribed',
+            )
+        ).scalars().all()
+    )
+
+    for sub in subscriptions:
+        deauthenticate_terra_user.delay(sub.user_id, delete_data=False)
 
 
 @worker_process_init.connect
@@ -738,6 +757,11 @@ celery.conf.beat_schedule = {
     'check_users_auto_renewal_status': {
         'task': 'odyssey.tasks.periodic.check_users_auto_renewal_status',
         'schedule': crontab(minute=0, hour=6),  # Run every day at 6am
+    },
+    # Deauthenticate terra users
+    'deauthenticate_unsubscribed_terra_users': {
+        'task': ('odyssey.tasks.periodic.deauthenticate_unsubscribed_terra_users'),
+        'schedule': crontab(hour='*/1'),  # Runs every hour
     },
 }
 
