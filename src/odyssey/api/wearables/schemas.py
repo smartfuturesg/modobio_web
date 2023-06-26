@@ -333,6 +333,7 @@ class WearablesV2BloodGlucoseTimeInRangesOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     results = fields.Nested(WearablesV2BloodGlucoseTimeInRangesSchema)
 
+
 class WearablesV2BloodPressureDailyAvgNestedSchema(Schema):
     date = fields.Date(required=True)
     systolic_bp_avg = fields.Integer(required=True)
@@ -341,8 +342,9 @@ class WearablesV2BloodPressureDailyAvgNestedSchema(Schema):
     hr_bpm_avg = fields.Integer(required=True)
     hr_readings_count = fields.Integer(required=True)
 
+
 class WearablesV2BloodPressureDailyAvgOutputSchema(Schema):
-    
+
     wearable = fields.String(required=True)
     items = fields.List(fields.Nested(WearablesV2BloodPressureDailyAvgNestedSchema))
     total_items = fields.Integer(required=True)

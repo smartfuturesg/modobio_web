@@ -3365,3 +3365,155 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Return completed payload
         return payload
+
+
+@ns_v2.route('/calculations/blood-pressure/daily-average/<int:user_id>/<string:wearable>')
+class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
+    @token_auth.login_required(user_type=('client', 'provider'), resources=('wearable_data', ))
+    @ns_v2.doc(
+        params={
+            'start_date': (
+                'Start of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+            'end_date': (
+                'End of specified date range. Can be either ISO format date'
+                ' (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)'
+            ),
+        }
+    )
+    @responds(
+        schema=WearablesV2BloodPressureDailyAvgOutputSchema,
+        status_code=200,
+        api=ns_v2,
+    )
+    def get(self, user_id, wearable):
+        """
+        Accepts a date range and returns the daily average systolic, diastolic blood pressure, and heartrate at time of reading.
+
+        Path Parameters
+        ----------
+        user_id : int
+            User ID number.
+        wearable: str
+            wearable used to measure blood pressure data
+
+        Query Parameters
+        ----------
+        start_date : str
+            Start of specified date range - Can be either ISO format date (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z).
+            Default will be current date - 30 days if not specified
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+        """
+
+        start_date, end_date = date_range(
+            start_time=request.args.get('start_date'),
+            end_time=request.args.get('end_date'),
+            time_range=timedelta(days=30),
+        )
+
+        stage_1_match_user_id_and_wearable = {
+            '$match': {
+                'user_id': user_id,
+                'wearable': wearable,
+                'timestamp': {
+                    '$gte': start_date,
+                    '$lte': end_date,
+                },
+            }
+        }
+
+        stage_2_unwind_bp_data = {
+            '$unwind': '$data.body.blood_pressure_data.blood_pressure_samples'
+        }
+
+        stage_3_group_by_date_take_bp_avgs = {
+            '$group': {
+                '_id': {
+                    'date': '$timestamp'
+                },
+                'systolic_bp_avg': {
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.systolic_bp'
+                },
+                'diastolic_bp_avg': {
+                    '$avg': '$data.body.blood_pressure_data.blood_pressure_samples.diastolic_bp'
+                },
+                'bp_readings_count': {
+                    '$sum': 1
+                },
+                'hr_samples': {
+                    '$first': '$data.body.heart_data.heart_rate_data.detailed.hr_samples'
+                },
+            }
+        }
+
+        stage_4_unwind_hr_data = {'$unwind': '$hr_samples'}
+
+        stage_5_group_by_date_take_hr_avgs = {
+            '$group': {
+                '_id': {
+                    'date': '$_id.date'
+                },
+                'systolic_bp_avg': {
+                    '$first': {
+                        '$round': ['$systolic_bp_avg', 0]
+                    }
+                },
+                'diastolic_bp_avg': {
+                    '$first': {
+                        '$round': ['$diastolic_bp_avg', 0]
+                    }
+                },
+                'bp_readings_count': {
+                    '$first': '$bp_readings_count'
+                },
+                'hr_bpm_avg': {
+                    '$avg': '$hr_samples.bpm'
+                },
+                'hr_readings_count': {
+                    '$sum': 1
+                },
+            }
+        }
+
+        stage_6_sort_by_date = {'$sort': {'_id.date': 1}}
+
+        stage_7_project = {
+            '$project': {
+                '_id': 0,
+                'date': '$_id.date',
+                'systolic_bp_avg': 1,
+                'diastolic_bp_avg': 1,
+                'bp_readings_count': 1,
+                'hr_bpm_avg': {
+                    '$round': ['$hr_bpm_avg', 0]
+                },
+                'hr_readings_count': 1,
+            }
+        }
+
+        pipeline = [
+            stage_1_match_user_id_and_wearable,
+            stage_2_unwind_bp_data,
+            stage_3_group_by_date_take_bp_avgs,
+            stage_4_unwind_hr_data,
+            stage_5_group_by_date_take_hr_avgs,
+            stage_6_sort_by_date,
+            stage_7_project,
+        ]
+
+        cursor = mongo.db.wearables.aggregate(pipeline)
+
+        document_list = list(cursor)
+
+        payload = {
+            'items': document_list,
+            'total_items': len(document_list),
+            'wearable': wearable,
+        }
+
+        return payload
