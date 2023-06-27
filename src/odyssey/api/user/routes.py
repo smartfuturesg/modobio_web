@@ -733,6 +733,7 @@ class UserSubscriptionApi(BaseResource):
                 is_staff=True if g.user_type == 'staff' else False,
             ).order_by(UserSubscriptions.idx.desc()).first()
         )
+        current_subscription.auto_renew_status = (current_subscription.apple_auto_renew)
 
         if current_subscription.sponsorship:
             sponsoring_user = User.query.filter_by(

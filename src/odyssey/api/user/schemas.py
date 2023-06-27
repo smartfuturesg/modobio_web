@@ -210,7 +210,7 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
             )
         }
     )
-    apple_auto_renew = fields.Boolean(
+    auto_renew_status = fields.Boolean(
         dump_only=True,
         metadata={'description': ('If True the subscription is set to be renewed automatically.')},
     )
