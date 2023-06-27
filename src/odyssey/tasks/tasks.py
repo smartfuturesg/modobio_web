@@ -18,6 +18,7 @@ from odyssey.api.staff.models import StaffCalendarEvents
 from odyssey.api.telehealth.models import *
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.api.wearables.models import WearablesV2
+from odyssey.integrations.apple import AppStore
 from odyssey.integrations.terra import TerraClient
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry, IntegrationsBaseTaskWithRetry
@@ -617,6 +618,30 @@ def update_active_campaign_tags(user_id: int, tags: list):
 
     for tag in tags:
         ac.add_tag(user.user_id, tag)
+
+
+@celery.task(base=IntegrationsBaseTaskWithRetry)
+def update_subscription_auto_renewal_status(subscription_idx):
+    """Check and update Apple auto renewal for subscriptions.
+
+    Parameters
+    ----------
+    subscription_idx : int
+       Subscription ID
+    """
+
+    subscription = UserSubscriptions.query.filter_by(idx=subscription_idx).one_or_none()
+
+    renewal_info = None
+    appstore = AppStore()
+    _, renewal_info, _ = appstore.latest_transaction(subscription.apple_original_transaction_id)
+
+    if renewal_info:
+        subscription.apple_auto_renew = (
+            True if renewal_info.get('autoRenewStatus') == 1 else False
+        )
+
+    db.session.commit()
 
 
 @celery.task(base=IntegrationsBaseTaskWithRetry)

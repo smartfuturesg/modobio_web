@@ -605,6 +605,12 @@ class UserSubscriptions(db.Model):
     :type: String
     """
 
+    apple_auto_renew = db.Column(db.Boolean)
+    """Denotes if user has apple app store auto renewal on.
+    
+    :type: Boolean
+    """
+
     google_transaction_id = db.Column(db.String)
     """
     Google playstore transaction ID related to a subscription purchase.
