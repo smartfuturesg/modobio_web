@@ -125,3 +125,68 @@ def cgm_data_multi_range(test_client):
 
     query = {'user_id': test_client.client_id, 'wearable': 'FREESTYLELIBRE'}
     test_client.mongo.db.wearables.delete_many(query)
+
+
+@pytest.fixture(scope='function')
+def bp_30_days_data(test_client):
+    """Adds 30 days of BP data to mongo db using bp_30_day_data.csv"""
+
+    # read csv
+    with open("tests/functional/wearables/bp_30_day_data.csv", "r") as f:
+        reader = csv.DictReader(f)
+        csv_data = list(reader)
+        f.close()
+    
+    # loop through data and group by days
+    # each document will represent a day of data
+    bp_samples = []
+    hr_samples = []
+    documents = []
+    data_start_time = parse(csv_data[0]["timestamp"])
+    data_end_time = parse(csv_data[-1]["timestamp"])
+    for i, dat in enumerate(csv_data):
+        if i > 0 and parse(dat["timestamp"]).time() < parse(csv_data[i-1]["timestamp"]).time():
+            # complete the document and start new list of data points
+            # use timestamp of first data point as timestamp for document. but zero out time
+            body_data_timestamp = bp_samples[0]["timestamp"]
+            body_data_timestamp = body_data_timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            documents.append({
+                "user_id": test_client.client_id,
+                "wearable": BLOOD_PRESSURE_WEARABLE,
+                "timestamp": body_data_timestamp,
+                "data": {
+                    "body": {
+                        "heart_data": {
+                            "heart_rate_data": {
+                                "detailed": {
+                                    "hr_samples": hr_samples,
+                                }
+                            },
+                        },
+                        "blood_pressure_data": {
+                            "blood_pressure_samples": bp_samples,
+                        },
+                    }
+                }})
+            hr_samples = [{"timestamp": parse(dat["timestamp"]), "bpm": int(dat["bpm"])}]
+            bp_samples = [{
+                "timestamp": parse(dat["timestamp"]), 
+                "systolic_bp": int(dat["systolic_bp"]), 
+                "diastolic_bp": int(dat["diastolic_bp"])}]
+        else:
+            hr_samples.append({"timestamp": parse(dat["timestamp"]), "bpm": int(dat["bpm"])})
+            bp_samples.append({
+                "timestamp": parse(dat["timestamp"]), 
+                "systolic_bp": int(dat["systolic_bp"]), 
+                "diastolic_bp": int(dat["diastolic_bp"])})
+
+    test_client.mongo.db.wearables.insert_many(documents)
+
+    data_start_time = data_start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+    data_end_time = data_end_time.replace(hour=23, minute=59, second=59, microsecond=0)
+
+    yield {"data_start_time": data_start_time, "data_end_time": data_end_time}
+
+    del_query = {'user_id': test_client.client_id, 'wearable': BLOOD_PRESSURE_WEARABLE}
+    test_client.mongo.db.wearables.delete_many(del_query)
