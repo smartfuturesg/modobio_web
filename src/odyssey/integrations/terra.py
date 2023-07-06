@@ -306,9 +306,12 @@ class TerraClient(terra.Terra):
                 continue
 
             if data_type == 'sleep':
-                # if resting_hr_bpm is 255, skip
+                # if resting_hr_bpm is 255, set to None
+                # if min_hr_bpm is 255, set to None
                 if data['heart_rate_data']['summary']['resting_hr_bpm'] == 255:
-                    continue
+                    data['heart_rate_data']['summary']['resting_hr_bpm'] = None
+                if data['heart_rate_data']['summary']['min_hr_bpm'] == 255:
+                    data['heart_rate_data']['summary']['min_hr_bpm'] = None
 
             # Update existing or create new doc (upsert).
             result = mongo.db.wearables.update_one(
