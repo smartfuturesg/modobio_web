@@ -20,7 +20,7 @@ DELETE FROM "LookupClinicalCareTeamResources"
         'trainer_history',
         'beautician_history',
         'chef_history',
-        'nurse_history)';
+        'nurse_history');
 
 -- fitness_goals was defined twice, so make sure we delete the correct one.
 DELETE FROM "LookupClinicalCareTeamResources"
