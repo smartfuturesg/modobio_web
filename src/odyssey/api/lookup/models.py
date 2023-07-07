@@ -79,6 +79,7 @@ class LookupProfessionalAppointmentConfirmationWindow(BaseModelWithIdx):
     :type: float
     """
 
+
 class LookupCountriesOfOperations(BaseModelWithIdx):
     """Stored countries of operations in database."""
 
@@ -361,6 +362,7 @@ class LookupActivityTrackers(BaseModelWithIdx):
 
     :type: bool
     """
+
 
 # class LookupDrinks(BaseModel):
 #     """ Static list of drinks that a client can purchase or be recommended.
@@ -1667,9 +1669,10 @@ class LookupEmotes(BaseModelWithIdx):
 
     :type: str
     """
-    
+
+
 class LookupBloodPressureRanges(BaseModelWithIdx):
-    """ Medical Look Up Blood Pressure Ranges
+    """Medical Look Up Blood Pressure Ranges
 
     This table will store the blood pressure categories
     and ranges.
@@ -1683,7 +1686,7 @@ class LookupBloodPressureRanges(BaseModelWithIdx):
 
     :type: str
     """
-    
+
     systolic = db.Column(db.String)
     """
     Systolic mmHg is the upper number for the range
@@ -1708,7 +1711,7 @@ class LookupBloodPressureRanges(BaseModelWithIdx):
 
 
 class LookupSTDs(BaseModel):
-    """ Medical Look Up STD
+    """Medical Look Up STD
 
     This table will store the sexual transmitted diseases
     that ModoBio works with
@@ -1727,9 +1730,10 @@ class LookupSTDs(BaseModel):
 
     :type: str
     """
-    
+
+
 class LookupBloodTestResultTypes(BaseModel):
-    """ Blood test evaluation limits.
+    """Blood test evaluation limits.
 
     Blood test values can be evaluated as lying in "normal" or "optimal"
     ranges. What constitutes as a normal or optimal range depends on gender
@@ -1792,9 +1796,10 @@ class LookupBloodTestResultTypes(BaseModel):
 
     :type: str
     """
-    
+
+
 class LookupMedicalConditions(BaseModel):
-    """ Medical Conditions Table
+    """Medical Conditions Table
 
     This table will store the medical conditions
     """
@@ -1850,4 +1855,3 @@ class LookupMedicalConditions(BaseModel):
 
     :type: str
     """
- 

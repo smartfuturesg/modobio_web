@@ -64,7 +64,6 @@ class MedicalBloodPressures(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMix
     """
 
 
-
 class MedicalSTDHistory(BaseModelWithIdx, UserIdFkeyMixin):
     """Medical STD History
 
@@ -238,7 +237,6 @@ class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: bool
     """
-
 
 
 class MedicalGeneralInfoMedicationAllergy(BaseModelWithIdx, UserIdFkeyMixin):

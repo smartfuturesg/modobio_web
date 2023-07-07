@@ -13,11 +13,11 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api.client.models import (
-    ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations,
-    ClientConsent, ClientConsultContract, ClientDataStorage, ClientFacilities, ClientFertility,
-    ClientHeight, ClientIndividualContract, ClientInfo, ClientMobileSettings,
-    ClientNotificationSettings, ClientPolicies, ClientRaceAndEthnicity, ClientRelease,
-    ClientSubscriptionContract, ClientWaistSize, ClientWeight
+    ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations, ClientConsent,
+    ClientConsultContract, ClientDataStorage, ClientFacilities, ClientFertility, ClientHeight,
+    ClientIndividualContract, ClientInfo, ClientMobileSettings, ClientNotificationSettings,
+    ClientPolicies, ClientRaceAndEthnicity, ClientRelease, ClientSubscriptionContract,
+    ClientWaistSize, ClientWeight
 )
 from odyssey.api.client.schemas import (
     AllClientsDataTier, ClientAndUserInfoPutSchema, ClientAndUserInfoSchema,
@@ -27,8 +27,8 @@ from odyssey.api.client.schemas import (
     ClientPoliciesContractSchema, ClientRaceAndEthnicityEditSchema, ClientRaceAndEthnicitySchema,
     ClientRegistrationStatusSchema, ClientReleaseContactsSchema, ClientReleaseSchema,
     ClientSearchItemsSchema, ClientSearchOutSchema, ClientSubscriptionContractSchema,
-    ClientTokenRequestSchema, ClientWaistSizeSchema,
-    ClientWeightSchema, ClinicalCareTeamAuthorizationNestedSchema, ClinicalCareTeamMemberOfSchema,
+    ClientTokenRequestSchema, ClientWaistSizeSchema, ClientWeightSchema,
+    ClinicalCareTeamAuthorizationNestedSchema, ClinicalCareTeamMemberOfSchema,
     ClinicalCareTeamTemporaryMembersSchema, SignAndDateSchema, SignedDocumentsSchema
 )
 from odyssey.api.doctor.models import (
@@ -39,8 +39,7 @@ from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.facility.schemas import ClientSummarySchema
 from odyssey.api.lookup.models import (
     LookupClinicalCareTeamResources, LookupCountriesOfOperations, LookupDefaultHealthMetrics,
-    LookupGoals, LookupMacroGoals, LookupNotifications, LookupRaces,
-    LookupTerritoriesOfOperations
+    LookupGoals, LookupMacroGoals, LookupNotifications, LookupRaces, LookupTerritoriesOfOperations
 )
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.physiotherapy.models import PTHistory
@@ -58,7 +57,7 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.message import email_domain_blacklisted, send_email
-from odyssey.utils.misc import (check_client_existence, create_notification)
+from odyssey.utils.misc import check_client_existence, create_notification
 from odyssey.utils.pdf import merge_pdfs, to_pdf
 
 logger = logging.getLogger(__name__)
@@ -347,7 +346,7 @@ class Client(BaseResource):
                                                          ).one_or_none()
             if not macro_goal:
                 raise BadRequest(f'Primary macro goal {primary_macro_goal_id} not found.')
-        
+
         # validate primary_goal_id if supplied
         if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
             primary_goal_id = request.parsed_obj['client_info']['primary_goal_id']

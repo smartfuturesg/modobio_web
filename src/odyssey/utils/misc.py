@@ -27,15 +27,10 @@ from odyssey.api.client.models import (
 )
 from odyssey.api.community_manager.models import \
     CommunityManagerSubscriptionGrants
-from odyssey.api.doctor.models import (
-    MedicalBloodTests,  MedicalImaging
-    
-)
+from odyssey.api.doctor.models import MedicalBloodTests, MedicalImaging
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import *
-from odyssey.api.lookup.models import (
-    LookupBookingTimeIncrements, LookupSubscriptions
-)
+from odyssey.api.lookup.models import (LookupBookingTimeIncrements, LookupSubscriptions)
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import (
@@ -179,7 +174,8 @@ def check_medical_condition_existence(medcon_id):
 #     drink = LookupDrinks.query.filter_by(drink_id=drink_id).one_or_none()
 #     if not drink:
 #         raise BadRequest(f'Drink {drink_id} not found.')
-        
+
+
 def check_std_existence(std_id):
     std = LookupSTDs.query.filter_by(std_id=std_id).one_or_none()
     if not std:

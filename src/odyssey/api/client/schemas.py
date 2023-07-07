@@ -8,11 +8,10 @@ from marshmallow import (Schema, ValidationError, fields, post_load, pre_dump, v
 
 from odyssey import ma
 from odyssey.api.client.models import (
-    ClientClinicalCareTeamAuthorizations, ClientConsent,
-    ClientConsultContract, ClientDataStorage, ClientFacilities, ClientFertility, ClientHeight,
-    ClientIndividualContract, ClientInfo, ClientMobileSettings, ClientNotificationSettings,
-    ClientPolicies, ClientRaceAndEthnicity, ClientRelease, ClientReleaseContacts,
-    ClientSubscriptionContract, ClientWaistSize, ClientWeight
+    ClientClinicalCareTeamAuthorizations, ClientConsent, ClientConsultContract, ClientDataStorage,
+    ClientFacilities, ClientFertility, ClientHeight, ClientIndividualContract, ClientInfo,
+    ClientMobileSettings, ClientNotificationSettings, ClientPolicies, ClientRaceAndEthnicity,
+    ClientRelease, ClientReleaseContacts, ClientSubscriptionContract, ClientWaistSize, ClientWeight
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 from odyssey.utils.base.schemas import BaseSchema

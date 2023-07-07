@@ -65,17 +65,14 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
 class MedicalBloodPressuresOutputSchema(Schema):
     items = fields.Nested(MedicalBloodPressuresSchema(many=True), missing=[])
     total_items = fields.Integer()
-    
 
 
 class CheckBoxDeleteSchema(Schema):
     idx = fields.Integer()
-    
 
 
 class CheckBoxArrayDeleteSchema(Schema):
     delete_ids = fields.Nested(CheckBoxDeleteSchema(many=True))
-    
 
 
 class MedicalSTDHistorySchema(BaseSchema):
@@ -84,13 +81,12 @@ class MedicalSTDHistorySchema(BaseSchema):
         exclude = ('user_id', )
         include_fk = True
         load_instance = True
-        
 
 
 class MedicalSTDHistoryInputSchema(Schema):
     stds = fields.Nested(MedicalSTDHistorySchema(many=True))
 
- 
+
 class MedicalSocialHistorySchema(Schema):
     ever_smoked = fields.Boolean(missing=None, allow_none=True)
     currently_smoke = fields.Boolean(missing=None, allow_none=True)
@@ -197,8 +193,6 @@ class MedicalMedicationsInfoInputSchema(Schema):
 
 class MedicalAllergiesInfoInputSchema(Schema):
     allergies = fields.Nested(MedicalGeneralInfoMedicationAllergySchema(many=True), missing=[])
-
-
 
 
 class MedicalFamilyHistSchema(BaseSchema):
@@ -387,7 +381,6 @@ class MedicalBloodTestResultsSchema(Schema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalBloodTestResults(**data)
-
 
 
 class MedicalHistorySchema(ma.SQLAlchemyAutoSchema):
