@@ -1,15 +1,18 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
+import requests
 import terra
 from flask import current_app
 from sqlalchemy import select
+from terra.api import api_responses
 from terra.api.api_responses import (ConnectionErrorHookResponse, TerraApiResponse)
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db, mongo
 from odyssey.api.doctor.models import MedicalBloodPressures
 from odyssey.api.wearables.models import WearablesV2
+from odyssey.defaults import TERRA_BASE_URL
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.utils.constants import WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
 
@@ -162,27 +165,9 @@ class TerraClient(terra.Terra):
             # but it is not connected to the client (here: self).
             terra_user._client = self
 
-            response = self.get_activity_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            # We already have biographical info.
-            # response = self.get_athlete_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            # self.status(response, raise_on_error=False)
-
-            response = self.get_body_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_daily_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_menstruation_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_nutrition_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
-
-            response = self.get_sleep_for_user(terra_user, WAY_BACK_WHEN, end_date=now)
-            self.status(response, raise_on_error=False)
+            # Request last 7 days of user data
+            seven_days_ago = now - timedelta(days=7)
+            self.get_terra_data(terra_user, seven_days_ago, now)
 
             if not current_app.debug:
                 # Add device tag to users active campaign account
@@ -191,6 +176,9 @@ class TerraClient(terra.Terra):
                     user_id,
                     WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable],
                 )
+
+            # Request the rest of the users data
+            self.get_terra_data(terra_user, WAY_BACK_WHEN, seven_days_ago)
 
         elif user_wearable.terra_user_id != terra_user_id:
             # User reauthentication
@@ -359,3 +347,100 @@ class TerraClient(terra.Terra):
 
                 db.session.commit()  # only commit once
                 # db.session.flush()  # do I have to flush too?
+
+    def terra_data_model_request(
+        self,
+        terra_user,
+        dtype: str,
+        start_date: datetime,
+        end_date: datetime = None,
+    ):
+        """Sends request to terra to get users terra data.
+
+        Parameters
+        ----------
+        terra_user : obj
+            Terra User
+        dtype : str
+            Data model type to request from Terra.
+        start_date : datetime
+            Start date of requested data
+        end_date : datetime
+            End date of requested data. By default ends on the current day.
+
+        Returns
+        -------
+        obj
+            TerraApiResponse object
+        """
+
+        params = {
+            'user_id': terra_user.user_id,
+            'start_date': int(start_date.timestamp()),
+            'end_date': int(end_date.timestamp()) if end_date is not None else None,
+            'retry_if_rate_limited': True,
+            'to_webhook': True,
+        }
+
+        data_resp = requests.get(
+            f'{TERRA_BASE_URL}/{dtype}',
+            params=params,
+            headers=self._auth_headers,
+        )
+
+        return api_responses.TerraApiResponse(data_resp, user=terra_user, dtype=dtype)
+
+    def get_terra_data(self, terra_user, start_date, end_date):
+        """Sends request to terra to get users terra data.
+
+        Parameters
+        ----------
+        terra_user : obj
+            Terra User
+        start_date : datetime
+            Start date of requested data
+        end_date : datetime
+            End date of requested data
+        """
+        response = self.terra_data_model_request(
+            terra_user, dtype='daily', start_date=start_date, end_date=end_date
+        )
+        self.status(response, raise_on_error=False)
+
+        response = self.terra_data_model_request(
+            terra_user, dtype='body', start_date=start_date, end_date=end_date
+        )
+        self.status(response, raise_on_error=False)
+
+        response = self.terra_data_model_request(
+            terra_user, dtype='sleep', start_date=start_date, end_date=end_date
+        )
+        self.status(response, raise_on_error=False)
+
+        response = self.terra_data_model_request(
+            terra_user,
+            dtype='nutrition',
+            start_date=start_date,
+            end_date=end_date,
+        )
+        self.status(response, raise_on_error=False)
+
+        response = self.terra_data_model_request(
+            terra_user,
+            dtype='menstruation',
+            start_date=start_date,
+            end_date=end_date,
+        )
+        self.status(response, raise_on_error=False)
+
+        response = self.terra_data_model_request(
+            terra_user,
+            dtype='activity',
+            start_date=start_date,
+            end_date=end_date,
+        )
+        self.status(response, raise_on_error=False)
+
+        # We already have biographical info.
+        # response =  self.terra_data_model_request(terra_user, dtype = 'athlete', start_date = start_date, end_date=end_date)
+        # self.status(response, raise_on_error=False)
