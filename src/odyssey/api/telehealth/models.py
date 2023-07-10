@@ -789,10 +789,12 @@ class TelehealthStaffSettings(BaseModel):
     """
     Holds staff preferred settings for Telehealth appointments
     """
-    
+
     __table_args__ = (
-        CheckConstraint('0 <= availability_horizon <= 52',
-                        name='availability_horizon_range'),
+        CheckConstraint(
+            '0 <= availability_horizon <= 52',
+            name='availability_horizon_range',
+        ),
     )
 
     user_id = db.Column(
@@ -820,7 +822,7 @@ class TelehealthStaffSettings(BaseModel):
 
     :type: str
     """
-    
+
     availability_horizon = db.Column(db.Integer, nullable=False, server_default='2')
     """
     How far out from the current week the practitioner wants to be available to be booked. An integer

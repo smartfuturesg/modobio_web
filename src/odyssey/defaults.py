@@ -384,3 +384,9 @@ SUBSCRIPTION_UPDATE_FREQUENCY_MINS = 5
 
 :type: int
 """
+
+TERRA_BASE_URL = 'https://api.tryterra.co/v2'
+"""Base URL for Terra API.
+
+:type: str
+"""

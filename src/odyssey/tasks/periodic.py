@@ -488,10 +488,8 @@ def remove_past_notifications():
     current_time = datetime.now(timezone.utc).date()
 
     logger.info('Removing past notifications...')
-    notifications = Notifications.query.filter(or_(
-        Notifications.expires < current_time,
-        Notifications.deleted == True
-    )
+    notifications = Notifications.query.filter(
+        or_(Notifications.expires < current_time, Notifications.deleted == True)
     ).all()
 
     for notification in notifications:
@@ -692,10 +690,10 @@ celery.conf.beat_schedule = {
         'args': (conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS, ),
         'schedule': crontab(minute=f'*/{conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS}'),
     },
-    #remove past notifications
+    # remove past notifications
     'remove_past_notifications': {
         'task': 'odyssey.tasks.periodic.remove_past_notifications',
-        'schedule': crontab(hour=0, minute=42)
+        'schedule': crontab(hour=0, minute=42),
     },
     # scheduled maintenances
     'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {

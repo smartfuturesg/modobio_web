@@ -115,7 +115,6 @@ class MedBloodPressures(BaseResource):
             raise BadRequest('idx must be an integer.')
 
 
-
 @ns.route('/medicalgeneralinfo/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalGenInformation(BaseResource):
@@ -675,7 +674,6 @@ class MedicalAllergiesInformation(BaseResource):
         return
 
 
-
 @ns.route('/medicalinfo/social/<int:user_id>/')
 @ns.doc(params={'user_id': 'User ID number'})
 class MedicalSocialHist(BaseResource):
@@ -798,7 +796,7 @@ class MedicalSocialHist(BaseResource):
         ):
 
             stds_current = MedicalSTDHistory.query.filter_by(user_id=user_id).all()
-            possible_stds = db.session.execute(select(LookupSTDs.std_id)).scalars().all()
+            possible_stds = (db.session.execute(select(LookupSTDs.std_id)).scalars().all())
 
             # Maps std_ids to instances, for both existing and requested
             existing = {s.std_id: s for s in stds_current}
@@ -819,8 +817,6 @@ class MedicalSocialHist(BaseResource):
                 db.session.add(req)
 
         db.session.commit()
-
-
 
 
 @ns.route('/familyhistory/<int:user_id>/')
@@ -1487,7 +1483,7 @@ class MedBloodTestResults(BaseResource):
         Returns details of the test denoted by test_id as well as
         the actual results submitted.
         """
-        #query for join of MedicalBloodTestResults and LookupBloodTestResultTypes table
+        # query for join of MedicalBloodTestResults and LookupBloodTestResultTypes table
 
         results = (
             db.session.query(
@@ -2185,28 +2181,25 @@ class MedicalBloodGlucoseEndpoint(BaseResource):
 
         db.session.delete(result)
         db.session.commit()
-\
-        
-#The below endpoints have been moved to the lookup namespace. They were deprecated in release 1.2.0
+
+
+# The below endpoints have been moved to the lookup namespace. They were deprecated in release 1.2.0
 @ns.route('/lookupstd/')
 class MedicalLookupSTDsApi(BaseResource):
-    
     @token_auth.login_required
     def get(self):
         return redirect('/lookup/stds/', 301)
-    
-    
+
+
 @ns.route('/lookupbloodpressureranges/')
 class MedicalLookupBloodPressureRangesApi(BaseResource):
-    
     @token_auth.login_required
     def get(self):
         return redirect('/lookup/bloodpressureranges/', 301)
-    
-    
+
+
 @ns.route('/medicalconditions/')
 class MedicalMedicalConditionsApi(BaseResource):
-    
     @token_auth.login_required
     def get(self):
         return redirect('/lookup/medicalconditions/', 301)

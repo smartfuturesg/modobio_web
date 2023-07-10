@@ -255,10 +255,13 @@ class TelehealthClientTimeSelectApi(BaseResource):
         Responds with available booking times localized to the client's timezone
         """
         check_client_existence(user_id)
-        
-        # Verify target date is client's local today or in the future 
+
+        # Verify target date is client's local today or in the future
         client_tz = request.parsed_obj.timezone
-        target_date = datetime.combine(request.parsed_obj.target_date.date(), time(0, tzinfo=tz.gettz(client_tz)))
+        target_date = datetime.combine(
+            request.parsed_obj.target_date.date(),
+            time(0, tzinfo=tz.gettz(client_tz)),
+        )
         client_local_datetime_now = datetime.now(tz.gettz(client_tz))
 
         client_in_queue = (
