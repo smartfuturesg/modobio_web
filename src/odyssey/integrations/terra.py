@@ -167,6 +167,7 @@ class TerraClient(terra.Terra):
 
             # Request last 7 days of user data
             seven_days_ago = now - timedelta(days=7)
+            thirty_five_days_ago = now - timedelta(days=35)
             self.get_terra_data(terra_user, seven_days_ago, now)
 
             if not current_app.debug:
@@ -177,8 +178,11 @@ class TerraClient(terra.Terra):
                     WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES[wearable],
                 )
 
+            # Request the next 28 days of user data
+            self.get_terra_data(terra_user, thirty_five_days_ago, seven_days_ago)
+
             # Request the rest of the users data
-            self.get_terra_data(terra_user, WAY_BACK_WHEN, seven_days_ago)
+            self.get_terra_data(terra_user, WAY_BACK_WHEN, thirty_five_days_ago)
 
         elif user_wearable.terra_user_id != terra_user_id:
             # User reauthentication
