@@ -957,7 +957,8 @@ class ClientMobileSettings(BaseModelWithIdx, UserIdFkeyMixin):
 
     :type: boolean
     """
-    
+
+
 # class ClientAssignedDrinks(BaseModelWithIdx, UserIdFkeyMixin):
 #     """
 #     Stores information about what nutrional beverages a client has been assigned.

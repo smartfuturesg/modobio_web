@@ -233,6 +233,7 @@ class WearablesLookUpAllActivityTrackersResource(BaseResource):
 
         return payload
 
+
 # @ns.route('/drinks/')
 # class LookupDrinksApi(BaseResource):
 #
@@ -642,7 +643,7 @@ class LookupEmotesApi(BaseResource):
         emotes = LookupEmotes.query.order_by('position').all()
 
         return {'total_items': len(emotes), 'items': emotes}
-        
+
 
 @ns.route('/medicalconditions/')
 class LookupMedicalConditionsApi(BaseResource):
@@ -650,14 +651,14 @@ class LookupMedicalConditionsApi(BaseResource):
     Returns the medical conditions currently documented in the DB
     """
     @token_auth.login_required
-    @responds(schema=LookupMedicalConditionsOutputSchema,status_code=200, api=ns)
+    @responds(schema=LookupMedicalConditionsOutputSchema, status_code=200, api=ns)
     def get(self):
         medcon_types = LookupMedicalConditions.query.all()
-        payload = {'items': medcon_types,
-                   'total_items': len(medcon_types)}
+        payload = {'items': medcon_types, 'total_items': len(medcon_types)}
 
         return payload
-    
+
+
 @ns.route('/stds/')
 class LookupSTDsApi(BaseResource):
     """
@@ -667,11 +668,8 @@ class LookupSTDsApi(BaseResource):
     @responds(schema=LookupSTDsOutputSchema, status_code=200, api=ns)
     def get(self):
         stds = LookupSTDs.query.all()
-        return {
-            'items': stds,
-            'total_items': len(stds)
-        }
-        
+        return {'items': stds, 'total_items': len(stds)}
+
 
 @ns.route('/bloodpressureranges/')
 class LookupBloodPressureRangesApi(BaseResource):
@@ -682,7 +680,4 @@ class LookupBloodPressureRangesApi(BaseResource):
     @responds(schema=LookupBloodPressureRangesOutputSchema, status_code=200, api=ns)
     def get(self):
         press = LookupBloodPressureRanges.query.all()
-        return {
-            'items': press,
-            'total_items': len(press)
-        }
+        return {'items': press, 'total_items': len(press)}

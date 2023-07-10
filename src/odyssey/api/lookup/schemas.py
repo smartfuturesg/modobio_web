@@ -70,7 +70,6 @@ class LookupProfessionalAppointmentConfirmationWindowOutputSchema(Schema):
     total_items = fields.Integer()
 
 
-
 class LookupCountriesOfOperationsSchema(BaseSchema):
     class Meta:
         model = LookupCountriesOfOperations
@@ -111,6 +110,7 @@ class LookupActivityTrackersSchema(BaseSchema):
 class LookupActivityTrackersOutputSchema(Schema):
     items = fields.Nested(LookupActivityTrackersSchema(many=True), missing=[])
     total_items = fields.Integer()
+
 
 # class LookupDrinksSchema(ma.SQLAlchemyAutoSchema):
 #     class Meta:
@@ -494,35 +494,37 @@ class LookupEmotesSchema(ma.SQLAlchemyAutoSchema):
 class LookupEmotesOutputSchema(Schema):
     items = fields.Nested(LookupEmotesSchema(many=True), missing=[])
     total_items = fields.Integer()
-    
-    
+
+
 class LookupMedicalConditionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupMedicalConditions
-    
+
     subcategory = fields.String(missing=None)
 
+
 class LookupMedicalConditionsOutputSchema(Schema):
-    items = fields.Nested(LookupMedicalConditionsSchema(many=True), missing = [])
+    items = fields.Nested(LookupMedicalConditionsSchema(many=True), missing=[])
     total_items = fields.Integer()
-    
-    
+
+
 class LookupSTDsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupSTDs
         exclude = ('created_at', 'updated_at')
-        
-        
+
+
 class LookupSTDsOutputSchema(Schema):
-    items = fields.Nested(LookupSTDsSchema(many=True), missing = [])
+    items = fields.Nested(LookupSTDsSchema(many=True), missing=[])
     total_items = fields.Integer()
-    
-    
+
+
 class LookupBloodPressureRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupBloodPressureRanges
         exclude = ('created_at', 'updated_at')
-        
+
+
 class LookupBloodPressureRangesOutputSchema(Schema):
-    items = fields.Nested(LookupBloodPressureRangesSchema(many=True), missing = [])
+    items = fields.Nested(LookupBloodPressureRangesSchema(many=True), missing=[])
     total_items = fields.Integer()
