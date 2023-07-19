@@ -7,8 +7,8 @@ from terra.api.api_responses import TerraApiResponse
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.terra import TerraClient
 
-@pytest.mark.skip(reason="Test is not currently working")
-def test_store_data(test_client):
+
+def base_test_store_data(test_client, device):
     # test the TerraClient() class instantiation
     tc = TerraClient()
     assert tc
@@ -30,7 +30,7 @@ def test_store_data(test_client):
     terra_user_id = None
 
     for u in response['users']:
-        if u['provider'] == 'OMRONUS':
+        if u['provider'] == device:
             terra_user_id = u['user_id']
             break
 
@@ -58,7 +58,7 @@ def test_store_data(test_client):
     # we need to inject into Wearables
     user_wearable = WearablesV2(
         user_id=test_client.client_id,
-        wearable='OMRONUS',
+        wearable=device,
         terra_user_id=terra_user_id,
     )
     test_client.db.session.add(user_wearable)
@@ -85,3 +85,20 @@ def test_store_data(test_client):
 
     # check that we are back to where we started to try to keep idempotency
     assert test_client.mongo.db.wearables.count_documents({}) == before_mongo_count
+
+
+def test_oura_store_data(test_client):
+    base_test_store_data(test_client, 'OURA')
+
+
+def test_fitbit_store_data(test_client):
+    base_test_store_data(test_client, 'FITBIT')
+
+
+def test_google_store_data(test_client):
+    base_test_store_data(test_client, 'GOOGLE')
+
+
+@pytest.mark.skip(reason="Terra no longer supports omron US")
+def test_omronus_store_data(test_client):
+    base_test_store_data(test_client, 'OMRONUS')
