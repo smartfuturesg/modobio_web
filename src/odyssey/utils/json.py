@@ -201,9 +201,10 @@ class JSONDecoder(json.JSONDecoder):
 
         # Some timestamps from Terra have an H:M:S format for timezone offset
         # e.g. 2023-03-19T00:39:35-07:00:00
+        # Datetime allows for seconds in the timezone offset, but dateutil does not.
         try:
-            return dateutil.parser.parse(string[:-3])
-        except dateutil.parser.ParserError:
+            return datetime.fromisoformat(string)
+        except ValueError:
             # Not a datetime string
             return string
 
