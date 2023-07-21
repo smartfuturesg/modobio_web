@@ -11,7 +11,7 @@ import pytz
 def remove_timezone_from_timestamps(data):
     if isinstance(data, dict):
         for key, value in data.items():
-            if isinstance(value, datetime):
+            if isinstance(value, (datetime, time)):
                 data[key] = value.replace(tzinfo=None)
             else:
                 remove_timezone_from_timestamps(value)
@@ -201,9 +201,10 @@ class JSONDecoder(json.JSONDecoder):
 
         # Some timestamps from Terra have an H:M:S format for timezone offset
         # e.g. 2023-03-19T00:39:35-07:00:00
+        # Datetime allows for seconds in the timezone offset, but dateutil does not.
         try:
-            return dateutil.parser.parse(string[:-3])
-        except dateutil.parser.ParserError:
+            return datetime.fromisoformat(string)
+        except ValueError:
             # Not a datetime string
             return string
 
@@ -238,20 +239,19 @@ class JSONProvider(flask.json.provider.JSONProvider):
             for item in data['data']:
                 if (
                     'metadata' in item and 'start_time' in item['metadata']
-                    and isinstance(item['metadata']['start_time'], datetime)
+                    and isinstance(item['metadata']['start_time'], (datetime, date, time))
                 ):
                     start_time = item['metadata']['start_time']
 
-                    # COROS does not have utc offset in start_time
-                    # So we need to check if there is that data, or not
-                    if start_time.tzinfo and start_time.tzinfo.utcoffset:
-                        tz_offset_seconds = start_time.tzinfo.utcoffset(start_time).total_seconds()
-                        item['metadata']['tz_offset'] = tz_offset_seconds
-                        # Remove timezone from all "timestamp" fields
-                        remove_timezone_from_timestamps(item)
+                    if isinstance(start_time, (datetime, time)):
+                        offset = start_time.utcoffset()
+                        if offset:
+                            offset = offset.total_seconds()
+                        item['metadata']['tz_offset'] = offset
                     else:
                         item['metadata']['tz_offset'] = None
-                        # Probably don't need to remove timezone from timestamps here
+
+                    remove_timezone_from_timestamps(item)
 
         return data
 
