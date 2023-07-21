@@ -239,7 +239,7 @@ class JSONProvider(flask.json.provider.JSONProvider):
             for item in data['data']:
                 if (
                     'metadata' in item and 'start_time' in item['metadata']
-                    and isinstance(item['metadata']['start_time'], datetime)
+                    and isinstance(item['metadata']['start_time'], (datetime, date, time))
                 ):
                     start_time = item['metadata']['start_time']
 
@@ -248,9 +248,10 @@ class JSONProvider(flask.json.provider.JSONProvider):
                         if offset:
                             offset = offset.total_seconds()
                         item['metadata']['tz_offset'] = offset
-                        remove_timezone_from_timestamps(item)
                     else:
                         item['metadata']['tz_offset'] = None
+
+                    remove_timezone_from_timestamps(item)
 
         return data
 
