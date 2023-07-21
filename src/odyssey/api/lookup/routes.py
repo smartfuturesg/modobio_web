@@ -14,8 +14,6 @@ from odyssey.api.lookup.schemas import *
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 
-# from odyssey.utils.misc import check_drink_existence
-
 logger = logging.getLogger(__name__)
 
 ns = Namespace('lookup', description='Endpoints for lookup tables.')
