@@ -11,7 +11,7 @@ import pytz
 def remove_timezone_from_timestamps(data):
     if isinstance(data, dict):
         for key, value in data.items():
-            if isinstance(value, datetime):
+            if isinstance(value, (datetime, time)):
                 data[key] = value.replace(tzinfo=None)
             else:
                 remove_timezone_from_timestamps(value)
