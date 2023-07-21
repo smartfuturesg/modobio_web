@@ -243,16 +243,14 @@ class JSONProvider(flask.json.provider.JSONProvider):
                 ):
                     start_time = item['metadata']['start_time']
 
-                    # COROS does not have utc offset in start_time
-                    # So we need to check if there is that data, or not
-                    if start_time.tzinfo and start_time.tzinfo.utcoffset:
-                        tz_offset_seconds = start_time.tzinfo.utcoffset(start_time).total_seconds()
-                        item['metadata']['tz_offset'] = tz_offset_seconds
-                        # Remove timezone from all "timestamp" fields
+                    if isinstance(start_time, (datetime, time)):
+                        offset = start_time.utcoffset()
+                        if offset:
+                            offset = offset.total_seconds()
+                        item['metadata']['tz_offset'] = offset
                         remove_timezone_from_timestamps(item)
                     else:
                         item['metadata']['tz_offset'] = None
-                        # Probably don't need to remove timezone from timestamps here
 
         return data
 
