@@ -59,8 +59,7 @@ from odyssey.utils.constants import (
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.message import email_domain_blacklisted, send_email
-from odyssey.utils.misc import (  # check_drink_existence,
-    check_client_existence, create_notification)
+from odyssey.utils.misc import create_notification
 from odyssey.utils.pdf import merge_pdfs, to_pdf
 
 logger = logging.getLogger(__name__)
