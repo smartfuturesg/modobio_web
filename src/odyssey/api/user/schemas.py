@@ -198,6 +198,10 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
         )
         load_only = ('apple_original_transaction_id', )
 
+    # THESE ARE FOR TESTING ONLY
+    package_name = fields.String(required=False)
+    product_id = fields.String(required=False)
+
     subscription_type_id = fields.Integer(required=False, validate=validate.OneOf([2, 3]))
     subscription_status = fields.String(
         validate=validate.OneOf(['unsubscribed', 'subscribed', 'free trial', 'sponsored'])
@@ -221,6 +225,10 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
+        # remove the package_name and product_id from the data
+        # they are only used for testing
+        data.pop('package_name', None)
+        data.pop('product_id', None)
         return UserSubscriptions(**data)
 
 

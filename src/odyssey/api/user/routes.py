@@ -1,5 +1,7 @@
 import logging
 
+from odyssey.integrations.google import PlayStore
+
 logger = logging.getLogger(__name__)
 
 import json
@@ -784,7 +786,7 @@ class UserSubscriptionApi(BaseResource):
                     apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id
                 ).filter(UserSubscriptions.user_id != user_id).first()
             ):
-                raise BadRequest('This original transaction ID is already in use.')
+                raise BadRequest('This original transaction ID is already in use by another user.')
             update_client_subscription(
                 user_id=user_id,
                 apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id,
@@ -794,6 +796,20 @@ class UserSubscriptionApi(BaseResource):
         elif request.parsed_obj.google_transaction_id:
             # placeholder for subscription validation. Add new subscription to db with google_transaction_id
 
+            # 1. check if google_transaction_id is already in use
+            # if (
+            #     UserSubscriptions.query.filter_by(
+            #         google_transaction_id=request.parsed_obj.google_transaction_id
+            #     ).filter(UserSubscriptions.user_id != user_id).first()
+            # ):
+            #     raise BadRequest('This google transaction ID is already in use by another user.')
+            
+            # 2. check if google_transaction_id is valid
+            google = PlayStore()
+            resp = google.verify_purchase(package_name=request.json["package_name"],
+                                    product_id=request.json["product_id"],
+                                    purchase_token=request.parsed_obj.google_transaction_id)
+            breakpoint()
             # add subscription to db
             request.parsed_obj.user_id = user_id
             request.parsed_obj.is_staff = False

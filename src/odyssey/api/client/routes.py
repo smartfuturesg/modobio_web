@@ -50,7 +50,7 @@ from odyssey.api.staff.schemas import StaffRecentClientsSchema
 from odyssey.api.telehealth.models import (TelehealthBookings, TelehealthStaffSettings)
 from odyssey.api.trainer.models import FitnessQuestionnaire
 from odyssey.api.user.models import (User, UserLogin, UserProfilePictures, UserTokenHistory)
-from odyssey.api.user.routes import UserLogoutApi
+# from odyssey.api.user.routes import UserLogoutApi
 from odyssey.utils.auth import basic_auth, token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (
