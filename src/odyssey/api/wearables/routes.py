@@ -1005,8 +1005,8 @@ class WearablesV2DataEndpoint(BaseResource):
                 redirect_url_scheme = redirect_url_scheme.lower()
 
             # TODO: when frontend adds success and failure views, fill in these paths
-            success_path = ''
-            failure_path = ''
+            success_path = 'setup_success'
+            failure_path = 'setup_failure'
 
             tc = TerraClient()
             response = tc.generate_authentication_url(
