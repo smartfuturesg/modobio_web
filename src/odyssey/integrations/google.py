@@ -63,9 +63,9 @@ class PlayStore:
         # log the arguments
         logger.info(f'\nVerifying purchase token: {purchase_token} for \nproduct: {product_id} in \npackage: {package_name}')
         try:
-            response = androidpublisher.purchases().subscriptionsv2().get(
+            response = androidpublisher.purchases().subscriptions().get(
                 packageName=package_name,
-                # subscriptionId=product_id,
+                subscriptionId=product_id,
                 token=purchase_token,
             ).execute()
         except googleapiclient.errors.HttpError as error:
