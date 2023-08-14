@@ -400,3 +400,10 @@ This is the parsed JSON key file.
 
 :type: dict
 """
+
+GOOGLE_PACKAGE_NAME = 'com.modobio.modobioclient'
+"""
+Package name for android app. 
+
+:type: str
+"""
