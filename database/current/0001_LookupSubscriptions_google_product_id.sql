@@ -1,5 +1,5 @@
 update "LookupSubscriptions"
-set google_product_id = 'mb_annual_ars_97.99_01'
+set google_product_id = 'mb_annual_ars_97.99_02'
 where name = 'Annual';
 
 update "LookupSubscriptions"
