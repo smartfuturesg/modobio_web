@@ -196,14 +196,16 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
             'end_date',
             'user_id',
         )
-        load_only = ('apple_original_transaction_id', 'google_purchase_token', 'google_transaction_id' )
+        load_only = (
+            'apple_original_transaction_id',
+            'google_purchase_token',
+            'google_transaction_id',
+        )
 
     # THESE ARE FOR TESTING ONLY
     package_name = fields.String(required=False)
     product_id = fields.String(required=False)
     #####################
-
-
 
     subscription_type_id = fields.Integer(required=False, validate=validate.OneOf([2, 3]))
     subscription_status = fields.String(
@@ -225,8 +227,10 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
     sponsorship_id = fields.Integer(load_only=True)
     sponsorship = fields.Nested(SubscriptionSponsorSchema, dump_only=True)
-    google_transaction_id = fields.String(load_only=True, missing=None) # TODO - remove once FE adjusts to use google_purchase_token
-    google_purchase_token = fields.String(load_only=True, missing=None) 
+    google_transaction_id = fields.String(
+        load_only=True, missing=None
+    )  # TODO - remove once FE adjusts to use google_purchase_token
+    google_purchase_token = fields.String(load_only=True, missing=None)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -234,7 +238,7 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
         # they are only used for testing
         data.pop('package_name', None)
         data.pop('product_id', None)
-        
+
         # TODO: remove this once FE adjusts to use google_purchase_token
         if data.get('google_transaction_id'):
             data['google_purchase_token'] = data.get('google_transaction_id')

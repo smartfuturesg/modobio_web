@@ -208,7 +208,6 @@ class Config:
             with open(self.GOOGLE_JSON_KEY_PATH, 'r') as f:
                 json_key = f.read()
             self.GOOGLE_SERVICE_ACCOUNT_KEY = json_key
-        
 
         # Look for values that need replacement.
         for var, val in self.__dict__.items():
