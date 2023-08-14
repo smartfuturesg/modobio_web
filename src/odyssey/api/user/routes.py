@@ -793,13 +793,13 @@ class UserSubscriptionApi(BaseResource):
             )
             db.session.commit()
 
-        elif request.parsed_obj.google_transaction_id:
+        elif request.parsed_obj.google_purchase_token:
             # placeholder for subscription validation. Add new subscription to db with google_transaction_id
 
-            # 1. check if google_transaction_id is already in use
+            # 1. check if google_purchase_token is already in use
             # if (
             #     UserSubscriptions.query.filter_by(
-            #         google_transaction_id=request.parsed_obj.google_transaction_id
+            #         google_purchase_token=request.parsed_obj.google_purchase_token
             #     ).filter(UserSubscriptions.user_id != user_id).first()
             # ):
             #     raise BadRequest('This google transaction ID is already in use by another user.')
@@ -808,7 +808,13 @@ class UserSubscriptionApi(BaseResource):
             google = PlayStore()
             resp = google.verify_purchase(package_name=request.json["package_name"],
                                     product_id=request.json["product_id"],
-                                    purchase_token=request.parsed_obj.google_transaction_id)
+                                    purchase_token=request.parsed_obj.google_purchase_token)
+            # TODO: use this when ready
+            # update_client_subscription(
+            #     user_id=user_id,
+            #     google_purchase_token=request.parsed_obj.google_transaction_id,
+            # )
+            db.session.commit()
             breakpoint()
             # add subscription to db
             request.parsed_obj.user_id = user_id
