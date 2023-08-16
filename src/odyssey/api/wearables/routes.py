@@ -999,20 +999,21 @@ class WearablesV2DataEndpoint(BaseResource):
             # bar will have all the relevant information.
 
             # These URL schemes are registered with Apple and Google.
-            redirect_url_scheme = 'com.modobio.ModoBioClient'
-            if request.parsed_obj['platform'] == 'android':
-                # Somebody was not paying attention when registering for Android.
-                redirect_url_scheme = redirect_url_scheme.lower()
+            # TODO: remove this when the following paths are verified to work
+            # redirect_url_scheme = 'com.modobio.ModoBioClient'
+            # if request.parsed_obj['platform'] == 'android':
+            #     # Somebody was not paying attention when registering for Android.
+            #     redirect_url_scheme = redirect_url_scheme.lower()
 
             # TODO: when frontend adds success and failure views, fill in these paths
-            success_path = ''
-            failure_path = ''
+            success_path = 'modobio://setup_success'
+            failure_path = 'modobio://setup_failure'
 
             tc = TerraClient()
             response = tc.generate_authentication_url(
                 resource=wearable,
-                auth_success_redirect_url=(f'{redirect_url_scheme}://{success_path}'),
-                auth_failure_redirect_url=(f'{redirect_url_scheme}://{failure_path}'),
+                auth_success_redirect_url=success_path,
+                auth_failure_redirect_url=failure_path,
                 reference_id=user_id,
             )
             tc.status(response)

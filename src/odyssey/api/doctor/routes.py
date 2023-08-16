@@ -3,7 +3,7 @@ import secrets
 from datetime import date, datetime
 
 from dateutil.relativedelta import relativedelta
-from flask import current_app, g, redirect, request, url_for
+from flask import g, redirect, request, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from sqlalchemy import and_, or_, select
