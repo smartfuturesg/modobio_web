@@ -61,6 +61,9 @@ for name in ('sqlalchemy', 'flask_cors', 'werkzeug'):
 
 log_level_num = logging.getLevelName(conf.LOG_LEVEL)
 
+# google api client for validating subscriptions
+logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.WARN)
+
 # SQLAlchemy and elasticsearch are too verbose, fine tune several loggers.
 if log_level_num < logging.WARN:
     logging.getLogger('elasticsearch').setLevel(logging.WARN)
