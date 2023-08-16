@@ -34,6 +34,8 @@ from odyssey.api.user.models import *
 from odyssey.api.user.schemas import UserSubscriptionsSchema
 from odyssey.api.wearables.models import WearablesV2
 from odyssey.integrations.apple import AppStore
+from odyssey.integrations.google import PlayStore
+from odyssey.integrations.terra import TerraClient
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
 from odyssey.utils.constants import (ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME)
@@ -1074,6 +1076,7 @@ def update_client_subscription(
     user_id: int,
     latest_subscription: UserSubscriptions = None,
     apple_original_transaction_id: str = None,
+    google_purchase_token: str = None,
 ):
     """
     Handles logic around updating a user's subscription.
@@ -1202,6 +1205,78 @@ def update_client_subscription(
             }
 
         logger.info(f'Apple subscription updated for user_id: {user_id}')
+
+    # check google play store
+    elif google_purchase_token or latest_subscription.google_purchase_token:
+        # check if google_transaction_id is valid
+        google = PlayStore()
+        playstore_response = google.verify_purchase(
+            purchase_token=google_purchase_token
+            if google_purchase_token else latest_subscription.google_purchase_token,
+        )
+
+        # playstore subscription is 'active', latest_subscription is unsubscribed - new subscription entry for subscribed status
+        # playstore subscription is 'active', latest_subscription is subscribed - update latest_subscription last_checked_date
+        # playstore subscription is 'invalid', latest_subscription is subscribed - update latest_subscription to unsubscribed, new subscription entry for unsubscribed status
+        # playstore subscription is 'invalid', latest_subscription is unsubscribed - new subscription entry for unsubscribed status
+        # playstore subscription is 'grace_period', latest_subscription.expire_date < utc_time_now - update latest_subscription to subscribed
+        if playstore_response['subscription_state'] != 'invalid':
+            if latest_subscription.subscription_status == 'subscribed':
+                # subscription is active and hasn't expired yet
+                latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
+            elif (latest_subscription.start_date == playstore_response['start_timestamp']):
+                # sub valid or in grace period, but technically expired on our end, continue subscription
+                latest_subscription.update({
+                    'end_date': None,
+                    'subscription_status': 'subscribed',
+                    'last_checked_date': utc_time_now.isoformat(),
+                    'expire_date': playstore_response['expiration_timestamp'].isoformat(),
+                })
+                logger.info(
+                    'Subscription was expired on our end, but technically'
+                    " valid on Google's end. Continuing subscription."
+                )
+                new_sub_data = {}
+
+            else:
+                new_sub_data = {
+                    'subscription_status': 'subscribed',
+                    'subscription_type_id': playstore_response['subscription_type_id'],
+                    'is_staff': False,
+                    'google_purchase_token': (
+                        google_purchase_token
+                        if google_purchase_token else latest_subscription.google_purchase_token
+                    ),
+                    'last_checked_date': utc_time_now.isoformat(),
+                    'expire_date': playstore_response['expiration_timestamp'].isoformat(),
+                    'start_date': playstore_response['start_timestamp'].isoformat(),
+                }
+                latest_subscription.update({
+                    'end_date': utc_time_now.isoformat(),
+                    'last_checked_date': utc_time_now.isoformat(),
+                })
+                if latest_subscription.subscription_type_id == None:
+                    welcome_email = True  # user was previously unsubscribed and now has a subscription
+        else:
+            # subscription is invalid. In this case, latest_subscription should be unsubscribed (see above)
+            # if latest_subscription is already unsubscribed, do nothing
+            # but if latest_subscription is subscribed for some reason (revoke, refund etc),
+            #   update to unsubscribed and add new subscription entry for unsubscribed status
+            if latest_subscription.subscription_status == 'subscribed':
+                # update current subscription to unsubscribed
+                latest_subscription.update({
+                    'end_date': utc_time_now.isoformat(),
+                    'subscription_status': 'unsubscribed',
+                    'last_checked_date': utc_time_now.isoformat(),
+                })
+                # subscription has been revoked. Add new unsubscribed entry to UserSubscriptions
+                new_sub_data = {
+                    'subscription_status': 'unsubscribed',
+                    'is_staff': False,
+                    'start_date': datetime.utcnow().isoformat(),
+                }
+
+        logger.info(f'Playstore subscription updated for user_id: {user_id}')
 
     if (
         latest_subscription.subscription_status == 'unsubscribed'

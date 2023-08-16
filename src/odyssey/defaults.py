@@ -385,6 +385,29 @@ SUBSCRIPTION_UPDATE_FREQUENCY_MINS = 5
 :type: int
 """
 
+GOOGLE_JSON_KEY_PATH = ''
+"""Path to the Google service account JSON key file.
+
+This file is used to authenticate with Google APIs.
+
+:type: str
+"""
+
+GOOGLE_SERVICE_ACCOUNT_KEY = {}
+"""Google service account key.
+
+This is the parsed JSON key file.
+
+:type: dict
+"""
+
+GOOGLE_PACKAGE_NAME = 'com.modobio.modobioclient'
+"""
+Package name for android app. 
+
+:type: str
+"""
+
 TERRA_BASE_URL = 'https://api.tryterra.co/v2'
 """Base URL for Terra API.
 
