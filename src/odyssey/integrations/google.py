@@ -107,8 +107,6 @@ class PlayStore:
         except googleapiclient.errors.HttpError as error:
             logger.error(error)
 
-        logger.info(f"Subscription state, is {response.get('subscriptionState', '')}")
-
         subscription_state = self.validate_subscription_state(response.get('subscriptionState', ''))
 
         if subscription_state == 'invalid':
