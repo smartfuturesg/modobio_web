@@ -1,5 +1,4 @@
 import json
-
 import logging
 
 from odyssey.api.lookup.models import LookupSubscriptions
@@ -8,11 +7,11 @@ logger = logging.getLogger(__name__)
 
 from typing import Dict
 
+import googleapiclient
 from dateutil import parser
 from flask import current_app
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import googleapiclient
 from werkzeug.exceptions import BadRequest
 
 
@@ -22,9 +21,13 @@ class PlayStore:
         Initializes the PlayStore class by creating service account credentials.
 
         """
-        self.credentials = self.create_service_account_credentials(json.loads(current_app.config.get('GOOGLE_SERVICE_ACCOUNT_KEY')))
+        self.credentials = self.create_service_account_credentials(
+            json.loads(current_app.config.get('GOOGLE_SERVICE_ACCOUNT_KEY'))
+        )
 
-    def create_service_account_credentials(self, json_key: Dict[str, str]) -> service_account.Credentials:
+    def create_service_account_credentials(
+        self, json_key: Dict[str, str]
+    ) -> service_account.Credentials:
         """
         Creates service account credentials using the given JSON key.
 
@@ -37,11 +40,11 @@ class PlayStore:
         # Create credentials from the service account info
         credentials = service_account.Credentials.from_service_account_info(
             json_key,
-            scopes=['https://www.googleapis.com/auth/androidpublisher']
+            scopes=['https://www.googleapis.com/auth/androidpublisher'],
         )
 
         return credentials
-    
+
     def validate_subscription_state(self, subscription_state: str) -> bool:
         """
         Responds with weather or not the subscription state is valid.
@@ -55,25 +58,31 @@ class PlayStore:
         SUBSCRIPTION_STATE_PAUSED - invalid
         SUBSCRIPTION_STATE_IN_GRACE_PERIOD - valid
         SUBSCRIPTION_STATE_ON_HOLD - invalid
-        SUBSCRIPTION_STATE_CANCELLED - invalid
+        SUBSCRIPTION_STATE_CANCELLED - valid (subscription is cancelled but not yet expired)
         SUBSCRIPTION_STATE_EXPIRED - invalid
-        
+
         Args:
-            subscription_state (str): The subscription state to validate.
-        
+            subscription_state (str): One of three states possible: acvtive, grace_period, or invalid.
+
         """
 
         valid_states = [
             'SUBSCRIPTION_STATE_ACTIVE',
-            'SUBSCRIPTION_STATE_IN_GRACE_PERIOD'
+        ]
+
+        grace_period_states = [
+            'SUBSCRIPTION_STATE_IN_GRACE_PERIOD',
+            'SUBSCRIPTION_STATE_CANCELED',
         ]
 
         if subscription_state in valid_states:
-            return True
+            return 'active'
+        elif subscription_state in grace_period_states:
+            return 'grace_period'
         else:
-            return False
+            return 'invalid'
 
-    def verify_purchase(self, package_name: str, product_id: str, purchase_token: str) -> Dict:
+    def verify_purchase(self, purchase_token: str) -> Dict:
         """
         Verifies a purchase token with the Google Play Developer API.
 
@@ -88,43 +97,39 @@ class PlayStore:
         # Build the service
         androidpublisher = build('androidpublisher', 'v3', credentials=self.credentials)
 
-        # get a list of all in app products
-        # response = androidpublisher.inappproducts().list(packageName=package_name).execute() # old do not use
-        # response = androidpublisher.monetization().subscriptions().list(packageName=package_name).execute()
-        # print(response)
-        # breakpoint()
-        # get info on inapp product
-        # response =  androidpublisher.inappproducts().get(packageName=package_name, sku=product_id).execute()
-        # breakpoint()
-        # log the arguments
-        logger.info(f'\nVerifying purchase token: {purchase_token} for \nproduct: {product_id} in \npackage: {package_name}')
         try:
-            response = androidpublisher.purchases().subscriptionsv2().get(
-                packageName=package_name,
-                # subscriptionId=product_id,
-                token=purchase_token,
-            ).execute()
-            breakpoint()
+            response = (
+                androidpublisher.purchases().subscriptionsv2().get(
+                    packageName=current_app.config['GOOGLE_PACKAGE_NAME'],
+                    token=purchase_token,
+                ).execute()
+            )
         except googleapiclient.errors.HttpError as error:
-            print(error)
-            breakpoint()
-            # print(error.resp.status)
-            # print(error.resp.reason)
-            # print(error.content)
+            logger.error(error)
 
-        is_subscription_valid = self.validate_subscription_state(response.get('subscriptionState', ''))
+        logger.info(f"Subscription state, is {response.get('subscriptionState', '')}")
 
-        if not is_subscription_valid:
-            return {'is_subscription_valid': False}
+        subscription_state = self.validate_subscription_state(response.get('subscriptionState', ''))
+
+        if subscription_state == 'invalid':
+            return {'subscription_state': subscription_state}
 
         start_timestamp = response['startTime']
-        start_timestamp = parser.parse(start_timestamp)
-        
-        expiration_timestamp = response['lineItems']['expiryTime'] # timestamp in RFC3339 UTC "Zulu" format
-        expiration_timestamp = parser.parse(expiration_timestamp)
+        start_timestamp = parser.parse(start_timestamp).replace(tzinfo=None)
 
-        subscription_type_id = LookupSubscriptions.query.filter_by(product_id=response['lineItems']['productId']).first().id
-        
+        expiration_timestamp = response['lineItems'][0]['expiryTime']
+        expiration_timestamp = parser.parse(expiration_timestamp).replace(tzinfo=None)
+
+        subscription_type_id = (
+            LookupSubscriptions.query.filter_by(
+                google_product_id=response['lineItems'][0]['productId']
+            ).first().sub_id
+        )
+
         # If the request is successful, the response will contain details about the purchase
-        return {'is_subscription_valid': True, 'start_timestamp': start_timestamp, 'expiration_timestamp': expiration_timestamp, 'subscription_type_id': subscription_type_id}
-
+        return {
+            'subscription_state': subscription_state,
+            'start_timestamp': start_timestamp,
+            'expiration_timestamp': expiration_timestamp,
+            'subscription_type_id': subscription_type_id,
+        }
