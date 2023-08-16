@@ -398,7 +398,6 @@ def update_client_subscription_task(user_id: int):
             UserSubscriptions.idx.desc()
         ).first()
     )
-
     if latest_subscription.subscription_status == 'unsubscribed':
         return
     else:
