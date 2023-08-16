@@ -786,7 +786,10 @@ class UserSubscriptionApi(BaseResource):
                     apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id
                 ).filter(UserSubscriptions.user_id != user_id).first()
             ):
-                raise BadRequest('This original transaction ID is already in use by another user.')
+                raise BadRequest(
+                    'This original transaction ID is already in use by another'
+                    ' user.'
+                )
             update_client_subscription(
                 user_id=user_id,
                 apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id,
@@ -794,35 +797,21 @@ class UserSubscriptionApi(BaseResource):
             db.session.commit()
 
         elif request.parsed_obj.google_purchase_token:
-            # placeholder for subscription validation. Add new subscription to db with google_transaction_id
+            # check if google_purchase_token is already in use
+            if (
+                UserSubscriptions.query.filter_by(
+                    google_purchase_token=request.parsed_obj.google_purchase_token
+                ).filter(UserSubscriptions.user_id != user_id).first()
+            ):
+                raise BadRequest(
+                    'This google purchase token is already in use by another'
+                    ' user.'
+                )
 
-            # 1. check if google_purchase_token is already in use
-            # if (
-            #     UserSubscriptions.query.filter_by(
-            #         google_purchase_token=request.parsed_obj.google_purchase_token
-            #     ).filter(UserSubscriptions.user_id != user_id).first()
-            # ):
-            #     raise BadRequest('This google transaction ID is already in use by another user.')
-            
-            # 2. check if google_transaction_id is valid
-            google = PlayStore()
-            resp = google.verify_purchase(package_name=request.json["package_name"],
-                                    product_id=request.json["product_id"],
-                                    purchase_token=request.parsed_obj.google_purchase_token)
-            # TODO: use this when ready
-            # update_client_subscription(
-            #     user_id=user_id,
-            #     google_purchase_token=request.parsed_obj.google_transaction_id,
-            # )
-            db.session.commit()
-            breakpoint()
-            # add subscription to db
-            request.parsed_obj.user_id = user_id
-            request.parsed_obj.is_staff = False
-            request.parsed_obj.subscription_status = 'subscribed'
-            request.parsed_obj.subscription_type_id = 2
-
-            db.session.add(request.parsed_obj)
+            update_client_subscription(
+                user_id=user_id,
+                google_purchase_token=request.parsed_obj.google_purchase_token,
+            )
             db.session.commit()
 
         elif (
