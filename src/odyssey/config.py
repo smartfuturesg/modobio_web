@@ -203,6 +203,12 @@ class Config:
             self.TELEHEALTH_BOOKING_LEAD_TIME_HRS = 0
             self.TELEHEALTH_BOOKING_TRANSCRIPT_EXPIRATION_HRS = 0.5
 
+        # Google Playstore subscription validation service account key
+        if self.GOOGLE_JSON_KEY_PATH:
+            with open(self.GOOGLE_JSON_KEY_PATH, 'r') as f:
+                json_key = f.read()
+            self.GOOGLE_SERVICE_ACCOUNT_KEY = json_key
+
         # Look for values that need replacement.
         for var, val in self.__dict__.items():
             if (

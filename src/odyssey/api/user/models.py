@@ -605,9 +605,9 @@ class UserSubscriptions(db.Model):
     :type: String
     """
 
-    google_transaction_id = db.Column(db.String)
+    google_purchase_token = db.Column(db.String)
     """
-    Google playstore transaction ID related to a subscription purchase.
+    Google playstore purchase token related to a subscription purchase.
 
     :type: String
     """

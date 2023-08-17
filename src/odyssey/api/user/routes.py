@@ -1,5 +1,7 @@
 import logging
 
+from odyssey.integrations.google import PlayStore
+
 logger = logging.getLogger(__name__)
 
 import json
@@ -784,23 +786,32 @@ class UserSubscriptionApi(BaseResource):
                     apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id
                 ).filter(UserSubscriptions.user_id != user_id).first()
             ):
-                raise BadRequest('This original transaction ID is already in use.')
+                raise BadRequest(
+                    'This original transaction ID is already in use by another'
+                    ' user.'
+                )
             update_client_subscription(
                 user_id=user_id,
                 apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id,
             )
             db.session.commit()
 
-        elif request.parsed_obj.google_transaction_id:
-            # placeholder for subscription validation. Add new subscription to db with google_transaction_id
+        elif request.parsed_obj.google_purchase_token:
+            # check if google_purchase_token is already in use
+            if (
+                UserSubscriptions.query.filter_by(
+                    google_purchase_token=request.parsed_obj.google_purchase_token
+                ).filter(UserSubscriptions.user_id != user_id).first()
+            ):
+                raise BadRequest(
+                    'This google purchase token is already in use by another'
+                    ' user.'
+                )
 
-            # add subscription to db
-            request.parsed_obj.user_id = user_id
-            request.parsed_obj.is_staff = False
-            request.parsed_obj.subscription_status = 'subscribed'
-            request.parsed_obj.subscription_type_id = 2
-
-            db.session.add(request.parsed_obj)
+            update_client_subscription(
+                user_id=user_id,
+                google_purchase_token=request.parsed_obj.google_purchase_token,
+            )
             db.session.commit()
 
         elif (
