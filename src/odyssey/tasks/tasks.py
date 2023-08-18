@@ -400,7 +400,7 @@ def update_client_subscription_task(user_id: int, auto_renew: bool = True):
             UserSubscriptions.idx.desc()
         ).first()
     )
-    # skip subscription update if user is currently unsubscribed 
+    # skip subscription update if user is currently unsubscribed
     # is not under a subscription auto_renew
     if (latest_subscription.subscription_status == 'unsubscribed' and auto_renew):
         return
