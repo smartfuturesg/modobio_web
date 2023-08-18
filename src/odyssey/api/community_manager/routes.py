@@ -145,7 +145,7 @@ class CMSubscriptionGrantingEndpoint(BaseResource):
             if current_app.testing:
                 update_client_subscription(user_id)
             else:
-                update_client_subscription_task.delay(user_id)
+                update_client_subscription_task.delay(user_id, auto_renew=False)
 
         db.session.commit()
 

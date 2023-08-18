@@ -381,7 +381,7 @@ def store_telehealth_transcript(booking_id: int):
 
 
 @celery.task(base=BaseTaskWithRetry)
-def update_client_subscription_task(user_id: int):
+def update_client_subscription_task(user_id: int, auto_renew: bool = True):
     """Updates the user's subscription by checking the subscription status with apple, google playstore,
     and UserSubscriptionGrants.
 
@@ -392,13 +392,17 @@ def update_client_subscription_task(user_id: int):
     ----------
     user_id : int
         used to grab the latest subscription
+    auto_renew : bool
+        A true value denotes that this subscription update is for a autorenewing subscription.
     """
     latest_subscription = (
         UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
             UserSubscriptions.idx.desc()
         ).first()
     )
-    if latest_subscription.subscription_status == 'unsubscribed':
+    # skip subscription update if user is currently unsubscribed
+    # is not under a subscription auto_renew
+    if (latest_subscription.subscription_status == 'unsubscribed' and auto_renew):
         return
     else:
         update_client_subscription(user_id=user_id, latest_subscription=latest_subscription)
