@@ -12,6 +12,11 @@ Flask-Migrate
 Flask-PyMongo
 flask-restx
 Flask-SQLAlchemy
+google-api-core
+google-api-python-client
+google-auth
+google-auth-httplib2
+googleapis-common-protos
 idna
 marshmallow
 marshmallow-dataclass
