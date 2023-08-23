@@ -9,25 +9,37 @@ from flask_restx import Namespace
 from odyssey import db
 from odyssey.api.doctor.models import MedicalPhysicalExam
 from odyssey.api.trainer.models import (
-    FitnessQuestionnaire, HeartAssessment, LungAssessment, MovementAssessment, MoxyAssessment,
-    MoxyRipTest, PowerAssessment, StrengthAssessment
+    FitnessQuestionnaire,
+    HeartAssessment,
+    LungAssessment,
+    MovementAssessment,
+    MoxyAssessment,
+    MoxyRipTest,
+    PowerAssessment,
+    StrengthAssessment,
 )
 from odyssey.api.trainer.schemas import (
-    FitnessQuestionnaireSchema, HeartAssessmentSchema, LungAssessmentSchema,
-    MovementAssessmentSchema, MoxyAssessmentSchema, MoxyRipSchema, PowerAssessmentSchema,
-    StrenghtAssessmentSchema
+    FitnessQuestionnaireSchema,
+    HeartAssessmentSchema,
+    LungAssessmentSchema,
+    MovementAssessmentSchema,
+    MoxyAssessmentSchema,
+    MoxyRipSchema,
+    PowerAssessmentSchema,
+    StrenghtAssessmentSchema,
 )
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_client_existence
 
-ns = Namespace('trainer', description='Operations related to the trainer')
+ns = Namespace("trainer", description="Operations related to the trainer")
 
 
-@ns.route('/assessment/power/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/assessment/power/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class Power(BaseResource):
     """GET and POST power assessments for the client"""
+
     @token_auth.login_required
     @responds(schema=PowerAssessmentSchema(many=True), api=ns)
     def get(self, user_id):
@@ -35,22 +47,22 @@ class Power(BaseResource):
         check_client_existence(user_id)
 
         all_entries = (
-            PowerAssessment.query.filter_by(user_id=user_id).order_by(
-                PowerAssessment.timestamp.asc()
-            ).all()
+            PowerAssessment.query.filter_by(user_id=user_id)
+            .order_by(PowerAssessment.timestamp.asc())
+            .all()
         )
 
         if len(all_entries) == 0:
             recent_physical = (
-                MedicalPhysicalExam.query.filter_by(user_id=user_id).order_by(
-                    MedicalPhysicalExam.idx.desc()
-                ).first()
+                MedicalPhysicalExam.query.filter_by(user_id=user_id)
+                .order_by(MedicalPhysicalExam.idx.desc())
+                .first()
             )
             if not recent_physical:
                 vital_weight = None
             else:
                 vital_weight = recent_physical.vital_weight
-            data_dict = {'vital_weight': vital_weight, 'user_id': user_id}
+            data_dict = {"vital_weight": vital_weight, "user_id": user_id}
             # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
             return data_dict
 
@@ -64,7 +76,7 @@ class Power(BaseResource):
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         pa_schema = PowerAssessmentSchema()
         client_pa = pa_schema.load(data)
@@ -73,17 +85,18 @@ class Power(BaseResource):
         db.session.commit()
 
         most_recent = (
-            PowerAssessment.query.filter_by(user_id=user_id).order_by(
-                PowerAssessment.timestamp.desc()
-            ).first()
+            PowerAssessment.query.filter_by(user_id=user_id)
+            .order_by(PowerAssessment.timestamp.desc())
+            .first()
         )
         return most_recent
 
 
-@ns.route('/assessment/strength/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/assessment/strength/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class Strength(BaseResource):
     """GET and POST strength assessments for the client"""
+
     @token_auth.login_required
     @responds(schema=StrenghtAssessmentSchema(many=True), api=ns)
     def get(self, user_id):
@@ -91,9 +104,9 @@ class Strength(BaseResource):
         check_client_existence(user_id)
 
         all_entries = (
-            StrengthAssessment.query.filter_by(user_id=user_id).order_by(
-                StrengthAssessment.timestamp.asc()
-            ).all()
+            StrengthAssessment.query.filter_by(user_id=user_id)
+            .order_by(StrengthAssessment.timestamp.asc())
+            .all()
         )
 
         return all_entries
@@ -106,7 +119,7 @@ class Strength(BaseResource):
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         sa_schema = StrenghtAssessmentSchema()
         client_sa = sa_schema.load(data)
@@ -115,17 +128,18 @@ class Strength(BaseResource):
         db.session.commit()
 
         most_recent = (
-            StrengthAssessment.query.filter_by(user_id=user_id).order_by(
-                StrengthAssessment.timestamp.desc()
-            ).first()
+            StrengthAssessment.query.filter_by(user_id=user_id)
+            .order_by(StrengthAssessment.timestamp.desc())
+            .first()
         )
         return most_recent
 
 
-@ns.route('/assessment/movement/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/assessment/movement/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class Movement(BaseResource):
     """GET and POST movement assessments for the client"""
+
     @token_auth.login_required
     @responds(schema=MovementAssessmentSchema(many=True), api=ns)
     def get(self, user_id):
@@ -133,9 +147,9 @@ class Movement(BaseResource):
         check_client_existence(user_id)
 
         all_entries = (
-            MovementAssessment.query.filter_by(user_id=user_id).order_by(
-                MovementAssessment.timestamp.asc()
-            ).all()
+            MovementAssessment.query.filter_by(user_id=user_id)
+            .order_by(MovementAssessment.timestamp.asc())
+            .all()
         )
 
         return all_entries
@@ -148,7 +162,7 @@ class Movement(BaseResource):
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         sa_schema = MovementAssessmentSchema()
         client_sa = sa_schema.load(data)
@@ -157,17 +171,18 @@ class Movement(BaseResource):
         db.session.commit()
 
         most_recent = (
-            MovementAssessment.query.filter_by(user_id=user_id).order_by(
-                MovementAssessment.timestamp.desc()
-            ).first()
+            MovementAssessment.query.filter_by(user_id=user_id)
+            .order_by(MovementAssessment.timestamp.desc())
+            .first()
         )
         return most_recent
 
 
-@ns.route('/assessment/heart/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/assessment/heart/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class Heart(BaseResource):
     """GET and POST movement assessments for the client"""
+
     @token_auth.login_required
     @responds(schema=HeartAssessmentSchema(many=True), api=ns)
     def get(self, user_id):
@@ -175,24 +190,24 @@ class Heart(BaseResource):
         check_client_existence(user_id)
 
         all_entries = (
-            HeartAssessment.query.filter_by(user_id=user_id).order_by(
-                HeartAssessment.timestamp.asc()
-            ).all()
+            HeartAssessment.query.filter_by(user_id=user_id)
+            .order_by(HeartAssessment.timestamp.asc())
+            .all()
         )
 
         if len(all_entries) == 0:
             recent_physical = (
-                MedicalPhysicalExam.query.filter_by(user_id=user_id).order_by(
-                    MedicalPhysicalExam.idx.desc()
-                ).first()
+                MedicalPhysicalExam.query.filter_by(user_id=user_id)
+                .order_by(MedicalPhysicalExam.idx.desc())
+                .first()
             )
             if not recent_physical:
                 vital_heartrate = None
             else:
                 vital_heartrate = recent_physical.vital_heartrate
             data_dict = {
-                'vital_heartrate': vital_heartrate,
-                'user_id': user_id,
+                "vital_heartrate": vital_heartrate,
+                "user_id": user_id,
             }
             # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
             return data_dict
@@ -207,7 +222,7 @@ class Heart(BaseResource):
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         hr_schema = HeartAssessmentSchema()
         client_hr = hr_schema.load(data)
@@ -217,10 +232,11 @@ class Heart(BaseResource):
         return client_hr
 
 
-@ns.route('/assessment/moxy/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/assessment/moxy/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class Moxy(BaseResource):
     """GET and POST moxy assessments for the client"""
+
     @token_auth.login_required
     @responds(schema=MoxyAssessmentSchema(many=True), api=ns)
     def get(self, user_id):
@@ -228,9 +244,9 @@ class Moxy(BaseResource):
         check_client_existence(user_id)
 
         all_entries = (
-            MoxyAssessment.query.filter_by(user_id=user_id).order_by(
-                MoxyAssessment.timestamp.asc()
-            ).all()
+            MoxyAssessment.query.filter_by(user_id=user_id)
+            .order_by(MoxyAssessment.timestamp.asc())
+            .all()
         )
 
         return all_entries
@@ -243,7 +259,7 @@ class Moxy(BaseResource):
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         moxy_schema = MoxyAssessmentSchema()
         client_moxy = moxy_schema.load(data)
@@ -253,10 +269,11 @@ class Moxy(BaseResource):
         return client_moxy
 
 
-@ns.route('/assessment/lungcapacity/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/assessment/lungcapacity/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class LungCapacity(BaseResource):
     """GET and POST moxy assessments for the client"""
+
     @token_auth.login_required
     @responds(schema=LungAssessmentSchema(many=True), api=ns)
     def get(self, user_id):
@@ -264,22 +281,22 @@ class LungCapacity(BaseResource):
         check_client_existence(user_id)
 
         all_entries = (
-            LungAssessment.query.filter_by(user_id=user_id).order_by(
-                LungAssessment.timestamp.asc()
-            ).all()
+            LungAssessment.query.filter_by(user_id=user_id)
+            .order_by(LungAssessment.timestamp.asc())
+            .all()
         )
 
         if len(all_entries) == 0:
             recent_physical = (
-                MedicalPhysicalExam.query.filter_by(user_id=user_id).order_by(
-                    MedicalPhysicalExam.idx.desc()
-                ).first()
+                MedicalPhysicalExam.query.filter_by(user_id=user_id)
+                .order_by(MedicalPhysicalExam.idx.desc())
+                .first()
             )
             if not recent_physical:
                 vital_weight = None
             else:
                 vital_weight = recent_physical.vital_weight
-            data_dict = {'vital_weight': vital_weight, 'user_id': user_id}
+            data_dict = {"vital_weight": vital_weight, "user_id": user_id}
             # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
             return data_dict
 
@@ -293,7 +310,7 @@ class LungCapacity(BaseResource):
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         lung_schema = LungAssessmentSchema()
         client_lung_capacity = lung_schema.load(data)
@@ -303,10 +320,11 @@ class LungCapacity(BaseResource):
         return client_lung_capacity
 
 
-@ns.route('/assessment/moxyrip/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/assessment/moxyrip/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class MoxyRipAssessment(BaseResource):
     """GET and POST moxy rip assessments for the client"""
+
     @token_auth.login_required
     @responds(schema=MoxyRipSchema(many=True), api=ns)
     def get(self, user_id):
@@ -314,20 +332,22 @@ class MoxyRipAssessment(BaseResource):
         check_client_existence(user_id)
 
         all_entries = (
-            MoxyRipTest.query.filter_by(user_id=user_id).order_by(MoxyRipTest.timestamp.asc()).all()
+            MoxyRipTest.query.filter_by(user_id=user_id)
+            .order_by(MoxyRipTest.timestamp.asc())
+            .all()
         )
 
         if len(all_entries) == 0:
             recent_physical = (
-                MedicalPhysicalExam.query.filter_by(user_id=user_id).order_by(
-                    MedicalPhysicalExam.idx.desc()
-                ).first()
+                MedicalPhysicalExam.query.filter_by(user_id=user_id)
+                .order_by(MedicalPhysicalExam.idx.desc())
+                .first()
             )
             if not recent_physical:
                 vital_weight = None
             else:
                 vital_weight = recent_physical.vital_weight
-            data_dict = {'vital_weight': vital_weight, 'user_id': user_id}
+            data_dict = {"vital_weight": vital_weight, "user_id": user_id}
             # raise ContentNotFoundReturnData(user_id=user_id, data=data_dict)
             return data_dict
 
@@ -341,7 +361,7 @@ class MoxyRipAssessment(BaseResource):
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         moxy_rip_schema = MoxyRipSchema()
         client_moxy_rip = moxy_rip_schema.load(data)
@@ -351,13 +371,14 @@ class MoxyRipAssessment(BaseResource):
         return client_moxy_rip
 
 
-@ns.route('/questionnaire/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/questionnaire/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class FitnessQuestionnaireEndpoint(BaseResource):
     """Fitness questionnaire endpoint.
 
     One questionnaire per client.
     """
+
     @token_auth.login_required
     @responds(schema=FitnessQuestionnaireSchema, api=ns)
     def get(self, user_id):

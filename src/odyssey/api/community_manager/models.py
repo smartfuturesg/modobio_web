@@ -13,13 +13,13 @@ from odyssey.utils.base.models import BaseModel
 class CommunityManagerSubscriptionGrants(BaseModel):
     """Community Manager Subscription Grants. Stores details related to subscription grant requests"""
 
-    __tablename__ = 'CommunityManagerSubscriptionGrants'
+    __tablename__ = "CommunityManagerSubscriptionGrants"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
@@ -33,7 +33,7 @@ class CommunityManagerSubscriptionGrants(BaseModel):
 
     subscription_grantee_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=True,
     )
     """
@@ -42,7 +42,9 @@ class CommunityManagerSubscriptionGrants(BaseModel):
     :type: string
     """
 
-    subscription_type_id = db.Column(db.Integer, db.ForeignKey('LookupSubscriptions.sub_id'))
+    subscription_type_id = db.Column(
+        db.Integer, db.ForeignKey("LookupSubscriptions.sub_id")
+    )
     """
     Id of this subscription plan. Comes from the LookupSubscriptions table.
 
@@ -62,16 +64,19 @@ class CommunityManagerSubscriptionGrants(BaseModel):
     :type: bool
     """
 
-    subscription = db.relationship('UserSubscriptions', back_populates='sponsorship', uselist=False)
+    subscription = db.relationship(
+        "UserSubscriptions", back_populates="sponsorship", uselist=False
+    )
 
-    subscription_type_information = db.relationship('LookupSubscriptions')
+    subscription_type_information = db.relationship("LookupSubscriptions")
     """
     Relationship lookup subscriptions
     """
+
     def __repr__(self):
         return (
-            f'<CommunityManagerSubscriptionGrants(user_id={self.user_id},'
-            f' email={self.email},'
-            f' subscription_type_id={self.subscription_type_id},'
-            f' sponsor={self.sponsor}, activated={self.activated})>'
+            f"<CommunityManagerSubscriptionGrants(user_id={self.user_id},"
+            f" email={self.email},"
+            f" subscription_type_id={self.subscription_type_id},"
+            f" sponsor={self.sponsor}, activated={self.activated})>"
         )

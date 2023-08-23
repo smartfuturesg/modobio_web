@@ -21,7 +21,6 @@ class RegisteredFacilitiesSchema(Schema):
 
 
 class ClientSummarySchema(Schema):
-
     firstname = fields.String()
     middlename = fields.String()
     lastname = fields.String()

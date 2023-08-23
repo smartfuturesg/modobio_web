@@ -16,13 +16,15 @@ from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import (
-    check_client_existence, check_client_facility_relation_existence, fetch_facility_existence
+    check_client_existence,
+    check_client_facility_relation_existence,
+    fetch_facility_existence,
 )
 
-ns = Namespace('facility', description='Endpoints for registered facilities.')
+ns = Namespace("facility", description="Endpoints for registered facilities.")
 
 
-@ns.route('/<int:facility_id>/')
+@ns.route("/<int:facility_id>/")
 class RegisteredFacility(BaseResource):
     @token_auth.login_required
     @responds(schema=RegisteredFacilitiesSchema, api=ns)
@@ -42,7 +44,7 @@ class RegisteredFacility(BaseResource):
 
         data = request.json
 
-        data['facility_id'] = facility_id
+        data["facility_id"] = facility_id
 
         facility.update(data)
 
@@ -51,9 +53,10 @@ class RegisteredFacility(BaseResource):
         return facility
 
 
-@ns.route('/all/')
+@ns.route("/all/")
 class AllFacilities(BaseResource):
     """api to return all registered facilities in the database"""
+
     @token_auth.login_required
     @responds(schema=RegisteredFacilitiesSchema(many=True), api=ns)
     def get(self):
@@ -61,9 +64,10 @@ class AllFacilities(BaseResource):
         return RegisteredFacilities.query.all()
 
 
-@ns.route('/')
+@ns.route("/")
 class NewFacility(BaseResource):
     """api to create a new registered facility"""
+
     @token_auth.login_required
     @accepts(schema=RegisteredFacilitiesSchema, api=ns)
     @responds(schema=RegisteredFacilitiesSchema, status_code=201, api=ns)
@@ -72,7 +76,7 @@ class NewFacility(BaseResource):
         data = request.get_json()
 
         # prevent requests to set facility_id and send message back to api user
-        if data.get('facility_id', None):
+        if data.get("facility_id", None):
             raise BadRequest('Don\'t include "facility_id" in the request.')
 
         facility_data = RegisteredFacilitiesSchema().load(data)
@@ -81,9 +85,10 @@ class NewFacility(BaseResource):
         return facility_data
 
 
-@ns.route('/client/<int:user_id>/')
+@ns.route("/client/<int:user_id>/")
 class RegisterClient(BaseResource):
     """api to handle actions revolving around what facilities a client is registered to"""
+
     @token_auth.login_required
     @responds(schema=RegisteredFacilitiesSchema(many=True), api=ns)
     def get(self, user_id):
@@ -96,7 +101,9 @@ class RegisterClient(BaseResource):
 
         response = []
         for item in facilityList:
-            response.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
+            response.append(
+                RegisteredFacilities.query.filter_by(facility_id=item).first()
+            )
 
         return response
 
@@ -109,12 +116,12 @@ class RegisterClient(BaseResource):
 
         data = request.get_json()
 
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
-        fetch_facility_existence(data['facility_id'])
+        fetch_facility_existence(data["facility_id"])
 
         # check if this client-facility relation already exists
-        check_client_facility_relation_existence(user_id, data['facility_id'])
+        check_client_facility_relation_existence(user_id, data["facility_id"])
 
         facility_data = ClientFacilitiesSchema().load(data)
 

@@ -22,7 +22,7 @@ class PlayStore:
 
         """
         self.credentials = self.create_service_account_credentials(
-            json.loads(current_app.config.get('GOOGLE_SERVICE_ACCOUNT_KEY'))
+            json.loads(current_app.config.get("GOOGLE_SERVICE_ACCOUNT_KEY"))
         )
 
     def create_service_account_credentials(
@@ -40,7 +40,7 @@ class PlayStore:
         # Create credentials from the service account info
         credentials = service_account.Credentials.from_service_account_info(
             json_key,
-            scopes=['https://www.googleapis.com/auth/androidpublisher'],
+            scopes=["https://www.googleapis.com/auth/androidpublisher"],
         )
 
         return credentials
@@ -67,20 +67,20 @@ class PlayStore:
         """
 
         valid_states = [
-            'SUBSCRIPTION_STATE_ACTIVE',
+            "SUBSCRIPTION_STATE_ACTIVE",
         ]
 
         grace_period_states = [
-            'SUBSCRIPTION_STATE_IN_GRACE_PERIOD',
-            'SUBSCRIPTION_STATE_CANCELED',
+            "SUBSCRIPTION_STATE_IN_GRACE_PERIOD",
+            "SUBSCRIPTION_STATE_CANCELED",
         ]
 
         if subscription_state in valid_states:
-            return 'active'
+            return "active"
         elif subscription_state in grace_period_states:
-            return 'grace_period'
+            return "grace_period"
         else:
-            return 'invalid'
+            return "invalid"
 
     def verify_purchase(self, purchase_token: str) -> Dict:
         """
@@ -95,39 +95,46 @@ class PlayStore:
             dict
         """
         # Build the service
-        androidpublisher = build('androidpublisher', 'v3', credentials=self.credentials)
+        androidpublisher = build("androidpublisher", "v3", credentials=self.credentials)
 
         try:
             response = (
-                androidpublisher.purchases().subscriptionsv2().get(
-                    packageName=current_app.config['GOOGLE_PACKAGE_NAME'],
+                androidpublisher.purchases()
+                .subscriptionsv2()
+                .get(
+                    packageName=current_app.config["GOOGLE_PACKAGE_NAME"],
                     token=purchase_token,
-                ).execute()
+                )
+                .execute()
             )
         except googleapiclient.errors.HttpError as error:
             logger.error(error)
 
-        subscription_state = self.validate_subscription_state(response.get('subscriptionState', ''))
+        subscription_state = self.validate_subscription_state(
+            response.get("subscriptionState", "")
+        )
 
-        if subscription_state == 'invalid':
-            return {'subscription_state': subscription_state}
+        if subscription_state == "invalid":
+            return {"subscription_state": subscription_state}
 
-        start_timestamp = response['startTime']
+        start_timestamp = response["startTime"]
         start_timestamp = parser.parse(start_timestamp).replace(tzinfo=None)
 
-        expiration_timestamp = response['lineItems'][0]['expiryTime']
+        expiration_timestamp = response["lineItems"][0]["expiryTime"]
         expiration_timestamp = parser.parse(expiration_timestamp).replace(tzinfo=None)
 
         subscription_type_id = (
             LookupSubscriptions.query.filter_by(
-                google_product_id=response['lineItems'][0]['productId']
-            ).first().sub_id
+                google_product_id=response["lineItems"][0]["productId"]
+            )
+            .first()
+            .sub_id
         )
 
         # If the request is successful, the response will contain details about the purchase
         return {
-            'subscription_state': subscription_state,
-            'start_timestamp': start_timestamp,
-            'expiration_timestamp': expiration_timestamp,
-            'subscription_type_id': subscription_type_id,
+            "subscription_state": subscription_state,
+            "start_timestamp": start_timestamp,
+            "expiration_timestamp": expiration_timestamp,
+            "subscription_type_id": subscription_type_id,
         }

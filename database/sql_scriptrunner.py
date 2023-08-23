@@ -36,56 +36,64 @@ conf = Config()
 
 # Get DB options.
 parser = database_parser()
-parser.description = __doc__ + '\n' + parser.description
+parser.description = __doc__ + "\n" + parser.description
 
 parser.add_argument(
-    'scripts',
-    nargs='*',
-    help='[Optional] Individual scripts to be run. Only the given scripts are run and nothing else. '
-         'Environment setting (development vs production) or any of the optional arguments are ignored.')
+    "scripts",
+    nargs="*",
+    help="[Optional] Individual scripts to be run. Only the given scripts are run and nothing else. "
+    "Environment setting (development vs production) or any of the optional arguments are ignored.",
+)
 
 prev_group = parser.add_mutually_exclusive_group()
 prev_group.add_argument(
-    '--previous',
-    action='store_true',
+    "--previous",
+    action="store_true",
     help='Include scripts from all previous releases. Searches all "release-x.y/" subdirectories. '
-         'Defaults to True when DEPLOYMENT_ENV=development, False otherwise.')
+    "Defaults to True when DEPLOYMENT_ENV=development, False otherwise.",
+)
 prev_group.add_argument(
-    '--no-previous',
-    action='store_false',
-    help='Negate the options of --previous. Do NOT include scripts from previous releases when '
-         'DEPLOYMENT_ENV=development.')
+    "--no-previous",
+    action="store_false",
+    help="Negate the options of --previous. Do NOT include scripts from previous releases when "
+    "DEPLOYMENT_ENV=development.",
+)
 
 current_group = parser.add_mutually_exclusive_group()
 current_group.add_argument(
-    '--current',
-    action='store_true',
-    help='Include scripts from the current development cycle. This does not depend on the '
-         'environment and is always True. Using this option has no effect, it is included '
-         'for completion.')
+    "--current",
+    action="store_true",
+    help="Include scripts from the current development cycle. This does not depend on the "
+    "environment and is always True. Using this option has no effect, it is included "
+    "for completion.",
+)
 current_group.add_argument(
-    '--no-current',
-    action='store_false',
-    help='Do NOT run the scripts from the current development cycle. This does not depend '
-         'on the environment and always defaults to False. May be useful during development '
-         'of the scripts.')
+    "--no-current",
+    action="store_false",
+    help="Do NOT run the scripts from the current development cycle. This does not depend "
+    "on the environment and always defaults to False. May be useful during development "
+    "of the scripts.",
+)
 
 dev_group = parser.add_mutually_exclusive_group()
 dev_group.add_argument(
-    '--dev',
-    action='store_true',
+    "--dev",
+    action="store_true",
     help='Include development scripts, all scripts under the "dev/" subdirectory. '
-         'Defaults to True when DEPLOYMENT_ENV=development, False otherwise.')
+    "Defaults to True when DEPLOYMENT_ENV=development, False otherwise.",
+)
 dev_group.add_argument(
-    '--no-dev',
-    action='store_false',
-    help='Negate the options of --dev. Do NOT include development scripts when '
-         'DEPLOYMENT_ENV=development.')
+    "--no-dev",
+    action="store_false",
+    help="Negate the options of --dev. Do NOT include development scripts when "
+    "DEPLOYMENT_ENV=development.",
+)
 
 parser.add_argument(
-    '--demo',
-    action='store_true',
-    help='Run extra scripts from the "demo/" subdirectory. Intended for the demo environment.')
+    "--demo",
+    action="store_true",
+    help='Run extra scripts from the "demo/" subdirectory. Intended for the demo environment.',
+)
 
 args = parser.parse_args()
 
@@ -109,9 +117,9 @@ if not files:
     here = pathlib.Path(__file__).parent
 
     if prev:
-        prev_dir = here / 'releases'
-        prev_sql_files = list(prev_dir.rglob('*.sql'))
-        prev_py_files = list(prev_dir.rglob('*.py'))
+        prev_dir = here / "releases"
+        prev_sql_files = list(prev_dir.rglob("*.sql"))
+        prev_py_files = list(prev_dir.rglob("*.py"))
 
         prev_sql_files.extend(prev_py_files)
 
@@ -119,49 +127,49 @@ if not files:
         files.extend(prev_sql_files)
 
     if cur:
-        current_dir = here / 'current'
-        current_sql_files = list(current_dir.glob('*.sql'))
-        current_py_files = list(current_dir.glob('*.py'))
+        current_dir = here / "current"
+        current_sql_files = list(current_dir.glob("*.sql"))
+        current_py_files = list(current_dir.glob("*.py"))
 
         current_sql_files.extend(current_py_files)
         current_sql_files.sort()
         files.extend(current_sql_files)
 
     if dev:
-        dev_dir = here / 'dev'
-        dev_sql_files = list(dev_dir.glob('*.sql'))
-        dev_py_files = list(dev_dir.glob('*py'))
+        dev_dir = here / "dev"
+        dev_sql_files = list(dev_dir.glob("*.sql"))
+        dev_py_files = list(dev_dir.glob("*py"))
 
         dev_sql_files.extend(dev_py_files)
         dev_sql_files.sort()
         files.extend(dev_sql_files)
 
 if args.demo:
-    demo_dir = pathlib.Path(__file__).parent / 'demo'
-    demo_sql_files = list(demo_dir.glob('*.sql'))
-    demo_py_files = list(demo_dir.glob('*py'))
+    demo_dir = pathlib.Path(__file__).parent / "demo"
+    demo_sql_files = list(demo_dir.glob("*.sql"))
+    demo_py_files = list(demo_dir.glob("*py"))
     demo_sql_files.extend(demo_py_files)
     demo_sql_files.sort()
     files.extend(demo_sql_files)
 
 # Open DB connection.
-print(f'Using the following database: {args.db_uri}')
+print(f"Using the following database: {args.db_uri}")
 engine = create_engine(args.db_uri)
 
 with engine.connect() as conn:
     for f in files:
-        if f.name == '__init__.py':
+        if f.name == "__init__.py":
             continue
 
-        print(f'Processing {f}... ', end='')
-        if f.suffix == '.sql':
+        print(f"Processing {f}... ", end="")
+        if f.suffix == ".sql":
             with f.open() as fh:
                 conn.execute(text(fh.read()))
                 # In some situations with comments in the text, there is no
                 # commit issued. Do it now. Multiple commits doesn't hurt.
-                conn.execute(text('commit;'))
-            print('done')
-        elif f.suffix == '.py':
+                conn.execute(text("commit;"))
+            print("done")
+        elif f.suffix == ".py":
             modname = f.stem
 
             # mod = importlib.import_module(modname) stopped working for no apparent reason,
@@ -170,9 +178,9 @@ with engine.connect() as conn:
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
 
-            if hasattr(mod, 'sql'):
+            if hasattr(mod, "sql"):
                 conn.execute(text(mod.sql))
-                conn.execute(text('commit;'))
-            print('done')
+                conn.execute(text("commit;"))
+            print("done")
         else:
-            print('skipped')
+            print("skipped")

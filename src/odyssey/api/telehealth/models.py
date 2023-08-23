@@ -9,9 +9,13 @@ from sqlalchemy.sql.expression import true
 from odyssey import db
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.models import (
-    BaseModel, BaseModelWithIdx, ReporterIdFkeyMixin, UserIdFkeyMixin
+    BaseModel,
+    BaseModelWithIdx,
+    ReporterIdFkeyMixin,
+    UserIdFkeyMixin,
 )
 from odyssey.utils.constants import DB_SERVER_TIME
+
 """
 Database models for all things telehealth. These tables will be used to keep track of bookings,
 meeting rooms, and other data related to telehealth meetings
@@ -25,7 +29,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     client_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -36,7 +40,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     staff_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -46,7 +50,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
 
     client = db.relationship(
-        'User', uselist=False, foreign_keys='TelehealthBookings.client_user_id'
+        "User", uselist=False, foreign_keys="TelehealthBookings.client_user_id"
     )
     """
     Many-to-One relationship with User
@@ -55,7 +59,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
 
     practitioner = db.relationship(
-        'User', uselist=False, foreign_keys='TelehealthBookings.staff_user_id'
+        "User", uselist=False, foreign_keys="TelehealthBookings.staff_user_id"
     )
     """
     Many-to-One relationship with User
@@ -79,7 +83,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     booking_window_id_start_time = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete='CASCADE'),
+        db.ForeignKey("LookupBookingTimeIncrements.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """ 
@@ -90,7 +94,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     booking_window_id_end_time = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete='CASCADE'),
+        db.ForeignKey("LookupBookingTimeIncrements.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """ 
@@ -99,7 +103,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
 
     status_history = db.relationship(
-        'TelehealthBookingStatus', uselist=True, back_populates='booking'
+        "TelehealthBookingStatus", uselist=True, back_populates="booking"
     )
     """
     One-to-Many relationship with TelehealthBookingStatus, history of all statuses the booking has gone through.
@@ -137,7 +141,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     booking_window_id_start_time_utc = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete='CASCADE'),
+        db.ForeignKey("LookupBookingTimeIncrements.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """ 
@@ -148,7 +152,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     booking_window_id_end_time_utc = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete='CASCADE'),
+        db.ForeignKey("LookupBookingTimeIncrements.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """ 
@@ -159,7 +163,7 @@ class TelehealthBookings(BaseModelWithIdx):
 
     client_location_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupTerritoriesOfOperations.idx'),
+        db.ForeignKey("LookupTerritoriesOfOperations.idx"),
         nullable=True,
     )
     """
@@ -167,7 +171,9 @@ class TelehealthBookings(BaseModelWithIdx):
         :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=True)
+    payment_method_id = db.Column(
+        db.Integer, db.ForeignKey("PaymentMethods.idx"), nullable=True
+    )
     """
     client payment method selected from PaymentMethods previously set up
 
@@ -175,7 +181,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
 
     staff_calendar_id = db.Column(
-        db.Integer, db.ForeignKey('StaffCalendarEvents.idx'), nullable=True
+        db.Integer, db.ForeignKey("StaffCalendarEvents.idx"), nullable=True
     )
     """
     Idx for the StaffCalendarEvents entry related to this booking.
@@ -207,7 +213,9 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: str
     """
 
-    chat_room = db.relationship('TelehealthChatRooms', uselist=False, back_populates='booking')
+    chat_room = db.relationship(
+        "TelehealthChatRooms", uselist=False, back_populates="booking"
+    )
     """
     One-to_One relationship with TelehealthChatRooms
 
@@ -215,7 +223,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
 
     booking_details = db.relationship(
-        'TelehealthBookingDetails', uselist=False, back_populates='booking'
+        "TelehealthBookingDetails", uselist=False, back_populates="booking"
     )
     """
     One-to_One relationship with TelehealthBookingDetails
@@ -223,7 +231,7 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: :class: `TelehealthBookingDetails` instance
     """
 
-    staff_calendar = db.relationship('StaffCalendarEvents', uselist=False)
+    staff_calendar = db.relationship("StaffCalendarEvents", uselist=False)
     """
     One-to_One relationship with StaffCalendarEvents
 
@@ -246,7 +254,9 @@ class TelehealthBookings(BaseModelWithIdx):
     :type: Numeric
     """
 
-    payment_history_id = db.Column(db.Integer, db.ForeignKey('PaymentHistory.idx'), nullable=True)
+    payment_history_id = db.Column(
+        db.Integer, db.ForeignKey("PaymentHistory.idx"), nullable=True
+    )
     """
     Foreign key to the PaymentHistory entry for this booking
 
@@ -276,7 +286,7 @@ class TelehealthBookings(BaseModelWithIdx):
     """
 
 
-@db.event.listens_for(TelehealthBookings, 'after_insert')
+@db.event.listens_for(TelehealthBookings, "after_insert")
 def add_booking_status_history(mapper, connection, target):
     """
     Listens for any new status change
@@ -287,20 +297,20 @@ def add_booking_status_history(mapper, connection, target):
 
     connection.execute(
         insert(TelehealthBookingStatus),
-        [{
-            'status':
-                booking.status,
-            'booking_id':
-                booking.idx,
-            'reporter_id':
-                current_user.user_id,
-            'reporter_role':
-                'Practitioner' if current_user.user_id == booking.staff_user_id else 'Client',
-        }],
+        [
+            {
+                "status": booking.status,
+                "booking_id": booking.idx,
+                "reporter_id": current_user.user_id,
+                "reporter_role": "Practitioner"
+                if current_user.user_id == booking.staff_user_id
+                else "Client",
+            }
+        ],
     )
 
 
-@db.event.listens_for(TelehealthBookings, 'after_update', 'status')
+@db.event.listens_for(TelehealthBookings, "after_update", "status")
 def update_booking_status_history(mapper, connection, target):
     """
     Listens for any new status change
@@ -318,19 +328,23 @@ def update_booking_status_history(mapper, connection, target):
         booking = target
 
     if current_user_id:
-        reporter_role = ('Practitioner' if current_user_id == booking.staff_user_id else 'Client')
+        reporter_role = (
+            "Practitioner" if current_user_id == booking.staff_user_id else "Client"
+        )
     else:
         # if the status is updated through the task cleanup_unended_call or after a failed payment
-        reporter_role = 'System'
+        reporter_role = "System"
 
     connection.execute(
         insert(TelehealthBookingStatus),
-        [{
-            'status': booking.status,
-            'booking_id': booking.idx,
-            'reporter_id': current_user_id,
-            'reporter_role': reporter_role,
-        }],
+        [
+            {
+                "status": booking.status,
+                "booking_id": booking.idx,
+                "reporter_id": current_user_id,
+                "reporter_role": reporter_role,
+            }
+        ],
     )
 
 
@@ -339,7 +353,7 @@ class TelehealthBookingStatus(db.Model):
     Holds all status changes a booking goes through
     """
 
-    __tablename__ = 'TelehealthBookingStatus'
+    __tablename__ = "TelehealthBookingStatus"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -350,7 +364,7 @@ class TelehealthBookingStatus(db.Model):
 
     booking_id = db.Column(
         db.Integer,
-        db.ForeignKey('TelehealthBookings.idx', ondelete='CASCADE'),
+        db.ForeignKey("TelehealthBookings.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -360,17 +374,17 @@ class TelehealthBookingStatus(db.Model):
     """
 
     booking = db.relationship(
-        'TelehealthBookings',
+        "TelehealthBookings",
         uselist=False,
-        back_populates='status_history',
-        foreign_keys='TelehealthBookingStatus.booking_id',
+        back_populates="status_history",
+        foreign_keys="TelehealthBookingStatus.booking_id",
     )
     """
     Many-to-One relationship with TelehealthBookings, the full booking info object
 
     :type: :class:`TelehealthBookings` instance
     """
-    reporter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=True)
+    reporter_id = db.Column(db.Integer, db.ForeignKey("User.user_id"), nullable=True)
     """
     Reporter ID number, foreign key to User.user_id
 
@@ -417,7 +431,7 @@ class TelehealthMeetingRooms(BaseModel):
 
     booking_id = db.Column(
         db.Integer,
-        db.ForeignKey('TelehealthBookings.idx', ondelete='CASCADE'),
+        db.ForeignKey("TelehealthBookings.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -448,14 +462,16 @@ class TelehealthMeetingRooms(BaseModel):
     :type: str
     """
 
-    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    client_user_id = db.Column(
+        db.Integer, db.ForeignKey("User.user_id"), nullable=False
+    )
     """
     user_id of the client participant
 
     :type: int
     """
 
-    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    staff_user_id = db.Column(db.Integer, db.ForeignKey("User.user_id"), nullable=False)
     """
     user_id of the staff participant
 
@@ -483,7 +499,7 @@ class TelehealthStaffAvailability(BaseModelWithIdx):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('TelehealthStaffSettings.user_id', ondelete='CASCADE'),
+        db.ForeignKey("TelehealthStaffSettings.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -501,7 +517,7 @@ class TelehealthStaffAvailability(BaseModelWithIdx):
 
     booking_window_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete='CASCADE'),
+        db.ForeignKey("LookupBookingTimeIncrements.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -511,7 +527,7 @@ class TelehealthStaffAvailability(BaseModelWithIdx):
     """
 
     settings = db.relationship(
-        'TelehealthStaffSettings', uselist=False, back_populates='availability'
+        "TelehealthStaffSettings", uselist=False, back_populates="availability"
     )
     """
     Many to one relationshp with TelehealthStaffSettings
@@ -534,7 +550,7 @@ class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
 
     exception_booking_window_id_start_time = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete='CASCADE'),
+        db.ForeignKey("LookupBookingTimeIncrements.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -545,7 +561,7 @@ class TelehealthStaffAvailabilityExceptions(BaseModelWithIdx, UserIdFkeyMixin):
 
     exception_booking_window_id_end_time = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBookingTimeIncrements.idx', ondelete='CASCADE'),
+        db.ForeignKey("LookupBookingTimeIncrements.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -623,7 +639,7 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
 
     location_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupTerritoriesOfOperations.idx'),
+        db.ForeignKey("LookupTerritoriesOfOperations.idx"),
         nullable=True,
     )
     """
@@ -631,7 +647,9 @@ class TelehealthQueueClientPool(BaseModelWithIdx, UserIdFkeyMixin):
     :type: int, foreign key(LookupTerritoriesOfOperations.idx)
     """
 
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('PaymentMethods.idx'), nullable=True)
+    payment_method_id = db.Column(
+        db.Integer, db.ForeignKey("PaymentMethods.idx"), nullable=True
+    )
     """
     client payment method selected from PaymentMethods previously set up
 
@@ -644,11 +662,15 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     Table holding text, images or sound recording details about a booking
     """
 
-    __table_args__ = (db.UniqueConstraint('booking_id', ), )
+    __table_args__ = (
+        db.UniqueConstraint(
+            "booking_id",
+        ),
+    )
 
     booking_id = db.Column(
         db.Integer,
-        db.ForeignKey('TelehealthBookings.idx', ondelete='CASCADE'),
+        db.ForeignKey("TelehealthBookings.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -667,7 +689,7 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     images = db.Column(
         db.ARRAY(db.String(1024), dimensions=1),
         nullable=False,
-        server_default='{}',
+        server_default="{}",
     )
     """
     List of paths to images stored on S3.
@@ -682,14 +704,18 @@ class TelehealthBookingDetails(BaseModelWithIdx):
     :type: str
     """
 
-    reason_id = db.Column(db.Integer, db.ForeignKey('LookupVisitReasons.idx'), nullable=True)
+    reason_id = db.Column(
+        db.Integer, db.ForeignKey("LookupVisitReasons.idx"), nullable=True
+    )
     """
     Foreign key to idx of VisitReasons, nullable
 
     :type: int, foreignkey(LookupVisitReasons.idx)
     """
 
-    booking = db.relationship('TelehealthBookings', uselist=False, back_populates='booking_details')
+    booking = db.relationship(
+        "TelehealthBookings", uselist=False, back_populates="booking_details"
+    )
     """
     One-to-One relationship with TelehealthBookings
 
@@ -716,7 +742,7 @@ class TelehealthChatRooms(BaseModel):
 
     booking_id = db.Column(
         db.Integer,
-        db.ForeignKey('TelehealthBookings.idx', ondelete='CASCADE'),
+        db.ForeignKey("TelehealthBookings.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -725,7 +751,9 @@ class TelehealthChatRooms(BaseModel):
     :type: int, foreign key('TelehealthBookings.idx')
     """
 
-    booking = db.relationship('TelehealthBookings', uselist=False, back_populates='chat_room')
+    booking = db.relationship(
+        "TelehealthBookings", uselist=False, back_populates="chat_room"
+    )
     """
     One-to-One relationship with TelehealthBookings
 
@@ -753,14 +781,16 @@ class TelehealthChatRooms(BaseModel):
     :type: str
     """
 
-    client_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    client_user_id = db.Column(
+        db.Integer, db.ForeignKey("User.user_id"), nullable=False
+    )
     """
     user_id of the client participant
 
     :type: int
     """
 
-    staff_user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+    staff_user_id = db.Column(db.Integer, db.ForeignKey("User.user_id"), nullable=False)
     """
     user_id of the staff participant
 
@@ -792,14 +822,14 @@ class TelehealthStaffSettings(BaseModel):
 
     __table_args__ = (
         CheckConstraint(
-            '0 <= availability_horizon <= 52',
-            name='availability_horizon_range',
+            "0 <= availability_horizon <= 52",
+            name="availability_horizon_range",
         ),
     )
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
@@ -809,7 +839,7 @@ class TelehealthStaffSettings(BaseModel):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    auto_confirm = db.Column(db.Boolean, server_default='t')
+    auto_confirm = db.Column(db.Boolean, server_default="t")
     """
     Setting to determine if Staff member wants to auto confirm appointments
 
@@ -823,7 +853,7 @@ class TelehealthStaffSettings(BaseModel):
     :type: str
     """
 
-    availability_horizon = db.Column(db.Integer, nullable=False, server_default='2')
+    availability_horizon = db.Column(db.Integer, nullable=False, server_default="2")
     """
     How far out from the current week the practitioner wants to be available to be booked. An integer
     representing weeks. Must be 0-52. If set to 0, the practitioner cannot be booked.
@@ -832,7 +862,7 @@ class TelehealthStaffSettings(BaseModel):
     """
 
     availability = db.relationship(
-        'TelehealthStaffAvailability', uselist=True, back_populates='settings'
+        "TelehealthStaffAvailability", uselist=True, back_populates="settings"
     )
     """
     One to many relationship with staff availability

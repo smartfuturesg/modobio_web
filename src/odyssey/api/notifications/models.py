@@ -15,7 +15,7 @@ from odyssey.utils.constants import DB_SERVER_TIME
 class Notifications(db.Model):
     """General information about notifications."""
 
-    __tablename__ = 'Notifications'
+    __tablename__ = "Notifications"
 
     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -40,7 +40,7 @@ class Notifications(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=False,
     )
@@ -50,7 +50,7 @@ class Notifications(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.api.models.user.User.user_id>`
     """
 
-    user = db.relationship('User', uselist=False)
+    user = db.relationship("User", uselist=False)
     """
     User instance holding user data.
 
@@ -71,7 +71,7 @@ class Notifications(db.Model):
     :type: str
     """
 
-    severity = db.relationship('LookupNotificationSeverity')
+    severity = db.relationship("LookupNotificationSeverity")
     """
     Severity of this notification. Relationship with LookupNotificationSeverity holding text and color data.
 
@@ -80,7 +80,7 @@ class Notifications(db.Model):
 
     severity_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupNotificationSeverity.idx', ondelete='SET NULL'),
+        db.ForeignKey("LookupNotificationSeverity.idx", ondelete="SET NULL"),
     )
     """
     Id of the severity type of this notification.
@@ -97,14 +97,14 @@ class Notifications(db.Model):
     :type: :class:`datetime` or None
     """
 
-    read = db.Column(db.Boolean, server_default='f')
+    read = db.Column(db.Boolean, server_default="f")
     """
     Whether the user has read this notification.
 
     :type: bool
     """
 
-    deleted = db.Column(db.Boolean, server_default='f')
+    deleted = db.Column(db.Boolean, server_default="f")
     """
     Whether the user has deleted this notification. This will not remove the entry from
     the database, but can be used to hide this notification in a UI.
@@ -121,7 +121,7 @@ class Notifications(db.Model):
 
     notification_type_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupNotifications.notification_type_id', ondelete='cascade'),
+        db.ForeignKey("LookupNotifications.notification_type_id", ondelete="cascade"),
         nullable=False,
         unique=False,
     )
@@ -132,7 +132,7 @@ class Notifications(db.Model):
     """
 
     # Should have been called notification_type, but that needs to be set in schema.
-    notification_type_obj = db.relationship('LookupNotifications', uselist=False)
+    notification_type_obj = db.relationship("LookupNotifications", uselist=False)
     """
     LookupNotification instance holding notification type data linked to this notification.
 
@@ -165,7 +165,7 @@ class Notifications(db.Model):
 class NotificationsPushRegistration(db.Model):
     """Table for registering devices for push notifications."""
 
-    __tablename__ = 'NotificationsPushRegistration'
+    __tablename__ = "NotificationsPushRegistration"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -190,7 +190,7 @@ class NotificationsPushRegistration(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=False,
     )
@@ -200,7 +200,7 @@ class NotificationsPushRegistration(db.Model):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    user = db.relationship('User', uselist=False)
+    user = db.relationship("User", uselist=False)
     """
     User instance holding user data.
 

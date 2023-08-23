@@ -20,17 +20,19 @@ def build_es_indices():
     # clients = db.session.query_data(User, ClientInfo).filter_by(is_client=True, deleted=False).join(
     # ClientInfo).order_by(User.lastname.asc(), User.firstname.asc()).all()
     clients = (
-        db.session.query(User).filter_by(is_client=True, deleted=False).order_by(
-            User.lastname.asc(), User.firstname.asc()
-        ).all()
+        db.session.query(User)
+        .filter_by(is_client=True, deleted=False)
+        .order_by(User.lastname.asc(), User.firstname.asc())
+        .all()
     )
     staff = (
-        db.session.query(User).filter_by(is_staff=True, deleted=False).order_by(
-            User.lastname.asc(), User.firstname.asc()
-        ).all()
+        db.session.query(User)
+        .filter_by(is_staff=True, deleted=False)
+        .order_by(User.lastname.asc(), User.firstname.asc())
+        .all()
     )
-    queries.append(('clients', clients))
-    queries.append(('staff', staff))
+    queries.append(("clients", clients))
+    queries.append(("staff", staff))
 
     # Create two(2) searchable indices (called "clients" and "staff") from query_data
     def build_index(index_name: str, query_data: list):
@@ -44,11 +46,11 @@ def build_es_indices():
 
             action = (
                 '{"index":{"_index":"'
-                f'{index_name}'
+                f"{index_name}"
                 '", "_id":'
-                f'{_id}'
-                '}}\n'
-                f'{json.dumps(payload)}'
+                f"{_id}"
+                "}}\n"
+                f"{json.dumps(payload)}"
             )
 
             yield action
@@ -107,73 +109,77 @@ def update_index(user: dict, new_entry: bool):
     # updating index indexName when there's an event notification from
     # listening to the db.
 
-    _id = user['user_id']
-    client = user['is_client']
-    staff = user['is_staff']
+    _id = user["user_id"]
+    client = user["is_client"]
+    staff = user["is_staff"]
 
     try:
-        dob = user['dob'].date()
+        dob = user["dob"].date()
     except:
-        dob = user['dob']
+        dob = user["dob"]
 
     update_body = {
-        'script': {
-            'source': (
-                'ctx._source.firstname = params.firstname;           '
-                ' ctx._source.lastname = params.lastname;           '
-                ' ctx._source.phone_number = params.phone_number;           '
-                ' ctx._source.modobio_id = params.modobio_id;           '
-                ' ctx._source.email = params.email;            ctx._source.dob'
-                ' = params.dob;            ctx._source.user_id ='
-                ' params.user_id'
+        "script": {
+            "source": (
+                "ctx._source.firstname = params.firstname;           "
+                " ctx._source.lastname = params.lastname;           "
+                " ctx._source.phone_number = params.phone_number;           "
+                " ctx._source.modobio_id = params.modobio_id;           "
+                " ctx._source.email = params.email;            ctx._source.dob"
+                " = params.dob;            ctx._source.user_id ="
+                " params.user_id"
             ),
-            'lang': 'painless',
-            'params': {
-                'firstname': f"{user['firstname']}",
-                'lastname': f"{user['lastname']}",
-                'phone_number': f"{user['phone_number']}",
-                'email': f"{user['email']}",
-                'modobio_id': f"{user['modobio_id']}",
-                'dob': f'{dob}' if dob else dob,
-                'user_id': f'{_id}',
+            "lang": "painless",
+            "params": {
+                "firstname": f"{user['firstname']}",
+                "lastname": f"{user['lastname']}",
+                "phone_number": f"{user['phone_number']}",
+                "email": f"{user['email']}",
+                "modobio_id": f"{user['modobio_id']}",
+                "dob": f"{dob}" if dob else dob,
+                "user_id": f"{_id}",
             },
         }
     }
 
     if new_entry:  # in all usages as of 12/01/2022 new_entry is always False
         if client:
-            payload = update_body['script']['params']
-            body = ('{"index":{"_index":"clients", "_id":'
-                    f'{_id}'
-                    '}\n'
-                    f'{json.dumps(payload)}')
+            payload = update_body["script"]["params"]
+            body = (
+                '{"index":{"_index":"clients", "_id":'
+                f"{_id}"
+                "}\n"
+                f"{json.dumps(payload)}"
+            )
             es.bulk(body=body, refresh=True)
 
         if staff:  # What about if client and staff both???
-            payload = update_body['script']['params']
-            body = ('{"index":{"_index":"staff", "_id":'
-                    f'{_id}'
-                    '}\n'
-                    f'{json.dumps(payload)}')
+            payload = update_body["script"]["params"]
+            body = (
+                '{"index":{"_index":"staff", "_id":'
+                f"{_id}"
+                "}\n"
+                f"{json.dumps(payload)}"
+            )
             es.bulk(body=body, refresh=True)
 
     else:
         if client:
-            if not es.exists(index='clients', id=_id):
+            if not es.exists(index="clients", id=_id):
                 es.index(
-                    index='clients',
+                    index="clients",
                     id=_id,
-                    document=update_body['script']['params'],
+                    document=update_body["script"]["params"],
                 )
-            es.update(index='clients', id=_id, body=update_body, refresh=True)
+            es.update(index="clients", id=_id, body=update_body, refresh=True)
         if staff:
-            if not es.exists(index='staff', id=_id):
+            if not es.exists(index="staff", id=_id):
                 es.index(
-                    index='staff',
+                    index="staff",
                     id=_id,
-                    document=update_body['script']['params'],
+                    document=update_body["script"]["params"],
                 )
-            es.update(index='staff', id=_id, body=update_body, refresh=True)
+            es.update(index="staff", id=_id, body=update_body, refresh=True)
 
 
 def delete_from_index(user_id: int):
@@ -186,8 +192,8 @@ def delete_from_index(user_id: int):
     if not es:
         return
 
-    if es.exists(index='clients', id=user_id):
-        es.delete(index='clients', id=user_id, refresh=True)
+    if es.exists(index="clients", id=user_id):
+        es.delete(index="clients", id=user_id, refresh=True)
 
-    if es.exists(index='staff', id=user_id):
-        es.delete(index='staff', id=user_id, refresh=True)
+    if es.exists(index="staff", id=user_id):
+        es.delete(index="staff", id=user_id, refresh=True)

@@ -21,7 +21,7 @@ class PowerAssessment(db.Model):
     performed on a Keiser machine with pneumatic resistance.
     """
 
-    __tablename__ = 'TrainerPowerAssessment'
+    __tablename__ = "TrainerPowerAssessment"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -53,7 +53,7 @@ class PowerAssessment(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -249,7 +249,7 @@ class StrengthAssessment(db.Model):
     is measured for the upper and lower body.
     """
 
-    __tablename__ = 'TrainerStrengthAssessment'
+    __tablename__ = "TrainerStrengthAssessment"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -281,7 +281,7 @@ class StrengthAssessment(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -593,7 +593,7 @@ class MovementAssessment(db.Model):
     This set of tests assesses movement through squats and forward bends.
     """
 
-    __tablename__ = 'TrainerMovementAssessment'
+    __tablename__ = "TrainerMovementAssessment"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -625,7 +625,7 @@ class MovementAssessment(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -757,7 +757,7 @@ class HeartAssessment(db.Model):
     Assessment of heartrate and breathing capabilities.
     """
 
-    __tablename__ = 'TrainerHeartAssessment'
+    __tablename__ = "TrainerHeartAssessment"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -789,7 +789,7 @@ class HeartAssessment(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -882,7 +882,7 @@ class MoxyAssessment(db.Model):
     alternative moxy test, with the test described in the :attr:`notes`.
     """
 
-    __tablename__ = 'TrainerMoxyAssessment'
+    __tablename__ = "TrainerMoxyAssessment"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -914,7 +914,7 @@ class MoxyAssessment(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -1056,7 +1056,7 @@ class MoxyRipTest(db.Model):
     a moxy sensor.
     """
 
-    __tablename__ = 'TrainerMoxyRipTest'
+    __tablename__ = "TrainerMoxyRipTest"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -1088,7 +1088,7 @@ class MoxyRipTest(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -1469,7 +1469,7 @@ class LungAssessment(db.Model):
     The total exhaled volume per minute is calculated.
     """
 
-    __tablename__ = 'TrainerLungAssessment'
+    __tablename__ = "TrainerLungAssessment"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -1501,7 +1501,7 @@ class LungAssessment(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -1565,9 +1565,9 @@ class FitnessQuestionnaire(db.Model):
     first sign up to Modo Bio.
     """
 
-    __tablename__ = 'TrainerFitnessQuestionnaire'
+    __tablename__ = "TrainerFitnessQuestionnaire"
 
-    displayname = 'Fitness questionnaire'
+    displayname = "Fitness questionnaire"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -1578,7 +1578,7 @@ class FitnessQuestionnaire(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -1608,7 +1608,9 @@ class FitnessQuestionnaire(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    physical_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
+    physical_goals = db.Column(
+        db.ARRAY(db.String), nullable=True, server_default="{'other'}"
+    )
     """
     The goals selected by the client from a predefined list of goals.
     Must be one or more of:
@@ -1642,7 +1644,9 @@ class FitnessQuestionnaire(db.Model):
     :type: int
     """
 
-    trainer_expectations = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
+    trainer_expectations = db.Column(
+        db.ARRAY(db.String), nullable=True, server_default="{'other'}"
+    )
     """
     The expectations the client has for the trainer, selected from a
     predefined list of expectations. Must be one or more of:
@@ -1656,7 +1660,9 @@ class FitnessQuestionnaire(db.Model):
     :type: str
     """
 
-    lifestyle_goals = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
+    lifestyle_goals = db.Column(
+        db.ARRAY(db.String), nullable=True, server_default="{'other'}"
+    )
     """
     The lifestyle goals the client has. Selected from a predefined list
     of goals. Must be one or more of:
@@ -1697,7 +1703,9 @@ class FitnessQuestionnaire(db.Model):
     :type: int
     """
 
-    stress_sources = db.Column(db.ARRAY(db.String), nullable=True, server_default="{'other'}")
+    stress_sources = db.Column(
+        db.ARRAY(db.String), nullable=True, server_default="{'other'}"
+    )
     """
     Which sources cause the most stress. Selected from a predefined list
     of stress sources. Must be one or more of:

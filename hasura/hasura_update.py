@@ -57,40 +57,43 @@ from default_permissions import (
     staff_default_select_permission,
     staff_default_insert_permission,
     staff_default_update_permission,
-    staff_default_delete_permission
+    staff_default_delete_permission,
 )
 from odyssey.config import database_uri
 
 # File locations
 here = pathlib.Path(__file__).parent
-hasura_tables_file = here / 'metadata' / 'tables.yaml'
-hasura_no_track_file = here / 'metadata' / 'tables-no-track.yaml'
-hasura_read_only_file = here / 'metadata' / 'tables-read-only.yaml'
+hasura_tables_file = here / "metadata" / "tables.yaml"
+hasura_no_track_file = here / "metadata" / "tables-no-track.yaml"
+hasura_read_only_file = here / "metadata" / "tables-read-only.yaml"
+
 
 def first_letter(string: str) -> int:
-    """ Return the index of the first non-underscore character in a string. """
+    """Return the index of the first non-underscore character in a string."""
     n = 0
-    while n < len(string) and string[n] == '_':
+    while n < len(string) and string[n] == "_":
         n += 1
     return n
 
-def pascal(string: str, preserve_leading: bool=True) -> str:
-    """ Convert a string from snake_case to PascalCase.
+
+def pascal(string: str, preserve_leading: bool = True) -> str:
+    """Convert a string from snake_case to PascalCase.
 
     Preserves leading underscores, unless preserve_leading=False.
     """
     if not string:
         return string
 
-    p = string.replace('_', ' ').title().replace(' ', '')
+    p = string.replace("_", " ").title().replace(" ", "")
     n = 0
     if preserve_leading:
         n = first_letter(string)
 
-    return '_' * n + p
+    return "_" * n + p
 
-def camel(string: str, preserve_leading: bool=True) -> str:
-    """ Convert a string from snake_case to camelCase.
+
+def camel(string: str, preserve_leading: bool = True) -> str:
+    """Convert a string from snake_case to camelCase.
 
     Preserves leading underscores, unless preserve_leading=False.
     """
@@ -100,10 +103,11 @@ def camel(string: str, preserve_leading: bool=True) -> str:
     if preserve_leading:
         n = first_letter(string)
 
-    return '_' * n + p[n].lower() + p[n+1:]
+    return "_" * n + p[n].lower() + p[n + 1 :]
 
-def combine_camel(*words, preserve_leading: bool=True) -> str:
-    """ Combine multiple words into a single camelCase string.
+
+def combine_camel(*words, preserve_leading: bool = True) -> str:
+    """Combine multiple words into a single camelCase string.
 
     Words not containing underscores are assumed to already be in
     camelCase or PascalCase and their internal case (all letters
@@ -115,7 +119,7 @@ def combine_camel(*words, preserve_leading: bool=True) -> str:
     final = []
     for w, word in enumerate(words):
         n = first_letter(word)
-        if '_' in word[n:]:
+        if "_" in word[n:]:
             if w == 0:
                 conv = camel(word, preserve_leading=preserve_leading)
             else:
@@ -124,11 +128,12 @@ def combine_camel(*words, preserve_leading: bool=True) -> str:
             if w == 0:
                 if not preserve_leading:
                     n = 0
-                conv = word[n].lower() + word[n + 1:]
+                conv = word[n].lower() + word[n + 1 :]
             else:
                 conv = word
         final.append(conv)
-    return ''.join(final)
+    return "".join(final)
+
 
 # Database
 db_uri = database_uri()
@@ -149,7 +154,7 @@ hasura_tables_idx = {}
 
 # First pass: track tables, add permissions
 for schema in sorted(inspector.get_schema_names()):
-    if schema in ('hdb_catalog', 'hdb_views', 'information_schema'):
+    if schema in ("hdb_catalog", "hdb_views", "information_schema"):
         continue
 
     # Views are tables in metadata
@@ -161,18 +166,16 @@ for schema in sorted(inspector.get_schema_names()):
             continue
         # Start tracking table by adding it to metadata
         table = {
-            'table': {
-                'schema': schema,
-                'name': tablename},
-            'configuration': {
-                'custom_column_names': {}},
-            'object_relationships': [],
-            'array_relationships': []}
+            "table": {"schema": schema, "name": tablename},
+            "configuration": {"custom_column_names": {}},
+            "object_relationships": [],
+            "array_relationships": [],
+        }
 
         # Add custom column names
         for column in inspector.get_columns(tablename, schema=schema):
-            colname = column['name']
-            table['configuration']['custom_column_names'][colname] = camel(colname)
+            colname = column["name"]
+            table["configuration"]["custom_column_names"][colname] = camel(colname)
 
         ##
         # Add table permissions here
@@ -189,84 +192,121 @@ for schema in sorted(inspector.get_schema_names()):
         # columns which may be selected or changed (update/insert)
         # filtering of columns is done in functions found in hasura/default_permissions.py
         permissible_columns = [
-            col['name'] for col in inspector.get_columns(tablename, schema=schema)]
+            col["name"] for col in inspector.get_columns(tablename, schema=schema)
+        ]
 
         # TODO: 5.3.21 Staff and clients may only select tables for the logged-in user.
         # further permissions are currently commented out and may be updated or removed in the future
         # Tables which hold client-specific user data
         allowed_prefixes = [
-            'Client',
-            'Medical',
-            'Notifications',
-            'PT',
-            'Trainer',
-            'User',
-            'Wearables']
+            "Client",
+            "Medical",
+            "Notifications",
+            "PT",
+            "Trainer",
+            "User",
+            "Wearables",
+        ]
 
-        if (any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
-            and any(tablename.startswith(prefix) for prefix in allowed_prefixes)):
-
-            select_permission_client = client_default_select_permission(columns=permissible_columns)
-            select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
+        if any(
+            col in permissible_columns
+            for col in ["user_id", "client_user_id", "staff_user_id"]
+        ) and any(tablename.startswith(prefix) for prefix in allowed_prefixes):
+            select_permission_client = client_default_select_permission(
+                columns=permissible_columns
+            )
+            select_permission_staff = staff_default_select_permission(
+                columns=permissible_columns, filtered=True
+            )
 
             if tablename not in hasura_read_only:
-                insert_permission_client = client_default_insert_permission(columns=permissible_columns)
-                update_permission_client = client_default_update_permission(columns=permissible_columns)
+                insert_permission_client = client_default_insert_permission(
+                    columns=permissible_columns
+                )
+                update_permission_client = client_default_update_permission(
+                    columns=permissible_columns
+                )
                 # delete_permission_client = client_default_delete_permission(columns=permissible_columns)
 
-                insert_permission_staff = staff_default_insert_permission(columns=permissible_columns)
-                update_permission_staff = staff_default_update_permission(columns=permissible_columns)
+                insert_permission_staff = staff_default_insert_permission(
+                    columns=permissible_columns
+                )
+                update_permission_staff = staff_default_update_permission(
+                    columns=permissible_columns
+                )
                 # delete_permission_staff = staff_default_delete_permission(columns=permissible_columns)
 
-            if tablename.startswith('Wearables'):
+            if tablename.startswith("Wearables"):
                 # Do not filter by user_id, staff needs access to client data
                 select_permission_staff = staff_default_select_permission(
-                    columns=permissible_columns,
-                    filtered=False)
+                    columns=permissible_columns, filtered=False
+                )
                 insert_permission_staff = staff_default_insert_permission(
-                    columns=permissible_columns,
-                    filtered=False)
+                    columns=permissible_columns, filtered=False
+                )
                 update_permission_staff = staff_default_update_permission(
-                    columns=permissible_columns,
-                    filtered=False)
+                    columns=permissible_columns, filtered=False
+                )
 
         # Tables here require API in order to for the FE to work with.
         # We will allow select access only for the following.
-        elif (any(col in permissible_columns for col in ['user_id','client_user_id', 'staff_user_id'])
-              and any(tablename.startswith(prefix) for prefix in ['Telehealth'])):
-
-            select_permission_client = client_default_select_permission(columns=permissible_columns)
-            select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
+        elif any(
+            col in permissible_columns
+            for col in ["user_id", "client_user_id", "staff_user_id"]
+        ) and any(tablename.startswith(prefix) for prefix in ["Telehealth"]):
+            select_permission_client = client_default_select_permission(
+                columns=permissible_columns
+            )
+            select_permission_staff = staff_default_select_permission(
+                columns=permissible_columns, filtered=True
+            )
 
         # Lookup tables
         # we still have a few medical lookup tables so the Medical prefix is included here
-        elif (not any(col in permissible_columns for col in ['user_id', 'client_user_id', 'staff_user_id'])
-              and any(tablename.startswith(prefix) for prefix in ['Lookup', 'Medical'])):
-
+        elif not any(
+            col in permissible_columns
+            for col in ["user_id", "client_user_id", "staff_user_id"]
+        ) and any(tablename.startswith(prefix) for prefix in ["Lookup", "Medical"]):
             select_permission_client = default_unfiltered_select_permission(
-                columns=permissible_columns,
-                user_type='client')
+                columns=permissible_columns, user_type="client"
+            )
 
             select_permission_staff = default_unfiltered_select_permission(
-                columns=permissible_columns,
-                user_type='staff')
+                columns=permissible_columns, user_type="staff"
+            )
 
         # staff specific data
-        elif any(tablename.startswith(prefix) for prefix in ['Staff', 'System']):
-            select_permission_client = client_default_select_permission(columns=permissible_columns)
-            select_permission_staff = staff_default_select_permission(columns=permissible_columns, filtered=True)
+        elif any(tablename.startswith(prefix) for prefix in ["Staff", "System"]):
+            select_permission_client = client_default_select_permission(
+                columns=permissible_columns
+            )
+            select_permission_staff = staff_default_select_permission(
+                columns=permissible_columns, filtered=True
+            )
 
-        table['select_permissions'] = [
-            permission for permission in [select_permission_client, select_permission_staff] if permission]
-        table['insert_permissions'] = [
-            permission for permission in [insert_permission_client, insert_permission_staff] if permission]
-        table['update_permissions'] = [
-            permission for permission in [update_permission_client, update_permission_staff] if permission]
-        table['delete_permissions'] = [
-            permission for permission in [delete_permission_client, delete_permission_staff] if permission]
+        table["select_permissions"] = [
+            permission
+            for permission in [select_permission_client, select_permission_staff]
+            if permission
+        ]
+        table["insert_permissions"] = [
+            permission
+            for permission in [insert_permission_client, insert_permission_staff]
+            if permission
+        ]
+        table["update_permissions"] = [
+            permission
+            for permission in [update_permission_client, update_permission_staff]
+            if permission
+        ]
+        table["delete_permissions"] = [
+            permission
+            for permission in [delete_permission_client, delete_permission_staff]
+            if permission
+        ]
 
         hasura_tables.append(table)
-        hasura_tables_idx[f'{schema}-{tablename}'] = len(hasura_tables) - 1
+        hasura_tables_idx[f"{schema}-{tablename}"] = len(hasura_tables) - 1
 
 # Second pass: track foreign keys
 
@@ -286,14 +326,14 @@ for table in hasura_tables:
     #
     # Multiple object-array combos is many-to-many.
 
-    schema = table['table']['schema']
-    tablename = table['table']['name']
+    schema = table["table"]["schema"]
+    tablename = table["table"]["name"]
 
     # Get list of all columns with unique contraint.
     uniq = set()
     for u in inspector.get_unique_constraints(tablename, schema=schema):
-        uname = [f'{tablename}'] + [col for col in u['column_names']]
-        uniq.add('-'.join(uname))
+        uname = [f"{tablename}"] + [col for col in u["column_names"]]
+        uniq.add("-".join(uname))
 
     # Hasura adds relationships in order of column definition.
     # TODO: this is not true for the situation where multiple foreign keys
@@ -305,21 +345,21 @@ for table in hasura_tables:
     foreign_keys_ordered = []
     for col in columns:
         for fk in foreign_keys:
-            if col['name'] in fk['constrained_columns']:
+            if col["name"] in fk["constrained_columns"]:
                 foreign_keys_ordered.append(fk)
 
     for fk in foreign_keys_ordered:
         # Foreign names and tables
-        f_schema = fk['referred_schema']
-        f_tablename = fk['referred_table']
-        f_schema_table = f'{f_schema}-{f_tablename}'
+        f_schema = fk["referred_schema"]
+        f_tablename = fk["referred_table"]
+        f_schema_table = f"{f_schema}-{f_tablename}"
         f_idx = hasura_tables_idx[f_schema_table]
         f_table = hasura_tables[f_idx]
 
         # TODO: What to do when either one of the sides of a
         # foreign key involves more than 1 column?
-        f_column = fk['referred_columns'][0]
-        column = fk['constrained_columns'][0]
+        f_column = fk["referred_columns"][0]
+        column = fk["constrained_columns"][0]
 
         ### Referring side
 
@@ -329,98 +369,99 @@ for table in hasura_tables:
         #     exists on this table: foreignTableByForeignColumn
         #     where foreignTable is the full (non-singularized) name.
         relationship_name = f_tablename
-        if f_tablename.endswith('ies'):
-            relationship_name = f_tablename[:-3] + 'y'
-        elif f_tablename.endswith('s'):
+        if f_tablename.endswith("ies"):
+            relationship_name = f_tablename[:-3] + "y"
+        elif f_tablename.endswith("s"):
             relationship_name = f_tablename[:-1]
 
-        idx_name = f'{tablename}-{relationship_name}'
+        idx_name = f"{tablename}-{relationship_name}"
         if idx_name in relationship_names:
-            relationship_name = combine_camel(f_tablename, 'By', column)
-            idx_name = f'{tablename}-{relationship_name}'
+            relationship_name = combine_camel(f_tablename, "By", column)
+            idx_name = f"{tablename}-{relationship_name}"
 
         relationship_names.add(idx_name)
 
         # Referring side, always object
         obj = {
-            'name': relationship_name,
-            'using': {
-                'foreign_key_constraint_on': column}}
+            "name": relationship_name,
+            "using": {"foreign_key_constraint_on": column},
+        }
 
-        table['object_relationships'].append(obj)
+        table["object_relationships"].append(obj)
 
         ### Referred side
 
         # Forced one-to-one relationship.
-        if f'{tablename}-{column}' in uniq:
+        if f"{tablename}-{column}" in uniq:
             # Set unique name for object relationship; sides have switched.
             relationship_name = tablename
-            if tablename.endswith('ies'):
-                relationship_name = tablename[:-3] + 'y'
-            elif tablename.endswith('s'):
+            if tablename.endswith("ies"):
+                relationship_name = tablename[:-3] + "y"
+            elif tablename.endswith("s"):
                 relationship_name = tablename[:-1]
 
-            idx_name = f'{f_tablename}-{relationship_name}'
+            idx_name = f"{f_tablename}-{relationship_name}"
             if idx_name in relationship_names:
-                relationship_name = combine_camel(tablename, 'By', column)
-                idx_name = f'{f_tablename}-{relationship_name}'
+                relationship_name = combine_camel(tablename, "By", column)
+                idx_name = f"{f_tablename}-{relationship_name}"
 
             relationship_names.add(idx_name)
 
             obj = {
-                'name': relationship_name,
-                'using': {
-                    'manual_configuration': {
-                        'remote_table': {
-                            'schema': schema,
-                            'name': tablename},
-                        'column_mapping': {
-                            f_column: column}}}}
+                "name": relationship_name,
+                "using": {
+                    "manual_configuration": {
+                        "remote_table": {"schema": schema, "name": tablename},
+                        "column_mapping": {f_column: column},
+                    }
+                },
+            }
 
-            f_table['object_relationships'].append(obj)
+            f_table["object_relationships"].append(obj)
         else:
             # Set unique name for array relationship; pluralize first.
             relationship_name = tablename
-            if tablename.endswith('y'):
-                relationship_name = tablename[:-1] + 'ies'
-            elif not tablename.endswith('s'):
-                relationship_name += 's'
+            if tablename.endswith("y"):
+                relationship_name = tablename[:-1] + "ies"
+            elif not tablename.endswith("s"):
+                relationship_name += "s"
 
-            idx_name = f'{f_tablename}-{relationship_name}'
+            idx_name = f"{f_tablename}-{relationship_name}"
             if idx_name in relationship_names:
-                relationship_name = combine_camel(tablename, 'By', column)
-                idx_name = f'{f_tablename}-{relationship_name}'
+                relationship_name = combine_camel(tablename, "By", column)
+                idx_name = f"{f_tablename}-{relationship_name}"
 
             relationship_names.add(idx_name)
 
             arr = {
-                'name': relationship_name,
-                'using': {
-                    'foreign_key_constraint_on': {
-                        'column': column,
-                        'table': {
-                            'schema': schema,
-                            'name': tablename}}}}
+                "name": relationship_name,
+                "using": {
+                    "foreign_key_constraint_on": {
+                        "column": column,
+                        "table": {"schema": schema, "name": tablename},
+                    }
+                },
+            }
 
-            f_table['array_relationships'].append(arr)
+            f_table["array_relationships"].append(arr)
 
 # Third pass: remove empty, sort non-empty
 for table in hasura_tables:
-    if not table['array_relationships']:
-        table.pop('array_relationships')
+    if not table["array_relationships"]:
+        table.pop("array_relationships")
     else:
-        table['array_relationships'].sort(key=lambda r: r['name'])
+        table["array_relationships"].sort(key=lambda r: r["name"])
 
-    if not table['object_relationships']:
-        table.pop('object_relationships')
+    if not table["object_relationships"]:
+        table.pop("object_relationships")
     else:
-        table['object_relationships'].sort(key=lambda r: r['name'])
+        table["object_relationships"].sort(key=lambda r: r["name"])
 
-    if table['configuration']:
-        if not table['configuration']['custom_column_names']:
-            table['configuration'].pop('custom_column_names')
-            if not table['configuration']:
-                table.pop('configuration')
+    if table["configuration"]:
+        if not table["configuration"]["custom_column_names"]:
+            table["configuration"].pop("custom_column_names")
+            if not table["configuration"]:
+                table.pop("configuration")
 
-with hasura_tables_file.open(mode='wt') as fh:
+with hasura_tables_file.open(mode="wt") as fh:
     yaml.dump(hasura_tables, stream=fh, sort_keys=False, default_flow_style=False)

@@ -9,7 +9,7 @@ import pathlib
 # Code copied from werkzeug v2.1.2. Remove on next update of flask-restx.
 import werkzeug.routing
 
-if not hasattr(werkzeug.routing, 'parse_rule'):
+if not hasattr(werkzeug.routing, "parse_rule"):
     import re
 
     _rule_re = re.compile(
@@ -42,19 +42,19 @@ if not hasattr(werkzeug.routing, 'parse_rule'):
             if m is None:
                 break
             data = m.groupdict()
-            if data['static']:
-                yield None, None, data['static']
-            variable = data['variable']
-            converter = data['converter'] or 'default'
+            if data["static"]:
+                yield None, None, data["static"]
+            variable = data["variable"]
+            converter = data["converter"] or "default"
             if variable in used_names:
-                raise ValueError(f'variable name {variable!r} used twice.')
+                raise ValueError(f"variable name {variable!r} used twice.")
             used_names.add(variable)
-            yield converter, data['args'] or None, variable
+            yield converter, data["args"] or None, variable
             pos = m.end()
         if pos < end:
             remaining = rule[pos:]
-            if '>' in remaining or '<' in remaining:
-                raise ValueError(f'malformed url rule: {rule!r}')
+            if ">" in remaining or "<" in remaining:
+                raise ValueError(f"malformed url rule: {rule!r}")
             yield None, None, remaining
 
     werkzeug.routing.parse_rule = _parse_rule
@@ -89,18 +89,12 @@ logger = logging.getLogger(__name__)
 # https://swagger.io/docs/specification/2-0/authentication/api-keys/
 
 authorizations = {
-    'apikey': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    },
-    'password': {
-        'type': 'basic'
-    },
+    "apikey": {"type": "apiKey", "in": "header", "name": "Authorization"},
+    "password": {"type": "basic"},
 }
 
-bp = Blueprint('api', __name__)
-api = Api(bp, authorizations=authorizations, security='apikey')
+bp = Blueprint("api", __name__)
+api = Api(bp, authorizations=authorizations, security="apikey")
 
 from odyssey.api.client_services.routes import ns
 
@@ -185,17 +179,17 @@ api.add_namespace(ns)
 # V2 of the API, only wearables for now, expand for release 2.0.0.
 # Loading mechanism backported from release 2.0.0.
 
-bp_v2 = Blueprint('api_v2', __name__)
-api_v2 = Api(bp_v2, authorizations=authorizations, security='apikey')
+bp_v2 = Blueprint("api_v2", __name__)
+api_v2 = Api(bp_v2, authorizations=authorizations, security="apikey")
 
 here = pathlib.Path(__file__).parent
-namespaces = here.glob('**/routes.py')
+namespaces = here.glob("**/routes.py")
 
 for namespace in namespaces:
-    loader = importlib.machinery.SourceFileLoader('routes', namespace.as_posix())
+    loader = importlib.machinery.SourceFileLoader("routes", namespace.as_posix())
     spec = importlib.util.spec_from_loader(loader.name, loader)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    if hasattr(module, 'ns_v2'):
+    if hasattr(module, "ns_v2"):
         api_v2.add_namespace(module.ns_v2)

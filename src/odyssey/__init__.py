@@ -35,7 +35,7 @@ conf = Config()
 if conf.LOG_FORMAT_JSON:
     formatter = JsonFormatter()
 else:
-    fmt = '%(levelname)-8s - %(asctime)s - %(name)s - %(message)s'
+    fmt = "%(levelname)-8s - %(asctime)s - %(name)s - %(message)s"
     formatter = logging.Formatter(fmt=fmt)
 
 handler = logging.StreamHandler()
@@ -56,30 +56,32 @@ if not logger.hasHandlers():
 # import pprint
 # pprint.pprint(logging.root.manager.loggerDict)
 
-for name in ('sqlalchemy', 'flask_cors', 'werkzeug'):
+for name in ("sqlalchemy", "flask_cors", "werkzeug"):
     logging.getLogger(name=name).setLevel(conf.LOG_LEVEL)
 
 log_level_num = logging.getLevelName(conf.LOG_LEVEL)
 
 # google api client for validating subscriptions
-logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.WARN)
+logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.WARN)
 
 # SQLAlchemy and elasticsearch are too verbose, fine tune several loggers.
 if log_level_num < logging.WARN:
-    logging.getLogger('elasticsearch').setLevel(logging.WARN)
-    logging.getLogger('sqlalchemy.orm.mapper.Mapper').setLevel(logging.WARN)
-    logging.getLogger('sqlalchemy.orm.relationships.RelationshipProperty').setLevel(logging.WARN)
-    logging.getLogger('sqlalchemy.orm.strategies.LazyLoader').setLevel(logging.WARN)
+    logging.getLogger("elasticsearch").setLevel(logging.WARN)
+    logging.getLogger("sqlalchemy.orm.mapper.Mapper").setLevel(logging.WARN)
+    logging.getLogger("sqlalchemy.orm.relationships.RelationshipProperty").setLevel(
+        logging.WARN
+    )
+    logging.getLogger("sqlalchemy.orm.strategies.LazyLoader").setLevel(logging.WARN)
 
 if log_level_num < logging.INFO:
-    logging.getLogger('sqlalchemy.orm.path_registry').setLevel(logging.INFO)
-    logging.getLogger('sqlalchemy.pool').setLevel(logging.INFO)
+    logging.getLogger("sqlalchemy.orm.path_registry").setLevel(logging.INFO)
+    logging.getLogger("sqlalchemy.pool").setLevel(logging.INFO)
 
     # **WARNING**: sqlalchemy.engine.Engine at DEBUG level logs every row
     # stored in/fetched from DB, including password hashes. Don't ever do that.
     # If you must see what's going on while developing, comment this out.
     # Otherwise, keep this at INFO level.
-    logging.getLogger('sqlalchemy.engine.Engine').setLevel(logging.INFO)
+    logging.getLogger("sqlalchemy.engine.Engine").setLevel(logging.INFO)
 
 # Instantiate Flask extensions.
 db = SQLAlchemy()
@@ -115,9 +117,9 @@ def create_app():
     :mod:`odyssey.config` and :mod:`odyssey.defaults`.
     """
     # Temporarily quiet login function
-    logging.getLogger(name='odyssey.utils.auth').setLevel(logging.INFO)
+    logging.getLogger(name="odyssey.utils.auth").setLevel(logging.INFO)
 
-    app = Flask(__name__, static_folder='static')
+    app = Flask(__name__, static_folder="static")
 
     # Extended JSON (de)serialization.
     # TODO: not yet ready for primetime. Breaks too many things.
@@ -168,11 +170,11 @@ def create_app():
 
     # api._doc or Api(doc=...) is not True/False,
     # it is 'path' (default '/') or False to disable.
-    if not app.config['SWAGGER_DOC']:
+    if not app.config["SWAGGER_DOC"]:
         api._doc = False
         api_v2._doc = False
-    api.version = app.config['VERSION_STRING']
-    api_v2.version = app.config['VERSION_STRING']
+    api.version = app.config["VERSION_STRING"]
+    api_v2.version = app.config["VERSION_STRING"]
 
     # Register development-only endpoints.
     if app.debug:
@@ -188,17 +190,19 @@ def create_app():
     # Api is registered through a blueprint, Api.init_app() is not needed.
     # https://flask-restx.readthedocs.io/en/latest/scaling.html#use-with-blueprints
     app.register_blueprint(bp)
-    app.register_blueprint(bp_v2, url_prefix='/v2')
+    app.register_blueprint(bp_v2, url_prefix="/v2")
 
     # Elasticsearch setup.
     app.elasticsearch = None
-    if app.config['ELASTICSEARCH_URL']:
-        app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']])
+    if app.config["ELASTICSEARCH_URL"]:
+        app.elasticsearch = Elasticsearch([app.config["ELASTICSEARCH_URL"]])
         if not app.testing:
             with app.app_context():
                 # action.destructive_requires_namesetting defaults to true in v8,
                 # which disallows use of wildcards or _all.
-                app.elasticsearch.indices.delete(index='clients,staff', ignore_unavailable=True)
+                app.elasticsearch.indices.delete(
+                    index="clients,staff", ignore_unavailable=True
+                )
                 from odyssey.utils import search
 
                 try:
@@ -206,10 +210,10 @@ def create_app():
                 except ProgrammingError as err:
                     # ProgrammingError wraps lower level errors, in this case a
                     # psycopg2.errors.UndefinedTable error. Ignore UndefinedTable error.
-                    if 'UndefinedTable' not in str(err):
+                    if "UndefinedTable" not in str(err):
                         raise err
     # mongo db
-    if app.config['MONGO_URI']:
+    if app.config["MONGO_URI"]:
         mongo.init_app(app)
 
         # Wearables collection needs non-standard option for
@@ -221,7 +225,7 @@ def create_app():
         )
 
         try:
-            mongo.db.create_collection('wearables', codec_options=co)
+            mongo.db.create_collection("wearables", codec_options=co)
         except CollectionInvalid:
             # Already exists
             pass
@@ -230,16 +234,16 @@ def create_app():
         # Does not fail if already exists.
         mongo.db.wearables.create_index(
             [
-                ('user_id', ASCENDING),
-                ('wearable', ASCENDING),
-                ('timestamp', DESCENDING),
+                ("user_id", ASCENDING),
+                ("wearable", ASCENDING),
+                ("timestamp", DESCENDING),
             ],
-            name='user_id-wearable-timestamp-index',
+            name="user_id-wearable-timestamp-index",
             unique=True,
         )
 
     # Reset login function log level
-    logging.getLogger(name='odyssey.utils.auth').setLevel(conf.LOG_LEVEL)
+    logging.getLogger(name="odyssey.utils.auth").setLevel(conf.LOG_LEVEL)
 
     # Print all config settings to debug, in DEV only.
     if app.debug:
@@ -285,16 +289,16 @@ def _update(self, other):
             self_type = class_mapper(type(self))
             other_type = class_mapper(type(other))
         except sqlalchemy.orm.exc.UnmappedClassError:
-            raise TypeError(f'{other!r} is not a dict or sqlalchemy model.')
+            raise TypeError(f"{other!r} is not a dict or sqlalchemy model.")
 
         if self_type != other_type:
             raise ValueError(
-                f'Trying to update an instance of {self_type.class_} '
-                f'with an instance of {other_type.class_}'
+                f"Trying to update an instance of {self_type.class_} "
+                f"with an instance of {other_type.class_}"
             )
 
         for k, v in other.__dict__.items():
-            if k.startswith('_sa'):
+            if k.startswith("_sa"):
                 continue
             setattr(self, k, v)
 
@@ -312,6 +316,7 @@ def init_celery(app=None):
 
     class ContextTask(celery.Task):
         """Make celery tasks work with Flask app context"""
+
         def __call__(self, *args, **kwargs):
             with app.app_context():
                 return self.run(*args, **kwargs)

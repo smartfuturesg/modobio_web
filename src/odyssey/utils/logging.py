@@ -21,16 +21,17 @@ def audit(self, msg, *args, **kwargs):
 
 
 logging.Logger.audit = audit
-logging.addLevelName(audit_level, 'AUDIT')
+logging.addLevelName(audit_level, "AUDIT")
 logging.captureWarnings(True)
 logging.Formatter.converter = time.gmtime
-logging.Formatter.default_msec_format = '%s.%03dZ'
+logging.Formatter.default_msec_format = "%s.%03dZ"
 
 
 class JsonFormatter(logging.Formatter):
     """Format log messages as JSON."""
+
     def __init__(self):
-        super().__init__(fmt='%(message)s')
+        super().__init__(fmt="%(message)s")
 
     def usesTime(self) -> bool:
         """Returns whether ``format()`` uses time.
@@ -64,23 +65,23 @@ class JsonFormatter(logging.Formatter):
             - error: traceback of error
             - trace: traceback of logger, only useful when debugging logging and error handling
         """
-        error = ''
+        error = ""
         if record.exc_info:
             error = self.formatException(record.exc_info)
 
-        trace = ''
+        trace = ""
         if record.stack_info:
             trace = self.formatStack(record.stack_info)
 
         out = {
-            'level': record.levelname,
-            'numlevel': record.levelno,
-            'name': record.name,
-            'timestamp': self.formatTime(record, self.datefmt),
-            'message': record.getMessage(),
-            'path': record.pathname,
-            'line': record.lineno,
-            'error': error,
-            'trace': trace,
+            "level": record.levelname,
+            "numlevel": record.levelno,
+            "name": record.name,
+            "timestamp": self.formatTime(record, self.datefmt),
+            "message": record.getMessage(),
+            "path": record.pathname,
+            "line": record.lineno,
+            "error": error,
+            "trace": trace,
         }
-        return dumps(out, separators=(',', ':'))
+        return dumps(out, separators=(",", ":"))

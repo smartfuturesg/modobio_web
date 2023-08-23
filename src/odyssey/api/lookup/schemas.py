@@ -20,7 +20,6 @@ class LookupNotificationSeverityOutputSchema(Schema):
 
 
 class LookupUSStatesSchema(ma.SQLAlchemyAutoSchema):
-
     territory_id = fields.Integer(missing=None)
     idx = fields.Integer(missing=None)
     state = fields.String()
@@ -42,7 +41,7 @@ class LookupTermsAndConditionsOutputSchema(BaseSchema):
 
 class LookupBookingTimeIncrementsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
         model = LookupBookingTimeIncrements
 
 
@@ -58,7 +57,7 @@ class LookupTimezones(Schema):
 
 class LookupProfessionalAppointmentConfirmationWindowSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
         model = LookupProfessionalAppointmentConfirmationWindow
 
 
@@ -82,7 +81,7 @@ class LookupCountriesOfOperationsOutputSchema(Schema):
 
 class LookupClientBookingWindowSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
         model = LookupClientBookingWindow
 
 
@@ -93,7 +92,7 @@ class LookupClientBookingWindowOutputSchema(Schema):
 
 class LookupTelehealthSessionDurationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
         model = LookupTelehealthSessionDuration
 
 
@@ -144,7 +143,7 @@ class LookupActivityTrackersOutputSchema(Schema):
 class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupGoals
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -154,7 +153,7 @@ class LookupGoalsSchema(ma.SQLAlchemyAutoSchema):
 class LookupCareTeamResourcesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupClinicalCareTeamResources
-        exclude = ('created_at', 'updated_at', 'resource_name')
+        exclude = ("created_at", "updated_at", "resource_name")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -170,11 +169,11 @@ class LookupEHRPagesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupClinicalCareTeamResources
         exclude = (
-            'created_at',
-            'updated_at',
-            'resource_group',
-            'access_group',
-            'resource_name',
+            "created_at",
+            "updated_at",
+            "resource_group",
+            "access_group",
+            "resource_name",
         )
 
     display_grouping = fields.String()
@@ -197,7 +196,7 @@ class LookupGoalsOutputSchema(Schema):
 class LookupMacroGoalsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupMacroGoals
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupMacroGoalsOutputSchema(Schema):
@@ -208,7 +207,7 @@ class LookupMacroGoalsOutputSchema(Schema):
 class LookupRacesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupRaces
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -223,7 +222,7 @@ class LookupRacesOutputSchema(Schema):
 class LookupSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupSubscriptions
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -238,7 +237,7 @@ class LookupSubscriptionsOutputSchema(Schema):
 class LookupNotificationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupNotifications
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -262,7 +261,7 @@ class LookupDefaultHealthMetricsOutputSchema(Schema):
 class LookupTerritoriesOfOperationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupTerritoriesOfOperations
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -280,7 +279,9 @@ class LookupNotificationsOutputSchema(Schema):
 
 
 class LookupTelehealthSettingsSchema(Schema):
-    session_durations = fields.Nested(LookupTelehealthSessionDurationOutputSchema, missing=[])
+    session_durations = fields.Nested(
+        LookupTelehealthSessionDurationOutputSchema, missing=[]
+    )
     booking_windows = fields.Nested(LookupClientBookingWindowOutputSchema, missing=[])
     confirmation_windows = fields.Nested(
         LookupProfessionalAppointmentConfirmationWindowOutputSchema, missing=[]
@@ -300,13 +301,13 @@ class LookupEmergencyNumbersOutputSchema(Schema):
 class LookupRoleGroupsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupRoleGroups
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ("created_at", "updated_at", "idx")
 
 
 class LookupRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupRoles
-        exclude = ('created_at', 'updated_at', 'color', 'is_practitioner')
+        exclude = ("created_at", "updated_at", "color", "is_practitioner")
 
     groups = fields.Nested(LookupRoleGroupsSchema, many=True)
 
@@ -319,9 +320,11 @@ class LookupRolesOutputSchema(Schema):
 class LookupLegalDocsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupLegalDocs
-        exclude = ('created_at', 'updated_at', 'path')
+        exclude = ("created_at", "updated_at", "path")
 
-    target = fields.String(validate=validate.OneOf(('User', 'Professional', 'Provider')))
+    target = fields.String(
+        validate=validate.OneOf(("User", "Professional", "Provider"))
+    )
     content = fields.String(dump_only=True)
     idx = fields.Integer(dump_only=True)
 
@@ -344,7 +347,7 @@ class LookupMedicalSymptomsOutputSchema(Schema):
 class LookupOrganizationsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupOrganizations
-        exclude = ('created_at', 'updated_at', 'org_token')
+        exclude = ("created_at", "updated_at", "org_token")
 
 
 class LookupOrganizationsOutputSchema(Schema):
@@ -355,7 +358,7 @@ class LookupOrganizationsOutputSchema(Schema):
 class LookupCurrenciesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupCurrencies
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupCurrenciesOutputSchema(Schema):
@@ -366,7 +369,7 @@ class LookupCurrenciesOutputSchema(Schema):
 class LookupBloodTestsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupBloodTests
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupBloodTestsOutputSchema(Schema):
@@ -377,7 +380,7 @@ class LookupBloodTestsOutputSchema(Schema):
 class LookupBloodTestRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupBloodTestRanges
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     race_id = fields.Integer()
     race = fields.String()
@@ -401,7 +404,7 @@ class LookupBloodTestRangesAllOutputSchema(Schema):
 class LookupDevNamesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupDevNames
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupDevNamesOutputSchema(Schema):
@@ -412,7 +415,7 @@ class LookupDevNamesOutputSchema(Schema):
 class LookupVisitReasonsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupVisitReasons
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupVisitReasonsOutputSchema(Schema):
@@ -423,7 +426,7 @@ class LookupVisitReasonsOutputSchema(Schema):
 class LookupBloodGlucoseRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupBloodGlucoseRanges
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     test_name = fields.String()
 
@@ -436,7 +439,7 @@ class LookupBloodGlucoseRangesOutputSchema(Schema):
 class LookupCredentialTypesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupCredentialTypes
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupCredentialTypesOutputSchema(Schema):
@@ -446,7 +449,7 @@ class LookupCredentialTypesOutputSchema(Schema):
 
 class LookupPHRResourcesOutputSchema(Schema):
     items = fields.Nested(
-        LookupEHRPagesSchema(many=True, exclude=('display_grouping', )),
+        LookupEHRPagesSchema(many=True, exclude=("display_grouping",)),
         missing=[],
     )
     total_items = fields.Integer()
@@ -455,13 +458,13 @@ class LookupPHRResourcesOutputSchema(Schema):
 class LookupCGMDemographicsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupCGMDemographics
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupBloodGlucoseCGMRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupBloodGlucoseCGMRanges
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     demographic = fields.Nested(LookupCGMDemographicsSchema, dump_only=True)
 
@@ -488,7 +491,7 @@ class LookupKeysOutputSchema(Schema):
 class LookupEmotesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupEmotes
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupEmotesOutputSchema(Schema):
@@ -511,7 +514,7 @@ class LookupMedicalConditionsOutputSchema(Schema):
 class LookupSTDsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupSTDs
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupSTDsOutputSchema(Schema):
@@ -522,7 +525,7 @@ class LookupSTDsOutputSchema(Schema):
 class LookupBloodPressureRangesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = LookupBloodPressureRanges
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
 
 class LookupBloodPressureRangesOutputSchema(Schema):

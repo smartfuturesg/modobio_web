@@ -1,7 +1,6 @@
 import logging
 
-from odyssey.api.community_manager.models import \
-    CommunityManagerSubscriptionGrants
+from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 from odyssey.api.lookup.schemas import LookupRolesSchema
 from odyssey.api.provider.models import *
 from odyssey.api.staff.models import StaffRoles
@@ -17,18 +16,17 @@ class SubscriptionGrantSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = CommunityManagerSubscriptionGrants
         exclude = (
-            'created_at',
-            'updated_at',
-            'idx',
-            'subscription_grantee_user_id',
+            "created_at",
+            "updated_at",
+            "idx",
+            "subscription_grantee_user_id",
         )
-        dump_only = ('user_id', )
+        dump_only = ("user_id",)
 
     modobio_id = fields.String(dump_only=True, default=None)
 
 
 class PostSubscriptionGrantSchema(Schema):
-
     modobio_ids = fields.List(fields.String(), missing=[])
     emails = fields.List(fields.Email(), missing=[])
     sponsor = fields.String(required=True)
@@ -36,7 +34,9 @@ class PostSubscriptionGrantSchema(Schema):
 
 
 class SubscriptionGrantsAllSchema(Schema):
-    subscription_grants = fields.List(fields.Nested(SubscriptionGrantSchema), missing=[])
+    subscription_grants = fields.List(
+        fields.Nested(SubscriptionGrantSchema), missing=[]
+    )
     total_items = fields.Integer(missing=0)
 
 
@@ -48,7 +48,7 @@ class PaginationLinks(Schema):
 class ProviderLicensingSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ProviderCredentials
-        exclude = ('idx', )
+        exclude = ("idx",)
 
     firstname = fields.String()
     lastname = fields.String()
@@ -64,7 +64,7 @@ class ProviderLiscensingAllSchema(Schema):
 class VerifyMedicalCredentialSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ProviderCredentials
-        exclude = ('country_id', 'role_id')
+        exclude = ("country_id", "role_id")
 
     user_id = fields.Integer(required=True)
 
@@ -73,11 +73,11 @@ class ProviderRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffRoles
         exclude = (
-            'idx',
-            'created_at',
-            'updated_at',
-            'user_id',
-            'consult_rate',
+            "idx",
+            "created_at",
+            "updated_at",
+            "user_id",
+            "consult_rate",
         )
 
     role = fields.String()
@@ -87,7 +87,7 @@ class ProviderRolesSchema(ma.SQLAlchemyAutoSchema):
 class ProviderRoleRequestsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ProviderRoleRequests
-        exclude = ('created_at', 'updated_at', 'user_id')
+        exclude = ("created_at", "updated_at", "user_id")
 
     idx = fields.Integer()
     firstname = fields.String()
@@ -101,12 +101,16 @@ class ProviderRoleRequestsSchema(ma.SQLAlchemyAutoSchema):
 
 
 class ProviderRoleRequestsAllSchema(Schema):
-    provider_role_requests = fields.List(fields.Nested(ProviderRoleRequestsSchema), missing=[])
+    provider_role_requests = fields.List(
+        fields.Nested(ProviderRoleRequestsSchema), missing=[]
+    )
     total_items = fields.Integer()
     _links = fields.Nested(PaginationLinks)
 
 
 class ProviderRoleRequestUpdateSchema(Schema):
     # status must be one of the following: inactive, pending, rejected, granted
-    status = fields.String(required=True, validate=lambda x: x in ['rejected', 'granted'])
+    status = fields.String(
+        required=True, validate=lambda x: x in ["rejected", "granted"]
+    )
     role_request_id = fields.Integer(required=True)

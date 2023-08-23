@@ -10,8 +10,14 @@ from sqlalchemy import select
 from werkzeug.exceptions import BadRequest
 
 from odyssey import celery, conf, db, mongo
-from odyssey.api.client.models import (ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations)
-from odyssey.api.lookup.models import (LookupBookingTimeIncrements, LookupClinicalCareTeamResources)
+from odyssey.api.client.models import (
+    ClientClinicalCareTeam,
+    ClientClinicalCareTeamAuthorizations,
+)
+from odyssey.api.lookup.models import (
+    LookupBookingTimeIncrements,
+    LookupClinicalCareTeamResources,
+)
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.payment.models import PaymentMethods
 from odyssey.api.staff.models import StaffCalendarEvents
@@ -23,7 +29,9 @@ from odyssey.integrations.terra import TerraClient
 from odyssey.integrations.twilio import Twilio
 from odyssey.tasks.base import BaseTaskWithRetry, IntegrationsBaseTaskWithRetry
 from odyssey.utils.constants import (
-    NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID, WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID,
+    WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES,
 )
 from odyssey.utils.files import FileUpload
 from odyssey.utils.misc import create_notification, update_client_subscription
@@ -44,31 +52,38 @@ def upcoming_appointment_notification_2hr(booking_id):
         db.session.execute(
             select(TelehealthBookings).where(
                 TelehealthBookings.idx == booking_id,
-                TelehealthBookings.status == 'Accepted',
+                TelehealthBookings.status == "Accepted",
             )
-        ).scalars().one_or_none()
+        )
+        .scalars()
+        .one_or_none()
     )
 
     if not booking:
         return
 
     staff_user = (
-        db.session.execute(select(User).where(User.user_id == booking.staff_user_id)
-                          ).scalars().one_or_none()
+        db.session.execute(select(User).where(User.user_id == booking.staff_user_id))
+        .scalars()
+        .one_or_none()
     )
 
     client_user = (
-        db.session.execute(select(User).where(User.user_id == booking.client_user_id)
-                          ).scalars().one_or_none()
+        db.session.execute(select(User).where(User.user_id == booking.client_user_id))
+        .scalars()
+        .one_or_none()
     )
 
     # look up the start time and create dt object for the notification expire time (2 hours after the appointment begins)
     start_time = (
         db.session.execute(
-            select(
-                LookupBookingTimeIncrements.start_time
-            ).where(LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time_utc)
-        ).scalars().one_or_none()
+            select(LookupBookingTimeIncrements.start_time).where(
+                LookupBookingTimeIncrements.idx
+                == booking.booking_window_id_start_time_utc
+            )
+        )
+        .scalars()
+        .one_or_none()
     )
 
     start_dt = datetime.combine(booking.target_date, start_time)
@@ -81,9 +96,12 @@ def upcoming_appointment_notification_2hr(booking_id):
             select(Notifications).where(
                 Notifications.user_id == staff_user.user_id,
                 Notifications.expires == expires_at,
-                Notifications.notification_type_id == NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+                Notifications.notification_type_id
+                == NOTIFICATION_TYPE_TO_ID.get("Scheduling"),
             )
-        ).scalars().one_or_none()
+        )
+        .scalars()
+        .one_or_none()
     )
 
     existing_client_notification = (
@@ -91,41 +109,42 @@ def upcoming_appointment_notification_2hr(booking_id):
             select(Notifications).where(
                 Notifications.user_id == client_user.user_id,
                 Notifications.expires == expires_at,
-                Notifications.notification_type_id == NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
+                Notifications.notification_type_id
+                == NOTIFICATION_TYPE_TO_ID.get("Scheduling"),
             )
-        ).scalars().one_or_none()
+        )
+        .scalars()
+        .one_or_none()
     )
 
     # create the staff and client notification entries
     if not existing_staff_notification:
-
         create_notification(
             booking.staff_user_id,
-            NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
-            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            'You have a telehealth appointment at'
-            f' <datetime_utc>{start_dt}</datetime_utc>',
-            'Your telehealth appointment with'
+            NOTIFICATION_SEVERITY_TO_ID.get("Medium"),
+            NOTIFICATION_TYPE_TO_ID.get("Scheduling"),
+            "You have a telehealth appointment at"
+            f" <datetime_utc>{start_dt}</datetime_utc>",
+            "Your telehealth appointment with"
             f" {client_user.firstname+' '+client_user.lastname} is at"
-            f' <datetime_utc>{start_dt}</datetime_utc>. Please review your'
+            f" <datetime_utc>{start_dt}</datetime_utc>. Please review your"
             " client's medical information before taking the call.",
-            'Provider',
+            "Provider",
             expires_at,
         )
 
     if not existing_client_notification:
-
         create_notification(
             booking.client_user_id,
-            NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
-            NOTIFICATION_TYPE_TO_ID.get('Scheduling'),
-            'You have a telehealth appointment at'
-            f' <datetime_utc>{start_dt}</datetime_utc>',
-            'Your telehealth appointment with'
+            NOTIFICATION_SEVERITY_TO_ID.get("Medium"),
+            NOTIFICATION_TYPE_TO_ID.get("Scheduling"),
+            "You have a telehealth appointment at"
+            f" <datetime_utc>{start_dt}</datetime_utc>",
+            "Your telehealth appointment with"
             f" {staff_user.firstname+' '+staff_user.lastname} is at"
-            f' <datetime_utc>{start_dt}</datetime_utc>. Please ensure your'
-            ' medical information is up to date before taking the call.',
-            'Client',
+            f" <datetime_utc>{start_dt}</datetime_utc>. Please ensure your"
+            " medical information is up to date before taking the call.",
+            "Client",
             expires_at,
         )
 
@@ -144,10 +163,16 @@ def upcoming_appointment_care_team_permissions(booking_id):
     # TODO: update this to align with other staff roles
     resource_ids_needed = (
         db.session.execute(
-            select(LookupClinicalCareTeamResources.resource_id, ).where(
-                LookupClinicalCareTeamResources.access_group.in_(['general', 'medical_doctor'])
+            select(
+                LookupClinicalCareTeamResources.resource_id,
+            ).where(
+                LookupClinicalCareTeamResources.access_group.in_(
+                    ["general", "medical_doctor"]
+                )
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     # bring up booking
@@ -155,9 +180,11 @@ def upcoming_appointment_care_team_permissions(booking_id):
         db.session.execute(
             select(TelehealthBookings).where(
                 TelehealthBookings.idx == booking_id,
-                TelehealthBookings.status == 'Accepted',
+                TelehealthBookings.status == "Accepted",
             )
-        ).scalars().one_or_none()
+        )
+        .scalars()
+        .one_or_none()
     )
 
     if not booking:
@@ -170,7 +197,9 @@ def upcoming_appointment_care_team_permissions(booking_id):
                 ClientClinicalCareTeam.user_id == booking.client_user_id,
                 ClientClinicalCareTeam.team_member_user_id == booking.staff_user_id,
             )
-        ).scalars().one_or_none()
+        )
+        .scalars()
+        .one_or_none()
     )
 
     # the staff member is already part of the user's care team
@@ -180,18 +209,23 @@ def upcoming_appointment_care_team_permissions(booking_id):
         current_resource_auths = (
             db.session.execute(
                 select(ClientClinicalCareTeamAuthorizations).where(
-                    ClientClinicalCareTeamAuthorizations.user_id == booking.client_user_id,
-                    ClientClinicalCareTeamAuthorizations.team_member_user_id ==
-                    booking.staff_user_id,
+                    ClientClinicalCareTeamAuthorizations.user_id
+                    == booking.client_user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id
+                    == booking.staff_user_id,
                 )
-            ).scalars().all()
+            )
+            .scalars()
+            .all()
         )
 
         current_resource_auth_ids = [
-            item.resource_id for item in current_resource_auths if item.status == 'accepted'
+            item.resource_id
+            for item in current_resource_auths
+            if item.status == "accepted"
         ]
         current_resource_auth_ids_not_accepted = [
-            item for item in current_resource_auths if item.status != 'accepted'
+            item for item in current_resource_auths if item.status != "accepted"
         ]
 
         remaining_auths = len(set(resource_ids_needed) - set(current_resource_auth_ids))
@@ -201,10 +235,12 @@ def upcoming_appointment_care_team_permissions(booking_id):
             # approve current pending auths
             if len(current_resource_auth_ids_not_accepted) > 0:
                 for pending_auth in current_resource_auth_ids_not_accepted:
-                    pending_auth.status = 'accepted'
+                    pending_auth.status = "accepted"
                     current_resource_auth_ids.append(pending_auth.resource_id)
 
-                remaining_auths = len(set(resource_ids_needed) - set(current_resource_auth_ids))
+                remaining_auths = len(
+                    set(resource_ids_needed) - set(current_resource_auth_ids)
+                )
 
             # add new permissions
             if remaining_auths > 0:
@@ -212,9 +248,9 @@ def upcoming_appointment_care_team_permissions(booking_id):
                     db.session.add(
                         ClientClinicalCareTeamAuthorizations(
                             **{
-                                'user_id': booking.client_user_id,
-                                'team_member_user_id': booking.staff_user_id,
-                                'resource_id': resource_id,
+                                "user_id": booking.client_user_id,
+                                "team_member_user_id": booking.staff_user_id,
+                                "resource_id": resource_id,
                             }
                         )
                     )
@@ -227,9 +263,9 @@ def upcoming_appointment_care_team_permissions(booking_id):
         db.session.add(
             ClientClinicalCareTeam(
                 **{
-                    'team_member_user_id': booking.staff_user_id,
-                    'user_id': booking.client_user_id,
-                    'is_temporary': True,
+                    "team_member_user_id": booking.staff_user_id,
+                    "user_id": booking.client_user_id,
+                    "is_temporary": True,
                 }
             )
         )
@@ -240,9 +276,9 @@ def upcoming_appointment_care_team_permissions(booking_id):
             db.session.add(
                 ClientClinicalCareTeamAuthorizations(
                     **{
-                        'user_id': booking.client_user_id,
-                        'team_member_user_id': booking.staff_user_id,
-                        'resource_id': resource_id,
+                        "user_id": booking.client_user_id,
+                        "team_member_user_id": booking.staff_user_id,
+                        "resource_id": resource_id,
                     }
                 )
             )
@@ -271,7 +307,7 @@ def cancel_noshow_appointment(booking_id):
     the start time. It will then refund the user.
     """
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
-    booking.status = 'Canceled'
+    booking.status = "Canceled"
 
     # run the task to store the chat transcript immediately
     if current_app.testing:
@@ -282,7 +318,9 @@ def cancel_noshow_appointment(booking_id):
         store_telehealth_transcript.delay(booking.idx)
 
     # delete booking from Practitioner's calendar
-    staff_event = StaffCalendarEvents.query.filter_by(idx=booking.staff_calendar_id).one_or_none()
+    staff_event = StaffCalendarEvents.query.filter_by(
+        idx=booking.staff_calendar_id
+    ).one_or_none()
     if staff_event:
         db.session.delete(staff_event)
 
@@ -316,8 +354,11 @@ def store_telehealth_transcript(booking_id: int):
     # bring up booking
     # For now, the boooking state does not matter.
     booking = (
-        db.session.execute(select(TelehealthBookings).where(TelehealthBookings.idx == booking_id)
-                          ).scalars().one_or_none()
+        db.session.execute(
+            select(TelehealthBookings).where(TelehealthBookings.idx == booking_id)
+        )
+        .scalars()
+        .one_or_none()
     )
 
     transcript = twilio.get_booking_transcript(booking.idx)
@@ -326,7 +367,7 @@ def store_telehealth_transcript(booking_id: int):
     if len(transcript) == 0:
         # delete from twilio, nothing to store
         twilio.delete_conversation(booking.chat_room.conversation_sid)
-        logger.info(f'Booking ID {booking.idx}: Conversation deleted from twilio.')
+        logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
 
         # set conversation sid to none since there is nothing to be stored to mongo
         booking.chat_room.conversation_sid = None
@@ -334,45 +375,45 @@ def store_telehealth_transcript(booking_id: int):
         # if there is media present in the transcript, store it in an s3 bucket
         hex_token = secrets.token_hex(4)
         for message_id, message in enumerate(transcript):
-            if message['media']:
-                for media_id, media in enumerate(message['media']):
+            if message["media"]:
+                for media_id, media in enumerate(message["media"]):
                     # download media from twilio
-                    media_content = twilio.get_media(media['sid'])
+                    media_content = twilio.get_media(media["sid"])
 
                     fu = FileUpload(
                         BytesIO(media_content),
                         booking.client_user_id,
-                        prefix=f'telehealth/booking_{booking_id}/message_{message_id}/',
+                        prefix=f"telehealth/booking_{booking_id}/message_{message_id}/",
                     )
                     fu.validate()
-                    fu.save(f'attachment_{hex_token}_{media_id}.{fu.extension}')
+                    fu.save(f"attachment_{hex_token}_{media_id}.{fu.extension}")
 
-                    media['s3_path'] = fu.filename
-                    transcript[message_id]['media'][media_id] = media
+                    media["s3_path"] = fu.filename
+                    transcript[message_id]["media"][media_id] = media
 
         payload = {
-            'created_at': datetime.utcnow().isoformat(),
-            'booking_id': booking.idx,
-            'transcript': transcript,
+            "created_at": datetime.utcnow().isoformat(),
+            "booking_id": booking.idx,
+            "transcript": transcript,
         }
         # insert transcript into mongo db under the telehealth_transcripts collection
-        if current_app.config['MONGO_URI']:
+        if current_app.config["MONGO_URI"]:
             _id = mongo.db.telehealth_transcripts.insert_one(payload).inserted_id
             logger.info(
-                f'Booking ID {booking.idx}: Conversation stored on MongoDB'
-                f' with idx {str(_id)}'
+                f"Booking ID {booking.idx}: Conversation stored on MongoDB"
+                f" with idx {str(_id)}"
             )
         else:
             logger.warning(
-                'Mongo db has not been setup. Twilio conversation will not be'
-                ' deleted.'
+                "Mongo db has not been setup. Twilio conversation will not be"
+                " deleted."
             )
             _id = None
 
         # delete the conversation from twilio if the transcript was successfully stored on mongo
         if _id:
             twilio.delete_conversation(booking.chat_room.conversation_sid)
-            logger.info(f'Booking ID {booking.idx}: Conversation deleted from twilio.')
+            logger.info(f"Booking ID {booking.idx}: Conversation deleted from twilio.")
             booking.chat_room.conversation_sid = None
 
         # delete the conversation sid entry, add transcript_object_id from mongodb
@@ -402,22 +443,24 @@ def update_client_subscription_task(user_id: int, auto_renew: bool = True):
         A true value denotes that this subscription update is for a autorenewing subscription.
     """
     latest_subscription = (
-        UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
-            UserSubscriptions.idx.desc()
-        ).first()
+        UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False)
+        .order_by(UserSubscriptions.idx.desc())
+        .first()
     )
     # skip subscription update if user is currently unsubscribed
     # is not under a subscription auto_renew
-    if (latest_subscription.subscription_status == 'unsubscribed' and auto_renew):
+    if latest_subscription.subscription_status == "unsubscribed" and auto_renew:
         return
     else:
-        update_client_subscription(user_id=user_id, latest_subscription=latest_subscription)
+        update_client_subscription(
+            user_id=user_id, latest_subscription=latest_subscription
+        )
 
     db.session.commit()
 
     # connect to redis and delete task key
     redis_conn = redis.Redis.from_url(conf.broker_url)
-    redis_conn.delete(f'task_subscription_update_{user_id}')
+    redis_conn.delete(f"task_subscription_update_{user_id}")
     return
 
 
@@ -433,7 +476,7 @@ def abandon_telehealth_booking(booking_id: int):
 
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
-    if booking.status == 'Pending':
+    if booking.status == "Pending":
         TelehealthBookingStatus.query.filter_by(booking_id=booking_id).delete()
         db.session.delete(booking)
         db.session.commit()
@@ -441,7 +484,7 @@ def abandon_telehealth_booking(booking_id: int):
 
 @celery.task()
 def test_task():
-    logger.info('Celery test task succeeded')
+    logger.info("Celery test task succeeded")
 
 
 @celery.task()
@@ -450,21 +493,21 @@ def upcoming_booking_payment_notification(booking_id):
     payment_method = PaymentMethods.query.filter_by(
         user_id=booking.client_user_id, is_default=True
     ).one_or_none()
-    index = (booking.booking_window_id_start_time_utc - 1)  # zero the index first
+    index = booking.booking_window_id_start_time_utc - 1  # zero the index first
     hours = index / 12
     minutes = (index % 12) * 5
     booking_start_time = time(hour=int(hours), minute=minutes)
     booking_dt_utc = datetime.combine(booking.target_date_utc, booking_start_time)
     create_notification(
         booking.client_user_id,
-        NOTIFICATION_SEVERITY_TO_ID.get('Medium'),
-        NOTIFICATION_TYPE_TO_ID.get('Payments'),
-        'Upcoming Telehealth Charge',
-        f'Your payment method ending in {payment_method.number} will be'
-        ' charged for your appointment scheduled on'
-        f' <datetime_utc>{booking_dt_utc}</datetime_utc> in the next 24'
-        ' hours.',
-        'Client',
+        NOTIFICATION_SEVERITY_TO_ID.get("Medium"),
+        NOTIFICATION_TYPE_TO_ID.get("Payments"),
+        "Upcoming Telehealth Charge",
+        f"Your payment method ending in {payment_method.number} will be"
+        " charged for your appointment scheduled on"
+        f" <datetime_utc>{booking_dt_utc}</datetime_utc> in the next 24"
+        " hours.",
+        "Client",
         booking_dt_utc + timedelta(days=1),  # expiry
     )
     booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
@@ -474,50 +517,50 @@ def upcoming_booking_payment_notification(booking_id):
 
 @celery.task()
 def notify_client_of_imminent_scheduled_maintenance(user_id, datum):
-    reformed_start = datum['start_time'].replace('T', ' ')
+    reformed_start = datum["start_time"].replace("T", " ")
     reformed_start = reformed_start[0:19]
-    reformed_end = datum['end_time'].replace('T', ' ')
+    reformed_end = datum["end_time"].replace("T", " ")
     reformed_end = reformed_end[0:19]
     create_notification(
         user_id,
-        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
-        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
-        'System maintenance scheduled',
-        'System maintenance has been scheduled between'
-        f' <datetime_utc>{reformed_start}</datetime_utc> and'
-        f' <datetime_utc>{reformed_end}</datetime_utc>. This means the system'
-        ' will be inaccessible and that it will not be possible to schedule'
-        ' telehealth appointments for that time period.',
-        'Client',
-        datum['end_time'],
+        NOTIFICATION_SEVERITY_TO_ID.get("Highest"),
+        NOTIFICATION_TYPE_TO_ID.get("System Maintenance"),
+        "System maintenance scheduled",
+        "System maintenance has been scheduled between"
+        f" <datetime_utc>{reformed_start}</datetime_utc> and"
+        f" <datetime_utc>{reformed_end}</datetime_utc>. This means the system"
+        " will be inaccessible and that it will not be possible to schedule"
+        " telehealth appointments for that time period.",
+        "Client",
+        datum["end_time"],
     )
     db.session.commit()
 
 
 @celery.task()
 def notify_staff_of_imminent_scheduled_maintenance(user_id, datum):
-    reformed_start = datum['start_time'].replace('T', ' ')
+    reformed_start = datum["start_time"].replace("T", " ")
     reformed_start = reformed_start[0:19]
-    reformed_end = datum['end_time'].replace('T', ' ')
+    reformed_end = datum["end_time"].replace("T", " ")
     reformed_end = reformed_end[0:19]
     create_notification(
         user_id,
-        NOTIFICATION_SEVERITY_TO_ID.get('Highest'),
-        NOTIFICATION_TYPE_TO_ID.get('System Maintenance'),
-        'System maintenance scheduled',
-        'System maintenance has been scheduled between'
-        f' <datetime_utc>{reformed_start}</datetime_utc> and'
-        f' <datetime_utc>{reformed_end}</datetime_utc>. This means the system'
-        ' will be inaccessible and that it will not be possible to accept'
-        ' telehealth bookings for that time period.',
-        'Provider',
-        datum['end_time'],
+        NOTIFICATION_SEVERITY_TO_ID.get("Highest"),
+        NOTIFICATION_TYPE_TO_ID.get("System Maintenance"),
+        "System maintenance scheduled",
+        "System maintenance has been scheduled between"
+        f" <datetime_utc>{reformed_start}</datetime_utc> and"
+        f" <datetime_utc>{reformed_end}</datetime_utc>. This means the system"
+        " will be inaccessible and that it will not be possible to accept"
+        " telehealth bookings for that time period.",
+        "Provider",
+        datum["end_time"],
     )
     db.session.commit()
 
 
 @celery.task()
-def cancel_telehealth_appointment(booking, reason='Failed Payment'):
+def cancel_telehealth_appointment(booking, reason="Failed Payment"):
     """
     Used to cancel an appointment in the event a payment is unsuccessful
     and from bookings PUT to cancel a booking
@@ -534,18 +577,22 @@ def cancel_telehealth_appointment(booking, reason='Failed Payment'):
         date=booking.target_date_utc,
         time=LookupBookingTimeIncrements.query.filter_by(
             idx=booking.booking_window_id_start_time_utc
-        ).one_or_none().start_time,
+        )
+        .one_or_none()
+        .start_time,
     )
 
     current_time_utc = datetime.utcnow()
 
     # prevent bookings that have already started from being cancelled.
     # exception: practitioner no show triggered by background process
-    if (current_time_utc > booking_start_time and reason != 'Practitioner No Show'):
-        raise BadRequest('Unable to cancel booking. Schedueld meeting has already begun')
+    if current_time_utc > booking_start_time and reason != "Practitioner No Show":
+        raise BadRequest(
+            "Unable to cancel booking. Schedueld meeting has already begun"
+        )
 
     # update booking status to canceled
-    booking.status = 'Canceled'
+    booking.status = "Canceled"
 
     # run the task to store the chat transcript immediately
     # imported in this way to get around circular importing issues
@@ -557,7 +604,9 @@ def cancel_telehealth_appointment(booking, reason='Failed Payment'):
         store_telehealth_transcript.delay(booking.idx)
 
     # delete booking from Practitioner's calendar
-    staff_event = StaffCalendarEvents.query.filter_by(idx=booking.staff_calendar_id).one_or_none()
+    staff_event = StaffCalendarEvents.query.filter_by(
+        idx=booking.staff_calendar_id
+    ).one_or_none()
     if staff_event:
         db.session.delete(staff_event)
 
@@ -602,7 +651,9 @@ def update_active_campaign_contact(user_id, firstname, lastname, email):
     ac_contact = UserActiveCampaign.query.filter_by(user_id=user_id).one_or_none()
     if ac_contact:
         ac = ActiveCampaign()
-        ac.update_ac_contact_info(user_id, first_name=firstname, last_name=lastname, email=email)
+        ac.update_ac_contact_info(
+            user_id, first_name=firstname, last_name=lastname, email=email
+        )
 
 
 @celery.task(base=IntegrationsBaseTaskWithRetry)
@@ -637,11 +688,13 @@ def update_subscription_auto_renewal_status(subscription_idx):
 
     renewal_info = None
     appstore = AppStore()
-    _, renewal_info, _ = appstore.latest_transaction(subscription.apple_original_transaction_id)
+    _, renewal_info, _ = appstore.latest_transaction(
+        subscription.apple_original_transaction_id
+    )
 
     if renewal_info:
         subscription.apple_auto_renew = (
-            True if renewal_info.get('autoRenewStatus') == 1 else False
+            True if renewal_info.get("autoRenewStatus") == 1 else False
         )
 
     db.session.commit()
@@ -701,7 +754,9 @@ def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
 
         # Delete terra data stored in mongo and wearable entry in postgres
         if delete_data:
-            mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable.wearable})
+            mongo.db.wearables.delete_many(
+                {"user_id": user_id, "wearable": wearable.wearable}
+            )
             db.session.delete(wearable)
 
             # Removes device tag association from users active campaign account
@@ -712,11 +767,12 @@ def deauthenticate_terra_user(user_id, wearable_obj=None, delete_data=False):
                 )
 
             logger.audit(
-                f'User {user_id} revoked access to wearable'
-                f' {wearable.wearable}. Info and data deleted.'
+                f"User {user_id} revoked access to wearable"
+                f" {wearable.wearable}. Info and data deleted."
             )
         else:
-            logger.audit(f'User {user_id} revoked access to wearable'
-                         f' {wearable.wearable}.')
+            logger.audit(
+                f"User {user_id} revoked access to wearable" f" {wearable.wearable}."
+            )
 
     db.session.commit()

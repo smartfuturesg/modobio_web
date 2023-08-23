@@ -1,8 +1,9 @@
 # Set DEBUG and TESTING. Do this before anything else,
 # definitely before Flask is started.
 import os
-os.environ['TESTING'] = 'true'
-os.environ['FLASK_DEBUG'] = 'true'
+
+os.environ["TESTING"] = "true"
+os.environ["FLASK_DEBUG"] = "true"
 
 import pathlib
 import uuid
@@ -28,7 +29,11 @@ from odyssey import create_app, db, mongo
 from odyssey.api.client.models import ClientClinicalCareTeam
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.payment.models import PaymentMethods, PaymentHistory
-from odyssey.api.telehealth.models import TelehealthBookingStatus, TelehealthBookings, TelehealthChatRooms
+from odyssey.api.telehealth.models import (
+    TelehealthBookingStatus,
+    TelehealthBookings,
+    TelehealthChatRooms,
+)
 from odyssey.api.user.models import User, UserLogin
 from odyssey.integrations.twilio import Twilio
 from odyssey.utils import search
@@ -39,16 +44,17 @@ from odyssey.utils import search
 from .utils import login
 
 # See database/1000_staff_all_roles.sql and database/3000_client.sql
-STAFF_EMAIL = 'name@modobio.com'
-CLIENT_EMAIL = 'client@modobio.com'
-PROVIDER_EMAIL = 'pro@modobio.com'
+STAFF_EMAIL = "name@modobio.com"
+CLIENT_EMAIL = "client@modobio.com"
+PROVIDER_EMAIL = "pro@modobio.com"
 
 # For care team fixture
-USER_TM = 'test_team_member_user@modobio.com'
-NON_USER_TM = 'test_team_member_non_user@modobio.com'
+USER_TM = "test_team_member_user@modobio.com"
+NON_USER_TM = "test_team_member_non_user@modobio.com"
+
 
 def setup_db(app):
-    """ Set up the database for testing.
+    """Set up the database for testing.
 
     Runs flask-migrate and database/sql_scriptrunner.py.
     """
@@ -57,25 +63,26 @@ def setup_db(app):
 
     # Flask-migrate
     root = pathlib.Path(__file__).parent.parent
-    migrations = root / 'migrations'
+    migrations = root / "migrations"
 
     try:
         upgrade(directory=migrations)
     except Exception as err:
-        pytest.exit(f'Failed to run flask-migrate during test setup: {err}')
+        pytest.exit(f"Failed to run flask-migrate during test setup: {err}")
 
     # Load SQL scripts.
-    runner = root / 'database' / 'sql_scriptrunner.py'
+    runner = root / "database" / "sql_scriptrunner.py"
     cmd = [
         sys.executable,
         runner,
-        '--db_uri', app.config['SQLALCHEMY_DATABASE_URI'],
+        "--db_uri",
+        app.config["SQLALCHEMY_DATABASE_URI"],
     ]
 
     proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True, env=os.environ)
 
     if proc.returncode != 0:
-        pytest.exit(f'Database scripts failed to run: {proc.stderr}')
+        pytest.exit(f"Database scripts failed to run: {proc.stderr}")
 
     # Sending output to stderr, because that is where flask-migrate sends debug/info output.
     print(proc.stdout, file=sys.stderr)
@@ -83,26 +90,29 @@ def setup_db(app):
     # Add elastic search index
     search.build_es_indices()
 
-def clear_db():
-    """ Delete all tables in the database. """
 
-    tables = (db.session.execute(
-        text("""
+def clear_db():
+    """Delete all tables in the database."""
+
+    tables = db.session.execute(
+        text(
+            """
             SELECT table_name, table_type
             FROM information_schema.tables 
-            WHERE table_schema = 'public';"""))
-        .all())
-    
+            WHERE table_schema = 'public';"""
+        )
+    ).all()
+
     for table, table_type in tables:
-        if table_type == 'BASE TABLE':
-            table_type = 'TABLE'
+        if table_type == "BASE TABLE":
+            table_type = "TABLE"
 
         try:
             db.session.execute(text(f'DROP {table_type} "{table}" CASCADE;'))
         except ProgrammingError as err:
             # Sqlalchemy wraps dialect errors in more generic errors.
             # Here: psycopg2.errors.UndefinedTable -> sqlalchemy.exc.ProgrammingError
-            if 'does not exist' in str(err.orig):
+            if "does not exist" in str(err.orig):
                 # Table already deleted through cascase.
                 db.session.rollback()
                 continue
@@ -111,8 +121,9 @@ def clear_db():
         finally:
             db.session.commit()
 
+
 def clear_twilio(modobio_ids=None):
-    """ Delete all Twilio conversations. """
+    """Delete all Twilio conversations."""
     twilio_obj = Twilio()
     if not modobio_ids:
         modobio_ids = db.session.execute(select(User.modobio_id)).scalars().all()
@@ -123,9 +134,10 @@ def clear_twilio(modobio_ids=None):
         return
 
     client = twilio.rest.Client(
-        twilio_credentials['api_key'], 
-        twilio_credentials['api_key_secret'],
-        twilio_credentials['account_sid'])
+        twilio_credentials["api_key"],
+        twilio_credentials["api_key_secret"],
+        twilio_credentials["account_sid"],
+    )
 
     for modobio_id in modobio_ids:
         try:
@@ -134,9 +146,10 @@ def clear_twilio(modobio_ids=None):
             # User does not exist in Twilio
             continue
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope="session")
 def test_client():
-    """ Flask application instance for testing. """
+    """Flask application instance for testing."""
     app = create_app()
 
     with app.test_client() as tc:
@@ -148,7 +161,9 @@ def test_client():
             # Load the main users for testing
             client = db.session.query(User).filter_by(email=CLIENT_EMAIL).one_or_none()
             staff = db.session.query(User).filter_by(email=STAFF_EMAIL).one_or_none()
-            provider = db.session.query(User).filter_by(email=PROVIDER_EMAIL).one_or_none()
+            provider = (
+                db.session.query(User).filter_by(email=PROVIDER_EMAIL).one_or_none()
+            )
 
             # Add everything we want to pass to tests
             # into the test_client instance as parameters.
@@ -158,48 +173,45 @@ def test_client():
 
             tc.client = client
             tc.client_id = client.user_id
-            tc.client_pass = '123'
-            tc.client_auth_header = login(tc, client, password='123')
+            tc.client_pass = "123"
+            tc.client_auth_header = login(tc, client, password="123")
 
             tc.staff = staff
             tc.staff_id = staff.user_id
-            tc.staff_pass = '123'
-            tc.staff_auth_header = login(tc, staff, password='123')
+            tc.staff_pass = "123"
+            tc.staff_auth_header = login(tc, staff, password="123")
 
             tc.provider = provider
             tc.provider_id = provider.user_id
-            tc.provider_pass = '123'
-            tc.provider_auth_header = login(tc, provider, password='123')
+            tc.provider_pass = "123"
+            tc.provider_auth_header = login(tc, provider, password="123")
             yield tc
-            
+
             # Cleanup functions also need a live app.
             db.session.rollback()
-            #TODO Telehealth on the Shelf - removed clear_twilio call - add back when telehealth and twilio reactivated
-            #clear_twilio()
+            # TODO Telehealth on the Shelf - removed clear_twilio call - add back when telehealth and twilio reactivated
+            # clear_twilio()
             clear_db()
 
             # https://stackoverflow.com/questions/26350911/what-to-do-when-a-py-test-hangs-silently
             db.session.close()
 
     # Delete files from S3 bucket
-    if not app.config['AWS_S3_PYTEST_KEEP']:
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(app.config['AWS_S3_BUCKET'])
+    if not app.config["AWS_S3_PYTEST_KEEP"]:
+        s3 = boto3.resource("s3")
+        bucket = s3.Bucket(app.config["AWS_S3_BUCKET"])
 
-        objects = bucket.objects.filter(Prefix=app.config['AWS_S3_PREFIX'])
-        objects = [{'Key': obj.key} for obj in objects]
+        objects = bucket.objects.filter(Prefix=app.config["AWS_S3_PREFIX"])
+        objects = [{"Key": obj.key} for obj in objects]
         if objects:
-            delete = {
-                'Objects': objects,
-                'Quiet': True}
+            delete = {"Objects": objects, "Quiet": True}
             bucket.delete_objects(Delete=delete)
 
 
-
 # Used by tests in client/ and in doctor/
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def care_team(test_client):
-    """ Add team members to client.
+    """Add team members to client.
 
     Adds a team member who is staff, a team member who is a client,
     and a team members who is not a registered user.
@@ -242,31 +254,30 @@ def care_team(test_client):
     """
     # Create a new client user.
     tm_client = User(
-        email = USER_TM,
-        firstname = 'Team',
-        lastname = 'Member',
-        phone_number = '9871237766',
-        modobio_id = 'ABC123X7Y8Z9',
-        is_staff = False,
-        was_staff = False,
-        is_client = True,
-        email_verified = True)
+        email=USER_TM,
+        firstname="Team",
+        lastname="Member",
+        phone_number="9871237766",
+        modobio_id="ABC123X7Y8Z9",
+        is_staff=False,
+        was_staff=False,
+        is_client=True,
+        email_verified=True,
+    )
 
     test_client.db.session.add(tm_client)
     test_client.db.session.commit()
 
     tm_login = UserLogin(user_id=tm_client.user_id)
-    tm_login.set_password('password')
+    tm_login.set_password("password")
 
     test_client.db.session.add(tm_login)
     test_client.db.session.commit()
 
     # Add non-user as non-login user.
     tm_non_user = User(
-        email=NON_USER_TM,
-        is_staff=False,
-        was_staff=False,
-        is_client=False)
+        email=NON_USER_TM, is_staff=False, was_staff=False, is_client=False
+    )
 
     test_client.db.session.add(tm_non_user)
     test_client.db.session.commit()
@@ -275,8 +286,8 @@ def care_team(test_client):
     ccteam = []
     for tm_id in (tm_client.user_id, tm_non_user.user_id):
         cct = ClientClinicalCareTeam(
-            user_id=test_client.client_id,
-            team_member_user_id=tm_id)
+            user_id=test_client.client_id, team_member_user_id=tm_id
+        )
         ccteam.append(cct)
 
     test_client.db.session.add_all(ccteam)
@@ -284,25 +295,29 @@ def care_team(test_client):
 
     # Return user_ids and modobio_ids
     yield {
-        'provider_id': test_client.provider_id,
-        'provider_modobio_id': test_client.provider.modobio_id,
-        'client_id': tm_client.user_id,
-        'client_modobio_id': tm_client.modobio_id,
-        'non_user_id': tm_non_user.user_id,
-        'non_user_modobio_id': None}
+        "provider_id": test_client.provider_id,
+        "provider_modobio_id": test_client.provider.modobio_id,
+        "client_id": tm_client.user_id,
+        "client_modobio_id": tm_client.modobio_id,
+        "non_user_id": tm_non_user.user_id,
+        "non_user_modobio_id": None,
+    }
 
     # Before we can delete care team members and authorizations,
     # refetch them. Tests may have already deleted them.
 
     # Delete care team
-    ccteam = (test_client.db.session.execute(
-        select(ClientClinicalCareTeam)
-        .where(
-            ClientClinicalCareTeam.team_member_user_id.in_((
-                tm_client.user_id,
-                tm_non_user.user_id))))
+    ccteam = (
+        test_client.db.session.execute(
+            select(ClientClinicalCareTeam).where(
+                ClientClinicalCareTeam.team_member_user_id.in_(
+                    (tm_client.user_id, tm_non_user.user_id)
+                )
+            )
+        )
         .scalars()
-        .all())
+        .all()
+    )
 
     for cct in ccteam:
         test_client.db.session.delete(cct)
@@ -313,10 +328,9 @@ def care_team(test_client):
     test_client.db.session.commit()
 
 
-
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def booking_function_scope(test_client):
-    """ Create a new telehealth booking.
+    """Create a new telehealth booking.
 
     This bookings fixture is used in the Twilio section of testing.
     The Telehealth section has its own bookings fixture.
@@ -327,34 +341,42 @@ def booking_function_scope(test_client):
     """
     # prepare a payment method to be used
     pm = PaymentMethods(
-        payment_type = 'VISA',
-        number = 123,
-        expiration = '05/26',
-        is_default = True,
-        user_id = test_client.client_id
+        payment_type="VISA",
+        number=123,
+        expiration="05/26",
+        is_default=True,
+        user_id=test_client.client_id,
     )
 
     test_client.db.session.add(pm)
     test_client.db.session.flush()
 
     # simulates logged-in user accepting a booking. Necessary to satisfy background process: telehealth.models.add_booking_status_history
-    g.flask_httpauth_user = (test_client.provider, UserLogin.query.filter_by(user_id = test_client.provider_id).one_or_none())
+    g.flask_httpauth_user = (
+        test_client.provider,
+        UserLogin.query.filter_by(user_id=test_client.provider_id).one_or_none(),
+    )
 
     # make a telehealth booking by direct db call
     # booking is made less than 10 minutes out from the current time
-    target_datetime = datetime.utcnow() 
+    target_datetime = datetime.utcnow()
 
     # Round target_datetime up to the next 10-minute time.
     target_datetime = target_datetime - timedelta(
         minutes=target_datetime.minute % 10 - 10,
         seconds=target_datetime.second,
-        microseconds=target_datetime.microsecond)
+        microseconds=target_datetime.microsecond,
+    )
 
     time_inc = LookupBookingTimeIncrements.query.all()
-        
-    start_time_idx_dict = {item.start_time.isoformat() : item.idx for item in time_inc} # {datetime.time: booking_availability_id}
-    
-    booking_start_idx = start_time_idx_dict.get(target_datetime.time().strftime('%H:%M:%S'))
+
+    start_time_idx_dict = {
+        item.start_time.isoformat(): item.idx for item in time_inc
+    }  # {datetime.time: booking_availability_id}
+
+    booking_start_idx = start_time_idx_dict.get(
+        target_datetime.time().strftime("%H:%M:%S")
+    )
 
     # below is to account for bookings starting at the very end of the day so that the booking end time
     # falls on the following day
@@ -364,19 +386,19 @@ def booking_function_scope(test_client):
         booking_end_idx = booking_start_idx + 3
 
     booking = TelehealthBookings(
-        staff_user_id = test_client.provider_id,
-        client_user_id = test_client.client_id,
-        target_date = target_datetime.date(),
-        target_date_utc = target_datetime.date(),
-        booking_window_id_start_time = booking_start_idx,
-        booking_window_id_end_time = booking_end_idx,
-        booking_window_id_start_time_utc = booking_start_idx,
-        booking_window_id_end_time_utc = booking_end_idx,
-        client_location_id = 1,  # TODO: make this not hardcoded
-        payment_method_id = pm.idx,
-        uid = uuid.uuid4(),
-        status = 'Accepted',
-        consult_rate=15
+        staff_user_id=test_client.provider_id,
+        client_user_id=test_client.client_id,
+        target_date=target_datetime.date(),
+        target_date_utc=target_datetime.date(),
+        booking_window_id_start_time=booking_start_idx,
+        booking_window_id_end_time=booking_end_idx,
+        booking_window_id_start_time_utc=booking_start_idx,
+        booking_window_id_end_time_utc=booking_end_idx,
+        client_location_id=1,  # TODO: make this not hardcoded
+        payment_method_id=pm.idx,
+        uid=uuid.uuid4(),
+        status="Accepted",
+        consult_rate=15,
     )
 
     test_client.db.session.add(booking)
@@ -387,17 +409,19 @@ def booking_function_scope(test_client):
     conversation_sid = twilio.create_telehealth_chatroom(booking.idx)
 
     test_client.db.session.commit()
-    
+
     # add payment history for the booking. Necessary for tests that need to try to start a call
-    payment = PaymentHistory(**{
-        'user_id': test_client.client_id,
-        'payment_method_id': booking.payment_method_id,
-        'transaction_amount': 1
-    })
-    
+    payment = PaymentHistory(
+        **{
+            "user_id": test_client.client_id,
+            "payment_method_id": booking.payment_method_id,
+            "transaction_amount": 1,
+        }
+    )
+
     test_client.db.session.add(payment)
     test_client.db.session.flush()
-    
+
     booking.payment_history_id = payment.idx
     test_client.db.session.commit()
 
@@ -405,18 +429,30 @@ def booking_function_scope(test_client):
 
     yield booking
 
-    booking = TelehealthBookings.query.filter_by(idx = booking_id).one_or_none()
+    booking = TelehealthBookings.query.filter_by(idx=booking_id).one_or_none()
 
-    chat_room = TelehealthChatRooms.query.filter_by(booking_id = booking_id).one_or_none()
+    chat_room = TelehealthChatRooms.query.filter_by(booking_id=booking_id).one_or_none()
 
-    booking_status = TelehealthBookingStatus.query.filter_by(booking_id = booking_id).all()
+    booking_status = TelehealthBookingStatus.query.filter_by(
+        booking_id=booking_id
+    ).all()
     if chat_room:
         # delete chatroom, booking, and payment method
-        chat_room = test_client.db.session.execute(select(TelehealthChatRooms).where(TelehealthChatRooms.booking_id == booking.idx)).scalars().one_or_none()
-        
+        chat_room = (
+            test_client.db.session.execute(
+                select(TelehealthChatRooms).where(
+                    TelehealthChatRooms.booking_id == booking.idx
+                )
+            )
+            .scalars()
+            .one_or_none()
+        )
+
         # remove transcript from mongo db
         if chat_room.transcript_object_id:
-            test_client.mongo.db.telehealth_transcripts.find_one_and_delete({"_id": ObjectId(chat_room.transcript_object_id)})
+            test_client.mongo.db.telehealth_transcripts.find_one_and_delete(
+                {"_id": ObjectId(chat_room.transcript_object_id)}
+            )
         test_client.db.session.delete(chat_room)
 
         try:
@@ -425,14 +461,14 @@ def booking_function_scope(test_client):
             # conversation was already removed as part of a test
             pass
 
-    if len(booking_status) > 0 :
+    if len(booking_status) > 0:
         for status in booking_status:
             test_client.db.session.delete(status)
 
-    if booking:            
+    if booking:
         test_client.db.session.delete(booking)
-        test_client.db.session.flush() 
-    
+        test_client.db.session.flush()
+
     test_client.db.session.delete(payment)
     test_client.db.session.delete(pm)
 

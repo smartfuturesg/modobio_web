@@ -1,16 +1,16 @@
-from flask import (Blueprint, redirect, render_template, request, session, url_for)
+from flask import Blueprint, redirect, render_template, request, session, url_for
 
 from odyssey import db
 from odyssey.forms.doctor import MedicalHistoryForm, MedicalPhysicalExamForm
 from odyssey.models.client import ClientInfo
 from odyssey.models.doctor import MedicalHistory, MedicalPhysicalExam
 
-bp = Blueprint('doctor', __name__)
+bp = Blueprint("doctor", __name__)
 
 
-@bp.route('/history', methods=('GET', 'POST'))
+@bp.route("/history", methods=("GET", "POST"))
 def history():
-    clientid = session['clientid']
+    clientid = session["clientid"]
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
     md = MedicalHistory.query.filter_by(clientid=clientid).one_or_none()
 
@@ -43,15 +43,15 @@ def history():
         healthcare_phone=ci.healthcare_phone,
     )
 
-    if request.method == 'GET':
-        return render_template('doctor/history.html', form=form)
+    if request.method == "GET":
+        return render_template("doctor/history.html", form=form)
 
     form = dict(request.form)
 
     # Error if date = ""
     # TODO: this should be fixed with better input validation
-    if not form['last_examination_date']:
-        form['last_examination_date'] = None
+    if not form["last_examination_date"]:
+        form["last_examination_date"] = None
 
     if md:
         md.update(form)
@@ -62,19 +62,19 @@ def history():
 
     db.session.commit()
 
-    return redirect(url_for('.physical'))
+    return redirect(url_for(".physical"))
 
 
-@bp.route('/physical', methods=('GET', 'POST'))
+@bp.route("/physical", methods=("GET", "POST"))
 def physical():
-    clientid = session['clientid']
+    clientid = session["clientid"]
     ci = ClientInfo.query.filter_by(clientid=clientid).one()
     md = MedicalPhysicalExam.query.filter_by(clientid=clientid).one_or_none()
 
     form = MedicalPhysicalExamForm(obj=md)
 
-    if request.method == 'GET':
-        return render_template('doctor/physical.html', form=form)
+    if request.method == "GET":
+        return render_template("doctor/physical.html", form=form)
 
     if md:
         form.populate_obj(md)
@@ -85,4 +85,4 @@ def physical():
 
     db.session.commit()
 
-    return redirect(url_for('main.index'))
+    return redirect(url_for("main.index"))

@@ -8,134 +8,161 @@ import pytest
 from flask.json import dumps
 from tests.utils import login
 
+
 def test_get_client_account_status(test_client, client_services):
     # Confirm not closed yet.
     response = test_client.get(
-        f'/client-services/account/{test_client.client_id}/',
-        headers=client_services.auth_header)
+        f"/client-services/account/{test_client.client_id}/",
+        headers=client_services.auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['client_account_closed'] is None
+    assert response.json["client_account_closed"] is None
+
 
 def test_close_client_account(test_client, client_services):
     # Close account
-    data = {'reason': 'developers smell like old socks'}
+    data = {"reason": "developers smell like old socks"}
     response = test_client.post(
-        f'/client/account/close/',
+        f"/client/account/close/",
         headers=test_client.client_auth_header,
         data=dumps(data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
     # Confirm closed
     response = test_client.get(
-        f'/client-services/account/{test_client.client_id}/',
-        headers=client_services.auth_header)
+        f"/client-services/account/{test_client.client_id}/",
+        headers=client_services.auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['client_account_closed'] is not None
-    assert response.json['client_account_closed_reason'] == data['reason']
+    assert response.json["client_account_closed"] is not None
+    assert response.json["client_account_closed_reason"] == data["reason"]
 
     # Check that account_closed was set to now, within a small window.
     now = datetime.now()
     interval = timedelta(seconds=10)
 
-    closed = datetime.fromisoformat(response.json['client_account_closed'])
+    closed = datetime.fromisoformat(response.json["client_account_closed"])
     assert now - closed < interval
 
-@pytest.mark.xfail(strict=True, reason='Logging out of the API does not invalidate the current token')
+
+@pytest.mark.xfail(
+    strict=True, reason="Logging out of the API does not invalidate the current token"
+)
 def test_access_client_account_after_close(test_client):
     # Try to do something, this should fail.
     response = test_client.get(
-        f'/client/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
+        f"/client/{test_client.client_id}/", headers=test_client.client_auth_header
+    )
 
     assert response.status_code == 401
 
+
 def test_reopen_client_account(test_client, client_services):
     # Logging in clears account_closed setting.
-    test_client.client_auth_header = login(test_client, test_client.client, password='123')
+    test_client.client_auth_header = login(
+        test_client, test_client.client, password="123"
+    )
 
     # Confirm account reopened
     response = test_client.get(
-        f'/client-services/account/{test_client.client_id}/',
-        headers=client_services.auth_header)
+        f"/client-services/account/{test_client.client_id}/",
+        headers=client_services.auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['client_account_closed'] is None
-    assert response.json['client_account_closed_reason'] is None
+    assert response.json["client_account_closed"] is None
+    assert response.json["client_account_closed_reason"] is None
 
     # Try to do something as client.
     response = test_client.get(
-        f'/client/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
+        f"/client/{test_client.client_id}/", headers=test_client.client_auth_header
+    )
 
     assert response.status_code == 200
 
+
 ###################################################################
+
 
 def test_get_staff_account_status(test_client, client_services, not_client_services):
     # Confirm not closed yet.
     response = test_client.get(
-        f'/client-services/account/{not_client_services.user_id}/',
-        headers=client_services.auth_header)
+        f"/client-services/account/{not_client_services.user_id}/",
+        headers=client_services.auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['staff_account_closed'] is None
+    assert response.json["staff_account_closed"] is None
+
 
 def test_close_staff_account(test_client, client_services, not_client_services):
     # Close account
-    data = {'reason': 'clients taste like pudding'}
+    data = {"reason": "clients taste like pudding"}
     response = test_client.post(
-        f'/staff/account/{not_client_services.user_id}/close/',
+        f"/staff/account/{not_client_services.user_id}/close/",
         headers=not_client_services.auth_header,
         data=dumps(data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
     # Confirm closed
     response = test_client.get(
-        f'/client-services/account/{not_client_services.user_id}/',
-        headers=client_services.auth_header)
+        f"/client-services/account/{not_client_services.user_id}/",
+        headers=client_services.auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['staff_account_closed'] is not None
-    assert response.json['staff_account_closed_reason'] == data['reason']
+    assert response.json["staff_account_closed"] is not None
+    assert response.json["staff_account_closed_reason"] == data["reason"]
 
     # Check that account_closed was set to now, within a small window.
     now = datetime.now()
     interval = timedelta(seconds=10)
 
-    closed = datetime.fromisoformat(response.json['staff_account_closed'])
+    closed = datetime.fromisoformat(response.json["staff_account_closed"])
     assert now - closed < interval
 
-@pytest.mark.xfail(strict=True, reason='Logging out of the API does not invalidate the current token')
+
+@pytest.mark.xfail(
+    strict=True, reason="Logging out of the API does not invalidate the current token"
+)
 def test_access_staff_account_after_close(test_client, not_client_services):
     # Try to do something, this should fail.
     response = test_client.get(
-        f'/staff/offices/{not_client_services.user_id}/',
-        headers=not_client_services.auth_header)
+        f"/staff/offices/{not_client_services.user_id}/",
+        headers=not_client_services.auth_header,
+    )
 
     assert response.status_code == 401
 
+
 def test_reopen_client_account(test_client, client_services, not_client_services):
     # Logging in clears account_closed setting.
-    not_client_services.auth_header = login(test_client, not_client_services, password='123')
+    not_client_services.auth_header = login(
+        test_client, not_client_services, password="123"
+    )
 
     # Confirm account reopened
     response = test_client.get(
-        f'/client-services/account/{not_client_services.user_id}/',
-        headers=client_services.auth_header)
+        f"/client-services/account/{not_client_services.user_id}/",
+        headers=client_services.auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['staff_account_closed'] is None
-    assert response.json['staff_account_closed_reason'] is None
+    assert response.json["staff_account_closed"] is None
+    assert response.json["staff_account_closed_reason"] is None
 
     # Try to do something as client.
     response = test_client.get(
-        f'/staff/offices/{not_client_services.user_id}/',
-        headers=not_client_services.auth_header)
+        f"/staff/offices/{not_client_services.user_id}/",
+        headers=not_client_services.auth_header,
+    )
 
     assert response.status_code == 200

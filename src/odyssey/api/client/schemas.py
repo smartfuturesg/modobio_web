@@ -4,14 +4,36 @@ from odyssey.utils.constants import FERTILITY_STATUSES
 
 logger = logging.getLogger(__name__)
 
-from marshmallow import (Schema, ValidationError, fields, post_load, pre_dump, validate, validates)
+from marshmallow import (
+    Schema,
+    ValidationError,
+    fields,
+    post_load,
+    pre_dump,
+    validate,
+    validates,
+)
 
 from odyssey import ma
 from odyssey.api.client.models import (
-    ClientClinicalCareTeamAuthorizations, ClientConsent, ClientConsultContract, ClientDataStorage,
-    ClientFacilities, ClientFertility, ClientHeight, ClientIndividualContract, ClientInfo,
-    ClientMobileSettings, ClientNotificationSettings, ClientPolicies, ClientRaceAndEthnicity,
-    ClientRelease, ClientReleaseContacts, ClientSubscriptionContract, ClientWaistSize, ClientWeight
+    ClientClinicalCareTeamAuthorizations,
+    ClientConsent,
+    ClientConsultContract,
+    ClientDataStorage,
+    ClientFacilities,
+    ClientFertility,
+    ClientHeight,
+    ClientIndividualContract,
+    ClientInfo,
+    ClientMobileSettings,
+    ClientNotificationSettings,
+    ClientPolicies,
+    ClientRaceAndEthnicity,
+    ClientRelease,
+    ClientReleaseContacts,
+    ClientSubscriptionContract,
+    ClientWaistSize,
+    ClientWeight,
 )
 from odyssey.api.user.schemas import UserInfoPutSchema
 from odyssey.utils.base.schemas import BaseSchema
@@ -19,8 +41,12 @@ from odyssey.utils.base.schemas import BaseSchema
 
 class ClientSearchItemsSchema(Schema):
     user_id = fields.Integer()
-    firstname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
-    lastname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
+    firstname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
+    lastname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
     email = fields.Email(required=False, missing=None)
     phone_number = fields.String(
         required=False, validate=validate.Length(min=0, max=50), missing=None
@@ -39,9 +65,15 @@ class ClientSearchMetaSchema(Schema):
 
 
 class ClientSearchLinksSchema(Schema):
-    _self = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
-    _next = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
-    _prev = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
+    _self = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
+    _next = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
+    _prev = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
 
 
 class ClientSearchOutSchema(Schema):
@@ -52,12 +84,15 @@ class ClientSearchOutSchema(Schema):
         ClientSearchItemsSchema(many=True),
         missing=ClientSearchItemsSchema().load({}),
     )
-    _meta = fields.Nested(ClientSearchMetaSchema, missing=ClientSearchMetaSchema().load({}))
-    _links = fields.Nested(ClientSearchLinksSchema, missing=ClientSearchLinksSchema().load({}))
+    _meta = fields.Nested(
+        ClientSearchMetaSchema, missing=ClientSearchMetaSchema().load({})
+    )
+    _links = fields.Nested(
+        ClientSearchLinksSchema, missing=ClientSearchLinksSchema().load({})
+    )
 
 
 class ClientFacilitiesSchema(Schema):
-
     idx = fields.Integer()
     user_id = fields.Integer()
     facility_id = fields.Integer()
@@ -89,11 +124,11 @@ class ClientInfoSchema(BaseSchema):
     class Meta:
         model = ClientInfo
         dump_only = (
-            'modobio_id',
-            'membersince',
-            'height',
-            'weight',
-            'waist_size',
+            "modobio_id",
+            "membersince",
+            "height",
+            "weight",
+            "waist_size",
         )
         include_fk = True
 
@@ -117,13 +152,13 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientInfo
         include_fk = True
-        exclude = ('created_at', 'updated_at', 'user_id')
+        exclude = ("created_at", "updated_at", "user_id")
         dump_only = (
-            'membersince',
-            'membersince',
-            'height',
-            'weight',
-            'waist_size',
+            "membersince",
+            "membersince",
+            "height",
+            "weight",
+            "waist_size",
         )
 
     dob = fields.Date()
@@ -132,19 +167,16 @@ class ClientInfoPutSchema(ma.SQLAlchemyAutoSchema):
 
 
 class ClientAndUserInfoSchema(Schema):
-
     client_info = fields.Nested(ClientInfoSchema, required=False, missing={})
     user_info = fields.Nested(UserInfoPutSchema, required=False, missing={})
 
 
 class ClientAndUserInfoPutSchema(Schema):
-
     client_info = fields.Nested(ClientInfoPutSchema, required=False, missing={})
     user_info = fields.Nested(UserInfoPutSchema, required=False, missing={})
 
 
 class NewRemoteClientSchema(Schema):
-
     email = fields.Email()
     firstname = fields.String(required=True, validate=validate.Length(min=1, max=50))
     lastname = fields.String(required=True, validate=validate.Length(min=1, max=50))
@@ -174,8 +206,9 @@ class ClientReleaseContactsSchema(BaseSchema):
     release_contract_id = fields.Integer()
     release_direction = fields.String(
         metadata={
-            'description': ('Direction must be either TO (release to) or FROM (release'
-                            ' from)')
+            "description": (
+                "Direction must be either TO (release to) or FROM (release" " from)"
+            )
         }
     )
 
@@ -183,13 +216,13 @@ class ClientReleaseContactsSchema(BaseSchema):
     def make_object(self, data, **kwargs):
         return ClientReleaseContacts(**data)
 
-    @validates('release_direction')
+    @validates("release_direction")
     def release_direction_picklist(self, value):
-        direction_values = ['TO', 'FROM']
+        direction_values = ["TO", "FROM"]
         if not value in direction_values:
             raise ValidationError(
-                'release_direction entry invalid. Please use one of the'
-                f' following: {direction_values}'
+                "release_direction entry invalid. Please use one of the"
+                f" following: {direction_values}"
             )
 
 
@@ -204,8 +237,8 @@ class ClientReleaseSchema(BaseSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        data.pop('release_to')
-        data.pop('release_from')
+        data.pop("release_to")
+        data.pop("release_from")
         return ClientRelease(**data)
 
     @pre_dump
@@ -216,17 +249,17 @@ class ClientReleaseSchema(BaseSchema):
         data_ravel = data.__dict__
 
         release_to = ClientReleaseContacts.query.filter_by(
-            release_contract_id=data.idx, release_direction='TO'
+            release_contract_id=data.idx, release_direction="TO"
         ).all()
         release_from = ClientReleaseContacts.query.filter_by(
-            release_contract_id=data.idx, release_direction='FROM'
+            release_contract_id=data.idx, release_direction="FROM"
         ).all()
 
         release_to_list = [obj.__dict__ for obj in release_to]
         release_from_list = [obj.__dict__ for obj in release_from]
 
-        data_ravel['release_to'] = release_to_list
-        data_ravel['release_from'] = release_from_list
+        data_ravel["release_to"] = release_to_list
+        data_ravel["release_from"] = release_from_list
         return data
 
 
@@ -234,7 +267,7 @@ class SignAndDateSchema(Schema):
     """for marshaling signatures and sign dates into objects (contracts) requiring only a signature"""
 
     user_id = fields.Integer(missing=0, dump_only=True)
-    signdate = fields.Date(format='iso', required=True)
+    signdate = fields.Date(format="iso", required=True)
     signature = fields.String(required=True)
 
 
@@ -247,9 +280,9 @@ class ClientSubscriptionContractSchema(BaseSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientSubscriptionContract(
-            user_id=data['user_id'],
-            signature=data['signature'],
-            signdate=data['signdate'],
+            user_id=data["user_id"],
+            signature=data["signature"],
+            signdate=data["signdate"],
         )
 
 
@@ -262,9 +295,9 @@ class ClientConsultContractSchema(BaseSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientConsultContract(
-            user_id=data['user_id'],
-            signature=data['signature'],
-            signdate=data['signdate'],
+            user_id=data["user_id"],
+            signature=data["signature"],
+            signdate=data["signdate"],
         )
 
 
@@ -277,9 +310,9 @@ class ClientPoliciesContractSchema(BaseSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return ClientPolicies(
-            user_id=data['user_id'],
-            signature=data['signature'],
-            signdate=data['signdate'],
+            user_id=data["user_id"],
+            signature=data["signature"],
+            signdate=data["signdate"],
         )
 
 
@@ -298,8 +331,8 @@ class SignedDocumentsSchema(Schema):
     """Dictionary of all signed documents and the URL to the PDF file."""
 
     urls = fields.Dict(
-        keys=fields.String(metadata={'description': 'Document display name'}),
-        values=fields.String(metadata={'description': 'URL to PDF file of document.'}),
+        keys=fields.String(metadata={"description": "Document display name"}),
+        values=fields.String(metadata={"description": "URL to PDF file of document."}),
     )
 
 
@@ -309,12 +342,11 @@ class OutstandingForm(Schema):
     Display name and URI given
     """
 
-    name = fields.String(metadata={'description': 'name of form'})
-    URI = fields.String(metadata={'description': 'URI for completing form'})
+    name = fields.String(metadata={"description": "name of form"})
+    URI = fields.String(metadata={"description": "URI for completing form"})
 
 
 class ClientRegistrationStatusSchema(Schema):
-
     outstanding = fields.Nested(OutstandingForm(many=True))
 
 
@@ -324,18 +356,17 @@ class ClientDataTierSchema(BaseSchema):
 
 
 class AllClientsDataTier(Schema):
-
     items = fields.Nested(
         ClientDataTierSchema(many=True),
         missing=ClientDataTierSchema().load({}),
     )
     total_stored_bytes = fields.Integer(
         missing=0,
-        metadata={'description': 'Total bytes stored for all clients'},
+        metadata={"description": "Total bytes stored for all clients"},
     )
     total_items = fields.Integer(
         missing=0,
-        metadata={'description': 'number of clients in this payload'},
+        metadata={"description": "number of clients in this payload"},
     )
 
 
@@ -361,15 +392,15 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     """
 
     modobio_id = fields.String(
-        metadata={'description': 'Modobio ID for clinical care team member'},
+        metadata={"description": "Modobio ID for clinical care team member"},
         required=False,
     )
     team_member_email = fields.Email(
-        metadata={'description': 'email for clinical care team member'},
+        metadata={"description": "email for clinical care team member"},
         required=False,
     )
     team_member_user_id = fields.Integer(
-        metadata={'description': 'user_id for clinical care team member'},
+        metadata={"description": "user_id for clinical care team member"},
         dump_only=True,
     )
     firstname = fields.String(dump_only=True, missing=None)
@@ -383,18 +414,21 @@ class ClientClinicalCareTeamInternalSchema(Schema):
     membersince = fields.Date(dump_only=True)
     hours_remaining = fields.Integer(required=False, dump_only=True)
     days_remaining = fields.Integer(required=False, dump_only=True)
-    authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True), missing=[])
+    authorizations = fields.Nested(
+        ClinicalCareTeamAuthorizationsForSchema(many=True), missing=[]
+    )
     bio = fields.String(required=False, dump_only=True)
     provider_telehealth_access = fields.Boolean(required=False, dump_only=True)
 
 
 class UserClinicalCareTeamSchema(Schema):
-
     client_user_id = fields.Integer()
     client_modobio_id = fields.String()
     client_name = fields.String()
     client_email = fields.String()
-    authorizations = fields.Nested(ClinicalCareTeamAuthorizationsForSchema(many=True), missing=[])
+    authorizations = fields.Nested(
+        ClinicalCareTeamAuthorizationsForSchema(many=True), missing=[]
+    )
     client_added_date = fields.Date(dump_only=True, required=False)
     client_profile_picture = fields.Dict(keys=fields.Str(), values=fields.Str())
 
@@ -413,7 +447,9 @@ class ClientClinicalCareTeamSchema(Schema):
     Schema is used for nesting ClientClinicalCareTeamInternalSchema
     """
 
-    care_team = fields.Nested(ClientClinicalCareTeamInternalSchema(many=True), missing=[])
+    care_team = fields.Nested(
+        ClientClinicalCareTeamInternalSchema(many=True), missing=[]
+    )
     total_items = fields.Integer(dump_only=True)
 
 
@@ -426,12 +462,13 @@ class ClientClinicalCareTeamDeleteSchema(Schema):
     Schema is used for nesting ClientClinicalCareTeamDeleteInternalSchema
     """
 
-    care_team = fields.Nested(ClientClinicalCareTeamDeleteInternalSchema(many=True), missing=[])
+    care_team = fields.Nested(
+        ClientClinicalCareTeamDeleteInternalSchema(many=True), missing=[]
+    )
     total_items = fields.Integer(dump_only=True)
 
 
 class ClinicalCareTeamTemporaryMembersSchema(Schema):
-
     staff_user_id = fields.Integer()
     booking_id = fields.Integer()
 
@@ -446,16 +483,18 @@ class ClinicalCareTeamAuthorizaitonSchema(Schema):
     user_id = fields.Integer(dump_only=True)
     team_member_modobio_id = fields.String(dump_only=True)
     team_member_user_id = fields.Integer(
-        metadata={'description': 'user_id for this clinical care team member'}
+        metadata={"description": "user_id for this clinical care team member"}
     )
     team_member_firstname = fields.String(dump_only=True)
     team_member_lastname = fields.String(dump_only=True)
     team_member_email = fields.Email(dump_only=True)
     resource_id = fields.Integer(
-        metadata={'description': ('id for the resource. See lookup table for resource ids')}
+        metadata={
+            "description": ("id for the resource. See lookup table for resource ids")
+        }
     )
     display_name = fields.String(dump_only=True)
-    status = fields.String(missing='pending', required=False)
+    status = fields.String(missing="pending", required=False)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -478,7 +517,7 @@ class ClientGeneralMobileSettingsSchema(BaseSchema):
 
     user_id = fields.Integer(dump_only=True)
     date_format = fields.String(
-        validate=validate.OneOf(('%d-%b-%Y', '%b-%d-%Y', '%d/%m/%Y', '%m/%d/%Y'))
+        validate=validate.OneOf(("%d-%b-%Y", "%b-%d-%Y", "%d/%m/%Y", "%m/%d/%Y"))
     )
 
     @post_load
@@ -519,31 +558,35 @@ class ClientMobileSettingsSchema(Schema):
 class ClientHeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientHeight
-        exclude = ('created_at', 'idx')
-        dump_only = ('updated_at', 'user_id')
+        exclude = ("created_at", "idx")
+        dump_only = ("updated_at", "user_id")
         load_instance = True
 
 
 class ClientWeightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientWeight
-        exclude = ('created_at', 'idx')
-        dump_only = ('updated_at', 'user_id')
+        exclude = ("created_at", "idx")
+        dump_only = ("updated_at", "user_id")
         load_instance = True
 
 
 class ClientWaistSizeSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientWaistSize
-        exclude = ('created_at', 'idx')
-        dump_only = ('updated_at', 'user_id')
+        exclude = ("created_at", "idx")
+        dump_only = ("updated_at", "user_id")
         load_instance = True
 
 
 class ClientTokenRequestSchema(Schema):
     user_id = fields.Integer()
-    firstname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
-    lastname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
+    firstname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
+    lastname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
     email = fields.Email(required=False, missing=None)
     token = fields.String()
     refresh_token = fields.String()
@@ -551,16 +594,18 @@ class ClientTokenRequestSchema(Schema):
 
 
 class ClientCloseAccountSchema(Schema):
-    reason = fields.String(required=False, missing=None, validate=validate.Length(max=500))
+    reason = fields.String(
+        required=False, missing=None, validate=validate.Length(max=500)
+    )
 
 
 class ClientFertilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ClientFertility
-        exclude = ('created_at', 'idx')
-        dump_only = ('updated_at', 'user_id')
+        exclude = ("created_at", "idx")
+        dump_only = ("updated_at", "user_id")
         load_instance = True
 
     status = validate = validate.OneOf(
-        FERTILITY_STATUSES['pregnant'] + FERTILITY_STATUSES['not_pregnant']
+        FERTILITY_STATUSES["pregnant"] + FERTILITY_STATUSES["not_pregnant"]
     )

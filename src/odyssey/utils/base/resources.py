@@ -56,13 +56,15 @@ class BaseResource(Resource):
             HTTP 400 if the user_id does not exists in the database, is marked deleted, or fails
             the additional check requested with ``user_type``.
         """
-        if user_type == 'client':
+        if user_type == "client":
             user = User.query.filter_by(
                 user_id=user_id, is_client=True, deleted=False
             ).one_or_none()
-        elif user_type == 'staff':
-            user = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
-        elif user_type == 'provider':
+        elif user_type == "staff":
+            user = User.query.filter_by(
+                user_id=user_id, is_staff=True, deleted=False
+            ).one_or_none()
+        elif user_type == "provider":
             user = User.query.filter_by(
                 user_id=user_id, is_provider=True, deleted=False
             ).one_or_none()
@@ -70,7 +72,7 @@ class BaseResource(Resource):
             user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
 
         if not user:
-            raise BadRequest(f'User {user_id} does not exist.')
+            raise BadRequest(f"User {user_id} does not exist.")
 
         return user
 
@@ -87,7 +89,7 @@ class BaseResource(Resource):
         """
         if data.reporter_id != token_auth.current_user()[0].user_id:
             raise Unauthorized(
-                description=('Only the reporter of this record can edit or delete it.')
+                description=("Only the reporter of this record can edit or delete it.")
             )
 
     def check_resource(self, func):
@@ -138,12 +140,13 @@ class BaseResource(Resource):
             If the resource already exists for a POST request or if the resource does not
             exist for a PUT or PATCH request.
         """
+
         @wraps(func)
         def wrapped(*args, **kwargs):
             if not self.__check_resource__:
                 logger.debug(
-                    'Not running check_resource() because __check_resource__'
-                    ' is False.'
+                    "Not running check_resource() because __check_resource__"
+                    " is False."
                 )
                 return func(*args, **kwargs)
 
@@ -151,32 +154,32 @@ class BaseResource(Resource):
             # /some/path/<int:user_id> or similar
             if len(request.view_args) == 0:
                 logger.debug(
-                    'Not running check_resource() because no path argument in'
-                    f' URL of {func}.'
+                    "Not running check_resource() because no path argument in"
+                    f" URL of {func}."
                 )
                 return func(*args, **kwargs)
 
             try:
-                schema = find_decorator_value(func, 'accepts', keyword='schema')
+                schema = find_decorator_value(func, "accepts", keyword="schema")
             except TypeError:
                 logger.debug(
-                    'Not running check_resource() because no @accepts'
-                    f' decorator on {func}.'
+                    "Not running check_resource() because no @accepts"
+                    f" decorator on {func}."
                 )
                 return func(*args, **kwargs)
 
             if not schema:
                 logger.debug(
-                    'Not running check_resource() because no schema declared'
-                    f' in @accepts decorator of {func}.'
+                    "Not running check_resource() because no schema declared"
+                    f" in @accepts decorator of {func}."
                 )
                 return func(*args, **kwargs)
 
             # Schema not based on a table, nothing to check.
-            if not hasattr(schema.Meta, 'model'):
+            if not hasattr(schema.Meta, "model"):
                 logger.debug(
-                    f'Not running check_resource() because schema {schema} is'
-                    ' not based on a table model.'
+                    f"Not running check_resource() because schema {schema} is"
+                    " not based on a table model."
                 )
                 return func(*args, **kwargs)
 
@@ -185,24 +188,24 @@ class BaseResource(Resource):
                 exists = table.query.filter_by(**request.view_args).one_or_none()
             except (InvalidRequestError, ArgumentError, AttributeError):
                 logger.debug(
-                    f'Not running check_resource() because table {table} can'
-                    ' not be filtered by any of the path arguments in the'
-                    ' URL.'
+                    f"Not running check_resource() because table {table} can"
+                    " not be filtered by any of the path arguments in the"
+                    " URL."
                 )
                 return func(*args, **kwargs)
 
-            if exists and request.method.lower() in ('post', ):
+            if exists and request.method.lower() in ("post",):
                 raise BadRequest(
-                    'The resource you are trying to create (POST) already'
-                    ' exists. Please use PUT or PATCH instead.'
+                    "The resource you are trying to create (POST) already"
+                    " exists. Please use PUT or PATCH instead."
                 )
-            elif not exists and request.method.lower() in ('put', 'patch'):
+            elif not exists and request.method.lower() in ("put", "patch"):
                 raise BadRequest(
-                    'The resource you are trying to change (PUT/PATCH) does'
-                    ' not exist. Please use POST first.'
+                    "The resource you are trying to change (PUT/PATCH) does"
+                    " not exist. Please use POST first."
                 )
 
-            logger.debug(f'Running check_resource() for {func}.')
+            logger.debug(f"Running check_resource() for {func}.")
             return func(*args, **kwargs)
 
         return wrapped

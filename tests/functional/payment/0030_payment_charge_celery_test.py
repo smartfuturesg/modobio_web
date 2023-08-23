@@ -17,9 +17,11 @@ Check that the payment was triggered through the payment history table
 Refund the payment
 Check that the refund was successful
 """
-@pytest.mark.skip('payment disabled until instamed is replaced')
+
+
+@pytest.mark.skip("payment disabled until instamed is replaced")
 def test_bookings_payment(test_client, test_booking):
-    #run celery tasks to find and charge bookings
+    # run celery tasks to find and charge bookings
     bookings = find_chargable_bookings()
     assert len(bookings) == 1
 
@@ -27,68 +29,73 @@ def test_bookings_payment(test_client, test_booking):
 
     assert test_booking.charged == True
 
-    history = PaymentHistory.query. \
-        filter_by(user_id=test_client.client_id, payment_method_id=test_booking.payment_method_id) \
-        .order_by(PaymentHistory.created_at.desc()).all()[-1]
+    history = (
+        PaymentHistory.query.filter_by(
+            user_id=test_client.client_id,
+            payment_method_id=test_booking.payment_method_id,
+        )
+        .order_by(PaymentHistory.created_at.desc())
+        .all()[-1]
+    )
 
     assert history.transaction_amount == test_booking.consult_rate
     assert history.transaction_id
-    assert history.transaction_descriptor == 'Telehealth-MedicalDoctor-20mins'
-    #process refunds for the payment
+    assert history.transaction_descriptor == "Telehealth-MedicalDoctor-20mins"
+    # process refunds for the payment
     response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}/',
+        f"/payment/refunds/{test_client.client_id}/",
         headers=test_client.staff_auth_header,
         data=dumps(payment_refund_data),
-        content_type='application.json'
+        content_type="application.json",
     )
 
     assert response.status_code == 201
 
     response = test_client.get(
-        f'/payment/refunds/{test_client.client_id}/',
+        f"/payment/refunds/{test_client.client_id}/",
         headers=test_client.staff_auth_header,
-        content_type='application.json'
+        content_type="application.json",
     )
 
     assert response.status_code == 200
-    assert response.json[0]['refund_amount'] == '49.50'
-    assert response.json[0]['refund_reason'] == "abcdefghijklmnopqrstuvwxyz"
+    assert response.json[0]["refund_amount"] == "49.50"
+    assert response.json[0]["refund_reason"] == "abcdefghijklmnopqrstuvwxyz"
 
     response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}/',
+        f"/payment/refunds/{test_client.client_id}/",
         headers=test_client.staff_auth_header,
         data=dumps(payment_refund_data),
-        content_type='application.json'
+        content_type="application.json",
     )
 
     assert response.status_code == 201
 
     response = test_client.get(
-        f'/payment/refunds/{test_client.client_id}/',
+        f"/payment/refunds/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application.json'
+        content_type="application.json",
     )
 
     assert response.status_code == 200
     assert len(response.json) == 2
 
-    #third try should error because we are trying to refund more than the original purchase amount
-    #the purchase was $99 and $99 total has been refunded over the course of the previous
-    #2 refund POSTs
+    # third try should error because we are trying to refund more than the original purchase amount
+    # the purchase was $99 and $99 total has been refunded over the course of the previous
+    # 2 refund POSTs
 
     response = test_client.post(
-        f'/payment/refunds/{test_client.client_id}/',
+        f"/payment/refunds/{test_client.client_id}/",
         headers=test_client.staff_auth_header,
         data=dumps(payment_refund_data),
-        content_type='application.json'
+        content_type="application.json",
     )
 
     assert response.status_code == 400
 
     response = test_client.get(
-        f'/payment/refunds/{test_client.client_id}/',
+        f"/payment/refunds/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application.json'
+        content_type="application.json",
     )
 
     assert response.status_code == 200

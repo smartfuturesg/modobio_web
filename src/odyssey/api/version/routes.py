@@ -9,21 +9,15 @@ from flask_restx import Namespace
 from odyssey import db
 from odyssey.utils.base.resources import BaseResource
 
-ns = Namespace('version', description='Endpoint for API version.')
+ns = Namespace("version", description="Endpoint for API version.")
 
 
-@ns.route('/')
+@ns.route("/")
 class VersionEndpoint(BaseResource):
     @ns.doc(security=None)
     @responds(
-        {
-            'name': 'version',
-            'type': str
-        },
-        {
-            'name': 'db_version',
-            'type': str
-        },
+        {"name": "version", "type": str},
+        {"name": "db_version", "type": str},
         status_code=200,
         api=ns,
     )
@@ -40,9 +34,11 @@ class VersionEndpoint(BaseResource):
         dict
             Dict with keys "version" and "db_version".
         """
-        db_version = db.session.execute('select version_num from alembic_version;').scalar()
+        db_version = db.session.execute(
+            "select version_num from alembic_version;"
+        ).scalar()
 
         return {
-            'version': current_app.config['VERSION_STRING'],
-            'db_version': db_version,
+            "version": current_app.config["VERSION_STRING"],
+            "db_version": db_version,
         }

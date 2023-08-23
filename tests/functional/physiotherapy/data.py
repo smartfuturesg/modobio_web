@@ -11,5 +11,5 @@ pt_history_data = {
     "worst_pain": 1,
     "current_pain": 4,
     "makes_worse": "exercise",
-    "makes_better": "also exercise"
+    "makes_better": "also exercise",
 }

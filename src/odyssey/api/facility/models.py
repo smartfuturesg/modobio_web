@@ -12,7 +12,7 @@ from odyssey.utils.constants import DB_SERVER_TIME
 class MedicalInstitutions(db.Model):
     """Medical institutions associated with client external medical records."""
 
-    __tablename__ = 'MedicalInstitutions'
+    __tablename__ = "MedicalInstitutions"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -48,7 +48,7 @@ class RegisteredFacilities(db.Model):
     or external(doctor's offices, hospitals, etc.)
     """
 
-    __tablename__ = 'RegisteredFacilities'
+    __tablename__ = "RegisteredFacilities"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """

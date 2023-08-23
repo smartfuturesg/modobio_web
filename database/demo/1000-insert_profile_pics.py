@@ -2,22 +2,20 @@ import boto3
 
 from odyssey.config import Config
 
-s3 = boto3.resource('s3')
+s3 = boto3.resource("s3")
 conf = Config()
 
 # Copy files from 'mock-users-profile-pics' bucket to destination bucket.
 
-source_bucket = s3.Bucket('mock-users-profile-pics')
+source_bucket = s3.Bucket("mock-users-profile-pics")
 dest_bucket = s3.Bucket(conf.AWS_S3_BUCKET)
 aws_s3_prefix = conf.AWS_S3_PREFIX
 
-if not aws_s3_prefix.endswith('/'):
-    aws_s3_prefix += '/'
+if not aws_s3_prefix.endswith("/"):
+    aws_s3_prefix += "/"
 
 for obj in source_bucket.objects.all():
-    copy_source = {
-        'Bucket': 'mock-users-profile-pics',
-        'Key': obj.key}
+    copy_source = {"Bucket": "mock-users-profile-pics", "Key": obj.key}
 
     dest_bucket.copy(copy_source, aws_s3_prefix + obj.key)
 
@@ -88,8 +86,8 @@ for user_id in staff_users:
     sql_insert = sql_insert_tmpl.format(
         prefix=aws_s3_prefix,
         user_id=user_id,
-        user_type='staff',
-        client_user_id='null',
+        user_type="staff",
+        client_user_id="null",
         staff_user_id=user_id,
     )
     sql_parts.append(sql_insert)
@@ -98,11 +96,11 @@ for user_id in client_users:
     sql_insert = sql_insert_tmpl.format(
         prefix=aws_s3_prefix,
         user_id=user_id,
-        user_type='client',
+        user_type="client",
         client_user_id=user_id,
-        staff_user_id='null',
+        staff_user_id="null",
     )
     sql_parts.append(sql_insert)
 
 # This variable is loaded and executed as SQL on the database by the script_runner.
-sql = '\n'.join([preamble] + sql_parts + [postamble])
+sql = "\n".join([preamble] + sql_parts + [postamble])

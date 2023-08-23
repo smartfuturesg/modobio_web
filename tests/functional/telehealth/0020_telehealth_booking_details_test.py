@@ -1,137 +1,147 @@
 import pytest
 from flask.json import dumps
 
-from odyssey.api.telehealth.models import (
-    TelehealthBookingDetails,
-    TelehealthBookings)
+from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings
 from tests.functional.telehealth.data import (
     telehealth_post_booking_details,
     telehealth_put_booking_details,
-    telehealth_post_booking_details_with_visit_reason, telehealth_put_booking_details_2,
+    telehealth_post_booking_details_with_visit_reason,
+    telehealth_put_booking_details_2,
     telehealth_put_booking_details_3,
 )
 from odyssey.api.user.models import User
 
-#Process for adding telehealth booking details:
-#1. create client, create staff
-#2. staff adds availability
-#3. client requests a booking on a certain date
-#4. client confirms a time
-#5. booking is created
-#6. client or staff involvedcan add booking details
+# Process for adding telehealth booking details:
+# 1. create client, create staff
+# 2. staff adds availability
+# 3. client requests a booking on a certain date
+# 4. client confirms a time
+# 5. booking is created
+# 6. client or staff involvedcan add booking details
 #   POST(add booking details to booking.idx)
-#7. client or staff involved can update booking details
+# 7. client or staff involved can update booking details
 #   PUT(update booking details, provide booking.idx and index of details to alter)
-#8. client or staff involved can access booking details
+# 8. client or staff involved can access booking details
 #   GET(get all the details for a booking.idx)
-#9. client or staff involved can delete all booking details
+# 9. client or staff involved can delete all booking details
 #   DELETE(delete all details for a booking.idx)
-#10. delete client and staff created for this purpose
+# 10. delete client and staff created for this purpose
 
-#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+# TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_post_booking_details(test_client, booking):
     payload = telehealth_post_booking_details_with_visit_reason
 
-    #add booking details as to existing booking.idx
+    # add booking details as to existing booking.idx
     response = test_client.post(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
 
     assert response.status_code == 201
 
-    #add booking details on the same id with POST, should fail
+    # add booking details on the same id with POST, should fail
     response = test_client.post(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
 
     assert response.status_code == 400
 
-    #add booking details as staff to existing booking.idx, no authorization
+    # add booking details as staff to existing booking.idx, no authorization
     response = test_client.post(
-        f'/telehealth/bookings/details/{booking.idx}',
-        data=payload)
+        f"/telehealth/bookings/details/{booking.idx}", data=payload
+    )
 
     assert response.status_code == 401
 
-    #add booking details as staff to non-existing booking.idx
+    # add booking details as staff to non-existing booking.idx
     invalid_booking_idx = 500
     response = test_client.post(
-        f'/telehealth/bookings/details/{invalid_booking_idx}',
+        f"/telehealth/bookings/details/{invalid_booking_idx}",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
 
     assert response.status_code == 400
 
-    #Post empty payload for booking details
-    payload = telehealth_put_booking_details['nothing_to_change']
+    # Post empty payload for booking details
+    payload = telehealth_put_booking_details["nothing_to_change"]
     response = test_client.post(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
     assert response.status_code == 400
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_put_booking_details(test_client, booking):
-    #To update an entry of booking details, we need the index,
-    #since we've only created one entry up to now, we use idx = 1 in the data
-    payload1 = telehealth_put_booking_details['remove_img_rec']
-    payload2 = telehealth_put_booking_details['swap_img_rec']
-    payload3 = telehealth_put_booking_details['change_text_only']
-    payload4 = telehealth_put_booking_details['nothing_to_change']
-    payload5 = telehealth_put_booking_details['empty_booking_details']
+    # To update an entry of booking details, we need the index,
+    # since we've only created one entry up to now, we use idx = 1 in the data
+    payload1 = telehealth_put_booking_details["remove_img_rec"]
+    payload2 = telehealth_put_booking_details["swap_img_rec"]
+    payload3 = telehealth_put_booking_details["change_text_only"]
+    payload4 = telehealth_put_booking_details["nothing_to_change"]
+    payload5 = telehealth_put_booking_details["empty_booking_details"]
 
-    #Remove image and recording from booking details
+    # Remove image and recording from booking details
     response = test_client.put(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload1)
+        data=payload1,
+    )
 
     assert response.status_code == 200
 
-    #Change image file and recording file from booking details
+    # Change image file and recording file from booking details
     response = test_client.put(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload2)
+        data=payload2,
+    )
 
     assert response.status_code == 200
 
-    #Leave image and recording intact, change text details
+    # Leave image and recording intact, change text details
     response = test_client.put(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload3)
+        data=payload3,
+    )
 
     assert response.status_code == 200
 
     # Submit a request without fields
     # Not an error, silently ignored
     response = test_client.put(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload4)
+        data=payload4,
+    )
 
     assert response.status_code == 200
 
-    #Submit a request to make every field empty
+    # Submit a request to make every field empty
     response = test_client.put(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload5)
+        data=payload5,
+    )
 
     assert response.status_code == 200
 
-    #bad booking.idx
+    # bad booking.idx
     invalid_booking_idx = 500
     response = test_client.put(
-        f'/telehealth/bookings/details/{invalid_booking_idx}',
+        f"/telehealth/bookings/details/{invalid_booking_idx}",
         headers=test_client.client_auth_header,
-        data=payload2)
+        data=payload2,
+    )
 
     assert response.status_code == 400
 
@@ -140,19 +150,21 @@ def test_put_booking_details(test_client, booking):
 def test_get_booking_details_with_reason(test_client, booking):
     # Get booking details for existing booking.idx
     response = test_client.get(
-        f'/telehealth/bookings/details/{booking.idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{booking.idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['details'] == 'Only changed text details'
-    assert response.json['images']
-    assert response.json['visit_reason'] == 'Improve Cardio'
+    assert response.json["details"] == "Only changed text details"
+    assert response.json["images"]
+    assert response.json["visit_reason"] == "Improve Cardio"
 
     # Try getting booking details for booking.idx that doens't exist
     invalid_booking_idx = 500
     response = test_client.get(
-        f'/telehealth/bookings/details/{invalid_booking_idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{invalid_booking_idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
 
@@ -161,30 +173,33 @@ def test_get_booking_details_with_reason(test_client, booking):
 def test_put_booking_details_edit_visit_reason(test_client, booking):
     payload = telehealth_put_booking_details_2
 
-    #edit visit reason
+    # edit visit reason
     response = test_client.put(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
 
     assert response.status_code == 200
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_booking_details_edited_visit_reason(test_client, booking):
-    #Get booking details for existing booking.idx
+    # Get booking details for existing booking.idx
     response = test_client.get(
-        f'/telehealth/bookings/details/{booking.idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{booking.idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['visit_reason'] == 'Core and Balance'
+    assert response.json["visit_reason"] == "Core and Balance"
 
-    #Try getting booking details for booking.idx that doens't exist
+    # Try getting booking details for booking.idx that doens't exist
     invalid_booking_idx = 500
     response = test_client.get(
-        f'/telehealth/bookings/details/{invalid_booking_idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{invalid_booking_idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
 
@@ -195,9 +210,10 @@ def test_put_booking_details_remove_visit_reason(test_client, booking):
 
     # Remove visit reason
     response = test_client.put(
-        f'/telehealth/bookings/details/{booking.idx}',
+        f"/telehealth/bookings/details/{booking.idx}",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
 
     assert response.status_code == 200
 
@@ -206,17 +222,19 @@ def test_put_booking_details_remove_visit_reason(test_client, booking):
 def test_get_booking_details_remove_visit_reason(test_client, booking):
     # Get booking details for existing booking.idx
     response = test_client.get(
-        f'/telehealth/bookings/details/{booking.idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{booking.idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['visit_reason'] is None
+    assert response.json["visit_reason"] is None
 
     # Try getting booking details for booking.idx that doens't exist
     invalid_booking_idx = 500
     response = test_client.get(
-        f'/telehealth/bookings/details/{invalid_booking_idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{invalid_booking_idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
 
@@ -224,29 +242,33 @@ def test_get_booking_details_remove_visit_reason(test_client, booking):
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_delete_booking_details(test_client, booking):
     response = test_client.delete(
-        f'/telehealth/bookings/details/{booking.idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{booking.idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 204
 
-    #check that details are now deleted
+    # check that details are now deleted
     response = test_client.get(
-        f'/telehealth/bookings/details/{booking.idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{booking.idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
 
-    #try to delete already deleted details
+    # try to delete already deleted details
     response = test_client.delete(
-        f'/telehealth/bookings/details/{booking.idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{booking.idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 204
 
     invalid_booking_idx = 500
 
     response = test_client.delete(
-        f'/telehealth/bookings/details/{invalid_booking_idx}',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/details/{invalid_booking_idx}",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 204

@@ -6,7 +6,7 @@ import terra
 from flask import current_app
 from sqlalchemy import select
 from terra.api import api_responses
-from terra.api.api_responses import (ConnectionErrorHookResponse, TerraApiResponse)
+from terra.api.api_responses import ConnectionErrorHookResponse, TerraApiResponse
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db, mongo
@@ -35,6 +35,7 @@ class TerraClient(terra.Terra):
     wearable       provider
     =============  ============
     """
+
     def __init__(
         self,
         terra_api_key: str = None,
@@ -60,11 +61,11 @@ class TerraClient(terra.Terra):
             Override the value taken from TERRA_API_SECRET.
         """
         if terra_api_key is None:
-            terra_api_key = current_app.config['TERRA_API_KEY']
+            terra_api_key = current_app.config["TERRA_API_KEY"]
         if terra_dev_id is None:
-            terra_dev_id = current_app.config['TERRA_DEV_ID']
+            terra_dev_id = current_app.config["TERRA_DEV_ID"]
         if terra_api_secret is None:
-            terra_api_secret = current_app.config['TERRA_API_SECRET']
+            terra_api_secret = current_app.config["TERRA_API_SECRET"]
         super().__init__(terra_api_key, terra_dev_id, terra_api_secret)
 
     def status(self, response: TerraApiResponse, raise_on_error: bool = True):
@@ -96,34 +97,36 @@ class TerraClient(terra.Terra):
             Raised when ``status`` is error, not available, or an unknown response. Only
             raised if ``raise_on_error`` is True (default).
         """
-        if 'status' not in response.json:
-            if 'data' in response.json:
+        if "status" not in response.json:
+            if "data" in response.json:
                 # Data messages in webhook do not (always?) have a status message.
                 return
-            elif response.json.get('type') == 'large_request_sending':
+            elif response.json.get("type") == "large_request_sending":
                 # Missing status
                 return
             elif raise_on_error:
-                raise BadRequest(f'Terra returned a response without a status.')
-            logger.error(f'Terra response without a status: {response.json}')
+                raise BadRequest(f"Terra returned a response without a status.")
+            logger.error(f"Terra response without a status: {response.json}")
             return
 
-        status = response.json['status']
+        status = response.json["status"]
 
-        if status in ('error', 'not_available'):
-            msg = response.json.get('message', 'no error message provided')
+        if status in ("error", "not_available"):
+            msg = response.json.get("message", "no error message provided")
             if raise_on_error:
-                raise BadRequest(f'Terra error: {msg}')
-            logger.error(f'Terra balked: {msg}')
-        elif status == 'warning':
-            msg = response.json.get('message', 'no warning message provided')
-            logger.warn(f'Terra complained: {msg}')
-        elif status in ('success', 'processing'):
-            logger.debug(f'Terra proclaimed: {response.json}')
+                raise BadRequest(f"Terra error: {msg}")
+            logger.error(f"Terra balked: {msg}")
+        elif status == "warning":
+            msg = response.json.get("message", "no warning message provided")
+            logger.warn(f"Terra complained: {msg}")
+        elif status in ("success", "processing"):
+            logger.debug(f"Terra proclaimed: {response.json}")
         else:
-            logger.error(f'Unknown status "{status}" in Terra response: {response.json}')
+            logger.error(
+                f'Unknown status "{status}" in Terra response: {response.json}'
+            )
             if raise_on_error:
-                raise BadRequest(f'Terra returned an unknown response.')
+                raise BadRequest(f"Terra returned an unknown response.")
 
     def auth_response(self, response: TerraApiResponse):
         """Handle authentication and reauthentication webhook responses.
@@ -154,8 +157,8 @@ class TerraClient(terra.Terra):
             db.session.commit()
 
             logger.audit(
-                f'User {user_id} successfully registered wearable '
-                f'device {wearable} (Terra ID {terra_user_id})'
+                f"User {user_id} successfully registered wearable "
+                f"device {wearable} (Terra ID {terra_user_id})"
             )
 
             # Fetch historical data. Data is send to webhook.
@@ -190,8 +193,8 @@ class TerraClient(terra.Terra):
             db.session.commit()
 
             logger.audit(
-                f'User {user_id} reauthenticated wearable device {wearable} '
-                f'(new Terra ID {terra_user_id})'
+                f"User {user_id} reauthenticated wearable device {wearable} "
+                f"(new Terra ID {terra_user_id})"
             )
 
     def access_revoked_response(self, response: TerraApiResponse):
@@ -227,8 +230,8 @@ class TerraClient(terra.Terra):
 
         if not user_wearable:
             logger.warn(
-                f'Access revoke requested for user_id {user_id} and wearable'
-                f' {wearable}, but was not found in the DB. Ignoring.'
+                f"Access revoke requested for user_id {user_id} and wearable"
+                f" {wearable}, but was not found in the DB. Ignoring."
             )
             return
 
@@ -237,14 +240,14 @@ class TerraClient(terra.Terra):
             resp = self.deauthenticate_user(terra_user)
             self.status(resp, raise_on_error=False)
 
-        mongo.db.wearables.delete_many({'user_id': user_id, 'wearable': wearable})
+        mongo.db.wearables.delete_many({"user_id": user_id, "wearable": wearable})
 
         db.session.delete(user_wearable)
         db.session.commit()
 
         logger.audit(
-            f'User {user_id} revoked access to wearable {wearable}. Info and'
-            ' data deleted.'
+            f"User {user_id} revoked access to wearable {wearable}. Info and"
+            " data deleted."
         )
 
         if not current_app.debug:
@@ -282,69 +285,73 @@ class TerraClient(terra.Terra):
         data_type = response.parsed_response.type
 
         user_id = (
-            db.session.execute(select(WearablesV2.user_id).filter_by(terra_user_id=terra_user_id)
-                              ).scalars().one_or_none()
+            db.session.execute(
+                select(WearablesV2.user_id).filter_by(terra_user_id=terra_user_id)
+            )
+            .scalars()
+            .one_or_none()
         )
 
         if not user_id:
             logger.error(
-                'User id not found for incoming data for Terra user id'
-                f' {terra_user_id}.'
+                "User id not found for incoming data for Terra user id"
+                f" {terra_user_id}."
             )
             return
         # Don't use parsed_response here, want to re-deserialize JSON with our JSONProvider.
-        for data in response.get_json()['data']:
-            if data['metadata']['start_time'] is None:
+        for data in response.get_json()["data"]:
+            if data["metadata"]["start_time"] is None:
                 continue
 
-            if data_type == 'sleep':
+            if data_type == "sleep":
                 # if resting_hr_bpm is 255, set to None
                 # if min_hr_bpm is 255, set to None
-                if data['heart_rate_data']['summary']['resting_hr_bpm'] == 255:
-                    data['heart_rate_data']['summary']['resting_hr_bpm'] = None
-                if data['heart_rate_data']['summary']['min_hr_bpm'] == 255:
-                    data['heart_rate_data']['summary']['min_hr_bpm'] = None
+                if data["heart_rate_data"]["summary"]["resting_hr_bpm"] == 255:
+                    data["heart_rate_data"]["summary"]["resting_hr_bpm"] = None
+                if data["heart_rate_data"]["summary"]["min_hr_bpm"] == 255:
+                    data["heart_rate_data"]["summary"]["min_hr_bpm"] = None
 
             # Update existing or create new doc (upsert).
             result = mongo.db.wearables.update_one(
                 {
-                    'user_id': user_id,
-                    'wearable': wearable,
-                    'timestamp': data['metadata']['start_time'],
+                    "user_id": user_id,
+                    "wearable": wearable,
+                    "timestamp": data["metadata"]["start_time"],
                 },
-                {'$set': {
-                    f'data.{data_type}': data
-                }},
+                {"$set": {f"data.{data_type}": data}},
                 upsert=True,
             )
 
             # check for bp data
             if (
-                data_type == 'body'
-                and len(data['blood_pressure_data']['blood_pressure_samples']) > 0
+                data_type == "body"
+                and len(data["blood_pressure_data"]["blood_pressure_samples"]) > 0
             ):
                 # loop through each individual sample
                 for i, bp_sample in enumerate(
-                    data['blood_pressure_data']['blood_pressure_samples']
+                    data["blood_pressure_data"]["blood_pressure_samples"]
                 ):
                     try:
                         if (
-                            data['heart_data']['heart_rate_data']['detailed']['hr_samples'][i]
-                            ['timestamp'] == bp_sample['timestamp']
+                            data["heart_data"]["heart_rate_data"]["detailed"][
+                                "hr_samples"
+                            ][i]["timestamp"]
+                            == bp_sample["timestamp"]
                         ):
-                            hr_sample = data['heart_data']['heart_rate_data']['detailed'][
-                                'hr_samples'][i]['bpm']
+                            hr_sample = data["heart_data"]["heart_rate_data"][
+                                "detailed"
+                            ]["hr_samples"][i]["bpm"]
                     except IndexError:
                         hr_sample = None
 
                     mbps = MedicalBloodPressures(
-                        datetime_taken=bp_sample['timestamp'],
+                        datetime_taken=bp_sample["timestamp"],
                         user_id=user_id,
                         reporter_id=user_id,
-                        device_name=response.get_json()['user']['provider'],
-                        source='device',
-                        systolic=bp_sample['systolic_bp'],
-                        diastolic=bp_sample['diastolic_bp'],
+                        device_name=response.get_json()["user"]["provider"],
+                        source="device",
+                        systolic=bp_sample["systolic_bp"],
+                        diastolic=bp_sample["diastolic_bp"],
                         pulse=hr_sample,  # not always present
                     )
                     db.session.add(mbps)
@@ -379,15 +386,15 @@ class TerraClient(terra.Terra):
         """
 
         params = {
-            'user_id': terra_user.user_id,
-            'start_date': int(start_date.timestamp()),
-            'end_date': int(end_date.timestamp()) if end_date is not None else None,
-            'retry_if_rate_limited': True,
-            'to_webhook': True,
+            "user_id": terra_user.user_id,
+            "start_date": int(start_date.timestamp()),
+            "end_date": int(end_date.timestamp()) if end_date is not None else None,
+            "retry_if_rate_limited": True,
+            "to_webhook": True,
         }
 
         data_resp = requests.get(
-            f'{TERRA_BASE_URL}/{dtype}',
+            f"{TERRA_BASE_URL}/{dtype}",
             params=params,
             headers=self._auth_headers,
         )
@@ -407,23 +414,23 @@ class TerraClient(terra.Terra):
             End date of requested data
         """
         response = self.terra_data_model_request(
-            terra_user, dtype='daily', start_date=start_date, end_date=end_date
+            terra_user, dtype="daily", start_date=start_date, end_date=end_date
         )
         self.status(response, raise_on_error=False)
 
         response = self.terra_data_model_request(
-            terra_user, dtype='body', start_date=start_date, end_date=end_date
+            terra_user, dtype="body", start_date=start_date, end_date=end_date
         )
         self.status(response, raise_on_error=False)
 
         response = self.terra_data_model_request(
-            terra_user, dtype='sleep', start_date=start_date, end_date=end_date
+            terra_user, dtype="sleep", start_date=start_date, end_date=end_date
         )
         self.status(response, raise_on_error=False)
 
         response = self.terra_data_model_request(
             terra_user,
-            dtype='nutrition',
+            dtype="nutrition",
             start_date=start_date,
             end_date=end_date,
         )
@@ -431,7 +438,7 @@ class TerraClient(terra.Terra):
 
         response = self.terra_data_model_request(
             terra_user,
-            dtype='menstruation',
+            dtype="menstruation",
             start_date=start_date,
             end_date=end_date,
         )
@@ -439,7 +446,7 @@ class TerraClient(terra.Terra):
 
         response = self.terra_data_model_request(
             terra_user,
-            dtype='activity',
+            dtype="activity",
             start_date=start_date,
             end_date=end_date,
         )

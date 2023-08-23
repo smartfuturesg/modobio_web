@@ -6,7 +6,7 @@ This file defines the configuration defaults for the entire API. It is loaded by
 # This file is imported by config.py, so it must be valid Python.
 
 # General defaults
-SECRET_KEY = 'abcdefghijklmnopqrstuvwxyz0123456789'
+SECRET_KEY = "abcdefghijklmnopqrstuvwxyz0123456789"
 """
 Flask secret key, used to encrypt sessions amongst other things.
 See https://stackoverflow.com/questions/22463939/demystify-flask-app-secret-key
@@ -16,7 +16,7 @@ must have a key of at least 32 characters long. The same key must also be passed
 as part of the ``HASURA_GRAPHQL_JWT_SECRET`` variable. See ``hasura/README.md``.
 """
 
-API_VERSION = ''
+API_VERSION = ""
 """
 Version number of the API.
 
@@ -52,7 +52,7 @@ which may not be correct at all.
 This setting prevents such stupid behaviour.
 """
 
-LOG_LEVEL = ''
+LOG_LEVEL = ""
 """ Show log message of this level and higher.
 
 Accepted levels are:
@@ -69,74 +69,74 @@ which is useful for AWS CloudTrail integration.
 """
 
 # Database parameters
-DB_FLAV = 'postgresql'
+DB_FLAV = "postgresql"
 """ Database "flavour" or dialect. """
 
-DB_USER = ''
+DB_USER = ""
 """ Username for database. """
 
-DB_PASS = ''
+DB_PASS = ""
 """ Password for database. """
 
-DB_HOST = 'localhost'
+DB_HOST = "localhost"
 """ Hostname for database. """
 
-DB_NAME = 'modobio'
+DB_NAME = "modobio"
 """ Name of database. """
 
-DB_NAME_TESTING = 'modobio_test'
+DB_NAME_TESTING = "modobio_test"
 """ Name of database specifically for running pytest. """
 
-DB_URI = ''
+DB_URI = ""
 """ Set the database URI as a single string. Takes precedence over setting the parts. """
 
 # Elasticsearch
-ELASTICSEARCH_URL = 'http://localhost:9200'
+ELASTICSEARCH_URL = "http://localhost:9200"
 """ URL of the local elasticsearch instance. """
 
 # Oura Cloud OAuth parameters
-OURA_CLIENT_ID = ''
+OURA_CLIENT_ID = ""
 """ Client ID for Oura Ring API. """
 
-OURA_CLIENT_SECRET = ''
+OURA_CLIENT_SECRET = ""
 """ Client secret for Oura Ring API. """
 
-OURA_AUTH_URL = 'https://cloud.ouraring.com/oauth/authorize'
+OURA_AUTH_URL = "https://cloud.ouraring.com/oauth/authorize"
 """ Authorization URL for Oura Ring API. """
 
-OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token'
+OURA_TOKEN_URL = "https://api.ouraring.com/oauth/token"
 """ Token URL for Oura Ring API. """
 
-OURA_SCOPE = 'daily'
+OURA_SCOPE = "daily"
 """ Oura resources (scopes) to request permission for. """
 
 # Fitbit OAuth parameters
-FITBIT_CLIENT_ID = ''
+FITBIT_CLIENT_ID = ""
 """ Client ID for Fitbit API. """
 
-FITBIT_CLIENT_SECRET = ''
+FITBIT_CLIENT_SECRET = ""
 """ Client secret for Fitbit API. """
 
-FITBIT_AUTH_URL = 'https://www.fitbit.com/oauth2/authorize'
+FITBIT_AUTH_URL = "https://www.fitbit.com/oauth2/authorize"
 """ Authorization URL for Fitbit API. """
 
-FITBIT_TOKEN_URL = 'https://api.fitbit.com/oauth2/token'
+FITBIT_TOKEN_URL = "https://api.fitbit.com/oauth2/token"
 """ Token URL for Fitbit API. """
 
-FITBIT_SCOPE = 'activity heartrate nutrition profile sleep weight'
+FITBIT_SCOPE = "activity heartrate nutrition profile sleep weight"
 """ Fitbit resources (scopes) to request permission for. """
 
 # AWS settings
-AWS_SNS_REGION = 'us-west-1'
+AWS_SNS_REGION = "us-west-1"
 """
 Our default AWS region is "us-east-2", but SNS is not available in that region.
 Instead, it uses this alternate region.
 """
 
-AWS_S3_BUCKET = 'local-dev-393511634479'
+AWS_S3_BUCKET = "local-dev-393511634479"
 """ Name of the AWS S3 bucket where files are stored. """
 
-AWS_S3_PREFIX = ''
+AWS_S3_PREFIX = ""
 """ Prefix (path) of files in the AWS S3 bucket.
 
 This prefix will be prepended to **every file** stored in the bucket.
@@ -161,7 +161,7 @@ When defining ``AWS_S3_PREFIX``, do **not** add leading or trailing /.
              :mod:`odyssey.utils.files`
 """
 
-AWS_S3_USER_PREFIX = 'id{user_id:05d}'
+AWS_S3_USER_PREFIX = "id{user_id:05d}"
 """ User specific prefix (path) for files in the AWS S3 bucket.
 
 This prefix will be **appended after** :const:`AWS_S3_PREFIX` and is
@@ -229,7 +229,7 @@ The default telehealth duration in minutes.
 """
 
 # Celery settings.
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = "redis://localhost:6379/0"
 """ Celery default broker URL.
 
 This must be a URL in the form of: ``transport://userid:password@hostname:port/virtual_host``
@@ -238,7 +238,7 @@ This variable will be converted to ``broker_url`` (lower case) to work with
 Celery's new config system.
 """
 
-CELERY_RESULT_BACKEND = ''
+CELERY_RESULT_BACKEND = ""
 """ Celery default backend to store results.
 
 The backend used to store task results (tombstones).
@@ -267,25 +267,25 @@ Celery's new config system.
 """
 
 # InstaMed Settings
-INSTAMED_MERCHANT_ID = ''
+INSTAMED_MERCHANT_ID = ""
 """InstaMed Merchant ID."""
 
-INSTAMED_API_KEY = ''
+INSTAMED_API_KEY = ""
 """ InstaMed API access key ID number. """
 
-INSTAMED_API_SECRET = ''
+INSTAMED_API_SECRET = ""
 """ InstaMed API access key secret. """
 
 # Wheel settings
-WHEEL_API_TOKEN = ''
-WHEEL_MD_CONSULT_RATE = '7161c1e9-69a6-4430-a7ef-04593300f48a'
-WHEEL_NP_CONSULT_RATE = '9c36e5c6-ed91-4546-a847-c649c81db265'
+WHEEL_API_TOKEN = ""
+WHEEL_MD_CONSULT_RATE = "7161c1e9-69a6-4430-a7ef-04593300f48a"
+WHEEL_NP_CONSULT_RATE = "9c36e5c6-ed91-4546-a847-c649c81db265"
 
 # mongo db
-MONGO_URI = ''
+MONGO_URI = ""
 
 # Calling host base uri
-FRONT_END_DOMAIN_NAME = ''
+FRONT_END_DOMAIN_NAME = ""
 """ Default name of calling domain
 
 The purpose of the variable is to produce clickable URLs specific to the domain being used
@@ -293,9 +293,9 @@ ie. production (modobio.com), dev r7 (dev-r0-7.modobio.com)
 """
 
 # Google ReCaptcha api secret
-GOOGLE_RECAPTCHA_SECRET = ''
+GOOGLE_RECAPTCHA_SECRET = ""
 
-WEARABLES_DYNAMO_TABLE = 'Wearables-V1-dev-r1-3-1'
+WEARABLES_DYNAMO_TABLE = "Wearables-V1-dev-r1-3-1"
 """ Name of the table in AWS DynamoDB where wearables data is stored.
 
 .. deprecated:: 1.3.1
@@ -314,23 +314,23 @@ this many days of data is returned.
 """
 
 # Apple app store
-APPLE_APPSTORE_API_KEY = ''
+APPLE_APPSTORE_API_KEY = ""
 
-APPLE_APPSTORE_API_KEY_ID = 'C9PC58MRPT'
+APPLE_APPSTORE_API_KEY_ID = "C9PC58MRPT"
 """Identifier for the API key"""
 
-APPLE_APPSTORE_ISSUER_ID = 'a81919e2-a4c0-4611-b8d0-7b260a6fdd62'
+APPLE_APPSTORE_ISSUER_ID = "a81919e2-a4c0-4611-b8d0-7b260a6fdd62"
 """ID from appstore conenct account"""
 
-APPLE_APPSTORE_BUNDLE_ID = 'com.modobio.ModoBioClient'
+APPLE_APPSTORE_BUNDLE_ID = "com.modobio.ModoBioClient"
 
-APPLE_APPSTORE_BASE_URL = 'https://api.storekit-sandbox.itunes.apple.com'
+APPLE_APPSTORE_BASE_URL = "https://api.storekit-sandbox.itunes.apple.com"
 
-MAINTENANCE_DYNAMO_TABLE = 'dev_maintenance_v02'
+MAINTENANCE_DYNAMO_TABLE = "dev_maintenance_v02"
 
-MAINTENANCE_REASONS_TABLE = 'prod_maintenance_reasons'
+MAINTENANCE_REASONS_TABLE = "prod_maintenance_reasons"
 
-MAINTENANCE_TIMEZONE = 'UTC'
+MAINTENANCE_TIMEZONE = "UTC"
 
 # Maintenance Business Hours Time Window In UTC
 BUSINESS_HRS_START = 13
@@ -342,7 +342,7 @@ MAINT_SHORT_NOTICE = 2
 
 MAINT_STD_NOTICE = 14
 
-SERVER_NAME = '127.0.0.1:5000'
+SERVER_NAME = "127.0.0.1:5000"
 """
 Name and port number of the server. This setting allows for
 url generation outside of the Flask request context. This is useful for
@@ -350,11 +350,11 @@ creating urls as part of celery tasks.
 """
 
 # Active Campaign
-ACTIVE_CAMPAIGN_BASE_URL = 'https://modobio.api-us1.com/api/3/'
-ACTIVE_CAMPAIGN_LIST = ''
-ACTIVE_CAMPAIGN_API_KEY = ''
+ACTIVE_CAMPAIGN_BASE_URL = "https://modobio.api-us1.com/api/3/"
+ACTIVE_CAMPAIGN_LIST = ""
+ACTIVE_CAMPAIGN_API_KEY = ""
 
-TERRA_DEV_ID = ''
+TERRA_DEV_ID = ""
 """
 Developer ID for Terra API.
 
@@ -365,14 +365,14 @@ which is also the place where id, key, and secret can be found.
 https://dashboard.tryterra.co/terraapi/customise
 """
 
-TERRA_API_KEY = ''
+TERRA_API_KEY = ""
 """
 Key for Terra API.
 
 See :const:`TERRA_DEV_ID`
 """
 
-TERRA_API_SECRET = ''
+TERRA_API_SECRET = ""
 """
 Secret password for Terra API.
 
@@ -385,7 +385,7 @@ SUBSCRIPTION_UPDATE_FREQUENCY_MINS = 5
 :type: int
 """
 
-GOOGLE_JSON_KEY_PATH = ''
+GOOGLE_JSON_KEY_PATH = ""
 """Path to the Google service account JSON key file.
 
 This file is used to authenticate with Google APIs.
@@ -401,14 +401,14 @@ This is the parsed JSON key file.
 :type: dict
 """
 
-GOOGLE_PACKAGE_NAME = 'com.modobio.modobioclient'
+GOOGLE_PACKAGE_NAME = "com.modobio.modobioclient"
 """
 Package name for android app. 
 
 :type: str
 """
 
-TERRA_BASE_URL = 'https://api.tryterra.co/v2'
+TERRA_BASE_URL = "https://api.tryterra.co/v2"
 """Base URL for Terra API.
 
 :type: str

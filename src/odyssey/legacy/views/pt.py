@@ -1,30 +1,30 @@
-from flask import (Blueprint, flash, redirect, render_template, request, session, url_for)
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 
 from odyssey import db
 from odyssey.forms.pt import MobilityAssessmentForm, PTHistoryForm
 from odyssey.models.pt import MobilityAssessment, PTHistory
 
-bp = Blueprint('pt', __name__)
+bp = Blueprint("pt", __name__)
 
 
-@bp.route('/history', methods=('GET', 'POST'))
+@bp.route("/history", methods=("GET", "POST"))
 def history():
-    clientid = session['clientid']
+    clientid = session["clientid"]
     pt = PTHistory.query.filter_by(clientid=clientid).one_or_none()
 
     form = PTHistoryForm(obj=pt)
 
-    if request.method == 'GET':
-        return render_template('pt/history.html', form=form)
+    if request.method == "GET":
+        return render_template("pt/history.html", form=form)
 
     form = dict(request.form)
     for k in (
-        'has_pt',
-        'has_chiro',
-        'has_massage',
-        'has_surgery',
-        'has_medication',
-        'has_acupuncture',
+        "has_pt",
+        "has_chiro",
+        "has_massage",
+        "has_surgery",
+        "has_medication",
+        "has_acupuncture",
     ):
         if k in form and form[k]:
             form[k] = True
@@ -39,46 +39,46 @@ def history():
 
     db.session.commit()
 
-    return redirect(url_for('.mobility'))
+    return redirect(url_for(".mobility"))
 
 
-@bp.route('/mobility', methods=('GET', 'POST'))
+@bp.route("/mobility", methods=("GET", "POST"))
 def mobility():
-    clientid = session['clientid']
+    clientid = session["clientid"]
     mb = MobilityAssessment.query.filter_by(clientid=clientid).one_or_none()
 
     # Map column_names to nested subform.name
     table2form = {
-        'left_shoulder': {},
-        'right_shoulder': {},
-        'left_hip': {},
-        'right_hip': {},
+        "left_shoulder": {},
+        "right_shoulder": {},
+        "left_hip": {},
+        "right_hip": {},
     }
 
     if mb:
         for col in mb.__table__.c:
-            parts = col.name.split('_')
+            parts = col.name.split("_")
             if len(parts) == 3:
-                subform = parts[0] + '_' + parts[1]
+                subform = parts[0] + "_" + parts[1]
                 element = parts[2]
-                table2form[subform][element] = getattr(mb, col.name, '')
+                table2form[subform][element] = getattr(mb, col.name, "")
 
     form = MobilityAssessmentForm(obj=mb, **table2form)
 
-    if request.method == 'GET':
+    if request.method == "GET":
         flash(
-            'This needs some type of load/save functionality to recall'
-            ' previous assessments and scroll through them.'
+            "This needs some type of load/save functionality to recall"
+            " previous assessments and scroll through them."
         )
-        return render_template('pt/mobility.html', form=form)
+        return render_template("pt/mobility.html", form=form)
 
     form = dict(request.form)
 
     isa = False
-    if 'isa_dynamic' in form and form['isa_dynamic']:
-        form['isa_dynamic'] = True
+    if "isa_dynamic" in form and form["isa_dynamic"]:
+        form["isa_dynamic"] = True
     else:
-        form['isa_dynamic'] = False
+        form["isa_dynamic"] = False
 
     if mb:
         mb.update(form)
@@ -88,4 +88,4 @@ def mobility():
 
     db.session.commit()
 
-    return redirect(url_for('main.index'))
+    return redirect(url_for("main.index"))

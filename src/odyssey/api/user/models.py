@@ -17,12 +17,14 @@ from werkzeug.security import generate_password_hash
 
 from odyssey import db
 from odyssey.api.client.models import ClientInfo
-from odyssey.api.community_manager.models import \
-    CommunityManagerSubscriptionGrants
+from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 from odyssey.api.staff.models import StaffProfile
 from odyssey.utils.base.models import BaseModel, BaseModelWithIdx
 from odyssey.utils.constants import (
-    ALPHANUMERIC, DB_SERVER_TIME, REFRESH_TOKEN_LIFETIME, TOKEN_LIFETIME
+    ALPHANUMERIC,
+    DB_SERVER_TIME,
+    REFRESH_TOKEN_LIFETIME,
+    TOKEN_LIFETIME,
 )
 
 
@@ -32,16 +34,16 @@ class User(db.Model):
     """
 
     __searchable__ = [
-        'modobio_id',
-        'email',
-        'phone_number',
-        'firstname',
-        'lastname',
-        'user_id',
-        'dob',
+        "modobio_id",
+        "email",
+        "phone_number",
+        "firstname",
+        "lastname",
+        "user_id",
+        "dob",
     ]
 
-    __tablename__ = 'User'
+    __tablename__ = "User"
 
     membersince = db.Column(db.DateTime)
     """
@@ -115,21 +117,21 @@ class User(db.Model):
     :type: str, max length 50
     """
 
-    biological_sex_male = db.Column(db.Boolean, server_default='false')
+    biological_sex_male = db.Column(db.Boolean, server_default="false")
     """
     Client biological sex, true for male, false for female.
 
     :type: bool
     """
 
-    is_staff = db.Column(db.Boolean, nullable=False, server_default='false')
+    is_staff = db.Column(db.Boolean, nullable=False, server_default="false")
     """
     Denotes if this user is a staff member. Note: a user can be both a client and a staff member.
 
     :type: boolean
     """
 
-    was_staff = db.Column(db.Boolean, nullable=False, server_default='false')
+    was_staff = db.Column(db.Boolean, nullable=False, server_default="false")
     """
     Denotes if this user was ever a staff member. This is important to retain necessary staff info 
     even if a user has deleted their staff account and then later deletes their client account.
@@ -140,35 +142,41 @@ class User(db.Model):
     :type: boolean
     """
 
-    staff_profile = db.relationship('StaffProfile', uselist=False, back_populates='user_info')
+    staff_profile = db.relationship(
+        "StaffProfile", uselist=False, back_populates="user_info"
+    )
     """
     One-to-One relationship with StaffProfile
 
     :type: :class: `StaffProfile` instance
     """
 
-    roles = db.relationship('StaffRoles', uselist=True, foreign_keys='StaffRoles.user_id')
+    roles = db.relationship(
+        "StaffRoles", uselist=True, foreign_keys="StaffRoles.user_id"
+    )
     """
     One-to-Many relationship between User and StaffRoles tables
 
     :type: :class:`StaffRoles` instance list 
     """
 
-    is_client = db.Column(db.Boolean, nullable=False, server_default='false')
+    is_client = db.Column(db.Boolean, nullable=False, server_default="false")
     """
     Denotes if this user is a client. Note: a user can be both a client and a staff member.
 
     :type: boolean
     """
 
-    client_info = db.relationship('ClientInfo', uselist=False, back_populates='user_info')
+    client_info = db.relationship(
+        "ClientInfo", uselist=False, back_populates="user_info"
+    )
     """
     One-to-One relatinoship with ClientInfo
 
     :type: :class: `ClientInfo` instance
     """
 
-    is_internal = db.Column(db.Boolean, nullable=False, server_default='false')
+    is_internal = db.Column(db.Boolean, nullable=False, server_default="false")
     """
     Whether or not the user is internal. If True, the user may be able to user features not yet 
     fully released. 
@@ -176,14 +184,14 @@ class User(db.Model):
     :type: boolean, non-null 
     """
 
-    deleted = db.Column(db.Boolean, nullable=False, server_default='false')
+    deleted = db.Column(db.Boolean, nullable=False, server_default="false")
     """
     Flags if the user has been deleted
 
     :type: boolean
     """
 
-    email_verified = db.Column(db.Boolean, nullable=False, server_default='false')
+    email_verified = db.Column(db.Boolean, nullable=False, server_default="false")
     """
     Flags if the user has verified their email
 
@@ -197,7 +205,7 @@ class User(db.Model):
     :type: :class:`datetime.date`
     """
 
-    is_provider = db.Column(db.Boolean, nullable=False, server_default='false')
+    is_provider = db.Column(db.Boolean, nullable=False, server_default="false")
     """
     Flags if the user is a provider
 
@@ -212,7 +220,7 @@ class User(db.Model):
     """
 
 
-@db.event.listens_for(User, 'after_update')
+@db.event.listens_for(User, "after_update")
 def update_ES_index(mapper, connection, target):
     """
     Listens for any updates to the User table
@@ -220,28 +228,28 @@ def update_ES_index(mapper, connection, target):
     from odyssey.utils.search import update_index
 
     user = {
-        'firstname': target.firstname,
-        'lastname': target.lastname,
-        'phone_number': target.phone_number,
-        'email': target.email,
-        'modobio_id': target.modobio_id,
-        'user_id': target.user_id,
-        'is_client': target.is_client,
-        'is_staff': target.is_staff,
-        'dob': target.dob,
+        "firstname": target.firstname,
+        "lastname": target.lastname,
+        "phone_number": target.phone_number,
+        "email": target.email,
+        "modobio_id": target.modobio_id,
+        "user_id": target.user_id,
+        "is_client": target.is_client,
+        "is_staff": target.is_staff,
+        "dob": target.dob,
     }
     update_index(user, False)
 
 
-@db.event.listens_for(User, 'after_update')
+@db.event.listens_for(User, "after_update")
 def update_active_campaign_contact_info(mapper, connection, target):
     """
     Listens for updates on User table
     """
-    modded_fname = get_history(target, 'firstname').added
-    modded_lname = get_history(target, 'lastname').added
-    modded_email = get_history(target, 'email').added
-    modded_dob = get_history(target, 'dob').added
+    modded_fname = get_history(target, "firstname").added
+    modded_lname = get_history(target, "lastname").added
+    modded_email = get_history(target, "email").added
+    modded_dob = get_history(target, "dob").added
     # Check if there were any changes to user info
     if any(len(mod) > 0 for mod in [modded_fname, modded_lname, modded_email]):
         firstname = target.firstname if len(modded_fname) > 0 else None
@@ -252,7 +260,9 @@ def update_active_campaign_contact_info(mapper, connection, target):
         if not current_app.debug:
             from odyssey.tasks.tasks import update_active_campaign_contact
 
-            update_active_campaign_contact.delay(target.user_id, firstname, lastname, email)
+            update_active_campaign_contact.delay(
+                target.user_id, firstname, lastname, email
+            )
     # Check updates on dob
     if len(modded_dob) > 0:
         # Run active campaign operations in prod
@@ -270,7 +280,7 @@ class UserLogin(db.Model):
     :attr:`user_id` number.
     """
 
-    __tablename__ = 'UserLogin'
+    __tablename__ = "UserLogin"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -295,7 +305,7 @@ class UserLogin(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -345,7 +355,7 @@ class UserLogin(db.Model):
     :type: str, max length 500
     """
 
-    staff_account_blocked = db.Column(db.Boolean, server_default='f')
+    staff_account_blocked = db.Column(db.Boolean, server_default="f")
     """
     Indicates when the staff portion of the account is blocked.
     See :attr:`staff_account_blocked_reason` for the reason why it was blocked.
@@ -378,7 +388,7 @@ class UserLogin(db.Model):
     :type: str, max length 500
     """
 
-    client_account_blocked = db.Column(db.Boolean, server_default='f')
+    client_account_blocked = db.Column(db.Boolean, server_default="f")
     """
     Indicates when the client portion of the account is blocked.
     See :attr:`client_account_blocked_reason` for the reason why it was blocked.
@@ -411,6 +421,7 @@ class UserLogin(db.Model):
 
     :type: str, unique
     """
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
         self.password_created_at = DB_SERVER_TIME
@@ -420,31 +431,31 @@ class UserLogin(db.Model):
         """
         Generate a JWT with the appropriate user type and user_id
         """
-        if token_type not in ('access', 'refresh'):
+        if token_type not in ("access", "refresh"):
             raise ValueError
 
-        secret = current_app.config['SECRET_KEY']
+        secret = current_app.config["SECRET_KEY"]
 
         # Handle token lifetime based on token type and params
-        if token_type == 'access':
+        if token_type == "access":
             lifetime = TOKEN_LIFETIME
-        elif token_type == 'refresh' and refresh_token_lifetime == None:
+        elif token_type == "refresh" and refresh_token_lifetime == None:
             lifetime = REFRESH_TOKEN_LIFETIME
         else:
             lifetime = refresh_token_lifetime
 
         return jwt.encode(
             {
-                'exp': datetime.utcnow() + timedelta(hours=lifetime),
-                'ttl': lifetime,
-                'uid': user_id,
-                'utype': user_type,
-                'x-hasura-allowed-roles': [user_type],
-                'x-hasura-user-id': str(user_id),
-                'ttype': token_type,
+                "exp": datetime.utcnow() + timedelta(hours=lifetime),
+                "ttl": lifetime,
+                "uid": user_id,
+                "utype": user_type,
+                "x-hasura-allowed-roles": [user_type],
+                "x-hasura-user-id": str(user_id),
+                "ttype": token_type,
             },
             secret,
-            algorithm='HS256',
+            algorithm="HS256",
         )
 
 
@@ -454,7 +465,7 @@ class UserRemovalRequests(db.Model):
     Stores the history of user removal request by all Users.
     """
 
-    __tablename__ = 'UserRemovalRequests'
+    __tablename__ = "UserRemovalRequests"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -479,7 +490,7 @@ class UserRemovalRequests(db.Model):
 
     requester_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -490,7 +501,7 @@ class UserRemovalRequests(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -519,7 +530,7 @@ class UserSubscriptions(db.Model):
     Stores details to relating to user account not related to the subscription system
     """
 
-    __tablename__ = 'UserSubscriptions'
+    __tablename__ = "UserSubscriptions"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -544,7 +555,7 @@ class UserSubscriptions(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -582,7 +593,9 @@ class UserSubscriptions(db.Model):
     :type: String
     """
 
-    subscription_type_id = db.Column(db.Integer, db.ForeignKey('LookupSubscriptions.sub_id'))
+    subscription_type_id = db.Column(
+        db.Integer, db.ForeignKey("LookupSubscriptions.sub_id")
+    )
     """
     Id of this subscription plan. Comes from the LookupSubscriptions table.
 
@@ -628,7 +641,7 @@ class UserSubscriptions(db.Model):
 
     sponsorship_id = db.Column(
         db.Integer,
-        db.ForeignKey('CommunityManagerSubscriptionGrants.idx'),
+        db.ForeignKey("CommunityManagerSubscriptionGrants.idx"),
         nullable=True,
     )
     """
@@ -637,12 +650,12 @@ class UserSubscriptions(db.Model):
     :type: str
     """
 
-    subscription_type_information = db.relationship('LookupSubscriptions')
+    subscription_type_information = db.relationship("LookupSubscriptions")
     """
     Relationship lookup subscriptions
     """
 
-    sponsorship = db.relationship('CommunityManagerSubscriptionGrants')
+    sponsorship = db.relationship("CommunityManagerSubscriptionGrants")
     """
     One to one relationship with CommunityManagerSubscriptionGrants
 
@@ -650,13 +663,13 @@ class UserSubscriptions(db.Model):
     """
 
 
-@db.event.listens_for(UserSubscriptions, 'after_insert')
+@db.event.listens_for(UserSubscriptions, "after_insert")
 def add_active_campaign_sub_tag(mapper, connection, target):
     """
     Listens for inserts on subscription table
     """
-    modded_sub_status = get_history(target, 'subscription_status').added
-    modded_sub_type = get_history(target, 'subscription_type_id').added
+    modded_sub_status = get_history(target, "subscription_status").added
+    modded_sub_type = get_history(target, "subscription_type_id").added
 
     # Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
@@ -666,13 +679,13 @@ def add_active_campaign_sub_tag(mapper, connection, target):
             add_subscription_tag.delay(target.user_id)
 
 
-@db.event.listens_for(UserSubscriptions, 'after_update')
+@db.event.listens_for(UserSubscriptions, "after_update")
 def update_active_campaign_sub_tag(mapper, connection, target):
     """
     Listens for updates on subscription table
     """
-    modded_sub_status = get_history(target, 'subscription_status').added
-    modded_sub_type = get_history(target, 'subscription_type_id').added
+    modded_sub_status = get_history(target, "subscription_status").added
+    modded_sub_type = get_history(target, "subscription_type_id").added
 
     # Check if there were any changes to relevant fields
     if any(len(mod) > 0 for mod in [modded_sub_status, modded_sub_type]):
@@ -690,7 +703,7 @@ class UserTokensBlacklist(db.Model):
     :attr:`token`
     """
 
-    __tablename__ = 'UserTokensBlacklist'
+    __tablename__ = "UserTokensBlacklist"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -726,7 +739,7 @@ class UserPendingEmailVerifications(db.Model):
     Holds information about user's who have not yet verified their email.
     """
 
-    __tablename__ = 'UserPendingEmailVerifications'
+    __tablename__ = "UserPendingEmailVerifications"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -751,7 +764,7 @@ class UserPendingEmailVerifications(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -794,7 +807,7 @@ class UserTokenHistory(db.Model):
     :attr:`user_id` number.
     """
 
-    __tablename__ = 'UserTokenHistory'
+    __tablename__ = "UserTokenHistory"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -854,7 +867,7 @@ class UserResetPasswordRequestHistory(db.Model):
     Stores a history of password reset requests
     """
 
-    __tablename__ = 'UserResetPasswordRequestHistory'
+    __tablename__ = "UserResetPasswordRequestHistory"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -879,7 +892,7 @@ class UserResetPasswordRequestHistory(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=True,
     )
     """
@@ -906,7 +919,7 @@ class UserLegalDocs(db.Model):
     :attr:`idx` number.
     """
 
-    __tablename__ = 'UserLegalDocs'
+    __tablename__ = "UserLegalDocs"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -929,14 +942,16 @@ class UserLegalDocs(db.Model):
     :type: int, primary key
     """
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey("User.user_id", ondelete="CASCADE"))
     """
     User ID number, foreign key to User.user_id
 
     :type: int, foreign key
     """
 
-    doc_id = db.Column(db.Integer, db.ForeignKey('LookupLegalDocs.idx', ondelete='CASCADE'))
+    doc_id = db.Column(
+        db.Integer, db.ForeignKey("LookupLegalDocs.idx", ondelete="CASCADE")
+    )
     """
     Document ID number, foreigh key to LookupLegalDocs.idx
 
@@ -959,12 +974,14 @@ class UserProfilePictures(BaseModelWithIdx):
     # Either client_user_id OR staff_user_id is used but not both and not neither (XOR).
     __table_args__ = (
         CheckConstraint(
-            '(client_user_id IS NULL) != (staff_user_id IS NULL)',
-            name='UserProfilePictures_check_user_id',
+            "(client_user_id IS NULL) != (staff_user_id IS NULL)",
+            name="UserProfilePictures_check_user_id",
         ),
     )
 
-    client_user_id = db.Column(db.Integer, db.ForeignKey('ClientInfo.user_id', ondelete='CASCADE'))
+    client_user_id = db.Column(
+        db.Integer, db.ForeignKey("ClientInfo.user_id", ondelete="CASCADE")
+    )
     """
     User ID number, foreign key to User.user_id
 
@@ -972,8 +989,8 @@ class UserProfilePictures(BaseModelWithIdx):
     """
 
     client_info = db.relationship(
-        'ClientInfo',
-        back_populates='profile_pictures',
+        "ClientInfo",
+        back_populates="profile_pictures",
         foreign_keys=[client_user_id],
     )
     """
@@ -982,7 +999,9 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: :class:`ClientInfo` instance
     """
 
-    staff_user_id = db.Column(db.Integer, db.ForeignKey('StaffProfile.user_id', ondelete='CASCADE'))
+    staff_user_id = db.Column(
+        db.Integer, db.ForeignKey("StaffProfile.user_id", ondelete="CASCADE")
+    )
     """
     User ID number, foreign key to User.user_id
 
@@ -990,8 +1009,8 @@ class UserProfilePictures(BaseModelWithIdx):
     """
 
     staff_profile = db.relationship(
-        'StaffProfile',
-        back_populates='profile_pictures',
+        "StaffProfile",
+        back_populates="profile_pictures",
         foreign_keys=[staff_user_id],
     )
     """
@@ -1021,7 +1040,7 @@ class UserProfilePictures(BaseModelWithIdx):
     :type: int
     """
 
-    original = db.Column(db.Boolean, server_default='f')
+    original = db.Column(db.Boolean, server_default="f")
     """
     Boolean determining if the image is the original or not, false by default
 
@@ -1032,7 +1051,7 @@ class UserProfilePictures(BaseModelWithIdx):
 class UserActiveCampaign(BaseModelWithIdx):
     """Stores the data related to Active Campaign"""
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey("User.user_id", ondelete="CASCADE"))
     """
     User ID number, foreign key to User.user_id
 
@@ -1050,7 +1069,7 @@ class UserActiveCampaign(BaseModelWithIdx):
 class UserActiveCampaignTags(BaseModelWithIdx):
     """Stores the tags the user is tagged with on Active Campaign"""
 
-    user_id = db.Column(db.Integer, db.ForeignKey('User.user_id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey("User.user_id", ondelete="CASCADE"))
     """
     User ID number, foreign key to User.user_id
 

@@ -10,7 +10,10 @@ from sqlalchemy import text
 
 from odyssey import db
 from odyssey.utils.base.models import (
-    BaseModel, BaseModelWithIdx, ReporterIdFkeyMixin, UserIdFkeyMixin
+    BaseModel,
+    BaseModelWithIdx,
+    ReporterIdFkeyMixin,
+    UserIdFkeyMixin,
 )
 from odyssey.utils.constants import BLOODTEST_EVAL, DB_SERVER_TIME
 
@@ -72,7 +75,7 @@ class MedicalSTDHistory(BaseModelWithIdx, UserIdFkeyMixin):
 
     std_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupSTDs.std_id', ondelete='CASCADE'),
+        db.ForeignKey("LookupSTDs.std_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -89,7 +92,7 @@ class MedicalSocialHistory(BaseModelWithIdx, UserIdFkeyMixin):
     storing the client's medical social information.
     """
 
-    displayname = 'Medical General Info - Social History'
+    displayname = "Medical General Info - Social History"
 
     ever_smoked = db.Column(db.Boolean)
     """
@@ -190,11 +193,13 @@ class MedicalFamilyHistory(BaseModelWithIdx, UserIdFkeyMixin):
     storing the client's general medical information.
     """
 
-    displayname = 'Medical General Info - Family History'
+    displayname = "Medical General Info - Family History"
 
     medical_condition_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupMedicalConditions.medical_condition_id', ondelete='CASCADE'),
+        db.ForeignKey(
+            "LookupMedicalConditions.medical_condition_id", ondelete="CASCADE"
+        ),
         nullable=False,
     )
     """
@@ -246,7 +251,7 @@ class MedicalGeneralInfoMedicationAllergy(BaseModelWithIdx, UserIdFkeyMixin):
     storing the client's general medical information.
     """
 
-    displayname = 'Medical General Info - Medication Allergies'
+    displayname = "Medical General Info - Medication Allergies"
 
     medication_name = db.Column(db.String)
     """
@@ -263,14 +268,16 @@ class MedicalGeneralInfoMedicationAllergy(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
 
-class MedicalGeneralInfoMedications(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
+class MedicalGeneralInfoMedications(
+    BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
+):
     """General Medical Information.
 
     This table is used for client onboarding. It is used for
     storing the client's general medical information.
     """
 
-    displayname = 'Medical General Info - Medications'
+    displayname = "Medical General Info - Medications"
 
     medication_name = db.Column(db.Text)
     """
@@ -335,7 +342,7 @@ class MedicalGeneralInfo(BaseModelWithIdx, UserIdFkeyMixin):
     storing the client's general medical information.
     """
 
-    displayname = displayname = 'Medical General Info'
+    displayname = displayname = "Medical General Info"
 
     primary_doctor_contact_name = db.Column(db.String(50))
     """
@@ -452,7 +459,7 @@ class MedicalHistory(BaseModelWithIdx, UserIdFkeyMixin):
     only once, during the initial consult.
     """
 
-    displayname = 'Medical history'
+    displayname = "Medical history"
 
     last_examination_date = db.Column(db.Date)
     """
@@ -560,7 +567,7 @@ class MedicalPhysicalExam(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin
     information is taken only once, during the initial consult.
     """
 
-    displayname = 'Medical physical examination'
+    displayname = "Medical physical examination"
 
     timestamp = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """
@@ -807,7 +814,7 @@ class MedicalBloodTestResults(BaseModelWithIdx):
 
     test_id = db.Column(
         db.Integer,
-        db.ForeignKey('MedicalBloodTests.test_id', ondelete='CASCADE'),
+        db.ForeignKey("MedicalBloodTests.test_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -816,7 +823,9 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     :type: int, foreign key to :attr:`MedicalBloodTests.testid`
     """
 
-    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
+    modobio_test_code = db.Column(
+        db.String, db.ForeignKey("LookupBloodTests.modobio_test_code")
+    )
     """
     Modobio Test Code for this result type.
     
@@ -856,7 +865,7 @@ class MedicalBloodTestResults(BaseModelWithIdx):
 
     result_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupBloodTestResultTypes.result_id', ondelete='SET NULL'),
+        db.ForeignKey("LookupBloodTestResultTypes.result_id", ondelete="SET NULL"),
         nullable=True,
     )
     """
@@ -888,7 +897,7 @@ class MedicalBloodTestResults(BaseModelWithIdx):
     """
 
     # 1-1 relationship with LookupBloodTests
-    test_type = db.relationship('LookupBloodTests')
+    test_type = db.relationship("LookupBloodTests")
 
 
 class MedicalSurgeries(BaseModel, UserIdFkeyMixin, ReporterIdFkeyMixin):
@@ -946,7 +955,7 @@ class MedicalExternalMR(BaseModelWithIdx, UserIdFkeyMixin):
     This table stores medical record ID numbers from external medical institutes.
     """
 
-    __table_args__ = (db.UniqueConstraint('user_id', 'med_record_id', 'institute_id'), )
+    __table_args__ = (db.UniqueConstraint("user_id", "med_record_id", "institute_id"),)
 
     med_record_id = db.Column(db.String, nullable=False)
     """
@@ -959,7 +968,7 @@ class MedicalExternalMR(BaseModelWithIdx, UserIdFkeyMixin):
 
     institute_id = db.Column(
         db.Integer,
-        db.ForeignKey('MedicalInstitutions.institute_id', ondelete='CASCADE'),
+        db.ForeignKey("MedicalInstitutions.institute_id", ondelete="CASCADE"),
         nullable=False,
     )
     """

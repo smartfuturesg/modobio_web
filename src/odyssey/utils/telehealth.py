@@ -10,12 +10,18 @@ from sqlalchemy.sql.expression import and_, or_
 from werkzeug.exceptions import BadRequest
 
 from odyssey import db
-from odyssey.api.lookup.models import (LookupBookingTimeIncrements, LookupTerritoriesOfOperations)
+from odyssey.api.lookup.models import (
+    LookupBookingTimeIncrements,
+    LookupTerritoriesOfOperations,
+)
 from odyssey.api.provider.models import ProviderCredentials
 from odyssey.api.staff.models import StaffCalendarEvents, StaffRoles
 from odyssey.api.telehealth.models import (
-    TelehealthBookings, TelehealthBookingStatus, TelehealthStaffAvailability,
-    TelehealthStaffAvailabilityExceptions, TelehealthStaffSettings
+    TelehealthBookings,
+    TelehealthBookingStatus,
+    TelehealthStaffAvailability,
+    TelehealthStaffAvailabilityExceptions,
+    TelehealthStaffSettings,
 )
 from odyssey.api.user.models import User
 from odyssey.integrations.twilio import Twilio
@@ -35,9 +41,9 @@ def get_utc_start_day_time(target_date: datetime, client_tz: str) -> tuple:
     localized_target_date = datetime.combine(
         target_date.date(), time(0, tzinfo=tz.gettz(client_tz))
     )
-    time_now_client_localized = datetime.now(
-        tz.gettz(client_tz)
-    ) + timedelta(hours=current_app.config['TELEHEALTH_BOOKING_LEAD_TIME_HRS'])
+    time_now_client_localized = datetime.now(tz.gettz(client_tz)) + timedelta(
+        hours=current_app.config["TELEHEALTH_BOOKING_LEAD_TIME_HRS"]
+    )
 
     # if request was for a time in the past or current time, use the present time + booking lead time window
     if localized_target_date <= time_now_client_localized:
@@ -97,12 +103,14 @@ def get_possible_ranges(
             last_time_idx - duration_idx_delta + 1,
             available_increments,
         ):
-            time_blocks[pos_start] = ((
-                target_date,
-                weekday_start,
-                pos_start,
-                pos_start + duration_idx_delta,
-            ), )
+            time_blocks[pos_start] = (
+                (
+                    target_date,
+                    weekday_start,
+                    pos_start,
+                    pos_start + duration_idx_delta,
+                ),
+            )
 
         # add overlapping times can be 283(23:30) 286(23:45) or ealier ones depending on duration.
         # last possible start time in a day is 286(23:45)
@@ -127,12 +135,14 @@ def get_possible_ranges(
             end_time_idx - duration_idx_delta + 1,
             available_increments,
         ):
-            time_blocks[pos_start] = ((
-                target_date + timedelta(days=1),
-                weekday_end,
-                pos_start,
-                pos_start + duration_idx_delta,
-            ), )
+            time_blocks[pos_start] = (
+                (
+                    target_date + timedelta(days=1),
+                    weekday_end,
+                    pos_start,
+                    pos_start + duration_idx_delta,
+                ),
+            )
 
     else:  # +1 to make it inclusive
         for pos_start in range(
@@ -140,43 +150,50 @@ def get_possible_ranges(
             end_time_idx - duration_idx_delta + 1,
             available_increments,
         ):
-            time_blocks[pos_start] = ((
-                target_date,
-                weekday_start,
-                pos_start,
-                pos_start + duration_idx_delta,
-            ), )
+            time_blocks[pos_start] = (
+                (
+                    target_date,
+                    weekday_start,
+                    pos_start,
+                    pos_start + duration_idx_delta,
+                ),
+            )
 
     return time_blocks
 
 
 def get_practitioners_available(time_block, q_request, staff_user_id):
-    gender = True if q_request.medical_gender == 'm' else False
+    gender = True if q_request.medical_gender == "m" else False
     date1, day1, day1_start, day1_end = time_block[0]
     date2, day2, day2_start, day2_end = (
         time_block[1] if len(time_block) > 1 else (None, None, None, None)
     )
     location = (
-        LookupTerritoriesOfOperations.query.filter_by(
-            idx=q_request.location_id
-        ).one_or_none().sub_territory_abbreviation if q_request.location_id else None
+        LookupTerritoriesOfOperations.query.filter_by(idx=q_request.location_id)
+        .one_or_none()
+        .sub_territory_abbreviation
+        if q_request.location_id
+        else None
     )
     duration = q_request.duration
 
-    if q_request.profession_type == 'medical_doctor':
+    if q_request.profession_type == "medical_doctor":
         query = (
             db.session.query(
                 TelehealthStaffAvailability.user_id,
                 TelehealthStaffAvailability,
-            ).join(
+            )
+            .join(
                 ProviderCredentials,
                 ProviderCredentials.user_id == TelehealthStaffAvailability.user_id,
-            ).join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id).join(
-                User, User.user_id == TelehealthStaffAvailability.user_id
-            ).join(
+            )
+            .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id)
+            .join(User, User.user_id == TelehealthStaffAvailability.user_id)
+            .join(
                 TelehealthStaffSettings,
                 TelehealthStaffSettings.user_id == TelehealthStaffAvailability.user_id,
-            ).filter(
+            )
+            .filter(
                 ProviderCredentials.role.has(role=q_request.profession_type),
                 StaffRoles.consult_rate != None,
                 TelehealthStaffSettings.provider_telehealth_access == True,
@@ -189,13 +206,17 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
             db.session.query(
                 TelehealthStaffAvailability.user_id,
                 TelehealthStaffAvailability,
-            ).join(
+            )
+            .join(
                 StaffRoles,
                 StaffRoles.user_id == TelehealthStaffAvailability.user_id,
-            ).join(User, User.user_id == TelehealthStaffAvailability.user_id).join(
+            )
+            .join(User, User.user_id == TelehealthStaffAvailability.user_id)
+            .join(
                 TelehealthStaffSettings,
                 TelehealthStaffSettings.user_id == TelehealthStaffAvailability.user_id,
-            ).filter(
+            )
+            .filter(
                 StaffRoles.consult_rate != None,
                 StaffRoles.role == q_request.profession_type,
                 TelehealthStaffSettings.provider_telehealth_access == True,
@@ -203,7 +224,7 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
         )
 
     # if we need to check for gender
-    if q_request.medical_gender != 'np':
+    if q_request.medical_gender != "np":
         query = query.filter(User.biological_sex_male == gender)
 
     # filter by practitioner id
@@ -268,12 +289,14 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
     # filtering through scheduled bookings and removing those availabilities occupied by a booking.
     practitioner_ids = set()  # set of practitioner's avaialbe user_ids
     bookings_base_query = (
-        db.session.query(TelehealthBookings).filter_by(target_date_utc=date1.date()).filter(
-            TelehealthBookings.status != 'Canceled'
-        )
+        db.session.query(TelehealthBookings)
+        .filter_by(target_date_utc=date1.date())
+        .filter(TelehealthBookings.status != "Canceled")
     )
     for practitioner_user_id in available:
-        current_bookings = bookings_base_query.filter_by(staff_user_id=practitioner_user_id)
+        current_bookings = bookings_base_query.filter_by(
+            staff_user_id=practitioner_user_id
+        )
 
         availability_range = [
             avail.booking_window_id for avail in available[practitioner_user_id]
@@ -281,13 +304,18 @@ def get_practitioners_available(time_block, q_request, staff_user_id):
 
         current_bookings = current_bookings.filter(
             or_(
-                TelehealthBookings.booking_window_id_start_time_utc.in_(availability_range),
-                TelehealthBookings.booking_window_id_end_time_utc.in_(availability_range),
+                TelehealthBookings.booking_window_id_start_time_utc.in_(
+                    availability_range
+                ),
+                TelehealthBookings.booking_window_id_end_time_utc.in_(
+                    availability_range
+                ),
             )
         )
 
         if (
-            len(available[practitioner_user_id]) == int(duration / 5) and not current_bookings.all()
+            len(available[practitioner_user_id]) == int(duration / 5)
+            and not current_bookings.all()
         ):
             # practitioner doesn't have a booking with the date1 and any of the times in the range
             practitioner_ids.add(practitioner_user_id)
@@ -302,15 +330,18 @@ def calculate_consult_rate(hourly_rate: float, duration: int) -> float:
     return rate
 
 
-def get_practitioner_details(user_ids: set, profession_type: str, duration: int) -> dict:
+def get_practitioner_details(
+    user_ids: set, profession_type: str, duration: int
+) -> dict:
     practitioners = (
-        db.session.query(User, StaffRoles.consult_rate).join(
-            StaffRoles, StaffRoles.user_id == User.user_id
-        ).filter(
+        db.session.query(User, StaffRoles.consult_rate)
+        .join(StaffRoles, StaffRoles.user_id == User.user_id)
+        .filter(
             User.user_id.in_(user_ids),
             StaffRoles.role == profession_type,
             StaffRoles.consult_rate != None,
-        ).all()
+        )
+        .all()
     )
 
     # {user_id: {firstname, lastname, consult_cost, gender, bio, profile_pictures, hourly_consult_rate}}
@@ -327,14 +358,14 @@ def get_practitioner_details(user_ids: set, profession_type: str, duration: int)
         # get presinged url to available practitioners' profile picture
         # it's done here so we only call S3 once per practitioner available
         practitioner_details[practitioner.user_id] = {
-            'firstname': practitioner.firstname,
-            'lastname': practitioner.lastname,
-            'gender': 'm' if practitioner.biological_sex_male else 'f',
-            'bio': practitioner.staff_profile.bio,
-            'hourly_consult_rate': consult_rate,
-            'consult_cost': calculate_consult_rate(consult_rate, duration),
-            'profile_pictures': urls,
-            'roles': [role.role for role in practitioner.roles],
+            "firstname": practitioner.firstname,
+            "lastname": practitioner.lastname,
+            "gender": "m" if practitioner.biological_sex_male else "f",
+            "bio": practitioner.staff_profile.bio,
+            "hourly_consult_rate": consult_rate,
+            "consult_cost": calculate_consult_rate(consult_rate, duration),
+            "profile_pictures": urls,
+            "roles": [role.role for role in practitioner.roles],
         }
 
     return practitioner_details
@@ -358,12 +389,12 @@ def verify_availability(
     client_bookings = TelehealthBookings.query.filter(
         TelehealthBookings.client_user_id == client_user_id,
         TelehealthBookings.target_date_utc == target_start_datetime_utc.date(),
-        TelehealthBookings.status != 'Canceled',
+        TelehealthBookings.status != "Canceled",
     ).all()
     staff_bookings = TelehealthBookings.query.filter(
         TelehealthBookings.staff_user_id == staff_user_id,
         TelehealthBookings.target_date_utc == target_start_datetime_utc.date(),
-        TelehealthBookings.status != 'Canceled',
+        TelehealthBookings.status != "Canceled",
     ).all()
 
     # This checks if the input slots have already been taken.
@@ -377,7 +408,7 @@ def verify_availability(
                 utc_end_idx > booking.booking_window_id_start_time_utc
                 and utc_end_idx < booking.booking_window_id_end_time_utc
             ):
-                raise BadRequest('There already is a client appointment for this time.')
+                raise BadRequest("There already is a client appointment for this time.")
 
     if staff_bookings:
         for booking in staff_bookings:
@@ -388,21 +419,24 @@ def verify_availability(
                 utc_end_idx > booking.booking_window_id_start_time_utc
                 and utc_end_idx < booking.booking_window_id_end_time_utc
             ):
-                raise BadRequest('There already is a practitioner appointment for this'
-                                 ' time.')
+                raise BadRequest(
+                    "There already is a practitioner appointment for this" " time."
+                )
 
     # TODO consider day overlaps???
     staff_availability = (
         db.session.execute(
             select(TelehealthStaffAvailability).filter(
-                TelehealthStaffAvailability.booking_window_id.in_([
-                    idx for idx in range(utc_start_idx, utc_end_idx + 1)
-                ]),
-                TelehealthStaffAvailability.day_of_week == DAY_OF_WEEK[
-                    target_start_datetime_utc.weekday()],
+                TelehealthStaffAvailability.booking_window_id.in_(
+                    [idx for idx in range(utc_start_idx, utc_end_idx + 1)]
+                ),
+                TelehealthStaffAvailability.day_of_week
+                == DAY_OF_WEEK[target_start_datetime_utc.weekday()],
                 TelehealthStaffAvailability.user_id == staff_user_id,
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     # Make sure the full range of requested indices are found in staff_availability
     available_indices = {line.booking_window_id for line in staff_availability}
@@ -419,7 +453,7 @@ def verify_availability(
     )
 
     if not has_availability or len(exceptions) > 0:
-        raise BadRequest('Staff does not currently have this time available')
+        raise BadRequest("Staff does not currently have this time available")
 
     return
 
@@ -438,7 +472,9 @@ def update_booking_status_history(
     db.session.add(status_history)
 
 
-def complete_booking(booking_id: int, ):
+def complete_booking(
+    booking_id: int,
+):
     """Complete a booking.
 
     After booking gets started, make sure it gets completed
@@ -449,42 +485,47 @@ def complete_booking(booking_id: int, ):
     # Query the booking in question & check status
     booking = TelehealthBookings.query.get(booking_id)
     if not booking:
-        raise BadRequest('Meeting does not exist')
+        raise BadRequest("Meeting does not exist")
 
-    if booking.status == 'Completed':
-        return 'Booking Completed by Participants'
+    if booking.status == "Completed":
+        return "Booking Completed by Participants"
 
-    elif booking.status != 'In Progress':
-        raise BadRequest('Meeting has not started')
+    elif booking.status != "In Progress":
+        raise BadRequest("Meeting has not started")
 
     # update status
-    booking.status = 'Completed'
+    booking.status = "Completed"
 
     # complete twilio room if making call over, catch error or raise if not expected error
     twilio = Twilio()
     twilio.complete_telehealth_video_room(booking_id)
 
     db.session.commit()
-    return 'Booking Completed by System'
+    return "Booking Completed by System"
 
 
 def add_booking_to_calendar(
     booking: TelehealthBookings,
     staff_settings: TelehealthStaffSettings,
 ):
-
     ##
     # Populate staff calendar with booking
     # localize to staff timezone first
     ##
 
     start_time = (
-        LookupBookingTimeIncrements.query.filter_by(idx=booking.booking_window_id_start_time_utc
-                                                   ).one_or_none().start_time
+        LookupBookingTimeIncrements.query.filter_by(
+            idx=booking.booking_window_id_start_time_utc
+        )
+        .one_or_none()
+        .start_time
     )
     end_time = (
-        LookupBookingTimeIncrements.query.filter_by(idx=booking.booking_window_id_end_time_utc
-                                                   ).one_or_none().end_time
+        LookupBookingTimeIncrements.query.filter_by(
+            idx=booking.booking_window_id_end_time_utc
+        )
+        .one_or_none()
+        .end_time
     )
     # find start datetime in UTC
     target_start_datetime_utc = datetime.combine(
@@ -494,15 +535,17 @@ def add_booking_to_calendar(
 
     # booking may end on following UTC date
     target_end_date_utc = (
-        booking.target_date_utc + timedelta(days=1) if booking.booking_window_id_end_time_utc
-        < booking.booking_window_id_start_time_utc else booking.target_date_utc
+        booking.target_date_utc + timedelta(days=1)
+        if booking.booking_window_id_end_time_utc
+        < booking.booking_window_id_start_time_utc
+        else booking.target_date_utc
     )
 
     target_end_datetime_utc = datetime.combine(
         target_end_date_utc,
         time(hour=end_time.hour, minute=end_time.minute, tzinfo=tz.UTC),
     )
-    if staff_settings.timezone != 'UTC':
+    if staff_settings.timezone != "UTC":
         booking_start_staff_localized = target_start_datetime_utc.astimezone(
             tz.gettz(staff_settings.timezone)
         )
@@ -517,12 +560,12 @@ def add_booking_to_calendar(
         user_id=booking.staff_user_id,
         start_date=booking_start_staff_localized.date(),
         end_date=booking_end_staff_localized.date(),
-        start_time=booking_start_staff_localized.strftime('%H:%M:%S'),
-        end_time=booking_end_staff_localized.strftime('%H:%M:%S'),
+        start_time=booking_start_staff_localized.strftime("%H:%M:%S"),
+        end_time=booking_end_staff_localized.strftime("%H:%M:%S"),
         recurring=False,
-        availability_status='Busy',
-        location='Telehealth_' + str(booking.idx),
-        description='',
+        availability_status="Busy",
+        location="Telehealth_" + str(booking.idx),
+        description="",
         all_day=False,
         timezone=staff_settings.timezone,
     )
@@ -540,20 +583,22 @@ def get_booking_increment_data():
         # values have not been calculated yet
 
         last_increment = LookupBookingTimeIncrements.query.all()[-1]
-        increment_length = datetime.combine(date.min, last_increment.end_time) - datetime.combine(
-            date.min, last_increment.start_time
-        )
+        increment_length = datetime.combine(
+            date.min, last_increment.end_time
+        ) - datetime.combine(date.min, last_increment.start_time)
         # convert time delta to minutes
         booking_time_increment_length = (increment_length.seconds % 3600) // 60
         booking_max_increment_idx = last_increment.idx
 
     return {
-        'length': booking_time_increment_length,
-        'max_idx': booking_max_increment_idx,
+        "length": booking_time_increment_length,
+        "max_idx": booking_max_increment_idx,
     }
 
 
-def accept_booking(booking: TelehealthBookings, staff_settings: TelehealthStaffSettings):
+def accept_booking(
+    booking: TelehealthBookings, staff_settings: TelehealthStaffSettings
+):
     """
     Complete the booking process. This is meant to be run upon setting thet status of a booking to 'Accepted'
 
@@ -566,42 +611,45 @@ def accept_booking(booking: TelehealthBookings, staff_settings: TelehealthStaffS
     conversation_sid = twilio_obj.create_telehealth_chatroom(booking_id=booking.idx)
 
     # add booking to staff's calendar
-    calendar_idx = add_booking_to_calendar(booking=booking, staff_settings=staff_settings)
+    calendar_idx = add_booking_to_calendar(
+        booking=booking, staff_settings=staff_settings
+    )
 
 
 def scheduled_maintenance_date_times(start_date, end_date):
     day_when = datetime.now()
     # beginning is basically the same as the get on /maintenance/schedule/
-    dynamodb = boto3.resource('dynamodb')  # get resource
+    dynamodb = boto3.resource("dynamodb")  # get resource
     table = dynamodb.Table(
-        current_app.config['MAINTENANCE_DYNAMO_TABLE']
+        current_app.config["MAINTENANCE_DYNAMO_TABLE"]
     )  # changes on defaults.py value
 
-    start_date = start_date.strftime('%Y-%m-%d')
-    end_date = end_date.strftime('%Y-%m-%d')
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
     start_date = date_validator(start_date)
     end_date = date_validator(end_date)
 
     response = table.scan(
-        FilterExpression=Attr('deleted').eq('False') & (
-            Attr('end_time').between(start_date, end_date) |
-            Attr('start_time').between(start_date, end_date)
+        FilterExpression=Attr("deleted").eq("False")
+        & (
+            Attr("end_time").between(start_date, end_date)
+            | Attr("start_time").between(start_date, end_date)
         )
     )
-    if response['ResponseMetadata']['HTTPStatusCode'] != 200:
+    if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
         raise BadRequest(
-            'AWS returned the following error:'
+            "AWS returned the following error:"
             f' {response["ResponseMetadata"]["Message"]}'
         )
 
-    blocks = response['Items']  # just need the items
+    blocks = response["Items"]  # just need the items
 
     result = []  # filter out the deleted maintenance blocks
     for block in blocks:
         result.append(
             {  # build list of dicts containing what we need
-                'start_time': block['start_time'],
-                'end_time': block['end_time'],
+                "start_time": block["start_time"],
+                "end_time": block["end_time"],
             }
         )
 
@@ -624,7 +672,8 @@ def check_availability_exceptions(user_id, is_busy, date, start_time_id, end_tim
     return (
         TelehealthStaffAvailabilityExceptions.query.filter_by(
             user_id=user_id, exception_date=date, is_busy=is_busy
-        ).filter(
+        )
+        .filter(
             or_(
                 and_(
                     TelehealthStaffAvailabilityExceptions.exception_booking_window_id_start_time
@@ -651,5 +700,6 @@ def check_availability_exceptions(user_id, is_busy, date, start_time_id, end_tim
                     <= end_time_id,
                 ),
             )
-        ).all()
+        )
+        .all()
     )
