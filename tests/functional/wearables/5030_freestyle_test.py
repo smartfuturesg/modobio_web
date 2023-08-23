@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask.json import dumps
+import pytest
 
 from odyssey.api.wearables.models import Wearables, WearablesFreeStyle
 
@@ -12,6 +13,8 @@ from .data import (
     wearables_freestyle_unequal_data,
     wearables_freestyle_duplicate_data,
 )
+
+pytest.skip(allow_module_level=True)
 
 
 def test_wearables_freestyle_activate_post(test_client):

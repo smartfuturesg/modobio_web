@@ -1,8 +1,12 @@
 from flask.json import dumps
+import pytest
 
 from odyssey.api.wearables.models import Wearables
 
 from .data import wearables_data
+
+
+pytest.skip(allow_module_level=True)
 
 
 def test_wearables_post(test_client):

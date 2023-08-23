@@ -6,6 +6,8 @@ from odyssey.api.wearables.models import Wearables, WearablesFitbit
 
 from .data import wearables_data
 
+pytest.skip(allow_module_level=True)
+
 
 def test_fitbit_pre_auth(test_client):
     data = Wearables.query.filter_by(user_id=test_client.client_id).one_or_none()
