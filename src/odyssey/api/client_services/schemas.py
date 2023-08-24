@@ -14,11 +14,11 @@ class CSUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = (
-            'created_at',
-            'updated_at',
-            'staff_profile',
-            'client_info',
-            'is_internal',
+            "created_at",
+            "updated_at",
+            "staff_profile",
+            "client_info",
+            "is_internal",
         )
 
 
@@ -26,13 +26,13 @@ class CSUserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserLogin
         exclude = (
-            'created_at',
-            'updated_at',
-            'idx',
-            'user_id',
-            'password',
-            'last_login',
-            'refresh_token',
+            "created_at",
+            "updated_at",
+            "idx",
+            "user_id",
+            "password",
+            "last_login",
+            "refresh_token",
         )
 
 

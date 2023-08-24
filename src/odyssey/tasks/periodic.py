@@ -14,25 +14,35 @@ from sqlalchemy import and_, delete, distinct, func, or_, select, text
 
 from odyssey import celery, conf, db, mongo
 from odyssey.api.client.models import (
-    ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations, ClientDataStorage
+    ClientClinicalCareTeam,
+    ClientClinicalCareTeamAuthorizations,
+    ClientDataStorage,
 )
 from odyssey.api.lookup.models import LookupBookingTimeIncrements
 from odyssey.api.notifications.models import Notifications
 from odyssey.api.notifications.schemas import NotificationSchema
 from odyssey.api.telehealth.models import (
-    TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailabilityExceptions
+    TelehealthBookings,
+    TelehealthChatRooms,
+    TelehealthStaffAvailabilityExceptions,
 )
 from odyssey.api.user.models import User, UserSubscriptions
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.tasks.base import BaseTaskWithRetry
 from odyssey.tasks.tasks import (
-    cancel_noshow_appointment, cancel_telehealth_appointment, deauthenticate_terra_user,
-    notify_client_of_imminent_scheduled_maintenance, notify_staff_of_imminent_scheduled_maintenance,
-    store_telehealth_transcript, upcoming_appointment_care_team_permissions,
-    upcoming_appointment_notification_2hr, upcoming_booking_payment_notification,
-    update_client_subscription_task, update_subscription_auto_renewal_status
+    cancel_noshow_appointment,
+    cancel_telehealth_appointment,
+    deauthenticate_terra_user,
+    notify_client_of_imminent_scheduled_maintenance,
+    notify_staff_of_imminent_scheduled_maintenance,
+    store_telehealth_transcript,
+    upcoming_appointment_care_team_permissions,
+    upcoming_appointment_notification_2hr,
+    upcoming_booking_payment_notification,
+    update_client_subscription_task,
+    update_subscription_auto_renewal_status,
 )
-from odyssey.utils.constants import (NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID)
+from odyssey.utils.constants import NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID
 from odyssey.utils.message import send_email
 from odyssey.utils.misc import create_notification, get_time_index
 
@@ -44,12 +54,14 @@ def refresh_client_data_storage():
     """
     Use data_per_client view to update ClientDataStorage table
     """
-    dat = db.session.execute(text('SELECT * FROM public.data_per_client')).all()
+    dat = db.session.execute(text("SELECT * FROM public.data_per_client")).all()
     db.session.execute(delete(ClientDataStorage))
     db.session.flush()
 
     for row in dat:
-        db.session.add(ClientDataStorage(user_id=row[0], total_bytes=row[1], storage_tier=row[2]))
+        db.session.add(
+            ClientDataStorage(user_id=row[0], total_bytes=row[1], storage_tier=row[2])
+        )
     db.session.commit()
 
     return
@@ -64,19 +76,19 @@ def deploy_upcoming_appointment_tasks():
     involved with the booking and deploy the needed ehr permissions to the practitioner.
     """
     # get all bookings that are sheduled <2 hours away and have not been notified yet
-    logger.info('deploying upcoming appointments task')
+    logger.info("deploying upcoming appointments task")
     current_time = datetime.now(timezone.utc)
     target_time = current_time + timedelta(hours=2)
     target_time_window_start = get_time_index(datetime.now(timezone.utc))
     target_time_window_end = get_time_index(target_time)
     logger.info(
-        f'upcoming bookings task time window: {target_time_window_start} -'
-        f' {target_time_window_end}'
+        f"upcoming bookings task time window: {target_time_window_start} -"
+        f" {target_time_window_end}"
     )
 
     # find all accepted bookings who have not been notified yet
     bookings = TelehealthBookings.query.filter(
-        TelehealthBookings.status == 'Accepted',
+        TelehealthBookings.status == "Accepted",
         TelehealthBookings.notified == False,
     )
     if target_time_window_start > target_time_window_end:
@@ -85,11 +97,13 @@ def deploy_upcoming_appointment_tasks():
         bookings = bookings.filter(
             or_(
                 and_(
-                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.booking_window_id_start_time_utc
+                    >= target_time_window_start,
                     TelehealthBookings.target_date_utc == current_time.date(),
                 ),
                 and_(
-                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.booking_window_id_start_time_utc
+                    <= target_time_window_end,
                     TelehealthBookings.target_date_utc == target_time.date(),
                 ),
             )
@@ -98,8 +112,10 @@ def deploy_upcoming_appointment_tasks():
         # otherwise just query for bookings whose start id falls between the target times on for today
         bookings = bookings.filter(
             and_(
-                TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
-                TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                TelehealthBookings.booking_window_id_start_time_utc
+                >= target_time_window_start,
+                TelehealthBookings.booking_window_id_start_time_utc
+                <= target_time_window_end,
                 TelehealthBookings.target_date_utc == target_time.date(),
             )
         ).all()
@@ -114,29 +130,37 @@ def deploy_upcoming_appointment_tasks():
     # schedule pre-appointment tasks
     for booking in bookings:
         logger.info(
-            'deploying notifcation and care team tasks for booking with id'
-            f' {booking.idx}'
+            "deploying notifcation and care team tasks for booking with id"
+            f" {booking.idx}"
         )
         booking.notified = True
         # create datetime object for scheduling tasks
         booking_start_time = (
             db.session.execute(
                 select(LookupBookingTimeIncrements.start_time).where(
-                    LookupBookingTimeIncrements.idx == booking.booking_window_id_start_time_utc
+                    LookupBookingTimeIncrements.idx
+                    == booking.booking_window_id_start_time_utc
                 )
-            ).scalars().one_or_none()
+            )
+            .scalars()
+            .one_or_none()
         )
-        notification_eta = datetime.combine(booking.target_date_utc,
-                                            booking_start_time) - timedelta(hours=2)
-        ehr_permissions_eta = datetime.combine(booking.target_date_utc,
-                                               booking_start_time) - timedelta(minutes=30)
+        notification_eta = datetime.combine(
+            booking.target_date_utc, booking_start_time
+        ) - timedelta(hours=2)
+        ehr_permissions_eta = datetime.combine(
+            booking.target_date_utc, booking_start_time
+        ) - timedelta(minutes=30)
 
         # Deploy scheduled task to update notifications table with upcoming booking notification
-        upcoming_appointment_notification_2hr.apply_async((booking.idx, ), eta=notification_eta)
-        upcoming_appointment_care_team_permissions.apply_async((booking.idx, ),
-                                                               eta=ehr_permissions_eta)
+        upcoming_appointment_notification_2hr.apply_async(
+            (booking.idx,), eta=notification_eta
+        )
+        upcoming_appointment_care_team_permissions.apply_async(
+            (booking.idx,), eta=ehr_permissions_eta
+        )
     db.session.commit()
-    logger.info('upcoming bookings task completed')
+    logger.info("upcoming bookings task completed")
 
 
 # TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
@@ -164,7 +188,9 @@ def deploy_appointment_transcript_store_tasks(target_date=None):
                 TelehealthChatRooms.write_access_timeout <= target_datetime_window,
                 TelehealthChatRooms.transcript_object_id == None,
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     # do not deploy task in testing
@@ -173,7 +199,9 @@ def deploy_appointment_transcript_store_tasks(target_date=None):
 
     for chat in chatrooms:
         # Deploy scheduled task
-        store_telehealth_transcript.apply_async((chat.booking_id, ), eta=chat.write_access_timeout)
+        store_telehealth_transcript.apply_async(
+            (chat.booking_id,), eta=chat.write_access_timeout
+        )
 
     return
 
@@ -200,23 +228,26 @@ def cleanup_temporary_care_team():
                     ClientClinicalCareTeam.is_temporary == True,
                 )
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     for notification in notifications:
         # create notification that care team member temporary access is expiring
-        member = User.query.filter_by(user_id=notification.team_member_user_id).one_or_none()
+        member = User.query.filter_by(
+            user_id=notification.team_member_user_id
+        ).one_or_none()
 
         create_notification(
             notification.team_member_user_id,
-            NOTIFICATION_SEVERITY_TO_ID.get('High'),
-            NOTIFICATION_TYPE_TO_ID.get('Team'),
-            f"{member.firstname} {member.lastname}'s Data Access Is About To"
-            ' Expire',
-            f'Would you like to add {member.firstname} {member.lastname} to'
-            ' your team?Swipe right on their entry in your team list to make'
-            ' them a permanent member of your team!',
-            'Provider',
+            NOTIFICATION_SEVERITY_TO_ID.get("High"),
+            NOTIFICATION_TYPE_TO_ID.get("Team"),
+            f"{member.firstname} {member.lastname}'s Data Access Is About To" " Expire",
+            f"Would you like to add {member.firstname} {member.lastname} to"
+            " your team?Swipe right on their entry in your team list to make"
+            " them a permanent member of your team!",
+            "Provider",
         )
 
     # find all temporary members that are older than the 180 hour limit
@@ -228,7 +259,9 @@ def cleanup_temporary_care_team():
                     ClientClinicalCareTeam.is_temporary == True,
                 )
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     for item in expired:
@@ -237,12 +270,14 @@ def cleanup_temporary_care_team():
             db.session.execute(
                 select(ClientClinicalCareTeamAuthorizations).where(
                     and_(
-                        ClientClinicalCareTeamAuthorizations.team_member_user_id ==
-                        item.team_member_user_id,
+                        ClientClinicalCareTeamAuthorizations.team_member_user_id
+                        == item.team_member_user_id,
                         ClientClinicalCareTeamAuthorizations.user_id == item.user_id,
                     )
                 )
-            ).scalars().all()
+            )
+            .scalars()
+            .all()
         )
 
         for permission in permissions:
@@ -277,7 +312,7 @@ def deploy_webhook_tasks(**kwargs):
     """
     # create a change stream object on it filtering by only insert operations
     # This step must be done first so that no entries are lost between now and the following step
-    stream = mongo.db.watch([{'$match': {'operationType': {'$in': ['insert']}}}])
+    stream = mongo.db.watch([{"$match": {"operationType": {"$in": ["insert"]}}}])
 
     # search for currently unprocessed webhook tasks, handle them accordingly
     # NOTE: each integration is given a colelction in the webhook database. MongoDB allows searching only one collection
@@ -317,27 +352,32 @@ def find_chargable_bookings():
     payment method saved to the booking.
     """
     # get all bookings that are scheduled <24 hours away and have not been charged yet
-    logger.info('deploying charge booking task')
+    logger.info("deploying charge booking task")
     target_time = datetime.now(timezone.utc) + timedelta(hours=24)
     target_time_window = get_time_index(target_time)
-    logger.info(f'charge bookings task time window: {target_time_window}')
+    logger.info(f"charge bookings task time window: {target_time_window}")
 
     bookings = (
         TelehealthBookings.query.filter(
             TelehealthBookings.charged == False,
-            TelehealthBookings.status == 'Accepted',
-        ).filter(
+            TelehealthBookings.status == "Accepted",
+        )
+        .filter(
             or_(
                 and_(
-                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window,
-                    TelehealthBookings.target_date_utc == datetime.now(timezone.utc).date(),
+                    TelehealthBookings.booking_window_id_start_time_utc
+                    >= target_time_window,
+                    TelehealthBookings.target_date_utc
+                    == datetime.now(timezone.utc).date(),
                 ),
                 and_(
-                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window,
+                    TelehealthBookings.booking_window_id_start_time_utc
+                    <= target_time_window,
                     TelehealthBookings.target_date_utc == target_time.date(),
                 ),
             )
-        ).all()
+        )
+        .all()
     )
 
     # do not deploy charge task in testing
@@ -345,11 +385,11 @@ def find_chargable_bookings():
         return bookings
 
     for booking in bookings:
-        logger.info(f'chargable booking detected with id {booking.idx}')
+        logger.info(f"chargable booking detected with id {booking.idx}")
         booking.charged = True
         db.session.commit()
-        charge_telehealth_appointment.apply_async((booking.idx, ), eta=datetime.now())
-    logger.info('charge booking task completed')
+        charge_telehealth_appointment.apply_async((booking.idx,), eta=datetime.now())
+    logger.info("charge booking task completed")
 
 
 # TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
@@ -360,30 +400,30 @@ def detect_practitioner_no_show():
     join the call on time. If a practitioner does not start a telehealth call within 10 minutes of
     the scheduled time, the client will be refunded for the booking.
     """
-    logger.info('deploying practitioner no show task')
+    logger.info("deploying practitioner no show task")
     target_time = datetime.now(timezone.utc)
     target_time_window = get_time_index(target_time)
     if target_time_window <= 2:
         # if it is 12:00 or 12:05, we have to adjust to target the previous date at 11:50 and 11:55 respectively
         target_time = target_time - timedelta(hours=24)
         target_time_window = 288 + target_time_window
-    logger.info(f'no show task time window: {target_time_window}')
+    logger.info(f"no show task time window: {target_time_window}")
 
     bookings = TelehealthBookings.query.filter(
-        TelehealthBookings.status == 'Accepted',
+        TelehealthBookings.status == "Accepted",
         # TelehealthBookings.charged == True,
         TelehealthBookings.target_date_utc == target_time.date(),
         TelehealthBookings.booking_window_id_start_time_utc <= target_time_window - 2,
     ).all()
     for booking in bookings:
-        logger.info(f'no show detected for the booking with id {booking.idx}')
+        logger.info(f"no show detected for the booking with id {booking.idx}")
         # change booking status to canceled and refund client
         if current_app.testing:
             # cancel_noshow_appointment(booking.idx)
-            cancel_telehealth_appointment(booking, reason='Practitioner No Show')
+            cancel_telehealth_appointment(booking, reason="Practitioner No Show")
         else:
-            cancel_noshow_appointment.apply_async((booking.idx, ), eta=datetime.now())
-    logger.info('no show task completed')
+            cancel_noshow_appointment.apply_async((booking.idx,), eta=datetime.now())
+    logger.info("no show task completed")
 
 
 @celery.task()
@@ -403,7 +443,7 @@ def deploy_subscription_update_tasks(interval: int):
     redis_conn = redis.from_url(conf.broker_url)
 
     # Use a lock to ensure only one instance of the task is running at a time
-    lock = redis_conn.lock('deploy_subscription_update_tasks_lock', blocking_timeout=10)
+    lock = redis_conn.lock("deploy_subscription_update_tasks_lock", blocking_timeout=10)
     if lock.acquire(blocking=False):
         try:
             # check for subscriptions expiring in the near future
@@ -413,45 +453,53 @@ def deploy_subscription_update_tasks(interval: int):
             latest_entries = (
                 db.session.query(
                     UserSubscriptions.user_id,
-                    func.max(UserSubscriptions.idx).label('max_idx'),
-                ).filter(UserSubscriptions.is_staff == False).group_by(UserSubscriptions.user_id
-                                                                      ).subquery()
+                    func.max(UserSubscriptions.idx).label("max_idx"),
+                )
+                .filter(UserSubscriptions.is_staff == False)
+                .group_by(UserSubscriptions.user_id)
+                .subquery()
             )
 
             # Main query to get the UserSubscriptions rows that match the latest entries
             subscriptions = (
-                db.session.query(UserSubscriptions).join(
+                db.session.query(UserSubscriptions)
+                .join(
                     latest_entries,
-                    (UserSubscriptions.user_id == latest_entries.c.user_id) &
-                    (UserSubscriptions.idx == latest_entries.c.max_idx),
-                ).filter(
+                    (UserSubscriptions.user_id == latest_entries.c.user_id)
+                    & (UserSubscriptions.idx == latest_entries.c.max_idx),
+                )
+                .filter(
                     UserSubscriptions.expire_date < expired_by,
-                    UserSubscriptions.subscription_status == 'subscribed',
+                    UserSubscriptions.subscription_status == "subscribed",
                     UserSubscriptions.is_staff == False,
-                ).all()
+                )
+                .all()
             )
 
             for subscription in subscriptions:
                 logger.info(
-                    'Deploying task to update subscription for user_id:'
-                    f' {subscription.user_id}'
+                    "Deploying task to update subscription for user_id:"
+                    f" {subscription.user_id}"
                 )
 
                 # check that subscription update task is not already in the redis queue
                 # if it is, do not deploy another task
-                if not redis_conn.get(f'task_subscription_update_{subscription.user_id}'):
+                if not redis_conn.get(
+                    f"task_subscription_update_{subscription.user_id}"
+                ):
                     # set redis key to indicate that a task has been deployed for this user_id
                     # the key is set to expire in 1 hour
                     redis_conn.set(
-                        f'task_subscription_update_{subscription.user_id}',
+                        f"task_subscription_update_{subscription.user_id}",
                         1,
                         ex=3600,
                     )
 
                     # buffer task eta to ensure subscription has been updated on apple's end by the time this task runs
                     task_eta = subscription.expire_date + timedelta(seconds=5)
-                    update_client_subscription_task.apply_async((subscription.user_id, ),
-                                                                eta=task_eta)
+                    update_client_subscription_task.apply_async(
+                        (subscription.user_id,), eta=task_eta
+                    )
         finally:
             lock.release()
 
@@ -466,7 +514,7 @@ def remove_expired_availability_exceptions():
     """
 
     current_date = datetime.now(timezone.utc).date()
-    logger.info('Deploying remove expired exceptions test')
+    logger.info("Deploying remove expired exceptions test")
     exceptions = TelehealthStaffAvailabilityExceptions.query.filter(
         TelehealthStaffAvailabilityExceptions.exception_date < current_date
     ).all()
@@ -474,7 +522,7 @@ def remove_expired_availability_exceptions():
     for exception in exceptions:
         db.session.delete(exception)
     db.session.commit()
-    logger.info('Completed remove expired exceptions task')
+    logger.info("Completed remove expired exceptions task")
 
 
 @celery.task()
@@ -487,7 +535,7 @@ def remove_past_notifications():
 
     current_time = datetime.now(timezone.utc).date()
 
-    logger.info('Removing past notifications...')
+    logger.info("Removing past notifications...")
     notifications = Notifications.query.filter(
         or_(Notifications.expires < current_time, Notifications.deleted == True)
     ).all()
@@ -495,26 +543,28 @@ def remove_past_notifications():
     for notification in notifications:
         db.session.delete(notification)
     db.session.commit()
-    logger.info('Completed remove past notifications task.')
+    logger.info("Completed remove past notifications task.")
 
 
 @celery.task()
 def create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance():
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(current_app.config['MAINTENANCE_DYNAMO_TABLE'])
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(current_app.config["MAINTENANCE_DYNAMO_TABLE"])
 
-    now_string = (datetime.utcnow()
-                  - timedelta(seconds=10)).strftime('%Y-%m-%dT%H:%M:%S.000000+00:00')
-    one_hour_15min_out_string = (datetime.utcnow() + timedelta(hours=1, minutes=15, seconds=10)
-                                ).strftime('%Y-%m-%dT%H:%M:%S.000000+00:00')
+    now_string = (datetime.utcnow() - timedelta(seconds=10)).strftime(
+        "%Y-%m-%dT%H:%M:%S.000000+00:00"
+    )
+    one_hour_15min_out_string = (
+        datetime.utcnow() + timedelta(hours=1, minutes=15, seconds=10)
+    ).strftime("%Y-%m-%dT%H:%M:%S.000000+00:00")
 
     response = table.scan(  # look for imminent scheduled maintenances
-        FilterExpression=Attr('deleted').eq('False')
-        & Attr('start_time').between(now_string, one_hour_15min_out_string)
-        & Attr('notified').eq('False')
+        FilterExpression=Attr("deleted").eq("False")
+        & Attr("start_time").between(now_string, one_hour_15min_out_string)
+        & Attr("notified").eq("False")
     )  # runs every 15 minutes, so reach out an extra 14 minutes
     # better that notifications are generated a bit early rather than late
-    data = response['Items']
+    data = response["Items"]
     # if data is empty, this for loop will not run
     for datum in data:  # should only ever be one, but just in case
         # create tasks to alert client users of the imminent maintenance
@@ -525,15 +575,15 @@ def create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenanc
             notify_staff_of_imminent_scheduled_maintenance.delay(staff.user_id, datum)
         # must now set notified attr of scheduled maintenance(s) to be True, was set to False on posting
         table.update_item(
-            Key={'block_id': datum['block_id']},
-            UpdateExpression='set #notified = :notified',
-            ExpressionAttributeNames={'#notified': 'notified'},
-            ExpressionAttributeValues={':notified': 'True'},
-            ReturnValues='UPDATED_NEW',
+            Key={"block_id": datum["block_id"]},
+            UpdateExpression="set #notified = :notified",
+            ExpressionAttributeNames={"#notified": "notified"},
+            ExpressionAttributeValues={":notified": "True"},
+            ReturnValues="UPDATED_NEW",
         )
         logger.info(
             f'Maintenance with block_id:{datum["block_id"]} had notifications'
-            ' for it sent to client and staff.'
+            " for it sent to client and staff."
         )
 
 
@@ -547,21 +597,21 @@ def check_for_upcoming_booking_charges():
     Subtasks for each booking will have a notification generated alerting clients they will be charged in 24 hours.
     """
     # get all bookings that are scheduled up to 48 hours away and have payment_notified: False
-    logger.info('deploying check_for_upcoming_booking_charges task')
+    logger.info("deploying check_for_upcoming_booking_charges task")
     time_now = datetime.utcnow()
     middle_dt = time_now + timedelta(days=1)
     target_time = time_now + timedelta(days=2)
     target_time_window = get_time_index(target_time)
     logger.info(
-        f'Upcoming bookings charges task checking time window: {time_now} to'
-        f' {target_time} '
+        f"Upcoming bookings charges task checking time window: {time_now} to"
+        f" {target_time} "
     )
 
     bookings = (
         TelehealthBookings.query.filter(
             TelehealthBookings.payment_notified
             == False,  # prevent multiple notifications for one appointment
-            TelehealthBookings.status == 'Accepted',
+            TelehealthBookings.status == "Accepted",
         )
         .filter(
             or_(  # booking either today, tomorrow or the next day
@@ -582,18 +632,18 @@ def check_for_upcoming_booking_charges():
 
     for booking in bookings:
         logger.info(
-            'Upcoming booking that will be charge in about 24 hours detected'
-            f' with id {booking.idx}'
+            "Upcoming booking that will be charge in about 24 hours detected"
+            f" with id {booking.idx}"
         )
         upcoming_booking_payment_notification.delay(booking.idx)
 
-    logger.info(f'upcoming booking charges periodic task for {time_now} completed')
+    logger.info(f"upcoming booking charges periodic task for {time_now} completed")
 
 
 # TODO Telehealth on the Shelf - task removed from scheduler - re-add to scheduler when telehealth returns
 @celery.task()
 def send_appointment_reminder_email():
-    logger.info(f'Finding bookings to send pre appointment reminder.')
+    logger.info(f"Finding bookings to send pre appointment reminder.")
 
     current_time = datetime.now(timezone.utc)
     target_time = current_time + timedelta(hours=6)
@@ -602,7 +652,7 @@ def send_appointment_reminder_email():
 
     # find all accepted bookings who have not been notified yet
     bookings = TelehealthBookings.query.filter(
-        TelehealthBookings.status == 'Accepted',
+        TelehealthBookings.status == "Accepted",
         TelehealthBookings.email_reminded == False,
     )
     if target_time_window_start > target_time_window_end:
@@ -611,11 +661,13 @@ def send_appointment_reminder_email():
         bookings = bookings.filter(
             or_(
                 and_(
-                    TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
+                    TelehealthBookings.booking_window_id_start_time_utc
+                    >= target_time_window_start,
                     TelehealthBookings.target_date_utc == current_time.date(),
                 ),
                 and_(
-                    TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                    TelehealthBookings.booking_window_id_start_time_utc
+                    <= target_time_window_end,
                     TelehealthBookings.target_date_utc == target_time.date(),
                 ),
             )
@@ -624,16 +676,18 @@ def send_appointment_reminder_email():
         # otherwise just query for bookings whose start id falls between the target times on for today
         bookings = bookings.filter(
             and_(
-                TelehealthBookings.booking_window_id_start_time_utc >= target_time_window_start,
-                TelehealthBookings.booking_window_id_start_time_utc <= target_time_window_end,
+                TelehealthBookings.booking_window_id_start_time_utc
+                >= target_time_window_start,
+                TelehealthBookings.booking_window_id_start_time_utc
+                <= target_time_window_end,
                 TelehealthBookings.target_date_utc == target_time.date(),
             )
         ).all()
 
     for booking in bookings:
-        logger.info(f'Sending pre appointment reminder to {booking.client.email}')
+        logger.info(f"Sending pre appointment reminder to {booking.client.email}")
         send_email(
-            'pre-appointment-reminder',
+            "pre-appointment-reminder",
             booking.client.email,
             firstname=booking.client.firstname,
             provider_firstname=booking.practitioner.firstname,
@@ -652,23 +706,27 @@ def update_ac_age_tags():
         dob = user.dob
         today = date.today()
         last_week = date.today() - timedelta(weeks=1)
-        age_today = (today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day)))
+        age_today = (
+            today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        )
         age_last_week = (
-            last_week.year - dob.year - ((last_week.month, last_week.day) < (dob.month, dob.day))
+            last_week.year
+            - dob.year
+            - ((last_week.month, last_week.day) < (dob.month, dob.day))
         )
 
         # check age and compare to age a week ago, place user in new age tag catergory
         if age_today == 25 and age_last_week == 24:
-            ac.remove_tag(user.user_id, 'Age 25 -')
-            ac.add_tag(user.user_id, 'Age 25-44')
+            ac.remove_tag(user.user_id, "Age 25 -")
+            ac.add_tag(user.user_id, "Age 25-44")
         if age_today == 45 and age_last_week == 44:
-            ac.remove_tag(user.user_id, 'Age 25-44')
-            ac.add_tag(user.user_id, 'Age 45-64')
+            ac.remove_tag(user.user_id, "Age 25-44")
+            ac.add_tag(user.user_id, "Age 45-64")
         if age_today == 64 and age_last_week == 63:
-            ac.remove_tag(user.user_id, 'Age 45-64')
-            ac.add_tag(user.user_id, 'Age 64+')
+            ac.remove_tag(user.user_id, "Age 45-64")
+            ac.add_tag(user.user_id, "Age 64+")
 
-    logger.info(f'Age group tags have been updated')
+    logger.info(f"Age group tags have been updated")
 
 
 @celery.task()
@@ -679,23 +737,28 @@ def check_users_auto_renewal_status():
     subquery = (
         db.session.query(
             UserSubscriptions.user_id,
-            func.max(UserSubscriptions.created_at).label('latest_created_at'),
-        ).group_by(UserSubscriptions.user_id).subquery()
+            func.max(UserSubscriptions.created_at).label("latest_created_at"),
+        )
+        .group_by(UserSubscriptions.user_id)
+        .subquery()
     )
 
     query = (
-        db.session.query(User, UserSubscriptions).join(
-            subquery, User.user_id == subquery.c.user_id
-        ).join(UserSubscriptions, UserSubscriptions.user_id == User.user_id).filter(
-            UserSubscriptions.subscription_status == 'subscribed',
+        db.session.query(User, UserSubscriptions)
+        .join(subquery, User.user_id == subquery.c.user_id)
+        .join(UserSubscriptions, UserSubscriptions.user_id == User.user_id)
+        .filter(
+            UserSubscriptions.subscription_status == "subscribed",
             UserSubscriptions.apple_original_transaction_id != None,
-        ).filter(UserSubscriptions.created_at == subquery.c.latest_created_at).all()
+        )
+        .filter(UserSubscriptions.created_at == subquery.c.latest_created_at)
+        .all()
     )
 
     for _, subscription in query:
         update_subscription_auto_renewal_status.delay(subscription.idx)
 
-    logger.info(f'Apple auto renewal statuses updated.')
+    logger.info(f"Apple auto renewal statuses updated.")
 
 
 @celery.task()
@@ -709,9 +772,11 @@ def deauthenticate_unsubscribed_terra_users():
         db.session.execute(
             select(UserSubscriptions).where(
                 UserSubscriptions.start_date < start_date,
-                UserSubscriptions.subscription_status == 'unsubscribed',
+                UserSubscriptions.subscription_status == "unsubscribed",
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     for sub in subscriptions:
@@ -727,42 +792,40 @@ def close_previous_db_connection(**kwargs):
 
 celery.conf.beat_schedule = {
     # temporary member cleanup
-    'cleanup_temporary_care_team': {
-        'task': 'odyssey.tasks.periodic.cleanup_temporary_care_team',
-        'schedule': crontab(minute='0', hour='*/1'),
+    "cleanup_temporary_care_team": {
+        "task": "odyssey.tasks.periodic.cleanup_temporary_care_team",
+        "schedule": crontab(minute="0", hour="*/1"),
     },
     # update active subscriptions
-    'update_active_subscriptions': {
-        'task': 'odyssey.tasks.periodic.deploy_subscription_update_tasks',
-        'args': (conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS, ),
-        'schedule': crontab(minute=f'*/{conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS}'),
+    "update_active_subscriptions": {
+        "task": "odyssey.tasks.periodic.deploy_subscription_update_tasks",
+        "args": (conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS,),
+        "schedule": crontab(minute=f"*/{conf.SUBSCRIPTION_UPDATE_FREQUENCY_MINS}"),
     },
     # remove past notifications
-    'remove_past_notifications': {
-        'task': 'odyssey.tasks.periodic.remove_past_notifications',
-        'schedule': crontab(hour=0, minute=42),
+    "remove_past_notifications": {
+        "task": "odyssey.tasks.periodic.remove_past_notifications",
+        "schedule": crontab(hour=0, minute=42),
     },
     # scheduled maintenances
-    'create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance': {
-        'task':
-            'odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance',
-        'schedule':
-            crontab(minute='*/15'),
+    "create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance": {
+        "task": "odyssey.tasks.periodic.create_subtasks_to_notify_clients_and_staff_of_imminent_scheduled_maintenance",
+        "schedule": crontab(minute="*/15"),
     },
     # Active campaign tags (age group)
-    'update_ac_age_tags': {
-        'task': 'odyssey.tasks.periodic.update_ac_age_tags',
-        'schedule': crontab(minute=0, hour=0, day_of_week=0),  # Run every sunday
+    "update_ac_age_tags": {
+        "task": "odyssey.tasks.periodic.update_ac_age_tags",
+        "schedule": crontab(minute=0, hour=0, day_of_week=0),  # Run every sunday
     },
     # Check subscription auto_renewal status
-    'check_users_auto_renewal_status': {
-        'task': 'odyssey.tasks.periodic.check_users_auto_renewal_status',
-        'schedule': crontab(minute=0, hour=6),  # Run every day at 6am
+    "check_users_auto_renewal_status": {
+        "task": "odyssey.tasks.periodic.check_users_auto_renewal_status",
+        "schedule": crontab(minute=0, hour=6),  # Run every day at 6am
     },
     # Deauthenticate terra users
-    'deauthenticate_unsubscribed_terra_users': {
-        'task': ('odyssey.tasks.periodic.deauthenticate_unsubscribed_terra_users'),
-        'schedule': crontab(hour='*/1'),  # Runs every hour
+    "deauthenticate_unsubscribed_terra_users": {
+        "task": ("odyssey.tasks.periodic.deauthenticate_unsubscribed_terra_users"),
+        "schedule": crontab(hour="*/1"),  # Runs every hour
     },
 }
 

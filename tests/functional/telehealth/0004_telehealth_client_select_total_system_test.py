@@ -8,7 +8,14 @@ from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRe
 from odyssey.api.user.models import User
 from odyssey.api.provider.models import ProviderCredentials
 from odyssey.api.staff.models import StaffRoles
-from odyssey.api.telehealth.models import TelehealthBookingDetails, TelehealthBookings, TelehealthChatRooms, TelehealthStaffAvailability, TelehealthQueueClientPool, TelehealthStaffSettings
+from odyssey.api.telehealth.models import (
+    TelehealthBookingDetails,
+    TelehealthBookings,
+    TelehealthChatRooms,
+    TelehealthStaffAvailability,
+    TelehealthQueueClientPool,
+    TelehealthStaffSettings,
+)
 from odyssey.tasks.tasks import cleanup_unended_call
 from flask import g
 
@@ -27,32 +34,34 @@ from .client_select_data import (
     telehealth_booking_data_2,
     telehealth_booking_data_3,
     telehealth_queue_client_3_data,
-    payment_method_data
+    payment_method_data,
 )
 
-#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+# TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_generate_client_queue(test_client):
-    #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    # telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f"/telehealth/queue/client-pool/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_client_time_select(test_client, staff_availabilities):
-
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
+        f"/telehealth/client/time-select/{test_client.client_id}/",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
-    assert response.json['total_options'] == 94
+    assert response.json["total_options"] == 94
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
@@ -68,68 +77,81 @@ def test_generate_staff_availability(test_client, telehealth_staff):
         telehealth_staff_8_general_availability_post_data,
         telehealth_staff_10_general_availability_post_data,
         telehealth_staff_12_general_availability_post_data,
-        telehealth_staff_14_general_availability_post_data]
+        telehealth_staff_14_general_availability_post_data,
+    ]
     for availability, user in zip(availability_data, telehealth_staff):
         auth_header = login(test_client, user)
 
-        staff_telehealth_access = TelehealthStaffSettings.query.filter_by(user_id=user.user_id).one_or_none()
-        #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+        staff_telehealth_access = TelehealthStaffSettings.query.filter_by(
+            user_id=user.user_id
+        ).one_or_none()
+        # Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
         if not staff_telehealth_access:
-             staff_telehealth_access = TelehealthStaffSettings(user_id=user.user_id, provider_telehealth_access = True)
-             test_client.db.session.add(staff_telehealth_access)
-             test_client.db.session.commit()
-      
+            staff_telehealth_access = TelehealthStaffSettings(
+                user_id=user.user_id, provider_telehealth_access=True
+            )
+            test_client.db.session.add(staff_telehealth_access)
+            test_client.db.session.commit()
+
         response = test_client.post(
-            f'/telehealth/settings/staff/availability/{user.user_id}/',
+            f"/telehealth/settings/staff/availability/{user.user_id}/",
             headers=auth_header,
             data=dumps(availability),
-            content_type='application/json')
+            content_type="application/json",
+        )
 
         assert response.status_code == 201
-        
+
+
 def test_client_time_select(test_client, payment_method):
-    telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    telehealth_queue_client_3_data["payment_method_id"] = payment_method.idx
     response = test_client.post(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
+        f"/telehealth/client/time-select/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
-    #TODO fix this later. length is changing depending on the day it is run?
-    #assert response.json['total_options'] == 40
+    # TODO fix this later. length is changing depending on the day it is run?
+    # assert response.json['total_options'] == 40
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
-def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, staff_availabilities):
-
+def test_generate_bookings(
+    test_client, telehealth_staff, telehealth_clients, staff_availabilities
+):
     ##
     # Create booking 1
     ##
     # add client to queue first
 
     queue_data = {
-        'profession_type': 'medical_doctor',
-        'target_date': datetime.strptime(
-                telehealth_booking_data_1.get('target_date'), '%Y-%m-%d').isoformat(),
-        'priority': False,
-        'medical_gender': 'np',
-        'location_id': 1}
+        "profession_type": "medical_doctor",
+        "target_date": datetime.strptime(
+            telehealth_booking_data_1.get("target_date"), "%Y-%m-%d"
+        ).isoformat(),
+        "priority": False,
+        "medical_gender": "np",
+        "location_id": 1,
+    }
 
     response = test_client.post(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
+        f"/telehealth/client/time-select/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(queue_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
-    #telehealth_booking_data_1['payment_method_id'] = payment_method.idx
+    # telehealth_booking_data_1['payment_method_id'] = payment_method.idx
     response = test_client.post(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={telehealth_staff[0].user_id}',
+        f"/telehealth/bookings/"
+        f"?client_user_id={test_client.client_id}"
+        f"&staff_user_id={telehealth_staff[0].user_id}",
         headers=test_client.client_auth_header,
         data=dumps(telehealth_booking_data_1),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
@@ -138,27 +160,31 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, st
     ##
     # add client to queue first
     queue_data = {
-        'profession_type': 'medical_doctor',
-        'target_date': datetime.strptime(
-                telehealth_booking_data_2.get('target_date'), '%Y-%m-%d').isoformat(),
-        'priority': False,
-        'medical_gender': 'np',
-        'location_id': 1}
+        "profession_type": "medical_doctor",
+        "target_date": datetime.strptime(
+            telehealth_booking_data_2.get("target_date"), "%Y-%m-%d"
+        ).isoformat(),
+        "priority": False,
+        "medical_gender": "np",
+        "location_id": 1,
+    }
 
     response = test_client.post(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
+        f"/telehealth/client/time-select/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(queue_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
-    #telehealth_booking_data_2['payment_method_id'] = payment_method.idx
+    # telehealth_booking_data_2['payment_method_id'] = payment_method.idx
     response = test_client.post(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={telehealth_staff[0].user_id}',
+        f"/telehealth/bookings/"
+        f"?client_user_id={test_client.client_id}"
+        f"&staff_user_id={telehealth_staff[0].user_id}",
         headers=test_client.client_auth_header,
         data=dumps(telehealth_booking_data_2),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
@@ -180,39 +206,44 @@ def test_generate_bookings(test_client, telehealth_staff, telehealth_clients, st
 
     # add client to queue first
     queue_data = {
-        'profession_type': 'medical_doctor',
-        'target_date': datetime.strptime(
-                telehealth_booking_data_3.get('target_date'), '%Y-%m-%d').isoformat(),
-        'priority': False,
-        'medical_gender': 'np',
-        'location_id': 1}
+        "profession_type": "medical_doctor",
+        "target_date": datetime.strptime(
+            telehealth_booking_data_3.get("target_date"), "%Y-%m-%d"
+        ).isoformat(),
+        "priority": False,
+        "medical_gender": "np",
+        "location_id": 1,
+    }
 
     response = test_client.post(
-        f'/telehealth/client/time-select/{client_4.user_id}/',
+        f"/telehealth/client/time-select/{client_4.user_id}/",
         headers=client_4_auth_header,
         data=dumps(queue_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
-    #telehealth_booking_data_3['payment_method_id'] = pm.idx
+    # telehealth_booking_data_3['payment_method_id'] = pm.idx
     response = test_client.post(
-        f'/telehealth/bookings/'
-        f'?client_user_id={client_4.user_id}'
-        f'&staff_user_id={telehealth_staff[2].user_id}',
+        f"/telehealth/bookings/"
+        f"?client_user_id={client_4.user_id}"
+        f"&staff_user_id={telehealth_staff[2].user_id}",
         headers=client_4_auth_header,
         data=dumps(telehealth_booking_data_3),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_generate_client_queue(test_client):
-    #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+    # telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f"/telehealth/queue/client-pool/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
@@ -220,87 +251,134 @@ def test_generate_client_queue(test_client):
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_client_time_select(test_client, staff_availabilities):
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
-        
+        f"/telehealth/client/time-select/{test_client.client_id}/",
+        headers=test_client.client_auth_header,
+    )
+
     assert response.status_code == 200
-    assert response.json['total_options'] == 95
+    assert response.json["total_options"] == 95
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
-def test_client_time_select_specific_provider_client_in_queue(test_client, staff_availabilities):
-
-    #telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
+def test_client_time_select_specific_provider_client_in_queue(
+    test_client, staff_availabilities
+):
+    # telehealth_queue_client_3_data['payment_method_id'] = payment_method.idx
     response = test_client.post(
-        f'/telehealth/queue/client-pool/{test_client.client_id}/',
+        f"/telehealth/queue/client-pool/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(telehealth_queue_client_3_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
-    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
-    staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
-                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
-                            ProviderCredentials.state == location,
-                            StaffRoles.consult_rate != None).first()
+    location = (
+        test_client.db.session.query(LookupTerritoriesOfOperations)
+        .filter_by(idx=1)
+        .one_or_none()
+        .sub_territory_abbreviation
+    )
+    staff_role_id = (
+        test_client.db.session.query(TelehealthStaffAvailability.user_id)
+        .join(
+            ProviderCredentials,
+            ProviderCredentials.user_id == TelehealthStaffAvailability.user_id,
+        )
+        .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id)
+        .filter(
+            ProviderCredentials.role.has(role="medical_doctor"),
+            ProviderCredentials.state == location,
+            StaffRoles.consult_rate != None,
+        )
+        .first()
+    )
 
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}',
-        headers=test_client.client_auth_header)
-    
+        f"/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}",
+        headers=test_client.client_auth_header,
+    )
+
     assert response.status_code == 200
-    for staff_id in response.json['practitioners_info']:
-        assert staff_id == f'{staff_role_id[0]}'
+    for staff_id in response.json["practitioners_info"]:
+        assert staff_id == f"{staff_role_id[0]}"
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
-def test_client_time_select_specific_provider_client_not_in_queue_with_query_params(test_client, staff_availabilities):
-
-    #Delete all clients in queue.  
+def test_client_time_select_specific_provider_client_not_in_queue_with_query_params(
+    test_client, staff_availabilities
+):
+    # Delete all clients in queue.
     test_client.db.session.query(TelehealthQueueClientPool).delete()
 
-    #Get staff_id of staff user with role medical_doctor with availability
-    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
-    staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
-                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
-                            ProviderCredentials.state == location,
-                            StaffRoles.consult_rate != None).first()
+    # Get staff_id of staff user with role medical_doctor with availability
+    location = (
+        test_client.db.session.query(LookupTerritoriesOfOperations)
+        .filter_by(idx=1)
+        .one_or_none()
+        .sub_territory_abbreviation
+    )
+    staff_role_id = (
+        test_client.db.session.query(TelehealthStaffAvailability.user_id)
+        .join(
+            ProviderCredentials,
+            ProviderCredentials.user_id == TelehealthStaffAvailability.user_id,
+        )
+        .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id)
+        .filter(
+            ProviderCredentials.role.has(role="medical_doctor"),
+            ProviderCredentials.state == location,
+            StaffRoles.consult_rate != None,
+        )
+        .first()
+    )
 
     # Request with the valid query parameters which should add client to the queue
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}&profession_type=medical_doctor&location_id=1',
-        headers=test_client.client_auth_header)
-    
+        f"/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}&profession_type=medical_doctor&location_id=1",
+        headers=test_client.client_auth_header,
+    )
+
     assert response.status_code == 200
-    for staff_id in response.json['practitioners_info']:
-        assert staff_id == f'{staff_role_id[0]}'
+    for staff_id in response.json["practitioners_info"]:
+        assert staff_id == f"{staff_role_id[0]}"
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
-def test_client_time_select_specific_provider_client_not_in_queue_without_required_query_params(test_client, staff_availabilities):
-
-    #Delete all clients in queue.  
+def test_client_time_select_specific_provider_client_not_in_queue_without_required_query_params(
+    test_client, staff_availabilities
+):
+    # Delete all clients in queue.
     test_client.db.session.query(TelehealthQueueClientPool).delete()
 
-    #Get staff_id of staff user with role medical_doctor with availability
-    location = test_client.db.session.query(LookupTerritoriesOfOperations).filter_by(idx=1).one_or_none().sub_territory_abbreviation
-    staff_role_id = test_client.db.session.query(TelehealthStaffAvailability.user_id)\
-            .join(ProviderCredentials, ProviderCredentials.user_id == TelehealthStaffAvailability.user_id)\
-                    .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id) \
-                            .filter(ProviderCredentials.role.has(role='medical_doctor'),
-                            ProviderCredentials.state == location,
-                            StaffRoles.consult_rate != None).first()
+    # Get staff_id of staff user with role medical_doctor with availability
+    location = (
+        test_client.db.session.query(LookupTerritoriesOfOperations)
+        .filter_by(idx=1)
+        .one_or_none()
+        .sub_territory_abbreviation
+    )
+    staff_role_id = (
+        test_client.db.session.query(TelehealthStaffAvailability.user_id)
+        .join(
+            ProviderCredentials,
+            ProviderCredentials.user_id == TelehealthStaffAvailability.user_id,
+        )
+        .join(StaffRoles, StaffRoles.idx == ProviderCredentials.role_id)
+        .filter(
+            ProviderCredentials.role.has(role="medical_doctor"),
+            ProviderCredentials.state == location,
+            StaffRoles.consult_rate != None,
+        )
+        .first()
+    )
 
     # Request without required query parameters add a new client in the queue
     response = test_client.get(
-        f'/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}',
-        headers=test_client.client_auth_header)
-    
+        f"/telehealth/client/time-select/{test_client.client_id}/?staff_user_id={staff_role_id[0]}",
+        headers=test_client.client_auth_header,
+    )
+
     assert response.status_code == 400
 
 
@@ -311,13 +389,13 @@ def test_full_system_with_settings(test_client, telehealth_staff):
 
     1. set staff availability (UTC)
     2. client adds to the queue (America/Phoenix)
-    3. client views availabilities and selects an appointment 
+    3. client views availabilities and selects an appointment
     4. Client makes booking
     5. Client confirms the booking
     6. client and staff view their bookings
 
     The staff availability in UTC should be converted to the client's timezone (America/Phoenix) for display.
-    """  
+    """
     staff_login = login(test_client, telehealth_staff[0])
     # clear all availabilities and bookings before this
     test_client.db.session.query(TelehealthStaffAvailability).delete()
@@ -326,9 +404,13 @@ def test_full_system_with_settings(test_client, telehealth_staff):
     test_client.db.session.query(TelehealthBookings).delete()
     test_client.db.session.commit()
 
-    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
-    staff_telehealth_access = TelehealthStaffSettings(user_id=telehealth_staff[0].user_id, provider_telehealth_access=True)
-    test_client_staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.staff_id, provider_telehealth_access=True)
+    # Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+    staff_telehealth_access = TelehealthStaffSettings(
+        user_id=telehealth_staff[0].user_id, provider_telehealth_access=True
+    )
+    test_client_staff_telehealth_access = TelehealthStaffSettings(
+        user_id=test_client.staff_id, provider_telehealth_access=True
+    )
     test_client.db.session.add(staff_telehealth_access)
     test_client.db.session.add(test_client_staff_telehealth_access)
     test_client.db.session.commit()
@@ -337,20 +419,19 @@ def test_full_system_with_settings(test_client, telehealth_staff):
     # 1. Set staff's availability
     ##
     availability = {
-        'settings': {
-            'timezone': 'UTC',
-            'auto_confirm': False},
-        'availability' : [{
-            'day_of_week': 'Monday',
-            'start_time': '3:00:00',
-            'end_time': '12:00:00'}]}
+        "settings": {"timezone": "UTC", "auto_confirm": False},
+        "availability": [
+            {"day_of_week": "Monday", "start_time": "3:00:00", "end_time": "12:00:00"}
+        ],
+    }
 
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{telehealth_staff[0].user_id}/',
+        f"/telehealth/settings/staff/availability/{telehealth_staff[0].user_id}/",
         headers=staff_login,
         data=dumps(availability),
-        content_type='application/json')
-    
+        content_type="application/json",
+    )
+
     ##
     # 2. Client requests to be added to the queue
     ##
@@ -361,95 +442,105 @@ def test_full_system_with_settings(test_client, telehealth_staff):
         "medical_gender": "np",
         "target_date": (target_date_next_monday + timedelta(weeks=1)).isoformat(),
         "timezone": "America/Phoenix",
-        'location_id': 1}
+        "location_id": 1,
+    }
 
     response = test_client.post(
-        f'/telehealth/client/time-select/{test_client.client_id}/',
+        f"/telehealth/client/time-select/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(client_queue),
-        content_type='application/json')
+        content_type="application/json",
+    )
     ##
     # 3. Client requests to view availabilities for selected target date
     ##
 
     assert response.status_code == 201
-    assert response.json['appointment_times'][0]['start_time'] == '00:00:00'
-    assert response.json['appointment_times'][0]['booking_window_id_start_time'] == 1
+    assert response.json["appointment_times"][0]["start_time"] == "00:00:00"
+    assert response.json["appointment_times"][0]["booking_window_id_start_time"] == 1
 
-    assert response.json['appointment_times'][-1]['start_time'] == '04:30:00'
-    assert response.json['appointment_times'][-1]['booking_window_id_start_time'] == 55
-    assert response.json['total_options'] == 19
+    assert response.json["appointment_times"][-1]["start_time"] == "04:30:00"
+    assert response.json["appointment_times"][-1]["booking_window_id_start_time"] == 55
+    assert response.json["total_options"] == 19
 
     ##
     # 4. Client selects an appointment time
     ##
     # select the booking that is at 4:30 Phx time/ 11:30 UTC
     client_booking = {
-        'target_date': target_date_next_monday.date().isoformat(),
-        'booking_window_id_start_time': response.json['appointment_times'][-1]['booking_window_id_start_time']
+        "target_date": target_date_next_monday.date().isoformat(),
+        "booking_window_id_start_time": response.json["appointment_times"][-1][
+            "booking_window_id_start_time"
+        ],
     }
 
     response = test_client.post(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={telehealth_staff[0].user_id}',
+        f"/telehealth/bookings/"
+        f"?client_user_id={test_client.client_id}"
+        f"&staff_user_id={telehealth_staff[0].user_id}",
         headers=test_client.client_auth_header,
         data=dumps(client_booking),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
-    assert response.json['bookings'][0]['client']['timezone'] == 'America/Phoenix'
-    assert response.json['bookings'][0]['practitioner']['timezone'] == 'UTC'
-    assert response.json['bookings'][0]['status'] == 'Pending'
+    assert response.json["bookings"][0]["client"]["timezone"] == "America/Phoenix"
+    assert response.json["bookings"][0]["practitioner"]["timezone"] == "UTC"
+    assert response.json["bookings"][0]["status"] == "Pending"
 
-    booking_id = response.json['bookings'][0]['booking_id']
+    booking_id = response.json["bookings"][0]["booking_id"]
 
     ##
     # 5. Client confirms the booking
     ##
     response = test_client.put(
-        f'/telehealth/bookings/?booking_id={ booking_id }',
+        f"/telehealth/bookings/?booking_id={ booking_id }",
         headers=test_client.client_auth_header,
-        data=dumps( {'status': 'Confirmed'}),
-        content_type='application/json')
+        data=dumps({"status": "Confirmed"}),
+        content_type="application/json",
+    )
 
-    booking_status = TelehealthBookings.query.filter_by(idx = booking_id).one_or_none().status
-    
-    assert booking_status == 'Confirmed'
+    booking_status = (
+        TelehealthBookings.query.filter_by(idx=booking_id).one_or_none().status
+    )
+
+    assert booking_status == "Confirmed"
 
     ##
     # 6. Pull up bookings from the client and staff perspectives
     ##
     response = test_client.get(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={telehealth_staff[0].user_id}',
+        f"/telehealth/bookings/"
+        f"?client_user_id={test_client.client_id}"
+        f"&staff_user_id={telehealth_staff[0].user_id}",
         headers=staff_login,
-        content_type='application/json')
-    for booking in response.json['bookings']:
-        if booking['booking_id'] == booking_id:
+        content_type="application/json",
+    )
+    for booking in response.json["bookings"]:
+        if booking["booking_id"] == booking_id:
             current_booking = booking
             break
     # booking time as seen by the staff
-    assert current_booking['practitioner']['start_time_localized'] == '11:30:00'
-    assert current_booking['practitioner']['end_time_localized'] == '11:50:00'
-    assert current_booking['practitioner']['timezone'] == 'UTC'
+    assert current_booking["practitioner"]["start_time_localized"] == "11:30:00"
+    assert current_booking["practitioner"]["end_time_localized"] == "11:50:00"
+    assert current_booking["practitioner"]["timezone"] == "UTC"
 
     response = test_client.get(
-        f'/telehealth/bookings/'
-        f'?client_user_id={test_client.client_id}'
-        f'&staff_user_id={test_client.staff_id}',
+        f"/telehealth/bookings/"
+        f"?client_user_id={test_client.client_id}"
+        f"&staff_user_id={test_client.staff_id}",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
-    for booking in response.json['bookings']:
-        if booking['booking_id'] == booking_id:
+    for booking in response.json["bookings"]:
+        if booking["booking_id"] == booking_id:
             current_booking = booking
             break
 
     # booking time as seen by the client
-    assert current_booking['client']['start_time_localized'] == '04:30:00'
-    assert current_booking['client']['end_time_localized'] == '04:50:00'
-    assert current_booking['client']['timezone'] == 'America/Phoenix'
+    assert current_booking["client"]["start_time_localized"] == "04:30:00"
+    assert current_booking["client"]["end_time_localized"] == "04:50:00"
+    assert current_booking["client"]["timezone"] == "America/Phoenix"
 
     test_client.db.session.delete(staff_telehealth_access)
     test_client.db.session.delete(test_client_staff_telehealth_access)
@@ -458,15 +549,18 @@ def test_full_system_with_settings(test_client, telehealth_staff):
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_booking_start_and_complete(test_client, booking_function_scope):
-    #Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
-    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access=True)
+    # Manually create telehealth staff settings for user. Setings from conftest is getting lost somewhere
+    staff_telehealth_access = TelehealthStaffSettings(
+        user_id=test_client.provider_id, provider_telehealth_access=True
+    )
     test_client.db.session.add(staff_telehealth_access)
     test_client.db.session.commit()
 
     # start telehealth call as a staff member
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.provider_auth_header)
+        f"/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/",
+        headers=test_client.provider_auth_header,
+    )
 
     assert response.status_code == 200
 
@@ -474,95 +568,109 @@ def test_booking_start_and_complete(test_client, booking_function_scope):
     # Complete the booking
     ###
     response = test_client.put(
-        f'/telehealth/bookings/complete/{booking_function_scope.idx}/',
-        headers=test_client.provider_auth_header)
+        f"/telehealth/bookings/complete/{booking_function_scope.idx}/",
+        headers=test_client.provider_auth_header,
+    )
 
     assert response.status_code == 200
 
     test_client.db.session.delete(staff_telehealth_access)
     test_client.db.session.commit()
 
-@pytest.mark.skip('Disabled until an alternative to InstaMed is implemented')
+
+@pytest.mark.skip("Disabled until an alternative to InstaMed is implemented")
 def test_booking_start_fail(test_client, booking_function_scope):
-    
     # mark the associated payment history row as voided
-    payment = PaymentHistory.query.filter_by(idx=booking_function_scope.payment_history_id).one_or_none()
+    payment = PaymentHistory.query.filter_by(
+        idx=booking_function_scope.payment_history_id
+    ).one_or_none()
     payment.voided = True
     test_client.db.session.commit()
-  
+
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.provider_auth_header)
-    
+        f"/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/",
+        headers=test_client.provider_auth_header,
+    )
+
     assert response.status_code == 400
-    
+
     # revert voided status and instead create a refund for this payment
     payment.voided = False
-    refund = PaymentRefunds(**{
-        'user_id': test_client.client_id,
-        'reporter_id': test_client.staff_id,
-        'payment_id': booking_function_scope.payment_history_id,
-        'refund_amount': 1,
-    })
+    refund = PaymentRefunds(
+        **{
+            "user_id": test_client.client_id,
+            "reporter_id": test_client.staff_id,
+            "payment_id": booking_function_scope.payment_history_id,
+            "refund_amount": 1,
+        }
+    )
     test_client.db.session.add(refund)
     test_client.db.session.flush()
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.provider_auth_header)
-    
-    assert response.status_code == 400   
-    
+        f"/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/",
+        headers=test_client.provider_auth_header,
+    )
+
+    assert response.status_code == 400
+
     # bookings cannot be started by a client, ensure this is the case by making the request below
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.client_auth_header)
+        f"/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 400
 
     # change the timing of the call so that it has already ended
     # meetings cannot begin after the scheduled duration has passed
-    booking_function_scope.target_date_utc = booking_function_scope.target_date_utc - timedelta(days=1)
+    booking_function_scope.target_date_utc = (
+        booking_function_scope.target_date_utc - timedelta(days=1)
+    )
 
     test_client.db.session.add(booking_function_scope)
     test_client.db.session.commit()
 
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.provider_auth_header)
+        f"/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/",
+        headers=test_client.provider_auth_header,
+    )
 
     assert response.status_code == 400
-    
+
     # change booking status to something other than accepted or in progress
-    booking_function_scope.status = 'Pending'
+    booking_function_scope.status = "Pending"
     test_client.db.session.flush()
-    
+
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.provider_auth_header)
+        f"/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/",
+        headers=test_client.provider_auth_header,
+    )
 
     assert response.status_code == 400
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_cleanup_unended_call(test_client, booking_function_scope):
-
-    staff_telehealth_access = TelehealthStaffSettings(user_id=test_client.provider_id, provider_telehealth_access = True)
+    staff_telehealth_access = TelehealthStaffSettings(
+        user_id=test_client.provider_id, provider_telehealth_access=True
+    )
     test_client.db.session.add(staff_telehealth_access)
     test_client.db.session.commit()
-    
+
     response = test_client.get(
-        f'/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/',
-        headers=test_client.provider_auth_header)
-    
+        f"/telehealth/bookings/meeting-room/access-token/{booking_function_scope.idx}/",
+        headers=test_client.provider_auth_header,
+    )
+
     assert response.status_code == 200
-    assert booking_function_scope.status == 'In Progress'
+    assert booking_function_scope.status == "In Progress"
 
     g.flask_httpauth_user = None
     complete = cleanup_unended_call(booking_function_scope.idx)
-    
-    assert booking_function_scope.status == 'Completed'
-    assert booking_function_scope.status_history[-1].reporter_role == 'System'
-    assert complete == 'Booking Completed by System'
+
+    assert booking_function_scope.status == "Completed"
+    assert booking_function_scope.status_history[-1].reporter_role == "System"
+    assert complete == "Booking Completed by System"
 
     test_client.db.session.delete(staff_telehealth_access)
     test_client.db.session.commit()

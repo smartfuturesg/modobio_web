@@ -104,7 +104,7 @@ import odyssey.defaults
 
 # Capture all valid upper-case variable names
 # that do not start with underscore, surrounded by @
-_repl_rx = re.compile(r'@([A-Z][A-Z0-9_]*)@')
+_repl_rx = re.compile(r"@([A-Z][A-Z0-9_]*)@")
 
 
 class Config:
@@ -122,6 +122,7 @@ class Config:
             app = Flask(__name__)
             app.config.from_object(Config())
     """
+
     def __init__(self):
         # Debug has already been enabled by Flask at startup, but we don't
         # have access to current_app here. We still need to know what
@@ -130,29 +131,29 @@ class Config:
         # https://flask.palletsprojects.com/en/2.2.x/config/#debug-mode
 
         # Force debug to be set.
-        flask_debug_env = os.getenv('FLASK_DEBUG')
+        flask_debug_env = os.getenv("FLASK_DEBUG")
         if flask_debug_env is None:
             # Allow for CLI option --debug/--no-debug
-            if '--debug' in sys.argv:
-                flask_debug_env = '1'
-            elif '--no-debug' in sys.argv:
-                flask_debug_env = '0'
+            if "--debug" in sys.argv:
+                flask_debug_env = "1"
+            elif "--no-debug" in sys.argv:
+                flask_debug_env = "0"
             else:
-                raise ValueError('FLASK_DEBUG must be set.')
+                raise ValueError("FLASK_DEBUG must be set.")
 
         # Here we propagate the env FLASK_DEBUG setting for external scripts.
         # We don't want to set DEBUG, since that is set by Flask at startup.
         # However, API code should use app.debug and app.testing.
         self.FLASK_DEBUG = True
-        if flask_debug_env.lower() in ('false', '0', 'no'):
+        if flask_debug_env.lower() in ("false", "0", "no"):
             self.FLASK_DEBUG = False
 
         # Are we running flask db ...?
-        migrate = len(sys.argv) > 1 and sys.argv[1] == 'db'
+        migrate = len(sys.argv) > 1 and sys.argv[1] == "db"
 
         # Load defaults.
         for var in odyssey.defaults.__dict__.keys():
-            if var.startswith('__') or not var.isupper():
+            if var.startswith("__") or not var.isupper():
                 continue
 
             # Celery expects configuration variables to be lower case and without
@@ -160,8 +161,8 @@ class Config:
             # That is fine, because they are not relevant to Flask. If there is ever a
             # need to access these variables from Flask, simply remove 'continue' and
             # use the upper case, celery_ prefixed version of the variables in Flask.
-            if var.startswith('CELERY_'):
-                _, stripped = var.split('_', maxsplit=1)
+            if var.startswith("CELERY_"):
+                _, stripped = var.split("_", maxsplit=1)
                 setattr(self, stripped.lower(), self.getvar(var))
                 continue
 
@@ -175,9 +176,9 @@ class Config:
 
         # Logging
         if not self.LOG_LEVEL:
-            self.LOG_LEVEL = 'INFO'
+            self.LOG_LEVEL = "INFO"
             if self.FLASK_DEBUG:
-                self.LOG_LEVEL = 'DEBUG'
+                self.LOG_LEVEL = "DEBUG"
 
         # Database URI.
         if not self.DB_URI:
@@ -185,18 +186,20 @@ class Config:
             if self.TESTING:
                 name = self.DB_NAME_TESTING
 
-            self.DB_URI = f'{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}'
+            self.DB_URI = (
+                f"{self.DB_FLAV}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}/{name}"
+            )
 
         self.SQLALCHEMY_DATABASE_URI = self.DB_URI
 
         # S3 prefix
-        if (self.FLASK_DEBUG and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX):
+        if self.FLASK_DEBUG and self.AWS_S3_PREFIX == odyssey.defaults.AWS_S3_PREFIX:
             if self.TESTING:
                 rand = secrets.token_hex(3)
-                self.AWS_S3_PREFIX = f'temp/pytest-{rand}'
+                self.AWS_S3_PREFIX = f"temp/pytest-{rand}"
             else:
                 username = getpass.getuser()
-                self.AWS_S3_PREFIX = f'{username}'
+                self.AWS_S3_PREFIX = f"{username}"
 
         # Telehealth timing
         if self.FLASK_DEBUG:
@@ -205,14 +208,15 @@ class Config:
 
         # Google Playstore subscription validation service account key
         if self.GOOGLE_JSON_KEY_PATH:
-            with open(self.GOOGLE_JSON_KEY_PATH, 'r') as f:
+            with open(self.GOOGLE_JSON_KEY_PATH, "r") as f:
                 json_key = f.read()
             self.GOOGLE_SERVICE_ACCOUNT_KEY = json_key
 
         # Look for values that need replacement.
         for var, val in self.__dict__.items():
             if (
-                var.startswith('__') or not var.isupper()
+                var.startswith("__")
+                or not var.isupper()
                 # replacement only makes sense with strings
                 or not isinstance(val, str)
             ):
@@ -222,7 +226,7 @@ class Config:
             if replacements:
                 for replvar in replacements:
                     replval = getattr(self, replvar)
-                    val = re.sub(f'@{replvar}@', replval, val, count=1)
+                    val = re.sub(f"@{replvar}@", replval, val, count=1)
                 setattr(self, var, val)
 
     def getvar(self, var: str) -> Any:
@@ -252,11 +256,11 @@ class Config:
         # a few basic types: None, True/False, int, or float.
         # Otherwise keep as string.
         if env is not None:
-            if env.lower() == 'none':
+            if env.lower() == "none":
                 return None
-            elif env.lower() == 'false':
+            elif env.lower() == "false":
                 return False
-            elif env.lower() == 'true':
+            elif env.lower() == "true":
                 return True
 
             try:
@@ -282,12 +286,12 @@ class Config:
         str
             All configuration variables and their values in a single string.
         """
-        conf = ['Configuration:']
+        conf = ["Configuration:"]
         for var, val in sorted(self.__dict__.items()):
-            if var.startswith('__') or not var.isupper():
+            if var.startswith("__") or not var.isupper():
                 continue
-            conf.append(f'   {var} = {val}')
-        return '\n'.join(conf)
+            conf.append(f"   {var} = {val}")
+        return "\n".join(conf)
 
     def get_version(self):
         """Get and parse version string.
@@ -311,32 +315,32 @@ class Config:
         that name will be used (and Version(0)) and on release branches the version
         number will be used ("release-1.2.3" and Version(1.2.3)).
         """
-        version = self.getvar('API_VERSION')
+        version = self.getvar("API_VERSION")
 
         if not version:
-            head = ''
+            head = ""
             here = pathlib.Path(__file__)
             for p in here.parents:
-                if (p / '.git' / 'HEAD').exists():
-                    head = (p / '.git' / 'HEAD').read_text()
+                if (p / ".git" / "HEAD").exists():
+                    head = (p / ".git" / "HEAD").read_text()
                     break
-            version = head.strip().split('/')[-1]
+            version = head.strip().split("/")[-1]
 
-        prefix = ''
-        if version and version.startswith('release-'):
-            prefix = 'release-'
+        prefix = ""
+        if version and version.startswith("release-"):
+            prefix = "release-"
             version = version[8:]
 
         try:
             self.VERSION = packaging.version.parse(version)
         except packaging.version.InvalidVersion:
-            self.VERSION = packaging.version.parse('0')
+            self.VERSION = packaging.version.parse("0")
             self.VERSION.prefix = prefix
             self.VERSION_BRANCH = version
             self.VERSION_STRING = version
         else:
             self.VERSION.prefix = prefix
-            self.VERSION_BRANCH = (f'{prefix}{self.VERSION.major}.{self.VERSION.minor}')
+            self.VERSION_BRANCH = f"{prefix}{self.VERSION.major}.{self.VERSION.minor}"
             self.VERSION_STRING = prefix + self.VERSION.public
 
 
@@ -358,6 +362,7 @@ def config_wrapper(key: str) -> Callable:
     Callable
         A function which, when called, will return the value of ``current_app.config[key]``.
     """
+
     def wrapper():
         return current_app.config[key]
 
@@ -400,9 +405,9 @@ def database_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        '--db_uri',
+        "--db_uri",
         default=conf.DB_URI,
-        help='Database URI postgres://<user>:<pass>@<host>/<db>',
+        help="Database URI postgres://<user>:<pass>@<host>/<db>",
     )
 
     return parser

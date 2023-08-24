@@ -18,9 +18,9 @@ class SystemTelehealthSessionCosts(BaseModel):
 
     __table_args__ = (
         UniqueConstraint(
-            'currency_id',
-            'profession_type',
-            name='telehealth_costs_unique_resource_currency_id_profession',
+            "currency_id",
+            "profession_type",
+            name="telehealth_costs_unique_resource_currency_id_profession",
         ),
     )
 
@@ -31,7 +31,9 @@ class SystemTelehealthSessionCosts(BaseModel):
     :type: integer, primary key, autoincrementing
     """
 
-    currency_id = db.Column(db.Integer, db.ForeignKey('LookupCurrencies.idx'), nullable=False)
+    currency_id = db.Column(
+        db.Integer, db.ForeignKey("LookupCurrencies.idx"), nullable=False
+    )
     """
     ID of the currency type.
 
@@ -72,7 +74,7 @@ class SystemVariables(db.Model):
     The value is always stored as a string and will need to be cast into its proper type where used.
     """
 
-    __tablename__ = 'SystemVariables'
+    __tablename__ = "SystemVariables"
 
     created_at = db.Column(db.DateTime, default=DB_SERVER_TIME)
     """

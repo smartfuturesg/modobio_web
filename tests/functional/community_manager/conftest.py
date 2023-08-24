@@ -94,8 +94,10 @@ def provider_role_request(test_client):
     role_id = 14 (trainer)
     """
     # add
-    role_request = ProviderRoleRequests(user_id = test_client.client_id, role_id = 14, status = 'pending')
-     
+    role_request = ProviderRoleRequests(
+        user_id=test_client.client_id, role_id=14, status="pending"
+    )
+
     test_client.client.is_provider = True
 
     test_client.db.session.add(role_request)
@@ -109,4 +111,3 @@ def provider_role_request(test_client):
     test_client.client.is_provider = False
 
     test_client.db.session.commit()
-    

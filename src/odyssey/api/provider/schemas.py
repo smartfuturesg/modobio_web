@@ -10,12 +10,16 @@ from marshmallow.decorators import post_load, pre_load
 from sqlalchemy import select
 
 from odyssey import db, ma
-from odyssey.api.lookup.schemas import (LookupOrganizationsSchema, LookupRolesSchema)
+from odyssey.api.lookup.schemas import LookupOrganizationsSchema, LookupRolesSchema
 from odyssey.api.practitioner.models import PractitionerOrganizationAffiliation
 from odyssey.api.provider.models import ProviderCredentials
 from odyssey.utils.constants import (
-    CREDENTIAL_ROLES, CREDENTIAL_STATUS, CREDENTIAL_TYPES, USSTATES_2
+    CREDENTIAL_ROLES,
+    CREDENTIAL_STATUS,
+    CREDENTIAL_TYPES,
+    USSTATES_2,
 )
+
 """
     Schemas for the practitioner API
 """
@@ -35,13 +39,15 @@ class ProviderOrganizationAffiliationSchema(ma.SQLAlchemyAutoSchema):
         model = PractitionerOrganizationAffiliation
         include_fk = True
         exclude = (
-            'created_at',
-            'updated_at',
-            'idx',
+            "created_at",
+            "updated_at",
+            "idx",
         )
-        dump_only = ('user_id', )
+        dump_only = ("user_id",)
 
-    org_info = fields.Nested(LookupOrganizationsSchema(many=False), missing=[], dump_only=True)
+    org_info = fields.Nested(
+        LookupOrganizationsSchema(many=False), missing=[], dump_only=True
+    )
     organization_idx = fields.Integer(required=True)
     affiliate_user_id = fields.String()
 
@@ -53,15 +59,15 @@ class ProviderOrganizationAffiliationSchema(ma.SQLAlchemyAutoSchema):
 class ProviderCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ProviderCredentials
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('timestamp', 'user_id', 'role_id', 'role_request_id')
+        exclude = ("created_at", "updated_at")
+        dump_only = ("timestamp", "user_id", "role_id", "role_request_id")
         include_fk = True
 
     idx = fields.Integer(required=False, dump_only=True)
     state = fields.String(validate=validate.OneOf(USSTATES_2))
     status = fields.String(
         validate=validate.OneOf(CREDENTIAL_STATUS),
-        missing='Pending Verification',
+        missing="Pending Verification",
         dump_only=True,
     )
     credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPES))
@@ -70,7 +76,7 @@ class ProviderCredentialsSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        role = data.pop('staff_role')
+        role = data.pop("staff_role")
         return (role, ProviderCredentials(**data))
 
 
@@ -81,14 +87,14 @@ class ProviderCredentialsInputSchema(Schema):
 class ProviderDeleteCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ProviderCredentials
-        only = 'idx'
+        only = "idx"
 
 
 class ProviderRoleRequestsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ProviderRoleRequests
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('user_id', 'role_id', 'idx')
+        exclude = ("created_at", "updated_at")
+        dump_only = ("user_id", "role_id", "idx")
         include_fk = True
 
     role_info = fields.Nested(LookupRolesSchema(many=False), missing=[], dump_only=True)

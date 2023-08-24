@@ -9,36 +9,50 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api.lookup.models import (
-    LookupCountriesOfOperations, LookupCurrencies, LookupOrganizations, LookupRoles,
-    LookupTerritoriesOfOperations
+    LookupCountriesOfOperations,
+    LookupCurrencies,
+    LookupOrganizations,
+    LookupRoles,
+    LookupTerritoriesOfOperations,
 )
 from odyssey.api.provider.models import *
 from odyssey.api.provider.schemas import *
 from odyssey.api.staff.models import (
-    StaffCalendarEvents, StaffOffices, StaffOperationalTerritories, StaffProfile,
-    StaffRecentClients, StaffRoles
+    StaffCalendarEvents,
+    StaffOffices,
+    StaffOperationalTerritories,
+    StaffProfile,
+    StaffRecentClients,
+    StaffRoles,
 )
 from odyssey.api.staff.schemas import StaffTokenRequestSchema
-from odyssey.api.user.models import (User, UserLogin, UserProfilePictures, UserTokenHistory)
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserProfilePictures,
+    UserTokenHistory,
+)
 from odyssey.utils.auth import basic_auth, token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (
-    MAX_CUSTOM_REFRESH_TOKEN_LIFETIME, MIN_CUSTOM_REFRESH_TOKEN_LIFETIME
+    MAX_CUSTOM_REFRESH_TOKEN_LIFETIME,
+    MIN_CUSTOM_REFRESH_TOKEN_LIFETIME,
 )
 
 logger = logging.getLogger(__name__)
 
-ns = Namespace('provider', description='Operations related to providers')
+ns = Namespace("provider", description="Operations related to providers")
 
 
-@ns.route('/token/')
+@ns.route("/token/")
 class ProviderToken(BaseResource):
     """create and revoke tokens"""
+
     @ns.doc(
-        security='password',
-        params={'refresh_token_lifetime': 'Lifetime for staff refresh token'},
+        security="password",
+        params={"refresh_token_lifetime": "Lifetime for staff refresh token"},
     )
-    @basic_auth.login_required(user_type=('provider', ), email_required=False)
+    @basic_auth.login_required(user_type=("provider",), email_required=False)
     @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
@@ -49,31 +63,35 @@ class ProviderToken(BaseResource):
 
         # bring up list of staff roles
         access_roles = (
-            db.session.query(StaffRoles.role).filter(StaffRoles.user_id == user.user_id).all()
+            db.session.query(StaffRoles.role)
+            .filter(StaffRoles.user_id == user.user_id)
+            .all()
         )
 
-        refresh_token_lifetime = request.args.get('refresh_token_lifetime', type=int)
+        refresh_token_lifetime = request.args.get("refresh_token_lifetime", type=int)
 
         # Handle refresh token lifetime param
         if refresh_token_lifetime:
             # Convert lifetime from days to hours
             if (
-                MIN_CUSTOM_REFRESH_TOKEN_LIFETIME <= refresh_token_lifetime <=
-                MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
+                MIN_CUSTOM_REFRESH_TOKEN_LIFETIME
+                <= refresh_token_lifetime
+                <= MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
             ):
                 refresh_token_lifetime *= 24
             # Else lifetime is not in acceptable range
             else:
-                raise BadRequest('Custom refresh token lifetime must be between 1 and 30'
-                                 ' days.')
+                raise BadRequest(
+                    "Custom refresh token lifetime must be between 1 and 30" " days."
+                )
 
         access_token = UserLogin.generate_token(
-            user_type='provider', user_id=user.user_id, token_type='access'
+            user_type="provider", user_id=user.user_id, token_type="access"
         )
         refresh_token = UserLogin.generate_token(
-            user_type='provider',
+            user_type="provider",
             user_id=user.user_id,
-            token_type='refresh',
+            token_type="refresh",
             refresh_token_lifetime=refresh_token_lifetime,
         )
 
@@ -81,8 +99,8 @@ class ProviderToken(BaseResource):
             UserTokenHistory(
                 user_id=user.user_id,
                 refresh_token=refresh_token,
-                event='login',
-                ua_string=request.headers.get('User-Agent'),
+                event="login",
+                ua_string=request.headers.get("User-Agent"),
             )
         )
 
@@ -95,21 +113,22 @@ class ProviderToken(BaseResource):
         db.session.commit()
 
         return {
-            'email': user.email,
-            'firstname': user.firstname,
-            'lastname': user.lastname,
-            'token': access_token,
-            'refresh_token': refresh_token,
-            'user_id': user.user_id,
-            'access_roles': [item[0] for item in access_roles],
-            'email_verified': user.email_verified,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "token": access_token,
+            "refresh_token": refresh_token,
+            "user_id": user.user_id,
+            "access_roles": [item[0] for item in access_roles],
+            "email_verified": user.email_verified,
         }
 
 
-@ns.route('/credentials/<int:user_id>/')
+@ns.route("/credentials/<int:user_id>/")
 class ProviderCredentialsEndpoint(BaseResource):
     """Endpoints for getting and updating credentials. Reroutes to provider/credentials"""
-    @token_auth.login_required(user_type=('staff_self', ))
+
+    @token_auth.login_required(user_type=("staff_self",))
     @responds(schema=ProviderCredentialsInputSchema, status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -119,7 +138,7 @@ class ProviderCredentialsEndpoint(BaseResource):
         """
 
         if not user_id:
-            raise BadRequest('Missing User ID.')
+            raise BadRequest("Missing User ID.")
 
         current_user, _ = token_auth.current_user()
         if current_user.user_id != user_id:
@@ -127,12 +146,16 @@ class ProviderCredentialsEndpoint(BaseResource):
 
         query = (
             db.session.execute(
-                select(ProviderCredentials).where(ProviderCredentials.user_id == user_id)
-            ).scalars().all()
+                select(ProviderCredentials).where(
+                    ProviderCredentials.user_id == user_id
+                )
+            )
+            .scalars()
+            .all()
         )
-        return {'items': query}
+        return {"items": query}
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=ProviderCredentialsInputSchema, api=ns)
     @responds(status_code=201, api=ns)
     def post(self, user_id):
@@ -146,28 +169,31 @@ class ProviderCredentialsEndpoint(BaseResource):
 
         payload = request.parsed_obj
         state_check = {}
-        for role, cred in payload['items']:
+        for role, cred in payload["items"]:
             # credentials must be tied to a role or role request
             # check if user holds the role
             # if user does not hold role, attempt to bring up role request
-            curr_role = StaffRoles.query.filter_by(user_id=user_id, role=role).one_or_none()
+            curr_role = StaffRoles.query.filter_by(
+                user_id=user_id, role=role
+            ).one_or_none()
             role_request = None
             if not curr_role:
                 lookup_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
                 role_request = ProviderRoleRequests.query.filter_by(
-                    user_id=user_id, role_id=lookup_role.idx, status='pending'
+                    user_id=user_id, role_id=lookup_role.idx, status="pending"
                 ).one_or_none()
                 if not role_request:
                     raise BadRequest(
-                        f'User does not hold role {role} or have requested'
-                        ' role. Cannot submit credentials for role.'
+                        f"User does not hold role {role} or have requested"
+                        " role. Cannot submit credentials for role."
                     )
 
             # This takes care of ensuring credential number is submitted if user
             # submits a payload with a state for DEA and Medical License credential types
-            if (cred.credential_type != 'npi' and cred.state) and not cred.credentials:
-                raise BadRequest('Credential number is mandatory if submitting with a'
-                                 ' state.')
+            if (cred.credential_type != "npi" and cred.state) and not cred.credentials:
+                raise BadRequest(
+                    "Credential number is mandatory if submitting with a" " state."
+                )
 
             # only one credential type, state, per role/role request allowed.
             # ensure user does not currently have a credential for this role
@@ -175,7 +201,7 @@ class ProviderCredentialsEndpoint(BaseResource):
                 user_id=user_id,
                 credential_type=cred.credential_type,
                 state=cred.state,
-            ).filter(ProviderCredentials.status.not_in(('Rejected', 'Expired')))
+            ).filter(ProviderCredentials.status.not_in(("Rejected", "Expired")))
 
             if curr_role:
                 query = query.filter_by(role_id=curr_role.idx)
@@ -186,8 +212,8 @@ class ProviderCredentialsEndpoint(BaseResource):
 
             if current_cred:
                 raise BadRequest(
-                    'User has already submitted this credential. Delete the'
-                    ' existing credential before adding a new one.'
+                    "User has already submitted this credential. Delete the"
+                    " existing credential before adding a new one."
                 )
 
             # This takes care of only allowing 1 state input per credential type
@@ -202,16 +228,16 @@ class ProviderCredentialsEndpoint(BaseResource):
                     # Rollback is necessary because we applied database changes above
                     db.session.rollback()
                     raise BadRequest(
-                        f'Multiple {cred.state} submissions for'
-                        f' {cred.credential_type}. Only one credential per'
-                        ' state is allowed'
+                        f"Multiple {cred.state} submissions for"
+                        f" {cred.credential_type}. Only one credential per"
+                        " state is allowed"
                     )
                 else:
                     state_check[cred.credential_type].append(cred.state)
 
-            cred.status = 'Pending Verification'
+            cred.status = "Pending Verification"
             if current_app.debug:
-                cred.status = 'Verified'
+                cred.status = "Verified"
             cred.role_id = curr_role.idx if curr_role else None
             cred.user_id = user_id
             cred.role_request_id = role_request.idx if role_request else None
@@ -220,7 +246,7 @@ class ProviderCredentialsEndpoint(BaseResource):
         db.session.commit()
         return
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=ProviderCredentialsSchema, api=ns)
     @responds(status_code=201, api=ns)
     def put(self, user_id):
@@ -232,28 +258,28 @@ class ProviderCredentialsEndpoint(BaseResource):
 
         current_user, _ = token_auth.current_user()
 
-        valid_statuses = ['Rejected', 'Expired']
+        valid_statuses = ["Rejected", "Expired"]
 
         payload = request.json
         payload.pop(
-            'staff_role'
+            "staff_role"
         )  # Staff_role passed in schema but isn't part of ProviderCredentials model
 
         curr_credentials = ProviderCredentials.query.filter_by(
-            user_id=user_id, idx=payload['idx']
+            user_id=user_id, idx=payload["idx"]
         ).one_or_none()
         if curr_credentials.status not in valid_statuses:
-            raise BadRequest('Current credential status must be rejected or expired.')
+            raise BadRequest("Current credential status must be rejected or expired.")
 
         if curr_credentials:
-            payload['status'] = 'Pending Verification'
+            payload["status"] = "Pending Verification"
             curr_credentials.update(payload)
             db.session.commit()
         else:
-            raise BadRequest('Credentials not found.')
+            raise BadRequest("Credentials not found.")
         return
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=ProviderDeleteCredentialsSchema, api=ns)
     @responds(status_code=201, api=ns)
     def delete(self, user_id):
@@ -268,23 +294,24 @@ class ProviderCredentialsEndpoint(BaseResource):
         payload = request.json
 
         curr_credentials = ProviderCredentials.query.filter_by(
-            user_id=user_id, idx=payload['idx']
+            user_id=user_id, idx=payload["idx"]
         ).one_or_none()
 
         if curr_credentials:
             db.session.delete(curr_credentials)
             db.session.commit()
         else:
-            raise BadRequest('Credentials not found.')
+            raise BadRequest("Credentials not found.")
         return
 
 
-@ns.route('/consult-rates/<int:user_id>/')
+@ns.route("/consult-rates/<int:user_id>/")
 class ProviderConsultationRates(BaseResource):
     """
     Endpoint for practitioners to GET and SET their own HOURLY rates.
     """
-    @token_auth.login_required(user_type=('staff_self', ))
+
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(api=ns)
     @responds(schema=ProviderConsultationRateInputSchema, status_code=200)
     def get(self, user_id):
@@ -297,11 +324,11 @@ class ProviderConsultationRates(BaseResource):
 
         items = []
         for role in staff_user_roles:
-            items.append({'role': role.role, 'rate': str(role.consult_rate)})
+            items.append({"role": role.role, "rate": str(role.consult_rate)})
 
-        return {'items': items}
+        return {"items": items}
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=ProviderConsultationRateInputSchema, api=ns)
     @responds(status_code=201)
     def post(self, user_id):
@@ -323,27 +350,29 @@ class ProviderConsultationRates(BaseResource):
         cost_range = LookupCurrencies.query.one_or_none()
         inc = cost_range.increment
 
-        for pract in payload['items']:
-            if pract['role'] in lookup_role:
-                if float(pract['rate']) < float(cost_range.min_rate) or float(
-                    pract['rate']
+        for pract in payload["items"]:
+            if pract["role"] in lookup_role:
+                if float(pract["rate"]) < float(cost_range.min_rate) or float(
+                    pract["rate"]
                 ) > float(cost_range.max_rate):
                     raise BadRequest(
-                        f'Input must be between {cost_range.min_rate} and'
-                        f' {cost_range.max_rate}.'
+                        f"Input must be between {cost_range.min_rate} and"
+                        f" {cost_range.max_rate}."
                     )
-                if float(pract['rate']) % inc == 0.0:
-                    lookup_role[pract['role']].update({'consult_rate': float(pract['rate'])})
+                if float(pract["rate"]) % inc == 0.0:
+                    lookup_role[pract["role"]].update(
+                        {"consult_rate": float(pract["rate"])}
+                    )
                 else:
-                    raise BadRequest('Cost is not valid')
+                    raise BadRequest("Cost is not valid")
             else:
-                raise BadRequest('Practitioner does not have selected role.')
+                raise BadRequest("Practitioner does not have selected role.")
 
         db.session.commit()
         return
 
 
-@ns.route('/affiliations/<int:user_id>/')
+@ns.route("/affiliations/<int:user_id>/")
 class ProviderOganizationAffiliationAPI(BaseResource):
     """
     Endpoint for Staff Admin to assign, edit and remove Practitioner's organization affiliations
@@ -352,7 +381,9 @@ class ProviderOganizationAffiliationAPI(BaseResource):
     # Multiple organizations per practitioner possible
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('staff', 'staff_self'), staff_role=('staff_admin', ))
+    @token_auth.login_required(
+        user_type=("staff", "staff_self"), staff_role=("staff_admin",)
+    )
     @responds(
         schema=ProviderOrganizationAffiliationSchema(many=True),
         status_code=200,
@@ -362,14 +393,16 @@ class ProviderOganizationAffiliationAPI(BaseResource):
         """
         Request to see the list of organizations the user_id is affiliated with
         """
-        organizations = PractitionerOrganizationAffiliation.query.filter_by(user_id=user_id).all()
+        organizations = PractitionerOrganizationAffiliation.query.filter_by(
+            user_id=user_id
+        ).all()
 
         for org in organizations:
             org.org_info = org.org_info
 
         return organizations
 
-    @token_auth.login_required(user_type=('staff', ), staff_role=('staff_admin', ))
+    @token_auth.login_required(user_type=("staff",), staff_role=("staff_admin",))
     @accepts(schema=ProviderOrganizationAffiliationSchema, api=ns)
     @responds(
         schema=ProviderOrganizationAffiliationSchema(many=True),
@@ -385,22 +418,25 @@ class ProviderOganizationAffiliationAPI(BaseResource):
         # validate organization_id
         organizations = [org.idx for org in LookupOrganizations.query.all()]
         if data.organization_idx not in organizations:
-            raise BadRequest('Invalid organization.')
+            raise BadRequest("Invalid organization.")
 
         # verify user_id has a practitioner role (will also raise error if user_id doesn't exist or is client)
         if True not in [
-            role.role_info.is_provider for role in StaffRoles.query.filter_by(user_id=user_id).all()
+            role.role_info.is_provider
+            for role in StaffRoles.query.filter_by(user_id=user_id).all()
         ]:
-            raise BadRequest('Not a practitioner.')
+            raise BadRequest("Not a practitioner.")
 
         # verify the practitioner is not already affiliated with same organization
         if data.organization_idx in [
             org.organization_idx
-            for org in PractitionerOrganizationAffiliation.query.filter_by(user_id=user_id).all()
+            for org in PractitionerOrganizationAffiliation.query.filter_by(
+                user_id=user_id
+            ).all()
         ]:
             raise BadRequest(
-                'Provider is already affiliated with organization'
-                f' {data.organization_idx}.'
+                "Provider is already affiliated with organization"
+                f" {data.organization_idx}."
             )
 
         # Add an affiliation to PractitionerOrganizationAffiliation table
@@ -408,12 +444,14 @@ class ProviderOganizationAffiliationAPI(BaseResource):
         db.session.add(data)
         db.session.commit()
 
-        organizations = PractitionerOrganizationAffiliation.query.filter_by(user_id=user_id).all()
+        organizations = PractitionerOrganizationAffiliation.query.filter_by(
+            user_id=user_id
+        ).all()
         for org in organizations:
             org.org_info = org.org_info
         return organizations
 
-    @token_auth.login_required(user_type=('staff', ), staff_role=('staff_admin', ))
+    @token_auth.login_required(user_type=("staff",), staff_role=("staff_admin",))
     @responds(
         schema=ProviderOrganizationAffiliationSchema(many=True),
         status_code=200,
@@ -421,7 +459,9 @@ class ProviderOganizationAffiliationAPI(BaseResource):
     )
     @ns.doc(
         params={
-            'organization_idx': ('(Optional) Index of organization to remove affiliation with')
+            "organization_idx": (
+                "(Optional) Index of organization to remove affiliation with"
+            )
         }
     )
     def delete(self, user_id):
@@ -432,33 +472,37 @@ class ProviderOganizationAffiliationAPI(BaseResource):
         Otherwise, all affiliations for the user_id will be removed.
         """
 
-        if 'organization_idx' in request.args:
+        if "organization_idx" in request.args:
             # validate organization_idx is a valid integer, if it was provided at all
-            if not request.args['organization_idx'].isnumeric():
-                raise BadRequest('Organization_idx must be a positive integer.')
+            if not request.args["organization_idx"].isnumeric():
+                raise BadRequest("Organization_idx must be a positive integer.")
 
             # if organization_idx is valid int delete that affiliation,
             # if the idx doesn't exist, nothing will happen
             PractitionerOrganizationAffiliation.query.filter_by(
                 user_id=user_id,
-                organization_idx=request.args['organization_idx'],
+                organization_idx=request.args["organization_idx"],
             ).delete()
 
         else:
             # delete all affiliations
-            PractitionerOrganizationAffiliation.query.filter_by(user_id=user_id).delete()
+            PractitionerOrganizationAffiliation.query.filter_by(
+                user_id=user_id
+            ).delete()
 
         # nothing will be removed if the organization index provided doesn't exist
         db.session.commit()
 
         # return all affiliations left on db
-        organizations = PractitionerOrganizationAffiliation.query.filter_by(user_id=user_id).all()
+        organizations = PractitionerOrganizationAffiliation.query.filter_by(
+            user_id=user_id
+        ).all()
         for org in organizations:
             org.org_info = org.org_info
         return organizations
 
 
-@ns.route('/role/requests/<int:user_id>/')
+@ns.route("/role/requests/<int:user_id>/")
 class ProviderRoleRequestsEndpoint(BaseResource):
     """
     Endpoint for submitting, removing, and retrieving requests for provider roles
@@ -469,10 +513,12 @@ class ProviderRoleRequestsEndpoint(BaseResource):
     # Multiple organizations per practitioner possible
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=(
-        'client',
-        'staff_self',
-    ))
+    @token_auth.login_required(
+        user_type=(
+            "client",
+            "staff_self",
+        )
+    )
     @responds(schema=ProviderRoleRequestsAllSchema, status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -492,12 +538,12 @@ class ProviderRoleRequestsEndpoint(BaseResource):
 
         role_requests = ProviderRoleRequests.query.filter_by(user_id=user_id).all()
 
-        payload = {'items': role_requests, 'total_items': len(role_requests)}
+        payload = {"items": role_requests, "total_items": len(role_requests)}
 
         return payload
 
-    @token_auth.login_required(user_type=('client', 'staff_self'))
-    @ns.doc(params={'role_id': 'Index of role to request from LookupRoles.idx'})
+    @token_auth.login_required(user_type=("client", "staff_self"))
+    @ns.doc(params={"role_id": "Index of role to request from LookupRoles.idx"})
     @responds(schema=ProviderRoleRequestsAllSchema, status_code=201, api=ns)
     def post(self, user_id):
         """
@@ -510,18 +556,24 @@ class ProviderRoleRequestsEndpoint(BaseResource):
         """
         user, _ = token_auth.current_user()
         # validate role_id. Must be a provider role
-        requested_role = LookupRoles.query.filter_by(idx=request.args['role_id']).first()
+        requested_role = LookupRoles.query.filter_by(
+            idx=request.args["role_id"]
+        ).first()
 
         if not requested_role.is_provider:
-            raise BadRequest('Requested role is not intended for providers.')
+            raise BadRequest("Requested role is not intended for providers.")
 
         # check if there are any other pending role requests for the user_id
-        if ProviderRoleRequests.query.filter_by(user_id=user_id, status='pending').first():
-            raise BadRequest('There is already an active role request for this user.')
+        if ProviderRoleRequests.query.filter_by(
+            user_id=user_id, status="pending"
+        ).first():
+            raise BadRequest("There is already an active role request for this user.")
 
         # check if user already has the requested role
-        if StaffRoles.query.filter_by(user_id=user_id, role=requested_role.role_name).one_or_none():
-            raise BadRequest('User already has the requested role.')
+        if StaffRoles.query.filter_by(
+            user_id=user_id, role=requested_role.role_name
+        ).one_or_none():
+            raise BadRequest("User already has the requested role.")
 
         # grant user provider login privileges if they don't have them already
         if not user.is_provider:
@@ -530,18 +582,18 @@ class ProviderRoleRequestsEndpoint(BaseResource):
 
         # create a new role request
         role_request = ProviderRoleRequests(
-            user_id=user_id, role_id=request.args['role_id'], status='pending'
+            user_id=user_id, role_id=request.args["role_id"], status="pending"
         )
         db.session.add(role_request)
 
         db.session.commit()
         # return role requests for user_id
-        payload = {'items': [role_request], 'total_items': 1}
+        payload = {"items": [role_request], "total_items": 1}
 
         return payload
 
-    @token_auth.login_required(user_type=('client', 'staff_self'))
-    @ns.doc(params={'request_id': 'Index of role request from LookupRoles.idx'})
+    @token_auth.login_required(user_type=("client", "staff_self"))
+    @ns.doc(params={"request_id": "Index of role request from LookupRoles.idx"})
     @responds(schema=ProviderRoleRequestsAllSchema, status_code=200, api=ns)
     def put(self, user_id):
         """
@@ -550,15 +602,15 @@ class ProviderRoleRequestsEndpoint(BaseResource):
         """
         # bring up the role request
         role_request = ProviderRoleRequests.query.filter_by(
-            user_id=user_id, idx=request.args['request_id']
+            user_id=user_id, idx=request.args["request_id"]
         ).one_or_none()
         if not role_request:
-            raise BadRequest('Role request does not exist.')
+            raise BadRequest("Role request does not exist.")
 
-        if role_request.status not in ('pending', 'inactive', 'rejected'):
-            raise BadRequest('Role request status cannot be changed')
+        if role_request.status not in ("pending", "inactive", "rejected"):
+            raise BadRequest("Role request status cannot be changed")
 
-        role_request.status = 'inactive'
+        role_request.status = "inactive"
         db.session.commit()
 
         return

@@ -8,15 +8,15 @@ from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
 from odyssey.api.staff.schemas import StaffRolesSchema
-from odyssey.api.user.models import (User, UserLegalDocs, UserLogin, UserSubscriptions)
+from odyssey.api.user.models import User, UserLegalDocs, UserLogin, UserSubscriptions
 from odyssey.utils.constants import ACCESS_ROLES
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('password', 'modobio_id', 'email_verified')
+        exclude = ("created_at", "updated_at")
+        dump_only = ("password", "modobio_id", "email_verified")
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -28,10 +28,10 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserLogin
         exclude = (
-            'staff_account_blocked',
-            'staff_account_blocked_reason',
-            'client_account_blocked',
-            'client_account_blocked_reason',
+            "staff_account_blocked",
+            "staff_account_blocked_reason",
+            "client_account_blocked",
+            "client_account_blocked_reason",
         )
 
     user_id = fields.Integer()
@@ -39,30 +39,30 @@ class UserLoginSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         new_user = UserLogin(**data)
-        new_user.set_password(data['password'])
+        new_user.set_password(data["password"])
         return new_user
 
 
 class UserInfoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        exclude = ('created_at', 'updated_at')
-        load_only = 'password'
+        exclude = ("created_at", "updated_at")
+        load_only = "password"
         dump_only = (
-            'modobio_id',
-            'user_id',
-            'is_internal',
-            'is_staff',
-            'is_client',
-            'deleted',
-            'email_verified',
+            "modobio_id",
+            "user_id",
+            "is_internal",
+            "is_staff",
+            "is_client",
+            "deleted",
+            "email_verified",
         )
 
     email = fields.Email(validate=validate.Length(min=0, max=50), required=True)
     phone_number = fields.String(validate=validate.Length(min=0, max=50))
     password = fields.String(
-        metadata={'description': 'password required'},
-        validate=validate.Regexp(regex='^(?=.*[A-z]).{9,64}$'),
+        metadata={"description": "password required"},
+        validate=validate.Regexp(regex="^(?=.*[A-z]).{9,64}$"),
         load_only=True,
         required=True,
     )
@@ -71,13 +71,13 @@ class UserInfoSchema(ma.SQLAlchemyAutoSchema):
 class UserInfoPutSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
         dump_only = (
-            'is_staff',
-            'is_client',
-            'modobio_id',
-            'user_id',
-            'email_verified',
+            "is_staff",
+            "is_client",
+            "modobio_id",
+            "user_id",
+            "email_verified",
         )
 
     email = fields.Email(validate=validate.Length(min=0, max=50))
@@ -93,9 +93,9 @@ class StaffInfoSchema(Schema):
     access_roles = fields.List(
         fields.String(validate=validate.OneOf(ACCESS_ROLES)),
         metadata={
-            'description': (
-                'Access roles the new user will have. Options include:'
-                f' {ACCESS_ROLES}'
+            "description": (
+                "Access roles the new user will have. Options include:"
+                f" {ACCESS_ROLES}"
             )
         },
     )
@@ -103,10 +103,10 @@ class StaffInfoSchema(Schema):
     access_roles_v2 = fields.Nested(
         StaffRolesSchema(many=True),
         metadata={
-            'description': (
-                'v2 of this field now returns the internal id for the role.  '
-                '                       Access roles the new user will have.'
-                f' Options include: {ACCESS_ROLES}'
+            "description": (
+                "v2 of this field now returns the internal id for the role.  "
+                "                       Access roles the new user will have."
+                f" Options include: {ACCESS_ROLES}"
             )
         },
     )
@@ -134,7 +134,7 @@ class NewStaffUserSchema(Schema):
     staff_info = fields.Nested(
         StaffInfoSchema,
         missing={},
-        metadata={'description': 'used when registering a staff member'},
+        metadata={"description": "used when registering a staff member"},
     )
 
 
@@ -156,8 +156,8 @@ class UserPasswordRecoveryContactSchema(Schema):
 class UserPasswordResetSchema(Schema):
     password = fields.String(
         required=True,
-        validate=validate.Regexp(regex='^(?=.*[A-z]).{9,64}$'),
-        metadata={'description': 'new password to be used going forward'},
+        validate=validate.Regexp(regex="^(?=.*[A-z]).{9,64}$"),
+        metadata={"description": "new password to be used going forward"},
     )
 
 
@@ -165,12 +165,12 @@ class UserPasswordUpdateSchema(Schema):
     current_password = fields.String(
         required=True,
         validate=validate.Length(min=3, max=64),
-        metadata={'description': 'current password'},
+        metadata={"description": "current password"},
     )
     new_password = fields.String(
         required=True,
-        validate=validate.Regexp(regex='^(?=.*[A-z]).{9,64}$'),
-        metadata={'description': 'new password to be used going forward'},
+        validate=validate.Regexp(regex="^(?=.*[A-z]).{9,64}$"),
+        metadata={"description": "new password to be used going forward"},
     )
 
 
@@ -191,34 +191,44 @@ class SubscriptionSponsorSchema(Schema):
 class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserSubscriptions
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ("created_at", "updated_at", "idx")
         dump_only = (
-            'end_date',
-            'user_id',
+            "end_date",
+            "user_id",
         )
         load_only = (
-            'apple_original_transaction_id',
-            'google_purchase_token',
+            "apple_original_transaction_id",
+            "google_purchase_token",
         )
 
-    subscription_type_id = fields.Integer(required=False, validate=validate.OneOf([2, 3]))
+    subscription_type_id = fields.Integer(
+        required=False, validate=validate.OneOf([2, 3])
+    )
     subscription_status = fields.String(
-        validate=validate.OneOf(['unsubscribed', 'subscribed', 'free trial', 'sponsored'])
+        validate=validate.OneOf(
+            ["unsubscribed", "subscribed", "free trial", "sponsored"]
+        )
     )
     expire_date = fields.DateTime(
         metadata={
-            '(UTC) description': (
-                'date this subscription purchase ends. Overall subscription'
-                ' may persist if it is renewed.'
+            "(UTC) description": (
+                "date this subscription purchase ends. Overall subscription"
+                " may persist if it is renewed."
             )
         }
     )
     auto_renew_status = fields.Boolean(
         dump_only=True,
-        metadata={'description': ('If True the subscription is set to be renewed automatically.')},
+        metadata={
+            "description": (
+                "If True the subscription is set to be renewed automatically."
+            )
+        },
     )
     apple_original_transaction_id = fields.String(load_only=True, missing=None)
-    subscription_type_information = fields.Nested(UserSubscriptionTypeSchema, dump_only=True)
+    subscription_type_information = fields.Nested(
+        UserSubscriptionTypeSchema, dump_only=True
+    )
     sponsorship_id = fields.Integer(load_only=True)
     sponsorship = fields.Nested(SubscriptionSponsorSchema, dump_only=True)
     google_transaction_id = fields.String(
@@ -228,23 +238,20 @@ class UserSubscriptionsSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-
         # TODO: remove this once FE adjusts to use google_purchase_token
-        if data.get('google_transaction_id'):
-            data['google_purchase_token'] = data.get('google_transaction_id')
-            data.pop('google_transaction_id', None)
+        if data.get("google_transaction_id"):
+            data["google_purchase_token"] = data.get("google_transaction_id")
+            data.pop("google_transaction_id", None)
 
         return UserSubscriptions(**data)
 
 
 class UserSubscriptionHistorySchema(Schema):
-
     client_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
     staff_subscription_history = fields.Nested(UserSubscriptionsSchema, many=True)
 
 
 class UserClinicalCareTeamSchema(Schema):
-
     client_user_id = fields.Integer()
     client_name = fields.String()
     client_email = fields.String()
@@ -253,7 +260,7 @@ class UserClinicalCareTeamSchema(Schema):
 class UserLegalDocsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = UserLegalDocs
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ("created_at", "updated_at", "idx")
 
     doc_id = fields.Integer()
     doc_name = fields.String(dump_only=True)

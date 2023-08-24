@@ -18,7 +18,11 @@ from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.user.models import User, UserLogin, UserTokenHistory
 from odyssey.utils.constants import (
-    ACCESS_ROLES, DB_SERVER_TIME, PROVIDER_ROLES, STAFF_ROLES, USER_TYPES
+    ACCESS_ROLES,
+    DB_SERVER_TIME,
+    PROVIDER_ROLES,
+    STAFF_ROLES,
+    USER_TYPES,
 )
 
 
@@ -26,6 +30,7 @@ class BasicAuth(object):
     """BasicAuth class is the main authentication class for
     the ModoBio project. It's primary function is to do basic
     authentications."""
+
     def __init__(self, scheme=None, header=None):
         self.scheme = scheme
         self.header = header
@@ -33,7 +38,7 @@ class BasicAuth(object):
     def login_required(
         self,
         f=None,
-        user_type=('staff', 'client', 'provider'),
+        user_type=("staff", "client", "provider"),
         staff_role=None,
         email_required=True,
         resources=(),
@@ -53,9 +58,9 @@ class BasicAuth(object):
               authenticate(auth,pass)
         """
         logger.debug(
-            f'Login required wrapper called with args: f={f},'
-            f' user_type={user_type}, staff_role={staff_role},'
-            f' email_required={email_required}, resources={resources}'
+            f"Login required wrapper called with args: f={f},"
+            f" user_type={user_type}, staff_role={staff_role},"
+            f" email_required={email_required}, resources={resources}"
         )
 
         ###
@@ -64,7 +69,7 @@ class BasicAuth(object):
         if user_type is not None:
             # Check if user type is a list:
             if type(user_type) is not tuple:
-                raise ValueError('user_type must be a tuple.')
+                raise ValueError("user_type must be a tuple.")
             else:
                 # Validate
                 self.validate_roles(user_type, USER_TYPES)
@@ -72,7 +77,7 @@ class BasicAuth(object):
         if staff_role is not None:
             # Check if staff role is a list:
             if type(staff_role) is not tuple:
-                raise ValueError('staff_role must be a tuple.')
+                raise ValueError("staff_role must be a tuple.")
             else:
                 # Validate
                 self.validate_roles(staff_role, ACCESS_ROLES)
@@ -102,9 +107,9 @@ class BasicAuth(object):
                 self.resources = resources
 
                 logger.debug(
-                    f'Login required decorator called with: f={f},'
-                    f' user_type={user_type}, staff_role={staff_role},'
-                    f' email_required={email_required}, resources={resources}'
+                    f"Login required decorator called with: f={f},"
+                    f" user_type={user_type}, staff_role={staff_role},"
+                    f" email_required={email_required}, resources={resources}"
                 )
 
                 auth = self.get_auth()
@@ -116,24 +121,25 @@ class BasicAuth(object):
                     raise Unauthorized
 
                 if check_staff_telehealth_access:
-                    if user_context == 'staff':
-                        from odyssey.api.telehealth.models import \
-                            TelehealthStaffSettings
-
-                        telehelath_settings = (
-                            TelehealthStaffSettings.query.filter_by(user_id=user.user_id
-                                                                   ).one_or_none()
+                    if user_context == "staff":
+                        from odyssey.api.telehealth.models import (
+                            TelehealthStaffSettings,
                         )
+
+                        telehelath_settings = TelehealthStaffSettings.query.filter_by(
+                            user_id=user.user_id
+                        ).one_or_none()
                         if not telehelath_settings:
                             raise Unauthorized(
-                                'Provider does not have telehealth settings'
-                                ' set.'
+                                "Provider does not have telehealth settings" " set."
                             )
                         if not telehelath_settings.provider_telehealth_access:
-                            raise Unauthorized('Provider does not have telehealth access')
+                            raise Unauthorized(
+                                "Provider does not have telehealth access"
+                            )
 
                 if email_required and not user.email_verified:
-                    raise BadRequest('Please verify your email address.')
+                    raise BadRequest("Please verify your email address.")
 
                 # If user_type exists (Staff or Client, etc)
                 # Check user and role access
@@ -146,7 +152,7 @@ class BasicAuth(object):
                         user_context,
                     )
 
-                g.flask_httpauth_user = ((user, user_login) if user else (None, None))
+                g.flask_httpauth_user = (user, user_login) if user else (None, None)
                 return f(*args, **kwargs)
 
             return decorated
@@ -159,80 +165,90 @@ class BasicAuth(object):
         """user_role_check is to determine if the user accessing the API
         is a Staff member or Client"""
         # user is logged in as a modobio user, they may access the endpoint
-        if 'modobio' in self.user_type:
+        if "modobio" in self.user_type:
             return
         # User is logged in, claims staff in token (user_context),
         # user is registered as staff member (user.is_staff),
         # and endpoint requests staff or staff_self (user_type).
         elif (
-            user_context == 'staff' and user.is_staff
-            and ('staff' in self.user_type or 'staff_self' in self.user_type)
+            user_context == "staff"
+            and user.is_staff
+            and ("staff" in self.user_type or "staff_self" in self.user_type)
         ):
             # Account is blocked
             if user_login.staff_account_blocked:
                 raise Unauthorized(
-                    'Your staff account has been blocked. Please contact '
-                    'client_services@modobio.com to resolve the issue.'
+                    "Your staff account has been blocked. Please contact "
+                    "client_services@modobio.com to resolve the issue."
                 )
             # Check staff roles and access.
-            elif (self.staff_role or 'staff_self' in self.user_type or len(self.resources) > 0):
+            elif (
+                self.staff_role
+                or "staff_self" in self.user_type
+                or len(self.resources) > 0
+            ):
                 self.staff_access_check(user)
             else:
                 logger.debug(
-                    'Staff user granted access to endpoint without checks:'
-                    f' {request.path}'
+                    "Staff user granted access to endpoint without checks:"
+                    f" {request.path}"
                 )
 
         # User is logged in, claims client in token (user_context),
         # user is registered as client (user.is_client),
         # and endpoint requests client (user_type).
-        elif (user_context == 'client' and user.is_client and 'client' in self.user_type):
+        elif user_context == "client" and user.is_client and "client" in self.user_type:
             # Account is blocked.
             if user_login.client_account_blocked:
                 raise Unauthorized(
-                    'Your client account has been blocked. Please contact '
-                    'client_services@modobio.com to resolve the issue.'
+                    "Your client account has been blocked. Please contact "
+                    "client_services@modobio.com to resolve the issue."
                 )
             # Check client access.
             self.client_access_check(user)
 
         elif (
-            user_context == 'provider' and user.is_provider
-            and ('provider' in self.user_type or 'staff_self' in self.user_type)
+            user_context == "provider"
+            and user.is_provider
+            and ("provider" in self.user_type or "staff_self" in self.user_type)
         ):
             # Account is blocked
             if user_login.staff_account_blocked:
                 raise Unauthorized(
-                    'Your provider account has been blocked. Please contact '
-                    'client_services@modobio.com to resolve the issue.'
+                    "Your provider account has been blocked. Please contact "
+                    "client_services@modobio.com to resolve the issue."
                 )
             # Check staff roles, resources, and user_type.
-            if (self.staff_role or 'staff_self' in self.user_type or len(self.resources) > 0):
+            if (
+                self.staff_role
+                or "staff_self" in self.user_type
+                or len(self.resources) > 0
+            ):
                 self.provider_access_check(user)
 
         # User is logging in
-        elif user_context == 'basic_auth':
+        elif user_context == "basic_auth":
             # /staff/token/ endpoint and user is registered staff member
-            if 'staff' in self.user_type and user.is_staff:
+            if "staff" in self.user_type and user.is_staff:
                 if user_login.staff_account_blocked:
                     raise Unauthorized(
-                        'Your staff account has been blocked. Please contact '
-                        'client_services@modobio.com to resolve the issue.'
+                        "Your staff account has been blocked. Please contact "
+                        "client_services@modobio.com to resolve the issue."
                     )
             # /client/token/ endpoint and user is registered client
-            elif self.user_type == ('client', ) and user.is_client:
+            elif self.user_type == ("client",) and user.is_client:
                 if user_login.client_account_blocked:
                     raise Unauthorized(
-                        'Your client account has been blocked. Please contact '
-                        'client_services@modobio.com to resolve the issue.'
+                        "Your client account has been blocked. Please contact "
+                        "client_services@modobio.com to resolve the issue."
                     )
             # /provider/token/ endpoint and user is registered client
-            elif 'provider' in self.user_type and user.is_provider:
+            elif "provider" in self.user_type and user.is_provider:
                 if user_login.staff_account_blocked:
                     raise Unauthorized(
-                        'Your provider account has been blocked. Please'
-                        ' contact client_services@modobio.com to resolve the'
-                        ' issue.'
+                        "Your provider account has been blocked. Please"
+                        " contact client_services@modobio.com to resolve the"
+                        " issue."
                     )
             else:
                 raise Unauthorized
@@ -248,7 +264,7 @@ class BasicAuth(object):
         """
 
         requested_user_id = request.view_args.get(
-            'user_id', request.view_args.get('client_user_id')
+            "user_id", request.view_args.get("client_user_id")
         )
 
         if requested_user_id:
@@ -259,7 +275,7 @@ class BasicAuth(object):
             # through the clinical care team system
             else:
                 # ensure request is GET
-                if request.method != 'GET':
+                if request.method != "GET":
                     raise Unauthorized
                 # resources must be specified for endpoint designated by table name
                 # e.g. @token_auth.login_required(resources=('MedicalSocialHistory','MedicalSTDHistory'))
@@ -274,16 +290,26 @@ class BasicAuth(object):
                         db.session.query(
                             ClientClinicalCareTeamAuthorizations.resource_id,
                             LookupClinicalCareTeamResources.resource_name,
-                        ).filter(
-                            ClientClinicalCareTeamAuthorizations.team_member_user_id == user.user_id
-                        ).filter(
-                            ClientClinicalCareTeamAuthorizations.user_id == requested_user_id
-                        ).filter(
-                            ClientClinicalCareTeamAuthorizations.resource_id ==
-                            LookupClinicalCareTeamResources.resource_id
-                        ).filter(LookupClinicalCareTeamResources.resource_name == resource
-                                ).filter(ClientClinicalCareTeamAuthorizations.status == 'accepted'
-                                        ).all()
+                        )
+                        .filter(
+                            ClientClinicalCareTeamAuthorizations.team_member_user_id
+                            == user.user_id
+                        )
+                        .filter(
+                            ClientClinicalCareTeamAuthorizations.user_id
+                            == requested_user_id
+                        )
+                        .filter(
+                            ClientClinicalCareTeamAuthorizations.resource_id
+                            == LookupClinicalCareTeamResources.resource_id
+                        )
+                        .filter(
+                            LookupClinicalCareTeamResources.resource_name == resource
+                        )
+                        .filter(
+                            ClientClinicalCareTeamAuthorizations.status == "accepted"
+                        )
+                        .all()
                     )
                     if len(is_authorized) == 1:
                         g.clinical_care_authorized_resources.append(resource)
@@ -336,23 +362,28 @@ class BasicAuth(object):
         """
         # bring up the roles for the staff member
         staff_user_roles = (
-            db.session.query(StaffRoles.role).filter(StaffRoles.user_id == user.user_id).all()
+            db.session.query(StaffRoles.role)
+            .filter(StaffRoles.user_id == user.user_id)
+            .all()
         )
         staff_user_roles = [x[0] for x in staff_user_roles]
 
         requested_user_id = request.view_args.get(
-            'user_id',
-            request.view_args.get('client_user_id', request.view_args.get('staff_user_id')),
+            "user_id",
+            request.view_args.get(
+                "client_user_id", request.view_args.get("staff_user_id")
+            ),
         )
 
         # staff accessing their own resources
         # request args will either contain user_id or staff_user_id which must match the logged-in user
         # if logged-in staff is not the user being requested and no role requirement, raise unauthorized
-        if ('staff_self' in self.user_type and requested_user_id == user.user_id):
+        if "staff_self" in self.user_type and requested_user_id == user.user_id:
             return
 
         elif (
-            'staff_self' in self.user_type and requested_user_id not in (None, user.user_id)
+            "staff_self" in self.user_type
+            and requested_user_id not in (None, user.user_id)
             and self.staff_role is None
         ):
             raise Unauthorized
@@ -365,8 +396,8 @@ class BasicAuth(object):
         # Staff is accessing client resources without role or resource authorization
         else:
             logger.debug(
-                'Staff user granted access to endpoint without checks:'
-                f' {request.path}'
+                "Staff user granted access to endpoint without checks:"
+                f" {request.path}"
             )
             return
 
@@ -422,41 +453,45 @@ class BasicAuth(object):
         """
         # bring up the roles for the staff member
         staff_user_roles = (
-            db.session.query(StaffRoles.role).filter(StaffRoles.user_id == user.user_id).all()
+            db.session.query(StaffRoles.role)
+            .filter(StaffRoles.user_id == user.user_id)
+            .all()
         )
         staff_user_roles = [x[0] for x in staff_user_roles]
 
         requested_user_id = request.view_args.get(
-            'user_id',
+            "user_id",
             request.view_args.get(
-                'client_user_id',
+                "client_user_id",
                 request.view_args.get(
-                    'staff_user_id',
-                    request.view_args.get('provider_user_id', None),
+                    "staff_user_id",
+                    request.view_args.get("provider_user_id", None),
                 ),
             ),
         )
 
         if len(staff_user_roles) == 0 and requested_user_id != user.user_id:
-            raise Unauthorized('Provider does not have any roles')
+            raise Unauthorized("Provider does not have any roles")
         # provider accessing their own resources
         # request args will either contain uid or staff_uid which must match the logged-in user
         # if logged-in staff is not the user being requested and no role nor resource requirements are provided, raise unauthorized
 
-        if ('staff_self' in self.user_type and requested_user_id == user.user_id):
+        if "staff_self" in self.user_type and requested_user_id == user.user_id:
             return
 
         # if requested user is not the logged-in user and no role nor resource requirements are provided, raise unauthorized
         elif (
-            'staff_self' in self.user_type and requested_user_id not in (None, user.user_id)
-            and self.staff_role is None and len(self.resources) == 0
+            "staff_self" in self.user_type
+            and requested_user_id not in (None, user.user_id)
+            and self.staff_role is None
+            and len(self.resources) == 0
         ):
             raise Unauthorized
 
         # check if resource access check is necessary
         if len(self.resources) > 0:
             if not requested_user_id:
-                raise BadRequest('No user specified')
+                raise BadRequest("No user specified")
             # 1. Check if staff member has resource access
             # 2. if request method is not GET, verify role access
 
@@ -469,16 +504,22 @@ class BasicAuth(object):
                     db.session.query(
                         ClientClinicalCareTeamAuthorizations.resource_id,
                         LookupClinicalCareTeamResources.resource_name,
-                    ).filter(
-                        ClientClinicalCareTeamAuthorizations.team_member_user_id == user.user_id
-                    ).filter(ClientClinicalCareTeamAuthorizations.user_id == requested_user_id
-                            ).filter(
-                                ClientClinicalCareTeamAuthorizations.resource_id ==
-                                LookupClinicalCareTeamResources.resource_id
-                            ).filter(LookupClinicalCareTeamResources.resource_name == resource
-                                    ).filter(
-                                        ClientClinicalCareTeamAuthorizations.status == 'accepted'
-                                    ).all()
+                    )
+                    .filter(
+                        ClientClinicalCareTeamAuthorizations.team_member_user_id
+                        == user.user_id
+                    )
+                    .filter(
+                        ClientClinicalCareTeamAuthorizations.user_id
+                        == requested_user_id
+                    )
+                    .filter(
+                        ClientClinicalCareTeamAuthorizations.resource_id
+                        == LookupClinicalCareTeamResources.resource_id
+                    )
+                    .filter(LookupClinicalCareTeamResources.resource_name == resource)
+                    .filter(ClientClinicalCareTeamAuthorizations.status == "accepted")
+                    .all()
                 )
                 if len(is_authorized) == 1:
                     g.clinical_care_authorized_resources.append(resource)
@@ -489,7 +530,7 @@ class BasicAuth(object):
 
             # any role may be granted read only access to client resources
             # only specific roles may be granted write access to client resources
-            if self.staff_role is not None and request.method != 'GET':
+            if self.staff_role is not None and request.method != "GET":
                 if not any(role in staff_user_roles for role in self.staff_role):
                     raise Unauthorized
 
@@ -501,8 +542,8 @@ class BasicAuth(object):
         # Staff is accessing client resources without role or resource authorization
         else:
             logger.debug(
-                'Staff user granted access to endpoint without checks:'
-                f' {request.path}'
+                "Staff user granted access to endpoint without checks:"
+                f" {request.path}"
             )
             return
 
@@ -513,7 +554,7 @@ class BasicAuth(object):
         # Validate
         for role in roles:
             if role not in constants:
-                ValueError('{} is not in {}'.format(role, constants))
+                ValueError("{} is not in {}".format(role, constants))
         return
 
     def verify_password(self, username, password):
@@ -522,15 +563,17 @@ class BasicAuth(object):
         that is defined in auth.py"""
 
         user_details = db.session.execute(
-            select(User, UserLogin).join(UserLogin, User.user_id == UserLogin.user_id).where(
-                User.email == username.lower()
-            )
+            select(User, UserLogin)
+            .join(UserLogin, User.user_id == UserLogin.user_id)
+            .where(User.email == username.lower())
         ).one_or_none()
 
         # make sure login details exist, check password
         if not user_details:
             db.session.add(
-                UserTokenHistory(event='login', ua_string=request.headers.get('User-Agent'))
+                UserTokenHistory(
+                    event="login", ua_string=request.headers.get("User-Agent")
+                )
             )
             db.session.commit()
             raise Unauthorized
@@ -541,13 +584,13 @@ class BasicAuth(object):
             user_login.last_login = DB_SERVER_TIME
             db.session.commit()
             db.session.refresh(user_login)
-            return user, user_login, 'basic_auth'
+            return user, user_login, "basic_auth"
         else:
             db.session.add(
                 UserTokenHistory(
-                    event='login',
+                    event="login",
                     user_id=user.user_id,
-                    ua_string=request.headers.get('User-Agent'),
+                    ua_string=request.headers.get("User-Agent"),
                 )
             )
             db.session.commit()
@@ -557,20 +600,20 @@ class BasicAuth(object):
         """This method is to authorize basic connections"""
         # this version of the Authorization header parser is more flexible
         # than Werkzeug's, as it also accepts other schemes besides "Basic"
-        header = self.header or 'Authorization'
+        header = self.header or "Authorization"
         if header not in request.headers:
             return None
-        value = request.headers[header].encode('utf-8')
+        value = request.headers[header].encode("utf-8")
         try:
-            scheme, credentials = value.split(b' ', 1)
-            username, password = b64decode(credentials).split(b':', 1)
+            scheme, credentials = value.split(b" ", 1)
+            username, password = b64decode(credentials).split(b":", 1)
         except (ValueError, TypeError):
             return None
         return Authorization(
             scheme,
             {
-                'username': username.decode('utf-8'),
-                'password': password.decode('utf-8'),
+                "username": username.decode("utf-8"),
+                "password": password.decode("utf-8"),
             },
         )
 
@@ -581,21 +624,22 @@ class BasicAuth(object):
             username = auth.username
             password = auth.password
         else:
-            username = ''
-            password = ''
+            username = ""
+            password = ""
         return self.verify_password(username, password)
 
     def current_user(self):
         """current_user method returns the current instance
         user, flask_httpauth_user, if it exists."""
-        if hasattr(g, 'flask_httpauth_user'):
+        if hasattr(g, "flask_httpauth_user"):
             return g.flask_httpauth_user
 
 
 class TokenAuth(BasicAuth):
     """TokenAuth class extends the OdyBasicAuth class.
     It's primary function is to do token authentications."""
-    def __init__(self, scheme='Bearer', header=None):
+
+    def __init__(self, scheme="Bearer", header=None):
         super(TokenAuth, self).__init__(scheme, header)
 
         self.verify_token_callback = None
@@ -607,45 +651,45 @@ class TokenAuth(BasicAuth):
             raise Unauthorized
 
         # decode and validate token
-        secret = current_app.config['SECRET_KEY']
+        secret = current_app.config["SECRET_KEY"]
         try:
-            decoded_token = jwt.decode(token, secret, algorithms='HS256')
+            decoded_token = jwt.decode(token, secret, algorithms="HS256")
         # Capture all possible JWT errors
         except jwt.exceptions.PyJWTError:
             raise Unauthorized
 
         # ensure token is an access token type
-        if decoded_token['ttype'] != 'access':
+        if decoded_token["ttype"] != "access":
             raise Unauthorized
 
         user, user_login = db.session.execute(
-            select(User, UserLogin).join(UserLogin, User.user_id == UserLogin.user_id).where(
-                User.user_id == decoded_token['uid']
-            )
+            select(User, UserLogin)
+            .join(UserLogin, User.user_id == UserLogin.user_id)
+            .where(User.user_id == decoded_token["uid"])
         ).one_or_none()
 
-        g.user_type = decoded_token.get('utype')
-        return user, user_login, decoded_token.get('utype')
+        g.user_type = decoded_token.get("utype")
+        return user, user_login, decoded_token.get("utype")
 
     def get_auth(self):
         """This method is to authorize tokens"""
         auth = None
-        if self.header is None or self.header == 'Authorization':
+        if self.header is None or self.header == "Authorization":
             auth = request.authorization
-            if auth is None and 'Authorization' in request.headers:
+            if auth is None and "Authorization" in request.headers:
                 # Flask/Werkzeug do not recognize any authentication types
                 # other than Basic or Digest, so here we parse the header by
                 # hand
                 try:
-                    auth_type, token = request.headers['Authorization'].split(None, 1)
-                    auth = Authorization(auth_type, {'token': token})
+                    auth_type, token = request.headers["Authorization"].split(None, 1)
+                    auth = Authorization(auth_type, {"token": token})
                 except (ValueError, KeyError):
                     # The Authorization header is either empty or has no token
                     pass
         elif self.header in request.headers:
             # using a custom header, so the entire value of the header is
             # assumed to be a token
-            auth = Authorization(self.scheme, {'token': request.headers[self.header]})
+            auth = Authorization(self.scheme, {"token": request.headers[self.header]})
 
         # if the auth type does not match, we act as if there is no auth
         # this is better than failing directly, as it allows the callback
@@ -660,9 +704,9 @@ class TokenAuth(BasicAuth):
         the OdyBasicAuth authenticate method and returns an object defined
         in verify_token_callback"""
         if auth:
-            token = auth['token']
+            token = auth["token"]
         else:
-            token = ''
+            token = ""
         return self.verify_token(token)
 
 

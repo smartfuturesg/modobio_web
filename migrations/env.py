@@ -12,26 +12,27 @@ logger = logging.getLogger(__name__)
 
 # Load config from the API.
 current_app.config.from_object(Config())
-db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
+db_uri = current_app.config["SQLALCHEMY_DATABASE_URI"]
 
 # Load metadata from sqlalchemy
-target_metadata = current_app.extensions['migrate'].db.metadata
+target_metadata = current_app.extensions["migrate"].db.metadata
 
 if not current_app.testing:
-    print(f'\n***\nUpdating the database at URI: \n {db_uri}')
-    print('Continue? [Y,n]')
+    print(f"\n***\nUpdating the database at URI: \n {db_uri}")
+    print("Continue? [Y,n]")
     answer = input()
 
-    if answer not in ('y', 'Y'):
+    if answer not in ("y", "Y"):
         sys.exit()
 
 # Load config from alembic.ini
 # Even though all of our configuration comes from odyssey.config,
 # context.config holds the config for alembic.
-context.config.set_main_option('sqlalchemy.url', db_uri)
+context.config.set_main_option("sqlalchemy.url", db_uri)
+
 
 def run_migrations_offline():
-    """ Run migrations in 'offline' mode.
+    """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
     and not an Engine, though an Engine is acceptable
@@ -43,16 +44,15 @@ def run_migrations_offline():
     """
     url = context.config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        compare_type=True)
+        url=url, target_metadata=target_metadata, literal_binds=True, compare_type=True
+    )
 
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online():
-    """ Run migrations in 'online' mode.
+    """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
@@ -62,23 +62,25 @@ def run_migrations_online():
     # when there are no changes to the schema
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     def process_revision_directives(context, revision, directives):
-        if getattr(context.config.cmd_opts, 'autogenerate', False):
+        if getattr(context.config.cmd_opts, "autogenerate", False):
             script = directives[0]
             if script.upgrade_ops.is_empty():
                 directives[:] = []
-                logger.info('No changes in schema detected.')
+                logger.info("No changes in schema detected.")
 
     connectable = engine_from_config(
         context.config.get_section(context.config.config_ini_section),
-        prefix='sqlalchemy.',
-        poolclass=pool.NullPool)
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
 
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
             process_revision_directives=process_revision_directives,
-            **current_app.extensions['migrate'].configure_args)
+            **current_app.extensions["migrate"].configure_args,
+        )
 
         with context.begin_transaction():
             if current_app.testing:
@@ -88,6 +90,7 @@ def run_migrations_online():
                     raise BaseException
             else:
                 context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

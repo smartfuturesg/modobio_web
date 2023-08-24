@@ -9,7 +9,11 @@ from sqlalchemy import CheckConstraint
 from sqlalchemy.orm import relationship
 
 from odyssey import db
-from odyssey.utils.base.models import (BaseModelWithIdx, ReporterIdFkeyMixin, UserIdFkeyMixin)
+from odyssey.utils.base.models import (
+    BaseModelWithIdx,
+    ReporterIdFkeyMixin,
+    UserIdFkeyMixin,
+)
 from odyssey.utils.constants import DB_SERVER_TIME
 
 
@@ -59,13 +63,13 @@ class PaymentHistory(BaseModelWithIdx, UserIdFkeyMixin):
     This keeps track of payments that have been charged to users.
     """
 
-    payment_method = relationship('PaymentMethods', backref='PaymentHistory')
+    payment_method = relationship("PaymentMethods", backref="PaymentHistory")
     """
     Relationship to PaymentMethods
     """
 
     payment_method_id = db.Column(
-        db.Integer, db.ForeignKey('PaymentMethods.idx', ondelete='SET NULL')
+        db.Integer, db.ForeignKey("PaymentMethods.idx", ondelete="SET NULL")
     )
     """
     Foreign key to the payment method used for this payment.
@@ -109,15 +113,17 @@ class PaymentRefunds(BaseModelWithIdx, UserIdFkeyMixin, ReporterIdFkeyMixin):
     """
 
     __table_args__ = (
-        CheckConstraint('char_length(refund_reason) > 20', name='refund_reason_min_length'),
+        CheckConstraint(
+            "char_length(refund_reason) > 20", name="refund_reason_min_length"
+        ),
     )
 
-    payment = relationship('PaymentHistory', backref='PaymentRefunds')
+    payment = relationship("PaymentHistory", backref="PaymentRefunds")
     """
     Relationship to the payment that was refunded in the PaymentHistory table.
     """
 
-    payment_id = db.Column(db.Integer, db.ForeignKey('PaymentHistory.idx'))
+    payment_id = db.Column(db.Integer, db.ForeignKey("PaymentHistory.idx"))
     """
     Foreign key to the payment this refund is associated with
 

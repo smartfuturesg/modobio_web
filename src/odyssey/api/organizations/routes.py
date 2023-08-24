@@ -5,21 +5,25 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey import db
 from odyssey.api.organizations.models import (
-    OrganizationAdmins, OrganizationMembers, Organizations
+    OrganizationAdmins,
+    OrganizationMembers,
+    Organizations,
 )
 from odyssey.api.organizations.schemas import (
-    OrganizationMembersPostInputSchema, OrganizationMembersPostOutputSchema, OrganizationsSchema
+    OrganizationMembersPostInputSchema,
+    OrganizationMembersPostOutputSchema,
+    OrganizationsSchema,
 )
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 
-ns = Namespace('organizations', description='Endpoints for member organizations')
+ns = Namespace("organizations", description="Endpoints for member organizations")
 
 
-@ns.route('/')
+@ns.route("/")
 class OrganizationsEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('staff', ), staff_role=('community_manager', ))
+    @token_auth.login_required(user_type=("staff",), staff_role=("community_manager",))
     @accepts(schema=OrganizationsSchema, api=ns)
     @responds(schema=OrganizationsSchema, api=ns, status_code=201)
     def post(self):
@@ -56,15 +60,15 @@ class OrganizationsEndpoint(BaseResource):
 
         # Check for invalid owner
         if not owner:
-            raise BadRequest('Organization owner must be a valid user.')
+            raise BadRequest("Organization owner must be a valid user.")
 
         # Check for duplicate organization name
         duplicate = Organizations.query.filter_by(name=org.name).one_or_none()
         if duplicate:
-            raise BadRequest('Organization name already in use.')
+            raise BadRequest("Organization name already in use.")
 
         # Create the organization
-        db.session.execute('SET CONSTRAINTS ALL DEFERRED')
+        db.session.execute("SET CONSTRAINTS ALL DEFERRED")
         db.session.add(org)
         db.session.flush()  # Flush to get the organization_id, does not complete the transaction
 
@@ -91,9 +95,9 @@ class OrganizationsEndpoint(BaseResource):
         return org
 
 
-@ns.route('/members/')
+@ns.route("/members/")
 class OrganizationMembersEndpoint(BaseResource):
-    @token_auth.login_required(user_type=('staff', ), staff_role=('community_manager', ))
+    @token_auth.login_required(user_type=("staff",), staff_role=("community_manager",))
     @accepts(schema=OrganizationMembersPostInputSchema, api=ns)
     @responds(schema=OrganizationMembersPostOutputSchema, api=ns, status_code=201)
     def post(self):
@@ -127,8 +131,8 @@ class OrganizationMembersEndpoint(BaseResource):
         BadRequest
             If adding this many members would exceed the organization's max_members.
         """
-        organization_uuid = request.json['organization_uuid']
-        members = request.json['members']
+        organization_uuid = request.json["organization_uuid"]
+        members = request.json["members"]
 
         # Remove duplicates from members
         members = list(set(members))
@@ -136,11 +140,11 @@ class OrganizationMembersEndpoint(BaseResource):
         # Check for valid organization
         org = db.session.get(Organizations, organization_uuid)
         if not org:
-            raise BadRequest('Organization does not exist.')
+            raise BadRequest("Organization does not exist.")
 
         # Check for too many members
         if len(members) > 100:
-            raise BadRequest('Cannot add more than 100 members at once.')
+            raise BadRequest("Cannot add more than 100 members at once.")
 
         # Create technical maximums due to owner being admin, admins being members
         num_current_admins = OrganizationAdmins.query.filter_by(
@@ -155,7 +159,7 @@ class OrganizationMembersEndpoint(BaseResource):
         ).count()
         if len(members) + num_current_members > technical_max_members:
             raise BadRequest(
-                f'Adding {len(members)} members would exceed the'
+                f"Adding {len(members)} members would exceed the"
                 f" organization's max_members limit, {org.max_members}."
             )
 
@@ -191,8 +195,8 @@ class OrganizationMembersEndpoint(BaseResource):
 
         # Return the organization_uuid, members added, invalid members, and prior members
         return {
-            'organization_uuid': organization_uuid,
-            'added_members': added_members,
-            'invalid_members': invalid_members,
-            'prior_members': prior_members,
+            "organization_uuid": organization_uuid,
+            "added_members": added_members,
+            "invalid_members": invalid_members,
+            "prior_members": prior_members,
         }

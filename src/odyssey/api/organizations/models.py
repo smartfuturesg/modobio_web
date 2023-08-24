@@ -18,7 +18,7 @@ class Organizations(BaseModel):
     organization_uuid = db.Column(
         UUID(as_uuid=True),
         primary_key=True,
-        server_default=text('gen_random_uuid()'),
+        server_default=text("gen_random_uuid()"),
     )
     """
     Organization UUID.
@@ -58,14 +58,14 @@ class Organizations(BaseModel):
     """
 
     __table_args__ = (
-        db.UniqueConstraint('name'),
+        db.UniqueConstraint("name"),
         db.ForeignKeyConstraint(
-            ['owner', 'organization_uuid'],
+            ["owner", "organization_uuid"],
             [
-                'OrganizationAdmins.user_id',
-                'OrganizationAdmins.organization_uuid',
+                "OrganizationAdmins.user_id",
+                "OrganizationAdmins.organization_uuid",
             ],
-            ondelete='RESTRICT',
+            ondelete="RESTRICT",
             deferrable=True,
         ),
     )
@@ -79,7 +79,7 @@ class OrganizationMembers(BaseModel):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
@@ -91,7 +91,7 @@ class OrganizationMembers(BaseModel):
 
     organization_uuid = db.Column(
         UUID(as_uuid=True),
-        db.ForeignKey('Organizations.organization_uuid', ondelete='CASCADE'),
+        db.ForeignKey("Organizations.organization_uuid", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
@@ -132,11 +132,11 @@ class OrganizationAdmins(BaseModel):
 
     __table_args__ = (
         db.ForeignKeyConstraint(
-            ['user_id', 'organization_uuid'],
+            ["user_id", "organization_uuid"],
             [
-                'OrganizationMembers.user_id',
-                'OrganizationMembers.organization_uuid',
+                "OrganizationMembers.user_id",
+                "OrganizationMembers.organization_uuid",
             ],
-            ondelete='CASCADE',
+            ondelete="CASCADE",
         ),
     )

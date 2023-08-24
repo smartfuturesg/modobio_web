@@ -5,15 +5,15 @@ logger = logging.getLogger(__name__)
 from marshmallow import Schema, fields, post_load, validate
 
 from odyssey import ma
-from odyssey.api.payment.models import (PaymentHistory, PaymentMethods, PaymentRefunds)
+from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.utils.base.schemas import BaseSchema
 
 
 class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PaymentMethods
-        dump_only = ('idx', 'payment_id', 'payment_type', 'number')
-        exclude = ('created_at', 'updated_at')
+        dump_only = ("idx", "payment_id", "payment_type", "number")
+        exclude = ("created_at", "updated_at")
 
     token = fields.String(load_only=True, required=True)
     expiration = fields.String(required=True)
@@ -23,7 +23,7 @@ class PaymentMethodsSchema(ma.SQLAlchemyAutoSchema):
 class PaymentHistorySchema(BaseSchema):
     class Meta:
         model = PaymentHistory
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
 
     transaction_amount = fields.String()
     transaction_descriptor = fields.String()
@@ -45,7 +45,7 @@ class TransactionHistorySchema(Schema):
 class PaymentRefundsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PaymentRefunds
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ("created_at", "updated_at", "idx")
 
     payment_id = fields.Integer(required=True)
     refund_amount = fields.String()

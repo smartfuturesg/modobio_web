@@ -98,7 +98,7 @@ class LookupTerritoriesOfOperations(BaseModelWithIdx):
     Staff members are required to specify which territories they can operate in.
     """
 
-    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
+    country_id = db.Column(db.Integer, db.ForeignKey("LookupCountriesOfOperations.idx"))
     """
     Country in which this territory resides
     
@@ -539,8 +539,8 @@ class LookupSubscriptions(BaseModel):
     """
 
     user_subscriptions = db.relationship(
-        'UserSubscriptions',
-        back_populates='subscription_type_information',
+        "UserSubscriptions",
+        back_populates="subscription_type_information",
         uselist=False,
     )
     """
@@ -983,7 +983,6 @@ class LookupEmergencyNumbers(BaseModelWithIdx):
 
 
 class LookupRoles(BaseModelWithIdx):
-
     role_name = db.Column(db.String, unique=True)
     """
     Internal name of this role that is used throughout the code.
@@ -991,7 +990,9 @@ class LookupRoles(BaseModelWithIdx):
     :type: string
     """
 
-    professionals_assigned = db.relationship('StaffRoles', uselist=True, back_populates='role_info')
+    professionals_assigned = db.relationship(
+        "StaffRoles", uselist=True, back_populates="role_info"
+    )
     """
     One to many relationship with staff roles table
     :type: :class:`StaffRoles` instance list
@@ -1076,7 +1077,7 @@ class LookupRoles(BaseModelWithIdx):
     :type: boolean
     """
 
-    groups = db.relationship('LookupRoleGroups', back_populates='role')
+    groups = db.relationship("LookupRoleGroups", back_populates="role")
     """
     One to many relationship with role groups
 
@@ -1103,14 +1104,14 @@ class LookupRoleGroups(BaseModelWithIdx):
     :type: String
     """
 
-    role_idx = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
+    role_idx = db.Column(db.Integer, db.ForeignKey("LookupRoles.idx"))
     """
     Foreign key to staff role ID 
 
     :type: int, foreign key
     """
 
-    role = db.relationship('LookupRoles', back_populates='groups')
+    role = db.relationship("LookupRoles", back_populates="groups")
     """
     Many to one relationship with lookup role
 
@@ -1119,7 +1120,6 @@ class LookupRoleGroups(BaseModelWithIdx):
 
 
 class LookupLegalDocs(BaseModelWithIdx):
-
     name = db.Column(db.String)
     """
     Name of this document.
@@ -1196,9 +1196,9 @@ class LookupOrganizations(BaseModelWithIdx):
     """
 
     practitioners_assigned = db.relationship(
-        'PractitionerOrganizationAffiliation',
+        "PractitionerOrganizationAffiliation",
         uselist=True,
-        back_populates='org_info',
+        back_populates="org_info",
     )
     """
     One to many relationship with pracitioner organization affiliation table
@@ -1297,7 +1297,7 @@ class LookupBloodTests(BaseModel):
     :type: string
     """
 
-    ranges = db.relationship('LookupBloodTestRanges')
+    ranges = db.relationship("LookupBloodTestRanges")
     """
     Relation holding information on ranges that apply to this test type.
     
@@ -1311,14 +1311,16 @@ class LookupBloodTestRanges(BaseModelWithIdx):
     entries if it can be affected by age/race/fertility status/bioloical sex
     """
 
-    modobio_test_code = db.Column(db.String, db.ForeignKey('LookupBloodTests.modobio_test_code'))
+    modobio_test_code = db.Column(
+        db.String, db.ForeignKey("LookupBloodTests.modobio_test_code")
+    )
     """
     Modobio Test Code for this result.
     
     :type: string, foreign key(LookupBloodTests.modobio_test_code)
     """
 
-    test_info = db.relationship('LookupBloodTests', back_populates='ranges')
+    test_info = db.relationship("LookupBloodTests", back_populates="ranges")
     """
     Many to one relationship holding the non-range test information.
     
@@ -1353,7 +1355,7 @@ class LookupBloodTestRanges(BaseModelWithIdx):
     :type: int
     """
 
-    race_id = db.Column(db.Integer, db.ForeignKey('LookupRaces.race_id'))
+    race_id = db.Column(db.Integer, db.ForeignKey("LookupRaces.race_id"))
     """
     Race_id this range applies to. If Null, the range applies to all races.
     
@@ -1426,7 +1428,7 @@ class LookupVisitReasons(BaseModelWithIdx):
     Name of reason for a visit
     """
 
-    role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'))
+    role_id = db.Column(db.Integer, db.ForeignKey("LookupRoles.idx"))
     """
     Role that the reason would justify a visit with
     """
@@ -1439,7 +1441,7 @@ class LookupBloodGlucoseRanges(BaseModelWithIdx):
 
     modobio_test_code = db.Column(
         db.String,
-        db.ForeignKey('LookupBloodTests.modobio_test_code'),
+        db.ForeignKey("LookupBloodTests.modobio_test_code"),
         nullable=False,
     )
     """
@@ -1498,7 +1500,6 @@ class LookupBloodGlucoseRanges(BaseModelWithIdx):
 
 
 class LookupCredentialTypes(BaseModelWithIdx):
-
     credential_type = db.Column(db.String, unique=True)
     """
     Internal name of credential type used in ProviderCredentials.credential_type
@@ -1546,7 +1547,9 @@ class LookupCGMDemographics(BaseModelWithIdx):
     :type: string
     """
 
-    ranges = db.relationship('LookupBloodGlucoseCGMRanges', back_populates='demographic')
+    ranges = db.relationship(
+        "LookupBloodGlucoseCGMRanges", back_populates="demographic"
+    )
     """
     Relation holding information on ranges that apply to this demographic.
 
@@ -1557,9 +1560,9 @@ class LookupCGMDemographics(BaseModelWithIdx):
 class LookupBloodGlucoseCGMRanges(BaseModelWithIdx):
     """Lookup table of reference ranges for continuous glucose monitors (CGM)"""
 
-    demographic_id = db.Column(db.Integer, db.ForeignKey('LookupCGMDemographics.idx'))
+    demographic_id = db.Column(db.Integer, db.ForeignKey("LookupCGMDemographics.idx"))
 
-    demographic = db.relationship('LookupCGMDemographics', back_populates='ranges')
+    demographic = db.relationship("LookupCGMDemographics", back_populates="ranges")
     """
     Relation holding information on demographics that apply to this range.
 

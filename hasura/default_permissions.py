@@ -51,9 +51,24 @@ Broken down here
 
 """
 # These tables should remain inaccessible in Hasura
-STAFF_SELECT_ONLY = ('StaffRecentClients', 'User', 'ClientInfo', 'StaffRoles', 'StaffOperationalTerriories')
-NO_UPDATE_FIELDS = ['user_id', 'created_at', 'updated_at', 'is_staff', 'is_client', 'role', 'idx', 'modobioId']
-NO_INSERT_FIELDS = [item for item in NO_UPDATE_FIELDS if item not in ['user_id']]
+STAFF_SELECT_ONLY = (
+    "StaffRecentClients",
+    "User",
+    "ClientInfo",
+    "StaffRoles",
+    "StaffOperationalTerriories",
+)
+NO_UPDATE_FIELDS = [
+    "user_id",
+    "created_at",
+    "updated_at",
+    "is_staff",
+    "is_client",
+    "role",
+    "idx",
+    "modobioId",
+]
+NO_INSERT_FIELDS = [item for item in NO_UPDATE_FIELDS if item not in ["user_id"]]
 NO_DELETE_FIELDS = NO_UPDATE_FIELDS
 
 ##
@@ -63,25 +78,27 @@ NO_DELETE_FIELDS = NO_UPDATE_FIELDS
 # TODO: permission for clinical care team members
 ##
 
+
 def client_default_select_permission(columns):
     """
     Covers select permisisons for most tables prefixed with
     'Client', 'Medical', 'User', 'PT', 'Trainer', 'Telehealth', 'Wearables'
     and accessed from a client context
     """
-    permission = {
-        'role': 'client',
-        'permission': {
-            'columns': columns,
-            'filter': {}}}
+    permission = {"role": "client", "permission": {"columns": columns, "filter": {}}}
 
-    #TODO add clinical care team scenario
-    if 'user_id' in columns:
-        permission['permission'].update({'filter': {'user_id': { '_eq': 'X-Hasura-User-Id'}}})
-    elif 'client_user_id' in columns:
-        permission['permission'].update({'filter': {'client_user_id': { '_eq': 'X-Hasura-User-Id'}}})
+    # TODO add clinical care team scenario
+    if "user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
+    elif "client_user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"client_user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
 
     return permission
+
 
 def client_default_update_permission(columns):
     """
@@ -92,17 +109,24 @@ def client_default_update_permission(columns):
     users may not alter user_id columns
     """
     permission = {
-        'role': 'client',
-        'permission': {
-            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
-            'filter': {}}}
+        "role": "client",
+        "permission": {
+            "columns": [column for column in columns if column not in NO_UPDATE_FIELDS],
+            "filter": {},
+        },
+    }
 
-    if 'user_id' in columns:
-        permission['permission']['filter'].update({'user_id': { '_eq': 'X-Hasura-User-Id'}})
-    elif 'client_user_id' in columns:
-        permission['permission']['filter'].update({'client_user_id': { '_eq': 'X-Hasura-User-Id'}})
+    if "user_id" in columns:
+        permission["permission"]["filter"].update(
+            {"user_id": {"_eq": "X-Hasura-User-Id"}}
+        )
+    elif "client_user_id" in columns:
+        permission["permission"]["filter"].update(
+            {"client_user_id": {"_eq": "X-Hasura-User-Id"}}
+        )
 
     return permission
+
 
 def client_default_insert_permission(columns):
     """
@@ -113,23 +137,30 @@ def client_default_insert_permission(columns):
     user_id is automatically set to uid (a.k.a 'X-Hasura-User-Id') found in the payload of the access token
     """
     permission = {
-        'role': 'client',
-        'permission': {
-            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
-            'check': {},
-            'set': {}}}
+        "role": "client",
+        "permission": {
+            "columns": [column for column in columns if column not in NO_UPDATE_FIELDS],
+            "check": {},
+            "set": {},
+        },
+    }
 
-    if 'reporter_id' in columns:
-        permission['permission']['set'].update({'reporter_id': 'X-Hasura-User-Id'})
+    if "reporter_id" in columns:
+        permission["permission"]["set"].update({"reporter_id": "X-Hasura-User-Id"})
 
-    if 'user_id' in columns:
-        permission['permission']['check'].update({'user_id': {'_eq': 'X-Hasura-User-Id'}})
-        permission['permission']['set'].update({'user_id': 'X-Hasura-User-Id'})
-    elif 'client_user_id' in columns:
-        permission['permission']['check'].update({'client_user_id': {'_eq': 'X-Hasura-User-Id'}})
-        permission['permission']['set'].update({'client_user_id': 'X-Hasura-User-Id'})
+    if "user_id" in columns:
+        permission["permission"]["check"].update(
+            {"user_id": {"_eq": "X-Hasura-User-Id"}}
+        )
+        permission["permission"]["set"].update({"user_id": "X-Hasura-User-Id"})
+    elif "client_user_id" in columns:
+        permission["permission"]["check"].update(
+            {"client_user_id": {"_eq": "X-Hasura-User-Id"}}
+        )
+        permission["permission"]["set"].update({"client_user_id": "X-Hasura-User-Id"})
 
     return permission
+
 
 def client_default_delete_permission(columns):
     """
@@ -139,19 +170,26 @@ def client_default_delete_permission(columns):
 
     user_id is automatically set to uid (a.k.a 'X-Hasura-User-Id') found in the payload of the access token
     """
-    permission =  {
-        'role': 'client',
-        'permission': {
-            'columns': [column for column in columns if column not in NO_DELETE_FIELDS],
-            'check': {},
-            'set': {}}}
+    permission = {
+        "role": "client",
+        "permission": {
+            "columns": [column for column in columns if column not in NO_DELETE_FIELDS],
+            "check": {},
+            "set": {},
+        },
+    }
 
-    if 'user_id' in columns:
-        permission['permission'].update({'filter': {'user_id': { '_eq': 'X-Hasura-User-Id'}}})
-    elif 'client_user_id' in columns:
-        permission['permission'].update({'filter': {'client_user_id': { '_eq': 'X-Hasura-User-Id'}}})
+    if "user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
+    elif "client_user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"client_user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
 
     return permission
+
 
 ##
 # Staff accessing their own data or client's data
@@ -168,18 +206,19 @@ def staff_default_select_permission(columns, filtered=True):
     when filtered = True, the permission sets the filter to allow only rows where the user_id is
     equal to the user_id of the request (found from JWT)
     """
-    permission = {
-        'role': 'staff',
-        'permission': {
-            'columns': columns,
-            'filter': {}}}
+    permission = {"role": "staff", "permission": {"columns": columns, "filter": {}}}
 
-    if filtered and 'user_id' in columns:
-        permission['permission'].update({'filter': {'user_id': { '_eq': 'X-Hasura-User-Id'}}})
-    elif filtered and 'staff_user_id' in columns:
-        permission['permission'].update({'filter': {'staff_user_id': { '_eq': 'X-Hasura-User-Id'}}})
+    if filtered and "user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
+    elif filtered and "staff_user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"staff_user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
 
     return permission
+
 
 def staff_default_update_permission(columns, filtered=True):
     """
@@ -192,19 +231,24 @@ def staff_default_update_permission(columns, filtered=True):
     when filtered = True, the permission sets the filter to allow only rows where the user_id is
     equal to the user_id of the request (found from JWT)
     """
-    permission =  {
-        'role': 'staff',
-        'permission': {
-            'columns': [column for column in columns if column not in NO_UPDATE_FIELDS],
-            'filter': {}}}
+    permission = {
+        "role": "staff",
+        "permission": {
+            "columns": [column for column in columns if column not in NO_UPDATE_FIELDS],
+            "filter": {},
+        },
+    }
 
-    if filtered and 'user_id' in columns:
-        permission['permission'].update({'filter': {'user_id': { '_eq': 'X-Hasura-User-Id'}}})
+    if filtered and "user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
 
-    if 'reporter_id' in columns:
-        permission['permission'].update({'set': {'reporter_id': 'X-Hasura-User-Id'}})
+    if "reporter_id" in columns:
+        permission["permission"].update({"set": {"reporter_id": "X-Hasura-User-Id"}})
 
     return permission
+
 
 def staff_default_insert_permission(columns, filtered=True):
     """
@@ -217,19 +261,24 @@ def staff_default_insert_permission(columns, filtered=True):
     TODO (4.1.21): we have not yet worked out which tables can be editied by staff on behalf of clients
     When we do have this in order, these permissions must be updated
     """
-    permission =  {
-        'role': 'staff',
-        'permission': {
-            'columns': [column for column in columns if column not in NO_INSERT_FIELDS],
-            'check': {}}}
+    permission = {
+        "role": "staff",
+        "permission": {
+            "columns": [column for column in columns if column not in NO_INSERT_FIELDS],
+            "check": {},
+        },
+    }
 
-    if 'reporter_id' in columns:
-        permission['permission'].update({'set': {'reporter_id':  'X-Hasura-User-Id'}})
+    if "reporter_id" in columns:
+        permission["permission"].update({"set": {"reporter_id": "X-Hasura-User-Id"}})
 
-    if filtered and 'user_id' in columns:
-        permission['permission'].update({'check': {'user_id': {'_eq': 'X-Hasura-User-Id'}}})
+    if filtered and "user_id" in columns:
+        permission["permission"].update(
+            {"check": {"user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
 
     return permission
+
 
 def staff_default_delete_permission(columns, filtered=True):
     """
@@ -239,18 +288,25 @@ def staff_default_delete_permission(columns, filtered=True):
 
     user_id must be submitted.
     """
-    permission =  {
-        'role': 'staff',
-        'permission': {
-            'columns': [column for column in columns if column not in NO_DELETE_FIELDS],
-            'check': {}}}
+    permission = {
+        "role": "staff",
+        "permission": {
+            "columns": [column for column in columns if column not in NO_DELETE_FIELDS],
+            "check": {},
+        },
+    }
 
-    if filtered and 'user_id' in columns:
-        permission['permission'].update({'filter': {'user_id': { '_eq': 'X-Hasura-User-Id'}}})
-    elif filtered and 'staff_user_id' in columns:
-        permission['permission'].update({'filter': {'staff_user_id': { '_eq': 'X-Hasura-User-Id'}}})
+    if filtered and "user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
+    elif filtered and "staff_user_id" in columns:
+        permission["permission"].update(
+            {"filter": {"staff_user_id": {"_eq": "X-Hasura-User-Id"}}}
+        )
 
     return permission
+
 
 ##
 # Unfiltered select access for lookup and system variable tables
@@ -259,10 +315,6 @@ def default_unfiltered_select_permission(columns, user_type):
     """
     Both client and staff permissions for accessing lookup tables
     """
-    permission = {
-        'role': user_type,
-        'permission': {
-            'columns': columns,
-            'filter': {}}}
+    permission = {"role": user_type, "permission": {"columns": columns, "filter": {}}}
 
     return permission

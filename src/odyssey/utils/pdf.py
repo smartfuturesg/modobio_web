@@ -28,7 +28,7 @@ from weasyprint import CSS, HTML
 from odyssey import db
 from odyssey.api.client.models import ClientInfo
 
-_executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix='PDF_')
+_executor = concurrent.futures.ThreadPoolExecutor(thread_name_prefix="PDF_")
 
 
 def to_pdf(user_id: int, table: Type[db.Model], template: str = None, form=None):
@@ -92,21 +92,28 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
     local_session = session.Session(db)
     with req_ctx:
         ### Load data and perform checks
-        client = (local_session.query(ClientInfo).filter_by(user_id=user_id).one_or_none())
+        client = (
+            local_session.query(ClientInfo).filter_by(user_id=user_id).one_or_none()
+        )
 
         if not client:
             # Calling thread has already finished, so raising errors here
             # has no effect. Print to stdout instead and hope somebody reads it.
             # TODO: logging
-            print(f'User ID {user_id} not found in table'
-                  f' {ClientInfo.__tablename__}.')
+            print(
+                f"User ID {user_id} not found in table" f" {ClientInfo.__tablename__}."
+            )
             return
 
-        query = (local_session.query(table).filter_by(user_id=user_id).order_by(table.idx.desc()))
+        query = (
+            local_session.query(table)
+            .filter_by(user_id=user_id)
+            .order_by(table.idx.desc())
+        )
         doc = query.first()
 
         if not doc:
-            print(f'User ID {user_id} not found in table {table.__tablename__}.')
+            print(f"User ID {user_id} not found in table {table.__tablename__}.")
             return
 
         if doc.pdf_path:
@@ -115,15 +122,16 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
 
         ### Read HTML page
         if template:
-
-            cssfile = (pathlib.Path(__file__).parent.parent / 'legacy' / 'static' / 'style.css')
+            cssfile = (
+                pathlib.Path(__file__).parent.parent / "legacy" / "static" / "style.css"
+            )
             css = CSS(filename=cssfile)
 
             html = render_template(template, form=form, pdf=True)
         else:
             # TODO: get html of page from React frontend
-            css = CSS(string='')
-            html = '<html><head></head><body>Nothing here yet</body></html>'
+            css = CSS(string="")
+            html = "<html><head></head><body>Nothing here yet</body></html>"
 
         ### Generate PDF document
         pdf = HTML(string=html).write_pdf(stylesheets=[css])
@@ -132,13 +140,15 @@ def _to_pdf(req_ctx, user_id, table, template=None, form=None):
         user_id = int(user_id)
         docname = table.displayname.split()[0].lower()
 
-        bucket = current_app.config['AWS_S3_BUCKET']
-        prefix = current_app.config['AWS_S3_PREFIX']
+        bucket = current_app.config["AWS_S3_BUCKET"]
+        prefix = current_app.config["AWS_S3_PREFIX"]
 
-        filename = f'ModoBio_{docname}_v{doc.revision}_client{user_id:05d}_{doc.signdate}.pdf'
-        pdf_path = f'{prefix}/id{user_id:05d}/signed_documents/{filename}'
+        filename = (
+            f"ModoBio_{docname}_v{doc.revision}_client{user_id:05d}_{doc.signdate}.pdf"
+        )
+        pdf_path = f"{prefix}/id{user_id:05d}/signed_documents/{filename}"
 
-        s3 = boto3.resource('s3')
+        s3 = boto3.resource("s3")
         bucket = s3.Bucket(bucket)
         bucket.put_object(Body=pdf, Key=pdf_path)
 
@@ -165,18 +175,19 @@ def merge_pdfs(documents: list, user_id: int) -> str:
     str
         Link to merged PDF file.
     """
-    bucket_name = current_app.config['AWS_S3_BUCKET']
+    bucket_name = current_app.config["AWS_S3_BUCKET"]
 
     merger = PdfFileMerger()
     bufs = []
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
     for doc in documents:
         doc_buf = io.BytesIO()
         try:
             s3.download_fileobj(bucket_name, doc, doc_buf)
         except ClientError as e:
-            print(f'Could not download file {doc} from S3 bucket'
-                  f' {bucket_name}: {e}')
+            print(
+                f"Could not download file {doc} from S3 bucket" f" {bucket_name}: {e}"
+            )
             continue
         doc_buf.seek(0)
         bufs.append(doc_buf)
@@ -191,15 +202,15 @@ def merge_pdfs(documents: list, user_id: int) -> str:
 
     user_id = int(user_id)
     signdate = date.today().isoformat()
-    filename = f'ModoBio_client{user_id:05d}_{signdate}.pdf'
+    filename = f"ModoBio_client{user_id:05d}_{signdate}.pdf"
 
     # Anything with a 'temp/' prefix in this bucket is set to be deleted after 1 day.
-    fullname = f'temp/{filename}'
+    fullname = f"temp/{filename}"
 
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
     s3.upload_fileobj(pdf_buf, bucket_name, fullname)
 
-    params = {'Bucket': bucket_name, 'Key': fullname}
-    pdf_path = s3.generate_presigned_url('get_object', Params=params, ExpiresIn=3600)
+    params = {"Bucket": bucket_name, "Key": fullname}
+    pdf_path = s3.generate_presigned_url("get_object", Params=params, ExpiresIn=3600)
 
     return pdf_path

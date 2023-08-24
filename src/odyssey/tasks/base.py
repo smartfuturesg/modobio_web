@@ -1,7 +1,7 @@
 import logging
 
 import celery
-from requests.exceptions import (ConnectionError, HTTPError, RequestException, Timeout)
+from requests.exceptions import ConnectionError, HTTPError, RequestException, Timeout
 from werkzeug.exceptions import BadRequest
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class BaseTaskWithRetry(celery.Task):
     ``autoretry_for`` attribute.
     """
 
-    autoretry_for = (Exception, )
+    autoretry_for = (Exception,)
     max_retries = 5
     retry_backoff = True
     retry_backoff_max = 700

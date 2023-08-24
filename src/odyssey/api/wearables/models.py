@@ -24,7 +24,7 @@ from odyssey.utils.constants import DB_SERVER_TIME
 class Wearables(db.Model):
     """Table that lists which supported wearables a client has."""
 
-    __tablename__ = 'Wearables'
+    __tablename__ = "Wearables"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -49,7 +49,7 @@ class Wearables(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -115,21 +115,25 @@ class Wearables(db.Model):
     :type: bool, default = False
     """
 
-    oura = db.relationship('WearablesOura', uselist=False, back_populates='wearable')
+    oura = db.relationship("WearablesOura", uselist=False, back_populates="wearable")
     """
     WearablesOura instance holding Oura specific data.
 
     :type: :class:`WearablesOura` instance
     """
 
-    fitbit = db.relationship('WearablesFitbit', uselist=False, back_populates='wearable')
+    fitbit = db.relationship(
+        "WearablesFitbit", uselist=False, back_populates="wearable"
+    )
     """
     WearablesFitbit instance holding Fitbit specific data.
 
     :type: :class:`WearablesFitbit` instance
     """
 
-    freestyle = db.relationship('WearablesFreeStyle', uselist=False, back_populates='wearable')
+    freestyle = db.relationship(
+        "WearablesFreeStyle", uselist=False, back_populates="wearable"
+    )
     """
     WearablesFreeStyle instance holding FreeStyle specific data.
 
@@ -140,7 +144,7 @@ class Wearables(db.Model):
 class WearablesOura(db.Model):
     """Oura Ring specific information."""
 
-    __tablename__ = 'WearablesOura'
+    __tablename__ = "WearablesOura"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -151,7 +155,7 @@ class WearablesOura(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -217,7 +221,7 @@ class WearablesOura(db.Model):
 
     wearable_id = db.Column(
         db.Integer,
-        db.ForeignKey('Wearables.idx', ondelete='CASCADE'),
+        db.ForeignKey("Wearables.idx", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -227,7 +231,7 @@ class WearablesOura(db.Model):
     :type: int, unique, foreign key to :attr:`Wearables.idx`
     """
 
-    wearable = db.relationship('Wearables', uselist=False, back_populates='oura')
+    wearable = db.relationship("Wearables", uselist=False, back_populates="oura")
     """
     Wearable instance this WearablesOura instance is linked to.
 
@@ -238,7 +242,7 @@ class WearablesOura(db.Model):
 class WearablesFitbit(db.Model):
     """Fitbit specific information."""
 
-    __tablename__ = 'WearablesFitbit'
+    __tablename__ = "WearablesFitbit"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -249,7 +253,7 @@ class WearablesFitbit(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -266,7 +270,9 @@ class WearablesFitbit(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    updated_at = db.Column(
+        db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME
+    )
     """
     Last update timestamp of this row in the database.
 
@@ -317,7 +323,7 @@ class WearablesFitbit(db.Model):
 
     wearable_id = db.Column(
         db.Integer,
-        db.ForeignKey('Wearables.idx', ondelete='CASCADE'),
+        db.ForeignKey("Wearables.idx", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -327,7 +333,7 @@ class WearablesFitbit(db.Model):
     :type: int, unique, foreign key to :attr:`Wearables.idx`
     """
 
-    wearable = db.relationship('Wearables', uselist=False, back_populates='fitbit')
+    wearable = db.relationship("Wearables", uselist=False, back_populates="fitbit")
     """
     Wearable instance this WearablesFitbit instance is linked to.
 
@@ -338,7 +344,7 @@ class WearablesFitbit(db.Model):
 class WearablesFreeStyle(db.Model):
     """FreeStyle Libre continuous glucose monitoring wearable specific information."""
 
-    __tablename__ = 'WearablesFreeStyle'
+    __tablename__ = "WearablesFreeStyle"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -349,7 +355,7 @@ class WearablesFreeStyle(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -400,7 +406,7 @@ class WearablesFreeStyle(db.Model):
 
     wearable_id = db.Column(
         db.Integer,
-        db.ForeignKey('Wearables.idx', ondelete='CASCADE'),
+        db.ForeignKey("Wearables.idx", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
@@ -410,7 +416,7 @@ class WearablesFreeStyle(db.Model):
     :type: int, unique, foreign key to :attr:`Wearables.idx`
     """
 
-    wearable = db.relationship('Wearables', uselist=False, back_populates='freestyle')
+    wearable = db.relationship("Wearables", uselist=False, back_populates="freestyle")
     """
     Wearable instance this WearablesFreeStyle instance is linked to.
 
@@ -428,9 +434,9 @@ class WearablesFreeStyle(db.Model):
 class WearablesV2(BaseModel, UserIdFkeyMixin):
     """Table that lists which supported wearables a client has."""
 
-    __tablename__ = 'WearablesV2'
+    __tablename__ = "WearablesV2"
 
-    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'wearable'), )
+    __table_args__ = (db.PrimaryKeyConstraint("user_id", "wearable"),)
 
     wearable = db.Column(db.String(64))
     """

@@ -7,14 +7,23 @@ from sqlalchemy.orm import load_only
 
 from odyssey import ma
 from odyssey.api.staff.models import (
-    StaffCalendarEvents, StaffOffices, StaffOperationalTerritories, StaffProfile,
-    StaffRecentClients, StaffRoles
+    StaffCalendarEvents,
+    StaffOffices,
+    StaffOperationalTerritories,
+    StaffProfile,
+    StaffRecentClients,
+    StaffRoles,
 )
 from odyssey.api.user.models import User
 from odyssey.utils.base.schemas import BaseSchema
 from odyssey.utils.constants import (
-    ACCESS_ROLES, BOOKINGS_STATUS, EVENT_AVAILABILITY, RECURRENCE_TYPE, STAFF_ROLES
+    ACCESS_ROLES,
+    BOOKINGS_STATUS,
+    EVENT_AVAILABILITY,
+    RECURRENCE_TYPE,
+    STAFF_ROLES,
 )
+
 """
     Schemas for the staff API
 """
@@ -33,8 +42,12 @@ class StaffRecentClientsSchema(Schema):
 
 class StaffSearchItemsSchema(Schema):
     user_id = fields.Integer()
-    firstname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
-    lastname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
+    firstname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
+    lastname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
     email = fields.Email(required=False, missing=None)
 
 
@@ -63,11 +76,11 @@ class StaffProfilePageGetSchema(Schema):
 class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffRoles
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ("created_at", "updated_at", "idx")
         include_fk = True
-        load_only = ('user_id', )
+        load_only = ("user_id",)
 
-    role_id = fields.Integer(attribute='idx', dump_only=True)
+    role_id = fields.Integer(attribute="idx", dump_only=True)
     granter_id = fields.Integer(load_only=True)
     consult_rate = fields.Number(missing=0)
 
@@ -78,8 +91,12 @@ class StaffRolesSchema(ma.SQLAlchemyAutoSchema):
 
 class StaffTokenRequestSchema(Schema):
     user_id = fields.Integer()
-    firstname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
-    lastname = fields.String(required=False, validate=validate.Length(min=1, max=50), missing=None)
+    firstname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
+    lastname = fields.String(
+        required=False, validate=validate.Length(min=1, max=50), missing=None
+    )
     email = fields.Email(required=False, missing=None)
     token = fields.String()
     refresh_token = fields.String()
@@ -88,15 +105,17 @@ class StaffTokenRequestSchema(Schema):
 
 
 class StaffCloseAccountSchema(Schema):
-    reason = fields.String(required=False, missing=None, validate=validate.Length(max=500))
+    reason = fields.String(
+        required=False, missing=None, validate=validate.Length(max=500)
+    )
 
 
 class StaffOperationalTerritoriesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffOperationalTerritories
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ("created_at", "updated_at", "idx")
         include_fk = True
-        dump_only = 'user_id'
+        dump_only = "user_id"
 
     user_id = fields.Integer(missing=None)
 
@@ -106,20 +125,24 @@ class StaffOperationalTerritoriesSchema(ma.SQLAlchemyAutoSchema):
 
 
 class StaffOperationalTerritoriesNestedSchema(Schema):
-    operational_territories = fields.Nested(StaffOperationalTerritoriesSchema(many=True))
+    operational_territories = fields.Nested(
+        StaffOperationalTerritoriesSchema(many=True)
+    )
 
 
 class StaffCalendarEventsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffCalendarEvents
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('idx', 'user_id', 'duration', 'warning', 'timezone')
+        exclude = ("created_at", "updated_at")
+        dump_only = ("idx", "user_id", "duration", "warning", "timezone")
         include_fk = True
 
     availability_status = fields.String(
-        validate=validate.OneOf(EVENT_AVAILABILITY), missing='Available'
+        validate=validate.OneOf(EVENT_AVAILABILITY), missing="Available"
     )
-    recurrence_type = fields.String(required=False, validate=validate.OneOf(RECURRENCE_TYPE))
+    recurrence_type = fields.String(
+        required=False, validate=validate.OneOf(RECURRENCE_TYPE)
+    )
     all_day = fields.Boolean(missing=True)
     recurring = fields.Boolean(missing=False)
     warning = fields.String()
@@ -139,7 +162,7 @@ class StaffCalendarEventsUpdateSchema(Schema):
 class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = StaffOffices
-        exclude = ('created_at', 'updated_at', 'idx')
+        exclude = ("created_at", "updated_at", "idx")
 
     territory_id = fields.Integer()
     country = fields.String(dump_only=True)
@@ -148,7 +171,9 @@ class StaffOfficesSchema(ma.SQLAlchemyAutoSchema):
     state = fields.String(dump_only=True)
     state_abbreviation = fields.String(dump_only=True)
     phone_type = fields.String(
-        validate=validate.OneOf(('primary', 'cell', 'work', 'home', 'fax', 'night', 'beeper'))
+        validate=validate.OneOf(
+            ("primary", "cell", "work", "home", "fax", "night", "beeper")
+        )
     )
 
     @post_load
@@ -160,7 +185,8 @@ class StaffInternalRolesSchema(Schema):
     access_roles = fields.List(
         fields.String(validate=validate.OneOf(STAFF_ROLES)),
         metadata={
-            'description': ('Access roles the user will have. Options include:'
-                            f' {STAFF_ROLES}')
+            "description": (
+                "Access roles the user will have. Options include:" f" {STAFF_ROLES}"
+            )
         },
     )

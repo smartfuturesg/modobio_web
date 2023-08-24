@@ -15,42 +15,64 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api.lookup.models import (
-    LookupCountriesOfOperations, LookupRoles, LookupTerritoriesOfOperations
+    LookupCountriesOfOperations,
+    LookupRoles,
+    LookupTerritoriesOfOperations,
 )
 from odyssey.api.staff.models import (
-    StaffCalendarEvents, StaffOffices, StaffOperationalTerritories, StaffProfile,
-    StaffRecentClients, StaffRoles
+    StaffCalendarEvents,
+    StaffOffices,
+    StaffOperationalTerritories,
+    StaffProfile,
+    StaffRecentClients,
+    StaffRoles,
 )
 from odyssey.api.staff.schemas import (
-    StaffCalendarEventsSchema, StaffCalendarEventsUpdateSchema, StaffCloseAccountSchema,
-    StaffInternalRolesSchema, StaffOfficesSchema, StaffOperationalTerritoriesNestedSchema,
-    StaffProfilePageGetSchema, StaffProfileSchema, StaffRecentClientsSchema, StaffRolesSchema,
-    StaffTokenRequestSchema
+    StaffCalendarEventsSchema,
+    StaffCalendarEventsUpdateSchema,
+    StaffCloseAccountSchema,
+    StaffInternalRolesSchema,
+    StaffOfficesSchema,
+    StaffOperationalTerritoriesNestedSchema,
+    StaffProfilePageGetSchema,
+    StaffProfileSchema,
+    StaffRecentClientsSchema,
+    StaffRolesSchema,
+    StaffTokenRequestSchema,
 )
-from odyssey.api.user.models import (User, UserLogin, UserProfilePictures, UserTokenHistory)
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserProfilePictures,
+    UserTokenHistory,
+)
 from odyssey.api.user.routes import UserLogoutApi
 from odyssey.api.user.schemas import UserSchema
 from odyssey.utils.auth import basic_auth, token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (
-    ALLOWED_IMAGE_TYPES, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE, MAX_CUSTOM_REFRESH_TOKEN_LIFETIME,
-    MIN_CUSTOM_REFRESH_TOKEN_LIFETIME
+    ALLOWED_IMAGE_TYPES,
+    IMAGE_DIMENSIONS,
+    IMAGE_MAX_SIZE,
+    MAX_CUSTOM_REFRESH_TOKEN_LIFETIME,
+    MIN_CUSTOM_REFRESH_TOKEN_LIFETIME,
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.misc import check_staff_existence
 
 logger = logging.getLogger(__name__)
 
-ns = Namespace('staff', description='Operations related to staff members')
+ns = Namespace("staff", description="Operations related to staff members")
 
 
-@ns.route('/')
+@ns.route("/")
 # @ns.doc(params={'firstname': 'first name to search',
 #                'lastname': 'last name to search',
 #                'user_id': 'user_id to search',
 #                'email': 'email to search'})
 class StaffMembers(BaseResource):
     """staff member class for creating, getting staff"""
+
     @token_auth.login_required
     # @responds(schema=StaffSearchItemsSchema(many=True), api=ns)
     @responds(schema=UserSchema(many=True), api=ns)
@@ -66,12 +88,12 @@ class StaffMembers(BaseResource):
     def post(self):
         """register a new staff member"""
         data = request.get_json() or {}
-        email = data.get('email')
+        email = data.get("email")
 
         # check if this email is already being used. If so raise 409 conflict error
         staff = User.query.filter_by(email=email).first()
         if staff:
-            raise BadRequest('Email {email} already in use.')
+            raise BadRequest("Email {email} already in use.")
 
         ## TODO: rework Role suppression
         # system_admin: permission to create staff admin.
@@ -84,9 +106,9 @@ class StaffMembers(BaseResource):
         #                          Please contact system admin")
 
         # remove user data from staff data
-        user_data = {'email': data['email'], 'password': data['password']}
-        del data['email']
-        del data['password']
+        user_data = {"email": data["email"], "password": data["password"]}
+        del data["email"]
+        del data["password"]
 
         # Staff schema instance load from payload
         staff_schema = StaffProfileSchema()
@@ -95,7 +117,7 @@ class StaffMembers(BaseResource):
         db.session.add(new_staff)
         db.session.commit()
 
-        user_data['user_id'] = new_staff.user_id
+        user_data["user_id"] = new_staff.user_id
         new_user = UserSchema().load(user_data)
 
         db.session.add(new_user)
@@ -104,69 +126,76 @@ class StaffMembers(BaseResource):
         return new_staff
 
 
-@ns.route('/roles/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/roles/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class UpdateRoles(BaseResource):
     """
     View and update roles for staff member with a given user_id.
     This endpoint is only for granting internal staff roles (staff_admin,data_scientist,
     community_manager, and client_services').
     """
-    @token_auth.login_required(user_type=('staff', ), staff_role=('staff_admin', ))
+
+    @token_auth.login_required(user_type=("staff",), staff_role=("staff_admin",))
     @accepts(schema=StaffInternalRolesSchema, api=ns)
     @responds(schema=StaffRolesSchema(many=True), status_code=201, api=ns)
     def put(self, user_id):
         """
         Update staff roles
         """
-        self.check_user(user_id, user_type='staff')
+        self.check_user(user_id, user_type="staff")
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
         staff_roles = (
-            db.session.query(StaffRoles.role).filter(StaffRoles.user_id == user_id).all()
+            db.session.query(StaffRoles.role)
+            .filter(StaffRoles.user_id == user_id)
+            .all()
         )
         staff_roles = [x[0] for x in staff_roles]
 
-        for role in request.parsed_obj['access_roles']:
+        for role in request.parsed_obj["access_roles"]:
             if role not in staff_roles:
-
                 new_role = LookupRoles.query.filter_by(role_name=role).one_or_none()
 
-                if '@modobio.com' not in user.email or not user.email_verified:
+                if "@modobio.com" not in user.email or not user.email_verified:
                     raise BadRequest(
-                        'Non-provider roles can only be granted to users '
-                        'with a verified @modobio.com address.'
+                        "Non-provider roles can only be granted to users "
+                        "with a verified @modobio.com address."
                     )
                 else:
                     db.session.add(
-                        StaffRolesSchema().load({
-                            'user_id': user_id,
-                            'role': role,
-                            'granter_id': token_auth.current_user()[0].user_id,
-                        })
+                        StaffRolesSchema().load(
+                            {
+                                "user_id": user_id,
+                                "role": role,
+                                "granter_id": token_auth.current_user()[0].user_id,
+                            }
+                        )
                     )
 
         db.session.commit()
         return StaffRoles.query.filter_by(user_id=user_id).all()
 
-    @token_auth.login_required(user_type=('staff', 'staff_self'), staff_role=('staff_admin', ))
+    @token_auth.login_required(
+        user_type=("staff", "staff_self"), staff_role=("staff_admin",)
+    )
     @responds(schema=StaffRolesSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
         """
         Get staff roles
         """
-        self.check_user(user_id, user_type='staff')
+        self.check_user(user_id, user_type="staff")
 
         return StaffRoles.query.filter_by(user_id=user_id).all()
 
 
-@ns.route('/operational-territories/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/operational-territories/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class OperationalTerritories(BaseResource):
     """
     View and update operational territories for staff member with a given user_id
     """
-    @token_auth.login_required(user_type=('staff_self', ))
+
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=StaffOperationalTerritoriesNestedSchema, api=ns)
     @responds(schema=StaffOperationalTerritoriesNestedSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -182,7 +211,9 @@ class OperationalTerritories(BaseResource):
             db.session.query(
                 StaffOperationalTerritories.role_id,
                 StaffOperationalTerritories.operational_territory_id,
-            ).filter(StaffOperationalTerritories.user_id == user_id).all()
+            )
+            .filter(StaffOperationalTerritories.user_id == user_id)
+            .all()
         )
 
         # ids of current roles held by staff member
@@ -191,16 +222,19 @@ class OperationalTerritories(BaseResource):
         )
         current_role_ids = [x[0] for x in current_role_ids]
 
-        for territory in data['operational_territories']:
+        for territory in data["operational_territories"]:
             # check if role-territory combination already exists. if so, skip it
-            if (not (territory.role_id, territory.operational_territory_id) in current_territories):
+            if (
+                not (territory.role_id, territory.operational_territory_id)
+                in current_territories
+            ):
                 # ensure role_id is assigned to this staff member
                 if territory.role_id in current_role_ids:
                     territory.user_id = user_id
                     db.session.add(territory)
                 else:
                     db.session.rollback()
-                    raise Unauthorized('Staff member does not have this role.')
+                    raise Unauthorized("Staff member does not have this role.")
 
         db.session.commit()
 
@@ -209,10 +243,12 @@ class OperationalTerritories(BaseResource):
             db.session.query(
                 StaffOperationalTerritories.role_id,
                 StaffOperationalTerritories.operational_territory_id,
-            ).filter(StaffOperationalTerritories.user_id == user_id).all()
+            )
+            .filter(StaffOperationalTerritories.user_id == user_id)
+            .all()
         )
 
-        return {'operational_territories': current_territories}
+        return {"operational_territories": current_territories}
 
     @token_auth.login_required
     @responds(schema=StaffOperationalTerritoriesNestedSchema, status_code=200, api=ns)
@@ -226,11 +262,13 @@ class OperationalTerritories(BaseResource):
             db.session.query(
                 StaffOperationalTerritories.role_id,
                 StaffOperationalTerritories.operational_territory_id,
-            ).filter(StaffOperationalTerritories.user_id == user_id).all()
+            )
+            .filter(StaffOperationalTerritories.user_id == user_id)
+            .all()
         )
-        return {'operational_territories': current_territories}
+        return {"operational_territories": current_territories}
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=StaffOperationalTerritoriesNestedSchema, api=ns)
     @responds(schema=StaffOperationalTerritoriesNestedSchema, status_code=204, api=ns)
     def delete(self, user_id):
@@ -240,7 +278,7 @@ class OperationalTerritories(BaseResource):
         """
         data = request.parsed_obj
 
-        for territory in data['operational_territories']:
+        for territory in data["operational_territories"]:
             StaffOperationalTerritories.query.filter_by(user_id=user_id).filter_by(
                 operational_territory_id=territory.operational_territory_id
             ).filter_by(role_id=territory.role_id).delete()
@@ -250,10 +288,11 @@ class OperationalTerritories(BaseResource):
         return
 
 
-@ns.route('/recentclients/')
+@ns.route("/recentclients/")
 class RecentClients(BaseResource):
     """endpoint related to the staff recent client feature"""
-    @token_auth.login_required(user_type=('staff_self', ))
+
+    @token_auth.login_required(user_type=("staff_self",))
     @responds(schema=StaffRecentClientsSchema(many=True), api=ns)
     def get(self):
         """get the 10 most recent clients a staff member has loaded"""
@@ -262,14 +301,15 @@ class RecentClients(BaseResource):
         ).all()
 
 
-@ns.route('/token/')
+@ns.route("/token/")
 class StaffToken(BaseResource):
     """create and revoke tokens"""
+
     @ns.doc(
-        security='password',
-        params={'refresh_token_lifetime': 'Lifetime for staff refresh token'},
+        security="password",
+        params={"refresh_token_lifetime": "Lifetime for staff refresh token"},
     )
-    @basic_auth.login_required(user_type=('staff', 'provider'), email_required=False)
+    @basic_auth.login_required(user_type=("staff", "provider"), email_required=False)
     @responds(schema=StaffTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """
@@ -285,33 +325,37 @@ class StaffToken(BaseResource):
 
         # bring up list of staff roles
         access_roles = (
-            db.session.query(StaffRoles.role).filter(StaffRoles.user_id == user.user_id).all()
+            db.session.query(StaffRoles.role)
+            .filter(StaffRoles.user_id == user.user_id)
+            .all()
         )
 
-        refresh_token_lifetime = request.args.get('refresh_token_lifetime', type=int)
+        refresh_token_lifetime = request.args.get("refresh_token_lifetime", type=int)
 
         # Handle refresh token lifetime param
         if refresh_token_lifetime:
             # Convert lifetime from days to hours
             if (
-                MIN_CUSTOM_REFRESH_TOKEN_LIFETIME <= refresh_token_lifetime <=
-                MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
+                MIN_CUSTOM_REFRESH_TOKEN_LIFETIME
+                <= refresh_token_lifetime
+                <= MAX_CUSTOM_REFRESH_TOKEN_LIFETIME
             ):
                 refresh_token_lifetime *= 24
             # Else lifetime is not in acceptable range
             else:
-                raise BadRequest('Custom refresh token lifetime must be between 1 and 30'
-                                 ' days.')
+                raise BadRequest(
+                    "Custom refresh token lifetime must be between 1 and 30" " days."
+                )
 
-        utype = 'provider' if user.is_provider else 'staff'
+        utype = "provider" if user.is_provider else "staff"
 
         access_token = UserLogin.generate_token(
-            user_type=utype, user_id=user.user_id, token_type='access'
+            user_type=utype, user_id=user.user_id, token_type="access"
         )
         refresh_token = UserLogin.generate_token(
             user_type=utype,
             user_id=user.user_id,
-            token_type='refresh',
+            token_type="refresh",
             refresh_token_lifetime=refresh_token_lifetime,
         )
 
@@ -319,8 +363,8 @@ class StaffToken(BaseResource):
             UserTokenHistory(
                 user_id=user.user_id,
                 refresh_token=refresh_token,
-                event='login',
-                ua_string=request.headers.get('User-Agent'),
+                event="login",
+                ua_string=request.headers.get("User-Agent"),
             )
         )
 
@@ -333,23 +377,24 @@ class StaffToken(BaseResource):
         db.session.commit()
 
         return {
-            'email': user.email,
-            'firstname': user.firstname,
-            'lastname': user.lastname,
-            'token': access_token,
-            'refresh_token': refresh_token,
-            'user_id': user.user_id,
-            'access_roles': [item[0] for item in access_roles],
-            'email_verified': user.email_verified,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "token": access_token,
+            "refresh_token": refresh_token,
+            "user_id": user.user_id,
+            "access_roles": [item[0] for item in access_roles],
+            "email_verified": user.email_verified,
         }
 
 
 # user_id in path is not necessary here, except that
 # staff_access_check() relies on it to check staff_self.
-@ns.route('/account/<int:user_id>/close/')
+@ns.route("/account/<int:user_id>/close/")
 class StaffCloseAccountEndpoint(BaseResource):
     """Close staff member account."""
-    @token_auth.login_required(user_type=('staff_self', ))
+
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=StaffCloseAccountSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self, user_id):
@@ -363,15 +408,16 @@ class StaffCloseAccountEndpoint(BaseResource):
         """
         user, user_login = token_auth.current_user()
         user_login.staff_account_closed = datetime.now()
-        user_login.staff_account_closed_reason = request.parsed_obj['reason']
+        user_login.staff_account_closed_reason = request.parsed_obj["reason"]
         db.session.commit()
         UserLogoutApi().post()
 
 
-@ns.route('/profile/<int:user_id>/')
+@ns.route("/profile/<int:user_id>/")
 class StaffProfilePage(BaseResource):
     """endpoint related staff members' profile pages"""
-    @token_auth.login_required(user_type=('modobio', ))
+
+    @token_auth.login_required(user_type=("modobio",))
     @responds(schema=StaffProfilePageGetSchema, api=ns, status_code=200)
     def get(self, user_id):
         """get details for a staff member's profile page"""
@@ -381,23 +427,23 @@ class StaffProfilePage(BaseResource):
         user = User.query.filter_by(user_id=user_id).one_or_none()
 
         res = {
-            'firstname': user.firstname,
-            'middlename': user.middlename,
-            'lastname': user.lastname,
-            'biological_sex_male': user.biological_sex_male,
-            'dob': user.dob,
+            "firstname": user.firstname,
+            "middlename": user.middlename,
+            "lastname": user.lastname,
+            "biological_sex_male": user.biological_sex_male,
+            "dob": user.dob,
         }
 
         # as long as a staff member exists(checked above), they have a profile
         # because it is made for them when the staff user is created
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
 
-        res['bio'] = profile.bio
-        res['profile_picture'] = get_profile_pictures(user_id, True)
+        res["bio"] = profile.bio
+        res["profile_picture"] = get_profile_pictures(user_id, True)
 
         return res
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @responds(schema=StaffProfilePageGetSchema, api=ns, status_code=200)
     def put(self, user_id):
         """Edit details for a staff member's profile page.
@@ -416,7 +462,7 @@ class StaffProfilePage(BaseResource):
         check_staff_existence(user_id)
 
         if not request.form and not request.files:
-            raise BadRequest('No data provided.')
+            raise BadRequest("No data provided.")
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
         profile = StaffProfile.query.filter_by(user_id=user_id).one_or_none()
@@ -427,29 +473,32 @@ class StaffProfilePage(BaseResource):
         has_bio = False
 
         for key in request.form:
-            if key == 'bio':
-                profile.bio = request.form.get('bio')
+            if key == "bio":
+                profile.bio = request.form.get("bio")
                 has_bio = True
             else:
                 data = request.form.get(key)
-                if key == 'biological_sex_male':
+                if key == "biological_sex_male":
                     # check that this value can be interpretted as a bool
-                    if data in ('true', 'True', '1'):
+                    if data in ("true", "True", "1"):
                         data = True
-                    elif data in ('false', 'False', '0'):
+                    elif data in ("false", "False", "0"):
                         data = False
                     else:
-                        raise BadRequest(f'Invalid value for {key}.')
-                if key == 'dob':
-                    data = datetime.strptime(data, '%Y-%m-%d')
+                        raise BadRequest(f"Invalid value for {key}.")
+                if key == "dob":
+                    data = datetime.strptime(data, "%Y-%m-%d")
                 user_update[key] = data
         urls = {}
         if request.files:
             if len(request.files) != 1:
-                raise BadRequest('Only one image upload allowed.')
+                raise BadRequest("Only one image upload allowed.")
 
-            if ('profile_picture' not in request.files or not request.files['profile_picture']):
-                raise BadRequest('No file selected.')
+            if (
+                "profile_picture" not in request.files
+                or not request.files["profile_picture"]
+            ):
+                raise BadRequest("No file selected.")
 
             # Store current pictures, delete only after upload of new pictures is successful.
             previous_pics = profile.profile_pictures
@@ -457,12 +506,12 @@ class StaffProfilePage(BaseResource):
             # Original image
             hex_token = secrets.token_hex(4)
             original = ImageUpload(
-                request.files['profile_picture'].stream,
+                request.files["profile_picture"].stream,
                 user_id,
-                prefix='staff_profile_picture',
+                prefix="staff_profile_picture",
             )
             original.validate()
-            original.save(f'original_{hex_token}.{original.extension}')
+            original.save(f"original_{hex_token}.{original.extension}")
 
             upp = UserProfilePictures(
                 staff_user_id=user_id,
@@ -476,7 +525,7 @@ class StaffProfilePage(BaseResource):
             # Resized images
             for dim in IMAGE_DIMENSIONS:
                 resized = original.resize(dim)
-                resized.save(f'size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}')
+                resized.save(f"size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}")
                 urls[str(resized.width)] = resized.url()
 
                 upp = UserProfilePictures(
@@ -500,9 +549,9 @@ class StaffProfilePage(BaseResource):
 
         # add profile keys to user_update to match @responds
         if has_bio:
-            user_update['bio'] = profile.bio
+            user_update["bio"] = profile.bio
         if urls:
-            user_update['profile_picture'] = urls
+            user_update["profile_picture"] = urls
 
         if len(user_update.keys()) == 0:
             # request was successful but there is no body to return
@@ -511,7 +560,7 @@ class StaffProfilePage(BaseResource):
         return user_update
 
 
-@ns.route('/calendar/<int:user_id>/')
+@ns.route("/calendar/<int:user_id>/")
 class StaffCalendarEventsRoute(BaseResource):
     """
     Endpoint to manage professional's (staff) calendar events
@@ -520,7 +569,7 @@ class StaffCalendarEventsRoute(BaseResource):
     # Multiple events per staff member allowed
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=StaffCalendarEventsSchema, api=ns)
     @responds(schema=StaffCalendarEventsSchema, status_code=201, api=ns)
     def post(self, user_id):
@@ -533,7 +582,9 @@ class StaffCalendarEventsRoute(BaseResource):
         if data.end_date:
             date_delta = data.end_date - data.start_date
             if date_delta.total_seconds() < 0:
-                raise BadRequest('Event end date must be later than start date or null.')
+                raise BadRequest(
+                    "Event end date must be later than start date or null."
+                )
 
         if data.all_day:
             data.start_time = time(hour=0, minute=0, second=0, tzinfo=tz.tzlocal())
@@ -541,11 +592,11 @@ class StaffCalendarEventsRoute(BaseResource):
 
             if data.recurring:
                 if not data.recurrence_type:
-                    raise BadRequest('Recurring events require recurrence type.')
+                    raise BadRequest("Recurring events require recurrence type.")
             else:
                 data.recurrence_type = None
                 if not data.end_date:
-                    raise BadRequest('This event requires an end date.')
+                    raise BadRequest("This event requires an end date.")
 
             data.duration = timedelta(days=1)
 
@@ -556,28 +607,29 @@ class StaffCalendarEventsRoute(BaseResource):
             if data.recurring:
                 end = datetime.combine(data.start_date, data.end_time)
                 if not data.recurrence_type:
-                    raise BadRequest('Recurring events require recurrence type.')
+                    raise BadRequest("Recurring events require recurrence type.")
             else:
                 data.recurrence_type = None
                 if not data.end_date:
-                    raise BadRequest('This event requires an end date.')
+                    raise BadRequest("This event requires an end date.")
                 end = datetime.combine(data.end_date, data.end_time)
 
             # Event's start time must come before end time
             delta = end - start
             if delta.total_seconds() < 0:
-                raise BadRequest('Start of event must be earlier than End of event.')
+                raise BadRequest("Start of event must be earlier than End of event.")
 
             data.duration = delta
 
-        if (data.recurrence_type == 'Monthly' and data.start_date.day > 28) or (
-            data.recurrence_type == 'Yearly' and data.start_date.month == 2
+        if (data.recurrence_type == "Monthly" and data.start_date.day > 28) or (
+            data.recurrence_type == "Yearly"
+            and data.start_date.month == 2
             and data.start_date.day > 28
         ):
             data.warning = (
-                f'Some months have less than {data.start_date.day} days. Those'
-                ' months, the occurrence will fall on the last day of the'
-                ' month'
+                f"Some months have less than {data.start_date.day} days. Those"
+                " months, the occurrence will fall on the last day of the"
+                " month"
             )
 
         data.timezone = data.start_time.tzname()
@@ -585,7 +637,7 @@ class StaffCalendarEventsRoute(BaseResource):
         db.session.commit()
         return data
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=StaffCalendarEventsUpdateSchema, api=ns)
     @responds(schema=StaffCalendarEventsUpdateSchema, status_code=200, api=ns)
     def put(self, user_id):
@@ -607,11 +659,11 @@ class StaffCalendarEventsRoute(BaseResource):
             The index of the event to update.
         """
         data = request.parsed_obj
-        updated_event = data['revised_event_schema']
-        updated_event_dict = request.json['revised_event_schema']
-        entire_series = data['entire_series']
-        idx = data['event_to_update_idx']
-        prev_start_date = data['previous_start_date']
+        updated_event = data["revised_event_schema"]
+        updated_event_dict = request.json["revised_event_schema"]
+        entire_series = data["entire_series"]
+        idx = data["event_to_update_idx"]
+        prev_start_date = data["previous_start_date"]
 
         # prepare edited event
         updated_event.user_id = user_id
@@ -623,51 +675,72 @@ class StaffCalendarEventsRoute(BaseResource):
             if updated_event.end_date:
                 date_delta = updated_event.end_date - updated_event.start_date
                 if date_delta.total_seconds() < 0:
-                    raise BadRequest('Event end date must be later than start date or null.')
+                    raise BadRequest(
+                        "Event end date must be later than start date or null."
+                    )
 
             if updated_event.all_day:
-                updated_event.start_time = time(hour=0, minute=0, second=0, tzinfo=tz.tzlocal())
-                updated_event.end_time = time(hour=23, minute=59, second=59, tzinfo=tz.tzlocal())
+                updated_event.start_time = time(
+                    hour=0, minute=0, second=0, tzinfo=tz.tzlocal()
+                )
+                updated_event.end_time = time(
+                    hour=23, minute=59, second=59, tzinfo=tz.tzlocal()
+                )
 
                 if updated_event.recurring:
                     if not updated_event.recurrence_type:
-                        raise BadRequest('Recurring events require recurrence type.')
+                        raise BadRequest("Recurring events require recurrence type.")
                 else:
                     updated_event.recurrence_type = None
                     if not updated_event.end_date:
-                        raise BadRequest('This event requires an end date.')
+                        raise BadRequest("This event requires an end date.")
 
                 updated_event.duration = timedelta(days=1)
             else:
-                updated_event.start_time = updated_event.start_time.replace(tzinfo=tz.tzlocal())
-                start = datetime.combine(updated_event.start_date, updated_event.start_time)
-                updated_event.end_time = updated_event.end_time.replace(tzinfo=tz.tzlocal())
+                updated_event.start_time = updated_event.start_time.replace(
+                    tzinfo=tz.tzlocal()
+                )
+                start = datetime.combine(
+                    updated_event.start_date, updated_event.start_time
+                )
+                updated_event.end_time = updated_event.end_time.replace(
+                    tzinfo=tz.tzlocal()
+                )
                 if updated_event.recurring:
-                    end = datetime.combine(updated_event.start_date, updated_event.end_time)
+                    end = datetime.combine(
+                        updated_event.start_date, updated_event.end_time
+                    )
                     if not updated_event.recurrence_type:
-                        raise BadRequest('Recurring events require recurrence type.')
+                        raise BadRequest("Recurring events require recurrence type.")
                 else:
                     updated_event.recurrence_type = None
                     if not updated_event.end_date:
-                        raise BadRequest('This event requires an end date.')
-                    end = datetime.combine(updated_event.end_date, updated_event.end_time)
+                        raise BadRequest("This event requires an end date.")
+                    end = datetime.combine(
+                        updated_event.end_date, updated_event.end_time
+                    )
 
                 # Event's start time must come before end time
                 delta = end - start
                 if delta.total_seconds() < 0:
-                    raise BadRequest('Start of event must be earlier than End of event.')
+                    raise BadRequest(
+                        "Start of event must be earlier than End of event."
+                    )
 
                 updated_event.duration = delta
 
-            if (updated_event.recurrence_type == 'Monthly'
-                and updated_event.start_date.day > 28) or (
-                    updated_event.recurrence_type == 'Yearly'
-                    and updated_event.start_date.month == 2 and updated_event.start_date.day > 28
-                ):
+            if (
+                updated_event.recurrence_type == "Monthly"
+                and updated_event.start_date.day > 28
+            ) or (
+                updated_event.recurrence_type == "Yearly"
+                and updated_event.start_date.month == 2
+                and updated_event.start_date.day > 28
+            ):
                 updated_event.warning = (
-                    'Some months have less than'
-                    f' {updated_event.start_date.day} days. Those months, the'
-                    ' occurrence will fall on the last day of the month'
+                    "Some months have less than"
+                    f" {updated_event.start_date.day} days. Those months, the"
+                    " occurrence will fall on the last day of the month"
                 )
 
             updated_event.timezone = updated_event.start_time.tzname()
@@ -697,11 +770,11 @@ class StaffCalendarEventsRoute(BaseResource):
                 new_recurrence.end_date = query.end_date
                 new_recurrence.timezone = query.timezone
 
-                if query.recurrence_type == 'Yearly':
+                if query.recurrence_type == "Yearly":
                     recurrence_delta = relativedelta(years=1)
-                elif query.recurrence_type == 'Monthly':
+                elif query.recurrence_type == "Monthly":
                     recurrence_delta = relativedelta(months=1)
-                elif query.recurrence_type == 'Weekly':
+                elif query.recurrence_type == "Weekly":
                     recurrence_delta = relativedelta(weeks=1)
                 else:
                     recurrence_delta = relativedelta(days=1)
@@ -712,12 +785,12 @@ class StaffCalendarEventsRoute(BaseResource):
                 query.end_date = prev_start_date - timedelta(days=1)
 
         else:
-            raise BadRequest('Event not found.')
+            raise BadRequest("Event not found.")
         db.session.commit()
         return data
 
-    @token_auth.login_required(user_type=('staff_self', ))
-    @ns.doc(params={'year': 'int', 'month': 'int: 1 - 12', 'day': 'int: 1 - 31'})
+    @token_auth.login_required(user_type=("staff_self",))
+    @ns.doc(params={"year": "int", "month": "int: 1 - 12", "day": "int: 1 - 31"})
     @responds(schema=StaffCalendarEventsSchema(many=True), status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -729,18 +802,18 @@ class StaffCalendarEventsRoute(BaseResource):
         """
         # If no year provided, the year deafults to current year
         # startAt = request.args.get('_from', 0, type= int)
-        year = request.args.get('year', datetime.now().year, type=int)
-        month = request.args.get('month', type=int)
-        day = request.args.get('day', type=int)
+        year = request.args.get("year", datetime.now().year, type=int)
+        month = request.args.get("month", type=int)
+        day = request.args.get("day", type=int)
 
         if month:
             if month < 1 or month > 12:
-                raise BadRequest('Invalid month.')
+                raise BadRequest("Invalid month.")
 
         # if the resquest inludes a day but not a month, the month defaults to current month
         if day:
             if day < 1 or day > 31:
-                raise BadRequest('Invalid day')
+                raise BadRequest("Invalid day")
 
             if not month:
                 month = datetime.now().month
@@ -748,12 +821,12 @@ class StaffCalendarEventsRoute(BaseResource):
             try:
                 datetime(year, month, day)
             except ValueError:
-                raise BadRequest('Invalid date.')
+                raise BadRequest("Invalid date.")
 
         query_set = set(
-            StaffCalendarEvents.query.filter_by(user_id=user_id).order_by(
-                StaffCalendarEvents.start_date.desc()
-            ).all()
+            StaffCalendarEvents.query.filter_by(user_id=user_id)
+            .order_by(StaffCalendarEvents.start_date.desc())
+            .all()
         )
         new_query = query_set.copy()
 
@@ -786,8 +859,14 @@ class StaffCalendarEventsRoute(BaseResource):
                 else:
                     check_date_2 = datetime(year, month, 1).date()
                     check_date_1 = datetime(year, month, last_day_of_month).date()
-                    if ((event.start_date.month != month and event.start_date == event.end_date)
-                        or event.end_date < check_date_2 or event.start_date > check_date_1):
+                    if (
+                        (
+                            event.start_date.month != month
+                            and event.start_date == event.end_date
+                        )
+                        or event.end_date < check_date_2
+                        or event.start_date > check_date_1
+                    ):
                         new_query.discard(event)
 
         query_set = new_query.copy()
@@ -813,10 +892,11 @@ class StaffCalendarEventsRoute(BaseResource):
                 week_day = event.start_date.weekday()
                 if year and not month and not day:
                     occurrence = copy.deepcopy(event)
-                    if event.recurrence_type == 'Yearly':
-                        if (event.start_date.month == 2 and event.start_date.day > 28):
-                            occurrence.start_date = datetime(year, event.start_date.month,
-                                                             28).date()
+                    if event.recurrence_type == "Yearly":
+                        if event.start_date.month == 2 and event.start_date.day > 28:
+                            occurrence.start_date = datetime(
+                                year, event.start_date.month, 28
+                            ).date()
                         else:
                             occurrence.start_date = datetime(
                                 year,
@@ -824,7 +904,7 @@ class StaffCalendarEventsRoute(BaseResource):
                                 event.start_date.day,
                             ).date()
                         payload.append(occurrence)
-                    elif event.recurrence_type == 'Monthly':
+                    elif event.recurrence_type == "Monthly":
                         if event.start_date.day <= 28:
                             dt_start = datetime(year, 1, event.start_date.day)
                             mylist = list(rrule(MONTHLY, count=12, dtstart=dt_start))
@@ -844,14 +924,16 @@ class StaffCalendarEventsRoute(BaseResource):
                             dt_start = datetime(year, 1, event.start_date.day)
                             mylist = list(rrule(MONTHLY, count=11, dtstart=dt_start))
                             # last day of feb = calendar.monthrange(year,2)[1]
-                            mylist.append(datetime(year, 2, calendar.monthrange(year, 2)[1]))
+                            mylist.append(
+                                datetime(year, 2, calendar.monthrange(year, 2)[1])
+                            )
                         for _day in mylist:
                             if _day.date() >= event.start_date:
-                                if (not event.end_date or _day.date() <= event.end_date):
+                                if not event.end_date or _day.date() <= event.end_date:
                                     occurrence.start_date = _day.date()
                                     payload.append(occurrence)
                                     occurrence = copy.deepcopy(event)
-                    elif event.recurrence_type == 'Weekly':
+                    elif event.recurrence_type == "Weekly":
                         # count=53 for weeks in a year rounded up
                         mylist = list(
                             rrule(
@@ -862,40 +944,47 @@ class StaffCalendarEventsRoute(BaseResource):
                             )
                         )
                         for _day in mylist:
-                            if (_day.date() >= event.start_date and _day.year == year):
-                                if (not event.end_date or _day.date() <= event.end_date):
+                            if _day.date() >= event.start_date and _day.year == year:
+                                if not event.end_date or _day.date() <= event.end_date:
                                     occurrence.start_date = _day.date()
                                     payload.append(occurrence)
                                     occurrence = copy.deepcopy(event)
-                    elif event.recurrence_type == 'Daily':
+                    elif event.recurrence_type == "Daily":
                         # count=366 for days in a year, considering leap years
-                        mylist = list(rrule(DAILY, count=366, dtstart=datetime(year, 1, 1)))
+                        mylist = list(
+                            rrule(DAILY, count=366, dtstart=datetime(year, 1, 1))
+                        )
                         for _day in mylist:
-                            if (_day.date() >= event.start_date and _day.year == year):
-                                if (not event.end_date or _day.date() <= event.end_date):
+                            if _day.date() >= event.start_date and _day.year == year:
+                                if not event.end_date or _day.date() <= event.end_date:
                                     occurrence.start_date = _day.date()
                                     payload.append(occurrence)
                                     occurrence = copy.deepcopy(event)
 
                 elif year and month and not day:
                     occurrence = copy.deepcopy(event)
-                    if event.recurrence_type == 'Yearly':
+                    if event.recurrence_type == "Yearly":
                         if event.start_date.month == month:
-                            if (month == 2 and event.start_date.day > last_day_of_month):
-                                occurrence.start_date = datetime(year, month,
-                                                                 last_day_of_month).date()
+                            if month == 2 and event.start_date.day > last_day_of_month:
+                                occurrence.start_date = datetime(
+                                    year, month, last_day_of_month
+                                ).date()
                             else:
-                                occurrence.start_date = datetime(year, month,
-                                                                 event.start_date.day).date()
+                                occurrence.start_date = datetime(
+                                    year, month, event.start_date.day
+                                ).date()
                             payload.append(occurrence)
-                    elif event.recurrence_type == 'Monthly':
+                    elif event.recurrence_type == "Monthly":
                         if event.start_date.day > last_day_of_month:
-                            occurrence.start_date = datetime(year, month, last_day_of_month).date()
+                            occurrence.start_date = datetime(
+                                year, month, last_day_of_month
+                            ).date()
                         else:
-                            occurrence.start_date = datetime(year, month,
-                                                             event.start_date.day).date()
+                            occurrence.start_date = datetime(
+                                year, month, event.start_date.day
+                            ).date()
                         payload.append(occurrence)
-                    elif event.recurrence_type == 'Weekly':
+                    elif event.recurrence_type == "Weekly":
                         # count = 5 as the max # of possible 'any week day' in a month
                         mylist = list(
                             rrule(
@@ -906,12 +995,12 @@ class StaffCalendarEventsRoute(BaseResource):
                             )
                         )
                         for _day in mylist:
-                            if (_day.month == month and _day.date() >= event.start_date):
-                                if (not event.end_date or _day.date() <= event.end_date):
+                            if _day.month == month and _day.date() >= event.start_date:
+                                if not event.end_date or _day.date() <= event.end_date:
                                     occurrence.start_date = _day.date()
                                     payload.append(occurrence)
                                     occurrence = copy.deepcopy(event)
-                    elif event.recurrence_type == 'Daily':
+                    elif event.recurrence_type == "Daily":
                         mylist = list(
                             rrule(
                                 DAILY,
@@ -921,7 +1010,7 @@ class StaffCalendarEventsRoute(BaseResource):
                         )
                         for _day in mylist:
                             if _day.date() >= event.start_date:
-                                if (not event.end_date or _day.date() <= event.end_date):
+                                if not event.end_date or _day.date() <= event.end_date:
                                     occurrence.start_date = _day.date()
                                     payload.append(occurrence)
                                     occurrence = copy.deepcopy(event)
@@ -929,18 +1018,22 @@ class StaffCalendarEventsRoute(BaseResource):
                 else:
                     specified_date = datetime(year, month, day).date()
                     occurrence = copy.deepcopy(event)
-                    if event.recurrence_type == 'Yearly':
-                        if (event.start_date.month == month and event.start_date.day == day):
+                    if event.recurrence_type == "Yearly":
+                        if (
+                            event.start_date.month == month
+                            and event.start_date.day == day
+                        ):
                             occurrence.start_date = specified_date
                             payload.append(occurrence)
                         elif (
-                            event.start_date.month == month and month == 2
+                            event.start_date.month == month
+                            and month == 2
                             and event.start_date.day > last_day_of_month
                             and specified_date.day == last_day_of_month
                         ):
                             occurrence.start_date = specified_date
                             payload.append(occurrence)
-                    elif event.recurrence_type == 'Monthly':
+                    elif event.recurrence_type == "Monthly":
                         if specified_date.day == event.start_date.day:
                             occurrence.start_date = specified_date
                             payload.append(occurrence)
@@ -948,20 +1041,22 @@ class StaffCalendarEventsRoute(BaseResource):
                             event.start_date.day > last_day_of_month
                             and specified_date.day == last_day_of_month
                         ):
-                            occurrence.start_date = datetime(year, month, last_day_of_month)
+                            occurrence.start_date = datetime(
+                                year, month, last_day_of_month
+                            )
                             payload.append(occurrence)
-                    elif event.recurrence_type == 'Weekly':
+                    elif event.recurrence_type == "Weekly":
                         if week_day == datetime(year, month, day).weekday():
                             occurrence.start_date = specified_date
                             payload.append(occurrence)
-                    elif event.recurrence_type == 'Daily':
+                    elif event.recurrence_type == "Daily":
                         occurrence = copy.deepcopy(event)
                         occurrence.start_date = specified_date
                         payload.append(occurrence)
 
             else:
                 # non recurring event but spans more than 1 day (semi recurring)
-                if (year and month and day and event.duration > timedelta(days=1)):
+                if year and month and day and event.duration > timedelta(days=1):
                     if datetime(year, month, day).date() == event.start_date:
                         event.end_time = time(23, 59, 59)
                     elif datetime(year, month, day).date() == event.end_date:
@@ -973,13 +1068,13 @@ class StaffCalendarEventsRoute(BaseResource):
 
         return payload
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(
         schema=StaffCalendarEventsUpdateSchema(
             only=(
-                'entire_series',
-                'event_to_update_idx',
-                'previous_start_date',
+                "entire_series",
+                "event_to_update_idx",
+                "previous_start_date",
             )
         ),
         api=ns,
@@ -988,9 +1083,9 @@ class StaffCalendarEventsRoute(BaseResource):
         """
         Delete events
         """
-        entire_series = request.parsed_obj['entire_series']
-        idx = request.parsed_obj['event_to_update_idx']
-        prev_start_date = request.parsed_obj['previous_start_date']
+        entire_series = request.parsed_obj["entire_series"]
+        idx = request.parsed_obj["event_to_update_idx"]
+        prev_start_date = request.parsed_obj["previous_start_date"]
 
         query = StaffCalendarEvents.query.filter_by(idx=idx).one_or_none()
 
@@ -1011,11 +1106,11 @@ class StaffCalendarEventsRoute(BaseResource):
                 new_recurrence.end_date = query.end_date
                 new_recurrence.timezone = query.timezone
 
-                if query.recurrence_type == 'Yearly':
+                if query.recurrence_type == "Yearly":
                     recurrence_delta = relativedelta(years=1)
-                elif query.recurrence_type == 'Monthly':
+                elif query.recurrence_type == "Monthly":
                     recurrence_delta = relativedelta(months=1)
-                elif query.recurrence_type == 'Weekly':
+                elif query.recurrence_type == "Weekly":
                     recurrence_delta = relativedelta(weeks=1)
                 else:
                     recurrence_delta = relativedelta(days=1)
@@ -1029,29 +1124,31 @@ class StaffCalendarEventsRoute(BaseResource):
                 db.session.delete(query)
 
         else:
-            raise BadRequest('Event not found.')
+            raise BadRequest("Event not found.")
 
         db.session.commit()
-        return ('Event Deleted', 200)
+        return ("Event Deleted", 200)
 
 
-@ns.route('/offices/<int:user_id>/')
+@ns.route("/offices/<int:user_id>/")
 class StaffOfficesRoute(BaseResource):
     """
     Endpoint to manage professional's physical office information
     """
-    @token_auth.login_required(user_type=('staff_self', ))
+
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=StaffOfficesSchema, api=ns)
     @responds(schema=StaffOfficesSchema, status_code=201, api=ns)
     def post(self, user_id):
         """
         Submit office data for a professional.
         """
-        state = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id
-                                                             ).one_or_none()
+        state = LookupTerritoriesOfOperations.query.filter_by(
+            idx=request.parsed_obj.territory_id
+        ).one_or_none()
 
         if not state:
-            raise BadRequest(f'State not found.')
+            raise BadRequest(f"State not found.")
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -1059,17 +1156,19 @@ class StaffOfficesRoute(BaseResource):
 
         # fill in country name for the response
         res = request.get_json()
-        res['country'] = (
-            LookupCountriesOfOperations.query.filter_by(idx=state.country_id).one_or_none().country
+        res["country"] = (
+            LookupCountriesOfOperations.query.filter_by(idx=state.country_id)
+            .one_or_none()
+            .country
         )
-        res['territory'] = state.sub_territory
-        res['territory_abbreviation'] = state.sub_territory_abbreviation
-        res['state'] = res['territory']
-        res['state_abbreviation'] = res['territory_abbreviation']
+        res["territory"] = state.sub_territory
+        res["territory_abbreviation"] = state.sub_territory_abbreviation
+        res["state"] = res["territory"]
+        res["state_abbreviation"] = res["territory_abbreviation"]
 
         return res
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @accepts(schema=StaffOfficesSchema, api=ns)
     @responds(schema=StaffOfficesSchema, status_code=201, api=ns)
     def put(self, user_id):
@@ -1078,28 +1177,31 @@ class StaffOfficesRoute(BaseResource):
         """
         office = StaffOffices.query.filter_by(user_id=user_id).one_or_none()
 
-        state = LookupTerritoriesOfOperations.query.filter_by(idx=request.parsed_obj.territory_id
-                                                             ).one_or_none()
+        state = LookupTerritoriesOfOperations.query.filter_by(
+            idx=request.parsed_obj.territory_id
+        ).one_or_none()
 
         if not state:
-            raise BadRequest(f'State not found.')
+            raise BadRequest(f"State not found.")
 
         office.update(request.parsed_obj)
         db.session.commit()
 
         # fill in country name for the response
         res = request.json
-        res['country'] = (
-            LookupCountriesOfOperations.query.filter_by(idx=state.country_id).one_or_none().country
+        res["country"] = (
+            LookupCountriesOfOperations.query.filter_by(idx=state.country_id)
+            .one_or_none()
+            .country
         )
-        res['territory'] = state.sub_territory
-        res['territory_abbreviation'] = state.sub_territory_abbreviation
-        res['state'] = res['territory']
-        res['state_abbreviation'] = res['territory_abbreviation']
+        res["territory"] = state.sub_territory
+        res["territory_abbreviation"] = state.sub_territory_abbreviation
+        res["state"] = res["territory"]
+        res["state_abbreviation"] = res["territory_abbreviation"]
 
         return res
 
-    @token_auth.login_required(user_type=('staff_self', ))
+    @token_auth.login_required(user_type=("staff_self",))
     @responds(schema=StaffOfficesSchema, status_code=200, api=ns)
     def get(self, user_id):
         """
@@ -1111,15 +1213,17 @@ class StaffOfficesRoute(BaseResource):
         if not office:
             return
 
-        territory = LookupTerritoriesOfOperations.query.filter_by(idx=office.territory_id
-                                                                 ).one_or_none()
+        territory = LookupTerritoriesOfOperations.query.filter_by(
+            idx=office.territory_id
+        ).one_or_none()
 
         res = office.__dict__
-        res['country'] = (
-            LookupCountriesOfOperations.query.filter_by(idx=territory.country_id
-                                                       ).one_or_none().country
+        res["country"] = (
+            LookupCountriesOfOperations.query.filter_by(idx=territory.country_id)
+            .one_or_none()
+            .country
         )
-        res['territory'] = territory.sub_territory
-        res['territory_abbreviation'] = territory.sub_territory_abbreviation
+        res["territory"] = territory.sub_territory
+        res["territory_abbreviation"] = territory.sub_territory_abbreviation
 
         return res

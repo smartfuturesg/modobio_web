@@ -11,11 +11,16 @@ from sqlalchemy import select
 from odyssey import db, ma
 from odyssey.api.lookup.schemas import LookupOrganizationsSchema
 from odyssey.api.practitioner.models import (
-    PractitionerCredentials, PractitionerOrganizationAffiliation
+    PractitionerCredentials,
+    PractitionerOrganizationAffiliation,
 )
 from odyssey.utils.constants import (
-    CREDENTIAL_ROLES, CREDENTIAL_STATUS, CREDENTIAL_TYPES, USSTATES_2
+    CREDENTIAL_ROLES,
+    CREDENTIAL_STATUS,
+    CREDENTIAL_TYPES,
+    USSTATES_2,
 )
+
 """
     Schemas for the practitioner API
 """
@@ -35,13 +40,15 @@ class PractitionerOrganizationAffiliationSchema(ma.SQLAlchemyAutoSchema):
         model = PractitionerOrganizationAffiliation
         include_fk = True
         exclude = (
-            'created_at',
-            'updated_at',
-            'idx',
+            "created_at",
+            "updated_at",
+            "idx",
         )
-        dump_only = ('user_id', )
+        dump_only = ("user_id",)
 
-    org_info = fields.Nested(LookupOrganizationsSchema(many=False), missing=[], dump_only=True)
+    org_info = fields.Nested(
+        LookupOrganizationsSchema(many=False), missing=[], dump_only=True
+    )
     organization_idx = fields.Integer(required=True)
     affiliate_user_id = fields.String()
 
@@ -53,15 +60,15 @@ class PractitionerOrganizationAffiliationSchema(ma.SQLAlchemyAutoSchema):
 class PractitionerCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PractitionerCredentials
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('timestamp', 'user_id', 'role_id')
+        exclude = ("created_at", "updated_at")
+        dump_only = ("timestamp", "user_id", "role_id")
         include_fk = True
 
     idx = fields.Integer(required=False)
     state = fields.String(validate=validate.OneOf(USSTATES_2))
     status = fields.String(
         validate=validate.OneOf(CREDENTIAL_STATUS),
-        missing='Pending Verification',
+        missing="Pending Verification",
     )
     credential_type = fields.String(validate=validate.OneOf(CREDENTIAL_TYPES))
     staff_role = fields.String(validate=validate.OneOf(CREDENTIAL_ROLES), required=True)
@@ -69,7 +76,7 @@ class PractitionerCredentialsSchema(ma.SQLAlchemyAutoSchema):
 
     @post_load
     def make_object(self, data, **kwargs):
-        role = data.pop('staff_role')
+        role = data.pop("staff_role")
         return (role, PractitionerCredentials(**data))
 
 
@@ -80,4 +87,4 @@ class PractitionerCredentialsInputSchema(Schema):
 class PractitionerDeleteCredentialsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = PractitionerCredentials
-        only = 'idx'
+        only = "idx"

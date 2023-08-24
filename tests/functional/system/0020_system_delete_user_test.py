@@ -4,120 +4,156 @@ from flask.json import dumps
 from sqlalchemy import select, text
 from odyssey.api.lookup.models import LookupClinicalCareTeamResources
 
-from odyssey.api.user.models import User, UserLogin, UserRemovalRequests, UserPendingEmailVerifications
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserRemovalRequests,
+    UserPendingEmailVerifications,
+)
 from odyssey.api.doctor.models import MedicalImaging
 from tests.functional.user.data import users_to_delete_data
 from tests.functional.doctor.data import doctor_medical_imaging_data
 from tests.functional.client.data import client_profile_picture_data
 from tests.utils import login
 
+
 def test_account_delete_client_and_staff(test_client):
-    #Create a new staff user and a new client user
-    #1. Create self created client user
-    payload = users_to_delete_data['client_user']
+    # Create a new staff user and a new client user
+    # 1. Create self created client user
+    payload = users_to_delete_data["client_user"]
     client_user = test_client.post(
-        '/user/client/',
-        data=dumps(payload),
-        content_type='application/json')
-    client_id = client_user.json['user_info']['user_id']
+        "/user/client/", data=dumps(payload), content_type="application/json"
+    )
+    client_id = client_user.json["user_info"]["user_id"]
 
-    #verify newly created client's email
-    token = UserPendingEmailVerifications.query.filter_by(user_id=client_id).first().token
-    request = test_client.get(
-        f'/user/email-verification/token/{token}/')
+    # verify newly created client's email
+    token = (
+        UserPendingEmailVerifications.query.filter_by(user_id=client_id).first().token
+    )
+    request = test_client.get(f"/user/email-verification/token/{token}/")
 
-    #2. Create staff/client user
-    payload = users_to_delete_data['staff_client_user']
+    # 2. Create staff/client user
+    payload = users_to_delete_data["staff_client_user"]
     response = test_client.post(
-        '/user/staff/',
+        "/user/staff/",
         headers=test_client.staff_auth_header,
         data=dumps(payload),
-        content_type='application/json')
-    staff_client_id = response.json['user_info']['user_id']
+        content_type="application/json",
+    )
+    staff_client_id = response.json["user_info"]["user_id"]
 
-    #verify newly created staff member's email
-    token = UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id).first().token
+    # verify newly created staff member's email
+    token = (
+        UserPendingEmailVerifications.query.filter_by(user_id=staff_client_id)
+        .first()
+        .token
+    )
 
-    request = test_client.get(
-        f'/user/email-verification/token/{token}/')
+    request = test_client.get(f"/user/email-verification/token/{token}/")
 
     staff_client_user = test_client.post(
-        '/user/client/',
-        data=dumps(payload['user_info']),
-        content_type='application/json')
+        "/user/client/",
+        data=dumps(payload["user_info"]),
+        content_type="application/json",
+    )
 
-    #3. Add staff members to client's clinical care team so we can make a request to add data on their behalf
-    email = users_to_delete_data['client_user']['email']
-    passw = users_to_delete_data['client_user']['password']
-    user = (test_client.db.session.execute(
-        select(User)
-        .filter_by(email=email))
-        .one_or_none())[0]
+    # 3. Add staff members to client's clinical care team so we can make a request to add data on their behalf
+    email = users_to_delete_data["client_user"]["email"]
+    passw = users_to_delete_data["client_user"]["password"]
+    user = (
+        test_client.db.session.execute(
+            select(User).filter_by(email=email)
+        ).one_or_none()
+    )[0]
 
     client_auth_header = login(test_client, user, password=passw)
 
     clients_clinical_care_team = {
-        'care_team' : [{
-            'team_member_email': users_to_delete_data['staff_client_user']['user_info']['email']}]}
+        "care_team": [
+            {
+                "team_member_email": users_to_delete_data["staff_client_user"][
+                    "user_info"
+                ]["email"]
+            }
+        ]
+    }
 
     response = test_client.post(
-        f'/client/clinical-care-team/members/{client_id}/',
+        f"/client/clinical-care-team/members/{client_id}/",
         data=dumps(clients_clinical_care_team),
         headers=client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     phr_resources = LookupClinicalCareTeamResources.query.all()
-    auths = [{
-        'team_member_user_id': staff_client_id,
-        'resource_id': resource.resource_id}
-        for resource in phr_resources]
+    auths = [
+        {"team_member_user_id": staff_client_id, "resource_id": resource.resource_id}
+        for resource in phr_resources
+    ]
 
-    payload = {'clinical_care_team_authorization' : auths}
+    payload = {"clinical_care_team_authorization": auths}
     response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{client_id}/",
         headers=client_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
-    #4. Add info for client user, reported by staff/client
-    email = users_to_delete_data['staff_client_user']['user_info']['email']
-    passw = users_to_delete_data['staff_client_user']['user_info']['password']
-    staff = (test_client.db.session.execute(
-        select(User)
-        .filter_by(email=email))
-        .one_or_none())[0]
+    # 4. Add info for client user, reported by staff/client
+    email = users_to_delete_data["staff_client_user"]["user_info"]["email"]
+    passw = users_to_delete_data["staff_client_user"]["user_info"]["password"]
+    staff = (
+        test_client.db.session.execute(
+            select(User).filter_by(email=email)
+        ).one_or_none()
+    )[0]
 
     staff_auth_header = login(test_client, staff, password=passw)
     payload = doctor_medical_imaging_data
 
     response = test_client.post(
-        f'/doctor/images/{client_id}/',
-        headers=staff_auth_header,
-        data=payload)
+        f"/doctor/images/{client_id}/", headers=staff_auth_header, data=payload
+    )
 
     assert response.status_code == 201
 
     # 5. Delete staff/client
     deleting_staff_client = test_client.delete(
-        f'/system/delete-user/{staff_client_id}/?delete_type=both',
-        headers=test_client.staff_auth_header)
+        f"/system/delete-user/{staff_client_id}/?delete_type=both",
+        headers=test_client.staff_auth_header,
+    )
 
     assert deleting_staff_client.status_code == 204
 
     # Check no info for user_id is in staff tables
-    tables = test_client.db.session.execute(text(
-        """ SELECT distinct(table_name)
+    tables = test_client.db.session.execute(
+        text(
+            """ SELECT distinct(table_name)
             FROM information_schema.columns
             WHERE table_name LIKE 'Staff%';
-        """)).fetchall()
+        """
+        )
+    ).fetchall()
 
     for table in tables:
-        if table.table_name == 'StaffRecentClients':
-            exists = test_client.db.session.execute(text(""" SELECT EXISTS( SELECT * FROM "{}" WHERE staff_user_id={});""".format(table.table_name, staff_client_id)))
+        if table.table_name == "StaffRecentClients":
+            exists = test_client.db.session.execute(
+                text(
+                    """ SELECT EXISTS( SELECT * FROM "{}" WHERE staff_user_id={});""".format(
+                        table.table_name, staff_client_id
+                    )
+                )
+            )
             result = exists.fetchall().pop()
             assert result[0] == False
         else:
-            exists = test_client.db.session.execute(text(""" SELECT EXISTS( SELECT * FROM "{}" WHERE user_id={});""".format(table.table_name, staff_client_id)))
+            exists = test_client.db.session.execute(
+                text(
+                    """ SELECT EXISTS( SELECT * FROM "{}" WHERE user_id={});""".format(
+                        table.table_name, staff_client_id
+                    )
+                )
+            )
             result = exists.fetchall().pop()
             assert result[0] == False
 
@@ -141,8 +177,9 @@ def test_account_delete_client_and_staff(test_client):
 
     # 5. Delete client
     deleting_client = test_client.delete(
-        f'/system/delete-user/{client_id}/?delete_type=client',
-        headers=test_client.staff_auth_header)
+        f"/system/delete-user/{client_id}/?delete_type=client",
+        headers=test_client.staff_auth_header,
+    )
 
     assert deleting_client.status_code == 204
 

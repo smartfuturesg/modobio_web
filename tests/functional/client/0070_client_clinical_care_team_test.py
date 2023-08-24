@@ -13,92 +13,111 @@ from odyssey.api.notifications.models import Notifications
 from tests.functional.doctor.data import doctor_blood_tests_data
 from tests.utils import login
 
+
 def test_adding_clinical_care_team(test_client, care_team):
     # Care team is added in fixture. Check that staff member can see
     # that it is part of a care team.
     response = test_client.get(
-        '/client/clinical-care-team/member-of/{}/'.format(care_team['provider_id']),
+        "/client/clinical-care-team/member-of/{}/".format(care_team["provider_id"]),
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
-    assert response.json['member_of_care_teams'][0]['client_user_id'] == test_client.client_id
+    assert (
+        response.json["member_of_care_teams"][0]["client_user_id"]
+        == test_client.client_id
+    )
 
     ###
     # attempt to access /client/clinical-care-team/members/ as a staff member
     ###
     response = test_client.post(
-        f'/client/clinical-care-team/members/{test_client.client_id}/',
+        f"/client/clinical-care-team/members/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
-        data=dumps({'care_team': [{'team_member_email': 'fail@modobio.com'}]}),
-        content_type='application/json')
+        data=dumps({"care_team": [{"team_member_email": "fail@modobio.com"}]}),
+        content_type="application/json",
+    )
 
     assert response.status_code == 401
 
     ###
     # Attempt to add more than 20 clinical care team members
     ###
-    long_care_team = {'care_team': [
-        {'team_member_email': f'email{x:02d}@modobio.com'} for x in range(25)]}
+    long_care_team = {
+        "care_team": [
+            {"team_member_email": f"email{x:02d}@modobio.com"} for x in range(25)
+        ]
+    }
 
     response = test_client.post(
-        f'/client/clinical-care-team/members/{test_client.client_id}/',
+        f"/client/clinical-care-team/members/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(long_care_team),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
+
 
 def test_delete_clinical_care_team(test_client, care_team):
     # Get members before
     response = test_client.get(
-        f'/client/clinical-care-team/members/{test_client.client_id}/',
+        f"/client/clinical-care-team/members/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
-    before = response.json['total_items']
+    before = response.json["total_items"]
 
     # Delete only the non-user team members: don't want to touch
     # team members added by database/1027_seed_users_ehr_auths.sql
     # add need the other two later.
     care_team_delete_payload = {
-        'care_team': [{
-            'team_member_user_id': care_team['non_user_id']}]}
+        "care_team": [{"team_member_user_id": care_team["non_user_id"]}]
+    }
 
     response = test_client.delete(
-        f'/client/clinical-care-team/members/{test_client.client_id}/',
+        f"/client/clinical-care-team/members/{test_client.client_id}/",
         data=dumps(care_team_delete_payload),
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
 
     # Get members again check that 1 was deleted.
     response = test_client.get(
-        f'/client/clinical-care-team/members/{test_client.client_id}/',
+        f"/client/clinical-care-team/members/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
-    assert response.json['total_items'] == before - 1
+    assert response.json["total_items"] == before - 1
+
 
 def test_authorize_clinical_care_team(test_client, care_team):
     #####
     # Authorize another client to access all clinical care team resources
     #####
     phr_resources = LookupClinicalCareTeamResources.query.all()
-    auths = [{
-        'team_member_user_id': care_team['client_id'],
-        'resource_id': resource.resource_id}
-        for resource in phr_resources]
-    payload = {'clinical_care_team_authorization': auths}
+    auths = [
+        {
+            "team_member_user_id": care_team["client_id"],
+            "resource_id": resource.resource_id,
+        }
+        for resource in phr_resources
+    ]
+    payload = {"clinical_care_team_authorization": auths}
 
     response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
@@ -109,28 +128,35 @@ def test_authorize_clinical_care_team(test_client, care_team):
     # care_team fixture already adds all authorizations for staff member,
     # so first delete them.
     #####
-    cct_auths = (test_client.db.session.execute(
-        select(ClientClinicalCareTeamAuthorizations)
-        .filter_by(
-            team_member_user_id=test_client.provider_id))
+    cct_auths = (
+        test_client.db.session.execute(
+            select(ClientClinicalCareTeamAuthorizations).filter_by(
+                team_member_user_id=test_client.provider_id
+            )
+        )
         .scalars()
-        .all())
+        .all()
+    )
 
     for cct_auth in cct_auths:
         test_client.db.session.delete(cct_auth)
     test_client.db.session.commit()
 
-    auths = [{
-        'team_member_user_id': care_team['provider_id'],
-        'resource_id': resource.resource_id}
-        for resource in phr_resources]
-    payload = {'clinical_care_team_authorization': auths}
+    auths = [
+        {
+            "team_member_user_id": care_team["provider_id"],
+            "resource_id": resource.resource_id,
+        }
+        for resource in phr_resources
+    ]
+    payload = {"clinical_care_team_authorization": auths}
 
     response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
@@ -138,15 +164,17 @@ def test_authorize_clinical_care_team(test_client, care_team):
     # Try to authorize a resource that doesn't exist
     ####
     payload = {
-        'clinical_care_team_authorization': [{
-            'team_member_user_id': care_team['client_id'],
-            'resource_id': 999999}]}
+        "clinical_care_team_authorization": [
+            {"team_member_user_id": care_team["client_id"], "resource_id": 999999}
+        ]
+    }
 
     response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
 
@@ -154,15 +182,17 @@ def test_authorize_clinical_care_team(test_client, care_team):
     # Try to authorize a resource for a client not part of the care team that doesnt exist
     ####
     payload = {
-        'clinical_care_team_authorization': [{
-            'team_member_user_id': 99,
-            'resource_id': 1}]}
+        "clinical_care_team_authorization": [
+            {"team_member_user_id": 99, "resource_id": 1}
+        ]
+    }
 
     response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
 
@@ -170,12 +200,13 @@ def test_authorize_clinical_care_team(test_client, care_team):
     # Get authorizations
     #####
     response = test_client.get(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
-    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+    assert response.json["clinical_care_team_authorization"][0]["status"] == "accepted"
 
     #####
     # As a staff member, post for data access.
@@ -184,79 +215,105 @@ def test_authorize_clinical_care_team(test_client, care_team):
 
     # delete resource authorization for staff member
     ClientClinicalCareTeamAuthorizations.query.filter_by(
-        team_member_user_id=care_team['provider_id'], resource_id = phr_resources[-1].resource_id).delete()
+        team_member_user_id=care_team["provider_id"],
+        resource_id=phr_resources[-1].resource_id,
+    ).delete()
     test_client.db.session.commit()
-    
+
     payload = {
-        'clinical_care_team_authorization': [{
-            'team_member_user_id': care_team['provider_id'],
-            'resource_id': phr_resources[-1].resource_id}]}
-            
+        "clinical_care_team_authorization": [
+            {
+                "team_member_user_id": care_team["provider_id"],
+                "resource_id": phr_resources[-1].resource_id,
+            }
+        ]
+    }
+
     response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
 
-    staff_authorization = test_client.db.session.execute(
-        select(ClientClinicalCareTeamAuthorizations)
-        .filter(
-            ClientClinicalCareTeamAuthorizations.team_member_user_id == care_team['provider_id'],
-            ClientClinicalCareTeamAuthorizations.resource_id == phr_resources[-1].resource_id)
-        ).scalars().one_or_none()
+    staff_authorization = (
+        test_client.db.session.execute(
+            select(ClientClinicalCareTeamAuthorizations).filter(
+                ClientClinicalCareTeamAuthorizations.team_member_user_id
+                == care_team["provider_id"],
+                ClientClinicalCareTeamAuthorizations.resource_id
+                == phr_resources[-1].resource_id,
+            )
+        )
+        .scalars()
+        .one_or_none()
+    )
 
-    assert staff_authorization.status == 'pending'
+    assert staff_authorization.status == "pending"
 
     # Make a double post, expect an error
     response = test_client.post(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
 
     response = test_client.get(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
-    assert response.json['clinical_care_team_authorization'][0]['status'] == 'accepted'
+    assert response.json["clinical_care_team_authorization"][0]["status"] == "accepted"
 
     # The staff member requested data access of resource id = total_resources from user_id 1
     # The status was automatically set to 'pending'
-    for idx, info in enumerate(response.json['clinical_care_team_authorization']):
-        if (info['team_member_user_id'] == care_team['provider_id']
-        and info['resource_id'] == phr_resources[-1].resource_id):
-            assert response.json['clinical_care_team_authorization'][idx]['status'] == 'pending'
+    for idx, info in enumerate(response.json["clinical_care_team_authorization"]):
+        if (
+            info["team_member_user_id"] == care_team["provider_id"]
+            and info["resource_id"] == phr_resources[-1].resource_id
+        ):
+            assert (
+                response.json["clinical_care_team_authorization"][idx]["status"]
+                == "pending"
+            )
 
     # Now, note the header has switched to the test_client.client_auth_header, indicating
     # we are now the client of interest. We will now approve of this data access request.
     response = test_client.put(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     response = test_client.get(
-        f'/client/clinical-care-team/resource-authorization/{test_client.client_id}/',
+        f"/client/clinical-care-team/resource-authorization/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
 
-    for idx, info in enumerate(response.json['clinical_care_team_authorization']):
-        if info['team_member_user_id'] == care_team['provider_id']:
-            assert response.json['clinical_care_team_authorization'][idx]['status'] == 'accepted'
+    for idx, info in enumerate(response.json["clinical_care_team_authorization"]):
+        if info["team_member_user_id"] == care_team["provider_id"]:
+            assert (
+                response.json["clinical_care_team_authorization"][idx]["status"]
+                == "accepted"
+            )
+
 
 def test_clinical_care_team_access(test_client, care_team):
     # The intention of this test is to run through the authorization routine once,
-    # rather than testing each endpoint that could be used by a care team member. 
+    # rather than testing each endpoint that could be used by a care team member.
 
-    tm_client = test_client.db.session.query(User).get(care_team['client_id'])
+    tm_client = test_client.db.session.query(User).get(care_team["client_id"])
     client_care_team_auth_header = login(test_client, tm_client)
 
     #####
@@ -271,26 +328,29 @@ def test_clinical_care_team_access(test_client, care_team):
     # as a clinical care team client
     ###
     response = test_client.get(
-        f'/doctor/bloodtest/all/{test_client.client_id}/',
+        f"/doctor/bloodtest/all/{test_client.client_id}/",
         headers=client_care_team_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     # no content submitted yet but, successful request
     assert response.status_code == 200
 
     response = test_client.get(
-        f'/doctor/medicalinfo/social/{test_client.client_id}/',
+        f"/doctor/medicalinfo/social/{test_client.client_id}/",
         headers=client_care_team_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
 
     # try adding a blood test for this client
     response = test_client.post(
-        f'/doctor/bloodtest/{test_client.client_id}/',
+        f"/doctor/bloodtest/{test_client.client_id}/",
         headers=client_care_team_auth_header,
         data=dumps(doctor_blood_tests_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 401
 
@@ -298,30 +358,33 @@ def test_clinical_care_team_access(test_client, care_team):
     # as a clinical care team staff
     ###
     response = test_client.get(
-        f'/doctor/bloodtest/all/{test_client.client_id}/',
+        f"/doctor/bloodtest/all/{test_client.client_id}/",
         headers=client_care_team_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
 
     response = test_client.get(
-        f'/doctor/medicalinfo/social/{test_client.client_id}/',
+        f"/doctor/medicalinfo/social/{test_client.client_id}/",
         headers=client_care_team_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
 
     # try adding a blood test for this client
     response = test_client.post(
-        f'/doctor/bloodtest/{test_client.client_id}/',
+        f"/doctor/bloodtest/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(doctor_blood_tests_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
-    assert response.json['notes'] == doctor_blood_tests_data['notes']
+    assert response.json["notes"] == doctor_blood_tests_data["notes"]
 
-    #clean up notifications that were created from care team requests so they don't impact future tests
+    # clean up notifications that were created from care team requests so they don't impact future tests
     notifications = Notifications.query.all()
     for notification in notifications:
         test_client.db.session.delete(notification)

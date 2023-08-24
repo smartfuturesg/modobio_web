@@ -4,18 +4,20 @@ import pathlib
 
 from dataclasses import dataclass
 
+
 @dataclass
-class Node():
-    """ Linked list node. """
+class Node:
+    """Linked list node."""
+
     next: object = None
-    hash: str = ''
-    file: str = ''
+    hash: str = ""
+    file: str = ""
 
     def __repr__(self):
-        return f'Node {self.hash}'
+        return f"Node {self.hash}"
 
     def __len__(self):
-        """ Length of linked list, starting from current node. """
+        """Length of linked list, starting from current node."""
         n = 0
         node = self
         while node is not None:
@@ -24,7 +26,7 @@ class Node():
         return n
 
     def __str__(self):
-        """ Returns linked list as string, starting from current node. """
+        """Returns linked list as string, starting from current node."""
         if len(self) == 0:
             pad = 2
         else:
@@ -33,13 +35,14 @@ class Node():
         node = self
         out = []
         while node:
-            out.append(f'{n:<{pad}}{node.file}')
+            out.append(f"{n:<{pad}}{node.file}")
             n += 1
             node = node.next
-        return '\n'.join(out)
+        return "\n".join(out)
 
-versions_dir = pathlib.Path(__file__).parent / 'versions'
-paths = versions_dir.glob('*.py')
+
+versions_dir = pathlib.Path(__file__).parent / "versions"
+paths = versions_dir.glob("*.py")
 
 nodes = {}
 nodelist = Node()
@@ -47,20 +50,20 @@ nodelist = Node()
 for path in paths:
     current_hash = None
     previous_hash = None
-    with open(path, mode='rt') as fh:
+    with open(path, mode="rt") as fh:
         for line in fh:
-            if line.startswith('revision'):
-                current_hash = line.split('=')[1].strip().strip("'")
-            if line.startswith('down_revision'):
-                previous_hash = line.split('=')[1].strip().strip("'")
+            if line.startswith("revision"):
+                current_hash = line.split("=")[1].strip().strip("'")
+            if line.startswith("down_revision"):
+                previous_hash = line.split("=")[1].strip().strip("'")
                 break
 
     if not previous_hash:
         print(f'Warning: script {path.name} does not have "down_revision" defined.')
         continue
-    elif previous_hash == 'None':
+    elif previous_hash == "None":
         if nodelist.hash:
-            print('Warning: found more than one starting point.')
+            print("Warning: found more than one starting point.")
             print(f'Both {nodelist.file} and {path.name} have "down_revision = None"')
             continue
 
@@ -68,15 +71,13 @@ for path in paths:
         nodelist.file = path.name
     elif previous_hash in nodes:
         prev = nodes[previous_hash]
-        print(f'Warning: scripts {path.name} and {prev.file} both '
-              f'claim to upgrade {previous_hash}. Branch point?')
+        print(
+            f"Warning: scripts {path.name} and {prev.file} both "
+            f"claim to upgrade {previous_hash}. Branch point?"
+        )
         continue
     else:
-        nodes[previous_hash] = Node(
-            next=None,
-            hash=current_hash,
-            file=path.name
-        )
+        nodes[previous_hash] = Node(next=None, hash=current_hash, file=path.name)
 
 node = nodelist
 while node.hash in nodes:
@@ -87,6 +88,6 @@ print(nodelist)
 
 if nodes:
     print()
-    print('The following files are not part of the upgrade chain:')
+    print("The following files are not part of the upgrade chain:")
     for node in nodes.values():
-        print(f'   {node.file}')
+        print(f"   {node.file}")

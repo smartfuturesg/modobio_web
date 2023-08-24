@@ -13,9 +13,9 @@ from odyssey.utils.base.models import BaseModelWithIdx, UserIdFkeyMixin
 class ProviderRoleRequests(BaseModelWithIdx, UserIdFkeyMixin):
     """Table for storing role requests made by prospective providers."""
 
-    role_id = db.Column(db.Integer, db.ForeignKey('LookupRoles.idx'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey("LookupRoles.idx"), nullable=False)
 
-    status = db.Column(db.String(10), nullable=False, default='inactive')
+    status = db.Column(db.String(10), nullable=False, default="inactive")
     """
     Status of the role request. Modobio staff will be responsible for
     updating this field with the appropriate status.
@@ -30,9 +30,9 @@ class ProviderRoleRequests(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     role_info = db.relationship(
-        'LookupRoles',
+        "LookupRoles",
         uselist=False,
-        foreign_keys='ProviderRoleRequests.role_id',
+        foreign_keys="ProviderRoleRequests.role_id",
     )
     """
     Many to one relationship with Lookup Roles table
@@ -41,12 +41,12 @@ class ProviderRoleRequests(BaseModelWithIdx, UserIdFkeyMixin):
 
     reviewer_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='SET NULL'),
+        db.ForeignKey("User.user_id", ondelete="SET NULL"),
         nullable=True,
     )
 
     credentials = db.relationship(
-        'ProviderCredentials', uselist=False, back_populates='role_request'
+        "ProviderCredentials", uselist=False, back_populates="role_request"
     )
     """
     One to many relationship with ProviderCredentials table
@@ -57,7 +57,7 @@ class ProviderRoleRequests(BaseModelWithIdx, UserIdFkeyMixin):
 class ProviderCredentials(BaseModelWithIdx, UserIdFkeyMixin):
     """Licensing and other credentials for providers."""
 
-    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
+    country_id = db.Column(db.Integer, db.ForeignKey("LookupCountriesOfOperations.idx"))
     """
     Country the MD is submitting credentials for (USA)
 
@@ -94,7 +94,7 @@ class ProviderCredentials(BaseModelWithIdx, UserIdFkeyMixin):
 
     role_id = db.Column(
         db.Integer,
-        db.ForeignKey('StaffRoles.idx', ondelete='CASCADE'),
+        db.ForeignKey("StaffRoles.idx", ondelete="CASCADE"),
         nullable=True,
     )
     """
@@ -104,7 +104,7 @@ class ProviderCredentials(BaseModelWithIdx, UserIdFkeyMixin):
 
     """
 
-    role = db.relationship('StaffRoles', uselist=False, back_populates='credentials')
+    role = db.relationship("StaffRoles", uselist=False, back_populates="credentials")
     """
     Many to one relationship with staff roles table
 
@@ -119,7 +119,7 @@ class ProviderCredentials(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     role_request_id = db.Column(
-        db.Integer, db.ForeignKey('ProviderRoleRequests.idx'), nullable=True
+        db.Integer, db.ForeignKey("ProviderRoleRequests.idx"), nullable=True
     )
     """
     Role request ID number, foreign key to ProviderRoleRequests.idx
@@ -128,7 +128,7 @@ class ProviderCredentials(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     role_request = db.relationship(
-        'ProviderRoleRequests', uselist=True, back_populates='credentials'
+        "ProviderRoleRequests", uselist=True, back_populates="credentials"
     )
     """
     One to many relationship with ProviderRoleRequests table
