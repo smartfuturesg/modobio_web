@@ -7,6 +7,7 @@ DECLARE
     _team_member_d INTEGER;
     _team_member_e INTEGER;
     _team_member_f INTEGER;
+    _team_member_g INTEGER;
 
 BEGIN
 
@@ -23,17 +24,17 @@ BEGIN
         gender,
         dob)
     VALUES (
-        'darrian.brown@atventurepartners.tech',
-        'DBFBJASDFF12',
-        'Darrian',
-        'Brown',
-        false,
-		false,
+        'trevor.stahl@atventurepartners.tech',
+        'TS12345ABCDE',
+        'Trevor',
+        'Stahl',
+        true,
+		true,
         true,
         true,
         true,
         'm',
-        '1959-09-10')
+        '1996-01-01')
     RETURNING user_id INTO _user_id;
 
     INSERT INTO "UserLogin" (
@@ -44,7 +45,7 @@ BEGIN
         'pbkdf2:sha256:150000$DdCwxwL8$c4f7e8c7179c47b8ec96b57e702bbcc83a98ea13575dfd74ca11b88f4069b3f1');
 
     INSERT INTO "ClientInfo" (user_id, membersince, zipcode, territory_id)
-    VALUES (_user_id, '2021-01-01', '85255', 1);
+    VALUES (_user_id, '2022-03-11', '67202', 16);
 
     INSERT INTO "UserSubscriptions"
         (
@@ -81,6 +82,8 @@ BEGIN
     WHERE email = 'train@modobio.com';
     SELECT user_id INTO _team_member_f FROM "User"
     WHERE email = 'psych@modobio.com';
+    SELECT user_id INTO _team_member_g FROM "User"
+    WHERE email = 'client@modobio.com';
     INSERT INTO "ClientClinicalCareTeam"
         (
          user_id,
@@ -93,7 +96,8 @@ BEGIN
         (_user_id, _team_member_c, false),
         (_user_id, _team_member_d, false),
         (_user_id, _team_member_e, false),
-        (_user_id, _team_member_f, false);
+        (_user_id, _team_member_f, false),
+        (_user_id, _team_member_g, false);
 
     INSERT INTO "ClientClinicalCareTeamAuthorizations" (
         user_id,
@@ -141,6 +145,14 @@ BEGIN
         resource_id,
         status)
     SELECT _user_id, _team_member_f, resources.resource_id, 'accepted'
+    FROM "LookupClinicalCareTeamResources" AS resources;
+
+    INSERT INTO "ClientClinicalCareTeamAuthorizations" (
+        user_id,
+        team_member_user_id,
+        resource_id,
+        status)
+    SELECT _user_id, _team_member_g, resources.resource_id, 'accepted'
     FROM "LookupClinicalCareTeamResources" AS resources;
 
 END;
