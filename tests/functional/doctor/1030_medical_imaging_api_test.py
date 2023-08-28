@@ -8,63 +8,80 @@ def test_post_medical_imaging(test_client):
     payload = doctor_medical_imaging_data
 
     response = test_client.post(
-        f'/doctor/images/{test_client.client_id}/',
+        f"/doctor/images/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
 
     data = MedicalImaging.query.filter_by(user_id=test_client.client_id).first()
 
     assert response.status_code == 201
     assert data.image_path
-    assert data.image_origin_location == payload['image_origin_location']
-    assert data.image_type == payload['image_type']
-    assert data.image_read == payload['image_read']
+    assert data.image_origin_location == payload["image_origin_location"]
+    assert data.image_type == payload["image_type"]
+    assert data.image_read == payload["image_read"]
 
 
 def test_post_medical_imaging_no_image(test_client):
     payload = doctor_medical_imaging_data
-    del payload['image']
+    del payload["image"]
 
     response = test_client.post(
-        f'/doctor/images/{test_client.client_id}/',
+        f"/doctor/images/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        data=payload)
+        data=payload,
+    )
 
-    data = (MedicalImaging
-            .query
-            .filter_by(user_id=test_client.client_id)
-            .order_by(MedicalImaging.created_at.desc())
-            .first())
+    data = (
+        MedicalImaging.query.filter_by(user_id=test_client.client_id)
+        .order_by(MedicalImaging.created_at.desc())
+        .first()
+    )
 
     assert response.status_code == 201
-    assert data.image_read == payload['image_read']
+    assert data.image_read == payload["image_read"]
 
 
 def test_get_medical_imaging(test_client):
     response = test_client.get(
-        f'/doctor/images/{test_client.client_id}/',
-        headers=test_client.client_auth_header)
+        f"/doctor/images/{test_client.client_id}/",
+        headers=test_client.client_auth_header,
+    )
 
     assert response.status_code == 200
     assert len(response.json) == 3  # images, reporter_infos, total images
-    assert response.json['images'][0]['image_type'] == doctor_medical_imaging_data['image_type']
-    assert response.json['images'][0]['image_origin_location'] == doctor_medical_imaging_data['image_origin_location']
-    assert response.json['images'][0]['image_date'] == doctor_medical_imaging_data['image_date']
-    assert response.json['images'][0]['image_read'] == doctor_medical_imaging_data['image_read']
+    assert (
+        response.json["images"][0]["image_type"]
+        == doctor_medical_imaging_data["image_type"]
+    )
+    assert (
+        response.json["images"][0]["image_origin_location"]
+        == doctor_medical_imaging_data["image_origin_location"]
+    )
+    assert (
+        response.json["images"][0]["image_date"]
+        == doctor_medical_imaging_data["image_date"]
+    )
+    assert (
+        response.json["images"][0]["image_read"]
+        == doctor_medical_imaging_data["image_read"]
+    )
 
 
 def test_delete_medical_imaging(test_client):
     response = test_client.delete(
-        f'/doctor/images/{test_client.client_id}/?image_id=1',
+        f"/doctor/images/{test_client.client_id}/?image_id=1",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 204
 
     response = test_client.get(
-        f'/doctor/images/{test_client.client_id}/',
+        f"/doctor/images/{test_client.client_id}/",
         headers=test_client.client_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert len(response.json) == 3  # images, reporter_infos, total images

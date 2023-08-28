@@ -127,8 +127,14 @@ from werkzeug.exceptions import BadRequest
 
 from odyssey.api.user.models import UserProfilePictures
 from odyssey.utils.constants import (
-    ALLOWED_AUDIO_TYPES, ALLOWED_FILE_TYPES, ALLOWED_IMAGE_TYPES, ALLOWED_MEDICAL_IMAGE_TYPES,
-    AUDIO_MAX_SIZE, FILE_MAX_SIZE, IMAGE_MAX_SIZE, MEDICAL_IMAGE_MAX_SIZE
+    ALLOWED_AUDIO_TYPES,
+    ALLOWED_FILE_TYPES,
+    ALLOWED_IMAGE_TYPES,
+    ALLOWED_MEDICAL_IMAGE_TYPES,
+    AUDIO_MAX_SIZE,
+    FILE_MAX_SIZE,
+    IMAGE_MAX_SIZE,
+    MEDICAL_IMAGE_MAX_SIZE,
 )
 
 logger = logging.getLogger(__name__)
@@ -140,6 +146,7 @@ class S3Bucket:
     Use this class if you need direct access to the S3 bucket without any of
     the other predefined file upload and download actions.
     """
+
     def __init__(self):
         """
         This class loads the S3 bucket named by
@@ -147,9 +154,9 @@ class S3Bucket:
         stored as :attr:`~.S3Bucket.s3`. The bucket object is stored as
         :attr:`~.S3Bucket.bucket`.
         """
-        bucket_name = current_app.config['AWS_S3_BUCKET']
+        bucket_name = current_app.config["AWS_S3_BUCKET"]
 
-        self.s3 = boto3.resource('s3')
+        self.s3 = boto3.resource("s3")
         self.bucket = self.s3.Bucket(bucket_name)
 
 
@@ -161,6 +168,7 @@ class FileDownload(S3Bucket):
     includes the full prefix. A check is performed to make sure the provided
     filename is not outside the system-wide prefix.
     """
+
     def __init__(self, user_id: int):
         """Instantiate the :class:`.FileDownload` class.
 
@@ -175,19 +183,19 @@ class FileDownload(S3Bucket):
             Raised when :attr:`user_id` is not valid.
         """
         if not user_id or not isinstance(user_id, int):
-            raise BadRequest('User ID must be an integer.')
+            raise BadRequest("User ID must be an integer.")
 
         super().__init__()
         self.user_id = user_id
 
-        prefix = current_app.config['AWS_S3_PREFIX'].strip('/')
-        user_prefix = current_app.config['AWS_S3_USER_PREFIX'].strip('/')
+        prefix = current_app.config["AWS_S3_PREFIX"].strip("/")
+        user_prefix = current_app.config["AWS_S3_USER_PREFIX"].strip("/")
 
-        self.prefix = ''
+        self.prefix = ""
         if prefix:
-            self.prefix += f'{prefix}/'
+            self.prefix += f"{prefix}/"
         if user_prefix:
-            self.prefix += user_prefix.format(user_id=user_id) + '/'
+            self.prefix += user_prefix.format(user_id=user_id) + "/"
 
     def check_filename(self, filename: str):
         """Make sure filename starts with self.prefix"""
@@ -199,7 +207,7 @@ class FileDownload(S3Bucket):
                 f'in S3 bucket "{self.bucket.name}" '
                 f'while prefix is set to "{self.prefix}".'
             )
-            raise BadRequest('Operation not allowed, file outside prefix.')
+            raise BadRequest("Operation not allowed, file outside prefix.")
 
     def url(self, filename: str, expires: int = 3600) -> str:
         """Generate a presigned URL for ``filename``.
@@ -230,16 +238,13 @@ class FileDownload(S3Bucket):
 
         try:
             url = self.s3.meta.client.generate_presigned_url(
-                'get_object',
-                Params={
-                    'Bucket': self.bucket.name,
-                    'Key': filename
-                },
+                "get_object",
+                Params={"Bucket": self.bucket.name, "Key": filename},
                 ExpiresIn=expires,
             )
         except ClientError as err:
-            msg = err.response['Error']['Message']
-            raise BadRequest(f'AWS returned the following error: {msg}')
+            msg = err.response["Error"]["Message"]
+            raise BadRequest(f"AWS returned the following error: {msg}")
 
         return url
 
@@ -303,17 +308,17 @@ class FileDownload(S3Bucket):
         objs = tuple(self.bucket.objects.filter(Prefix=filename))
 
         if len(objs) == 0:
-            raise BadRequest(f'Filename {filename} not found.')
+            raise BadRequest(f"Filename {filename} not found.")
         elif len(objs) > 1:
-            raise BadRequest(f'Multiple files with name {filename} found.')
+            raise BadRequest(f"Multiple files with name {filename} found.")
 
         try:
             objs[0].delete()
         except ClientError as err:
-            msg = err.response['Error']['Message']
-            raise BadRequest(f'AWS returned the following error: {msg}')
+            msg = err.response["Error"]["Message"]
+            raise BadRequest(f"AWS returned the following error: {msg}")
 
-        logger.info(f'{filename} deleted from S3 bucket {self.bucket.name}.')
+        logger.info(f"{filename} deleted from S3 bucket {self.bucket.name}.")
 
 
 class FileUpload(FileDownload):
@@ -328,7 +333,7 @@ class FileUpload(FileDownload):
     max_size = FILE_MAX_SIZE
     allowed_types = ALLOWED_FILE_TYPES
 
-    def __init__(self, file, user_id: int, prefix: str = ''):
+    def __init__(self, file, user_id: int, prefix: str = ""):
         """Instantiate the :class:`.FileUpload` class.
 
         Parameters
@@ -347,8 +352,10 @@ class FileUpload(FileDownload):
         :exc:`~werkzeug.exceptions.BadRequest`
             Raised if :attr:`file` is not a readable file handle.
         """
-        if not (hasattr(file, 'read') and hasattr(file, 'tell') and hasattr(file, 'seek')):
-            return BadRequest('File must be an opened file object.')
+        if not (
+            hasattr(file, "read") and hasattr(file, "tell") and hasattr(file, "seek")
+        ):
+            return BadRequest("File must be an opened file object.")
 
         super().__init__(user_id)
 
@@ -364,10 +371,10 @@ class FileUpload(FileDownload):
         self.file.seek(0)
 
         if prefix:
-            self.prefix += f'{prefix}/'
+            self.prefix += f"{prefix}/"
 
         # This will be set only after the file is uploaded to S3.
-        self.filename = ''
+        self.filename = ""
 
     def _read_chunk(self, chunk_size=8192) -> bytes:
         """Read :attr:`.FileUpoad.file` in chunks.
@@ -393,7 +400,7 @@ class FileUpload(FileDownload):
             yield data
         self.file.seek(0)
 
-    def parse_filename(self, filename: str, prefix: str = '') -> str:
+    def parse_filename(self, filename: str, prefix: str = "") -> str:
         """Validate and clean up filename.
 
         The following actions will be performed:
@@ -429,19 +436,19 @@ class FileUpload(FileDownload):
         """
         if not isinstance(filename, str):
             t = str(type(filename))
-            raise BadRequest(f'Filename must be a string, got {t}')
+            raise BadRequest(f"Filename must be a string, got {t}")
 
-        filename = filename.strip('/')
+        filename = filename.strip("/")
 
         if not filename:
-            raise BadRequest('Filename can not be empty.')
+            raise BadRequest("Filename can not be empty.")
 
-        prefix = prefix.strip('/')
+        prefix = prefix.strip("/")
 
         if self.prefix and not filename.startswith(self.prefix):
             if prefix:
-                prefix = f'{prefix}/'
-            filename = f'{self.prefix}{prefix}{filename}'
+                prefix = f"{prefix}/"
+            filename = f"{self.prefix}{prefix}{filename}"
 
         return filename
 
@@ -489,25 +496,25 @@ class FileUpload(FileDownload):
             return False.
         """
         if not self.validate_size():
-            pretty = f'{self.max_size} bytes'
+            pretty = f"{self.max_size} bytes"
             if self.max_size > 1024:
                 val = self.max_size / 1024
-                pretty = f'{val:0.1f} kb'
+                pretty = f"{val:0.1f} kb"
             elif self.max_size > 1024 * 1024:
                 val = self.max_size / (1024 * 1024)
-                pretty = f'{val:0.1f} Mb'
+                pretty = f"{val:0.1f} Mb"
             elif self.max_size > 1024 * 1024 * 1024:
                 val = self.max_size / (1024 * 1024 * 1024)
-                pretty = f'{val:0.1f} Gb'
-            raise BadRequest(f'File exceeds maximum size of {pretty}.')
+                pretty = f"{val:0.1f} Gb"
+            raise BadRequest(f"File exceeds maximum size of {pretty}.")
 
         if not self.validate_type():
             raise BadRequest(
-                f'File recognized as {self.extension} ({self.mime}). '
-                'Only allowed are {}'.format(', '.join(self.allowed_types))
+                f"File recognized as {self.extension} ({self.mime}). "
+                "Only allowed are {}".format(", ".join(self.allowed_types))
             )
 
-    def save(self, filename: str, prefix: str = ''):
+    def save(self, filename: str, prefix: str = ""):
         """Store the uploaded file on S3 under the given filename.
 
         After upload is complete, sets :attr:`.FileUpoad.filename` to the full
@@ -533,13 +540,13 @@ class FileUpload(FileDownload):
         for data in self._read_chunk():
             md5.update(data)
 
-        md5_b64 = base64.b64encode(md5.digest()).decode('utf-8')
+        md5_b64 = base64.b64encode(md5.digest()).decode("utf-8")
 
         try:
             self.bucket.put_object(Key=filename, Body=self.file, ContentMD5=md5_b64)
         except ClientError as err:
-            msg = err.response['Error']['Message']
-            raise BadRequest(f'AWS returned the following error: {msg}')
+            msg = err.response["Error"]["Message"]
+            raise BadRequest(f"AWS returned the following error: {msg}")
 
         self.filename = filename
 
@@ -553,7 +560,7 @@ class FileUpload(FileDownload):
         .. seealso:: :meth:`.FileDownload.url`
         """
         if not self.filename:
-            raise BadRequest('File has not been uploaded to S3 yet, use save() first.')
+            raise BadRequest("File has not been uploaded to S3 yet, use save() first.")
 
         return super().url(self.filename, expires=expires)
 
@@ -568,7 +575,7 @@ class AudioUpload(FileUpload):
     max_size = AUDIO_MAX_SIZE
     allowed_types = ALLOWED_AUDIO_TYPES
 
-    def __init__(self, file, user_id: int, prefix: str = ''):
+    def __init__(self, file, user_id: int, prefix: str = ""):
         """Instantiate the :class:`.AudioUpload` class.
 
         .. see:: :meth:`.FileUpload.__init__`
@@ -592,7 +599,7 @@ class ImageUpload(FileUpload):
     max_size = IMAGE_MAX_SIZE
     allowed_types = ALLOWED_IMAGE_TYPES
 
-    def __init__(self, file, user_id: int, prefix: str = ''):
+    def __init__(self, file, user_id: int, prefix: str = ""):
         """Instantiate the :class:`.ImageUpload` class.
 
         .. see:: :meth:`.FileUpload.__init__`
@@ -622,13 +629,15 @@ class ImageUpload(FileUpload):
     def _pil_to_imageupload(self, image: Image, **kwargs):
         """Convert a PIL image to a new instance of ImageUpload."""
         # Remove transparency
-        if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
-            image = image.convert('RGB')
+        if image.mode in ("RGBA", "LA") or (
+            image.mode == "P" and "transparency" in image.info
+        ):
+            image = image.convert("RGB")
 
-        if 'format' not in kwargs:
-            kwargs['format'] = 'jpeg'
-            if 'quality' not in kwargs:
-                kwargs['quality'] = 90
+        if "format" not in kwargs:
+            kwargs["format"] = "jpeg"
+            if "quality" not in kwargs:
+                kwargs["quality"] = 90
 
         buf = BytesIO()
         image.save(buf, **kwargs)
@@ -670,10 +679,12 @@ class ImageUpload(FileUpload):
             Raised in case dimensions is not of shape tuple(int, int).
         """
         if (
-            not isinstance(dimensions, (tuple, list)) or len(dimensions) != 2
-            or not isinstance(dimensions[0], int) or not isinstance(dimensions[1], int)
+            not isinstance(dimensions, (tuple, list))
+            or len(dimensions) != 2
+            or not isinstance(dimensions[0], int)
+            or not isinstance(dimensions[1], int)
         ):
-            raise BadRequest('Dimensions must be a tuple of 2 integers.')
+            raise BadRequest("Dimensions must be a tuple of 2 integers.")
 
         box = None
         if self.width != self.height:
@@ -711,7 +722,7 @@ class MedicalImageUpload(ImageUpload, FileUpload):
     max_size = MEDICAL_IMAGE_MAX_SIZE
     allowed_types = ALLOWED_MEDICAL_IMAGE_TYPES
 
-    def __init__(self, file, user_id: int, prefix: str = ''):
+    def __init__(self, file, user_id: int, prefix: str = ""):
         """Instantiate the :class:`.MedicalImageUpload` class.
 
         .. see:: :meth:`.ImageUpload.__init__`
@@ -723,7 +734,7 @@ class MedicalImageUpload(ImageUpload, FileUpload):
         self.extension = ft.extension
         self.mime = ft.mime
 
-        if self.extension in ('pdf', 'dcm'):
+        if self.extension in ("pdf", "dcm"):
             super(FileUpload, self).__init__(file, user_id, prefix=prefix)
         else:
             super(ImageUpload).__init__(file, user_id, prefix=prefix)

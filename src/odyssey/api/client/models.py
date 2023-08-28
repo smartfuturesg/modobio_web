@@ -11,10 +11,10 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm.query import Query
 
 from odyssey import db
-from odyssey.utils.base.models import (BaseModel, BaseModelWithIdx, UserIdFkeyMixin)
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
 from odyssey.utils.constants import DB_SERVER_TIME
 
-phx_tz = pytz.timezone('America/Phoenix')
+phx_tz = pytz.timezone("America/Phoenix")
 
 
 class ClientInfo(BaseModel):
@@ -25,7 +25,7 @@ class ClientInfo(BaseModel):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
@@ -35,7 +35,7 @@ class ClientInfo(BaseModel):
     :type: int, foreign key to :attr:`User.user_id <odyssey.models.user.User.user_id>`
     """
 
-    user_info = db.relationship('User', back_populates='client_info')
+    user_info = db.relationship("User", back_populates="client_info")
     """
     One-to-One relatinoship with User
 
@@ -86,7 +86,9 @@ class ClientInfo(BaseModel):
     :type: str, max length 10
     """
 
-    territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
+    territory_id = db.Column(
+        db.Integer, db.ForeignKey("LookupTerritoriesOfOperations.idx")
+    )
     """
     Client address territory. Foreign key gives information about both the state/province/etc. as
     well as the country.
@@ -177,7 +179,7 @@ class ClientInfo(BaseModel):
     :type: bool
     """
 
-    primary_goal_id = db.Column(db.Integer, db.ForeignKey('LookupGoals.goal_id'))
+    primary_goal_id = db.Column(db.Integer, db.ForeignKey("LookupGoals.goal_id"))
     """
     The client's stated primary goal for using modobio. Must be an option in the LookupGoals table.
 
@@ -185,7 +187,7 @@ class ClientInfo(BaseModel):
     """
 
     primary_macro_goal_id = db.Column(
-        db.Integer, db.ForeignKey('LookupMacroGoals.goal_id'), nullable=True
+        db.Integer, db.ForeignKey("LookupMacroGoals.goal_id"), nullable=True
     )
     """
     The client's primary goal for using modobio. Must be an option in the LookupMacroGoals table.
@@ -215,13 +217,14 @@ class ClientInfo(BaseModel):
     """
 
     profile_pictures = db.relationship(
-        'UserProfilePictures', uselist=True, back_populates='client_info'
+        "UserProfilePictures", uselist=True, back_populates="client_info"
     )
     """
     One to many relationship with UserProfilePictures
 
     :type: :class:`UserProfilePicture` instance
     """
+
     def client_info_search_dict(self, user) -> dict:
         """Searchable client info.
 
@@ -241,12 +244,12 @@ class ClientInfo(BaseModel):
             Subset of data in this row object.
         """
         data = {
-            'user_id': self.user_id,
-            'firstname': user.firstname,
-            'lastname': user.lastname,
-            'dob': user.dob,
-            'phone': user.phone_number,
-            'email': user.email,
+            "user_id": self.user_id,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "dob": user.dob,
+            "phone": user.phone_number,
+            "email": user.email,
         }
         return data
 
@@ -280,12 +283,12 @@ class ClientInfo(BaseModel):
         """
         resources = query.paginate(page=page, per_page=per_page, error_out=False)
         data = {
-            'items': [item.client_info_search_dict() for item in resources.items],
-            '_meta': {
-                'page': page,
-                'per_page': per_page,
-                'total_pages': resources.pages,
-                'total_items': resources.total,
+            "items": [item.client_info_search_dict() for item in resources.items],
+            "_meta": {
+                "page": page,
+                "per_page": per_page,
+                "total_pages": resources.pages,
+                "total_items": resources.total,
             },
         }
         return data, resources
@@ -302,7 +305,7 @@ class ClientRaceAndEthnicity(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     race_id = db.Column(
-        db.ForeignKey('LookupRaces.race_id', ondelete='CASCADE'),
+        db.ForeignKey("LookupRaces.race_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -316,7 +319,7 @@ class ClientFacilities(BaseModelWithIdx, UserIdFkeyMixin):
     """A mapping of client ID number to registered facility ID numbers."""
 
     facility_id = db.Column(
-        db.ForeignKey('RegisteredFacilities.facility_id', ondelete='CASCADE'),
+        db.ForeignKey("RegisteredFacilities.facility_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -332,14 +335,14 @@ class ClientConsent(BaseModelWithIdx, UserIdFkeyMixin):
     This table stores the signature and related information of the consent form.
     """
 
-    displayname = 'Consent form'
+    displayname = "Consent form"
     """
     Print-friendly name of this document.
 
     :type: str
     """
 
-    current_revision = '20200317'
+    current_revision = "20200317"
     """
     Current revision of this document.
 
@@ -405,14 +408,14 @@ class ClientRelease(BaseModelWithIdx, UserIdFkeyMixin):
     release of information form.
     """
 
-    displayname = 'Release of information form'
+    displayname = "Release of information form"
     """
     Print-friendly name of this document.
 
     :type: str
     """
 
-    current_revision = '20200416'
+    current_revision = "20200416"
     """
     Current revision of this document.
 
@@ -506,14 +509,14 @@ class ClientPolicies(BaseModelWithIdx, UserIdFkeyMixin):
     Modo Bio policies form.
     """
 
-    displayname = 'Policies form'
+    displayname = "Policies form"
     """
     Print-friendly name of this document.
 
     :type: str
     """
 
-    current_revision = '20200513'
+    current_revision = "20200513"
     """
     Current revision of this document.
 
@@ -572,14 +575,14 @@ class ClientConsultContract(BaseModelWithIdx, UserIdFkeyMixin):
     initial consultation contract.
     """
 
-    displayname = 'Consultation contract'
+    displayname = "Consultation contract"
     """
     Print-friendly name of this document.
 
     :type: str
     """
 
-    current_revision = '20200428'
+    current_revision = "20200428"
     """
     Current revision of this document.
 
@@ -638,14 +641,14 @@ class ClientSubscriptionContract(BaseModelWithIdx, UserIdFkeyMixin):
     subscription contract.
     """
 
-    displayname = 'Subscription contract'
+    displayname = "Subscription contract"
     """
     Print-friendly name of this document.
 
     :type: str
     """
 
-    current_revision = '20200428'
+    current_revision = "20200428"
     """
     Current revision of this document.
 
@@ -698,15 +701,14 @@ class ClientSubscriptionContract(BaseModelWithIdx, UserIdFkeyMixin):
 
 
 class ClientIndividualContract(BaseModelWithIdx, UserIdFkeyMixin):
-
-    displayname = 'Individual services contract'
+    displayname = "Individual services contract"
     """
     Print-friendly name of this document.
 
     :type: str
     """
 
-    current_revision = '20200513'
+    current_revision = "20200513"
     """
     Current revision of this document.
 
@@ -794,7 +796,7 @@ class ClientReleaseContacts(BaseModelWithIdx, UserIdFkeyMixin):
 
     release_contract_id = db.Column(
         db.Integer,
-        db.ForeignKey('ClientRelease.idx', ondelete='CASCADE'),
+        db.ForeignKey("ClientRelease.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -851,11 +853,11 @@ class ClientClinicalCareTeam(BaseModelWithIdx, UserIdFkeyMixin):
     certain clinical data.
     """
 
-    __table_args__ = (UniqueConstraint('user_id', 'team_member_user_id'), )
+    __table_args__ = (UniqueConstraint("user_id", "team_member_user_id"),)
 
     team_member_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=True,
     )
     """
@@ -1040,16 +1042,16 @@ class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
 
     __table_args__ = (
         UniqueConstraint(
-            'user_id',
-            'team_member_user_id',
-            'resource_id',
-            name='care_team_auth_unique_resource_user_team_member_ids',
+            "user_id",
+            "team_member_user_id",
+            "resource_id",
+            name="care_team_auth_unique_resource_user_team_member_ids",
         ),
     )
 
     team_member_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -1061,7 +1063,9 @@ class ClientClinicalCareTeamAuthorizations(BaseModelWithIdx, UserIdFkeyMixin):
 
     resource_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupClinicalCareTeamResources.resource_id', ondelete='CASCADE'),
+        db.ForeignKey(
+            "LookupClinicalCareTeamResources.resource_id", ondelete="CASCADE"
+        ),
         nullable=False,
     )
     """
@@ -1113,7 +1117,7 @@ class ClientNotificationSettings(BaseModelWithIdx, UserIdFkeyMixin):
 
     notification_type_id = db.Column(
         db.Integer,
-        db.ForeignKey('LookupNotifications.notification_type_id', ondelete='CASCADE'),
+        db.ForeignKey("LookupNotifications.notification_type_id", ondelete="CASCADE"),
         nullable=False,
     )
     """

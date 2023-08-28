@@ -12,29 +12,33 @@ def test_post_pt_history(test_client):
 
     # For COVERAGE, raise a ContentNotFound error
     response = test_client.get(
-        f'/physiotherapy/history/{test_client.client_id}/',
+        f"/physiotherapy/history/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
     assert response.status_code == 200
 
     # For coverage, raise a UserNotFound error
     response = test_client.put(
-        f'/physiotherapy/history/{test_client.client_id}/',
+        f"/physiotherapy/history/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
 
     response = test_client.post(
-        f'/physiotherapy/history/{test_client.client_id}/',
+        f"/physiotherapy/history/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
-    assert response.json['exercise'] == pt_history_data['exercise']
-    assert response.json['best_pain'] == pt_history_data['best_pain']
+    assert response.json["exercise"] == pt_history_data["exercise"]
+    assert response.json["best_pain"] == pt_history_data["best_pain"]
+
 
 def test_put_pt_history(test_client):
     pt_history_data["exercise"] = "test put"
@@ -42,30 +46,34 @@ def test_put_pt_history(test_client):
 
     # For COVERAGE, raise an IllegalSettings Error
     response = test_client.post(
-        f'/physiotherapy/history/{test_client.client_id}/',
+        f"/physiotherapy/history/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
 
     response = test_client.put(
-        f'/physiotherapy/history/{test_client.client_id}/',
+        f"/physiotherapy/history/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(payload),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     client = PTHistory.query.filter_by(user_id=test_client.client_id).first()
 
     assert response.status_code == 200
     assert client.exercise == "test put"
 
+
 def test_get_pt_history(test_client):
     response = test_client.get(
-        f'/physiotherapy/history/{test_client.client_id}/',
+        f"/physiotherapy/history/{test_client.client_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
-    assert response.json['exercise'] == 'test put'
-    assert response.json['best_pain'] == 7
+    assert response.json["exercise"] == "test put"
+    assert response.json["best_pain"] == 7

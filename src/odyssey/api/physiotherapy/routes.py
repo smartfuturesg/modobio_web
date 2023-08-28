@@ -14,14 +14,15 @@ from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.misc import check_client_existence
 
 ns = Namespace(
-    'physiotherapy',
-    description='Operations related to physical therapy services',
+    "physiotherapy",
+    description="Operations related to physical therapy services",
 )
 
 
-@ns.route('/history/<int:user_id>/')
+@ns.route("/history/<int:user_id>/")
 class ClientPTHistory(BaseResource):
     """GET, POST, PUT for pt history data"""
+
     @token_auth.login_required
     @responds(schema=PTHistorySchema)
     def get(self, user_id):
@@ -43,7 +44,7 @@ class ClientPTHistory(BaseResource):
         # check to see if there is already an entry for pt history
         current_pt_history = PTHistory.query.filter_by(user_id=user_id).first()
 
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         # create a new entry into the pt history table
         client_pt = PTHistorySchema().load(data)
@@ -71,33 +72,36 @@ class ClientPTHistory(BaseResource):
         return client_pt
 
 
-@ns.route('/chessboard/<int:user_id>/')
+@ns.route("/chessboard/<int:user_id>/")
 class ClientChessboard(BaseResource):
     """GET, POST for chessboard assesssment data
     note that clients will have multiple entries as they progress through the program
     Trainers may update some or all fields. The backend will store every update as a new row
     fields left blank will be left as null"""
-    @token_auth.login_required(user_type=('provider', 'client'))
+
+    @token_auth.login_required(user_type=("provider", "client"))
     @responds(schema=ChessboardSchema(many=True), api=ns)
     def get(self, user_id):
         """returns all chessboard entries for the specified client"""
         check_client_existence(user_id)
 
         all_entries = (
-            Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.asc()).all()
+            Chessboard.query.filter_by(user_id=user_id)
+            .order_by(Chessboard.timestamp.asc())
+            .all()
         )
 
         return all_entries
 
     @accepts(schema=ChessboardSchema, api=ns)
-    @token_auth.login_required(user_type=('provider', 'client'))
+    @token_auth.login_required(user_type=("provider", "client"))
     @responds(schema=ChessboardSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create new chessboard entry"""
         check_client_existence(user_id)
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         client_ma = ChessboardSchema().load(data)
 
@@ -106,7 +110,8 @@ class ClientChessboard(BaseResource):
 
         # return the most recent entry (this one)
         most_recent = (
-            Chessboard.query.filter_by(user_id=user_id).order_by(Chessboard.timestamp.desc()
-                                                                ).first()
+            Chessboard.query.filter_by(user_id=user_id)
+            .order_by(Chessboard.timestamp.desc())
+            .first()
         )
         return most_recent

@@ -19,20 +19,24 @@ from odyssey import db
 from odyssey.api.lookup.models import LookupSubscriptions
 from odyssey.api.user.models import UserSubscriptions
 from odyssey.api.user.schemas import UserSubscriptionsSchema
-from odyssey.utils.constants import (APPLE_APPSTORE_BASE_URLS, APPLE_SUBSCRIPTION_STATUS_DICT)
+from odyssey.utils.constants import (
+    APPLE_APPSTORE_BASE_URLS,
+    APPLE_SUBSCRIPTION_STATUS_DICT,
+)
 
 
 class AppStore:
     """Class that handles interaction with the Apple Appstore API"""
+
     def __init__(self):
-        self.bundle_id = current_app.config.get('APPLE_APPSTORE_BUNDLE_ID')
-        self.private_api_key = current_app.config.get('APPLE_APPSTORE_API_KEY').replace(
-            '\\\n', '\n'
+        self.bundle_id = current_app.config.get("APPLE_APPSTORE_BUNDLE_ID")
+        self.private_api_key = current_app.config.get("APPLE_APPSTORE_API_KEY").replace(
+            "\\\n", "\n"
         )  # additional '\' added when reading in from env var (\\ in DEV)
         self.private_api_key = self.private_api_key.replace(
-            '\\n', '\n'
+            "\\n", "\n"
         )  # additional '\' added when reading in from env var
-        self.api_key_id = current_app.config.get('APPLE_APPSTORE_API_KEY_ID')
+        self.api_key_id = current_app.config.get("APPLE_APPSTORE_API_KEY_ID")
 
     def _generate_auth_jwt(self):
         """
@@ -43,20 +47,18 @@ class AppStore:
 
         token = jwt.encode(
             {
-                'iss': current_app.config.get('APPLE_APPSTORE_ISSUER_ID'),
-                'iat': int(mktime((datetime.now()).timetuple())),
-                'exp': int(mktime((datetime.now() + timedelta(minutes=20)).timetuple())),
-                'aud': 'appstoreconnect-v1',
-                'nonce': str(uuid.uuid4()),
-                'bid': self.bundle_id,
+                "iss": current_app.config.get("APPLE_APPSTORE_ISSUER_ID"),
+                "iat": int(mktime((datetime.now()).timetuple())),
+                "exp": int(
+                    mktime((datetime.now() + timedelta(minutes=20)).timetuple())
+                ),
+                "aud": "appstoreconnect-v1",
+                "nonce": str(uuid.uuid4()),
+                "bid": self.bundle_id,
             },
             self.private_api_key,
-            headers={
-                'alg': 'ES256',
-                'kid': self.api_key_id,
-                'typ': 'JWT'
-            },
-            algorithm='ES256',
+            headers={"alg": "ES256", "kid": self.api_key_id, "typ": "JWT"},
+            algorithm="ES256",
         )
 
         return token
@@ -80,11 +82,11 @@ class AppStore:
         #   as per apple recommendation, use the production url first, then try the
         #   storekit url if the transaction_id is not found: error code 4040005
         access_token = self._generate_auth_jwt()
-        headers = {'Authorization': f'Bearer {access_token}'}
+        headers = {"Authorization": f"Bearer {access_token}"}
 
         for url in APPLE_APPSTORE_BASE_URLS:
             response = requests.get(
-                url + '/inApps/v1/subscriptions/' + original_transaction_id,
+                url + "/inApps/v1/subscriptions/" + original_transaction_id,
                 headers=headers,
             )
             try:
@@ -93,19 +95,19 @@ class AppStore:
                 # continue if transaction_id not found in production appstore
                 if url == APPLE_APPSTORE_BASE_URLS[-1]:
                     raise BadRequest(
-                        'Apple AppStore returned the following error:'
-                        f' {response.text}'
+                        "Apple AppStore returned the following error:"
+                        f" {response.text}"
                     )
                 else:
                     continue
 
             # in some cases bad transaction_ids don't return anything but a successful request
             try:
-                if response.json().get('data') == []:
+                if response.json().get("data") == []:
                     raise BadRequest(
-                        'Something went wrong while trying to verify Apple'
-                        ' AppStore subscription for transaction_id:'
-                        f' {original_transaction_id}'
+                        "Something went wrong while trying to verify Apple"
+                        " AppStore subscription for transaction_id:"
+                        f" {original_transaction_id}"
                     )
             except json.decoder.JSONDecodeError:
                 continue  # try the next url in the list if the response is not json
@@ -116,22 +118,28 @@ class AppStore:
 
         # extract signed transaction info and status from response. Should always be present given a valid originalTransactionID from apple
         transaction_jws = (
-            payload.get('data')[0].get('lastTransactions')[0].get('signedTransactionInfo')
+            payload.get("data")[0]
+            .get("lastTransactions")[0]
+            .get("signedTransactionInfo")
         )
-        renewal_jws = (payload.get('data')[0].get('lastTransactions')[0].get('signedRenewalInfo'))
+        renewal_jws = (
+            payload.get("data")[0].get("lastTransactions")[0].get("signedRenewalInfo")
+        )
 
-        status = (payload.get('data')[0].get('lastTransactions')[0].get('status'))
-        status = APPLE_SUBSCRIPTION_STATUS_DICT.get(status, 'UNKNOWN')
+        status = payload.get("data")[0].get("lastTransactions")[0].get("status")
+        status = APPLE_SUBSCRIPTION_STATUS_DICT.get(status, "UNKNOWN")
 
         # decode JWS payload, check the subscription product
-        transaction_info = base64_decode(transaction_jws.split('.')[1])
+        transaction_info = base64_decode(transaction_jws.split(".")[1])
 
-        renewal_info = base64_decode(renewal_jws.split('.')[1])
+        renewal_info = base64_decode(renewal_jws.split(".")[1])
 
         return json.loads(transaction_info), json.loads(renewal_info), status
 
     @staticmethod
-    def update_user_subscription(current_subscription: UserSubscriptions, transaction_info: dict):
+    def update_user_subscription(
+        current_subscription: UserSubscriptions, transaction_info: dict
+    ):
         """
         Update user subscription:
         -end current subscription
@@ -151,23 +159,20 @@ class AppStore:
             A new instance of :class:`UserSubscriptions`
         """
         # end current subscription
-        end_date = datetime.fromtimestamp(transaction_info['purchaseDate'] / 1000, utc)
+        end_date = datetime.fromtimestamp(transaction_info["purchaseDate"] / 1000, utc)
         current_subscription.end_date = end_date
-        current_subscription.subscription_status = 'unsubscribed'
+        current_subscription.subscription_status = "unsubscribed"
 
         new_subscription_data = {
-            'subscription_status':
-                'subscribed',
-            'subscription_type_id':
-                LookupSubscriptions.query.filter_by(
-                    ios_product_id=transaction_info.get('productId')
-                ).one_or_none().sub_id,
-            'is_staff':
-                current_subscription.is_staff,
-            'last_checked_date':
-                datetime.utcnow().isoformat(),
-            'apple_original_transaction_id':
-                current_subscription.apple_original_transaction_id,
+            "subscription_status": "subscribed",
+            "subscription_type_id": LookupSubscriptions.query.filter_by(
+                ios_product_id=transaction_info.get("productId")
+            )
+            .one_or_none()
+            .sub_id,
+            "is_staff": current_subscription.is_staff,
+            "last_checked_date": datetime.utcnow().isoformat(),
+            "apple_original_transaction_id": current_subscription.apple_original_transaction_id,
         }
         new_subscription = UserSubscriptionsSchema().load(new_subscription_data)
         new_subscription.user_id = current_subscription.user_id

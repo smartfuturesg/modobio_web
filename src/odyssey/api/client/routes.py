@@ -13,49 +13,102 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db
 from odyssey.api.client.models import (  # ClientAssignedDrinks,
-    ClientClinicalCareTeam, ClientClinicalCareTeamAuthorizations,
-    ClientConsent, ClientConsultContract, ClientDataStorage, ClientFacilities,
-    ClientFertility, ClientHeight, ClientIndividualContract, ClientInfo,
-    ClientMobileSettings, ClientNotificationSettings, ClientPolicies,
-    ClientRaceAndEthnicity, ClientRelease, ClientSubscriptionContract,
-    ClientWaistSize, ClientWeight)
+    ClientClinicalCareTeam,
+    ClientClinicalCareTeamAuthorizations,
+    ClientConsent,
+    ClientConsultContract,
+    ClientDataStorage,
+    ClientFacilities,
+    ClientFertility,
+    ClientHeight,
+    ClientIndividualContract,
+    ClientInfo,
+    ClientMobileSettings,
+    ClientNotificationSettings,
+    ClientPolicies,
+    ClientRaceAndEthnicity,
+    ClientRelease,
+    ClientSubscriptionContract,
+    ClientWaistSize,
+    ClientWeight,
+)
 from odyssey.api.client.schemas import (  # ClientAssignedDrinksSchema,; ClientAssignedDrinksDeleteSchema,
-    AllClientsDataTier, ClientAndUserInfoPutSchema, ClientAndUserInfoSchema,
-    ClientClinicalCareTeamDeleteSchema, ClientClinicalCareTeamSchema,
-    ClientCloseAccountSchema, ClientConsentSchema, ClientConsultContractSchema,
-    ClientFertilitySchema, ClientHeightSchema, ClientIndividualContractSchema,
-    ClientInfoSchema, ClientMobileSettingsSchema, ClientPoliciesContractSchema,
-    ClientRaceAndEthnicityEditSchema, ClientRaceAndEthnicitySchema,
-    ClientRegistrationStatusSchema, ClientReleaseContactsSchema,
-    ClientReleaseSchema, ClientSearchItemsSchema, ClientSearchOutSchema,
-    ClientSubscriptionContractSchema, ClientTokenRequestSchema,
-    ClientWaistSizeSchema, ClientWeightSchema,
-    ClinicalCareTeamAuthorizationNestedSchema, ClinicalCareTeamMemberOfSchema,
-    ClinicalCareTeamTemporaryMembersSchema, SignAndDateSchema,
-    SignedDocumentsSchema)
+    AllClientsDataTier,
+    ClientAndUserInfoPutSchema,
+    ClientAndUserInfoSchema,
+    ClientClinicalCareTeamDeleteSchema,
+    ClientClinicalCareTeamSchema,
+    ClientCloseAccountSchema,
+    ClientConsentSchema,
+    ClientConsultContractSchema,
+    ClientFertilitySchema,
+    ClientHeightSchema,
+    ClientIndividualContractSchema,
+    ClientInfoSchema,
+    ClientMobileSettingsSchema,
+    ClientPoliciesContractSchema,
+    ClientRaceAndEthnicityEditSchema,
+    ClientRaceAndEthnicitySchema,
+    ClientRegistrationStatusSchema,
+    ClientReleaseContactsSchema,
+    ClientReleaseSchema,
+    ClientSearchItemsSchema,
+    ClientSearchOutSchema,
+    ClientSubscriptionContractSchema,
+    ClientTokenRequestSchema,
+    ClientWaistSizeSchema,
+    ClientWeightSchema,
+    ClinicalCareTeamAuthorizationNestedSchema,
+    ClinicalCareTeamMemberOfSchema,
+    ClinicalCareTeamTemporaryMembersSchema,
+    SignAndDateSchema,
+    SignedDocumentsSchema,
+)
 from odyssey.api.doctor.models import (
-    MedicalFamilyHistory, MedicalGeneralInfo, MedicalGeneralInfoMedicationAllergy,
-    MedicalGeneralInfoMedications, MedicalHistory, MedicalPhysicalExam, MedicalSocialHistory
+    MedicalFamilyHistory,
+    MedicalGeneralInfo,
+    MedicalGeneralInfoMedicationAllergy,
+    MedicalGeneralInfoMedications,
+    MedicalHistory,
+    MedicalPhysicalExam,
+    MedicalSocialHistory,
 )
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.facility.schemas import ClientSummarySchema
 from odyssey.api.lookup.models import (  # LookupDrinks,
-    LookupClinicalCareTeamResources, LookupCountriesOfOperations,
-    LookupDefaultHealthMetrics, LookupGoals, LookupMacroGoals,
-    LookupNotifications, LookupRaces, LookupTerritoriesOfOperations)
+    LookupClinicalCareTeamResources,
+    LookupCountriesOfOperations,
+    LookupDefaultHealthMetrics,
+    LookupGoals,
+    LookupMacroGoals,
+    LookupNotifications,
+    LookupRaces,
+    LookupTerritoriesOfOperations,
+)
 from odyssey.api.lookup.schemas import LookupDefaultHealthMetricsSchema
 from odyssey.api.physiotherapy.models import PTHistory
-from odyssey.api.staff.models import (StaffProfile, StaffRecentClients, StaffRoles)
+from odyssey.api.staff.models import StaffProfile, StaffRecentClients, StaffRoles
 from odyssey.api.staff.schemas import StaffRecentClientsSchema
-from odyssey.api.telehealth.models import (TelehealthBookings, TelehealthStaffSettings)
+from odyssey.api.telehealth.models import TelehealthBookings, TelehealthStaffSettings
 from odyssey.api.trainer.models import FitnessQuestionnaire
-from odyssey.api.user.models import (User, UserLogin, UserProfilePictures, UserTokenHistory)
+from odyssey.api.user.models import (
+    User,
+    UserLogin,
+    UserProfilePictures,
+    UserTokenHistory,
+)
 from odyssey.api.user.routes import UserLogoutApi
 from odyssey.utils.auth import basic_auth, token_auth
 from odyssey.utils.base.resources import BaseResource
 from odyssey.utils.constants import (
-    ALLOWED_IMAGE_TYPES, DEV_EMAIL_DOMAINS, FERTILITY_STATUSES, IMAGE_DIMENSIONS, IMAGE_MAX_SIZE,
-    NOTIFICATION_SEVERITY_TO_ID, NOTIFICATION_TYPE_TO_ID, TABLE_TO_URI
+    ALLOWED_IMAGE_TYPES,
+    DEV_EMAIL_DOMAINS,
+    FERTILITY_STATUSES,
+    IMAGE_DIMENSIONS,
+    IMAGE_MAX_SIZE,
+    NOTIFICATION_SEVERITY_TO_ID,
+    NOTIFICATION_TYPE_TO_ID,
+    TABLE_TO_URI,
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
 from odyssey.utils.message import email_domain_blacklisted, send_email
@@ -64,7 +117,7 @@ from odyssey.utils.pdf import merge_pdfs, to_pdf
 
 logger = logging.getLogger(__name__)
 
-ns = Namespace('client', description='Operations related to clients')
+ns = Namespace("client", description="Operations related to clients")
 
 
 def process_race_and_ethnicity(user_id, mother, father):
@@ -81,11 +134,13 @@ def process_race_and_ethnicity(user_id, mother, father):
         # race_id 1 (unknown) must be exclusive, a user cannot submit 'unknown' and
         # other race(s) for a single parent
         if 1 in formatted_list and len(formatted_list) > 1:
-            raise BadRequest('Race_id 1 (unknown) cannot be submitted with other race ids.')
+            raise BadRequest(
+                "Race_id 1 (unknown) cannot be submitted with other race ids."
+            )
 
         for race_id in formatted_list:
             if not LookupRaces.query.filter_by(race_id=race_id).one_or_none():
-                raise BadRequest(f'Race {race_id} not found.')
+                raise BadRequest(f"Race {race_id} not found.")
 
         return formatted_list
 
@@ -97,43 +152,46 @@ def process_race_and_ethnicity(user_id, mother, father):
     # add incoming data from request
     if not mother:
         # if a blank array is passed, mark as 'unknown'
-        model = ClientRaceAndEthnicitySchema().load({'is_client_mother': True, 'race_id': 1})
+        model = ClientRaceAndEthnicitySchema().load(
+            {"is_client_mother": True, "race_id": 1}
+        )
         model.user_id = user_id
         db.session.add(model)
     else:
         formatted_list = format_list(mother)
         for race_id in formatted_list:
-            model = ClientRaceAndEthnicitySchema().load({
-                'race_id': race_id,
-                'is_client_mother': True
-            })
+            model = ClientRaceAndEthnicitySchema().load(
+                {"race_id": race_id, "is_client_mother": True}
+            )
             model.user_id = user_id
             db.session.add(model)
 
     if not father:
         # if a blank array is passed, mark as 'unknown'
-        model = ClientRaceAndEthnicitySchema().load({'is_client_mother': False, 'race_id': 1})
+        model = ClientRaceAndEthnicitySchema().load(
+            {"is_client_mother": False, "race_id": 1}
+        )
         model.user_id = user_id
         db.session.add(model)
     else:
         formatted_list = format_list(father)
         for race_id in formatted_list:
-            model = ClientRaceAndEthnicitySchema().load({
-                'race_id': race_id,
-                'is_client_mother': False
-            })
+            model = ClientRaceAndEthnicitySchema().load(
+                {"race_id": race_id, "is_client_mother": False}
+            )
             model.user_id = user_id
             db.session.add(model)
 
     db.session.commit()
 
 
-@ns.route('/profile-picture/<int:user_id>/')
+@ns.route("/profile-picture/<int:user_id>/")
 class ClientProfilePicture(BaseResource):
     """Enpoint to edit client profile picture."""
-    @token_auth.login_required(user_type=('client', ))
+
+    @token_auth.login_required(user_type=("client",))
     @responds(
-        schema=ClientInfoSchema(only=['user_id', 'profile_picture']),
+        schema=ClientInfoSchema(only=["user_id", "profile_picture"]),
         status_code=200,
         api=ns,
     )
@@ -157,17 +215,20 @@ class ClientProfilePicture(BaseResource):
             is another dict that contains the filenames and the presigned URLs for
             the profile picture in different sizes.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         if len(request.files) != 1:
-            raise BadRequest('Only one image upload allowed.')
+            raise BadRequest("Only one image upload allowed.")
 
-        if ('profile_picture' not in request.files or not request.files['profile_picture']):
-            raise BadRequest('No file selected.')
+        if (
+            "profile_picture" not in request.files
+            or not request.files["profile_picture"]
+        ):
+            raise BadRequest("No file selected.")
 
         client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         if not client:
-            raise BadRequest(f'Client {user_id} not found.')
+            raise BadRequest(f"Client {user_id} not found.")
 
         # Keep existing, delete only after successfully uploading new images.
         prev_pics = client.profile_pictures
@@ -177,12 +238,12 @@ class ClientProfilePicture(BaseResource):
         # Save original image to S3.
         hex_token = secrets.token_hex(4)
         original = ImageUpload(
-            request.files['profile_picture'].stream,
+            request.files["profile_picture"].stream,
             user_id,
-            prefix='client_profile_picture',
+            prefix="client_profile_picture",
         )
         original.validate()
-        original.save(f'original_{hex_token}.{original.extension}')
+        original.save(f"original_{hex_token}.{original.extension}")
 
         # Save image metadata in DB.
         upp = UserProfilePictures(
@@ -197,7 +258,7 @@ class ClientProfilePicture(BaseResource):
         # Resize cropped image to multiple sizes.
         for dim in IMAGE_DIMENSIONS:
             resized = original.resize(dim)
-            resized.save(f'size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}')
+            resized.save(f"size{dim[0]}x{dim[1]}_{hex_token}.{resized.extension}")
             urls[str(resized.width)] = resized.url()
 
             upp = UserProfilePictures(
@@ -217,34 +278,34 @@ class ClientProfilePicture(BaseResource):
             db.session.delete(pic)
 
         db.session.commit()
-        return {'user_id': user_id, 'profile_picture': urls}
+        return {"user_id": user_id, "profile_picture": urls}
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @responds(status_code=204, api=ns)
     def delete(self, user_id):
         """Delete client profile picture."""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         fd = FileDownload(user_id)
-        pics = (ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures)
+        pics = ClientInfo.query.filter_by(user_id=user_id).first().profile_pictures
         for pic in pics:
             fd.delete(pic.image_path)
             db.session.delete(pic)
         db.session.commit()
 
 
-@ns.route('/<int:user_id>/')
+@ns.route("/<int:user_id>/")
 class Client(BaseResource):
     @token_auth.login_required
     @responds(schema=ClientAndUserInfoSchema, api=ns)
     def get(self, user_id):
         """returns client info table as a json for the user_id specified"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
         if not client_data or not user_data:
-            raise BadRequest(f'Client {user_id} not found.')
+            raise BadRequest(f"Client {user_id} not found.")
 
         # update staff recent clients information
         staff_user_id = token_auth.current_user()[0].user_id
@@ -253,8 +314,9 @@ class Client(BaseResource):
         if staff_user_id != user_id:
             # check if supplied client is already in staff recent clients
             client_exists = (
-                StaffRecentClients.query.filter_by(staff_user_id=staff_user_id
-                                                  ).filter_by(client_user_id=user_id).one_or_none()
+                StaffRecentClients.query.filter_by(staff_user_id=staff_user_id)
+                .filter_by(client_user_id=user_id)
+                .one_or_none()
             )
             if client_exists:
                 # update timestamp
@@ -263,18 +325,17 @@ class Client(BaseResource):
                 db.session.commit()
             else:
                 # enter new recent client information
-                recent_client_schema = StaffRecentClientsSchema().load({
-                    'staff_user_id': staff_user_id,
-                    'client_user_id': user_id
-                })
+                recent_client_schema = StaffRecentClientsSchema().load(
+                    {"staff_user_id": staff_user_id, "client_user_id": user_id}
+                )
                 db.session.add(recent_client_schema)
                 db.session.flush()
 
                 # check if staff member has more than 10 recent clients
                 staff_recent_searches = (
-                    StaffRecentClients.query.filter_by(staff_user_id=staff_user_id).order_by(
-                        StaffRecentClients.timestamp.asc()
-                    ).all()
+                    StaffRecentClients.query.filter_by(staff_user_id=staff_user_id)
+                    .order_by(StaffRecentClients.timestamp.asc())
+                    .all()
                 )
                 if len(staff_recent_searches) > 10:
                     # remove the oldest client in the list
@@ -288,73 +349,85 @@ class Client(BaseResource):
             db.session.refresh(user_data)
 
         client_info_payload = client_data.__dict__
-        client_info_payload['primary_goal'] = (
-            db.session.query(
-                LookupGoals.goal_name
-            ).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["primary_goal"] = (
+            db.session.query(LookupGoals.goal_name)
+            .filter(client_data.primary_goal_id == LookupGoals.goal_id)
+            .one_or_none()
         )
-        client_info_payload['primary_macro_goal'] = (
-            db.session.query(
-                LookupMacroGoals.goal
-            ).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
+        client_info_payload["primary_macro_goal"] = (
+            db.session.query(LookupMacroGoals.goal)
+            .filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id)
+            .one_or_none()
         )
-        client_info_payload['race_information'] = (
+        client_info_payload["race_information"] = (
             db.session.query(
                 ClientRaceAndEthnicity.is_client_mother,
                 LookupRaces.race_id,
                 LookupRaces.race_name,
-            ).join(
+            )
+            .join(
                 LookupRaces,
                 LookupRaces.race_id == ClientRaceAndEthnicity.race_id,
-            ).filter(ClientRaceAndEthnicity.user_id == user_id).all()
-        )
-        territory = LookupTerritoriesOfOperations.query.filter_by(idx=client_data.territory_id
-                                                                 ).one_or_none()
-        if territory:
-            client_info_payload['country'] = (
-                LookupCountriesOfOperations.query.filter_by(idx=territory.country_id
-                                                           ).one_or_none().country
             )
-            client_info_payload['territory'] = territory.sub_territory
-            client_info_payload['territory_abbreviation'] = territory.sub_territory_abbreviation
+            .filter(ClientRaceAndEthnicity.user_id == user_id)
+            .all()
+        )
+        territory = LookupTerritoriesOfOperations.query.filter_by(
+            idx=client_data.territory_id
+        ).one_or_none()
+        if territory:
+            client_info_payload["country"] = (
+                LookupCountriesOfOperations.query.filter_by(idx=territory.country_id)
+                .one_or_none()
+                .country
+            )
+            client_info_payload["territory"] = territory.sub_territory
+            client_info_payload[
+                "territory_abbreviation"
+            ] = territory.sub_territory_abbreviation
 
         # TODO: When FE updates code, we can remove this 9/1/2021
         # This is redundant, however, necessary to
         # keep to not have the FE change any code on their side
-        client_info_payload['dob'] = user_data.dob
+        client_info_payload["dob"] = user_data.dob
 
         # Include profile picture in different sizes
-        client_info_payload['profile_picture'] = get_profile_pictures(user_id, False)
+        client_info_payload["profile_picture"] = get_profile_pictures(user_id, False)
 
-        return {'client_info': client_info_payload, 'user_info': user_data}
+        return {"client_info": client_info_payload, "user_info": user_data}
 
     @token_auth.login_required
     @accepts(schema=ClientAndUserInfoPutSchema, api=ns)
     @responds(schema=ClientAndUserInfoSchema, status_code=200, api=ns)
     def put(self, user_id):
         """edit client info"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_data = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
 
         user_data = User.query.filter_by(user_id=user_id).one_or_none()
 
         if not client_data or not user_data:
-            raise BadRequest(f'Client {user_id} not found.')
+            raise BadRequest(f"Client {user_id} not found.")
         # validate primary_macro_goal_id
-        if 'primary_macro_goal_id' in request.parsed_obj['client_info'].keys():
-            primary_macro_goal_id = request.parsed_obj['client_info']['primary_macro_goal_id']
-            macro_goal = LookupMacroGoals.query.filter_by(goal_id=primary_macro_goal_id
-                                                         ).one_or_none()
+        if "primary_macro_goal_id" in request.parsed_obj["client_info"].keys():
+            primary_macro_goal_id = request.parsed_obj["client_info"][
+                "primary_macro_goal_id"
+            ]
+            macro_goal = LookupMacroGoals.query.filter_by(
+                goal_id=primary_macro_goal_id
+            ).one_or_none()
             if not macro_goal:
-                raise BadRequest(f'Primary macro goal {primary_macro_goal_id} not found.')
+                raise BadRequest(
+                    f"Primary macro goal {primary_macro_goal_id} not found."
+                )
 
         # validate primary_goal_id if supplied
-        if 'primary_goal_id' in request.parsed_obj['client_info'].keys():
-            primary_goal_id = request.parsed_obj['client_info']['primary_goal_id']
+        if "primary_goal_id" in request.parsed_obj["client_info"].keys():
+            primary_goal_id = request.parsed_obj["client_info"]["primary_goal_id"]
             goal = LookupGoals.query.filter_by(goal_id=primary_goal_id).one_or_none()
             if not goal:
-                raise BadRequest(f'Primary goal {primary_goal_id} not found.')
+                raise BadRequest(f"Primary goal {primary_goal_id} not found.")
 
             # # make automatic drink recommendation
             # drink_id = LookupDrinks.query.filter_by(primary_goal_id=request.parsed_obj['client_info']['primary_goal_id']).one_or_none().drink_id
@@ -363,81 +436,88 @@ class Client(BaseResource):
             # db.session.add(recommendation)
 
         # update both tables with request data
-        client_info = request.parsed_obj['client_info']
+        client_info = request.parsed_obj["client_info"]
         if client_info:
-            if 'race_information' in client_info:
+            if "race_information" in client_info:
                 # send race_information through race-and-ethnicity endpoint
-                if client_info['race_information']['mother']:
-                    mother = client_info['race_information']['mother']
+                if client_info["race_information"]["mother"]:
+                    mother = client_info["race_information"]["mother"]
                 else:
                     mother = None
-                if client_info['race_information']['father']:
-                    father = client_info['race_information']['father']
+                if client_info["race_information"]["father"]:
+                    father = client_info["race_information"]["father"]
                 else:
                     father = None
 
                 process_race_and_ethnicity(user_id, mother, father)
-                del client_info['race_information']
+                del client_info["race_information"]
 
-            if ('dob' in client_info and 'dob' not in request.parsed_obj['user_info']):
-                dob = client_info['dob']
-                del client_info['dob']
-                user_data.update({'dob': dob})
+            if "dob" in client_info and "dob" not in request.parsed_obj["user_info"]:
+                dob = client_info["dob"]
+                del client_info["dob"]
+                user_data.update({"dob": dob})
 
             client_data.update(client_info)
-        if request.parsed_obj['user_info']:
-            if 'email' in request.parsed_obj['user_info']:
-                email_domain_blacklisted(request.parsed_obj['user_info']['email'])
-            user_data.update(request.parsed_obj['user_info'])
+        if request.parsed_obj["user_info"]:
+            if "email" in request.parsed_obj["user_info"]:
+                email_domain_blacklisted(request.parsed_obj["user_info"]["email"])
+            user_data.update(request.parsed_obj["user_info"])
 
         db.session.commit()
 
         # prepare client_info payload
         client_info_payload = client_data.__dict__
-        client_info_payload['primary_goal'] = (
-            db.session.query(
-                LookupGoals.goal_name
-            ).filter(client_data.primary_goal_id == LookupGoals.goal_id).one_or_none()
+        client_info_payload["primary_goal"] = (
+            db.session.query(LookupGoals.goal_name)
+            .filter(client_data.primary_goal_id == LookupGoals.goal_id)
+            .one_or_none()
         )
-        client_info_payload['primary_macro_goal'] = (
-            db.session.query(
-                LookupMacroGoals.goal
-            ).filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id).one_or_none()
+        client_info_payload["primary_macro_goal"] = (
+            db.session.query(LookupMacroGoals.goal)
+            .filter(client_data.primary_macro_goal_id == LookupMacroGoals.goal_id)
+            .one_or_none()
         )
-        client_info_payload['race_information'] = (
+        client_info_payload["race_information"] = (
             db.session.query(
                 ClientRaceAndEthnicity.is_client_mother,
                 LookupRaces.race_id,
                 LookupRaces.race_name,
-            ).join(
+            )
+            .join(
                 LookupRaces,
                 LookupRaces.race_id == ClientRaceAndEthnicity.race_id,
-            ).filter(ClientRaceAndEthnicity.user_id == user_id).all()
+            )
+            .filter(ClientRaceAndEthnicity.user_id == user_id)
+            .all()
         )
-        if 'dob' in client_info:
-            client_info_payload['dob'] = dob
+        if "dob" in client_info:
+            client_info_payload["dob"] = dob
 
         # validate territory_id if supplied
-        territory_id = request.parsed_obj['client_info'].get('territory_id')
+        territory_id = request.parsed_obj["client_info"].get("territory_id")
         if territory_id:
-            territory = LookupTerritoriesOfOperations.query.filter_by(idx=territory_id
-                                                                     ).one_or_none()
+            territory = LookupTerritoriesOfOperations.query.filter_by(
+                idx=territory_id
+            ).one_or_none()
             if not territory:
-                raise BadRequest(f'Territory {territory_id} not found.')
+                raise BadRequest(f"Territory {territory_id} not found.")
 
-            client_info_payload['country'] = (
-                LookupCountriesOfOperations.query.filter_by(idx=territory.country_id
-                                                           ).one_or_none().country
+            client_info_payload["country"] = (
+                LookupCountriesOfOperations.query.filter_by(idx=territory.country_id)
+                .one_or_none()
+                .country
             )
-            client_info_payload['territory'] = territory.sub_territory
-            client_info_payload['territory_abbreviation'] = territory.sub_territory_abbreviation
+            client_info_payload["territory"] = territory.sub_territory
+            client_info_payload[
+                "territory_abbreviation"
+            ] = territory.sub_territory_abbreviation
 
         # Not returning profile picture since it can't be edited through PUT
 
-        return {'client_info': client_info_payload, 'user_info': user_data}
+        return {"client_info": client_info_payload, "user_info": user_data}
 
 
-@ns.route('/summary/<int:user_id>/')
+@ns.route("/summary/<int:user_id>/")
 class ClientSummary(BaseResource):
     @token_auth.login_required
     @responds(schema=ClientSummarySchema, api=ns)
@@ -445,39 +525,41 @@ class ClientSummary(BaseResource):
         user = User.query.filter_by(user_id=user_id).one_or_none()
         client = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         if not client:
-            raise BadRequest(f'Client {user_id} not found.')
+            raise BadRequest(f"Client {user_id} not found.")
 
         # get list of a client's registered facilities' addresses
         clientFacilities = ClientFacilities.query.filter_by(user_id=user_id).all()
         facilityList = [item.facility_id for item in clientFacilities]
         facilities = []
         for item in facilityList:
-            facilities.append(RegisteredFacilities.query.filter_by(facility_id=item).first())
+            facilities.append(
+                RegisteredFacilities.query.filter_by(facility_id=item).first()
+            )
 
         data = {
-            'firstname': user.firstname,
-            'middlename': user.middlename,
-            'lastname': user.lastname,
-            'user_id': user.user_id,
-            'dob': client.user_info.dob,
-            'membersince': client.membersince,
-            'facilities': facilities,
+            "firstname": user.firstname,
+            "middlename": user.middlename,
+            "lastname": user.lastname,
+            "user_id": user.user_id,
+            "dob": client.user_info.dob,
+            "membersince": client.membersince,
+            "facilities": facilities,
         }
         return data
 
 
-@ns.route('/clientsearch/')
+@ns.route("/clientsearch/")
 @ns.deprecated
 @ns.doc(
     params={
-        'page': 'request page for paginated clients list',
-        'per_page': 'number of clients per page',
-        'firstname': 'first name to search',
-        'lastname': 'last name to search',
-        'email': 'email to search',
-        'phone': 'phone number to search',
-        'dob': 'date of birth to search',
-        'record_locator_id': 'record locator id to search',
+        "page": "request page for paginated clients list",
+        "per_page": "number of clients per page",
+        "firstname": "first name to search",
+        "lastname": "last name to search",
+        "email": "email to search",
+        "phone": "phone number to search",
+        "dob": "date of birth to search",
+        "record_locator_id": "record locator id to search",
     }
 )
 class ClientsDepricated(BaseResource):
@@ -489,35 +571,35 @@ class ClientsDepricated(BaseResource):
         clients = []
         for user in User.query.filter_by(is_client=True).all():
             client = {
-                'user_id': user.user_id,
-                'firstname': user.firstname,
-                'lastname': user.lastname,
-                'email': user.email,
-                'phone': user.phone_number,
-                'dob': None,
-                'record_locator_id': None,
-                'modobio_id': user.modobio_id,
+                "user_id": user.user_id,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "email": user.email,
+                "phone": user.phone_number,
+                "dob": None,
+                "record_locator_id": None,
+                "modobio_id": user.modobio_id,
             }
             clients.append(client)
-        response = {'items': clients, '_meta': None, '_links': None}
+        response = {"items": clients, "_meta": None, "_links": None}
         return response
 
 
-@ns.route('/search/')
+@ns.route("/search/")
 class Clients(BaseResource):
     @ns.doc(
         params={
-            '_from': 'starting at result 0, from what result to display',
-            'per_page': 'number of clients per page',
-            'firstname': 'first name to search',
-            'lastname': 'last name to search',
-            'email': 'email to search',
-            'phone': 'phone number to search',
-            'dob': 'date of birth to search',
-            'modobio_id': 'modobio id to search',
+            "_from": "starting at result 0, from what result to display",
+            "per_page": "number of clients per page",
+            "firstname": "first name to search",
+            "lastname": "last name to search",
+            "email": "email to search",
+            "phone": "phone number to search",
+            "dob": "date of birth to search",
+            "modobio_id": "modobio id to search",
         }
     )
-    @token_auth.login_required(user_type=('staff', 'provider'))
+    @token_auth.login_required(user_type=("staff", "provider"))
     @responds(schema=ClientSearchOutSchema, api=ns)
     def get(self):
         """returns list of clients given query parameters,"""
@@ -530,119 +612,115 @@ class Clients(BaseResource):
         # bring up user_ids for care team members
         care_team_ids = (
             db.session.execute(
-                select(ClientClinicalCareTeam.user_id
-                      ).where(ClientClinicalCareTeam.team_member_user_id == current_user.user_id)
-            ).scalars().all()
+                select(ClientClinicalCareTeam.user_id).where(
+                    ClientClinicalCareTeam.team_member_user_id == current_user.user_id
+                )
+            )
+            .scalars()
+            .all()
         )
 
         # no care team members
         if len(care_team_ids) == 0:
-            return {'items': []}
+            return {"items": []}
 
         # clean up and validate input data
-        startAt = request.args.get('_from', 0, type=int)
-        per_page = min(request.args.get('per_page', 10, type=int), 100)
+        startAt = request.args.get("_from", 0, type=int)
+        per_page = min(request.args.get("per_page", 10, type=int), 100)
 
         if startAt < 0:
-            raise BadRequest('_from must be greater than or equal to 0.')
+            raise BadRequest("_from must be greater than or equal to 0.")
         if per_page <= 0:
-            raise BadRequest('per_page must be greater than 0.')
+            raise BadRequest("per_page must be greater than 0.")
 
         param = {}
-        search = ''
+        search = ""
         keys = request.args.keys()
         for key in keys:
-            param[key] = request.args.get(key, default='')
-            if key == 'phone' and param[key]:
-                param[key] = re.sub('[^0-9]', '', param[key])
-            if key not in ['_from', 'per_page', 'dob'] and param[key]:
-                search += param[key] + ' '
+            param[key] = request.args.get(key, default="")
+            if key == "phone" and param[key]:
+                param[key] = re.sub("[^0-9]", "", param[key])
+            if key not in ["_from", "per_page", "dob"] and param[key]:
+                search += param[key] + " "
 
         # build ES query body
-        if param.get('dob'):
+        if param.get("dob"):
             body = {
-                'query': {
-                    'bool': {
-                        'must': {
-                            'multi_match': {
-                                'query': search.strip(),
-                                'fuzziness': 'AUTO:1, 2',
-                                'zero_terms_query': 'all',
+                "query": {
+                    "bool": {
+                        "must": {
+                            "multi_match": {
+                                "query": search.strip(),
+                                "fuzziness": "AUTO:1, 2",
+                                "zero_terms_query": "all",
                             }
                         },
-                        'filter': [
-                            {
-                                'term': {
-                                    'dob': param.get('dob')
-                                }
-                            },
-                            {
-                                'terms': {
-                                    'user_id': [f'{id_}' for id_ in care_team_ids]
-                                }
-                            },
+                        "filter": [
+                            {"term": {"dob": param.get("dob")}},
+                            {"terms": {"user_id": [f"{id_}" for id_ in care_team_ids]}},
                         ],
                     }
                 },
-                'from': startAt,
-                'size': per_page,
+                "from": startAt,
+                "size": per_page,
             }
         else:
             body = {
-                'query': {
-                    'bool': {
-                        'must': {
-                            'multi_match': {
-                                'query': search.strip(),
-                                'fuzziness': 'AUTO:1,2',
-                                'zero_terms_query': 'all',
+                "query": {
+                    "bool": {
+                        "must": {
+                            "multi_match": {
+                                "query": search.strip(),
+                                "fuzziness": "AUTO:1,2",
+                                "zero_terms_query": "all",
                             }
                         },
-                        'filter': {
-                            'terms': {
-                                'user_id': [str(_id) for _id in care_team_ids]
-                            }
+                        "filter": {
+                            "terms": {"user_id": [str(_id) for _id in care_team_ids]}
                         },
                     }
                 },
-                'from': startAt,
-                'size': per_page,
+                "from": startAt,
+                "size": per_page,
             }
 
         # query ES index
-        results = es.search(index='clients', body=body)
+        results = es.search(index="clients", body=body)
 
         # Format return data
-        total_hits = results['hits']['total']['value']
+        total_hits = results["hits"]["total"]["value"]
         items = []
 
-        for hit in results['hits']['hits']:
-            items.append(ClientSearchItemsSchema().load(hit['_source']))
+        for hit in results["hits"]["hits"]:
+            items.append(ClientSearchItemsSchema().load(hit["_source"]))
 
         response = {
-            '_meta': {
-                'from_result': startAt,
-                'per_page': per_page,
-                'total_pages': math.ceil(total_hits / per_page),
-                'total_items': total_hits,
+            "_meta": {
+                "from_result": startAt,
+                "per_page": per_page,
+                "total_pages": math.ceil(total_hits / per_page),
+                "total_items": total_hits,
             },
-            '_links': {
-                '_self':
-                    url_for('api.client_clients', _from=startAt, per_page=per_page),
-                '_next':
-                    url_for(
-                        'api.client_clients',
-                        _from=startAt + per_page,
-                        per_page=per_page,
-                    ) if startAt + per_page < total_hits else None,
-                '_prev':
-                    url_for(
-                        'api.client_clients',
-                        _from=startAt - per_page if startAt - per_page >= 0 else 0,
-                        per_page=per_page,
-                    ) if startAt != 0 else None,
+            "_links": {
+                "_self": url_for(
+                    "api.client_clients", _from=startAt, per_page=per_page
+                ),
+                "_next": url_for(
+                    "api.client_clients",
+                    _from=startAt + per_page,
+                    per_page=per_page,
+                )
+                if startAt + per_page < total_hits
+                else None,
+                "_prev": url_for(
+                    "api.client_clients",
+                    _from=startAt - per_page if startAt - per_page >= 0 else 0,
+                    per_page=per_page,
+                )
+                if startAt != 0
+                else None,
             },
-            'items': items,
+            "items": items,
         }
 
         # TODO maybe elasticsarch-DSL
@@ -651,19 +729,21 @@ class Clients(BaseResource):
         return response
 
 
-@ns.route('/consent/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/consent/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ConsentContract(BaseResource):
     """client consent forms"""
+
     @token_auth.login_required
     @responds(schema=ClientConsentSchema, api=ns)
     def get(self, user_id):
         """returns the most recent consent table as a json for the user_id specified"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_consent_form = (
-            ClientConsent.query.filter_by(user_id=user_id).order_by(ClientConsent.idx.desc()
-                                                                   ).first()
+            ClientConsent.query.filter_by(user_id=user_id)
+            .order_by(ClientConsent.idx.desc())
+            .first()
         )
 
         return client_consent_form
@@ -673,10 +753,10 @@ class ConsentContract(BaseResource):
     @responds(schema=ClientConsentSchema, status_code=201, api=ns)
     def post(self, user_id):
         """Create client consent contract for the specified user_id"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         client_consent_schema = ClientConsentSchema()
         client_consent_form = client_consent_schema.load(data)
@@ -689,19 +769,21 @@ class ConsentContract(BaseResource):
         return client_consent_form
 
 
-@ns.route('/release/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/release/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ReleaseContract(BaseResource):
     """Client release forms"""
+
     @token_auth.login_required
     @responds(schema=ClientReleaseSchema, api=ns)
     def get(self, user_id):
         """returns most recent client release table as a json for the user_id specified"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_release_contract = (
-            ClientRelease.query.filter_by(user_id=user_id).order_by(ClientRelease.idx.desc()
-                                                                   ).first()
+            ClientRelease.query.filter_by(user_id=user_id)
+            .order_by(ClientRelease.idx.desc())
+            .first()
         )
 
         return client_release_contract
@@ -711,12 +793,12 @@ class ReleaseContract(BaseResource):
     @responds(schema=ClientReleaseSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create client release contract object for the specified user_id"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         data = request.get_json()
 
         # add client id to release contract
-        data['user_id'] = user_id
+        data["user_id"] = user_id
 
         # load the client release contract into the db and flush
         client_release_contract = ClientReleaseSchema().load(data)
@@ -726,18 +808,20 @@ class ReleaseContract(BaseResource):
         db.session.add(client_release_contract)
         db.session.flush()
 
-        release_to_data = data['release_to']
-        release_from_data = data['release_from']
+        release_to_data = data["release_to"]
+        release_from_data = data["release_from"]
 
         # add user_id to each release contact
         release_contacts = []
         for item in release_to_data + release_from_data:
-            item['user_id'] = user_id
-            item['release_contract_id'] = client_release_contract.idx
+            item["user_id"] = user_id
+            item["release_contract_id"] = client_release_contract.idx
             release_contacts.append(item)
 
         # load contacts and rest of release form into objects seperately
-        release_contact_objects = ClientReleaseContactsSchema(many=True).load(release_contacts)
+        release_contact_objects = ClientReleaseContactsSchema(many=True).load(
+            release_contacts
+        )
 
         db.session.add_all(release_contact_objects)
 
@@ -746,19 +830,21 @@ class ReleaseContract(BaseResource):
         return client_release_contract
 
 
-@ns.route('/policies/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/policies/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class PoliciesContract(BaseResource):
     """Client policies form"""
+
     @token_auth.login_required
     @responds(schema=ClientPoliciesContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client policies table as a json for the user_id specified"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_policies = (
-            ClientPolicies.query.filter_by(user_id=user_id).order_by(ClientPolicies.idx.desc()
-                                                                    ).first()
+            ClientPolicies.query.filter_by(user_id=user_id)
+            .order_by(ClientPolicies.idx.desc())
+            .first()
         )
 
         return client_policies
@@ -768,10 +854,10 @@ class PoliciesContract(BaseResource):
     @responds(schema=ClientPoliciesContractSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create client policies contract object for the specified user_id"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
         client_policies_schema = ClientPoliciesContractSchema()
         client_policies = client_policies_schema.load(data)
         client_policies.revision = ClientPolicies.current_revision
@@ -782,20 +868,21 @@ class PoliciesContract(BaseResource):
         return client_policies
 
 
-@ns.route('/consultcontract/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/consultcontract/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ConsultConstract(BaseResource):
     """client consult contract"""
+
     @token_auth.login_required
     @responds(schema=ClientConsultContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client consultation table as a json for the user_id specified"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_consult = (
-            ClientConsultContract.query.filter_by(user_id=user_id).order_by(
-                ClientConsultContract.idx.desc()
-            ).first()
+            ClientConsultContract.query.filter_by(user_id=user_id)
+            .order_by(ClientConsultContract.idx.desc())
+            .first()
         )
 
         return client_consult
@@ -805,10 +892,10 @@ class ConsultConstract(BaseResource):
     @responds(schema=ClientConsultContractSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create client consult contract object for the specified user_id"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
         consult_contract_schema = ClientConsultContractSchema()
         client_consult = consult_contract_schema.load(data)
         client_consult.revision = ClientConsultContract.current_revision
@@ -819,20 +906,21 @@ class ConsultConstract(BaseResource):
         return client_consult
 
 
-@ns.route('/subscriptioncontract/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/subscriptioncontract/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class SubscriptionContract(BaseResource):
     """client subscription contract"""
+
     @token_auth.login_required
     @responds(schema=ClientSubscriptionContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client subscription contract table as a json for the user_id specified"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_subscription = (
-            ClientSubscriptionContract.query.filter_by(user_id=user_id).order_by(
-                ClientSubscriptionContract.idx.desc()
-            ).first()
+            ClientSubscriptionContract.query.filter_by(user_id=user_id)
+            .order_by(ClientSubscriptionContract.idx.desc())
+            .first()
         )
 
         return client_subscription
@@ -842,13 +930,13 @@ class SubscriptionContract(BaseResource):
     @responds(schema=ClientSubscriptionContractSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create client subscription contract object for the specified user_id"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         data = request.get_json()
-        data['user_id'] = user_id
+        data["user_id"] = user_id
         subscription_contract_schema = ClientSubscriptionContractSchema()
         client_subscription = subscription_contract_schema.load(data)
-        client_subscription.revision = (ClientSubscriptionContract.current_revision)
+        client_subscription.revision = ClientSubscriptionContract.current_revision
 
         db.session.add(client_subscription)
         db.session.commit()
@@ -856,20 +944,21 @@ class SubscriptionContract(BaseResource):
         return client_subscription
 
 
-@ns.route('/servicescontract/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/servicescontract/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class IndividualContract(BaseResource):
     """client individual services contract"""
+
     @token_auth.login_required
     @responds(schema=ClientIndividualContractSchema, api=ns)
     def get(self, user_id):
         """returns most recent client individual servies table as a json for the user_id specified"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_services = (
-            ClientIndividualContract.query.filter_by(user_id=user_id).order_by(
-                ClientIndividualContract.idx.desc()
-            ).first()
+            ClientIndividualContract.query.filter_by(user_id=user_id)
+            .order_by(ClientIndividualContract.idx.desc())
+            .first()
         )
 
         return client_services
@@ -879,11 +968,11 @@ class IndividualContract(BaseResource):
     @responds(schema=ClientIndividualContractSchema, status_code=201, api=ns)
     def post(self, user_id):
         """create client individual services contract object for the specified user_id"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         data = request.get_json()
-        data['user_id'] = user_id
-        data['revision'] = ClientIndividualContract.current_revision
+        data["user_id"] = user_id
+        data["revision"] = ClientIndividualContract.current_revision
 
         client_services = ClientIndividualContract(**data)
 
@@ -893,8 +982,8 @@ class IndividualContract(BaseResource):
         return client_services
 
 
-@ns.route('/signeddocuments/<int:user_id>/', methods=('GET', ))
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/signeddocuments/<int:user_id>/", methods=("GET",))
+@ns.doc(params={"user_id": "User ID number"})
 class SignedDocuments(BaseResource):
     """
     API endpoint that provides access to documents signed
@@ -906,6 +995,7 @@ class SignedDocuments(BaseResource):
     Returns a list of URLs to the stored the PDF documents.
     The URLs expire after 10 min.
     """
+
     @token_auth.login_required
     @responds(schema=SignedDocumentsSchema, api=ns)
     def get(self, user_id):
@@ -922,7 +1012,7 @@ class SignedDocuments(BaseResource):
             Keys are the display names of the documents,
             values are URLs to the generated PDF documents.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         urls = {}
         paths = []
@@ -937,7 +1027,11 @@ class SignedDocuments(BaseResource):
             ClientSubscriptionContract,
             ClientIndividualContract,
         ):
-            result = (table.query.filter_by(user_id=user_id).order_by(table.idx.desc()).first())
+            result = (
+                table.query.filter_by(user_id=user_id)
+                .order_by(table.idx.desc())
+                .first()
+            )
             if result and result.pdf_path:
                 paths.append(result.pdf_path)
 
@@ -945,24 +1039,25 @@ class SignedDocuments(BaseResource):
                 urls[table.displayname] = url
 
         concat = merge_pdfs(paths, user_id)
-        urls['All documents'] = concat
+        urls["All documents"] = concat
 
-        return {'urls': urls}
+        return {"urls": urls}
 
 
-@ns.route('/registrationstatus/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/registrationstatus/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class JourneyStatusCheck(BaseResource):
     """
     Returns the outstanding forms needed to complete the client journey
     """
+
     @responds(schema=ClientRegistrationStatusSchema, api=ns)
     @token_auth.login_required
     def get(self, user_id):
         """
         Returns the client's outstanding registration items and their URIs.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         remaining_forms = []
 
@@ -983,64 +1078,72 @@ class JourneyStatusCheck(BaseResource):
             MedicalPhysicalExam,
             PTHistory,
         ):
-            result = (table.query.filter_by(user_id=user_id).order_by(table.idx.desc()).first())
+            result = (
+                table.query.filter_by(user_id=user_id)
+                .order_by(table.idx.desc())
+                .first()
+            )
 
             if result is None:
-                remaining_forms.append({
-                    'name': table.displayname,
-                    'URI': TABLE_TO_URI.get(table.__tablename__).format(user_id),
-                })
+                remaining_forms.append(
+                    {
+                        "name": table.displayname,
+                        "URI": TABLE_TO_URI.get(table.__tablename__).format(user_id),
+                    }
+                )
 
-        return {'outstanding': remaining_forms}
+        return {"outstanding": remaining_forms}
 
 
-@ns.route('/testemail/')
+@ns.route("/testemail/")
 class TestEmail(BaseResource):
     """
     Send a test email
     """
-    @token_auth.login_required(user_type=('staff', ), staff_role=('system_admin', ))
+
+    @token_auth.login_required(user_type=("staff",), staff_role=("system_admin",))
     @ns.doc(
         params={
-            'email_address': (
-                'Email address to send a test email to. If empty, email is'
-                ' send to an AWS SES internal mailbox that always succeeds.'
+            "email_address": (
+                "Email address to send a test email to. If empty, email is"
+                " send to an AWS SES internal mailbox that always succeeds."
             ),
-            'internal': (
-                'Use one of the AWS SES internal mailboxes. Value must be one'
+            "internal": (
+                "Use one of the AWS SES internal mailboxes. Value must be one"
                 ' of "success", "bounce", or "complaint". Overrides email'
-                ' address.'
+                " address."
             ),
         }
     )
     def get(self):
         """Send a test email."""
-        email_address = request.args.get('email_address', '')
-        internal = request.args.get('internal')
+        email_address = request.args.get("email_address", "")
+        internal = request.args.get("internal")
 
         if not email_address and not internal:
-            internal = 'success'
+            internal = "success"
 
         # Temporarily add domain to DEV list, so that email is always send.
         domain = None
-        parts = email_address.split('@')
+        parts = email_address.split("@")
         if len(parts) == 2 and parts[1] not in DEV_EMAIL_DOMAINS:
             domain = parts[1]
             DEV_EMAIL_DOMAINS.append(domain)
 
         try:
-            send_email('test', email_address, _internal=internal)
+            send_email("test", email_address, _internal=internal)
         finally:
             if domain:
                 DEV_EMAIL_DOMAINS.remove(domain)
 
 
-@ns.route('/datastoragetiers/')
+@ns.route("/datastoragetiers/")
 class ClientDataStorageTiers(BaseResource):
     """
     Amount of data stored on each client and their storage tier
     """
-    @token_auth.login_required(user_type=('staff', ), staff_role=('system_admin', ))
+
+    @token_auth.login_required(user_type=("staff",), staff_role=("system_admin",))
     @responds(schema=AllClientsDataTier, api=ns)
     def get(self):
         """Returns the total data storage for each client along with their data storage tier"""
@@ -1051,19 +1154,20 @@ class ClientDataStorageTiers(BaseResource):
         total_items = len(query)
 
         payload = {
-            'total_stored_bytes': total_bytes,
-            'total_items': total_items,
-            'items': query,
+            "total_stored_bytes": total_bytes,
+            "total_items": total_items,
+            "items": query,
         }
 
         return payload
 
 
-@ns.route('/token/')
+@ns.route("/token/")
 class ClientToken(BaseResource):
     """create and revoke tokens"""
-    @ns.doc(security='password')
-    @basic_auth.login_required(user_type=('client', ), email_required=False)
+
+    @ns.doc(security="password")
+    @basic_auth.login_required(user_type=("client",), email_required=False)
     @responds(schema=ClientTokenRequestSchema, status_code=201, api=ns)
     def post(self):
         """generates a token for the 'current_user' immediately after password authentication"""
@@ -1073,18 +1177,18 @@ class ClientToken(BaseResource):
             raise Unauthorized
 
         access_token = UserLogin.generate_token(
-            user_type='client', user_id=user.user_id, token_type='access'
+            user_type="client", user_id=user.user_id, token_type="access"
         )
         refresh_token = UserLogin.generate_token(
-            user_type='client', user_id=user.user_id, token_type='refresh'
+            user_type="client", user_id=user.user_id, token_type="refresh"
         )
 
         db.session.add(
             UserTokenHistory(
                 user_id=user.user_id,
                 refresh_token=refresh_token,
-                event='login',
-                ua_string=request.headers.get('User-Agent'),
+                event="login",
+                ua_string=request.headers.get("User-Agent"),
             )
         )
 
@@ -1097,30 +1201,31 @@ class ClientToken(BaseResource):
         db.session.commit()
 
         return {
-            'email': user.email,
-            'firstname': user.firstname,
-            'lastname': user.lastname,
-            'token': access_token,
-            'refresh_token': refresh_token,
-            'user_id': user.user_id,
-            'email_verified': user.email_verified,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "token": access_token,
+            "refresh_token": refresh_token,
+            "user_id": user.user_id,
+            "email_verified": user.email_verified,
         }
 
-    @ns.doc(security='password')
+    @ns.doc(security="password")
     @ns.deprecated
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     def delete(self):
         """
         Deprecated 11.19.20..does nothing now
         invalidate urrent token. Used to effectively logout a user
         """
-        return '', 200
+        return "", 200
 
 
-@ns.route('/account/close/')
+@ns.route("/account/close/")
 class ClientCloseAccountEndpoint(BaseResource):
     """Close client account."""
-    @token_auth.login_required(user_type=('client', ))
+
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientCloseAccountSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self):
@@ -1134,19 +1239,20 @@ class ClientCloseAccountEndpoint(BaseResource):
         """
         user, user_login = token_auth.current_user()
         user_login.client_account_closed = datetime.now()
-        user_login.client_account_closed_reason = request.parsed_obj['reason']
+        user_login.client_account_closed_reason = request.parsed_obj["reason"]
         db.session.commit()
         UserLogoutApi().post()
 
 
-@ns.route('/clinical-care-team/members/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/clinical-care-team/members/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClinicalCareTeamMembers(BaseResource):
     """
     Create update and remove members of a client's clinical care team
     only the client themselves may have access to these operations.
     """
-    @token_auth.login_required(user_type=('client', ))
+
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientClinicalCareTeamSchema, api=ns)
     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -1185,69 +1291,75 @@ class ClinicalCareTeamMembers(BaseResource):
         user = token_auth.current_user()[0]
 
         current_team = db.session.execute(
-            select(ClientClinicalCareTeam, User.email, User.modobio_id).join(
+            select(ClientClinicalCareTeam, User.email, User.modobio_id)
+            .join(
                 User,
                 User.user_id == ClientClinicalCareTeam.team_member_user_id,
-            ).where(ClientClinicalCareTeam.user_id == user.user_id)
+            )
+            .where(ClientClinicalCareTeam.user_id == user.user_id)
         ).all()
 
         current_team_emails = [x[1] for x in current_team]
         current_team_modobio_ids = [x[2] for x in current_team]
 
         # prevent users from having more than 20 clinical care team members
-        if len(current_team) + len(data.get('care_team')) > 20:
-            raise BadRequest('Maximum number of team members reached.')
+        if len(current_team) + len(data.get("care_team")) > 20:
+            raise BadRequest("Maximum number of team members reached.")
 
         # enter new team members into client's clinical care team
         # if email is associated with a current user account, add that user's id to
         #  the database entry
         emails_to_send = []
-        for team_member in data.get('care_team'):
-
-            if ('modobio_id' not in team_member and 'team_member_email' not in team_member):
+        for team_member in data.get("care_team"):
+            if (
+                "modobio_id" not in team_member
+                and "team_member_email" not in team_member
+            ):
                 raise BadRequest(
-                    'Provide either modobio_id or email for each care team'
-                    ' member.'
+                    "Provide either modobio_id or email for each care team" " member."
                 )
 
             # skip if user already part of care team
             elif (
-                team_member.get('modobio_id', '').upper() in current_team_modobio_ids
-                or team_member.get('team_member_email', '').lower() in current_team_emails
+                team_member.get("modobio_id", "").upper() in current_team_modobio_ids
+                or team_member.get("team_member_email", "").lower()
+                in current_team_emails
             ):
                 continue
 
             # user attempting to add themselves, skip.
             elif (
-                team_member.get('modobio_id') == user.modobio_id
-                or team_member.get('team_member_email') == user.email
+                team_member.get("modobio_id") == user.modobio_id
+                or team_member.get("team_member_email") == user.email
             ):
                 continue
 
             # if modobio_id has been given, find the user with that id and insert their email into the payload
-            elif 'modobio_id' in team_member:
-                modo_id = team_member.get('modobio_id', '').upper()
-                team_member_user = User.query.filter_by(modobio_id=modo_id).one_or_none()
+            elif "modobio_id" in team_member:
+                modo_id = team_member.get("modobio_id", "").upper()
+                team_member_user = User.query.filter_by(
+                    modobio_id=modo_id
+                ).one_or_none()
                 if team_member_user:
-                    team_member['team_member_user_id'] = team_member_user.user_id
+                    team_member["team_member_user_id"] = team_member_user.user_id
                     emails_to_send.append(team_member_user.email)
                 else:
-                    raise BadRequest(f'Client {modo_id} not found.')
+                    raise BadRequest(f"Client {modo_id} not found.")
 
             # only email provided. Check if the user exists, if not, create new user
             else:
                 team_member_user = User.query.filter_by(
-                    email=team_member['team_member_email'].lower()
+                    email=team_member["team_member_email"].lower()
                 ).one_or_none()
                 if team_member_user:
-                    team_member['team_member_user_id'] = team_member_user.user_id
+                    team_member["team_member_user_id"] = team_member_user.user_id
                     emails_to_send.append(team_member_user.email)
                 # email is not in our system.
                 # create a new, unverified user using the provided email
                 # user is neither staff nor client
                 else:
                     team_member_user = User(
-                        email=team_member['team_member_email'],
+                        email=team_member["team_member_email"],
                         is_staff=False,
                         was_staff=False,
                         is_client=False,
@@ -1256,13 +1368,13 @@ class ClinicalCareTeamMembers(BaseResource):
                     db.session.add(team_member_user)
                     db.session.flush()
 
-                    team_member['team_member_user_id'] = team_member_user.user_id
+                    team_member["team_member_user_id"] = team_member_user.user_id
                     emails_to_send.append(team_member_user.email)
 
             # add new team member to the clincial care team
             db.session.add(
                 ClientClinicalCareTeam(
-                    team_member_user_id=team_member['team_member_user_id'],
+                    team_member_user_id=team_member["team_member_user_id"],
                     user_id=user_id,
                 )
             )
@@ -1272,9 +1384,10 @@ class ClinicalCareTeamMembers(BaseResource):
         # prepare response with names for clinical care team members who are also users
         current_team = []
         current_team_users = (
-            db.session.query(ClientClinicalCareTeam, User).filter(
-                ClientClinicalCareTeam.user_id == user_id
-            ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id).all()
+            db.session.query(ClientClinicalCareTeam, User)
+            .filter(ClientClinicalCareTeam.user_id == user_id)
+            .filter(ClientClinicalCareTeam.team_member_user_id == User.user_id)
+            .all()
         )
 
         for team_member in current_team_users:
@@ -1284,8 +1397,12 @@ class ClinicalCareTeamMembers(BaseResource):
             # bring up a profile photo and membersince date for the team member
             staff_profile = (
                 db.session.execute(
-                    select(StaffProfile).where(StaffProfile.user_id == team_member[1].user_id)
-                ).scalars().one_or_none()
+                    select(StaffProfile).where(
+                        StaffProfile.user_id == team_member[1].user_id
+                    )
+                )
+                .scalars()
+                .one_or_none()
             )
 
             if staff_profile:
@@ -1294,8 +1411,12 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 staff_roles = (
                     db.session.execute(
-                        select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)
-                    ).scalars().all()
+                        select(StaffRoles.role).where(
+                            StaffRoles.user_id == team_member[1].user_id
+                        )
+                    )
+                    .scalars()
+                    .all()
                 )
 
                 is_staff = True
@@ -1307,7 +1428,9 @@ class ClinicalCareTeamMembers(BaseResource):
                         select(ClientInfo).where(
                             ClientInfo.user_id == team_member[0].team_member_user_id
                         )
-                    ).scalars().one_or_none()
+                    )
+                    .scalars()
+                    .one_or_none()
                 )
 
                 if client_profile:
@@ -1319,56 +1442,63 @@ class ClinicalCareTeamMembers(BaseResource):
                 select(
                     ClientClinicalCareTeamAuthorizations,
                     LookupClinicalCareTeamResources.display_name,
-                ).join(
+                )
+                .join(
                     LookupClinicalCareTeamResources,
-                    LookupClinicalCareTeamResources.resource_id ==
-                    ClientClinicalCareTeamAuthorizations.resource_id,
-                ).where(
+                    LookupClinicalCareTeamResources.resource_id
+                    == ClientClinicalCareTeamAuthorizations.resource_id,
+                )
+                .where(
                     ClientClinicalCareTeamAuthorizations.user_id == user_id,
-                    ClientClinicalCareTeamAuthorizations.team_member_user_id ==
-                    team_member[1].user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id
+                    == team_member[1].user_id,
                 )
             ).all()
 
-            authorizations = [{
-                'resource_id': auth.resource_id,
-                'status': auth.status,
-                'display_name': display_name,
-            } for auth, display_name in team_member_authorizations]
+            authorizations = [
+                {
+                    "resource_id": auth.resource_id,
+                    "status": auth.status,
+                    "display_name": display_name,
+                }
+                for auth, display_name in team_member_authorizations
+            ]
 
-            current_team.append({
-                'firstname': team_member[1].firstname,
-                'lastname': team_member[1].lastname,
-                'modobio_id': team_member[1].modobio_id,
-                'team_member_email': team_member[1].email,
-                'team_member_user_id': team_member[0].team_member_user_id,
-                'profile_picture': profile_pic,
-                'staff_roles': staff_roles,
-                'is_temporary': team_member[0].is_temporary,
-                'membersince': membersince,
-                'is_staff': is_staff,
-                'authorizations': authorizations,
-            })
+            current_team.append(
+                {
+                    "firstname": team_member[1].firstname,
+                    "lastname": team_member[1].lastname,
+                    "modobio_id": team_member[1].modobio_id,
+                    "team_member_email": team_member[1].email,
+                    "team_member_user_id": team_member[0].team_member_user_id,
+                    "profile_picture": profile_pic,
+                    "staff_roles": staff_roles,
+                    "is_temporary": team_member[0].is_temporary,
+                    "membersince": membersince,
+                    "is_staff": is_staff,
+                    "authorizations": authorizations,
+                }
+            )
 
         # Send an email to all added team members
         for email_address in emails_to_send:
-            fullname = f'{user.firstname} {user.lastname}'
+            fullname = f"{user.firstname} {user.lastname}"
             send_email(
-                'team-added',
+                "team-added",
                 email_address,
-                sender='Modo Bio Team <team@modobio.com>',
+                sender="Modo Bio Team <team@modobio.com>",
                 fullname=fullname,
                 firstname=user.firstname,
             )
 
         response = {
-            'care_team': current_team,
-            'total_items': len(current_team),
+            "care_team": current_team,
+            "total_items": len(current_team),
         }
 
         return response
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientClinicalCareTeamDeleteSchema, api=ns)
     def delete(self, user_id):
         """
@@ -1390,22 +1520,22 @@ class ClinicalCareTeamMembers(BaseResource):
 
         data = request.parsed_obj
 
-        for team_member in data.get('care_team'):
+        for team_member in data.get("care_team"):
             # TODO remove one of these authorization table in a followup story
             ClientClinicalCareTeamAuthorizations.query.filter_by(
                 user_id=user_id,
-                team_member_user_id=team_member.get('team_member_user_id'),
+                team_member_user_id=team_member.get("team_member_user_id"),
             ).delete()
             ClientClinicalCareTeam.query.filter_by(
                 user_id=user_id,
-                team_member_user_id=team_member.get('team_member_user_id'),
+                team_member_user_id=team_member.get("team_member_user_id"),
             ).delete()
 
         db.session.commit()
 
         return 200
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
@@ -1426,10 +1556,12 @@ class ClinicalCareTeamMembers(BaseResource):
         # prepare response with names for clinical care team members who are also users
         current_team = []
         current_team_users = (
-            db.session.query(ClientClinicalCareTeam, User).filter(
+            db.session.query(ClientClinicalCareTeam, User)
+            .filter(
                 ClientClinicalCareTeam.user_id == user_id,
                 ClientClinicalCareTeam.team_member_user_id == User.user_id,
-            ).all()
+            )
+            .all()
         )
 
         for team_member in current_team_users:
@@ -1440,8 +1572,12 @@ class ClinicalCareTeamMembers(BaseResource):
             # bring up a profile photo and membersince date for the team member
             staff_profile = (
                 db.session.execute(
-                    select(StaffProfile).where(StaffProfile.user_id == team_member[1].user_id)
-                ).scalars().one_or_none()
+                    select(StaffProfile).where(
+                        StaffProfile.user_id == team_member[1].user_id
+                    )
+                )
+                .scalars()
+                .one_or_none()
             )
 
             if staff_profile:
@@ -1450,16 +1586,25 @@ class ClinicalCareTeamMembers(BaseResource):
 
                 staff_roles = (
                     db.session.execute(
-                        select(StaffRoles.role).where(StaffRoles.user_id == team_member[1].user_id)
-                    ).scalars().all()
+                        select(StaffRoles.role).where(
+                            StaffRoles.user_id == team_member[1].user_id
+                        )
+                    )
+                    .scalars()
+                    .all()
                 )
 
                 # Get provider_telehealth_access flag for staff users
                 provider_telehealth_access_flag = (
                     db.session.execute(
-                        select(TelehealthStaffSettings.provider_telehealth_access
-                              ).where(TelehealthStaffSettings.user_id == team_member[1].user_id)
-                    ).scalars().one_or_none()
+                        select(
+                            TelehealthStaffSettings.provider_telehealth_access
+                        ).where(
+                            TelehealthStaffSettings.user_id == team_member[1].user_id
+                        )
+                    )
+                    .scalars()
+                    .one_or_none()
                 )
 
                 is_staff = True
@@ -1471,7 +1616,9 @@ class ClinicalCareTeamMembers(BaseResource):
                         select(ClientInfo).where(
                             ClientInfo.user_id == team_member[0].team_member_user_id
                         )
-                    ).scalars().one_or_none()
+                    )
+                    .scalars()
+                    .one_or_none()
                 )
 
                 if client_profile:
@@ -1483,112 +1630,110 @@ class ClinicalCareTeamMembers(BaseResource):
                 select(
                     ClientClinicalCareTeamAuthorizations,
                     LookupClinicalCareTeamResources.display_name,
-                ).join(
+                )
+                .join(
                     LookupClinicalCareTeamResources,
-                    LookupClinicalCareTeamResources.resource_id ==
-                    ClientClinicalCareTeamAuthorizations.resource_id,
-                ).where(
+                    LookupClinicalCareTeamResources.resource_id
+                    == ClientClinicalCareTeamAuthorizations.resource_id,
+                )
+                .where(
                     ClientClinicalCareTeamAuthorizations.user_id == user_id,
-                    ClientClinicalCareTeamAuthorizations.team_member_user_id ==
-                    team_member[1].user_id,
+                    ClientClinicalCareTeamAuthorizations.team_member_user_id
+                    == team_member[1].user_id,
                 )
             ).all()
 
-            authorizations = [{
-                'resource_id': auth.resource_id,
-                'status': auth.status,
-                'display_name': display_name,
-            } for auth, display_name in team_member_authorizations]
+            authorizations = [
+                {
+                    "resource_id": auth.resource_id,
+                    "status": auth.status,
+                    "display_name": display_name,
+                }
+                for auth, display_name in team_member_authorizations
+            ]
 
             member_data = {
-                'firstname':
-                    team_member[1].firstname,
-                'lastname':
-                    team_member[1].lastname,
-                'modobio_id':
-                    team_member[1].modobio_id,
-                'team_member_email':
-                    team_member[1].email,
-                'team_member_user_id':
-                    team_member[0].team_member_user_id,
-                'profile_picture':
-                    profile_pic,
-                'staff_roles':
-                    staff_roles,
-                'is_temporary':
-                    team_member[0].is_temporary,
-                'membersince':
-                    membersince,
-                'is_staff':
-                    is_staff,
-                'authorizations':
-                    authorizations,
-                'provider_telehealth_access':
-                    provider_telehealth_access_flag if team_member[1].is_staff else None,
-                'bio':
-                    team_member[1].staff_profile.bio if team_member[1].is_staff else None,
+                "firstname": team_member[1].firstname,
+                "lastname": team_member[1].lastname,
+                "modobio_id": team_member[1].modobio_id,
+                "team_member_email": team_member[1].email,
+                "team_member_user_id": team_member[0].team_member_user_id,
+                "profile_picture": profile_pic,
+                "staff_roles": staff_roles,
+                "is_temporary": team_member[0].is_temporary,
+                "membersince": membersince,
+                "is_staff": is_staff,
+                "authorizations": authorizations,
+                "provider_telehealth_access": provider_telehealth_access_flag
+                if team_member[1].is_staff
+                else None,
+                "bio": team_member[1].staff_profile.bio
+                if team_member[1].is_staff
+                else None,
             }
 
             # calculate how much time is remaining for temporary members
             if team_member[0].is_temporary:
                 expire_date = team_member[0].created_at + timedelta(hours=180)
                 time_remaining = expire_date - datetime.utcnow()
-                member_data['days_remaining'] = time_remaining.days
-                member_data['hours_remaining'] = time_remaining.seconds // 3600
+                member_data["days_remaining"] = time_remaining.days
+                member_data["hours_remaining"] = time_remaining.seconds // 3600
 
             current_team.append(member_data)
 
         response = {
-            'care_team': current_team,
-            'total_items': len(current_team),
+            "care_team": current_team,
+            "total_items": len(current_team),
         }
 
         return response
 
 
-@ns.route('/clinical-care-team/members/temporary/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/clinical-care-team/members/temporary/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClinicalCareTeamTemporaryMembers(BaseResource):
     """
     Endpoints related to temporary care team members.
     Temporary members are not considered in a user's maximum allowed team members limit (20).
     They will lose access 180 hours after having been added to a user's care team.
     """
-    @token_auth.login_required(user_type=('client', ))
+
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClinicalCareTeamTemporaryMembersSchema, api=ns)
     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
     def post(self, user_id):
         """
         Adds a practitioner as a temporary team member to a user's care team
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         # assure that a booking exists for the given booking_id and that it is between the given client
         # and staff user ids
         if not TelehealthBookings.query.filter_by(
-            idx=request.parsed_obj['booking_id'],
-            staff_user_id=request.parsed_obj['staff_user_id'],
+            idx=request.parsed_obj["booking_id"],
+            staff_user_id=request.parsed_obj["staff_user_id"],
             client_user_id=user_id,
         ).one_or_none():
             raise BadRequest(f'Booking {request.parsed_obj["booking_id"]} not found.')
 
         # ensure that this client does not already have this user as a care team member
-        staff_user_id = request.parsed_obj['staff_user_id']
+        staff_user_id = request.parsed_obj["staff_user_id"]
         if ClientClinicalCareTeam.query.filter_by(
             user_id=user_id, team_member_user_id=staff_user_id
         ).one_or_none():
-            raise BadRequest(f'User {staff_user_id} already a member of the care team.')
+            raise BadRequest(f"User {staff_user_id} already a member of the care team.")
 
         # retrieve staff account, staff account must exist because of the above check in the bookings table
-        team_member = User.query.filter_by(user_id=request.parsed_obj['staff_user_id']
-                                          ).one_or_none()
+        team_member = User.query.filter_by(
+            user_id=request.parsed_obj["staff_user_id"]
+        ).one_or_none()
 
         db.session.add(
             ClientClinicalCareTeam(
                 **{
-                    'team_member_user_id': team_member.user_id,
-                    'user_id': user_id,
-                    'is_temporary': True,
+                    "team_member_user_id": team_member.user_id,
+                    "user_id": user_id,
+                    "is_temporary": True,
                 }
             )
         )
@@ -1606,28 +1751,32 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
                 User.firstname,
                 User.lastname,
                 User.modobio_id,
-            ).filter(ClientClinicalCareTeam.user_id == user_id
-                    ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id).all()
+            )
+            .filter(ClientClinicalCareTeam.user_id == user_id)
+            .filter(ClientClinicalCareTeam.team_member_user_id == User.user_id)
+            .all()
         )
 
         for team_member in current_team_users:
-            team_member[0].__dict__.update({
-                'firstname': team_member[1],
-                'lastname': team_member[2],
-                'modobio_id': team_member[3],
-            })
+            team_member[0].__dict__.update(
+                {
+                    "firstname": team_member[1],
+                    "lastname": team_member[2],
+                    "modobio_id": team_member[3],
+                }
+            )
             current_team.append(team_member[0])
 
-        return {'care_team': current_team, 'total_items': len(current_team)}
+        return {"care_team": current_team, "total_items": len(current_team)}
 
-    @token_auth.login_required(user_type=('client', ))
-    @ns.doc(params={'team_member_user_id': 'User id of the member to make permanent.'})
+    @token_auth.login_required(user_type=("client",))
+    @ns.doc(params={"team_member_user_id": "User id of the member to make permanent."})
     @responds(schema=ClientClinicalCareTeamSchema, api=ns, status_code=201)
     def put(self, user_id):
         """
         Update a temporary team member to a permanent team member
         """
-        target_id = request.args.get('team_member_user_id', type=int)
+        target_id = request.args.get("team_member_user_id", type=int)
 
         team_member = ClientClinicalCareTeam.query.filter_by(
             user_id=user_id, team_member_user_id=target_id
@@ -1635,7 +1784,7 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
 
         # if team member exists, change their status to permanent, otherwise raise an error
         if not team_member:
-            raise BadRequest(f'User {target_id} is not a member of the care team.')
+            raise BadRequest(f"User {target_id} is not a member of the care team.")
         else:
             team_member.is_temporary = False
             db.session.commit()
@@ -1651,30 +1800,35 @@ class ClinicalCareTeamTemporaryMembers(BaseResource):
                 User.firstname,
                 User.lastname,
                 User.modobio_id,
-            ).filter(ClientClinicalCareTeam.user_id == user_id
-                    ).filter(ClientClinicalCareTeam.team_member_user_id == User.user_id).all()
+            )
+            .filter(ClientClinicalCareTeam.user_id == user_id)
+            .filter(ClientClinicalCareTeam.team_member_user_id == User.user_id)
+            .all()
         )
 
         for team_member in current_team_users:
-            team_member[0].__dict__.update({
-                'firstname': team_member[1],
-                'lastname': team_member[2],
-                'modobio_id': team_member[3],
-            })
+            team_member[0].__dict__.update(
+                {
+                    "firstname": team_member[1],
+                    "lastname": team_member[2],
+                    "modobio_id": team_member[3],
+                }
+            )
             current_team.append(team_member[0])
 
-        return {'care_team': current_team, 'total_items': len(current_team)}
+        return {"care_team": current_team, "total_items": len(current_team)}
 
 
-@ns.route('/clinical-care-team/member-of/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/clinical-care-team/member-of/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class UserClinicalCareTeamApi(BaseResource):
     """
     Clinical care teams the speficied user is part of
 
     Endpoint for viewing and managing the list of clients who have the specified user as part of their care team.
     """
-    @token_auth.login_required(user_type=('staff_self', 'client'))
+
+    @token_auth.login_required(user_type=("staff_self", "client"))
     @responds(schema=ClinicalCareTeamMemberOfSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
@@ -1682,28 +1836,31 @@ class UserClinicalCareTeamApi(BaseResource):
         is a part of along with the permissions granted to them
         """
         res = []
-        for client in ClientClinicalCareTeam.query.filter_by(team_member_user_id=user_id).all():
+        for client in ClientClinicalCareTeam.query.filter_by(
+            team_member_user_id=user_id
+        ).all():
             client_user = User.query.filter_by(user_id=client.user_id).one_or_none()
             authorizations_query = (
                 db.session.query(
                     ClientClinicalCareTeamAuthorizations.resource_id,
                     ClientClinicalCareTeamAuthorizations.status,
                     LookupClinicalCareTeamResources.display_name,
-                ).filter(
+                )
+                .filter(
                     ClientClinicalCareTeamAuthorizations.team_member_user_id == user_id,
                     ClientClinicalCareTeamAuthorizations.user_id == client.user_id,
-                    ClientClinicalCareTeamAuthorizations.resource_id ==
-                    LookupClinicalCareTeamResources.resource_id,
-                ).all()
+                    ClientClinicalCareTeamAuthorizations.resource_id
+                    == LookupClinicalCareTeamResources.resource_id,
+                )
+                .all()
             )
 
             profile_pic = get_profile_pictures(client_user.user_id, False)
 
-            res.append({
-                'client_user_id':
-                    client_user.user_id,
-                'client_name':
-                    ' '.join(
+            res.append(
+                {
+                    "client_user_id": client_user.user_id,
+                    "client_name": " ".join(
                         filter(
                             None,
                             (
@@ -1713,26 +1870,26 @@ class UserClinicalCareTeamApi(BaseResource):
                             ),
                         )
                     ),
-                'client_email':
-                    client_user.email,
-                'client_modobio_id':
-                    client_user.modobio_id,
-                'client_profile_picture':
-                    profile_pic,
-                'client_added_date':
-                    client.created_at,
-                'authorizations': [{
-                    'display_name': x[2],
-                    'resource_id': x[0],
-                    'status': x[1],
-                } for x in authorizations_query],
-            })
+                    "client_email": client_user.email,
+                    "client_modobio_id": client_user.modobio_id,
+                    "client_profile_picture": profile_pic,
+                    "client_added_date": client.created_at,
+                    "authorizations": [
+                        {
+                            "display_name": x[2],
+                            "resource_id": x[0],
+                            "status": x[1],
+                        }
+                        for x in authorizations_query
+                    ],
+                }
+            )
 
-        return {'member_of_care_teams': res, 'total': len(res)}
+        return {"member_of_care_teams": res, "total": len(res)}
 
 
-@ns.route('/clinical-care-team/resource-authorization/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/clinical-care-team/resource-authorization/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClinicalCareTeamResourceAuthorization(BaseResource):
     """
     Create, update, remove, retrieve authorization of ehr page access for care team members.
@@ -1758,7 +1915,8 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
     Care team resources are added by resource_id.
     The available options can be found by using the /lookup/care-team/ehr-resources/ (GET) API.
     """
-    @token_auth.login_required(user_type=('client', 'provider'))
+
+    @token_auth.login_required(user_type=("client", "provider"))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     @responds(
         schema=ClinicalCareTeamAuthorizationNestedSchema,
@@ -1774,8 +1932,9 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         data = request.parsed_obj
 
         current_team_ids = (
-            db.session.query(ClientClinicalCareTeam.team_member_user_id
-                            ).filter(ClientClinicalCareTeam.user_id == user_id).all()
+            db.session.query(ClientClinicalCareTeam.team_member_user_id)
+            .filter(ClientClinicalCareTeam.user_id == user_id)
+            .all()
         )
         current_team_ids = [x[0] for x in current_team_ids if x[0] is not None]
 
@@ -1783,19 +1942,21 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
             db.session.query(
                 ClientClinicalCareTeamAuthorizations.team_member_user_id,
                 ClientClinicalCareTeamAuthorizations.resource_id,
-            ).filter_by(user_id=user_id).all()
+            )
+            .filter_by(user_id=user_id)
+            .all()
         )
 
         # validate the requested resource authorizations by checking them against the lookup table
         care_team_resources = LookupClinicalCareTeamResources.query.all()
         care_team_resources_ids = [x.resource_id for x in care_team_resources]
         requested_resources_by_id = [
-            x.resource_id for x in data.get('clinical_care_team_authorization')
+            x.resource_id for x in data.get("clinical_care_team_authorization")
         ]
 
         diff = set(requested_resources_by_id) - set(care_team_resources_ids)
         if diff:
-            raise BadRequest(f'Resources {diff} not found.')
+            raise BadRequest(f"Resources {diff} not found.")
 
         # user_id denotes the main users
         # if the current user is not the main user (aka a random user)
@@ -1803,21 +1964,24 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
         if current_user.user_id != user_id:
             # bring up all team_member_ids in payload
             # all team members in resource request must hav ethe same id as logged-in user
-            team_member_ids = set([
-                x.team_member_user_id for x in data.get('clinical_care_team_authorization')
-            ])
+            team_member_ids = set(
+                [
+                    x.team_member_user_id
+                    for x in data.get("clinical_care_team_authorization")
+                ]
+            )
 
-            if (current_user.user_id not in team_member_ids or len(team_member_ids) > 1):
-                raise BadRequest('User can not be added to care team.')
+            if current_user.user_id not in team_member_ids or len(team_member_ids) > 1:
+                raise BadRequest("User can not be added to care team.")
 
             # authorization must be validated by the client themselves
-            status = 'pending'
+            status = "pending"
         else:
             # The logged-in user is the main user in this request
-            status = 'accepted'
+            status = "accepted"
 
         # loop through the authorization requests and add them ``
-        for authorization in data.get('clinical_care_team_authorization'):
+        for authorization in data.get("clinical_care_team_authorization"):
             if authorization.team_member_user_id in current_team_ids:
                 for member_id, resource_id in current_authorizations:
                     if (
@@ -1825,38 +1989,40 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
                         and authorization.resource_id == resource_id
                     ):
                         raise BadRequest(
-                            f'Member {member_id} and resource'
-                            f' {resource_id} already requested.'
+                            f"Member {member_id} and resource"
+                            f" {resource_id} already requested."
                         )
 
                 authorization.user_id = user_id
                 authorization.status = status
-                if status == 'pending':
+                if status == "pending":
                     # if this is another user requesting data access, create a notification for the client
                     resource_name = (
                         LookupClinicalCareTeamResources.query.filter_by(
                             resource_id=authorization.resource_id
-                        ).one_or_none().display_name
+                        )
+                        .one_or_none()
+                        .display_name
                     )
                     create_notification(
                         user_id,
-                        NOTIFICATION_SEVERITY_TO_ID.get('Low'),
-                        NOTIFICATION_TYPE_TO_ID.get('Health'),
-                        f'{current_user.firstname} {current_user.lastname} has'
-                        ' requested access ' + f'to your {resource_name} data',
-                        'Would you like to grant'
-                        f' {current_user.firstname} {current_user.lastname} '
-                        + f'access to your {resource_name} data?',
-                        'Client',
+                        NOTIFICATION_SEVERITY_TO_ID.get("Low"),
+                        NOTIFICATION_TYPE_TO_ID.get("Health"),
+                        f"{current_user.firstname} {current_user.lastname} has"
+                        " requested access " + f"to your {resource_name} data",
+                        "Would you like to grant"
+                        f" {current_user.firstname} {current_user.lastname} "
+                        + f"access to your {resource_name} data?",
+                        "Client",
                     )
                 db.session.add(authorization)
             else:
                 db.session.rollback()
-                raise BadRequest('Team member not in care team.')
+                raise BadRequest("Team member not in care team.")
         db.session.commit()
         return
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @responds(
         schema=ClinicalCareTeamAuthorizationNestedSchema,
         api=ns,
@@ -1882,34 +2048,38 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
                 User.user_id,
                 User.modobio_id,
                 ClientClinicalCareTeamAuthorizations.status,
-            ).filter(ClientClinicalCareTeamAuthorizations.user_id == user_id).filter(
+            )
+            .filter(ClientClinicalCareTeamAuthorizations.user_id == user_id)
+            .filter(
                 User.user_id == ClientClinicalCareTeamAuthorizations.team_member_user_id
-            ).filter(
-                ClientClinicalCareTeamAuthorizations.resource_id ==
-                LookupClinicalCareTeamResources.resource_id
-            ).all()
+            )
+            .filter(
+                ClientClinicalCareTeamAuthorizations.resource_id
+                == LookupClinicalCareTeamResources.resource_id
+            )
+            .all()
         )
 
         care_team_auths = []
         for row in data:
             tmp = {
-                'resource_id': row[0],
-                'display_name': row[1],
-                'team_member_firstname': row[2],
-                'team_member_lastname': row[3],
-                'team_member_email': row[4],
-                'team_member_user_id': row[5],
-                'team_member_modobio_id': row[6],
-                'status': row[7],
+                "resource_id": row[0],
+                "display_name": row[1],
+                "team_member_firstname": row[2],
+                "team_member_lastname": row[3],
+                "team_member_email": row[4],
+                "team_member_user_id": row[5],
+                "team_member_modobio_id": row[6],
+                "status": row[7],
             }
 
             care_team_auths.append(tmp)
 
-        payload = {'clinical_care_team_authorization': care_team_auths}
+        payload = {"clinical_care_team_authorization": care_team_auths}
 
         return payload
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     @responds(api=ns, status_code=200)
     def put(self, user_id):
@@ -1927,25 +2097,23 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
         data = request.json
 
-        for dat in data.get('clinical_care_team_authorization'):
+        for dat in data.get("clinical_care_team_authorization"):
             try:
-                authorization = (
-                    ClientClinicalCareTeamAuthorizations.query.filter_by(
-                        user_id=user_id,
-                        resource_id=dat['resource_id'],
-                        team_member_user_id=dat['team_member_user_id'],
-                    ).one_or_none()
-                )
+                authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+                    user_id=user_id,
+                    resource_id=dat["resource_id"],
+                    team_member_user_id=dat["team_member_user_id"],
+                ).one_or_none()
             except SQLAlchemyError as e:
                 return e.message
 
             if not authorization:
-                raise BadRequest('Team member or resource ID request not found.')
-            authorization.update({'status': 'accepted'})
+                raise BadRequest("Team member or resource ID request not found.")
+            authorization.update({"status": "accepted"})
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClinicalCareTeamAuthorizationNestedSchema, api=ns)
     def delete(self, user_id):
         """
@@ -1958,16 +2126,14 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 
         data = request.parsed_obj
 
-        for dat in data.get('clinical_care_team_authorization'):
-            authorization = (
-                ClientClinicalCareTeamAuthorizations.query.filter_by(
-                    user_id=user_id,
-                    resource_id=dat.resource_id,
-                    team_member_user_id=dat.team_member_user_id,
-                ).one_or_none()
-            )
+        for dat in data.get("clinical_care_team_authorization"):
+            authorization = ClientClinicalCareTeamAuthorizations.query.filter_by(
+                user_id=user_id,
+                resource_id=dat.resource_id,
+                team_member_user_id=dat.team_member_user_id,
+            ).one_or_none()
             if not authorization:
-                raise BadRequest('Team member or resource ID request not found.')
+                raise BadRequest("Team member or resource ID request not found.")
 
             db.session.delete(authorization)
 
@@ -2025,11 +2191,12 @@ class ClinicalCareTeamResourceAuthorization(BaseResource):
 #         db.session.commit()
 
 
-@ns.route('/mobile-settings/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/mobile-settings/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClientMobileSettingsApi(BaseResource):
     """For the client to change their own mobile settings."""
-    @token_auth.login_required(user_type=('client', ))
+
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self, user_id):
@@ -2037,24 +2204,26 @@ class ClientMobileSettingsApi(BaseResource):
 
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
         if settings:
-            raise BadRequest('Settings already exist. Use PUT to edit.')
+            raise BadRequest("Settings already exist. Use PUT to edit.")
 
-        gen_settings = request.parsed_obj['general_settings']
+        gen_settings = request.parsed_obj["general_settings"]
         gen_settings.user_id = user_id
         db.session.add(gen_settings)
 
         ntypes = set()
-        if request.parsed_obj['notification_type_ids']:
-            ntypes.update(request.parsed_obj['notification_type_ids'])
+        if request.parsed_obj["notification_type_ids"]:
+            ntypes.update(request.parsed_obj["notification_type_ids"])
 
         lu_ntypes = set(
-            db.session.execute(select(LookupNotifications.notification_type_id)).scalars().all()
+            db.session.execute(select(LookupNotifications.notification_type_id))
+            .scalars()
+            .all()
         )
         wrong = ntypes - lu_ntypes
         if wrong:
             db.session.rollback()
-            wrongstr = ', '.join((str(w) for w in sorted(wrong)))
-            raise BadRequest(f'Invalid notification type(s): {wrongstr}.')
+            wrongstr = ", ".join((str(w) for w in sorted(wrong)))
+            raise BadRequest(f"Invalid notification type(s): {wrongstr}.")
 
         for ntype in ntypes:
             notification_type = ClientNotificationSettings(
@@ -2064,28 +2233,34 @@ class ClientMobileSettingsApi(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @responds(schema=ClientMobileSettingsSchema, api=ns, status_code=200)
     def get(self, user_id):
         """Returns the mobile settings that a client has set."""
 
-        gen_settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
+        gen_settings = ClientMobileSettings.query.filter_by(
+            user_id=user_id
+        ).one_or_none()
 
         # TODO: push_notification_types deprecated
         # notification_types = ClientNotificationSettings.query.filter_by(user_id=user_id).all()
 
         notification_types = (
             db.session.execute(
-                select(ClientNotificationSettings.notification_type_id).filter_by(user_id=user_id)
-            ).scalars().all()
+                select(ClientNotificationSettings.notification_type_id).filter_by(
+                    user_id=user_id
+                )
+            )
+            .scalars()
+            .all()
         )
 
         return {
-            'general_settings': gen_settings,
-            'notification_type_ids': sorted(notification_types),
+            "general_settings": gen_settings,
+            "notification_type_ids": sorted(notification_types),
         }
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientMobileSettingsSchema, api=ns)
     @responds(api=ns, status_code=201)
     def put(self, user_id):
@@ -2094,28 +2269,34 @@ class ClientMobileSettingsApi(BaseResource):
         settings = ClientMobileSettings.query.filter_by(user_id=user_id).one_or_none()
 
         if not settings:
-            raise BadRequest('Settings not found. Use POST first.')
+            raise BadRequest("Settings not found. Use POST first.")
 
-        for k, v in request.json['general_settings'].items():
+        for k, v in request.json["general_settings"].items():
             setattr(settings, k, v)
 
         ntypes = set()
-        if request.parsed_obj['notification_type_ids']:
-            ntypes.update(request.parsed_obj['notification_type_ids'])
+        if request.parsed_obj["notification_type_ids"]:
+            ntypes.update(request.parsed_obj["notification_type_ids"])
 
         lu_ntypes = set(
-            db.session.execute(select(LookupNotifications.notification_type_id)).scalars().all()
+            db.session.execute(select(LookupNotifications.notification_type_id))
+            .scalars()
+            .all()
         )
         wrong = ntypes - lu_ntypes
         if wrong:
             db.session.rollback()
-            wrongstr = ', '.join((str(w) for w in sorted(wrong)))
-            raise BadRequest(f'Invalid notification type(s): {wrongstr}.')
+            wrongstr = ", ".join((str(w) for w in sorted(wrong)))
+            raise BadRequest(f"Invalid notification type(s): {wrongstr}.")
 
         prev_ntypes = set(
             db.session.execute(
-                select(ClientNotificationSettings.notification_type_id).filter_by(user_id=user_id)
-            ).scalars().all()
+                select(ClientNotificationSettings.notification_type_id).filter_by(
+                    user_id=user_id
+                )
+            )
+            .scalars()
+            .all()
         )
 
         remove = prev_ntypes - ntypes
@@ -2137,15 +2318,15 @@ class ClientMobileSettingsApi(BaseResource):
         db.session.commit()
 
 
-@ns.route('/height/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/height/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClientHeightEndpoint(BaseResource):
     """Endpoint for height measurements."""
 
     # Multiple heights per user allowed
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientHeightSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self, user_id):
@@ -2166,7 +2347,7 @@ class ClientHeightEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', 'provider'))
+    @token_auth.login_required(user_type=("client", "provider"))
     @responds(schema=ClientHeightSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """All height measurements and dates.
@@ -2180,15 +2361,15 @@ class ClientHeightEndpoint(BaseResource):
         return ClientHeight.query.filter_by(user_id=user_id).all()
 
 
-@ns.route('/weight/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/weight/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClientWeightEndpoint(BaseResource):
     """Endpoint for weight measurements."""
 
     # Multiple weights per user allowed
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientWeightSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self, user_id):
@@ -2199,7 +2380,7 @@ class ClientWeightEndpoint(BaseResource):
         weight : float
             Weight of the client in kilograms.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -2210,7 +2391,7 @@ class ClientWeightEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', 'provider'))
+    @token_auth.login_required(user_type=("client", "provider"))
     @responds(schema=ClientWeightSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """All weight measurements and dates.
@@ -2224,15 +2405,15 @@ class ClientWeightEndpoint(BaseResource):
         return ClientWeight.query.filter_by(user_id=user_id).all()
 
 
-@ns.route('/waist-size/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/waist-size/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClientWaistSizeEndpoint(BaseResource):
     """Endpoint for waist size measurements."""
 
     # Multiple waist sizes per user allowed
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientWaistSizeSchema, api=ns)
     @responds(api=ns, status_code=201)
     def post(self, user_id):
@@ -2243,7 +2424,7 @@ class ClientWaistSizeEndpoint(BaseResource):
         waist_size : float
             Waist size of the client in centimeters.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         request.parsed_obj.user_id = user_id
         db.session.add(request.parsed_obj)
@@ -2254,7 +2435,7 @@ class ClientWaistSizeEndpoint(BaseResource):
 
         db.session.commit()
 
-    @token_auth.login_required(user_type=('client', 'provider'))
+    @token_auth.login_required(user_type=("client", "provider"))
     @responds(schema=ClientWaistSizeSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """All waist size measurements and dates.
@@ -2264,20 +2445,20 @@ class ClientWaistSizeEndpoint(BaseResource):
         dict
             Dict of date-waist_size pairs. Waist size is in centimeters.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         return ClientWaistSize.query.filter_by(user_id=user_id).all()
 
 
-@ns.route('/fertility/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/fertility/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClientWeightEndpoint(BaseResource):
     """Endpoint for weight measurements."""
 
     # Multiple fertility statuses per user allowed
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientFertilitySchema, api=ns)
     @responds(schema=ClientFertilitySchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -2291,27 +2472,27 @@ class ClientWeightEndpoint(BaseResource):
         status : str
             Phase of this fertility status.
         """
-        self.check_user(user_id, user_type='client')
-        if (User.query.filter_by(user_id=user_id).one_or_none().biological_sex_male):
+        self.check_user(user_id, user_type="client")
+        if User.query.filter_by(user_id=user_id).one_or_none().biological_sex_male:
             raise BadRequest(
                 "Fertility updates can only be submitted for user's whose"
-                ' assigned sexat birth is female.'
+                " assigned sexat birth is female."
             )
 
         if request.parsed_obj.pregnant:
-            if request.parsed_obj.status not in FERTILITY_STATUSES['pregnant']:
-                e = BadRequest('Invalid status when pregnant.')
+            if request.parsed_obj.status not in FERTILITY_STATUSES["pregnant"]:
+                e = BadRequest("Invalid status when pregnant.")
                 e.data = {
-                    'pregnant': request.parsed_obj.pregnant,
-                    'status': request.parsed_obj.status,
+                    "pregnant": request.parsed_obj.pregnant,
+                    "status": request.parsed_obj.status,
                 }
                 raise e
         else:
-            if (request.parsed_obj.status not in FERTILITY_STATUSES['not_pregnant']):
-                e = BadRequest('Invalid status when not pregnant.')
+            if request.parsed_obj.status not in FERTILITY_STATUSES["not_pregnant"]:
+                e = BadRequest("Invalid status when not pregnant.")
                 e.data = {
-                    'pregnant': request.parsed_obj.pregnant,
-                    'status': request.parsed_obj.status,
+                    "pregnant": request.parsed_obj.pregnant,
+                    "status": request.parsed_obj.status,
                 }
                 raise e
 
@@ -2321,7 +2502,7 @@ class ClientWeightEndpoint(BaseResource):
         db.session.commit()
         return request.parsed_obj
 
-    @token_auth.login_required(user_type=('client', 'provider'))
+    @token_auth.login_required(user_type=("client", "provider"))
     @responds(schema=ClientFertilitySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """All fertility status updates.
@@ -2331,17 +2512,18 @@ class ClientWeightEndpoint(BaseResource):
         dict
             Dict of date-fertility status pairs.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         return ClientFertility.query.filter_by(user_id=user_id).all()
 
 
-@ns.route('/default-health-metrics/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/default-health-metrics/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClientDefaultHealthMetricApi(BaseResource):
     """
     Endpoint for returning the recommended health metrics for the client based on age and sex
     """
+
     @token_auth.login_required()
     @responds(schema=LookupDefaultHealthMetricsSchema, api=ns, status_code=200)
     def get(self, user_id):
@@ -2349,79 +2531,85 @@ class ClientDefaultHealthMetricApi(BaseResource):
         Looks up client's age and sex. One or both are not available, we return our best guess: the health
         metrics for a 30 year old female.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         client_info = ClientInfo.query.filter_by(user_id=user_id).one_or_none()
         user_info, _ = token_auth.current_user()
 
         # get user sex and age info
         if user_info.biological_sex_male != None:
-            sex = 'm' if user_info.biological_sex_male else 'f'
+            sex = "m" if user_info.biological_sex_male else "f"
         elif user_info.gender in (
-            'm',
-            'f',
+            "m",
+            "f",
         ):  # use gender instead of biological sex
             sex = user_info.gender
         else:  # default to female
-            sex = 'f'
+            sex = "f"
 
         if client_info.user_info.dob:
-            years_old = round((datetime.now().date() - client_info.user_info.dob).days / 365.25)
+            years_old = round(
+                (datetime.now().date() - client_info.user_info.dob).days / 365.25
+            )
         else:  # default to 30 years old if not dob is present
             years_old = 30
 
         age_categories = (
-            db.session.query(LookupDefaultHealthMetrics.age
-                            ).filter(LookupDefaultHealthMetrics.sex == 'm').all()
+            db.session.query(LookupDefaultHealthMetrics.age)
+            .filter(LookupDefaultHealthMetrics.sex == "m")
+            .all()
         )
         age_categories = [x[0] for x in age_categories]
         age_category = min(age_categories, key=lambda x: abs(x - years_old))
 
         health_metrics = (
-            LookupDefaultHealthMetrics.query.filter_by(age=age_category).filter_by(sex=sex
-                                                                                  ).one_or_none()
+            LookupDefaultHealthMetrics.query.filter_by(age=age_category)
+            .filter_by(sex=sex)
+            .one_or_none()
         )
 
         return health_metrics
 
 
-@ns.route('/race-and-ethnicity/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/race-and-ethnicity/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ClientRaceAndEthnicityApi(BaseResource):
     """
     Endpoint for returning viewing and editing information about a client's race and ethnicity
     information.
     """
-    @token_auth.login_required(user_type=('client', 'provider'))
+
+    @token_auth.login_required(user_type=("client", "provider"))
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
-
         res = (
             db.session.query(
                 ClientRaceAndEthnicity.is_client_mother,
                 LookupRaces.race_id,
                 LookupRaces.race_name,
-            ).join(
+            )
+            .join(
                 LookupRaces,
                 LookupRaces.race_id == ClientRaceAndEthnicity.race_id,
-            ).filter(ClientRaceAndEthnicity.user_id == user_id).all()
+            )
+            .filter(ClientRaceAndEthnicity.user_id == user_id)
+            .all()
         )
 
         return res
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=ClientRaceAndEthnicityEditSchema, api=ns)
     @responds(schema=ClientRaceAndEthnicitySchema(many=True), api=ns, status_code=201)
     def put(self, user_id):
+        self.check_user(user_id, user_type="client")
 
-        self.check_user(user_id, user_type='client')
-
-        if request.parsed_obj['mother']:
-            mother = request.parsed_obj['mother']
+        if request.parsed_obj["mother"]:
+            mother = request.parsed_obj["mother"]
         else:
             mother = None
-        if request.parsed_obj['father']:
-            father = request.parsed_obj['father']
+        if request.parsed_obj["father"]:
+            father = request.parsed_obj["father"]
         else:
             father = None
 
@@ -2432,10 +2620,13 @@ class ClientRaceAndEthnicityApi(BaseResource):
                 ClientRaceAndEthnicity.is_client_mother,
                 LookupRaces.race_id,
                 LookupRaces.race_name,
-            ).join(
+            )
+            .join(
                 LookupRaces,
                 LookupRaces.race_id == ClientRaceAndEthnicity.race_id,
-            ).filter(ClientRaceAndEthnicity.user_id == user_id).all()
+            )
+            .filter(ClientRaceAndEthnicity.user_id == user_id)
+            .all()
         )
 
         return res

@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from odyssey import db
 from odyssey.api.lookup.models import LookupRoles
 from odyssey.api.provider.models import ProviderCredentials
-from odyssey.utils.base.models import (BaseModel, BaseModelWithIdx, UserIdFkeyMixin)
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
 from odyssey.utils.constants import DB_SERVER_TIME
 
 
@@ -26,7 +26,7 @@ class StaffProfile(BaseModel):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
@@ -37,9 +37,9 @@ class StaffProfile(BaseModel):
     """
 
     user_info = db.relationship(
-        'User',
-        back_populates='staff_profile',
-        foreign_keys='StaffProfile.user_id',
+        "User",
+        back_populates="staff_profile",
+        foreign_keys="StaffProfile.user_id",
     )
     """
     One-to-One relatinoship with User
@@ -64,7 +64,7 @@ class StaffProfile(BaseModel):
     """
 
     profile_pictures = db.relationship(
-        'UserProfilePictures', uselist=True, back_populates='staff_profile'
+        "UserProfilePictures", uselist=True, back_populates="staff_profile"
     )
     """
     One to many relationship with UserProfilePictures
@@ -76,7 +76,7 @@ class StaffProfile(BaseModel):
 class StaffRecentClients(db.Model):
     """this table stores the last 10 clients that a staff member has loaded"""
 
-    __tablename__ = 'StaffRecentClients'
+    __tablename__ = "StaffRecentClients"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -87,7 +87,7 @@ class StaffRecentClients(db.Model):
 
     staff_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -98,7 +98,7 @@ class StaffRecentClients(db.Model):
 
     client_user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -123,7 +123,7 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     (state, country etc.).
     """
 
-    role = db.Column(db.String, db.ForeignKey('LookupRoles.role_name'), nullable=False)
+    role = db.Column(db.String, db.ForeignKey("LookupRoles.role_name"), nullable=False)
     """
     Name of the role assignment
 
@@ -142,10 +142,10 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     role_info = db.relationship(
-        'LookupRoles',
+        "LookupRoles",
         uselist=False,
-        back_populates='professionals_assigned',
-        foreign_keys='StaffRoles.role',
+        back_populates="professionals_assigned",
+        foreign_keys="StaffRoles.role",
     )
     """
     Many to one relationship with Lookup Roles table
@@ -153,7 +153,7 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     operational_territories = db.relationship(
-        'StaffOperationalTerritories', uselist=True, back_populates='role'
+        "StaffOperationalTerritories", uselist=True, back_populates="role"
     )
     """
     One to many relationship with staff's opeartional territories
@@ -161,14 +161,16 @@ class StaffRoles(BaseModelWithIdx, UserIdFkeyMixin):
     :type: :class:`StaffOperationalTerritories` instance list
     """
 
-    credentials = db.relationship('ProviderCredentials', uselist=True, back_populates='role')
+    credentials = db.relationship(
+        "ProviderCredentials", uselist=True, back_populates="role"
+    )
     """
     One to many relationship with staff's credentials
 
     :type: :class:`ProviderCredentials` instance list
     """
 
-    granter_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=True)
+    granter_id = db.Column(db.Integer, db.ForeignKey("User.user_id"), nullable=True)
     """
     ID of the user who granted this role to this user.
 
@@ -196,7 +198,7 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     operational_territory_id = db.Column(
-        db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx')
+        db.Integer, db.ForeignKey("LookupTerritoriesOfOperations.idx")
     )
     """
     Operational subterritory from the operational territories lookup table.
@@ -210,7 +212,7 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
 
     role_id = db.Column(
         db.Integer,
-        db.ForeignKey('StaffRoles.idx', ondelete='CASCADE'),
+        db.ForeignKey("StaffRoles.idx", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -220,10 +222,10 @@ class StaffOperationalTerritories(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     role = db.relationship(
-        'StaffRoles',
+        "StaffRoles",
         uselist=False,
-        back_populates='operational_territories',
-        foreign_keys='StaffOperationalTerritories.role_id',
+        back_populates="operational_territories",
+        foreign_keys="StaffOperationalTerritories.role_id",
     )
     """
     Many to one relationship with staff roles table
@@ -351,7 +353,9 @@ class StaffOffices(BaseModelWithIdx, UserIdFkeyMixin):
     :type: str
     """
 
-    territory_id = db.Column(db.Integer, db.ForeignKey('LookupTerritoriesOfOperations.idx'))
+    territory_id = db.Column(
+        db.Integer, db.ForeignKey("LookupTerritoriesOfOperations.idx")
+    )
     """
     Client address territory. Foreign key gives information about both the state/province/etc. as
     well as the country.

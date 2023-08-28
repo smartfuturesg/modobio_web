@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from odyssey import db
-from odyssey.utils.base.models import (BaseModel, BaseModelWithIdx, UserIdFkeyMixin)
+from odyssey.utils.base.models import BaseModel, BaseModelWithIdx, UserIdFkeyMixin
 
 
 class PractitionerCredentials(BaseModelWithIdx, UserIdFkeyMixin):
@@ -19,7 +19,7 @@ class PractitionerCredentials(BaseModelWithIdx, UserIdFkeyMixin):
     All data from this table is migrated to ProviderCredentials
     """
 
-    country_id = db.Column(db.Integer, db.ForeignKey('LookupCountriesOfOperations.idx'))
+    country_id = db.Column(db.Integer, db.ForeignKey("LookupCountriesOfOperations.idx"))
     """
     Country the MD is submitting credentials for (USA)
 
@@ -57,7 +57,7 @@ class PractitionerCredentials(BaseModelWithIdx, UserIdFkeyMixin):
 
     role_id = db.Column(
         db.Integer,
-        db.ForeignKey('StaffRoles.idx', ondelete='CASCADE'),
+        db.ForeignKey("StaffRoles.idx", ondelete="CASCADE"),
         nullable=True,
     )
     """
@@ -67,7 +67,7 @@ class PractitionerCredentials(BaseModelWithIdx, UserIdFkeyMixin):
 
     """
 
-    role = db.relationship('StaffRoles', uselist=False)
+    role = db.relationship("StaffRoles", uselist=False)
     """
     Many to one relationship with staff roles table
 
@@ -89,7 +89,7 @@ class PractitionerOrganizationAffiliation(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     organization_idx = db.Column(
-        db.Integer, db.ForeignKey('LookupOrganizations.idx'), nullable=False
+        db.Integer, db.ForeignKey("LookupOrganizations.idx"), nullable=False
     )
     """
     index of the organization the practitioner is affiliated with
@@ -105,9 +105,9 @@ class PractitionerOrganizationAffiliation(BaseModelWithIdx, UserIdFkeyMixin):
     """
 
     org_info = db.relationship(
-        'LookupOrganizations',
+        "LookupOrganizations",
         uselist=False,
-        back_populates='practitioners_assigned',
+        back_populates="practitioners_assigned",
     )
     """
     Many to one relationship with Lookup Organizations table

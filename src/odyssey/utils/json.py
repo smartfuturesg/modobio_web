@@ -30,6 +30,7 @@ class JSONEncoder(json.JSONEncoder):
 
     Create a corresponding deserializer in :class:`JSONDecoder`.
     """
+
     def default(self, obj, **kwargs):
         """Serialize Python objects into a JSON string.
 
@@ -80,8 +81,9 @@ class JSONDecoder(json.JSONDecoder):
 
     Create a corresponding serializer in :class:`JSONEncoder` if needed.
     """
+
     def __init__(self, *args, **kwargs):
-        kwargs['object_pairs_hook'] = self._parse
+        kwargs["object_pairs_hook"] = self._parse
         super().__init__(*args, **kwargs)
 
         # Removed auto-registration in favour of fixed list
@@ -229,27 +231,31 @@ class JSONDecoder(json.JSONDecoder):
 
 class JSONProvider(flask.json.provider.JSONProvider):
     """Extends JSONProvider with better datetime and uuid (de)serialization."""
+
     def __init__(self, app=None, **kwargs):
         if app:
             super().__init__(app=app, **kwargs)
 
     @staticmethod
     def process_terra_data(data):
-        if 'data' in data:
-            for item in data['data']:
+        if "data" in data:
+            for item in data["data"]:
                 if (
-                    'metadata' in item and 'start_time' in item['metadata']
-                    and isinstance(item['metadata']['start_time'], (datetime, date, time))
+                    "metadata" in item
+                    and "start_time" in item["metadata"]
+                    and isinstance(
+                        item["metadata"]["start_time"], (datetime, date, time)
+                    )
                 ):
-                    start_time = item['metadata']['start_time']
+                    start_time = item["metadata"]["start_time"]
 
                     if isinstance(start_time, (datetime, time)):
                         offset = start_time.utcoffset()
                         if offset:
                             offset = offset.total_seconds()
-                        item['metadata']['tz_offset'] = offset
+                        item["metadata"]["tz_offset"] = offset
                     else:
-                        item['metadata']['tz_offset'] = None
+                        item["metadata"]["tz_offset"] = None
 
                     remove_timezone_from_timestamps(item)
 
@@ -271,7 +277,7 @@ class JSONProvider(flask.json.provider.JSONProvider):
         str
             JSON formatted string.
         """
-        kwargs['cls'] = JSONEncoder
+        kwargs["cls"] = JSONEncoder
         return json.dumps(obj, **kwargs)
 
     def loads(self, s: str, **kwargs):
@@ -290,7 +296,7 @@ class JSONProvider(flask.json.provider.JSONProvider):
         dict
             A Python dict containing the converted data.
         """
-        kwargs['cls'] = JSONDecoder
+        kwargs["cls"] = JSONDecoder
 
         data = json.loads(s, **kwargs)
 

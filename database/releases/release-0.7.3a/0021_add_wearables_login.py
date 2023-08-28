@@ -2,9 +2,9 @@ import os
 
 from werkzeug.security import generate_password_hash
 
-passw = os.getenv('MODOBIO_WEARABLES_PASS')
+passw = os.getenv("MODOBIO_WEARABLES_PASS")
 if not passw:
-    raise ValueError('MODOBIO_WEARABLES_PASS not set.')
+    raise ValueError("MODOBIO_WEARABLES_PASS not set.")
 
 passw_hash = generate_password_hash(passw)
 

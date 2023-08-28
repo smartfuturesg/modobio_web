@@ -11,38 +11,44 @@ from .data import (
     telehealth_staff_general_availability_bad_5_post_data,
     telehealth_staff_general_availability_bad_6_post_data,
     telehealth_staff_general_availability_bad_7_post_data,
-    telehealth_queue_client_pool_8_post_data
+    telehealth_queue_client_pool_8_post_data,
 )
 from tests.functional.practitioner.data import practitioner_credentials_post_1_data
 
-#TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+# TODO Telehealth on the Shelf - all tests skipped - remove skip annotations when telehealth reactivated
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
-def test_post_1_staff_general_availability(test_client, staff_territory, staff_credentials, staff_consult_rate):
+def test_post_1_staff_general_availability(
+    test_client, staff_territory, staff_credentials, staff_consult_rate
+):
     # DEPENDENCY - add practitioner credentials
     response = test_client.post(
-        f'/practitioner/credentials/{test_client.provider_id}/',
+        f"/practitioner/credentials/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(practitioner_credentials_post_1_data),
-        content_type='application/json')
-    
+        content_type="application/json",
+    )
+
     assert response.status_code == 201
     # DEPENDENCCY - add practitioner availability
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_1_post_data),
-        content_type='application/json')
-    
+        content_type="application/json",
+    )
+
     assert response.status_code == 201
 
-    #telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
+    # telehealth_queue_client_pool_8_post_data['payment_method_id'] = payment_method.idx
 
     response = test_client.post(
-        f'telehealth/client/time-select/{test_client.client_id}/',
+        f"telehealth/client/time-select/{test_client.client_id}/",
         headers=test_client.client_auth_header,
         data=dumps(telehealth_queue_client_pool_8_post_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     # NOTE: At this point we have one staff member with availability 11 am - 12 pm on Mondays
     # this allows 3 avaiablities ==> 11 am, 11:15 am and 11:30 am
@@ -51,232 +57,282 @@ def test_post_1_staff_general_availability(test_client, staff_territory, staff_c
     # NOTE: Availabilities are returned with this rule
     # At least 10 available time slots unless we have checked a full 2 weeks (14 days) off.
     # Thus, we will receive 9 availabilities, 3 on closest_future_Monday & 3 on closest_future_Monday + week & 3 on closest_future_Monday + 2 weeks
-    assert response.json['total_options'] == 9
+    assert response.json["total_options"] == 9
 
     # 3_midnight_bug_staff_general_availability
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_3_post_data),
-        content_type='application/json')
-    
+        content_type="application/json",
+    )
+
     assert response.status_code == 201
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_1_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert [
-        response.json['availability'][0]['day_of_week'],
-        response.json['availability'][0]['start_time'],
-        response.json['availability'][0]['end_time']] == ['Monday', '00:00:00', '12:00:00']
+        response.json["availability"][0]["day_of_week"],
+        response.json["availability"][0]["start_time"],
+        response.json["availability"][0]["end_time"],
+    ] == ["Monday", "00:00:00", "12:00:00"]
 
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_post_2_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_2_post_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 201
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_2_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert [
-        response.json['availability'][0]['day_of_week'],
-        response.json['availability'][0]['start_time'],
-        response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00']
+        response.json["availability"][0]["day_of_week"],
+        response.json["availability"][0]["start_time"],
+        response.json["availability"][0]["end_time"],
+    ] == ["Monday", "08:00:00", "09:00:00"]
     assert [
-        response.json['availability'][1]['day_of_week'],
-        response.json['availability'][1]['start_time'],
-        response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00']
+        response.json["availability"][1]["day_of_week"],
+        response.json["availability"][1]["start_time"],
+        response.json["availability"][1]["end_time"],
+    ] == ["Monday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][2]['day_of_week'],
-        response.json['availability'][2]['start_time'],
-        response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00']
+        response.json["availability"][2]["day_of_week"],
+        response.json["availability"][2]["start_time"],
+        response.json["availability"][2]["end_time"],
+    ] == ["Tuesday", "11:00:00", "13:00:00"]
     assert [
-        response.json['availability'][3]['day_of_week'],
-        response.json['availability'][3]['start_time'],
-        response.json['availability'][3]['end_time']] == ['Wednesday', '09:00:00', '20:00:00']
+        response.json["availability"][3]["day_of_week"],
+        response.json["availability"][3]["start_time"],
+        response.json["availability"][3]["end_time"],
+    ] == ["Wednesday", "09:00:00", "20:00:00"]
     assert [
-        response.json['availability'][4]['day_of_week'],
-        response.json['availability'][4]['start_time'],
-        response.json['availability'][4]['end_time']] == ['Friday', '13:00:00', '20:00:00']
+        response.json["availability"][4]["day_of_week"],
+        response.json["availability"][4]["start_time"],
+        response.json["availability"][4]["end_time"],
+    ] == ["Friday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][5]['day_of_week'],
-        response.json['availability'][5]['start_time'],
-        response.json['availability'][5]['end_time']] == ['Saturday', '13:00:00', '20:00:00']
+        response.json["availability"][5]["day_of_week"],
+        response.json["availability"][5]["start_time"],
+        response.json["availability"][5]["end_time"],
+    ] == ["Saturday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][6]['day_of_week'],
-        response.json['availability'][6]['start_time'],
-        response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
+        response.json["availability"][6]["day_of_week"],
+        response.json["availability"][6]["start_time"],
+        response.json["availability"][6]["end_time"],
+    ] == ["Sunday", "13:00:00", "20:00:00"]
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_invalid_post_3_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_3_post_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_3_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert [
-        response.json['availability'][0]['day_of_week'],
-        response.json['availability'][0]['start_time'],
-        response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00']
+        response.json["availability"][0]["day_of_week"],
+        response.json["availability"][0]["start_time"],
+        response.json["availability"][0]["end_time"],
+    ] == ["Monday", "08:00:00", "09:00:00"]
     assert [
-        response.json['availability'][1]['day_of_week'],
-        response.json['availability'][1]['start_time'],
-        response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00']
+        response.json["availability"][1]["day_of_week"],
+        response.json["availability"][1]["start_time"],
+        response.json["availability"][1]["end_time"],
+    ] == ["Monday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][2]['day_of_week'],
-        response.json['availability'][2]['start_time'],
-        response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00']
+        response.json["availability"][2]["day_of_week"],
+        response.json["availability"][2]["start_time"],
+        response.json["availability"][2]["end_time"],
+    ] == ["Tuesday", "11:00:00", "13:00:00"]
     assert [
-        response.json['availability'][3]['day_of_week'],
-        response.json['availability'][3]['start_time'],
-        response.json['availability'][3]['end_time']] == ['Wednesday', '09:00:00', '20:00:00']
+        response.json["availability"][3]["day_of_week"],
+        response.json["availability"][3]["start_time"],
+        response.json["availability"][3]["end_time"],
+    ] == ["Wednesday", "09:00:00", "20:00:00"]
     assert [
-        response.json['availability'][4]['day_of_week'],
-        response.json['availability'][4]['start_time'],
-        response.json['availability'][4]['end_time']] == ['Friday', '13:00:00', '20:00:00']
+        response.json["availability"][4]["day_of_week"],
+        response.json["availability"][4]["start_time"],
+        response.json["availability"][4]["end_time"],
+    ] == ["Friday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][5]['day_of_week'],
-        response.json['availability'][5]['start_time'],
-        response.json['availability'][5]['end_time']] == ['Saturday', '13:00:00', '20:00:00']
+        response.json["availability"][5]["day_of_week"],
+        response.json["availability"][5]["start_time"],
+        response.json["availability"][5]["end_time"],
+    ] == ["Saturday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][6]['day_of_week'],
-        response.json['availability'][6]['start_time'],
-        response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
+        response.json["availability"][6]["day_of_week"],
+        response.json["availability"][6]["start_time"],
+        response.json["availability"][6]["end_time"],
+    ] == ["Sunday", "13:00:00", "20:00:00"]
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_invalid_post_4_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_4_post_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
     assert response.status_code == 400
 
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_4_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert [
-        response.json['availability'][0]['day_of_week'],
-        response.json['availability'][0]['start_time'],
-        response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00']
+        response.json["availability"][0]["day_of_week"],
+        response.json["availability"][0]["start_time"],
+        response.json["availability"][0]["end_time"],
+    ] == ["Monday", "08:00:00", "09:00:00"]
     assert [
-        response.json['availability'][1]['day_of_week'],
-        response.json['availability'][1]['start_time'],
-        response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00']
+        response.json["availability"][1]["day_of_week"],
+        response.json["availability"][1]["start_time"],
+        response.json["availability"][1]["end_time"],
+    ] == ["Monday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][2]['day_of_week'],
-        response.json['availability'][2]['start_time'],
-        response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00']
+        response.json["availability"][2]["day_of_week"],
+        response.json["availability"][2]["start_time"],
+        response.json["availability"][2]["end_time"],
+    ] == ["Tuesday", "11:00:00", "13:00:00"]
     assert [
-        response.json['availability'][3]['day_of_week'],
-        response.json['availability'][3]['start_time'],
-        response.json['availability'][3]['end_time']] == ['Wednesday', '09:00:00', '20:00:00']
+        response.json["availability"][3]["day_of_week"],
+        response.json["availability"][3]["start_time"],
+        response.json["availability"][3]["end_time"],
+    ] == ["Wednesday", "09:00:00", "20:00:00"]
     assert [
-        response.json['availability'][4]['day_of_week'],
-        response.json['availability'][4]['start_time'],
-        response.json['availability'][4]['end_time']] == ['Friday', '13:00:00', '20:00:00']
+        response.json["availability"][4]["day_of_week"],
+        response.json["availability"][4]["start_time"],
+        response.json["availability"][4]["end_time"],
+    ] == ["Friday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][5]['day_of_week'],
-        response.json['availability'][5]['start_time'],
-        response.json['availability'][5]['end_time']] == ['Saturday', '13:00:00', '20:00:00']
+        response.json["availability"][5]["day_of_week"],
+        response.json["availability"][5]["start_time"],
+        response.json["availability"][5]["end_time"],
+    ] == ["Saturday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][6]['day_of_week'],
-        response.json['availability'][6]['start_time'],
-        response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
+        response.json["availability"][6]["day_of_week"],
+        response.json["availability"][6]["start_time"],
+        response.json["availability"][6]["end_time"],
+    ] == ["Sunday", "13:00:00", "20:00:00"]
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_invalid_post_5_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_5_post_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_5_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert [
-        response.json['availability'][0]['day_of_week'],
-        response.json['availability'][0]['start_time'],
-        response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00']
+        response.json["availability"][0]["day_of_week"],
+        response.json["availability"][0]["start_time"],
+        response.json["availability"][0]["end_time"],
+    ] == ["Monday", "08:00:00", "09:00:00"]
     assert [
-        response.json['availability'][1]['day_of_week'],
-        response.json['availability'][1]['start_time'],
-        response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00']
+        response.json["availability"][1]["day_of_week"],
+        response.json["availability"][1]["start_time"],
+        response.json["availability"][1]["end_time"],
+    ] == ["Monday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][2]['day_of_week'],
-        response.json['availability'][2]['start_time'],
-        response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00']
+        response.json["availability"][2]["day_of_week"],
+        response.json["availability"][2]["start_time"],
+        response.json["availability"][2]["end_time"],
+    ] == ["Tuesday", "11:00:00", "13:00:00"]
     assert [
-        response.json['availability'][3]['day_of_week'],
-        response.json['availability'][3]['start_time'],
-        response.json['availability'][3]['end_time']] == ['Wednesday', '09:00:00', '20:00:00']
+        response.json["availability"][3]["day_of_week"],
+        response.json["availability"][3]["start_time"],
+        response.json["availability"][3]["end_time"],
+    ] == ["Wednesday", "09:00:00", "20:00:00"]
     assert [
-        response.json['availability'][4]['day_of_week'],
-        response.json['availability'][4]['start_time'],
-        response.json['availability'][4]['end_time']] == ['Friday', '13:00:00', '20:00:00']
+        response.json["availability"][4]["day_of_week"],
+        response.json["availability"][4]["start_time"],
+        response.json["availability"][4]["end_time"],
+    ] == ["Friday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][5]['day_of_week'],
-        response.json['availability'][5]['start_time'],
-        response.json['availability'][5]['end_time']] == ['Saturday', '13:00:00', '20:00:00']
+        response.json["availability"][5]["day_of_week"],
+        response.json["availability"][5]["start_time"],
+        response.json["availability"][5]["end_time"],
+    ] == ["Saturday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][6]['day_of_week'],
-        response.json['availability'][6]['start_time'],
-        response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
+        response.json["availability"][6]["day_of_week"],
+        response.json["availability"][6]["start_time"],
+        response.json["availability"][6]["end_time"],
+    ] == ["Sunday", "13:00:00", "20:00:00"]
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_invalid_post_6_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_6_post_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
 
@@ -284,115 +340,137 @@ def test_invalid_post_6_staff_general_availability(test_client):
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_6_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert [
-        response.json['availability'][0]['day_of_week'],
-        response.json['availability'][0]['start_time'],
-        response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00']
+        response.json["availability"][0]["day_of_week"],
+        response.json["availability"][0]["start_time"],
+        response.json["availability"][0]["end_time"],
+    ] == ["Monday", "08:00:00", "09:00:00"]
     assert [
-        response.json['availability'][1]['day_of_week'],
-        response.json['availability'][1]['start_time'],
-        response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00']
+        response.json["availability"][1]["day_of_week"],
+        response.json["availability"][1]["start_time"],
+        response.json["availability"][1]["end_time"],
+    ] == ["Monday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][2]['day_of_week'],
-        response.json['availability'][2]['start_time'],
-        response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00']
+        response.json["availability"][2]["day_of_week"],
+        response.json["availability"][2]["start_time"],
+        response.json["availability"][2]["end_time"],
+    ] == ["Tuesday", "11:00:00", "13:00:00"]
     assert [
-        response.json['availability'][3]['day_of_week'],
-        response.json['availability'][3]['start_time'],
-        response.json['availability'][3]['end_time']] == ['Wednesday', '09:00:00', '20:00:00']
+        response.json["availability"][3]["day_of_week"],
+        response.json["availability"][3]["start_time"],
+        response.json["availability"][3]["end_time"],
+    ] == ["Wednesday", "09:00:00", "20:00:00"]
     assert [
-        response.json['availability'][4]['day_of_week'],
-        response.json['availability'][4]['start_time'],
-        response.json['availability'][4]['end_time']] == ['Friday', '13:00:00', '20:00:00']
+        response.json["availability"][4]["day_of_week"],
+        response.json["availability"][4]["start_time"],
+        response.json["availability"][4]["end_time"],
+    ] == ["Friday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][5]['day_of_week'],
-        response.json['availability'][5]['start_time'],
-        response.json['availability'][5]['end_time']] == ['Saturday', '13:00:00', '20:00:00']
+        response.json["availability"][5]["day_of_week"],
+        response.json["availability"][5]["start_time"],
+        response.json["availability"][5]["end_time"],
+    ] == ["Saturday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][6]['day_of_week'],
-        response.json['availability'][6]['start_time'],
-        response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
+        response.json["availability"][6]["day_of_week"],
+        response.json["availability"][6]["start_time"],
+        response.json["availability"][6]["end_time"],
+    ] == ["Sunday", "13:00:00", "20:00:00"]
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_invalid_post_7_staff_general_availability(test_client):
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_bad_7_post_data),
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 400
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_get_7_staff_availability(test_client):
     response = test_client.get(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
-        content_type='application/json')
+        content_type="application/json",
+    )
 
     assert response.status_code == 200
     assert [
-        response.json['availability'][0]['day_of_week'],
-        response.json['availability'][0]['start_time'],
-        response.json['availability'][0]['end_time']] == ['Monday', '08:00:00', '09:00:00']
+        response.json["availability"][0]["day_of_week"],
+        response.json["availability"][0]["start_time"],
+        response.json["availability"][0]["end_time"],
+    ] == ["Monday", "08:00:00", "09:00:00"]
     assert [
-        response.json['availability'][1]['day_of_week'],
-        response.json['availability'][1]['start_time'],
-        response.json['availability'][1]['end_time']] == ['Monday', '13:00:00', '20:00:00']
+        response.json["availability"][1]["day_of_week"],
+        response.json["availability"][1]["start_time"],
+        response.json["availability"][1]["end_time"],
+    ] == ["Monday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][2]['day_of_week'],
-        response.json['availability'][2]['start_time'],
-        response.json['availability'][2]['end_time']] == ['Tuesday', '11:00:00', '13:00:00']
+        response.json["availability"][2]["day_of_week"],
+        response.json["availability"][2]["start_time"],
+        response.json["availability"][2]["end_time"],
+    ] == ["Tuesday", "11:00:00", "13:00:00"]
     assert [
-        response.json['availability'][3]['day_of_week'],
-        response.json['availability'][3]['start_time'],
-        response.json['availability'][3]['end_time']] == ['Wednesday', '09:00:00', '20:00:00']
+        response.json["availability"][3]["day_of_week"],
+        response.json["availability"][3]["start_time"],
+        response.json["availability"][3]["end_time"],
+    ] == ["Wednesday", "09:00:00", "20:00:00"]
     assert [
-        response.json['availability'][4]['day_of_week'],
-        response.json['availability'][4]['start_time'],
-        response.json['availability'][4]['end_time']] == ['Friday', '13:00:00', '20:00:00']
+        response.json["availability"][4]["day_of_week"],
+        response.json["availability"][4]["start_time"],
+        response.json["availability"][4]["end_time"],
+    ] == ["Friday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][5]['day_of_week'],
-        response.json['availability'][5]['start_time'],
-        response.json['availability'][5]['end_time']] == ['Saturday', '13:00:00', '20:00:00']
+        response.json["availability"][5]["day_of_week"],
+        response.json["availability"][5]["start_time"],
+        response.json["availability"][5]["end_time"],
+    ] == ["Saturday", "13:00:00", "20:00:00"]
     assert [
-        response.json['availability'][6]['day_of_week'],
-        response.json['availability'][6]['start_time'],
-        response.json['availability'][6]['end_time']] == ['Sunday', '13:00:00', '20:00:00']
+        response.json["availability"][6]["day_of_week"],
+        response.json["availability"][6]["start_time"],
+        response.json["availability"][6]["end_time"],
+    ] == ["Sunday", "13:00:00", "20:00:00"]
+
 
 @pytest.mark.skip(reason="Telehealth on the Shelf")
 def test_update_availability_conflicts(test_client, booking):
-    #tests that conflicting appointments show up when a practitioner updates their availability
-    
-    #set booking within availability (Monday 8:30AM)
+    # tests that conflicting appointments show up when a practitioner updates their availability
+
+    # set booking within availability (Monday 8:30AM)
     booking.booking_window_id_start_time_utc = 103
     booking.booking_window_id_start_time = 103
     booking.booking_window_id_end_time_utc = 109
     booking.booking_window_id_end_time = 109
-    
-    #change availability to exclude booking
+
+    # change availability to exclude booking
     data = copy.deepcopy(telehealth_staff_general_availability_2_post_data)
-    data['availability'] = data['availability'][1:]
+    data["availability"] = data["availability"][1:]
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(data),
-        content_type='application/json')
-    
-    #assert booking in conflicts
+        content_type="application/json",
+    )
+
+    # assert booking in conflicts
     assert response.status_code == 201
-    assert len(response.json['conflicts']) == 1
-    
-    #return availability to normal for future tests
+    assert len(response.json["conflicts"]) == 1
+
+    # return availability to normal for future tests
     response = test_client.post(
-        f'/telehealth/settings/staff/availability/{test_client.provider_id}/',
+        f"/telehealth/settings/staff/availability/{test_client.provider_id}/",
         headers=test_client.provider_auth_header,
         data=dumps(telehealth_staff_general_availability_2_post_data),
-        content_type='application/json')
-    
+        content_type="application/json",
+    )
+
     assert response.status_code == 201

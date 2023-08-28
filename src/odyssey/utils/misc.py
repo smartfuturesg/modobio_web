@@ -21,11 +21,15 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db, mongo
 from odyssey.api.client.models import (
-    ClientConsent, ClientConsultContract, ClientFacilities, ClientIndividualContract,
-    ClientPolicies, ClientRelease, ClientSubscriptionContract
+    ClientConsent,
+    ClientConsultContract,
+    ClientFacilities,
+    ClientIndividualContract,
+    ClientPolicies,
+    ClientRelease,
+    ClientSubscriptionContract,
 )
-from odyssey.api.community_manager.models import \
-    CommunityManagerSubscriptionGrants
+from odyssey.api.community_manager.models import CommunityManagerSubscriptionGrants
 from odyssey.api.doctor.models import *
 from odyssey.api.facility.models import RegisteredFacilities
 from odyssey.api.lookup.models import *
@@ -38,14 +42,16 @@ from odyssey.integrations.google import PlayStore
 from odyssey.integrations.terra import TerraClient
 from odyssey.utils import search
 from odyssey.utils.auth import token_auth
-from odyssey.utils.constants import (ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME)
+from odyssey.utils.constants import ALPHANUMERIC, DB_SERVER_TIME, EMAIL_TOKEN_LIFETIME
 from odyssey.utils.files import FileDownload
 from odyssey.utils.message import send_email
 
 logger = logging.getLogger(__name__)
 
 
-def generate_modobio_id(user_id: int, firstname: str = None, lastname: str = None) -> str:
+def generate_modobio_id(
+    user_id: int, firstname: str = None, lastname: str = None
+) -> str:
     """Generate the user's mdobio_id.
 
     The modo bio identifier is used as a public user id, it
@@ -69,12 +75,12 @@ def generate_modobio_id(user_id: int, firstname: str = None, lastname: str = Non
     str
         Medical record ID
     """
-    rli_hash = ''.join([random.choice(ALPHANUMERIC) for i in range(10)])
+    rli_hash = "".join([random.choice(ALPHANUMERIC) for i in range(10)])
 
     if all((firstname, lastname)):
         salt = firstname[0] + lastname[0]
     else:
-        raise BadRequest('Missing first and/or last name.')
+        raise BadRequest("Missing first and/or last name.")
     return (salt + rli_hash).upper()
 
 
@@ -91,7 +97,9 @@ def list_average(values_list):
 def check_client_existence(user_id):
     """Check that the client is in the database
     All clients must be in the CLientInfo table before any other procedure"""
-    client = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
+    client = User.query.filter_by(
+        user_id=user_id, is_client=True, deleted=False
+    ).one_or_none()
     if not client:
         raise Unauthorized
     return client
@@ -99,7 +107,9 @@ def check_client_existence(user_id):
 
 def check_staff_existence(user_id):
     """Check that the user is in the database and is a staff member"""
-    staff = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
+    staff = User.query.filter_by(
+        user_id=user_id, is_staff=True, deleted=False
+    ).one_or_none()
     if not staff:
         raise Unauthorized
     return staff
@@ -107,7 +117,9 @@ def check_staff_existence(user_id):
 
 def check_provider_existence(user_id):
     """Check that the user is in the database and is a staff member"""
-    staff = User.query.filter_by(user_id=user_id, is_provider=True, deleted=False).one_or_none()
+    staff = User.query.filter_by(
+        user_id=user_id, is_provider=True, deleted=False
+    ).one_or_none()
     if not staff:
         raise Unauthorized
     return staff
@@ -119,10 +131,14 @@ def check_user_existence(user_id, user_type=None):
     If user_type is 'staff', check if user_id exists in StaffProfile table.
     If user_type is neither of the above, just check if user_id exists in User table.
     """
-    if user_type == 'client':
-        user = User.query.filter_by(user_id=user_id, is_client=True, deleted=False).one_or_none()
-    elif user_type == 'staff':
-        user = User.query.filter_by(user_id=user_id, is_staff=True, deleted=False).one_or_none()
+    if user_type == "client":
+        user = User.query.filter_by(
+            user_id=user_id, is_client=True, deleted=False
+        ).one_or_none()
+    elif user_type == "staff":
+        user = User.query.filter_by(
+            user_id=user_id, is_staff=True, deleted=False
+        ).one_or_none()
     else:
         user = User.query.filter_by(user_id=user_id, deleted=False).one_or_none()
     if not user:
@@ -134,20 +150,24 @@ def check_blood_test_existence(test_id):
     """Check that the blood test is in the database"""
     test = MedicalBloodTests.query.filter_by(test_id=test_id).one_or_none()
     if not test:
-        raise BadRequest(f'Blood test {test_id} not found.')
+        raise BadRequest(f"Blood test {test_id} not found.")
 
 
 def check_blood_test_result_type_existence(result_name):
     """Check that a supplied blood test result type is in the database"""
-    result = LookupBloodTestResultTypes.query.filter_by(result_name=result_name).one_or_none()
+    result = LookupBloodTestResultTypes.query.filter_by(
+        result_name=result_name
+    ).one_or_none()
     if not result:
-        raise BadRequest(f'Blood test result {result_name} not found.')
+        raise BadRequest(f"Blood test result {result_name} not found.")
 
 
 def fetch_facility_existence(facility_id):
-    facility = RegisteredFacilities.query.filter_by(facility_id=facility_id).one_or_none()
+    facility = RegisteredFacilities.query.filter_by(
+        facility_id=facility_id
+    ).one_or_none()
     if not facility:
-        raise BadRequest(f'Facility {facility_id} not found.')
+        raise BadRequest(f"Facility {facility_id} not found.")
     return facility
 
 
@@ -156,13 +176,15 @@ def check_client_facility_relation_existence(user_id, facility_id):
         user_id=user_id, facility_id=facility_id
     ).one_or_none()
     if relation:
-        raise BadRequest(f'Client already associated with facility {facility_id}.')
+        raise BadRequest(f"Client already associated with facility {facility_id}.")
 
 
 def check_medical_condition_existence(medcon_id):
-    medcon = LookupMedicalConditions.query.filter_by(medical_condition_id=medcon_id).one_or_none()
+    medcon = LookupMedicalConditions.query.filter_by(
+        medical_condition_id=medcon_id
+    ).one_or_none()
     if not medcon:
-        raise BadRequest(f'Medical condition {medcon_id} not found.')
+        raise BadRequest(f"Medical condition {medcon_id} not found.")
 
 
 # def check_drink_existence(drink_id):
@@ -174,26 +196,26 @@ def check_medical_condition_existence(medcon_id):
 def check_std_existence(std_id):
     std = LookupSTDs.query.filter_by(std_id=std_id).one_or_none()
     if not std:
-        raise BadRequest(f'STD {std_id} not found.')
+        raise BadRequest(f"STD {std_id} not found.")
 
 
-def verify_jwt(token, error_message='', refresh=False):
+def verify_jwt(token, error_message="", refresh=False):
     """
     Ensure token is signed correctly and is not yet expired
     Returns the token's payload
     """
-    secret = current_app.config['SECRET_KEY']
+    secret = current_app.config["SECRET_KEY"]
     try:
-        decoded_token = jwt.decode(token, secret, algorithms='HS256')
+        decoded_token = jwt.decode(token, secret, algorithms="HS256")
     except:
         # log the refresh attempt
         if refresh:
-            token_payload = jwt.decode(token, options={'verify_signature': False})
+            token_payload = jwt.decode(token, options={"verify_signature": False})
             db.session.add(
                 UserTokenHistory(
-                    user_id=token_payload.get('uid'),
-                    event='refresh',
-                    ua_string=request.headers.get('User-Agent'),
+                    user_id=token_payload.get("uid"),
+                    event="refresh",
+                    ua_string=request.headers.get("User-Agent"),
                 )
             )
             db.session.commit()
@@ -284,7 +306,9 @@ def find_decorator_value(
         are not found in the decorator.
     """
     # Check parameters
-    if (keyword is None and argument is None) or (keyword is not None and argument is not None):
+    if (keyword is None and argument is None) or (
+        keyword is not None and argument is not None
+    ):
         raise ValueError('You must provide exactly one of "keyword" or "argument".')
 
     if argument is not None and not isinstance(argument, int):
@@ -293,7 +317,7 @@ def find_decorator_value(
     if keyword is not None and not isinstance(keyword, str):
         raise ValueError('Parameter "keyword" must be string.')
 
-    if decorator.startswith('@'):
+    if decorator.startswith("@"):
         decorator = decorator[1:]
 
     # Get actual function, not the one wrapped by a decorator
@@ -308,21 +332,21 @@ def find_decorator_value(
         lineno -= 1
         while lineno >= 0:
             line = wholefile[lineno].strip()
-            if line.startswith('@'):
+            if line.startswith("@"):
                 extralines.append(wholefile[lineno])
                 lineno -= 1
                 continue
 
             # It is legal to intersperse decorators with empty lines and comments.
             # Keep searching in that case.
-            if not line or line.startswith('#'):
+            if not line or line.startswith("#"):
                 lineno -= 1
                 continue
 
             break
 
     code = inspect.getsource(top_func)
-    code = '\n'.join(extralines) + code
+    code = "\n".join(extralines) + code
     code = textwrap.dedent(code)
     tree = ast.parse(code)
 
@@ -348,21 +372,21 @@ def find_decorator_value(
         if isinstance(deco, ast.Name):
             deco_name = deco.id
         elif isinstance(deco, ast.Attribute):
-            deco_name = deco.value.id + '.' + deco.attr
+            deco_name = deco.value.id + "." + deco.attr
         elif isinstance(deco, ast.Call):
             if isinstance(deco.func, ast.Name):
                 deco_name = deco.func.id
             elif isinstance(deco.func, ast.Attribute):
-                deco_name = deco.func.value.id + '.' + deco.func.attr
+                deco_name = deco.func.value.id + "." + deco.func.attr
             else:
-                raise TypeError(f'Unknown decorator Call type found {deco}.')
+                raise TypeError(f"Unknown decorator Call type found {deco}.")
         else:
-            raise TypeError(f'Unknown decorator type found {deco}.')
+            raise TypeError(f"Unknown decorator type found {deco}.")
 
         decos[deco_name] = deco
 
     if decorator not in decos:
-        raise TypeError(f'Decorator {decorator} not found on {function}.')
+        raise TypeError(f"Decorator {decorator} not found on {function}.")
 
     # Continue with the requested decorator
     deco = decos[decorator]
@@ -370,21 +394,21 @@ def find_decorator_value(
     # Find the AST node that represents either the argument or the keyword value.
     value = None
     if argument is not None:
-        if not hasattr(deco, 'args'):
-            raise TypeError(f'Decorator @{deco_name} has no positional arguments.')
+        if not hasattr(deco, "args"):
+            raise TypeError(f"Decorator @{deco_name} has no positional arguments.")
 
         try:
             value = deco.args[argument]
         except IndexError:
             argno = len(deco.args)
-            raise TypeError(f'Decorator @{deco_name} has only {argno} argument(s).')
+            raise TypeError(f"Decorator @{deco_name} has only {argno} argument(s).")
     else:
-        if not hasattr(deco, 'keywords'):
-            raise TypeError(f'Decorator @{deco_name} has no keyword arguments.')
+        if not hasattr(deco, "keywords"):
+            raise TypeError(f"Decorator @{deco_name} has no keyword arguments.")
 
         kws = {kw.arg: kw.value for kw in deco.keywords}
         if keyword not in kws:
-            raise TypeError(f'Keyword {keyword} not found in decorator @{deco_name}.')
+            raise TypeError(f"Keyword {keyword} not found in decorator @{deco_name}.")
 
         value = kws[keyword]
 
@@ -420,7 +444,9 @@ def find_decorator_value(
             return set(elts)
     elif isinstance(value, ast.Dict):
         # Only support simple dicts where both keys and values are Constant.
-        if not all([isinstance(elt, ast.Constant) for elt in value.keys + value.values]):
+        if not all(
+            [isinstance(elt, ast.Constant) for elt in value.keys + value.values]
+        ):
             return
 
         return {k.value: v.value for k, v in zip(value.keys, value.values)}
@@ -444,7 +470,7 @@ def date_validator(date_string: str):
     """
     import re
 
-    regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])'
+    regex = r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])"
     match_iso8601 = re.compile(regex).match
     try:
         if match_iso8601(date_string) is not None:
@@ -452,13 +478,13 @@ def date_validator(date_string: str):
         else:
             # string does not match requirements
             raise BadRequest(
-                'date requested is not formatted properly. Please use ISO'
-                ' format YYYY-MM-DD'
+                "date requested is not formatted properly. Please use ISO"
+                " format YYYY-MM-DD"
             )
     except TypeError:
         raise BadRequest(
-            'date requested is not formatted properly. Please use ISO format'
-            ' YYYY-MM-DD'
+            "date requested is not formatted properly. Please use ISO format"
+            " YYYY-MM-DD"
         )
 
 
@@ -478,7 +504,7 @@ def iso_string_to_iso_datetime(date_string: str):
     """
     import re
 
-    regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$'
+    regex = r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$"
     match_iso8601 = re.compile(regex).match
 
     # ISO Date was passed in. Ex. '2023-01-01'. Need to append midnight to the date to use to filter MongoDB documents
@@ -507,7 +533,9 @@ def get_time_index(target_time: datetime):
             LookupBookingTimeIncrements.query.filter(
                 LookupBookingTimeIncrements.start_time <= target_time.time(),
                 LookupBookingTimeIncrements.end_time > target_time.time(),
-            ).one_or_none().idx
+            )
+            .one_or_none()
+            .idx
         )
 
 
@@ -515,8 +543,9 @@ class EmailVerification:
     """
     Class for handling email verification routines
     """
+
     def __init__(self) -> None:
-        self.secret = current_app.config['SECRET_KEY']
+        self.secret = current_app.config["SECRET_KEY"]
 
     @staticmethod
     def generate_token(user_id: int) -> str:
@@ -524,16 +553,16 @@ class EmailVerification:
         Generate a JWT with the appropriate user type and user_id
         """
 
-        secret = current_app.config['SECRET_KEY']
+        secret = current_app.config["SECRET_KEY"]
 
         return jwt.encode(
             {
-                'exp': datetime.utcnow() + timedelta(hours=EMAIL_TOKEN_LIFETIME),
-                'uid': user_id,
-                'ttype': 'email_verification',
+                "exp": datetime.utcnow() + timedelta(hours=EMAIL_TOKEN_LIFETIME),
+                "uid": user_id,
+                "ttype": "email_verification",
             },
             secret,
-            algorithm='HS256',
+            algorithm="HS256",
         )
 
     @staticmethod
@@ -543,7 +572,9 @@ class EmailVerification:
         """
         return str(random.randrange(1000, 9999))
 
-    def begin_email_verification(self, user: User, updating: bool, email: str = None) -> dict:
+    def begin_email_verification(
+        self, user: User, updating: bool, email: str = None
+    ) -> dict:
         """
         Email verification process creates an entry into the UserPendingEmailVerification table which stores
         the code and token used to verify new emails. If a user is updating their email address, the new email
@@ -565,11 +596,12 @@ class EmailVerification:
         # Check if email is already in use
         if email:
             if User.query.filter_by(email=email).one_or_none():
-                raise BadRequest('Email in use')
+                raise BadRequest("Email in use")
 
         # check if there is already a Pending email verification entry
-        pending_verification = UserPendingEmailVerifications.query.filter_by(user_id=user.user_id
-                                                                            ).one_or_none()
+        pending_verification = UserPendingEmailVerifications.query.filter_by(
+            user_id=user.user_id
+        ).one_or_none()
 
         # if there is a pending verification, remove it and create a new one
         if pending_verification:
@@ -582,10 +614,10 @@ class EmailVerification:
 
         # create pending email verification in db
         email_verification_data = {
-            'user_id': user.user_id,
-            'token': token,
-            'code': code,
-            'email': email,
+            "user_id": user.user_id,
+            "token": token,
+            "code": code,
+            "email": email,
         }
 
         verification = UserPendingEmailVerifications(**email_verification_data)
@@ -594,13 +626,13 @@ class EmailVerification:
         # send email to the user
         if updating:
             # send update email if user already had a verified email
-            template = 'email-update'
+            template = "email-update"
         else:
             # send first time verify email if user did not have an email on file
-            template = 'email-verify'
+            template = "email-verify"
 
         link = url_for(
-            'api.user_user_pending_email_verifications_token_api',
+            "api.user_user_pending_email_verifications_token_api",
             token=token,
             _external=True,
         )
@@ -631,14 +663,16 @@ class EmailVerification:
         UserPendingEmailVerifications
         """
         try:
-            jwt.decode(token, self.secret, algorithms='HS256')
+            jwt.decode(token, self.secret, algorithms="HS256")
         except jwt.ExpiredSignatureError:
-            raise Unauthorized('Email verification token expired.')
+            raise Unauthorized("Email verification token expired.")
 
-        verification = UserPendingEmailVerifications.query.filter_by(token=token).one_or_none()
+        verification = UserPendingEmailVerifications.query.filter_by(
+            token=token
+        ).one_or_none()
 
         if not verification:
-            raise Unauthorized('Email verification token not found.')
+            raise Unauthorized("Email verification token not found.")
 
         return verification
 
@@ -657,16 +691,18 @@ class EmailVerification:
         UserPendingEmailVerifications
         """
 
-        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+        verification = UserPendingEmailVerifications.query.filter_by(
+            user_id=user_id
+        ).one_or_none()
 
         if not verification or verification.code != code:
-            raise Unauthorized('Email verification failed.')
+            raise Unauthorized("Email verification failed.")
 
         # Decode and validate token. Code should expire the same time the token does.
         try:
-            jwt.decode(verification.token, self.secret, algorithms='HS256')
+            jwt.decode(verification.token, self.secret, algorithms="HS256")
         except jwt.ExpiredSignatureError:
-            raise Unauthorized('Email verification token expired.')
+            raise Unauthorized("Email verification token expired.")
 
         return verification
 
@@ -699,13 +735,13 @@ class EmailVerification:
         elif code and user_id:
             verification = self.check_code(user_id=user_id, code=code)
         else:
-            raise BadRequest('Code or token not provided')
+            raise BadRequest("Code or token not provided")
 
         user = User.query.filter_by(user_id=verification.user_id).one_or_none()
 
         # If account is new, update modobio_id, membersince, and set User.email_verified=True
         if user.email_verified == False:
-            user.update({'email_verified': True})
+            user.update({"email_verified": True})
             # Run active campaign operations for when a user verifies their email.
             # Only run active campaign operations in prod
             if not current_app.debug:
@@ -714,21 +750,21 @@ class EmailVerification:
                 tags = []
                 # Add user type tags
                 if user.is_client:
-                    tags.append('Persona - Client')
+                    tags.append("Persona - Client")
                 if user.is_staff:
-                    tags.append('Persona - Provider')
+                    tags.append("Persona - Provider")
                 update_active_campaign_tags.delay(user.user_id, tags)
         elif verification.email:
-            user.update({'email': verification.email})
+            user.update({"email": verification.email})
 
         if user.modobio_id == None:
             md_id = generate_modobio_id(user.user_id, user.firstname, user.lastname)
-            user.update({'modobio_id': md_id, 'membersince': DB_SERVER_TIME})
+            user.update({"modobio_id": md_id, "membersince": DB_SERVER_TIME})
 
             # check for pending subscription grants on this email, add new user_id to subscription grant entries
-        subscription_grants = (
-            CommunityManagerSubscriptionGrants.query.filter_by(email=user.email.lower()).all()
-        )
+        subscription_grants = CommunityManagerSubscriptionGrants.query.filter_by(
+            email=user.email.lower()
+        ).all()
         for grant in subscription_grants:
             grant.subscription_grantee_user_id = user.user_id
 
@@ -760,8 +796,11 @@ def delete_staff_data(user_id):
     # Delete all staff profile pictures from S3.
     fd = FileDownload(user_id)
     paths = (
-        db.session.execute(select(UserProfilePictures.image_path).filter_by(staff_user_id=user_id)
-                          ).scalars().all()
+        db.session.execute(
+            select(UserProfilePictures.image_path).filter_by(staff_user_id=user_id)
+        )
+        .scalars()
+        .all()
     )
     for path in paths:
         fd.delete(path)
@@ -770,23 +809,22 @@ def delete_staff_data(user_id):
     # NOTE - Order matters, must delete these tables before those with user_id
     # to avoid problems while deleting payment methods
     tableList = db.session.execute(
-        'SELECT distinct(table_name) from information_schema.columns          '
+        "SELECT distinct(table_name) from information_schema.columns          "
         "  WHERE column_name='staff_user_id' OR column_name='client_user_id';"
     ).fetchall()
 
     for table in tableList:
         # Do not delete from TelehealthBookings when deleting staff data
-        if table.table_name == 'TelehealthBookings':
+        if table.table_name == "TelehealthBookings":
             continue
         else:
             db.session.execute(
-                f'DELETE FROM "{table.table_name}" WHERE'
-                f' staff_user_id={user_id};'
+                f'DELETE FROM "{table.table_name}" WHERE' f" staff_user_id={user_id};"
             )
 
     # Get a list of all staff-specific tables in database that have field: user_id
     tableList = db.session.execute(
-        'SELECT distinct(table_name) from information_schema.columns          '
+        "SELECT distinct(table_name) from information_schema.columns          "
         "  WHERE column_name='user_id' and (table_name LIKE '%Staff%' or"
         " table_name LIKE '%Practitioner');"
     ).fetchall()
@@ -795,11 +833,11 @@ def delete_staff_data(user_id):
     for table in tableList:
         # added data_per_client table due to issues with the testing database
         if table.table_name not in (
-            'User',
-            'UserRemovalRequests',
-            'UserLogin',
-            'UserSubscriptions',
-            'data_per_client',
+            "User",
+            "UserRemovalRequests",
+            "UserLogin",
+            "UserSubscriptions",
+            "data_per_client",
         ):
             db.session.execute(
                 'DELETE FROM "{}" WHERE user_id={};'.format(table.table_name, user_id)
@@ -812,7 +850,9 @@ def delete_staff_data(user_id):
                 UserSubscriptions.user_id == user_id,
                 UserSubscriptions.is_staff == True,
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     for sub in user_subs:
         db.session.delete(sub)
@@ -858,7 +898,9 @@ def delete_client_data(user_id):
         MedicalImaging.image_path,
     )
     for col in cols:
-        results = (db.session.execute(select(col).filter_by(user_id=user_id)).scalars().all())
+        results = (
+            db.session.execute(select(col).filter_by(user_id=user_id)).scalars().all()
+        )
 
         for path in results:
             if path:
@@ -868,7 +910,9 @@ def delete_client_data(user_id):
     paths = (
         db.session.execute(
             select(UserProfilePictures.image_path).filter_by(client_user_id=user_id)
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     for path in paths:
         if path:
@@ -894,11 +938,11 @@ def delete_client_data(user_id):
     remaining = tuple(fd.bucket.objects.filter(Prefix=fd.prefix))
     if remaining:
         files = (r.key for r in remaining)
-        files = '\n'.join(files)
+        files = "\n".join(files)
         logger.warning(
-            'Found the following files remaining in S3 bucket'
-            f' {fd.bucket.name} after deleting all registered files for user'
-            f' {user_id}:\n{files}'
+            "Found the following files remaining in S3 bucket"
+            f" {fd.bucket.name} after deleting all registered files for user"
+            f" {user_id}:\n{files}"
         )
         for f in files:
             fd.delete(f)
@@ -907,17 +951,19 @@ def delete_client_data(user_id):
     # NOTE - Order matters, must delete these tables before those with user_id
     # to avoid problems while deleting payment methods
     tableList = db.session.execute(
-        'SELECT distinct(table_name) from information_schema.columns          '
+        "SELECT distinct(table_name) from information_schema.columns          "
         "  WHERE column_name='staff_user_id' OR column_name='client_user_id';"
     ).fetchall()
 
     # Delete lines with user_id in all other tables except "User" and "UserRemovalRequests"
     for table in tableList:
-        db.session.execute(f'DELETE FROM "{table.table_name}" WHERE client_user_id={user_id};')
+        db.session.execute(
+            f'DELETE FROM "{table.table_name}" WHERE client_user_id={user_id};'
+        )
 
     # Get a list of all client-specific tables in database that have field: user_id
     tableList = db.session.execute(
-        'SELECT distinct(table_name) from information_schema.columns          '
+        "SELECT distinct(table_name) from information_schema.columns          "
         "  WHERE column_name='user_id' and NOT (table_name LIKE '%Staff%' or"
         " table_name LIKE '%Practitioner');"
     ).fetchall()
@@ -926,11 +972,11 @@ def delete_client_data(user_id):
     for table in tableList:
         # added data_per_client table due to issues with the testing database
         if table.table_name not in (
-            'User',
-            'UserRemovalRequests',
-            'UserLogin',
-            'UserSubscriptions',
-            'data_per_client',
+            "User",
+            "UserRemovalRequests",
+            "UserLogin",
+            "UserSubscriptions",
+            "data_per_client",
         ):
             db.session.execute(
                 'DELETE FROM "{}" WHERE user_id={};'.format(table.table_name, user_id)
@@ -943,7 +989,9 @@ def delete_client_data(user_id):
                 UserSubscriptions.user_id == user_id,
                 UserSubscriptions.is_staff == False,
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
     for sub in user_subs:
         db.session.delete(sub)
@@ -980,15 +1028,16 @@ def delete_user(user_id, requestor_id, delete_type):
     db.session.flush()
 
     user_login = (
-        db.session.execute(select(UserLogin).filter(UserLogin.user_id == user_id)
-                          ).scalars().one_or_none()
+        db.session.execute(select(UserLogin).filter(UserLogin.user_id == user_id))
+        .scalars()
+        .one_or_none()
     )
     if user.was_staff:
         # cases where the user is either only staff or client and staff
 
         # staff users must always retain name, modobio_id, and user_id
         user.phone_number = None
-        if delete_type == 'both':
+        if delete_type == "both":
             user.phone_number = None
             user.email = None
             user.deleted = True
@@ -1002,10 +1051,10 @@ def delete_user(user_id, requestor_id, delete_type):
 
             # remove user from elastic search indices (must be done after commit)
             search.delete_from_index(user_id)
-        elif delete_type == 'client':
+        elif delete_type == "client":
             delete_client_data(user_id)
             user.is_client = False
-        elif delete_type == 'staff':
+        elif delete_type == "staff":
             delete_staff_data(user_id)
             if not user.is_client:
                 # user was only staff, so we can delete the login info
@@ -1019,10 +1068,10 @@ def delete_user(user_id, requestor_id, delete_type):
 
             user.is_staff = False
         else:
-            raise BadRequest('Invalid delete type.')
+            raise BadRequest("Invalid delete type.")
     else:
         # cases where the user is only a client user
-        if delete_type in ('client', 'both'):
+        if delete_type in ("client", "both"):
             user.email = None
             user.firstname = None
             user.middlename = None
@@ -1041,9 +1090,9 @@ def delete_user(user_id, requestor_id, delete_type):
     # Send notification email to user being deleted.
     # Also send to user requesting deletion when DEPLOYMENT_ENV=production
     if user_email != requester.email:
-        send_email('account-deleted', requester.email, user_email=user_email)
+        send_email("account-deleted", requester.email, user_email=user_email)
 
-    send_email('account-deleted', user_email, user_email=user_email)
+    send_email("account-deleted", user_email, user_email=user_email)
 
 
 def create_notification(
@@ -1059,13 +1108,13 @@ def create_notification(
 
     notification = Notifications(
         **{
-            'user_id': user_id,
-            'title': title,
-            'content': content,
-            'severity_id': severity_id,
-            'notification_type_id': notification_type_id,
-            'persona_type': persona_type,
-            'expires': expires,
+            "user_id": user_id,
+            "title": title,
+            "content": content,
+            "severity_id": severity_id,
+            "notification_type_id": notification_type_id,
+            "persona_type": persona_type,
+            "expires": expires,
         }
     )
 
@@ -1098,113 +1147,130 @@ def update_client_subscription(
     """
     if not latest_subscription:
         latest_subscription = (
-            UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False).order_by(
-                UserSubscriptions.idx.desc()
-            ).first()
+            UserSubscriptions.query.filter_by(user_id=user_id, is_staff=False)
+            .order_by(UserSubscriptions.idx.desc())
+            .first()
         )
 
         # verify the user is a client and has a verified email
         user = User.query.filter_by(user_id=user_id).one_or_none()
         if not user.is_client:
-            raise BadRequest('User is not a client.')
+            raise BadRequest("User is not a client.")
         if not user.email_verified:
-            raise BadRequest('User email is not verified.')
+            raise BadRequest("User email is not verified.")
 
     new_sub_data = {}
     utc_time_now = datetime.utcnow()
     welcome_email = False
 
     if (
-        latest_subscription.subscription_status == 'subscribed'
+        latest_subscription.subscription_status == "subscribed"
         and latest_subscription.expire_date < utc_time_now
     ):
         # update current subscription to unsubscribed
-        latest_subscription.update({
-            'end_date': utc_time_now.isoformat(),
-            'subscription_status': 'unsubscribed',
-            'last_checked_date': utc_time_now.isoformat(),
-        })
+        latest_subscription.update(
+            {
+                "end_date": utc_time_now.isoformat(),
+                "subscription_status": "unsubscribed",
+                "last_checked_date": utc_time_now.isoformat(),
+            }
+        )
         # new subscription entry for unsubscribed status.
         # Can be overwritten if a subscription is found in the app store or subscription grants
         new_sub_data = {
-            'subscription_status': 'unsubscribed',
-            'is_staff': False,
-            'start_date': utc_time_now.isoformat(),
+            "subscription_status": "unsubscribed",
+            "is_staff": False,
+            "start_date": utc_time_now.isoformat(),
         }
 
     # check appstore first
-    if (apple_original_transaction_id or latest_subscription.apple_original_transaction_id):
+    if (
+        apple_original_transaction_id
+        or latest_subscription.apple_original_transaction_id
+    ):
         appstore = AppStore()
         # use transaction_id provided if exists else the transaction_id used previously
         transaction_info, renewal_info, status = appstore.latest_transaction(
-            apple_original_transaction_id if apple_original_transaction_id else latest_subscription.
             apple_original_transaction_id
+            if apple_original_transaction_id
+            else latest_subscription.apple_original_transaction_id
         )
 
-        if status == 'ACTIVE':
-            if latest_subscription.subscription_status == 'subscribed':
+        if status == "ACTIVE":
+            if latest_subscription.subscription_status == "subscribed":
                 # subscription is active and hasn't expired yet
-                latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
+                latest_subscription.update(
+                    {"last_checked_date": utc_time_now.isoformat()}
+                )
             else:
                 new_sub_data = {
-                    'subscription_status':
-                        'subscribed',
-                    'subscription_type_id':
-                        LookupSubscriptions.query.filter_by(
-                            ios_product_id=transaction_info.get('productId')
-                        ).one_or_none().sub_id,
-                    'is_staff':
-                        False,
-                    'apple_original_transaction_id': (
-                        apple_original_transaction_id if apple_original_transaction_id else
-                        latest_subscription.apple_original_transaction_id
+                    "subscription_status": "subscribed",
+                    "subscription_type_id": LookupSubscriptions.query.filter_by(
+                        ios_product_id=transaction_info.get("productId")
+                    )
+                    .one_or_none()
+                    .sub_id,
+                    "is_staff": False,
+                    "apple_original_transaction_id": (
+                        apple_original_transaction_id
+                        if apple_original_transaction_id
+                        else latest_subscription.apple_original_transaction_id
                     ),
-                    'last_checked_date':
-                        utc_time_now.isoformat(),
-                    'expire_date':
-                        datetime.fromtimestamp(transaction_info['expiresDate'] / 1000,
-                                               utc).replace(tzinfo=None).isoformat(),
-                    'start_date':
-                        datetime.fromtimestamp(transaction_info['purchaseDate'] / 1000,
-                                               utc).replace(tzinfo=None).isoformat(),
+                    "last_checked_date": utc_time_now.isoformat(),
+                    "expire_date": datetime.fromtimestamp(
+                        transaction_info["expiresDate"] / 1000, utc
+                    )
+                    .replace(tzinfo=None)
+                    .isoformat(),
+                    "start_date": datetime.fromtimestamp(
+                        transaction_info["purchaseDate"] / 1000, utc
+                    )
+                    .replace(tzinfo=None)
+                    .isoformat(),
                 }
-                latest_subscription.update({
-                    'end_date': utc_time_now.isoformat(),
-                    'last_checked_date': utc_time_now.isoformat(),
-                })
+                latest_subscription.update(
+                    {
+                        "end_date": utc_time_now.isoformat(),
+                        "last_checked_date": utc_time_now.isoformat(),
+                    }
+                )
                 if latest_subscription.subscription_type_id == None:
                     welcome_email = True  # user was previously unsubscribed and now has a subscription
 
         # if status in grace period or retry period, update subscription status to subscribed to keep current subscription
         elif (
-            status in ('RETRY', 'GRACE_PERIOD')
-            and latest_subscription.subscription_status == 'unsubscribed'
+            status in ("RETRY", "GRACE_PERIOD")
+            and latest_subscription.subscription_status == "unsubscribed"
         ):
-            latest_subscription.update({
-                'end_date': None,
-                'subscription_status': 'subscribed',
-            })
+            latest_subscription.update(
+                {
+                    "end_date": None,
+                    "subscription_status": "subscribed",
+                }
+            )
 
             new_sub_data = {}
 
         elif (
-            status in ('REVOKED', 'EXPIRED')
-            and latest_subscription.subscription_status == 'subscribed'
+            status in ("REVOKED", "EXPIRED")
+            and latest_subscription.subscription_status == "subscribed"
         ):
             # update current subscription to unsubscribed
-            latest_subscription.update({
-                'end_date': utc_time_now.isoformat(),
-                'subscription_status': 'unsubscribed',
-                'last_checked_date': utc_time_now.isoformat(),
-            })
+            latest_subscription.update(
+                {
+                    "end_date": utc_time_now.isoformat(),
+                    "subscription_status": "unsubscribed",
+                    "last_checked_date": utc_time_now.isoformat(),
+                }
+            )
             # subscription has been revoked. Add new unsubscribed entry to UserSubscriptions
             new_sub_data = {
-                'subscription_status': 'unsubscribed',
-                'is_staff': False,
-                'start_date': datetime.utcnow().isoformat(),
+                "subscription_status": "unsubscribed",
+                "is_staff": False,
+                "start_date": datetime.utcnow().isoformat(),
             }
 
-        logger.info(f'Apple subscription updated for user_id: {user_id}')
+        logger.info(f"Apple subscription updated for user_id: {user_id}")
 
     # check google play store
     elif google_purchase_token or latest_subscription.google_purchase_token:
@@ -1212,7 +1278,8 @@ def update_client_subscription(
         google = PlayStore()
         playstore_response = google.verify_purchase(
             purchase_token=google_purchase_token
-            if google_purchase_token else latest_subscription.google_purchase_token,
+            if google_purchase_token
+            else latest_subscription.google_purchase_token,
         )
 
         # playstore subscription is 'active', latest_subscription is unsubscribed - new subscription entry for subscribed status
@@ -1220,41 +1287,54 @@ def update_client_subscription(
         # playstore subscription is 'invalid', latest_subscription is subscribed - update latest_subscription to unsubscribed, new subscription entry for unsubscribed status
         # playstore subscription is 'invalid', latest_subscription is unsubscribed - new subscription entry for unsubscribed status
         # playstore subscription is 'grace_period', latest_subscription.expire_date < utc_time_now - update latest_subscription to subscribed
-        if playstore_response['subscription_state'] != 'invalid':
-            if latest_subscription.subscription_status == 'subscribed':
+        if playstore_response["subscription_state"] != "invalid":
+            if latest_subscription.subscription_status == "subscribed":
                 # subscription is active and hasn't expired yet
-                latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
-            elif (latest_subscription.start_date == playstore_response['start_timestamp']):
+                latest_subscription.update(
+                    {"last_checked_date": utc_time_now.isoformat()}
+                )
+            elif (
+                latest_subscription.start_date == playstore_response["start_timestamp"]
+            ):
                 # sub valid or in grace period, but technically expired on our end, continue subscription
-                latest_subscription.update({
-                    'end_date': None,
-                    'subscription_status': 'subscribed',
-                    'last_checked_date': utc_time_now.isoformat(),
-                    'expire_date': playstore_response['expiration_timestamp'].isoformat(),
-                })
+                latest_subscription.update(
+                    {
+                        "end_date": None,
+                        "subscription_status": "subscribed",
+                        "last_checked_date": utc_time_now.isoformat(),
+                        "expire_date": playstore_response[
+                            "expiration_timestamp"
+                        ].isoformat(),
+                    }
+                )
                 logger.info(
-                    'Subscription was expired on our end, but technically'
+                    "Subscription was expired on our end, but technically"
                     " valid on Google's end. Continuing subscription."
                 )
                 new_sub_data = {}
 
             else:
                 new_sub_data = {
-                    'subscription_status': 'subscribed',
-                    'subscription_type_id': playstore_response['subscription_type_id'],
-                    'is_staff': False,
-                    'google_purchase_token': (
+                    "subscription_status": "subscribed",
+                    "subscription_type_id": playstore_response["subscription_type_id"],
+                    "is_staff": False,
+                    "google_purchase_token": (
                         google_purchase_token
-                        if google_purchase_token else latest_subscription.google_purchase_token
+                        if google_purchase_token
+                        else latest_subscription.google_purchase_token
                     ),
-                    'last_checked_date': utc_time_now.isoformat(),
-                    'expire_date': playstore_response['expiration_timestamp'].isoformat(),
-                    'start_date': playstore_response['start_timestamp'].isoformat(),
+                    "last_checked_date": utc_time_now.isoformat(),
+                    "expire_date": playstore_response[
+                        "expiration_timestamp"
+                    ].isoformat(),
+                    "start_date": playstore_response["start_timestamp"].isoformat(),
                 }
-                latest_subscription.update({
-                    'end_date': utc_time_now.isoformat(),
-                    'last_checked_date': utc_time_now.isoformat(),
-                })
+                latest_subscription.update(
+                    {
+                        "end_date": utc_time_now.isoformat(),
+                        "last_checked_date": utc_time_now.isoformat(),
+                    }
+                )
                 if latest_subscription.subscription_type_id == None:
                     welcome_email = True  # user was previously unsubscribed and now has a subscription
         else:
@@ -1262,25 +1342,27 @@ def update_client_subscription(
             # if latest_subscription is already unsubscribed, do nothing
             # but if latest_subscription is subscribed for some reason (revoke, refund etc),
             #   update to unsubscribed and add new subscription entry for unsubscribed status
-            if latest_subscription.subscription_status == 'subscribed':
+            if latest_subscription.subscription_status == "subscribed":
                 # update current subscription to unsubscribed
-                latest_subscription.update({
-                    'end_date': utc_time_now.isoformat(),
-                    'subscription_status': 'unsubscribed',
-                    'last_checked_date': utc_time_now.isoformat(),
-                })
+                latest_subscription.update(
+                    {
+                        "end_date": utc_time_now.isoformat(),
+                        "subscription_status": "unsubscribed",
+                        "last_checked_date": utc_time_now.isoformat(),
+                    }
+                )
                 # subscription has been revoked. Add new unsubscribed entry to UserSubscriptions
                 new_sub_data = {
-                    'subscription_status': 'unsubscribed',
-                    'is_staff': False,
-                    'start_date': datetime.utcnow().isoformat(),
+                    "subscription_status": "unsubscribed",
+                    "is_staff": False,
+                    "start_date": datetime.utcnow().isoformat(),
                 }
 
-        logger.info(f'Playstore subscription updated for user_id: {user_id}')
+        logger.info(f"Playstore subscription updated for user_id: {user_id}")
 
     if (
-        latest_subscription.subscription_status == 'unsubscribed'
-        and new_sub_data.get('subscription_status') != 'subscribed'
+        latest_subscription.subscription_status == "unsubscribed"
+        and new_sub_data.get("subscription_status") != "subscribed"
     ):
         # check if the user has a subscription granted to them
         #  - bring up earliest unused subscription grant
@@ -1289,41 +1371,44 @@ def update_client_subscription(
         subscription_grant = (
             CommunityManagerSubscriptionGrants.query.filter_by(
                 subscription_grantee_user_id=user_id, activated=False
-            ).order_by(CommunityManagerSubscriptionGrants.idx.asc()).first()
+            )
+            .order_by(CommunityManagerSubscriptionGrants.idx.asc())
+            .first()
         )
         if subscription_grant:
             subscription_grant.activated = True
             new_sub_data = {
-                'sponsorship_id':
-                    subscription_grant.idx,
-                'subscription_status':
-                    'subscribed',
-                'subscription_type_id':
-                    subscription_grant.subscription_type_id,
-                'is_staff':
-                    False,
-                'last_checked_date':
-                    utc_time_now.isoformat(),
-                'expire_date': (
-                    utc_time_now + timedelta(
-                        days=31 if subscription_grant.subscription_type_information.frequency ==
-                        'Month' else 365
+                "sponsorship_id": subscription_grant.idx,
+                "subscription_status": "subscribed",
+                "subscription_type_id": subscription_grant.subscription_type_id,
+                "is_staff": False,
+                "last_checked_date": utc_time_now.isoformat(),
+                "expire_date": (
+                    utc_time_now
+                    + timedelta(
+                        days=31
+                        if subscription_grant.subscription_type_information.frequency
+                        == "Month"
+                        else 365
                     )
                 ).isoformat(),
-                'start_date':
-                    utc_time_now.isoformat(),
+                "start_date": utc_time_now.isoformat(),
             }
-            latest_subscription.update({
-                'end_date': utc_time_now.isoformat(),
-                'last_checked_date': utc_time_now.isoformat(),
-            })
+            latest_subscription.update(
+                {
+                    "end_date": utc_time_now.isoformat(),
+                    "last_checked_date": utc_time_now.isoformat(),
+                }
+            )
             if latest_subscription.subscription_type_id == None:
-                welcome_email = True  # user was previously unsubscribed and now has a subscription
+                welcome_email = (
+                    True  # user was previously unsubscribed and now has a subscription
+                )
     else:
         # user is subscribed and hasn't expired yet
-        latest_subscription.update({'last_checked_date': utc_time_now.isoformat()})
+        latest_subscription.update({"last_checked_date": utc_time_now.isoformat()})
 
-    if new_sub_data.get('subscription_status'):
+    if new_sub_data.get("subscription_status"):
         new_sub = UserSubscriptionsSchema().load(new_sub_data)
         new_sub.user_id = user_id
         db.session.add(new_sub)
@@ -1331,7 +1416,7 @@ def update_client_subscription(
     if welcome_email:
         # send welcome email for new subscriptions
         user = User.query.filter_by(user_id=user_id).one_or_none()
-        send_email('subscription-confirm', user.email, firstname=user.firstname)
+        send_email("subscription-confirm", user.email, firstname=user.firstname)
 
 
 def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
@@ -1375,19 +1460,19 @@ def lru_cache_with_ttl(maxsize=128, typed=False, ttl=60):
                 f'Loading "{func!r}" ttl cache expire "{expire}" with value'
                 f' "{value}"'
             )
-            return {'value': value, 'expire': expire}
+            return {"value": value, "expire": expire}
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             result = cached_func(*args, **kwargs)
-            if result['expire'] < monotonic():
-                result['value'] = func(*args, **kwargs)
-                result['expire'] = monotonic() + ttl
+            if result["expire"] < monotonic():
+                result["value"] = func(*args, **kwargs)
+                result["expire"] = monotonic() + ttl
                 logger.debug(
                     f'Reloading "{func!r}" expired ttl cache new expire'
                     f' "{result["expire"]}"with value "{result["value"]}"'
                 )
-            return result['value']
+            return result["value"]
 
         wrapper.cache_clear = cached_func.cache_clear
         return wrapper
@@ -1424,12 +1509,9 @@ def create_wearables_filter_query(
     """
 
     filters = {
-        'user_id': user_id,
-        'wearable': wearable,
-        'timestamp': {
-            '$gte': start_date,
-            '$lte': end_date
-        },
+        "user_id": user_id,
+        "wearable": wearable,
+        "timestamp": {"$gte": start_date, "$lte": end_date},
     }
     # Data that should or shouldn't be included in final result.
     # Defaults to all fields
@@ -1437,23 +1519,25 @@ def create_wearables_filter_query(
 
     if len(query_specificaiton) > 0:
         # Validate
-        valid_query_specification = re.compile(r'^[A-Za-z_.]*$')
+        valid_query_specification = re.compile(r"^[A-Za-z_.]*$")
         # must manually include these fields to be returned if specifying data
-        specification['user_id'] = specification['timestamp'] = specification['wearable'] = 1
+        specification["user_id"] = specification["timestamp"] = specification[
+            "wearable"
+        ] = 1
 
         for field in query_specificaiton:
             # validate only allowed characters are in the query specifcation.
             if not valid_query_specification.match(field):
                 raise BadRequest(
-                    'Invalid character in query_specification. Only letters,'
-                    ' underscores, and periods allowed.'
+                    "Invalid character in query_specification. Only letters,"
+                    " underscores, and periods allowed."
                 )
 
             # Format to filter if requested field exists in document
-            if '$or' not in filters:
-                filters['$or'] = [{field: {'$exists': True}}]
+            if "$or" not in filters:
+                filters["$or"] = [{field: {"$exists": True}}]
             else:
-                filters['$or'].append({field: {'$exists': True}})
+                filters["$or"].append({field: {"$exists": True}})
 
             # Set field to be included in result
             specification[field] = 1
@@ -1461,7 +1545,9 @@ def create_wearables_filter_query(
     return filters, specification
 
 
-def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta(days=7)):
+def date_range(
+    start_time: str, end_time: str, time_range: timedelta = timedelta(days=7)
+):
     """
     Generate a start and end range for wearables data retrieval.
 
@@ -1483,7 +1569,7 @@ def date_range(start_time: str, end_time: str, time_range: timedelta = timedelta
         start_time = iso_string_to_iso_datetime(start_time)
         end_time = iso_string_to_iso_datetime(end_time)
         if start_time > end_time:
-            raise BadRequest('start_time must occur before end_time')
+            raise BadRequest("start_time must occur before end_time")
     elif start_time:
         start_time = iso_string_to_iso_datetime(start_time)
         end_time = start_time + time_range

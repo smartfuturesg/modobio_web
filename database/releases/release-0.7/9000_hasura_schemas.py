@@ -16,16 +16,16 @@
 
 import os
 
-user = os.getenv('DB_USER')
-password = os.getenv('DB_PASS')
+user = os.getenv("DB_USER")
+password = os.getenv("DB_PASS")
 
 # CREATE USER has no IF NOT EXISTS clause, hence the ugly workaround
 # https://stackoverflow.com/questions/8092086/create-postgresql-role-user-if-it-doesnt-exist
 
 if user:
-    add_password = ''
+    add_password = ""
     if password:
-        add_password = f'LOGIN PASSWORD \'{password}\''
+        add_password = f"LOGIN PASSWORD '{password}'"
 
     sql = f"""
     DO

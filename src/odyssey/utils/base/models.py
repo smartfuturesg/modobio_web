@@ -28,7 +28,9 @@ class BaseModel(db.Model):
     :type: :class:`datetime.datetime`
     """
 
-    updated_at = db.Column(db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME)
+    updated_at = db.Column(
+        db.DateTime, server_default=DB_SERVER_TIME, onupdate=DB_SERVER_TIME
+    )
     """
     Last update timestamp of this row in the database.
 
@@ -57,11 +59,12 @@ class UserIdFkeyMixin:
     Mixin for tables that require a foriegn key to the User.user_id column
     BE CAREFUL to only use this mixin when you intend to user Cascade deletion with this fkey
     """
+
     @declared_attr
     def user_id(cls):
         return db.Column(
             db.Integer,
-            db.ForeignKey('User.user_id', ondelete='CASCADE'),
+            db.ForeignKey("User.user_id", ondelete="CASCADE"),
             nullable=False,
         )
         """
@@ -75,11 +78,12 @@ class UserIdFkeyPKMixin:
     """
     Same as :class:`UserIdFkeyMixin` but with column `user_id` set as primary key.
     """
+
     @declared_attr
     def user_id(cls):
         return db.Column(
             db.Integer,
-            db.ForeignKey('User.user_id', ondelete='CASCADE'),
+            db.ForeignKey("User.user_id", ondelete="CASCADE"),
             primary_key=True,
         )
         """
@@ -93,9 +97,10 @@ class ReporterIdFkeyMixin:
     """
     Mixin for tables that require a reporter_id (user that reported the data) foreign key
     """
+
     @declared_attr
     def reporter_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('User.user_id'), nullable=False)
+        return db.Column(db.Integer, db.ForeignKey("User.user_id"), nullable=False)
         """
         Reporter ID number, foreign key to User.user_id
 

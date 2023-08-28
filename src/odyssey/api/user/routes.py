@@ -19,40 +19,62 @@ from werkzeug.security import check_password_hash
 from odyssey import db
 from odyssey.api.client.models import ClientFertility
 from odyssey.api.client.schemas import (
-    ClientGeneralMobileSettingsSchema, ClientInfoSchema, ClientRaceAndEthnicitySchema
+    ClientGeneralMobileSettingsSchema,
+    ClientInfoSchema,
+    ClientRaceAndEthnicitySchema,
 )
 from odyssey.api.lookup.models import LookupLegalDocs
 from odyssey.api.staff.models import StaffRoles
 from odyssey.api.staff.schemas import StaffProfileSchema, StaffRolesSchema
 from odyssey.api.user.models import (
-    User, UserLegalDocs, UserLogin, UserPendingEmailVerifications, UserResetPasswordRequestHistory,
-    UserSubscriptions, UserTokenHistory, UserTokensBlacklist
+    User,
+    UserLegalDocs,
+    UserLogin,
+    UserPendingEmailVerifications,
+    UserResetPasswordRequestHistory,
+    UserSubscriptions,
+    UserTokenHistory,
+    UserTokensBlacklist,
 )
 from odyssey.api.user.schemas import (
-    NewClientUserSchema, NewStaffUserSchema, UserInfoPutSchema, UserInfoSchema, UserLegalDocsSchema,
-    UserLoginSchema, UserPasswordRecoveryContactSchema, UserPasswordResetSchema,
-    UserPasswordUpdateSchema, UserSchema, UserSubscriptionHistorySchema, UserSubscriptionsSchema
+    NewClientUserSchema,
+    NewStaffUserSchema,
+    UserInfoPutSchema,
+    UserInfoSchema,
+    UserLegalDocsSchema,
+    UserLoginSchema,
+    UserPasswordRecoveryContactSchema,
+    UserPasswordResetSchema,
+    UserPasswordUpdateSchema,
+    UserSchema,
+    UserSubscriptionHistorySchema,
+    UserSubscriptionsSchema,
 )
 from odyssey.integrations.apple import AppStore
 from odyssey.tasks.tasks import update_active_campaign_tags
 from odyssey.utils.auth import basic_auth, token_auth
 from odyssey.utils.base.resources import BaseResource
-from odyssey.utils.constants import (PASSWORD_RESET_URL, PROVIDER_ROLES, STAFF_ROLES)
+from odyssey.utils.constants import PASSWORD_RESET_URL, PROVIDER_ROLES, STAFF_ROLES
 from odyssey.utils.message import email_domain_blacklisted, send_email
 from odyssey.utils.misc import (
-    EmailVerification, check_client_existence, check_staff_existence, check_user_existence,
-    update_client_subscription, verify_jwt
+    EmailVerification,
+    check_client_existence,
+    check_staff_existence,
+    check_user_existence,
+    update_client_subscription,
+    verify_jwt,
 )
 
-ns = Namespace('user', description='Endpoints for user accounts.')
+ns = Namespace("user", description="Endpoints for user accounts.")
 
 
-@ns.route('/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class ApiUser(BaseResource):
     """
     Retrieve, Update, and Delete a User's basic information.
     """
+
     @token_auth.login_required
     @responds(schema=UserSchema, api=ns)
     def get(self, user_id):
@@ -61,8 +83,8 @@ class ApiUser(BaseResource):
         return User.query.filter_by(user_id=user_id).one_or_none()
 
     @token_auth.login_required(
-        user_type=('staff', 'client', 'staff_self'),
-        staff_role=('client_services', ),
+        user_type=("staff", "client", "staff_self"),
+        staff_role=("client_services",),
     )
     @accepts(schema=UserInfoPutSchema)
     @responds(schema=NewClientUserSchema, status_code=200)
@@ -75,20 +97,20 @@ class ApiUser(BaseResource):
         user = self.check_user(user_id)
 
         user_info = request.json
-        email = user_info.get('email')
+        email = user_info.get("email")
 
         payload = {}
 
         # if email is part of payload, use email update routine
         if email:
             email_domain_blacklisted(email)
-            email_verification_data = (
-                EmailVerification().begin_email_verification(user, True, email=email)
+            email_verification_data = EmailVerification().begin_email_verification(
+                user, True, email=email
             )
-            del user_info['email']
+            del user_info["email"]
             # respond with verification code in dev/testing
             if current_app.debug:
-                payload['email_verification_code'] = email_verification_data.get('code')
+                payload["email_verification_code"] = email_verification_data.get("code")
 
         user.update(user_info)
         db.session.commit()
@@ -96,11 +118,11 @@ class ApiUser(BaseResource):
         return payload
 
 
-@ns.route('/staff/')
+@ns.route("/staff/")
 class NewStaffUser(BaseResource):
     @token_auth.login_required(
-        user_type=('staff', ),
-        staff_role=('staff_admin', 'system_admin', 'client_services'),
+        user_type=("staff",),
+        staff_role=("staff_admin", "system_admin", "client_services"),
     )
     @accepts(schema=NewStaffUserSchema, api=ns)
     @responds(schema=NewStaffUserSchema, status_code=201, api=ns)
@@ -114,8 +136,8 @@ class NewStaffUser(BaseResource):
         the password must match, or be and empty string (ie. "")
         """
         # Check if user exists already
-        user_info = request.json['user_info']
-        email = user_info['email']
+        user_info = request.json["user_info"]
+        email = user_info["email"]
 
         email_domain_blacklisted(email)
 
@@ -131,59 +153,67 @@ class NewStaffUser(BaseResource):
         # https://en.wikipedia.org/wiki/Email_address
         # https://unicode.org/reports/tr46/
         # Leaving this behaviour for now, until it becomes a problem.
-        email = user_info['email'] = email.lower()
+        email = user_info["email"] = email.lower()
 
-        staff_info = request.json.get('staff_info')
+        staff_info = request.json.get("staff_info")
 
         # validate requested roles. Assign user as staff, provider or both
         is_provider = (
-            True if any(role in PROVIDER_ROLES
-                        for role in staff_info.get('access_roles', [])) else False
+            True
+            if any(
+                role in PROVIDER_ROLES for role in staff_info.get("access_roles", [])
+            )
+            else False
         )
         is_staff = (
-            True if any(role in STAFF_ROLES
-                        for role in staff_info.get('access_roles', [])) else False
+            True
+            if any(role in STAFF_ROLES for role in staff_info.get("access_roles", []))
+            else False
         )
 
         user = User.query.filter(User.email.ilike(email)).first()
         if user:
             if user.is_staff or user.is_provider:
                 # user account already exists for this email and is already a staff/provider account
-                raise BadRequest('Email address {email} already exists.')
+                raise BadRequest("Email address {email} already exists.")
 
-            elif all((
-                user.is_client == False,
-                user.is_staff == False,
-                user.is_provider == False,
-            )):
+            elif all(
+                (
+                    user.is_client == False,
+                    user.is_staff == False,
+                    user.is_provider == False,
+                )
+            ):
                 # user is neither a staff, provider, nor client user
                 # currently, this can be the case when the user has been added by another user through the
                 # team system. the user info provided will populate the already existing user entry and the
                 # password given will overwrite the password in the UserLogin entry (if it exist)
 
-                password = user_info.get('password', None)
+                password = user_info.get("password", None)
 
                 if not password:
-                    raise BadRequest('Password required.')
+                    raise BadRequest("Password required.")
 
-                del user_info['password']
-                user_info['is_client'] = False
-                user_info['is_staff'] = is_staff
-                user_info['is_provider'] = is_provider
-                user_info['was_staff'] = True
+                del user_info["password"]
+                user_info["is_client"] = False
+                user_info["is_staff"] = is_staff
+                user_info["is_provider"] = is_provider
+                user_info["was_staff"] = True
                 user.update(user_info)
 
                 user_login = (
-                    db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)
-                                      ).scalars().one_or_none()
+                    db.session.execute(
+                        select(UserLogin).filter(UserLogin.user_id == user.user_id)
+                    )
+                    .scalars()
+                    .one_or_none()
                 )
                 if user_login:
                     user_login.set_password(password)
                 else:
-                    user_login = UserLoginSchema().load({
-                        'user_id': user.user_id,
-                        'password': password
-                    })
+                    user_login = UserLoginSchema().load(
+                        {"user_id": user.user_id, "password": password}
+                    )
                     db.session.add(user_login)
                 db.session.flush()
                 verify_email = True
@@ -192,7 +222,7 @@ class NewStaffUser(BaseResource):
                 user.is_staff = is_staff
                 user.is_provider = is_provider
                 user.was_staff = True
-                del user_info['password']
+                del user_info["password"]
                 user.update(user_info)
 
                 if user.email_verified:
@@ -202,78 +232,83 @@ class NewStaffUser(BaseResource):
                         # User already exists and email is verified.
                         # Check if contact exists in Active Campaign, if not create contact.
                         update_active_campaign_tags.delay(
-                            user_id=user.user_id, tags=['Persona - Provider']
+                            user_id=user.user_id, tags=["Persona - Provider"]
                         )
                 else:
                     verify_email = True
         else:
             # user account does not yet exist for this email
             # require password
-            password = user_info.get('password', None)
+            password = user_info.get("password", None)
             if not password:
-                raise BadRequest('Password required.')
+                raise BadRequest("Password required.")
 
-            del user_info['password']
+            del user_info["password"]
 
-            user_info['is_client'] = False
-            user_info['is_staff'] = is_staff
-            user_info['is_provider'] = is_provider
-            user_info['was_staff'] = True
+            user_info["is_client"] = False
+            user_info["is_staff"] = is_staff
+            user_info["is_provider"] = is_provider
+            user_info["was_staff"] = True
             # create entry into User table first
             # use the generated user_id for UserLogin & StaffProfile tables
             user = UserSchema().load(user_info)
             db.session.add(user)
             db.session.flush()
 
-            user_login = UserLoginSchema().load({'user_id': user.user_id, 'password': password})
+            user_login = UserLoginSchema().load(
+                {"user_id": user.user_id, "password": password}
+            )
             db.session.add(user_login)
 
             verify_email = True
 
         if verify_email:
-            email_verification_data = (EmailVerification().begin_email_verification(user, False))
+            email_verification_data = EmailVerification().begin_email_verification(
+                user, False
+            )
 
         # create subscription entry for new staff user
-        staff_sub = UserSubscriptionsSchema().load({
-            'subscription_status': 'subscribed',
-            'is_staff': True
-        })
+        staff_sub = UserSubscriptionsSchema().load(
+            {"subscription_status": "subscribed", "is_staff": True}
+        )
         staff_sub.user_id = user.user_id
         db.session.add(staff_sub)
 
         # add staff_profile for user
-        staff_profile = StaffProfileSchema().load({'user_id': user.user_id})
+        staff_profile = StaffProfileSchema().load({"user_id": user.user_id})
         db.session.add(staff_profile)
 
         # create entries for role assignments
-        for role in staff_info.get('access_roles', []):
+        for role in staff_info.get("access_roles", []):
             db.session.add(
-                StaffRolesSchema().load({
-                    'user_id': user.user_id,
-                    'role': role,
-                    'granter_id': token_auth.current_user()[0].user_id,
-                })
+                StaffRolesSchema().load(
+                    {
+                        "user_id": user.user_id,
+                        "role": role,
+                        "granter_id": token_auth.current_user()[0].user_id,
+                    }
+                )
             )
 
         db.session.commit()
         db.session.refresh(user)
         payload = user.__dict__
-        payload['staff_info'] = {
-            'access_roles': staff_info.get('access_roles', []),
-            'access_roles_v2': StaffRoles.query.filter_by(user_id=user.user_id),
+        payload["staff_info"] = {
+            "access_roles": staff_info.get("access_roles", []),
+            "access_roles_v2": StaffRoles.query.filter_by(user_id=user.user_id),
         }
 
-        payload['user_info'] = user
+        payload["user_info"] = user
 
         # respond with verification code in dev
         if current_app.debug and verify_email:
-            payload['email_verification_code'] = email_verification_data.get('code')
+            payload["email_verification_code"] = email_verification_data.get("code")
 
         return payload
 
 
-@ns.route('/staff/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/staff/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class StaffUserInfo(BaseResource):
     @token_auth.login_required
     @responds(schema=NewStaffUserSchema, status_code=200, api=ns)
@@ -286,16 +321,16 @@ class StaffUserInfo(BaseResource):
             access_roles.append(role.role)
 
         payload = {
-            'staff_info': {
-                'access_roles': access_roles,
-                'access_roles_v2': staff_roles,
+            "staff_info": {
+                "access_roles": access_roles,
+                "access_roles_v2": staff_roles,
             },
-            'user_info': user,
+            "user_info": user,
         }
         return payload
 
 
-@ns.route('/client/')
+@ns.route("/client/")
 class NewClientUser(BaseResource):
     @accepts(schema=UserInfoSchema, api=ns)
     @responds(schema=NewClientUserSchema, status_code=201, api=ns)
@@ -307,7 +342,7 @@ class NewClientUser(BaseResource):
         the password provided must match the one already in use by staff account
         """
         user_info = request.json
-        email = user_info['email']
+        email = user_info["email"]
 
         email_domain_blacklisted(email)
 
@@ -323,44 +358,48 @@ class NewClientUser(BaseResource):
         # https://en.wikipedia.org/wiki/Email_address
         # https://unicode.org/reports/tr46/
         # Leaving this behaviour for now, until it becomes a problem.
-        email = user_info['email'] = email.lower()
+        email = user_info["email"] = email.lower()
 
         user = (
-            db.session.execute(select(User).filter(User.email == email)).scalars().one_or_none()
+            db.session.execute(select(User).filter(User.email == email))
+            .scalars()
+            .one_or_none()
         )
         subscription_update = False
         if user:
             if user.is_client:
                 # user account already exists for this email and is already a client account
-                raise BadRequest('Email address {email} already exists.')
+                raise BadRequest("Email address {email} already exists.")
             elif user.is_client == False and user.is_staff == False:
                 # client is neither a staff or client user
                 # currently, this can be the case when the user has been added by another user through the clinical
                 # care team system. the user info provided will populate the already existing user entry and the
                 # password given will overwrite the password in the UserLogin entry (if it exist)
 
-                password = user_info.get('password', None)
+                password = user_info.get("password", None)
 
                 if not password:
-                    raise BadRequest('Password required.')
+                    raise BadRequest("Password required.")
 
-                del user_info['password']
-                user_info['is_client'] = True
-                user_info['is_staff'] = False
-                user_info['was_staff'] = False
+                del user_info["password"]
+                user_info["is_client"] = True
+                user_info["is_staff"] = False
+                user_info["was_staff"] = False
                 user.update(user_info)
 
                 user_login = (
-                    db.session.execute(select(UserLogin).filter(UserLogin.user_id == user.user_id)
-                                      ).scalars().one_or_none()
+                    db.session.execute(
+                        select(UserLogin).filter(UserLogin.user_id == user.user_id)
+                    )
+                    .scalars()
+                    .one_or_none()
                 )
                 if user_login:
                     user_login.set_password(password)
                 else:
-                    user_login = UserLoginSchema().load({
-                        'user_id': user.user_id,
-                        'password': password
-                    })
+                    user_login = UserLoginSchema().load(
+                        {"user_id": user.user_id, "password": password}
+                    )
                     db.session.add(user_login)
                 db.session.flush()
                 verify_email = True
@@ -368,8 +407,8 @@ class NewClientUser(BaseResource):
             else:
                 # user account exists but only the staff portion of the account is defined
                 # verify password matches already existing staff login info before allowing client access
-                password = user_info.get('password')
-                del user_info['password']
+                password = user_info.get("password")
+                del user_info["password"]
                 user, user_login, _ = basic_auth.verify_password(
                     username=user.email, password=password
                 )
@@ -386,87 +425,92 @@ class NewClientUser(BaseResource):
                         # User already exists and email is verified.
                         # Check if contact exists in Active Campaign, if not create contact.
                         update_active_campaign_tags.delay(
-                            user_id=user.user_id, tags=['Persona - Client']
+                            user_id=user.user_id, tags=["Persona - Client"]
                         )
 
                 else:
                     verify_email = True
         else:
             # user account does not yet exist for this email
-            password = user_info.get('password', None)
+            password = user_info.get("password", None)
             if not password:
-                raise BadRequest('Password required.')
+                raise BadRequest("Password required.")
 
-            del user_info['password']
-            user_info['is_client'] = True
-            user_info['is_staff'] = False
-            user_info['was_staff'] = False
+            del user_info["password"]
+            user_info["is_client"] = True
+            user_info["is_staff"] = False
+            user_info["was_staff"] = False
             user = UserSchema().load(user_info)
             db.session.add(user)
             db.session.flush()
-            user_login = UserLoginSchema().load({'user_id': user.user_id, 'password': password})
+            user_login = UserLoginSchema().load(
+                {"user_id": user.user_id, "password": password}
+            )
             db.session.add(user_login)
 
             verify_email = True
 
         if verify_email:
-            email_verification_data = (EmailVerification().begin_email_verification(user, False))
+            email_verification_data = EmailVerification().begin_email_verification(
+                user, False
+            )
 
             # Authenticate newly created client account for immediate login
-            user, user_login, _ = basic_auth.verify_password(username=user.email, password=password)
+            user, user_login, _ = basic_auth.verify_password(
+                username=user.email, password=password
+            )
 
-        client_info = ClientInfoSchema().load({'user_id': user.user_id})
+        client_info = ClientInfoSchema().load({"user_id": user.user_id})
         db.session.add(client_info)
 
         # add new client subscription information
-        client_sub = UserSubscriptionsSchema().load({
-            'subscription_status': 'unsubscribed',
-            'is_staff': False
-        })
+        client_sub = UserSubscriptionsSchema().load(
+            {"subscription_status": "unsubscribed", "is_staff": False}
+        )
         client_sub.user_id = user.user_id
         db.session.add(client_sub)
 
         # add default client mobile settings
-        client_mobile_settings = ClientGeneralMobileSettingsSchema().load({
-            'include_timezone': True,
-            'display_middle_name': False,
-            'use_24_hour_clock': False,
-            'is_right_handed': True,
-            'enable_push_notifications': False,
-            'timezone_tracking': False,
-            'biometrics_setup': False,
-            'date_format': '%d-%b-%Y',
-        })
+        client_mobile_settings = ClientGeneralMobileSettingsSchema().load(
+            {
+                "include_timezone": True,
+                "display_middle_name": False,
+                "use_24_hour_clock": False,
+                "is_right_handed": True,
+                "enable_push_notifications": False,
+                "timezone_tracking": False,
+                "biometrics_setup": False,
+                "date_format": "%d-%b-%Y",
+            }
+        )
         client_mobile_settings.user_id = user.user_id
         db.session.add(client_mobile_settings)
 
         # add default client race and ethnicity settings
-        client_mother_race_info = ClientRaceAndEthnicitySchema().load({
-            'is_client_mother': True,
-            'race_id': 1
-        })
+        client_mother_race_info = ClientRaceAndEthnicitySchema().load(
+            {"is_client_mother": True, "race_id": 1}
+        )
         client_mother_race_info.user_id = user.user_id
-        client_father_race_info = ClientRaceAndEthnicitySchema().load({
-            'is_client_mother': False,
-            'race_id': 1
-        })
+        client_father_race_info = ClientRaceAndEthnicitySchema().load(
+            {"is_client_mother": False, "race_id": 1}
+        )
         client_father_race_info.user_id = user.user_id
         db.session.add(client_mother_race_info)
         db.session.add(client_father_race_info)
 
         # if client biological_sex_male = False, add default fertility status
-        if 'biological_sex_male' in user_info:
-            if not user_info['biological_sex_male']:
-                fertility = ClientFertility(**{'pregnant': False, 'status': 'unknown'})
+        if "biological_sex_male" in user_info:
+            if not user_info["biological_sex_male"]:
+                fertility = ClientFertility(**{"pregnant": False, "status": "unknown"})
                 fertility.user_id = user.user_id
                 db.session.add(fertility)
 
         # Generate access and refresh tokens
         access_token = UserLogin.generate_token(
-            user_type='client', user_id=user.user_id, token_type='access'
+            user_type="client", user_id=user.user_id, token_type="access"
         )
         refresh_token = UserLogin.generate_token(
-            user_type='client', user_id=user.user_id, token_type='refresh'
+            user_type="client", user_id=user.user_id, token_type="refresh"
         )
 
         # Add refresh token to db
@@ -474,8 +518,8 @@ class NewClientUser(BaseResource):
             UserTokenHistory(
                 user_id=user.user_id,
                 refresh_token=refresh_token,
-                event='login',
-                ua_string=request.headers.get('User-Agent'),
+                event="login",
+                ua_string=request.headers.get("User-Agent"),
             )
         )
 
@@ -486,21 +530,22 @@ class NewClientUser(BaseResource):
             update_client_subscription(user_id=user.user_id)
 
         payload = {
-            'user_info': user,
-            'token': access_token,
-            'refresh_token': refresh_token,
+            "user_info": user,
+            "token": access_token,
+            "refresh_token": refresh_token,
         }
 
         # respond with verification code in dev
         if current_app.debug and verify_email:
-            payload['email_verification_code'] = email_verification_data.get('code')
+            payload["email_verification_code"] = email_verification_data.get("code")
 
         return payload
 
 
-@ns.route('/password/forgot-password/recovery-link/')
+@ns.route("/password/forgot-password/recovery-link/")
 class PasswordResetEmail(BaseResource):
     """Password reset endpoints."""
+
     @accepts(schema=UserPasswordRecoveryContactSchema, api=ns)
     @responds(schema=UserPasswordRecoveryContactSchema, status_code=200, api=ns)
     def post(self):
@@ -517,35 +562,37 @@ class PasswordResetEmail(BaseResource):
         If the email does not exist, no email is sent.
         response 200 OK
         """
-        email = request.parsed_obj['email']
+        email = request.parsed_obj["email"]
         if not email:
-            raise BadRequest('Email address required.')
+            raise BadRequest("Email address required.")
 
         res = {}
 
         # verify Google ReCaptcha - optional if in dev environment, otherwise required.
-        if not current_app.debug or (current_app.debug and 'captcha_key' in request.parsed_obj):
+        if not current_app.debug or (
+            current_app.debug and "captcha_key" in request.parsed_obj
+        ):
             request_data = {
-                'secret': current_app.config['GOOGLE_RECAPTCHA_SECRET'],
-                'response': request.parsed_obj['captcha_key'],
+                "secret": current_app.config["GOOGLE_RECAPTCHA_SECRET"],
+                "response": request.parsed_obj["captcha_key"],
             }
 
             response = requests.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                "https://www.google.com/recaptcha/api/siteverify",
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
                 data=request_data,
             )
 
             res = json.loads(response.text)
-            if 'error-codes' in res:
-                res['error_codes'] = res['error-codes']
+            if "error-codes" in res:
+                res["error_codes"] = res["error-codes"]
 
             # if captcha verification failed, return here rather than starting the password reset process
-            if not res['success']:
+            if not res["success"]:
                 return res
 
         # collect user agent string from request headers
-        ua_string = request.headers.get('User-Agent')
+        ua_string = request.headers.get("User-Agent")
 
         # TODO save request history in logs, not db
         request_history = UserResetPasswordRequestHistory()
@@ -567,33 +614,38 @@ class PasswordResetEmail(BaseResource):
         # For mobile, this should be a universal link that tries to open the app
         url_scheme = f'https://{current_app.config["FRONT_END_DOMAIN_NAME"]}'
 
-        secret = current_app.config['SECRET_KEY']
+        secret = current_app.config["SECRET_KEY"]
         token = {
-            'exp': datetime.utcnow() + timedelta(minutes=15),
-            'sid': user.user_id,
+            "exp": datetime.utcnow() + timedelta(minutes=15),
+            "sid": user.user_id,
         }
-        password_reset_token = jwt.encode(token, secret, algorithm='HS256')
+        password_reset_token = jwt.encode(token, secret, algorithm="HS256")
 
         send_email(
-            'password-reset',
+            "password-reset",
             user.email,
             name=user.firstname,
             email=user.email,
-            reset_password_url=PASSWORD_RESET_URL.format(url_scheme, password_reset_token),
+            reset_password_url=PASSWORD_RESET_URL.format(
+                url_scheme, password_reset_token
+            ),
         )
 
         # DEV mode won't send an email, so return password. DEV mode ONLY.
         if current_app.debug:
-            res['token'] = password_reset_token
-            res['password_reset_url'] = PASSWORD_RESET_URL.format(url_scheme, password_reset_token)
+            res["token"] = password_reset_token
+            res["password_reset_url"] = PASSWORD_RESET_URL.format(
+                url_scheme, password_reset_token
+            )
 
         return res
 
 
-@ns.route('/password/forgot-password/reset')
-@ns.doc(params={'reset_token': 'token from password reset endpoint'})
+@ns.route("/password/forgot-password/reset")
+@ns.doc(params={"reset_token": "token from password reset endpoint"})
 class ResetPassword(BaseResource):
     """Reset the user's password."""
+
     @accepts(schema=UserPasswordResetSchema, api=ns)
     def put(self):
         """
@@ -602,21 +654,21 @@ class ResetPassword(BaseResource):
         response 200 OK
         """
         # decode and validate token
-        secret = current_app.config['SECRET_KEY']
-        reset_token = request.args.get('reset_token')
+        secret = current_app.config["SECRET_KEY"]
+        reset_token = request.args.get("reset_token")
         try:
-            decoded_token = jwt.decode(reset_token, secret, algorithms='HS256')
+            decoded_token = jwt.decode(reset_token, secret, algorithms="HS256")
         except jwt.ExpiredSignatureError:
-            raise Unauthorized('Token authorization expired.')
+            raise Unauthorized("Token authorization expired.")
 
         # bring up the staff member and reset their password
-        pswd = request.parsed_obj['password']
+        pswd = request.parsed_obj["password"]
 
-        user = UserLogin.query.filter_by(user_id=decoded_token['sid']).first()
+        user = UserLogin.query.filter_by(user_id=decoded_token["sid"]).first()
 
         # Make sure user does not enter the previous password as the new password
         if check_password_hash(user.password, pswd):
-            raise BadRequest('New password must be different than the old password.')
+            raise BadRequest("New password must be different than the old password.")
 
         user.set_password(pswd)
         db.session.commit()
@@ -624,9 +676,10 @@ class ResetPassword(BaseResource):
         return 200
 
 
-@ns.route('/password/update/')
+@ns.route("/password/update/")
 class ChangePassword(BaseResource):
     """Reset the user's password."""
+
     @token_auth.login_required
     @accepts(schema=UserPasswordUpdateSchema, api=ns)
     def post(self):
@@ -639,12 +692,18 @@ class ChangePassword(BaseResource):
         _, user_login = token_auth.current_user()
 
         # Check that the user entered the correct current password
-        if check_password_hash(user_login.password, request.parsed_obj['current_password']):
+        if check_password_hash(
+            user_login.password, request.parsed_obj["current_password"]
+        ):
             # Make sure user does not enter the previous password as the new password
-            if check_password_hash(user_login.password, request.parsed_obj['new_password']):
-                raise BadRequest('New password must be different than the old password.')
+            if check_password_hash(
+                user_login.password, request.parsed_obj["new_password"]
+            ):
+                raise BadRequest(
+                    "New password must be different than the old password."
+                )
 
-            user_login.set_password(request.parsed_obj['new_password'])
+            user_login.set_password(request.parsed_obj["new_password"])
         else:
             raise Unauthorized
 
@@ -653,54 +712,57 @@ class ChangePassword(BaseResource):
         return 200
 
 
-@ns.route('/token/refresh')
-@ns.doc(params={'refresh_token': 'token from password reset endpoint'})
+@ns.route("/token/refresh")
+@ns.doc(params={"refresh_token": "token from password reset endpoint"})
 class RefreshToken(BaseResource):
     """User refresh token to issue a new token with a 1 hr TTL"""
+
     def post(self):
         """
         Issues new API access token if refrsh_token is still valid
         """
-        refresh_token = request.args.get('refresh_token')
+        refresh_token = request.args.get("refresh_token")
 
         # ensure refresh token is not on blacklist
         if UserTokensBlacklist.query.filter_by(token=refresh_token).one_or_none():
             # log failed refresh attempt
-            token_payload = jwt.decode(refresh_token, options={'verify_signature': False})
+            token_payload = jwt.decode(
+                refresh_token, options={"verify_signature": False}
+            )
             db.session.add(
                 UserTokenHistory(
-                    user_id=token_payload.get('uid'),
-                    event='refresh',
-                    ua_string=request.headers.get('User-Agent'),
+                    user_id=token_payload.get("uid"),
+                    event="refresh",
+                    ua_string=request.headers.get("User-Agent"),
                 )
             )
             db.session.commit()
-            raise Unauthorized('Invalid refresh token.')
+            raise Unauthorized("Invalid refresh token.")
 
         # check that the token is valid
         decoded_token = verify_jwt(refresh_token, refresh=True)
 
         # if valid, create a new access token, return it in the payload
         access_token = UserLogin.generate_token(
-            user_id=decoded_token['uid'],
-            user_type=decoded_token['utype'],
-            token_type='access',
+            user_id=decoded_token["uid"],
+            user_type=decoded_token["utype"],
+            token_type="access",
         )
         # pass new lifetime here
         new_refresh_token = UserLogin.generate_token(
-            user_id=decoded_token['uid'],
-            user_type=decoded_token['utype'],
-            token_type='refresh',
-            refresh_token_lifetime=decoded_token['ttl'],
+            user_id=decoded_token["uid"],
+            user_type=decoded_token["utype"],
+            token_type="refresh",
+            refresh_token_lifetime=decoded_token["ttl"],
         )
 
         # add refresh details to UserTokenHistory table
         db.session.add(
             UserTokenHistory(
-                user_id=decoded_token['uid'],
+                user_id=decoded_token["uid"],
                 refresh_token=new_refresh_token,
-                event='refresh',
-                ua_string=request.headers.get('User-Agent'),
+                event="refresh",
+                ua_string=request.headers.get("User-Agent"),
             )
         )
 
@@ -709,17 +771,19 @@ class RefreshToken(BaseResource):
         db.session.commit()
 
         return {
-            'access_token': access_token,
-            'refresh_token': new_refresh_token,
+            "access_token": access_token,
+            "refresh_token": new_refresh_token,
         }, 201
 
 
-@ns.route('/subscription/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/subscription/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class UserSubscriptionApi(BaseResource):
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('staff', 'client'), staff_role=('client_services', ))
+    @token_auth.login_required(
+        user_type=("staff", "client"), staff_role=("client_services",)
+    )
     @responds(schema=UserSubscriptionsSchema, api=ns, status_code=200)
     def get(self, user_id):
         """
@@ -732,24 +796,26 @@ class UserSubscriptionApi(BaseResource):
         current_subscription = (
             UserSubscriptions.query.filter_by(
                 user_id=user_id,
-                is_staff=True if g.user_type == 'staff' else False,
-            ).order_by(UserSubscriptions.idx.desc()).first()
+                is_staff=True if g.user_type == "staff" else False,
+            )
+            .order_by(UserSubscriptions.idx.desc())
+            .first()
         )
-        current_subscription.auto_renew_status = (current_subscription.apple_auto_renew)
+        current_subscription.auto_renew_status = current_subscription.apple_auto_renew
 
         if current_subscription.sponsorship:
             sponsoring_user = User.query.filter_by(
                 user_id=current_subscription.sponsorship.user_id
             ).one_or_none()
-            current_subscription.__dict__['sponsorship'] = {
-                'sponsor': current_subscription.sponsorship.sponsor,
-                'first_name': sponsoring_user.firstname,
-                'last_name': sponsoring_user.lastname,
-                'modobio_id': sponsoring_user.modobio_id,
+            current_subscription.__dict__["sponsorship"] = {
+                "sponsor": current_subscription.sponsorship.sponsor,
+                "first_name": sponsoring_user.firstname,
+                "last_name": sponsoring_user.lastname,
+                "modobio_id": sponsoring_user.modobio_id,
             }
         return current_subscription
 
-    @token_auth.login_required(user_type=('staff-self', 'client'))
+    @token_auth.login_required(user_type=("staff-self", "client"))
     @accepts(schema=UserSubscriptionsSchema, api=ns)
     @responds(schema=UserSubscriptionsSchema, api=ns, status_code=201)
     def put(self, user_id):
@@ -770,11 +836,12 @@ class UserSubscriptionApi(BaseResource):
             if (
                 UserSubscriptions.query.filter_by(
                     apple_original_transaction_id=request.parsed_obj.apple_original_transaction_id
-                ).filter(UserSubscriptions.user_id != user_id).first()
+                )
+                .filter(UserSubscriptions.user_id != user_id)
+                .first()
             ):
                 raise BadRequest(
-                    'This original transaction ID is already in use by another'
-                    ' user.'
+                    "This original transaction ID is already in use by another" " user."
                 )
             update_client_subscription(
                 user_id=user_id,
@@ -787,11 +854,12 @@ class UserSubscriptionApi(BaseResource):
             if (
                 UserSubscriptions.query.filter_by(
                     google_purchase_token=request.parsed_obj.google_purchase_token
-                ).filter(UserSubscriptions.user_id != user_id).first()
+                )
+                .filter(UserSubscriptions.user_id != user_id)
+                .first()
             ):
                 raise BadRequest(
-                    'This google purchase token is already in use by another'
-                    ' user.'
+                    "This google purchase token is already in use by another" " user."
                 )
 
             update_client_subscription(
@@ -801,22 +869,25 @@ class UserSubscriptionApi(BaseResource):
             db.session.commit()
 
         elif (
-            not request.parsed_obj.is_staff and not request.parsed_obj.apple_original_transaction_id
+            not request.parsed_obj.is_staff
+            and not request.parsed_obj.apple_original_transaction_id
         ):
-            raise BadRequest('Missing original transaction id')
+            raise BadRequest("Missing original transaction id")
 
         current_subscription = (
             UserSubscriptions.query.filter_by(
                 user_id=user_id,
-                is_staff=True if g.user_type == 'staff' else False,
-            ).order_by(UserSubscriptions.idx.desc()).first()
+                is_staff=True if g.user_type == "staff" else False,
+            )
+            .order_by(UserSubscriptions.idx.desc())
+            .first()
         )
 
         return current_subscription
 
 
-@ns.route('/subscription/history/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/subscription/history/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class UserSubscriptionHistoryApi(BaseResource):
     @token_auth.login_required
     @responds(schema=UserSubscriptionHistorySchema, api=ns, status_code=200)
@@ -828,34 +899,37 @@ class UserSubscriptionHistoryApi(BaseResource):
         check_user_existence(user_id)
 
         client_history = (
-            UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=False).order_by(
-                UserSubscriptions.idx.desc()
-            ).all()
+            UserSubscriptions.query.filter_by(user_id=user_id)
+            .filter_by(is_staff=False)
+            .order_by(UserSubscriptions.idx.desc())
+            .all()
         )
         for i, client_subscription in enumerate(client_history):
             if client_subscription.sponsorship:
                 sponsoring_user = User.query.filter_by(
                     user_id=client_subscription.sponsorship.user_id
                 ).one_or_none()
-                client_subscription.__dict__['sponsorship'] = {
-                    'sponsor': client_subscription.sponsorship.sponsor,
-                    'first_name': sponsoring_user.firstname,
-                    'last_name': sponsoring_user.lastname,
-                    'modobio_id': sponsoring_user.modobio_id,
+                client_subscription.__dict__["sponsorship"] = {
+                    "sponsor": client_subscription.sponsorship.sponsor,
+                    "first_name": sponsoring_user.firstname,
+                    "last_name": sponsoring_user.lastname,
+                    "modobio_id": sponsoring_user.modobio_id,
                 }
                 client_history[i] = client_subscription
 
         staff_history = (
-            UserSubscriptions.query.filter_by(user_id=user_id).filter_by(is_staff=True).all()
+            UserSubscriptions.query.filter_by(user_id=user_id)
+            .filter_by(is_staff=True)
+            .all()
         )
 
         res = {}
-        res['client_subscription_history'] = client_history
-        res['staff_subscription_history'] = staff_history
+        res["client_subscription_history"] = client_history
+        res["staff_subscription_history"] = staff_history
         return res
 
 
-@ns.route('/logout/')
+@ns.route("/logout/")
 class UserLogoutApi(BaseResource):
     @token_auth.login_required
     def post(self):
@@ -866,7 +940,7 @@ class UserLogoutApi(BaseResource):
         refresh_token = token_auth.current_user()[1].refresh_token
 
         # remove 'Bearer ' from the front of the access token
-        access_token = request.headers.get('Authorization').split()[1]
+        access_token = request.headers.get("Authorization").split()[1]
 
         db.session.add(UserTokensBlacklist(token=refresh_token))
         db.session.add(UserTokensBlacklist(token=access_token))
@@ -880,39 +954,39 @@ class UserLogoutApi(BaseResource):
 from odyssey.api.notifications.schemas import NotificationSchema
 
 
-@ns.route('/notifications/<int:user_id>/')
+@ns.route("/notifications/<int:user_id>/")
 @ns.deprecated
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.doc(params={"user_id": "User ID number"})
 class UserNotificationsApi(BaseResource):
     @token_auth.login_required
     @responds(
         api=ns,
         status_code=308,
-        description='Permanently moved to GET /notifications/<user_id>/',
+        description="Permanently moved to GET /notifications/<user_id>/",
     )
     def get(self, user_id):
         """[DEPRECATED] Moved to GET `/notifications/<user_id>/`."""
-        return redirect(f'/notifications/{user_id}/', code=308)
+        return redirect(f"/notifications/{user_id}/", code=308)
 
 
-@ns.route('/notifications/<int:idx>/')
+@ns.route("/notifications/<int:idx>/")
 @ns.deprecated
-@ns.doc(params={'idx': 'Notification idx number'})
+@ns.doc(params={"idx": "Notification idx number"})
 class UserNotificationsPutApi(BaseResource):
     @token_auth.login_required
     @accepts(schema=NotificationSchema, api=ns)
     @responds(
         api=ns,
         status_code=308,
-        description=('Permanently moved to PUT /notifications/<notification_id>/'),
+        description=("Permanently moved to PUT /notifications/<notification_id>/"),
     )
     def put(self, idx):
         """[DEPRECATED] Moved to PUT `/notifications/<notification_id>/`."""
-        return redirect(f'/notifications/{idx}/', code=308)
+        return redirect(f"/notifications/{idx}/", code=308)
 
 
-@ns.route('/email-verification/token/<string:token>/')
-@ns.doc(params={'token': 'Email verification token'})
+@ns.route("/email-verification/token/<string:token>/")
+@ns.doc(params={"token": "Email verification token"})
 class UserPendingEmailVerificationsTokenApi(BaseResource):
     @responds(status_code=200)
     def get(self, token):
@@ -925,8 +999,8 @@ class UserPendingEmailVerificationsTokenApi(BaseResource):
         return
 
 
-@ns.route('/email-verification/code/<int:user_id>/')
-@ns.doc(params={'code': 'Email verification code'})
+@ns.route("/email-verification/code/<int:user_id>/")
+@ns.doc(params={"code": "Email verification code"})
 class UserPendingEmailVerificationsCodeApi(BaseResource):
     __check_resource__ = False
 
@@ -948,14 +1022,14 @@ class UserPendingEmailVerificationsCodeApi(BaseResource):
             email verification code provided during client creation
         """
         EmailVerification().complete_email_verification(
-            user_id=user_id, code=request.args.get('code')
+            user_id=user_id, code=request.args.get("code")
         )
 
         return
 
 
-@ns.route('/email-verification/resend/<int:user_id>/')
-@ns.doc(params={'user_id': 'User ID number'})
+@ns.route("/email-verification/resend/<int:user_id>/")
+@ns.doc(params={"user_id": "User ID number"})
 class UserPendingEmailVerificationsResendApi(BaseResource):
     """
     If a user waited too long to verify their email and their token/code have expired,
@@ -967,10 +1041,12 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
 
     @responds(status_code=200)
     def post(self, user_id):
-        verification = UserPendingEmailVerifications.query.filter_by(user_id=user_id).one_or_none()
+        verification = UserPendingEmailVerifications.query.filter_by(
+            user_id=user_id
+        ).one_or_none()
 
         if not verification:
-            raise Unauthorized('Email verification failed.')
+            raise Unauthorized("Email verification failed.")
 
         # create a new token and code for this user
         verification.token = EmailVerification.generate_token(user_id)
@@ -981,13 +1057,13 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
         user = User.query.filter_by(user_id=user_id).one_or_none()
 
         link = url_for(
-            '.user_user_pending_email_verifications_token_api',
+            ".user_user_pending_email_verifications_token_api",
             token=verification.token,
             _external=True,
         )
 
         send_email(
-            'email-verify',
+            "email-verify",
             user.email,
             name=user.firstname,
             verification_link=link,
@@ -995,7 +1071,7 @@ class UserPendingEmailVerificationsResendApi(BaseResource):
         )
 
 
-@ns.route('/legal-docs/<int:user_id>/')
+@ns.route("/legal-docs/<int:user_id>/")
 class UserLegalDocsApi(BaseResource):
     """
     Endpoints related to legal documents that users have viewed and signed.
@@ -1007,7 +1083,6 @@ class UserLegalDocsApi(BaseResource):
     @token_auth.login_required
     @responds(schema=UserLegalDocsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
-
         check_user_existence(user_id)
 
         docs = UserLegalDocs.query.filter_by(user_id=user_id).all()
@@ -1023,23 +1098,26 @@ class UserLegalDocsApi(BaseResource):
     @accepts(schema=UserLegalDocsSchema, api=ns)
     @responds(schema=UserLegalDocsSchema, api=ns, status_code=200)
     def post(self, user_id):
-
         check_user_existence(user_id)
 
         if UserLegalDocs.query.filter_by(
             user_id=user_id, doc_id=request.parsed_obj.doc_id
         ).one_or_none():
-            raise BadRequest(f'Document {request.parsed_obj.doc_id} already exists.')
+            raise BadRequest(f"Document {request.parsed_obj.doc_id} already exists.")
 
-        if not LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none():
-            raise BadRequest(f'Document {request.parsed_obj.doc_id} not found.')
+        if not LookupLegalDocs.query.filter_by(
+            idx=request.parsed_obj.doc_id
+        ).one_or_none():
+            raise BadRequest(f"Document {request.parsed_obj.doc_id} not found.")
 
         request.parsed_obj.user_id = user_id
 
         db.session.add(request.parsed_obj)
         db.session.commit()
 
-        doc_info = LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none()
+        doc_info = LookupLegalDocs.query.filter_by(
+            idx=request.parsed_obj.doc_id
+        ).one_or_none()
         request.parsed_obj.doc_name = doc_info.name
         request.parsed_obj.doc_version = doc_info.version
 
@@ -1049,7 +1127,6 @@ class UserLegalDocsApi(BaseResource):
     @accepts(schema=UserLegalDocsSchema, api=ns)
     @responds(schema=UserLegalDocsSchema, api=ns, status_code=200)
     def put(self, user_id):
-
         check_user_existence(user_id)
 
         doc = UserLegalDocs.query.filter_by(
@@ -1057,13 +1134,15 @@ class UserLegalDocsApi(BaseResource):
         ).one_or_none()
 
         if not doc:
-            raise BadRequest(f'Document {request.parsed_obj.doc_id} already exists.')
+            raise BadRequest(f"Document {request.parsed_obj.doc_id} already exists.")
 
-        if not LookupLegalDocs.query.filter_by(idx=request.parsed_obj.doc_id).one_or_none():
-            raise BadRequest(f'Document {request.parsed_obj.doc_id} not found.')
+        if not LookupLegalDocs.query.filter_by(
+            idx=request.parsed_obj.doc_id
+        ).one_or_none():
+            raise BadRequest(f"Document {request.parsed_obj.doc_id} not found.")
 
         new_data = request.parsed_obj.__dict__
-        del new_data['_sa_instance_state']
+        del new_data["_sa_instance_state"]
 
         doc.update(new_data)
         db.session.commit()

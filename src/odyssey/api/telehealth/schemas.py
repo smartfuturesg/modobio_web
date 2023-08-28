@@ -8,14 +8,24 @@ from twilio.rest.conversations.v1 import conversation
 from odyssey import ma
 from odyssey.api.lookup.schemas import LookupVisitReasonsSchema
 from odyssey.api.telehealth.models import (
-    TelehealthBookingDetails, TelehealthBookings, TelehealthBookingStatus, TelehealthChatRooms,
-    TelehealthMeetingRooms, TelehealthQueueClientPool, TelehealthStaffAvailability,
-    TelehealthStaffAvailabilityExceptions, TelehealthStaffSettings
+    TelehealthBookingDetails,
+    TelehealthBookings,
+    TelehealthBookingStatus,
+    TelehealthChatRooms,
+    TelehealthMeetingRooms,
+    TelehealthQueueClientPool,
+    TelehealthStaffAvailability,
+    TelehealthStaffAvailabilityExceptions,
+    TelehealthStaffSettings,
 )
 from odyssey.api.user.models import User
 from odyssey.config import config_wrapper
 from odyssey.utils.constants import (
-    ACCESS_ROLES, BOOKINGS_STATUS, DAY_OF_WEEK, GENDERS, USSTATES_2
+    ACCESS_ROLES,
+    BOOKINGS_STATUS,
+    DAY_OF_WEEK,
+    GENDERS,
+    USSTATES_2,
 )
 
 logger = logging.getLogger(__name__)
@@ -63,7 +73,7 @@ class TelehealthTimeSelectOutputSchema(Schema):
 class TelehealthBookingStatusSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookingStatus
-        exclude = ('idx', )
+        exclude = ("idx",)
         include_fk = True
 
 
@@ -78,7 +88,7 @@ class TelehealthBookingsPUTSchema(ma.SQLAlchemyAutoSchema):
 class TelehealthChatRoomsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthChatRooms
-        exclude = ('booking', 'booking_id', 'client_user_id', 'staff_user_id')
+        exclude = ("booking", "booking_id", "client_user_id", "staff_user_id")
 
     transcript_url = fields.String(missing=None)
 
@@ -87,16 +97,16 @@ class TelehealthUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = (
-            'email_verified',
-            'is_client',
-            'created_at',
-            'updated_at',
-            'modobio_id',
-            'is_staff',
-            'phone_number',
-            'deleted',
-            'email',
-            'is_internal',
+            "email_verified",
+            "is_client",
+            "created_at",
+            "updated_at",
+            "modobio_id",
+            "is_staff",
+            "phone_number",
+            "deleted",
+            "email",
+            "is_internal",
         )
 
     profile_picture = fields.String()
@@ -116,27 +126,29 @@ class TelehealthBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookings
         exclude = (
-            'client_user_id',
-            'staff_user_id',
-            'idx',
-            'booking_window_id_start_time_utc',
-            'booking_window_id_end_time_utc',
-            'created_at',
-            'updated_at',
+            "client_user_id",
+            "staff_user_id",
+            "idx",
+            "booking_window_id_start_time_utc",
+            "booking_window_id_end_time_utc",
+            "created_at",
+            "updated_at",
         )
         include_fk = True
 
     booking_id = fields.Integer(dump_only=True)
     status = fields.String(required=False, validate=validate.OneOf(BOOKINGS_STATUS))
-    status_history = fields.Nested(TelehealthBookingStatusSchema(many=True), dump_only=True)
+    status_history = fields.Nested(
+        TelehealthBookingStatusSchema(many=True), dump_only=True
+    )
     chat_room = fields.Nested(
         TelehealthChatRoomsSchema(
             only=[
-                'conversation_sid',
-                'room_name',
-                'room_status',
-                'transcript_url',
-                'write_access_timeout',
+                "conversation_sid",
+                "room_name",
+                "room_status",
+                "transcript_url",
+                "write_access_timeout",
             ]
         ),
         dump_only=True,
@@ -171,8 +183,8 @@ class TelehealthBookingsOutputSchema(Schema):
 class TelehealthStaffAvailabilitySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthStaffAvailability
-        exclude = ('created_at', )
-        dump_only = ('idx', )
+        exclude = ("created_at",)
+        dump_only = ("idx",)
         include_fk = True
 
     user_id = fields.Integer()
@@ -204,8 +216,8 @@ class TelehealthStaffAvailabilityExceptionsPOSTSchema(Schema):
 class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthStaffAvailabilityExceptions
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('idx', )
+        exclude = ("created_at", "updated_at")
+        dump_only = ("idx",)
 
     user_id = fields.Integer(dump_only=True)
     exception_start_time = fields.Time(dump_only=True)
@@ -217,7 +229,9 @@ class TelehealthStaffAvailabilityExceptionsSchema(ma.SQLAlchemyAutoSchema):
 
 
 class TelehealthStaffAvailabilityExceptionsOutputSchema(Schema):
-    exceptions = fields.Nested(TelehealthStaffAvailabilityExceptionsSchema(many=True), missing=[])
+    exceptions = fields.Nested(
+        TelehealthStaffAvailabilityExceptionsSchema(many=True), missing=[]
+    )
     conflicts = fields.Nested(TelehealthBookingsSchema(many=True), missing=[])
 
 
@@ -229,27 +243,27 @@ class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthStaffSettings
         include_fk = True
-        dump_only = ('user_id', )
+        dump_only = ("user_id",)
         exclude = (
-            'created_at',
-            'updated_at',
+            "created_at",
+            "updated_at",
         )
 
     auto_confirm = fields.Boolean(
         required=True,
-        metadata={'description': 'auto-confirm appointments based on availability'},
+        metadata={"description": "auto-confirm appointments based on availability"},
     )
     timezone = fields.String(
         validate=validate.OneOf(pytz.common_timezones),
-        metadata={'description': 'optional timezone selection, defaults to UTC'},
-        missing='UTC',
+        metadata={"description": "optional timezone selection, defaults to UTC"},
+        missing="UTC",
     )
     availability_horizon = fields.Integer(
         validate=validate.Range(0, 52),
         metadata={
-            'description': (
-                'how many weeks in advance the practitioner can be booked. If'
-                ' 0, the practitioner cannot be booked'
+            "description": (
+                "how many weeks in advance the practitioner can be booked. If"
+                " 0, the practitioner cannot be booked"
             )
         },
     )
@@ -260,7 +274,9 @@ class TelehealthStaffSettingsSchema(ma.SQLAlchemyAutoSchema):
 
 
 class TelehealthStaffAvailabilityOutputSchema(Schema):
-    availability = fields.Nested(TelehealthStaffAvailabilityInputSchema(many=True), missing=[])
+    availability = fields.Nested(
+        TelehealthStaffAvailabilityInputSchema(many=True), missing=[]
+    )
     settings = fields.Nested(TelehealthStaffSettingsSchema, required=True)
 
 
@@ -272,44 +288,51 @@ class TelehealthMeetingRoomSchema(ma.SQLAlchemyAutoSchema):
     """
     Schema for TelehealthMeeting rooms model
     """
+
     class Meta:
         model = TelehealthMeetingRooms
         exclude = (
-            'created_at',
-            'updated_at',
-            'staff_access_token',
-            'client_access_token',
+            "created_at",
+            "updated_at",
+            "staff_access_token",
+            "client_access_token",
         )
 
     access_token = fields.String(
-        metadata={'description': ('meeting room access token. To be shown only to the owner')},
+        metadata={
+            "description": ("meeting room access token. To be shown only to the owner")
+        },
         required=False,
     )
-    conversation_sid = fields.String(metadata={'description': 'chat room sid'}, required=False)
+    conversation_sid = fields.String(
+        metadata={"description": "chat room sid"}, required=False
+    )
 
 
 class TelehealthQueueClientPoolSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthQueueClientPool
-        exclude = ('created_at', 'updated_at')
-        dump_only = ('idx', 'user_id', 'location_name')
+        exclude = ("created_at", "updated_at")
+        dump_only = ("idx", "user_id", "location_name")
 
-    duration = fields.Integer(missing=config_wrapper('TELEHEALTH_BOOKING_DURATION'))
+    duration = fields.Integer(missing=config_wrapper("TELEHEALTH_BOOKING_DURATION"))
     medical_gender = fields.String(
         validate=validate.OneOf([gender[0] for gender in GENDERS]),
-        metadata={'description': 'Preferred Medical Professional gender'},
-        missing='np',
+        metadata={"description": "Preferred Medical Professional gender"},
+        missing="np",
         required=False,
     )
     timezone = fields.String(
         validate=validate.OneOf(pytz.common_timezones),
-        metadata={'description': 'optional timezone selection, defaults to UTC'},
-        missing='UTC',
+        metadata={"description": "optional timezone selection, defaults to UTC"},
+        missing="UTC",
     )
     location_name = fields.String()
     location_id = fields.Integer(required=False, missing=None)
     # payment_method_id = fields.Integer(required=False, missing=None, metadata={'description': 'idx from PaymentMethods selected'})
-    profession_type = fields.String(validate=validate.OneOf(ACCESS_ROLES), required=True)
+    profession_type = fields.String(
+        validate=validate.OneOf(ACCESS_ROLES), required=True
+    )
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -320,7 +343,7 @@ class TelehealthQueueClientPoolOutputSchema(Schema):
     queue = fields.Nested(
         TelehealthQueueClientPoolSchema(many=True),
         missing=[],
-        metadata={'description': 'SORTED queue of client pool'},
+        metadata={"description": "SORTED queue of client pool"},
     )
     total_queue = fields.Integer()
 
@@ -328,7 +351,7 @@ class TelehealthQueueClientPoolOutputSchema(Schema):
 class TelehealthBookingDetailsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TelehealthBookingDetails
-        exclude = ('created_at', 'updated_at')
+        exclude = ("created_at", "updated_at")
         include_fk = True
 
     visit_reason = fields.String()
@@ -353,7 +376,6 @@ class TelehealthConversationsSchema(Schema):
 
 
 class TelehealthConversationsNestedSchema(Schema):
-
     conversations = fields.Nested(TelehealthConversationsSchema(many=True))
     twilio_token = fields.String()
 

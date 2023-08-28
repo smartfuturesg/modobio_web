@@ -52,23 +52,23 @@ def http_exception_handler(error: HTTPException) -> tuple:
     # Keep this order so that custom values from error.data can be added to the
     # response, but cannot be used to override status_code, message, and error.
     response = {}
-    if hasattr(error, 'data') and isinstance(error.data, dict):
+    if hasattr(error, "data") and isinstance(error.data, dict):
         response = error.data
 
-    response['status_code'] = error.code
-    response['message'] = error.description
-    response['error'] = HTTP_STATUS_CODES.get(error.code, 'Unknown error')
+    response["status_code"] = error.code
+    response["message"] = error.description
+    response["error"] = HTTP_STATUS_CODES.get(error.code, "Unknown error")
 
     # Full traceback for testing and dev only.
     if current_app.testing:
         tb = traceback.format_tb(error.__traceback__)
-        response['trace'] = ''.join(tb)
+        response["trace"] = "".join(tb)
     elif current_app.debug:
         tb = []
         # This looks better in swagger
         for line in traceback.format_tb(error.__traceback__):
-            tb.extend(line.strip('\n').split('\n'))
-        response['trace'] = tb
+            tb.extend(line.strip("\n").split("\n"))
+        response["trace"] = tb
 
     logger.info(error.description, exc_info=True)
 
@@ -120,19 +120,19 @@ def exception_handler(error: Exception) -> tuple:
     # Keep this order so that custom values from error.data can be added to the
     # response, but cannot be used to override status_code, message, and error.
     response = {}
-    if hasattr(error, 'data') and isinstance(error.data, dict):
+    if hasattr(error, "data") and isinstance(error.data, dict):
         response = error.data
 
-    response['status_code'] = 500
-    response['error'] = 'Internal server error'
-    response['message'] = 'Internal server error'
+    response["status_code"] = 500
+    response["error"] = "Internal server error"
+    response["message"] = "Internal server error"
 
     if current_app.debug:
         tb = []
         # This looks better in swagger
         for line in traceback.format_tb(error.__traceback__):
-            tb.extend(line.strip('\n').split('\n'))
-        response['trace'] = tb + [repr(error)]
+            tb.extend(line.strip("\n").split("\n"))
+        response["trace"] = tb + [repr(error)]
 
     logger.error(repr(error), exc_info=True)
 

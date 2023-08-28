@@ -12,39 +12,44 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 from odyssey import db
 from odyssey.api import api
 from odyssey.api.lookup.models import LookupOrganizations
-from odyssey.api.payment.models import (PaymentHistory, PaymentMethods, PaymentRefunds)
+from odyssey.api.payment.models import PaymentHistory, PaymentMethods, PaymentRefunds
 from odyssey.api.payment.schemas import (
-    PaymentHistorySchema, PaymentMethodsSchema, PaymentRefundsSchema, PaymentTestChargeVoidSchema,
-    TransactionHistorySchema
+    PaymentHistorySchema,
+    PaymentMethodsSchema,
+    PaymentRefundsSchema,
+    PaymentTestChargeVoidSchema,
+    TransactionHistorySchema,
 )
 from odyssey.api.telehealth.models import TelehealthBookings
 from odyssey.api.user.models import User
 from odyssey.utils.auth import token_auth
 from odyssey.utils.base.resources import BaseResource
 
-ns = api.namespace('payment', description='Endpoints for functions related to payments.')
+ns = api.namespace(
+    "payment", description="Endpoints for functions related to payments."
+)
 
 
 @ns.deprecated
-@ns.route('/methods/<int:user_id>/')
+@ns.route("/methods/<int:user_id>/")
 class PaymentMethodsApi(BaseResource):
     # Multiple payment methods per user allowed
     __check_resource__ = False
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @responds(schema=PaymentMethodsSchema(many=True), api=ns)
     def get(self, user_id):
         """get active user payment methods"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         return PaymentMethods.query.filter_by(user_id=user_id)
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @accepts(schema=PaymentMethodsSchema, api=ns)
     @responds(schema=PaymentMethodsSchema, api=ns, status_code=201)
     def post(self, user_id):
         """add a new payment method"""
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         if (
             len(
@@ -52,22 +57,25 @@ class PaymentMethodsApi(BaseResource):
                     PaymentMethods.user_id == user_id,
                     PaymentMethods.expiration.isnot(None),
                 ).all()
-            ) >= 5
+            )
+            >= 5
         ):
-            raise BadRequest('Maximum number of payment methods reached.')
+            raise BadRequest("Maximum number of payment methods reached.")
 
         # if requesting to set this method to default and user already has a default
         # payment method, remove default status from their previous default method
-        old_default = PaymentMethods.query.filter_by(user_id=user_id, is_default=True).one_or_none()
-        if request.json['is_default'] and old_default:
-            old_default.update({'is_default': False})
+        old_default = PaymentMethods.query.filter_by(
+            user_id=user_id, is_default=True
+        ).one_or_none()
+        if request.json["is_default"] and old_default:
+            old_default.update({"is_default": False})
 
         # then store the payment plan info from response in db
         payment_data = {
-            'user_id': user_id,
-            'cardholder_name': request.json['cardholder_name'],
-            'expiration': request.json['expiration'],
-            'is_default': request.json['is_default'],
+            "user_id": user_id,
+            "cardholder_name": request.json["cardholder_name"],
+            "expiration": request.json["expiration"],
+            "is_default": request.json["is_default"],
         }
 
         payment = PaymentMethods(**payment_data)
@@ -77,22 +85,21 @@ class PaymentMethodsApi(BaseResource):
 
         return payment
 
-    @token_auth.login_required(user_type=('client', ))
+    @token_auth.login_required(user_type=("client",))
     @ns.doc(
         params={
-            'idx':
-                'int id of the payment method to remove',
-            'replacement_id': (
-                'int id of the payment method to replace the removed method'
-                ' with for future appointments. If the appointments should be'
-                ' canceled, use id 0.'
+            "idx": "int id of the payment method to remove",
+            "replacement_id": (
+                "int id of the payment method to replace the removed method"
+                " with for future appointments. If the appointments should be"
+                " canceled, use id 0."
             ),
         }
     )
     @responds(schema=PaymentMethodsSchema, api=ns, status_code=204)
     def delete(self, user_id):
         """remove an existing payment method"""
-        idx = request.args.get('idx', type=int)
+        idx = request.args.get("idx", type=int)
 
         payment = PaymentMethods.query.filter_by(idx=idx, user_id=user_id).one_or_none()
         if payment:
@@ -104,12 +111,12 @@ class PaymentMethodsApi(BaseResource):
             # check if booking has been cancelled or completed. If so, remove it from the list.
             for booking in bookings:
                 for status in booking.status_history:
-                    if status.status in ('Cancelled', 'Canceled', 'Completed'):
+                    if status.status in ("Cancelled", "Canceled", "Completed"):
                         bookings.remove(booking)
                         continue
 
             if len(bookings) > 0:
-                replacement_id = request.args.get('replacement_id', type=int)
+                replacement_id = request.args.get("replacement_id", type=int)
                 if replacement_id == 0:
                     # cancel appointments that are attached to the payment method being removed
                     for booking in bookings:
@@ -118,25 +125,26 @@ class PaymentMethodsApi(BaseResource):
                     # replace payment method on affected appointments with the new method
 
                     # ensure replacement_id references an active payment method that belong to this user
-                    method = PaymentMethods.query.filter_by(idx=replacement_id).one_or_none()
+                    method = PaymentMethods.query.filter_by(
+                        idx=replacement_id
+                    ).one_or_none()
                     if not method:
                         raise BadRequest(
-                            'No payment method exists the the id'
-                            f' {replacement_id}.'
+                            "No payment method exists the the id" f" {replacement_id}."
                         )
 
                     if method.user_id != token_auth.current_user()[0].user_id:
                         raise BadRequest(
-                            f'The payment method with id {replacement_id} does'
-                            ' not belong to the current user. Please use a'
-                            ' valid payment method id that belongs to the'
-                            ' current user.'
+                            f"The payment method with id {replacement_id} does"
+                            " not belong to the current user. Please use a"
+                            " valid payment method id that belongs to the"
+                            " current user."
                         )
                     elif method.expiration == None:
                         # this method has been removed, it only exists to be displayed in history
                         raise BadRequest(
-                            f'The payment method with id {replacement_id} has'
-                            ' been removed, it can no longer be charged.'
+                            f"The payment method with id {replacement_id} has"
+                            " been removed, it can no longer be charged."
                         )
                     else:
                         # replace payment_method_id in the affected bookings
@@ -148,14 +156,14 @@ class PaymentMethodsApi(BaseResource):
                     booking_ids = []
                     for booking in bookings:
                         booking_ids += str(booking.idx)
-                    booking_ids = ','.join(booking_ids)
+                    booking_ids = ",".join(booking_ids)
                     e = BadRequest(
-                        'This payment method cannot be deleted because it is'
-                        ' involved with unpcoming unpaid bookings.'
+                        "This payment method cannot be deleted because it is"
+                        " involved with unpcoming unpaid bookings."
                     )
                     e.data = {
-                        'booking_ids': booking_ids,
-                        'replacement_id': replacement_id,
+                        "booking_ids": booking_ids,
+                        "replacement_id": replacement_id,
                     }
                     raise e
 
@@ -166,71 +174,75 @@ class PaymentMethodsApi(BaseResource):
 
 
 @ns.deprecated
-@ns.route('/history/<int:user_id>/')
+@ns.route("/history/<int:user_id>/")
 class PaymentHistoryApi(BaseResource):
-    @token_auth.login_required(user_type=('client', 'staff'), staff_role=('client_services', ))
+    @token_auth.login_required(
+        user_type=("client", "staff"), staff_role=("client_services",)
+    )
     @responds(schema=PaymentHistorySchema(many=True), api=ns, status_code=200)
     @ns.deprecated
     def get(self, user_id):
         """
         Returns a list of transactions for the given user_id.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         return PaymentHistory.query.filter_by(user_id=user_id).all()
 
 
 @ns.deprecated
-@ns.route('/transaction-history/<int:user_id>/')
+@ns.route("/transaction-history/<int:user_id>/")
 class PaymentHistoryApi(BaseResource):
     @token_auth.login_required(
-        user_type=('client', 'staff', 'staff-self'),
-        staff_role=('client_services', ),
+        user_type=("client", "staff", "staff-self"),
+        staff_role=("client_services",),
     )
     @responds(schema=TransactionHistorySchema, api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns a list of transactions for the given user_id.
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
-        payload = {'items': []}
+        payload = {"items": []}
 
         for transaction in PaymentHistory.query.filter_by(user_id=user_id).all():
-            transaction.__dict__.update({
-                'transaction_date': transaction.created_at,
-                'currency': 'USD',
-                'transaction_updated': transaction.updated_at,
-                'payment_method': transaction.payment_method,
-            })
-            payload['items'].append(transaction.__dict__)
+            transaction.__dict__.update(
+                {
+                    "transaction_date": transaction.created_at,
+                    "currency": "USD",
+                    "transaction_updated": transaction.updated_at,
+                    "payment_method": transaction.payment_method,
+                }
+            )
+            payload["items"].append(transaction.__dict__)
 
         return payload
 
 
 @ns.deprecated
-@ns.route('/refunds/<int:user_id>/')
+@ns.route("/refunds/<int:user_id>/")
 class PaymentRefundApi(BaseResource):
     # Multiple refunds allowed
     __check_resource__ = False
 
     @token_auth.login_required(
         user_type=(
-            'client',
-            'staff',
+            "client",
+            "staff",
         ),
-        staff_role=('client_services', ),
+        staff_role=("client_services",),
     )
     @responds(schema=PaymentRefundsSchema(many=True), api=ns, status_code=200)
     def get(self, user_id):
         """
         Returns all refunds that have been issued for the given user_id
         """
-        self.check_user(user_id, user_type='client')
+        self.check_user(user_id, user_type="client")
 
         return PaymentRefunds.query.filter_by(user_id=user_id).all()
 
-    @token_auth.login_required(user_type=('staff', ), staff_role=('client_services', ))
+    @token_auth.login_required(user_type=("staff",), staff_role=("client_services",))
     @accepts(schema=PaymentRefundsSchema, api=ns)
     @responds(schema=PaymentRefundsSchema, api=ns, status_code=201)
     def post(self, user_id):
@@ -239,8 +251,8 @@ class PaymentRefundApi(BaseResource):
         total amount refunded cannot exceed the amount of the original transaction.
         """
         raise BadRequest(
-            'This endpoint has been deprecated until a replacement for'
-            ' InstaMed has been implemented.'
+            "This endpoint has been deprecated until a replacement for"
+            " InstaMed has been implemented."
         )
         """self.check_user(user_id, user_type='client')
 

@@ -3,12 +3,12 @@ from wtforms import PasswordField, StringField
 
 
 class StaffLoginForm(FlaskForm):
-    email = StringField('Email', render_kw={'type': 'email'})
-    password = PasswordField('Password')
+    email = StringField("Email", render_kw={"type": "email"})
+    password = PasswordField("Password")
 
 
 class ClientSearchForm(FlaskForm):
-    firstname = StringField('First name')
-    lastname = StringField('Last name')
-    email = StringField('Email address', render_kw={'type': 'email'})
-    phone = StringField('Phone number', render_kw={'type': 'phone'})
+    firstname = StringField("First name")
+    lastname = StringField("Last name")
+    email = StringField("Email address", render_kw={"type": "email"})
+    phone = StringField("Phone number", render_kw={"type": "phone"})

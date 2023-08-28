@@ -17,9 +17,9 @@ class PTHistory(db.Model):
     is taken only once, during the initial consult.
     """
 
-    __tablename__ = 'PTHistory'
+    __tablename__ = "PTHistory"
 
-    displayname = 'Physical therapy history'
+    displayname = "Physical therapy history"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -44,7 +44,7 @@ class PTHistory(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -158,7 +158,7 @@ class Chessboard(db.Model):
     this table, with the exception of :attr:`isa_dynamic`, are angles in degrees.
     """
 
-    __tablename__ = 'PTChessboard'
+    __tablename__ = "PTChessboard"
 
     idx = db.Column(db.Integer, primary_key=True, autoincrement=True)
     """
@@ -169,7 +169,7 @@ class Chessboard(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
@@ -454,11 +454,11 @@ class MobilityAssessment(db.Model):
     .. seealso:: :class:`Chessboard`
     """
 
-    __tablename__ = 'MobilityAssessment'
+    __tablename__ = "MobilityAssessment"
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('User.user_id', ondelete='CASCADE'),
+        db.ForeignKey("User.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     """
