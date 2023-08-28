@@ -15,12 +15,11 @@ check-formatting:
     - python3 --version
     - python3 -m venv venv
     - source venv/bin/activate
-    - pip3 install yapf==0.33.0 blue==0.9.1 isort==5.11.5 pylint==2.17.2 --cache-dir deps_cache
+    - pip3 install black==23.7.0 isort==5.12.0 --cache-dir deps_cache
 
   script:
-    - blue --preview src/
     - isort src/
-    - yapf -i src/ --recursive
+    - black src/
     - git add ./src/
     - if [[ -n $(git diff --cached --name-only) ]]; then exit 1; fi
 
