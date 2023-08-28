@@ -3505,14 +3505,13 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
         return payload
 
 
-@ns_v2.route('/data/dashboard/<int:user_id>')
+@ns_v2.route("/data/dashboard/<int:user_id>")
 class WearablesV2DataDashboardEndpoint(BaseResource):
     """Endpoint for retrieving data for the data dashboard"""
-    
-    
+
     def get(self, user_id):
         """
-        Retrieve data for the data dashboard. 
+        Retrieve data for the data dashboard.
         This endpoint will return the following data:
             - Total sleep duration
             - Daily Steps
@@ -3523,6 +3522,8 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         ---------------
         user_id : int
             User ID number.
+        device: str
+            TODO target device
 
         Returns
         -------
@@ -3533,7 +3534,13 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             - daily_calories - daily calories
             - daily_resting_heart_rate - daily resting heart rate
         """
+        start_date, end_date = date_range(
+            start_time=request.args.get("start_date"),
+            end_time=request.args.get("end_date"),
+            time_range=timedelta(days=30),
+        )
 
+        user_id = 17
         # mongo db query for sleep
         # this one will require an aggregation due to the complexity of sleep data
         # the data can get muddled with multiple sleep events and handling sleep
@@ -3541,13 +3548,71 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         # Notable points:
         # - sleep events are grouped on the day the sleep even ends
         # - sleep data is only returned for a day if there are sleep events that were not considered a nap
-        # - total sleep duration is summed from all naps 
+        # - total sleep duration is summed from all naps
 
+        sleep_durations_aggregation = [
+            # Filter by user_id and ensure there is data in the data.sleep path
+            {
+                "$match": {
+                    "user_id": user_id,
+                    "data.sleep": {"$exists": True, "$ne": None},
+                    "timestamp": {"$gte": start_date, "$lte": end_date},
+                }
+            },
+            {
+                "$addFields": {
+                    "date": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": "$data.sleep.metadata.end_time",
+                        }
+                    }
+                }
+            },
+            {"$group": {"_id": "$date", "entries": {"$push": "$$ROOT"}}},
+            {
+                "$match": {
+                    "entries": {"$elemMatch": {"data.sleep.metadata.is_nap": False}}
+                }
+            },
+            {"$unwind": "$entries"},
+            {
+                "$group": {
+                    "_id": "$_id",
+                    "total_duration_asleep": {
+                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_asleep_state_seconds"
+                    },
+                    "total_duration_REM": {
+                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_REM_sleep_state_seconds"
+                    },
+                    "total_duration_light_sleep": {
+                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_light_sleep_state_seconds"
+                    },
+                    "total_duration_deep_sleep": {
+                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_deep_sleep_state_seconds"
+                    },
+                    "total_duration_in_bed": {
+                        "$sum": "$entries.data.sleep.sleep_durations_data.other.duration_in_bed_seconds"
+                    },
+                }
+            },
+            {
+                "$project": {
+                    "date": "$_id",
+                    "_id": 0,
+                    "total_duration_asleep": 1,
+                    "total_duration_REM": 1,
+                    "total_duration_light_sleep": 1,
+                    "total_duration_deep_sleep": 1,
+                    "total_duration_in_bed": 1,
+                }
+            },
+        ]
 
+        cursor = mongo.db.wearables.aggregate(sleep_durations_aggregation)
+        document_list = list(cursor)
 
+        # return the documents using json
+        payload = {"items": document_list, "total_items": len(document_list)}
 
-
-
-
-
-
+        return payload
