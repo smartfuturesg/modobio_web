@@ -3489,3 +3489,51 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
         }
 
         return payload
+
+
+@ns_v2.route('/data/dashboard/<int:user_id>')
+class WearablesV2DataDashboardEndpoint(BaseResource):
+    """Endpoint for retrieving data for the data dashboard"""
+    
+    
+    def get(self, user_id):
+        """
+        Retrieve data for the data dashboard. 
+        This endpoint will return the following data:
+            - Total sleep duration
+            - Daily Steps
+            - Daily Calories
+            - Daily resting heart rate
+
+        Path Parameters
+        ---------------
+        user_id : int
+            User ID number.
+
+        Returns
+        -------
+        dict
+            JSON encoded dict containing:
+            - total_sleep_duration - total sleep duration in hours
+            - daily_steps - daily steps
+            - daily_calories - daily calories
+            - daily_resting_heart_rate - daily resting heart rate
+        """
+
+        # mongo db query for sleep
+        # this one will require an aggregation due to the complexity of sleep data
+        # the data can get muddled with multiple sleep events and handling sleep
+        # recordings which cross day boundaries
+        # Notable points:
+        # - sleep events are grouped on the day the sleep even ends
+        # - sleep data is only returned for a day if there are sleep events that were not considered a nap
+        # - total sleep duration is summed from all naps 
+
+
+
+
+
+
+
+
+
