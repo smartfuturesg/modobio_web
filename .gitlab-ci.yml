@@ -15,7 +15,7 @@ check-formatting:
     - python3 --version
     - python3 -m venv venv
     - source venv/bin/activate
-    - pip3 install black==23.3.0 isort==5.12.0 --cache-dir deps_cache
+    - pip3 install black==23.3.0 isort==5.11.5 --cache-dir deps_cache
 
   script:
     - isort src/
