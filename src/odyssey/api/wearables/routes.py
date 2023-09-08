@@ -1190,7 +1190,7 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
     def post(self):
         """Webhook for incoming notifications from Terra."""
         # Override JSON handling for this request.
-        request.json_module = JSONProvider()
+        request.json_module = JSONProvider(is_terra_data=True)
 
         tc = TerraClient()
 
