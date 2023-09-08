@@ -37,6 +37,11 @@ from odyssey.utils.misc import (
     iso_string_to_iso_datetime,
     lru_cache_with_ttl,
 )
+from odyssey.utils.mongo_queries import (
+    sleep_durations_aggregation,
+    resting_hr_aggregation,
+    steps_aggregation
+)
 
 logger = logging.getLogger(__name__)
 
@@ -3537,10 +3542,11 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         start_date, end_date = date_range(
             start_time=request.args.get("start_date"),
             end_time=request.args.get("end_date"),
-            time_range=timedelta(days=30),
+            time_range=timedelta(days=14),
         )
 
-        user_id = 17
+        device = request.args.get("device", "OURA")
+
         # mongo db query for sleep
         # this one will require an aggregation due to the complexity of sleep data
         # the data can get muddled with multiple sleep events and handling sleep
@@ -3550,69 +3556,98 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         # - sleep data is only returned for a day if there are sleep events that were not considered a nap
         # - total sleep duration is summed from all naps
 
-        sleep_durations_aggregation = [
-            # Filter by user_id and ensure there is data in the data.sleep path
-            {
-                "$match": {
-                    "user_id": user_id,
-                    "data.sleep": {"$exists": True, "$ne": None},
-                    "timestamp": {"$gte": start_date, "$lte": end_date},
-                }
-            },
-            {
-                "$addFields": {
-                    "date": {
-                        "$dateToString": {
-                            "format": "%Y-%m-%d",
-                            "date": "$data.sleep.metadata.end_time",
-                        }
-                    }
-                }
-            },
-            {"$group": {"_id": "$date", "entries": {"$push": "$$ROOT"}}},
-            {
-                "$match": {
-                    "entries": {"$elemMatch": {"data.sleep.metadata.is_nap": False}}
-                }
-            },
-            {"$unwind": "$entries"},
-            {
-                "$group": {
-                    "_id": "$_id",
-                    "total_duration_asleep": {
-                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_asleep_state_seconds"
-                    },
-                    "total_duration_REM": {
-                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_REM_sleep_state_seconds"
-                    },
-                    "total_duration_light_sleep": {
-                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_light_sleep_state_seconds"
-                    },
-                    "total_duration_deep_sleep": {
-                        "$sum": "$entries.data.sleep.sleep_durations_data.asleep.duration_deep_sleep_state_seconds"
-                    },
-                    "total_duration_in_bed": {
-                        "$sum": "$entries.data.sleep.sleep_durations_data.other.duration_in_bed_seconds"
-                    },
-                }
-            },
-            {
-                "$project": {
-                    "date": "$_id",
-                    "_id": 0,
-                    "total_duration_asleep": 1,
-                    "total_duration_REM": 1,
-                    "total_duration_light_sleep": 1,
-                    "total_duration_deep_sleep": 1,
-                    "total_duration_in_bed": 1,
-                }
-            },
-        ]
+        
+        sleep_durations_query = sleep_durations_aggregation(user_id, device, start_date, end_date)
+        resting_hr_query= resting_hr_aggregation(user_id, device, start_date, end_date)
+        steps_query = steps_aggregation(user_id, device, start_date, end_date)
 
-        cursor = mongo.db.wearables.aggregate(sleep_durations_aggregation)
-        document_list = list(cursor)
 
+        sleep_durations_cursor = mongo.db.wearables.aggregate(sleep_durations_query)
+        resting_hrs_cursor = mongo.db.wearables.aggregate(resting_hr_query)
+        steps_cursor = mongo.db.wearables.aggregate(steps_query)
+
+        # Initialize an empty dictionary to store the collated results
+        collated_results = {}
+
+        num_entries = 0
+        asleep_duration_sum = 0
+        in_bed_duration_sum = 0
+
+        # Add result1 to the collated_results
+        for entry in sleep_durations_cursor:
+            date = entry["date"]
+            del entry["date"]
+            num_entries += 1
+            asleep_duration_sum += entry["total_duration_asleep"]
+            in_bed_duration_sum += entry["total_duration_in_bed"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        # Calculate the average sleep duration
+
+        if num_entries > 0:
+            avg_sleep_duration = asleep_duration_sum / num_entries
+            avg_in_bed_duration = in_bed_duration_sum / num_entries
+
+        # Add the hr_aggregation data to the collated_results
+        # while looping through hr_aggregation, find the average resting heart rate
+        hr_sum = 0
+        hr_count = 0
+
+        for entry in resting_hrs_cursor:
+            date = entry["date"]
+            hr_count += 1
+            hr_sum += entry["resting_hr"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date]["resting_hr"] = entry["resting_hr"]
+
+        # Calculate the average resting heart rate
+        if hr_count == 0:
+            avg_resting_hr = None
+        else:
+            avg_resting_hr = hr_sum / hr_count
+
+        num_entries = 0
+        steps_sum = 0
+        distance_sum = 0
+
+        for entry in steps_cursor:
+            date = entry["date"]
+            del entry["date"]
+            num_entries += 1
+
+            # convert total_distance_meters to feet
+            entry["total_distance_feet"] = entry["total_distance_meters"] * 3.28084
+
+            del entry["total_distance_meters"]
+
+            steps_sum += entry["total_steps"]
+            distance_sum += entry["total_distance_feet"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        # Calculate the average steps and distance
+        if num_entries > 0:
+            avg_steps = steps_sum / num_entries
+            avg_distance = distance_sum / num_entries
+        else:
+            avg_steps = None
+            avg_distance = None
+
+
+        # breakpoint()
         # return the documents using json
-        payload = {"items": document_list, "total_items": len(document_list)}
+        payload = {
+            "daily_metrics": collated_results,
+            "total_days": len(collated_results),
+            "avg_resting_hr": avg_resting_hr,
+            "avg_steps": avg_steps,
+            "avg_distance_feet": avg_distance,
+            "avg_sleep_duration": avg_sleep_duration,
+            "avg_in_bed_duration": avg_in_bed_duration,
+        }
 
         return payload
