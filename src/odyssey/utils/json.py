@@ -1,3 +1,4 @@
+from bson.binary import Binary
 import dataclasses
 import json
 import uuid
@@ -8,16 +9,35 @@ import flask.json.provider
 import pytz
 
 
-def remove_timezone_from_timestamps(data):
+def terra_data_handler(data):
+    """
+    Handles special data types for Terra data.
+
+    Removes timezone information from datetime and time objects.
+    Converts uuid.UUID objects to BSON binary types for MongoDB compatibility.
+
+    Parameters:
+    -----------
+    data : dict or list
+        The data structure containing datetime, time, or uuid.UUID objects.
+    """
+
     if isinstance(data, dict):
         for key, value in data.items():
+            # If the value is a datetime or time object, remove its timezone information
             if isinstance(value, (datetime, time)):
                 data[key] = value.replace(tzinfo=None)
+
+            # If the value is a uuid.UUID object, convert it to BSON binary for MongoDB
+            elif isinstance(value, uuid.UUID):
+                data[key] = Binary.from_uuid(value)
+
             else:
-                remove_timezone_from_timestamps(value)
+                terra_data_handler(value)
+
     elif isinstance(data, list):
         for item in data:
-            remove_timezone_from_timestamps(item)
+            terra_data_handler(item)
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -232,7 +252,8 @@ class JSONDecoder(json.JSONDecoder):
 class JSONProvider(flask.json.provider.JSONProvider):
     """Extends JSONProvider with better datetime and uuid (de)serialization."""
 
-    def __init__(self, app=None, **kwargs):
+    def __init__(self, app=None, is_terra_data=False, **kwargs):
+        self.is_terra_data = is_terra_data
         if app:
             super().__init__(app=app, **kwargs)
 
@@ -257,7 +278,7 @@ class JSONProvider(flask.json.provider.JSONProvider):
                     else:
                         item["metadata"]["tz_offset"] = None
 
-                    remove_timezone_from_timestamps(item)
+                    terra_data_handler(item)
 
         return data
 
@@ -300,7 +321,9 @@ class JSONProvider(flask.json.provider.JSONProvider):
 
         data = json.loads(s, **kwargs)
 
-        # Process the data after deserialization
-        processed_data = JSONProvider.process_terra_data(data)
+        # Check if the data is from Terra and needs special processing
+        if self.is_terra_data:
+            processed_data = JSONProvider.process_terra_data(data)
+            return processed_data
 
-        return processed_data
+        return data
