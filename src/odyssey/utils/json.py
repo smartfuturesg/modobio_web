@@ -1,4 +1,3 @@
-from bson.binary import Binary
 import dataclasses
 import json
 import uuid
@@ -7,6 +6,7 @@ from datetime import date, datetime, time
 import dateutil
 import flask.json.provider
 import pytz
+from bson.binary import Binary
 
 
 def terra_data_handler(data):
