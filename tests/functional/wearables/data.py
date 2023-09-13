@@ -220,11 +220,13 @@ blood_pressure_data_1 = {
             "testField": 1.0,
             "testFieldAgain": 2.0,
             "heart_data": {
-                "detailed": {
-                    "hr_samples": [
-                        {"bpm": 90.0, "timestamp": DATETIME_NOW_HOUR_0},
-                        {"bpm": 155.0, "timestamp": DATETIME_NOW_HOUR_0},
-                    ]
+                "heart_rate_data": {    
+                    "detailed": {
+                        "hr_samples": [
+                            {"bpm": 90.0, "timestamp": DATETIME_NOW_HOUR_0},
+                            {"bpm": 155.0, "timestamp": DATETIME_NOW_HOUR_0},
+                        ]
+                    }
                 }
             },
             "blood_pressure_data": {
@@ -254,11 +256,13 @@ blood_pressure_data_2 = {
             "testField": 1.0,
             "testFieldAgain": 2.0,
             "heart_data": {
-                "detailed": {
-                    "hr_samples": [
-                        {"bpm": 100.0, "timestamp": DATETIME_MINUS_THREE_WEEKS_HOUR_7},
-                        {"bpm": 120.0, "timestamp": DATETIME_MINUS_THREE_WEEKS_HOUR_7},
-                    ]
+                "heart_rate_data": {
+                    "detailed": {
+                        "hr_samples": [
+                            {"bpm": 100.0, "timestamp": DATETIME_MINUS_THREE_WEEKS_HOUR_7},
+                            {"bpm": 120.0, "timestamp": DATETIME_MINUS_THREE_WEEKS_HOUR_7},
+                        ]
+                    }
                 }
             },
             "blood_pressure_data": {
