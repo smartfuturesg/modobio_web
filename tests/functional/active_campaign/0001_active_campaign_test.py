@@ -87,7 +87,7 @@ def test_add_age_tag(test_client, create_client_contact):
 
     assert response.status_code == 201
     ac_tag = UserActiveCampaignTags.query.filter_by(
-        user_id=test_client.client_id, tag_name="Age 45-64"
+        user_id=test_client.client_id, tag_name="Age 64+"
     ).one_or_none()
     assert ac_tag.tag_id == int(data["contactTag"]["id"])
 
