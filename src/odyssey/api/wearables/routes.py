@@ -40,7 +40,7 @@ from odyssey.utils.misc import (
 from odyssey.utils.mongo_queries import (
     sleep_durations_aggregation,
     resting_hr_aggregation,
-    steps_aggregation
+    steps_aggregation,
 )
 
 logger = logging.getLogger(__name__)
@@ -3556,11 +3556,11 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         # - sleep data is only returned for a day if there are sleep events that were not considered a nap
         # - total sleep duration is summed from all naps
 
-        
-        sleep_durations_query = sleep_durations_aggregation(user_id, device, start_date, end_date)
-        resting_hr_query= resting_hr_aggregation(user_id, device, start_date, end_date)
+        sleep_durations_query = sleep_durations_aggregation(
+            user_id, device, start_date, end_date
+        )
+        resting_hr_query = resting_hr_aggregation(user_id, device, start_date, end_date)
         steps_query = steps_aggregation(user_id, device, start_date, end_date)
-
 
         sleep_durations_cursor = mongo.db.wearables.aggregate(sleep_durations_query)
         resting_hrs_cursor = mongo.db.wearables.aggregate(resting_hr_query)
@@ -3636,7 +3636,6 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         else:
             avg_steps = None
             avg_distance = None
-
 
         # breakpoint()
         # return the documents using json
