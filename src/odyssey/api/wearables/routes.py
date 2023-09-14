@@ -780,6 +780,27 @@ WAY_BACK_WHEN = datetime(2010, 1, 1)
 WEBHOOK_RESPONSES = HOOK_TYPES.copy()
 WEBHOOK_RESPONSES.update(set(USER_DATATYPES))
 
+SUPPORTED_WEARABLES = {
+    "providers": {
+        "COROS": "Coros",
+        "DEXCOM": "Dexcom",
+        "FITBIT": "Fitbit",
+        "FREESTYLELIBRE": "Freestyle Libre",
+        "GARMIN": "Garmin",
+        "GOOGLE": "Google Fit",
+        "OMRONUS": "Omron",
+        "OURA": "Oura",
+        "POLAR": "Polar",
+        "SUUNTO": "Suunto",
+        "WITHINGS": "Withings",
+    },
+    "sdk_providers": {
+        "GOOGLEFIT": "Google Fit (SDK)",
+        "APPLE": "Apple HealthKit",
+        "SAMSUNG": "Samsung",
+    },
+}
+
 
 @lru_cache_with_ttl(maxsize=1, ttl=86400)
 def supported_wearables() -> dict:
@@ -920,10 +941,10 @@ def parse_wearable(wearable: str) -> str:
         of supported wearable devices, see :func:`supported_wearables`.
     """
     wearable_clean = wearable.upper().replace(" ", "")
-    supported = supported_wearables()
+
     if (
-        wearable_clean in supported["providers"]
-        or wearable_clean in supported["sdk_providers"]
+        wearable_clean in SUPPORTED_WEARABLES["providers"]
+        or wearable_clean in SUPPORTED_WEARABLES["sdk_providers"]
     ):
         return wearable_clean
     raise BadRequest(f"Unknown wearable {wearable}")
@@ -935,26 +956,7 @@ class WearablesV2Endpoint(BaseResource):
     @responds(schema=WearablesV2ProvidersGetSchema, api=ns_v2)
     def get(self):
         """Get a list of all supported wearable devices."""
-        return {
-            "providers": {
-                "COROS": "Coros",
-                "DEXCOM": "Dexcom",
-                "FITBIT": "Fitbit",
-                "FREESTYLELIBRE": "Freestyle Libre",
-                "GARMIN": "Garmin",
-                "GOOGLE": "Google Fit",
-                "OMRONUS": "Omron",
-                "OURA": "Oura",
-                "POLAR": "Polar",
-                "SUUNTO": "Suunto",
-                "WITHINGS": "Withings",
-            },
-            "sdk_providers": {
-                "GOOGLEFIT": "Google Fit (SDK)",
-                "APPLE": "Apple HealthKit",
-                "SAMSUNG": "Samsung",
-            },
-        }
+        return SUPPORTED_WEARABLES
 
 
 @ns_v2.route("/<int:user_id>")
@@ -2626,13 +2628,13 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
 
         # Unwind the hr_samples array so that we can operate on each individual sample
         stage_unwind_hr_samples = {
-            "$unwind": "$data.body.heart_data.detailed.hr_samples"
+            "$unwind": "$data.body.heart_data.heart_rate_data.detailed.hr_samples"
         }
 
         # Filter on the timestamp of each hr_sample
         stage_match_date_range_pulse = {
             "$match": {
-                "data.body.heart_data.detailed.hr_samples.timestamp": {
+                "data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp": {
                     "$gte": start_date,
                     "$lte": end_date,
                 }
@@ -2643,7 +2645,9 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         stage_add_hour_pulse = {
             "$addFields": {
                 "hour": {
-                    "$hour": ("$data.body.heart_data.detailed.hr_samples.timestamp")
+                    "$hour": (
+                        "$data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp"
+                    )
                 }
             }
         }
@@ -2656,7 +2660,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
                 "boundaries": THREE_HOUR_TIME_BLOCK_START_TIMES_LIST,
                 "output": {
                     "average_pulse": {
-                        "$avg": "$data.body.heart_data.detailed.hr_samples.bpm"
+                        "$avg": "$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm"
                     },
                     "total_pulse_readings": {"$sum": 1},
                 },
@@ -3133,13 +3137,13 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Unwind the hr_samples array so that we can operate on each individual sample
         stage_unwind_hr_samples = {
-            "$unwind": "$data.body.heart_data.detailed.hr_samples"
+            "$unwind": "$data.body.heart_data.heart_rate_data.detailed.hr_samples"
         }
 
         # Filter on the timestamp of each hr_sample
         stage_match_date_range_pulse = {
             "$match": {
-                "data.body.heart_data.detailed.hr_samples.timestamp": {
+                "data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp": {
                     "$gte": start_date,
                     "$lte": end_date,
                 }
@@ -3149,7 +3153,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         # Filter on the timestamp of each prev hr_sample
         stage_match_date_range_pulse_prev = {
             "$match": {
-                "data.body.heart_data.detailed.hr_samples.timestamp": {
+                "data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp": {
                     "$gte": start_date - timedelta(days=days),
                     "$lte": start_date,
                 }
@@ -3161,7 +3165,13 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 "_id": None,
                 "total_pulse_readings": {"$sum": 1},
                 "average_pulse": {
-                    "$avg": "$data.body.heart_data.detailed.hr_samples.bpm"
+                    "$avg": "$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm"
+                },
+                "min_pulse": {
+                    "$min": "$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm"
+                },
+                "max_pulse": {
+                    "$max": "$data.body.heart_data.heart_rate_data.detailed.hr_samples.bpm"
                 },
             }
         }
@@ -3284,6 +3294,12 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         payload["current_block"]["general_data"][
             "total_pulse_readings"
         ] = pulse_data.get("total_pulse_readings")
+        payload["current_block"]["general_data"]["min_pulse"] = pulse_data.get(
+            "min_pulse"
+        )
+        payload["current_block"]["general_data"]["max_pulse"] = pulse_data.get(
+            "max_pulse"
+        )
 
         # Systolic classifications
         cursor = mongo.db.wearables.aggregate(classification_pipeline)
@@ -3351,6 +3367,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         payload["prev_block"]["general_data"]["total_pulse_readings"] = pulse_data.get(
             "total_pulse_readings"
         )
+        payload["prev_block"]["general_data"]["min_pulse"] = pulse_data.get("min_pulse")
+        payload["prev_block"]["general_data"]["max_pulse"] = pulse_data.get("max_pulse")
 
         # Systolic classifications prev
         cursor = mongo.db.wearables.aggregate(prev_classification_pipeline)
