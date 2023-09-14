@@ -277,6 +277,8 @@ class WearablesV2BloodPressureMonitoringStatisticsGeneralInfoSchema(Schema):
     total_pulse_readings = fields.Integer(default=0)
     average_pulse = fields.Integer(default=None)
     average_readings_per_day = fields.Float(default=None)
+    min_pulse = fields.Integer(default=None)
+    max_pulse = fields.Integer(default=None)
 
 
 class WearablesV2BloodPressureMonitoringStatisticsTimeBlockSchema(Schema):
