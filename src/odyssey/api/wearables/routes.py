@@ -38,6 +38,7 @@ from odyssey.utils.misc import (
     lru_cache_with_ttl,
 )
 from odyssey.utils.mongo_queries import (
+    calories_aggregation,
     sleep_durations_aggregation,
     resting_hr_aggregation,
     steps_aggregation,
@@ -3514,6 +3515,7 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
 class WearablesV2DataDashboardEndpoint(BaseResource):
     """Endpoint for retrieving data for the data dashboard"""
 
+    @responds(schema=WearablesV2DashboardOutputSchema, status_code=200, api=ns_v2)
     def get(self, user_id):
         """
         Retrieve data for the data dashboard.
@@ -3561,10 +3563,12 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         )
         resting_hr_query = resting_hr_aggregation(user_id, device, start_date, end_date)
         steps_query = steps_aggregation(user_id, device, start_date, end_date)
+        calories_query = calories_aggregation(user_id, device, start_date, end_date)
 
         sleep_durations_cursor = mongo.db.wearables.aggregate(sleep_durations_query)
         resting_hrs_cursor = mongo.db.wearables.aggregate(resting_hr_query)
         steps_cursor = mongo.db.wearables.aggregate(steps_query)
+        calories_cursor = mongo.db.wearables.aggregate(calories_query)
 
         # Initialize an empty dictionary to store the collated results
         collated_results = {}
@@ -3573,7 +3577,7 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         asleep_duration_sum = 0
         in_bed_duration_sum = 0
 
-        # Add result1 to the collated_results
+        # Add result to the collated_results
         for entry in sleep_durations_cursor:
             date = entry["date"]
             del entry["date"]
@@ -3637,6 +3641,28 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             avg_steps = None
             avg_distance = None
 
+        num_entries = 0
+        calories_sum = 0
+        active_calories_sum = 0
+
+        for entry in calories_cursor:
+            date = entry["date"]
+            del entry["date"]
+            num_entries += 1
+            calories_sum += entry["total_calories"]
+            active_calories_sum += entry["active_calories"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        # Calculate the average calories and active calories
+        if num_entries > 0:
+            avg_calories = calories_sum / num_entries
+            avg_active_calories = active_calories_sum / num_entries
+        else:
+            avg_calories = None
+            avg_active_calories = None
+
         # breakpoint()
         # return the documents using json
         payload = {
@@ -3647,6 +3673,8 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             "avg_distance_feet": avg_distance,
             "avg_sleep_duration": avg_sleep_duration,
             "avg_in_bed_duration": avg_in_bed_duration,
+            "avg_calories": avg_calories,
+            "avg_active_calories": avg_active_calories,
         }
 
         return payload
