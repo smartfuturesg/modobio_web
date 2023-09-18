@@ -81,6 +81,17 @@ from terra.models.v2.nutrition import Nutrition
 from terra.models.v2.sleep import Sleep
 
 
+class RoundedFloat(fields.Float):
+    def __init__(self, decimals=2, **kwargs):
+        self.decimals = decimals
+        super().__init__(**kwargs)
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return None
+        return round(value, self.decimals)
+
+
 class WearablesV2BaseSchema(Schema):
     class Meta:
         unknown = EXCLUDE
@@ -371,3 +382,30 @@ class WearablesV2BloodPressureDailyAvgOutputSchema(Schema):
     wearable = fields.String(required=True)
     items = fields.List(fields.Nested(WearablesV2BloodPressureDailyAvgNestedSchema))
     total_items = fields.Integer(required=True)
+
+
+class DailyMetricsSchema(Schema):
+    total_duration_asleep = fields.Int()
+    total_duration_REM = fields.Int()
+    total_duration_light_sleep = fields.Int()
+    total_duration_deep_sleep = fields.Int()
+    total_duration_in_bed = fields.Int()
+    resting_hr = fields.Int()
+    total_steps = fields.Int()
+    total_distance_feet = RoundedFloat()
+    total_calories = fields.Int()
+    active_calories = fields.Int()
+
+
+class WearablesV2DashboardOutputSchema(Schema):
+    daily_metrics = fields.Dict(
+        keys=fields.Str(), values=fields.Nested(DailyMetricsSchema())
+    )
+    total_days = fields.Int(load_default=0)
+    avg_resting_hr = RoundedFloat()
+    avg_steps = RoundedFloat()
+    avg_distance_feet = RoundedFloat()
+    avg_sleep_duration = RoundedFloat()
+    avg_in_bed_duration = RoundedFloat()
+    avg_calories = RoundedFloat()
+    avg_active_calories = RoundedFloat()
