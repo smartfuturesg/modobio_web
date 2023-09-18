@@ -224,3 +224,25 @@ def bp_30_days_data(test_client):
 
     del_query = {"user_id": test_client.client_id, "wearable": BLOOD_PRESSURE_WEARABLE}
     test_client.mongo.db.wearables.delete_many(del_query)
+
+
+@pytest.fixture(scope="function")
+def oura_data(test_client):
+    """
+    Adds data from oura_wearable_daily_and_sleep_data into mongodb
+    """
+
+    # oura_wearable_daily_and_sleep_data imported list of dicts from data.py
+
+    test_client.mongo.db.wearables.insert_many(oura_wearable_daily_and_sleep_data)
+
+    # find start and end times of data
+    data_start_time = min(
+        dat["timestamp"] for dat in oura_wearable_daily_and_sleep_data
+    )
+    data_end_time = max(dat["timestamp"] for dat in oura_wearable_daily_and_sleep_data)
+
+    yield {"data_start_time": data_start_time, "data_end_time": data_end_time}
+
+    del_query = {"user_id": test_client.client_id, "wearable": "OURA"}
+    test_client.mongo.db.wearables.delete_many(del_query)

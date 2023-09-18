@@ -37,6 +37,12 @@ from odyssey.utils.misc import (
     iso_string_to_iso_datetime,
     lru_cache_with_ttl,
 )
+from odyssey.utils.mongo_queries import (
+    calories_aggregation,
+    resting_hr_aggregation,
+    sleep_durations_aggregation,
+    steps_aggregation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -3518,6 +3524,213 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
             "items": document_list,
             "total_items": len(document_list),
             "wearable": wearable,
+        }
+
+        return payload
+
+
+@ns_v2.route("/data/dashboard/<int:user_id>")
+class WearablesV2DataDashboardEndpoint(BaseResource):
+    """Endpoint for retrieving data for the data dashboard"""
+
+    @ns_v2.doc(
+        params={
+            "start_date": "Start of specified date range in ISO format or full ISO timestamp",
+            "end_date": "End of specified date range in ISO format or full ISO timestamp",
+            "default_wearable": "Default device for all metrics (Required)",
+            "sleep_wearable": "Device to use specifically for sleep data",
+            "hr_wearable": "Device to use specifically for heart rate data",
+            "steps_wearable": "Device to use specifically for steps data",
+            "calories_wearable": "Device to use specifically for calories data",
+        }
+    )
+    @responds(schema=WearablesV2DashboardOutputSchema, status_code=200, api=ns_v2)
+    def get(self, user_id):
+        """
+        Retrieve data for the data dashboard.
+        This endpoint will return the following data:
+            - Total sleep duration
+            - Daily Steps
+            - Daily Calories
+            - Daily resting heart rate
+
+        Path Parameters
+        ---------------
+        user_id : int
+            User ID number.
+
+        Query Parameters
+        ----------------
+        start_date : str
+            Start of the specified date range in ISO format or full ISO timestamp.
+        end_date : str
+            End of the specified date range in ISO format or full ISO timestamp.
+        default_wearable : str
+            Default device for all metrics. This is a required query parameter.
+        sleep_wearable : str
+            Device to use specifically for sleep data.
+        hr_wearable : str
+            Device to use specifically for heart rate data.
+        steps_wearable : str
+            Device to use specifically for steps data.
+        calories_wearable : str
+            Device to use specifically for calories data.
+
+
+        Returns
+        -------
+        dict
+             `WearablesV2DashboardOutputSchema`
+        """
+        start_date, end_date = date_range(
+            start_time=request.args.get("start_date"),
+            end_time=request.args.get("end_date"),
+            time_range=timedelta(days=14),
+        )
+
+        default_wearable = request.args.get("default_wearable")
+        if default_wearable is None:
+            raise BadRequest("The 'default_wearable' query parameter is required.")
+
+        # Devices for each metric
+        sleep_wearable = request.args.get("sleep_wearable", default_wearable)
+        hr_wearable = request.args.get("hr_wearable", default_wearable)
+        steps_wearable = request.args.get("steps_wearable", default_wearable)
+        calories_wearable = request.args.get("calories_wearable", default_wearable)
+
+        # mongo db query for sleep
+        # this one will require an aggregation due to the complexity of sleep data
+        # the data can get muddled with multiple sleep events and handling sleep
+        # recordings which cross day boundaries
+        # Notable points:
+        # - sleep events are grouped on the day the sleep even ends
+        # - sleep data is only returned for a day if there are sleep events that were not considered a nap
+        # - total sleep duration is summed from all naps
+
+        sleep_durations_query = sleep_durations_aggregation(
+            user_id, sleep_wearable, start_date, end_date
+        )
+        resting_hr_query = resting_hr_aggregation(
+            user_id, hr_wearable, start_date, end_date
+        )
+        steps_query = steps_aggregation(user_id, steps_wearable, start_date, end_date)
+        calories_query = calories_aggregation(
+            user_id, calories_wearable, start_date, end_date
+        )
+
+        sleep_durations_cursor = mongo.db.wearables.aggregate(sleep_durations_query)
+        resting_hrs_cursor = mongo.db.wearables.aggregate(resting_hr_query)
+        steps_cursor = mongo.db.wearables.aggregate(steps_query)
+        calories_cursor = mongo.db.wearables.aggregate(calories_query)
+
+        # Initialize an empty dictionary to store the collated results
+        collated_results = {}
+
+        num_entries = 0
+        asleep_duration_sum = 0
+        in_bed_duration_sum = 0
+
+        # Add result to the collated_results
+        for entry in sleep_durations_cursor:
+            date = entry["date"]
+            del entry["date"]
+            num_entries += 1
+            asleep_duration_sum += entry["total_duration_asleep"]
+            in_bed_duration_sum += entry["total_duration_in_bed"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        # Calculate the average sleep duration
+
+        if num_entries > 0:
+            avg_sleep_duration = asleep_duration_sum / num_entries
+            avg_in_bed_duration = in_bed_duration_sum / num_entries
+        else:
+            avg_sleep_duration = None
+            avg_in_bed_duration = None
+
+        # Add the hr_aggregation data to the collated_results
+        # while looping through hr_aggregation, find the average resting heart rate
+        hr_sum = 0
+        hr_count = 0
+
+        for entry in resting_hrs_cursor:
+            date = entry["date"]
+            hr_count += 1
+            hr_sum += entry["resting_hr"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date]["resting_hr"] = entry["resting_hr"]
+
+        # Calculate the average resting heart rate
+        if hr_count > 0:
+            avg_resting_hr = hr_sum / hr_count
+        else:
+            avg_resting_hr = None
+
+        num_entries = 0
+        steps_sum = 0
+        distance_sum = 0
+
+        for entry in steps_cursor:
+            date = entry["date"]
+            del entry["date"]
+            num_entries += 1
+
+            # convert total_distance_meters to feet
+            entry["total_distance_feet"] = entry["total_distance_meters"] * 3.28084
+
+            del entry["total_distance_meters"]
+
+            steps_sum += entry["total_steps"]
+            distance_sum += entry["total_distance_feet"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        # Calculate the average steps and distance
+        if num_entries > 0:
+            avg_steps = steps_sum / num_entries
+            avg_distance = distance_sum / num_entries
+        else:
+            avg_steps = None
+            avg_distance = None
+
+        num_entries = 0
+        calories_sum = 0
+        active_calories_sum = 0
+
+        for entry in calories_cursor:
+            date = entry["date"]
+            del entry["date"]
+            num_entries += 1
+            calories_sum += entry["total_calories"]
+            active_calories_sum += entry["active_calories"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        # Calculate the average calories and active calories
+        if num_entries > 0:
+            avg_calories = calories_sum / num_entries
+            avg_active_calories = active_calories_sum / num_entries
+        else:
+            avg_calories = None
+            avg_active_calories = None
+
+        # breakpoint()
+        # return the documents using json
+        payload = {
+            "daily_metrics": collated_results,
+            "total_days": len(collated_results),
+            "avg_resting_hr": avg_resting_hr,
+            "avg_steps": avg_steps,
+            "avg_distance_feet": avg_distance,
+            "avg_sleep_duration": avg_sleep_duration,
+            "avg_in_bed_duration": avg_in_bed_duration,
+            "avg_calories": avg_calories,
+            "avg_active_calories": avg_active_calories,
         }
 
         return payload
