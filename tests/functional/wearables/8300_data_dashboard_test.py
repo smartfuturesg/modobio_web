@@ -15,7 +15,7 @@ def test_data_dashboard_endpoint(
         query_string={
             "start_date": oura_data["data_start_time"].strftime("%Y-%m-%d"),
             "end_date": oura_data["data_end_time"].strftime("%Y-%m-%d"),
-            "default_device": "OURA",
+            "default_wearable": "OURA",
         },
         content_type="application/json",
     )
