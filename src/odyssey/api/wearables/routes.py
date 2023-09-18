@@ -3643,6 +3643,9 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         if num_entries > 0:
             avg_sleep_duration = asleep_duration_sum / num_entries
             avg_in_bed_duration = in_bed_duration_sum / num_entries
+        else:
+            avg_sleep_duration = None
+            avg_in_bed_duration = None
 
         # Add the hr_aggregation data to the collated_results
         # while looping through hr_aggregation, find the average resting heart rate
@@ -3658,10 +3661,10 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             collated_results[date]["resting_hr"] = entry["resting_hr"]
 
         # Calculate the average resting heart rate
-        if hr_count == 0:
-            avg_resting_hr = None
-        else:
+        if hr_count > 0:
             avg_resting_hr = hr_sum / hr_count
+        else:
+            avg_resting_hr = None
 
         num_entries = 0
         steps_sum = 0
