@@ -39,8 +39,8 @@ from odyssey.utils.misc import (
 )
 from odyssey.utils.mongo_queries import (
     calories_aggregation,
-    sleep_durations_aggregation,
     resting_hr_aggregation,
+    sleep_durations_aggregation,
     steps_aggregation,
 )
 
