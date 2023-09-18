@@ -3412,11 +3412,6 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
                 "End of specified date range. Can be either ISO format date"
                 " (2023-01-01) or full ISO timestamp (2023-01-01T00:00:00Z)"
             ),
-            "default_device": "(Required) Default device for all metrics",
-            "sleep_device": "Device to use specifically for sleep data",
-            "hr_device": "Device to use specifically for heart rate data",
-            "steps_device": "Device to use specifically for steps data",
-            "calories_device": "Device to use specifically for calories data",
         }
     )
     @responds(
@@ -3542,11 +3537,11 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         params={
             "start_date": "Start of specified date range in ISO format or full ISO timestamp",
             "end_date": "End of specified date range in ISO format or full ISO timestamp",
-            "default_device": "Default device for all metrics (Required)",
-            "sleep_device": "Device to use specifically for sleep data",
-            "hr_device": "Device to use specifically for heart rate data",
-            "steps_device": "Device to use specifically for steps data",
-            "calories_device": "Device to use specifically for calories data",
+            "default_wearable": "Default device for all metrics (Required)",
+            "sleep_wearable": "Device to use specifically for sleep data",
+            "hr_wearable": "Device to use specifically for heart rate data",
+            "steps_wearable": "Device to use specifically for steps data",
+            "calories_wearable": "Device to use specifically for calories data",
         }
     )
     @responds(schema=WearablesV2DashboardOutputSchema, status_code=200, api=ns_v2)
@@ -3563,21 +3558,29 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         ---------------
         user_id : int
             User ID number.
-        device: str
-            TODO target device
 
         Query Parameters
         ----------------
+        start_date : str
+            Start of the specified date range in ISO format or full ISO timestamp.
+        end_date : str
+            End of the specified date range in ISO format or full ISO timestamp.
+        default_wearable : str
+            Default device for all metrics. This is a required query parameter.
+        sleep_wearable : str
+            Device to use specifically for sleep data.
+        hr_wearable : str
+            Device to use specifically for heart rate data.
+        steps_wearable : str
+            Device to use specifically for steps data.
+        calories_wearable : str
+            Device to use specifically for calories data.
 
 
         Returns
         -------
         dict
-            JSON encoded dict containing:
-            - total_sleep_duration - total sleep duration in hours
-            - daily_steps - daily steps
-            - daily_calories - daily calories
-            - daily_resting_heart_rate - daily resting heart rate
+             `WearablesV2DashboardOutputSchema`
         """
         start_date, end_date = date_range(
             start_time=request.args.get("start_date"),
@@ -3585,15 +3588,15 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             time_range=timedelta(days=14),
         )
 
-        default_device = request.args.get("default_device")
-        if default_device is None:
-            raise BadRequest("The 'default_device' query parameter is required.")
+        default_wearable = request.args.get("default_wearable")
+        if default_wearable is None:
+            raise BadRequest("The 'default_wearable' query parameter is required.")
 
         # Devices for each metric
-        sleep_device = request.args.get("sleep_device", default_device)
-        hr_device = request.args.get("hr_device", default_device)
-        steps_device = request.args.get("steps_device", default_device)
-        calories_device = request.args.get("calories_device", default_device)
+        sleep_wearable = request.args.get("sleep_wearable", default_wearable)
+        hr_wearable = request.args.get("hr_wearable", default_wearable)
+        steps_wearable = request.args.get("steps_wearable", default_wearable)
+        calories_wearable = request.args.get("calories_wearable", default_wearable)
 
         # mongo db query for sleep
         # this one will require an aggregation due to the complexity of sleep data
@@ -3605,14 +3608,14 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         # - total sleep duration is summed from all naps
 
         sleep_durations_query = sleep_durations_aggregation(
-            user_id, sleep_device, start_date, end_date
+            user_id, sleep_wearable, start_date, end_date
         )
         resting_hr_query = resting_hr_aggregation(
-            user_id, hr_device, start_date, end_date
+            user_id, hr_wearable, start_date, end_date
         )
-        steps_query = steps_aggregation(user_id, steps_device, start_date, end_date)
+        steps_query = steps_aggregation(user_id, steps_wearable, start_date, end_date)
         calories_query = calories_aggregation(
-            user_id, calories_device, start_date, end_date
+            user_id, calories_wearable, start_date, end_date
         )
 
         sleep_durations_cursor = mongo.db.wearables.aggregate(sleep_durations_query)
