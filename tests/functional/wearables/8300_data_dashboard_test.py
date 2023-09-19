@@ -19,7 +19,6 @@ def test_data_dashboard_endpoint(
         },
         content_type="application/json",
     )
-
     # ensure that all items from the WearablesV2DashboardOutputSchema schema are returned
     assert response.status_code == 200
 
@@ -37,16 +36,16 @@ def test_data_dashboard_endpoint(
     # keys nested under daily_metrics['2023-09-11']
 
     assert (
-        type(response.json["daily_metrics"]["2023-09-11"].get("total_duration_asleep"))
+        type(response.json["daily_metrics"][0].get("total_duration_asleep"))
         == int
     )
     assert (
-        type(response.json["daily_metrics"]["2023-09-11"].get("total_duration_REM"))
+        type(response.json["daily_metrics"][0].get("total_duration_REM"))
         == int
     )
     assert (
         type(
-            response.json["daily_metrics"]["2023-09-11"].get(
+            response.json["daily_metrics"][0].get(
                 "total_duration_light_sleep"
             )
         )
@@ -54,25 +53,25 @@ def test_data_dashboard_endpoint(
     )
     assert (
         type(
-            response.json["daily_metrics"]["2023-09-11"].get(
+            response.json["daily_metrics"][0].get(
                 "total_duration_deep_sleep"
             )
         )
         == int
     )
     assert (
-        type(response.json["daily_metrics"]["2023-09-11"].get("total_duration_in_bed"))
+        type(response.json["daily_metrics"][0].get("total_duration_in_bed"))
         == int
     )
-    assert type(response.json["daily_metrics"]["2023-09-11"].get("resting_hr")) == int
-    assert type(response.json["daily_metrics"]["2023-09-11"].get("total_steps")) == int
+    assert type(response.json["daily_metrics"][0].get("resting_hr")) == int
+    assert type(response.json["daily_metrics"][0].get("total_steps")) == int
     assert (
-        type(response.json["daily_metrics"]["2023-09-11"].get("total_distance_feet"))
+        type(response.json["daily_metrics"][0].get("total_distance_feet"))
         == float
     )
     assert (
-        type(response.json["daily_metrics"]["2023-09-11"].get("total_calories")) == int
+        type(response.json["daily_metrics"][0].get("total_calories")) == int
     )
     assert (
-        type(response.json["daily_metrics"]["2023-09-11"].get("active_calories")) == int
+        type(response.json["daily_metrics"][0].get("active_calories")) == int
     )
