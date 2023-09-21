@@ -103,7 +103,6 @@ def test_remove_past_notifications_deleted_flag(test_client):
         headers=test_client.client_auth_header,
         content_type="application/json",
     )
-    # breakpoint()
     notif = response.json[0]
 
     assert response.status_code == 200

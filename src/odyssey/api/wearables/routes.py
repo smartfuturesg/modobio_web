@@ -3719,7 +3719,6 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             avg_calories = None
             avg_active_calories = None
 
-        # breakpoint()
         # return the documents using json
         payload = {
             "daily_metrics": collated_results,
