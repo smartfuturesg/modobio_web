@@ -1,5 +1,9 @@
+from datetime import datetime, timedelta
+from math import e
+
+
 def sleep_durations_aggregation(
-    user_id: int, device: str, start_date: str, end_date: str
+    user_id: int, device: str, start_date: datetime, end_date: datetime
 ):
     return [
         # Filter by user_id and ensure there is data in the data.sleep path
@@ -8,7 +12,17 @@ def sleep_durations_aggregation(
                 "user_id": user_id,
                 "wearable": device,
                 "data.sleep": {"$exists": True, "$ne": None},
-                "timestamp": {"$gte": start_date, "$lte": end_date},
+                "timestamp": {
+                    "$gte": start_date - timedelta(days=1),
+                    "$lte": end_date + timedelta(days=1),
+                },  # timestamp filters start of sleep event. we are interested in when the sleep event ends
+                "data.sleep.metadata.end_time": {
+                    "$gte": start_date,
+                    "$lte": end_date
+                    + timedelta(
+                        days=1
+                    ),  # added an extra day to ensure we get the last sleep event
+                },
             }
         },
         {
@@ -22,7 +36,15 @@ def sleep_durations_aggregation(
             }
         },
         {"$group": {"_id": "$date", "entries": {"$push": "$$ROOT"}}},
-        {"$match": {"entries": {"$elemMatch": {"data.sleep.metadata.is_nap": False}}}},
+        {
+            "$match": {
+                "entries": {
+                    "$elemMatch": {
+                        "data.sleep.metadata.is_nap": False,
+                    }
+                }
+            }
+        },
         {"$unwind": "$entries"},
         {
             "$group": {
@@ -58,7 +80,12 @@ def sleep_durations_aggregation(
     ]
 
 
-def resting_hr_aggregation(user_id: int, device: str, start_date: str, end_date: str):
+def resting_hr_daily_aggregation(
+    user_id: int, device: str, start_date: datetime, end_date: datetime
+):
+    """
+    Resting HR aggregation for the daily data type.
+    """
     return [
         {
             "$match": {
@@ -104,14 +131,87 @@ def resting_hr_aggregation(user_id: int, device: str, start_date: str, end_date:
         {
             "$project": {
                 "date": "$_id",
+                "_id": 0,
                 "resting_hr": {"$arrayElemAt": ["$min_hr", 0]},
             }
         },
-        {"$sort": {"date": -1}},
     ]
 
 
-def steps_aggregation(user_id: int, device: str, start_date: str, end_date: str):
+def resting_hr_sleep_aggregation(
+    user_id: int, device: str, start_date: datetime, end_date: datetime
+):
+    """
+    Resting HR aggregation for the sleep data type.
+    """
+    return [
+        {
+            "$match": {
+                "user_id": user_id,
+                "wearable": device,
+                "timestamp": {
+                    "$gte": start_date - timedelta(days=1),
+                    "$lte": end_date + timedelta(days=1),
+                },
+                "data.sleep.metadata.end_time": {
+                    "$gte": start_date,
+                    "$lte": end_date
+                    + timedelta(
+                        days=1
+                    ),  # added an extra day to ensure we get the last sleep event
+                },
+            }
+        },
+        {
+            "$addFields": {
+                "date": {
+                    "$dateToString": {
+                        "format": "%Y-%m-%d",
+                        "date": "$data.sleep.metadata.end_time",
+                    }
+                }
+            }
+        },
+        {
+            "$project": {
+                "date": 1,
+                "heartrateValues": [
+                    "$data.sleep.heart_rate_data.summary.min_hr_bpm",
+                    "$data.sleep.heart_rate_data.summary.resting_hr_bpm",
+                ],
+            }
+        },
+        {
+            "$addFields": {
+                "heartrateValues": {
+                    "$filter": {
+                        "input": "$heartrateValues",
+                        "as": "rate",
+                        "cond": {
+                            "$and": [
+                                {"$ne": ["$$rate", None]},
+                                {"$ne": ["$$rate", 0]},
+                            ]
+                        },
+                    }
+                }
+            }
+        },
+        {"$match": {"heartrateValues": {"$ne": []}}},
+        {"$group": {"_id": "$date", "min_hr": {"$min": "$heartrateValues"}}},
+        {
+            "$project": {
+                "date": "$_id",
+                "_id": 0,
+                "resting_hr": {"$arrayElemAt": ["$min_hr", 0]},
+            }
+        },
+    ]
+
+
+def steps_aggregation(
+    user_id: int, device: str, start_date: datetime, end_date: datetime
+):
     return [
         {
             "$match": {
@@ -146,7 +246,9 @@ def steps_aggregation(user_id: int, device: str, start_date: str, end_date: str)
     ]
 
 
-def calories_aggregation(user_id: int, device: str, start_date: str, end_date: str):
+def calories_aggregation(
+    user_id: int, device: str, start_date: datetime, end_date: datetime
+):
     return [
         {
             "$match": {

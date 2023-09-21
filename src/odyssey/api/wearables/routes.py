@@ -37,12 +37,7 @@ from odyssey.utils.misc import (
     iso_string_to_iso_datetime,
     lru_cache_with_ttl,
 )
-from odyssey.utils.mongo_queries import (
-    calories_aggregation,
-    resting_hr_aggregation,
-    sleep_durations_aggregation,
-    steps_aggregation,
-)
+from odyssey.utils.mongo_queries import *
 
 logger = logging.getLogger(__name__)
 
@@ -3533,6 +3528,9 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
 class WearablesV2DataDashboardEndpoint(BaseResource):
     """Endpoint for retrieving data for the data dashboard"""
 
+    @token_auth.login_required(
+        user_type=("client", "provider"), resources=("wearable_data",)
+    )
     @ns_v2.doc(
         params={
             "start_date": "Start of specified date range in ISO format or full ISO timestamp",
@@ -3610,7 +3608,10 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         sleep_durations_query = sleep_durations_aggregation(
             user_id, sleep_wearable, start_date, end_date
         )
-        resting_hr_query = resting_hr_aggregation(
+        resting_hr_sleep_query = resting_hr_sleep_aggregation(
+            user_id, hr_wearable, start_date, end_date
+        )
+        resting_hr_daily_query = resting_hr_daily_aggregation(
             user_id, hr_wearable, start_date, end_date
         )
         steps_query = steps_aggregation(user_id, steps_wearable, start_date, end_date)
@@ -3619,12 +3620,32 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         )
 
         sleep_durations_cursor = mongo.db.wearables.aggregate(sleep_durations_query)
-        resting_hrs_cursor = mongo.db.wearables.aggregate(resting_hr_query)
+        resting_hrs_daily_cursor = mongo.db.wearables.aggregate(resting_hr_daily_query)
+        resting_hrs_sleep_cursor = mongo.db.wearables.aggregate(resting_hr_sleep_query)
         steps_cursor = mongo.db.wearables.aggregate(steps_query)
         calories_cursor = mongo.db.wearables.aggregate(calories_query)
 
         # Initialize an empty dictionary to store the collated results
         collated_results = {}
+
+        # resting_hrs_daily_cursor and resting_hrs_sleep_cursor must be collated together and then averaged
+        for entry in resting_hrs_daily_cursor:
+            date = entry["date"]
+            del entry["date"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        for entry in resting_hrs_sleep_cursor:
+            date = entry["date"]
+            del entry["date"]
+            if date not in collated_results:
+                collated_results[date] = {}
+            collated_results[date].update(entry)
+
+        # Calculate the average resting heart rate
+        total_hr = sum([entry["resting_hr"] for entry in collated_results.values()])
+        avg_resting_hr = round(total_hr / len(collated_results), 2)
 
         num_entries = 0
         asleep_duration_sum = 0
@@ -3642,32 +3663,12 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             collated_results[date].update(entry)
 
         # Calculate the average sleep duration
-
         if num_entries > 0:
-            avg_sleep_duration = asleep_duration_sum / num_entries
-            avg_in_bed_duration = in_bed_duration_sum / num_entries
+            avg_sleep_duration = round(asleep_duration_sum / num_entries, 2)
+            avg_in_bed_duration = round(in_bed_duration_sum / num_entries, 2)
         else:
             avg_sleep_duration = None
             avg_in_bed_duration = None
-
-        # Add the hr_aggregation data to the collated_results
-        # while looping through hr_aggregation, find the average resting heart rate
-        hr_sum = 0
-        hr_count = 0
-
-        for entry in resting_hrs_cursor:
-            date = entry["date"]
-            hr_count += 1
-            hr_sum += entry["resting_hr"]
-            if date not in collated_results:
-                collated_results[date] = {}
-            collated_results[date]["resting_hr"] = entry["resting_hr"]
-
-        # Calculate the average resting heart rate
-        if hr_count > 0:
-            avg_resting_hr = hr_sum / hr_count
-        else:
-            avg_resting_hr = None
 
         num_entries = 0
         steps_sum = 0
@@ -3685,14 +3686,15 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
 
             steps_sum += entry["total_steps"]
             distance_sum += entry["total_distance_feet"]
+            entry["total_distance_feet"] = round(entry["total_distance_feet"], 2)
             if date not in collated_results:
                 collated_results[date] = {}
             collated_results[date].update(entry)
 
         # Calculate the average steps and distance
         if num_entries > 0:
-            avg_steps = steps_sum / num_entries
-            avg_distance = distance_sum / num_entries
+            avg_steps = round(steps_sum / num_entries, 2)
+            avg_distance = round(distance_sum / num_entries, 2)
         else:
             avg_steps = None
             avg_distance = None
@@ -3713,15 +3715,21 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
 
         # Calculate the average calories and active calories
         if num_entries > 0:
-            avg_calories = calories_sum / num_entries
-            avg_active_calories = active_calories_sum / num_entries
+            avg_calories = round(calories_sum / num_entries, 2)
+            avg_active_calories = round(active_calories_sum / num_entries, 2)
         else:
             avg_calories = None
             avg_active_calories = None
 
+        # loop through collated_results and append to a list
+        daily_results = []
+        for date, data in collated_results.items():
+            data["date"] = parser.parse(date)
+            daily_results.append(data)
+
         # return the documents using json
         payload = {
-            "daily_metrics": collated_results,
+            "daily_metrics": daily_results,
             "total_days": len(collated_results),
             "avg_resting_hr": avg_resting_hr,
             "avg_steps": avg_steps,
