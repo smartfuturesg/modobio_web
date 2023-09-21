@@ -1259,7 +1259,7 @@ class WearablesV2TerraWebHookEndpoint(BaseResource):
 @ns_v2.route("/calculations/blood-glucose/<int:user_id>/<string:wearable>")
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     @token_auth.login_required(
-        user_type=("client", "provider"), resources=("wearable_data",)
+        user_type=("client", "provider"), resources=("blood_glucose",)
     )
     @ns_v2.doc(
         params={
@@ -1445,7 +1445,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 )
 class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
     @token_auth.login_required(
-        user_type=("client", "provider"), resources=("wearable_data",)
+        user_type=("client", "provider"), resources=("blood_glucose",)
     )
     @ns_v2.doc(
         params={
@@ -1842,7 +1842,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
 )
 class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
     @token_auth.login_required(
-        user_type=("client", "provider"), resources=("wearable_data",)
+        user_type=("client", "provider"), resources=("blood_glucose",)
     )
     @ns_v2.doc(
         params={
@@ -2186,7 +2186,7 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
 @ns_v2.route("/calculations/blood-pressure/variation/<int:user_id>/<string:wearable>")
 class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
     @token_auth.login_required(
-        user_type=("client", "provider"), resources=("wearable_data",)
+        user_type=("client", "provider"), resources=("blood_pressure",)
     )
     @ns_v2.doc(
         params={
@@ -2468,7 +2468,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 )
 class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
     @token_auth.login_required(
-        user_type=("client", "provider"), resources=("wearable_data",)
+        user_type=("client", "provider"), resources=("blood_pressure",)
     )
     @ns_v2.doc(
         params={
@@ -2750,7 +2750,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
 )
 class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResource):
     @token_auth.login_required(
-        user_type=("client", "provider"), resources=("wearable_data",)
+        user_type=("client", "provider"), resources=("blood_pressure",)
     )
     @ns_v2.doc(
         params={
@@ -3400,7 +3400,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 )
 class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
     @token_auth.login_required(
-        user_type=("client", "provider"), resources=("wearable_data",)
+        user_type=("client", "provider"), resources=("blood_pressure",)
     )
     @ns_v2.doc(
         params={
