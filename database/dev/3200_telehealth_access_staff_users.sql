@@ -15,8 +15,6 @@ DECLARE
     _pro_user_4 INTEGER;
     _pro_user_5 INTEGER;
 BEGIN
-    SELECT user_id INTO _staff_user_1 FROM "User"
-    WHERE email = 'wearables_scraper@modobio.com';
     SELECT user_id INTO _staff_user_2 FROM "User"
     WHERE email = 'name@modobio.com';
     SELECT user_id INTO _staff_user_3 FROM "User"
@@ -52,7 +50,6 @@ BEGIN
          provider_telehealth_access
          )
     VALUES
-        (_staff_user_1, true, 'UTC', true),
         (_staff_user_2, true, 'UTC', true),
         (_staff_user_3, true, 'UTC', true),
         (_staff_user_4, true, 'UTC', true),
