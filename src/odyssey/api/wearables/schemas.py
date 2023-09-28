@@ -408,3 +408,16 @@ class WearablesV2DashboardOutputSchema(Schema):
     avg_in_bed_duration = fields.Float()
     avg_calories = fields.Float()
     avg_active_calories = fields.Float()
+
+
+class WearablesV2RawBPSchema(Schema):
+    timestamp = fields.DateTime()
+    systolic_bp = fields.Integer()
+    diastolic_bp = fields.Integer()
+    bpm = fields.Integer()
+    wearable = fields.String()
+
+
+class WearablesV2RawBPOutputSchema(Schema):
+    items = fields.List(fields.Nested(WearablesV2RawBPSchema))
+    total_items = fields.Integer(required=True)
