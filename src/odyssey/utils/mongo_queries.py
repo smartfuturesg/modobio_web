@@ -277,3 +277,67 @@ def calories_aggregation(
             }
         },
     ]
+
+
+def bp_raw_data_aggregation(user_id: int, start_date: datetime, end_date: datetime):
+    return [
+        {
+            "$match": {
+                "user_id": user_id,
+                "timestamp": {"$gte": start_date, "$lte": end_date},
+                "data.body": {
+                    "$exists": True,
+                    "$ne": None,
+                },
+            }
+        },
+        {
+            "$addFields": {
+                "collated_data": {
+                    "$map": {
+                        "input": "$data.body.heart_data.heart_rate_data.detailed.hr_samples",
+                        "as": "hr",
+                        "in": {
+                            "$let": {
+                                "vars": {
+                                    "bp": {
+                                        "$arrayElemAt": [
+                                            {
+                                                "$filter": {
+                                                    "input": "$data.body.blood_pressure_data.blood_pressure_samples",
+                                                    "as": "bp",
+                                                    "cond": {
+                                                        "$eq": [
+                                                            "$$bp.timestamp",
+                                                            "$$hr.timestamp",
+                                                        ]
+                                                    },
+                                                }
+                                            },
+                                            0,
+                                        ]
+                                    }
+                                },
+                                "in": {
+                                    "$cond": [
+                                        "$$bp",
+                                        {
+                                            "timestamp": "$$hr.timestamp",
+                                            "bpm": "$$hr.bpm",
+                                            "systolic_bp": "$$bp.systolic_bp",
+                                            "diastolic_bp": "$$bp.diastolic_bp",
+                                            "wearable": "$wearable",
+                                        },
+                                        "$$REMOVE",
+                                    ]
+                                },
+                            }
+                        },
+                    }
+                }
+            }
+        },
+        {"$project": {"collated_data": 1}},
+        {"$unwind": "$collated_data"},
+        {"$replaceRoot": {"newRoot": "$collated_data"}},
+    ]
