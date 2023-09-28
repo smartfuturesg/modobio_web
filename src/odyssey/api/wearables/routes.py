@@ -3748,7 +3748,7 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
     @token_auth.login_required(
         user_type=("client", "provider"), resources=("blood_pressure",)
     )
-    @responds(schema= WearablesV2RawBPOutputSchema, status_code=200, api=ns_v2)
+    @responds(schema=WearablesV2RawBPOutputSchema, status_code=200, api=ns_v2)
     @ns_v2.doc(
         params={
             "start_date": "Start of specified date range in ISO format or full ISO timestamp",
@@ -3767,7 +3767,7 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
         )
 
         bp_query = bp_raw_data_aggregation(user_id, start_date, end_date)
-    
+
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
         bp_data = list(bp_cursor)
         payload = {
