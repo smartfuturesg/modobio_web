@@ -1835,7 +1835,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
 @ns_v2.route(
     "/calculations/blood-glucose/cgm/percentiles/<int:user_id>/<string:wearable>"
 )
-class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
+class WearablesV2BloodGlucosePercentilesCalculationEndpoint(BaseResource):
     @token_auth.login_required(
         user_type=("client", "provider"), resources=("blood_glucose",)
     )
