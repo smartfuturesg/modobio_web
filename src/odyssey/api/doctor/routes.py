@@ -1,4 +1,5 @@
 import logging
+import re
 import secrets
 from datetime import date, datetime
 
@@ -6,10 +7,11 @@ from dateutil.relativedelta import relativedelta
 from flask import g, redirect, request, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
+from pymongo import ReturnDocument
 from sqlalchemy import and_, or_, select
 from werkzeug.exceptions import BadRequest
 
-from odyssey import db
+from odyssey import db, mongo
 from odyssey.api.client.models import *
 from odyssey.api.client.models import ClientFertility, ClientRaceAndEthnicity
 from odyssey.api.doctor.models import *
@@ -49,7 +51,7 @@ class MedBloodPressures(BaseResource):
     @token_auth.login_required(
         user_type=("client", "provider"), resources=("blood_pressure",)
     )
-    @responds(schema=MedicalBloodPressuresOutputSchema, api=ns)
+    @responds(schema=MedicalBloodPressureInsertRespondSchema, api=ns, status_code=201)
     def get(self, user_id):
         """
         This request gets the users submitted blood pressure if it exists
@@ -81,29 +83,60 @@ class MedBloodPressures(BaseResource):
         resources=("blood_pressure",),
     )
     @accepts(schema=MedicalBloodPressuresSchema, api=ns)
-    @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
     def post(self, user_id):
         """
-        Post request to post the client's blood pressure
+        Post request to store the client's blood pressure.
+        Will be stored in MongoDB indexed by day and wearable device type.
         """
-        # First check if the client exists
-        self.check_user(user_id, user_type="client")
 
-        if request.parsed_obj.source:
-            if (
-                request.parsed_obj.source == "device"
-                and not request.parsed_obj.device_name
-            ):
-                raise BadRequest("Device name is missing.")
+        if request.parsed_obj.get("source") == "device" and not request.parsed_obj.get(
+            "device_name"
+        ):
+            raise BadRequest("Device name is missing.")
 
-        self.set_reporter_id(request.parsed_obj)
+        # fit the source and device info into one field
+        if request.parsed_obj.get("device_name"):
+            measurement_method = (
+                "MANUAL - " + request.parsed_obj.get("device_name").upper()
+            )
+        else:
+            measurement_method = "MANUAL"
 
-        request.parsed_obj.user_id = user_id
+        # remove the timezone from datetime_taken, store utc_offset for payload metadata
+        datetime_taken = request.parsed_obj.get("datetime_taken")
+        if datetime_taken.tzinfo:
+            utc_offset = datetime_taken.utcoffset()
+            utc_offset = utc_offset.total_seconds()
+            datetime_taken = datetime_taken.replace(tzinfo=None)
+        else:
+            utc_offset = None
 
-        db.session.add(request.parsed_obj)
-        db.session.commit()
+        payload = mongo_bloodpressure_schema(
+            reporter_id=token_auth.current_user()[0].user_id,
+            datetime_taken=datetime_taken,
+            utc_offset=utc_offset,
+            reported_timestamp=datetime.utcnow(),
+            systolic=request.parsed_obj.get("systolic"),
+            diastolic=request.parsed_obj.get("diastolic"),
+            pulse=request.parsed_obj.get("pulse"),
+        )
 
-        return request.parsed_obj
+        # upsert into mongodb filtered by user_id, wearable, timestamp
+        # if the entry already exists, then update it
+        # if it doesn't exist, then insert it
+        # Update existing or create new doc (upsert).
+        result = mongo.db.wearables.find_one_and_update(
+            {
+                "user_id": user_id,
+                "wearable": measurement_method,
+                "timestamp": request.parsed_obj.get("datetime_taken"),
+            },
+            {"$set": {f"data": payload}},
+            upsert=True,
+            return_document=ReturnDocument.AFTER,
+        )
+
+        return {"_id": str(result.get("_id"))}
 
     @token_auth.login_required(
         user_type=("client", "provider"),
