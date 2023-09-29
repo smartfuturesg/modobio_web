@@ -416,6 +416,7 @@ class WearablesV2RawBPSchema(Schema):
     diastolic_bp = fields.Integer()
     bpm = fields.Integer()
     wearable = fields.String()
+    _id = fields.String()
 
 
 class WearablesV2RawBPOutputSchema(Schema):
