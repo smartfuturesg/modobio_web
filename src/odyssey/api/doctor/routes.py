@@ -3,6 +3,7 @@ import re
 import secrets
 from datetime import date, datetime
 
+from bson import ObjectId
 from dateutil.relativedelta import relativedelta
 from flask import g, redirect, request, url_for
 from flask_accepts import accepts, responds
@@ -145,7 +146,7 @@ class MedBloodPressures(BaseResource):
     )
     @ns.doc(
         params={
-            "idx": "int",
+            "_id": "Object Id for the blood pressure reading",
         }
     )
     @responds(status_code=204, api=ns)
@@ -153,23 +154,16 @@ class MedBloodPressures(BaseResource):
         """
         Delete request for a client's blood pressure
         """
-        self.check_user(user_id, user_type="client")
 
-        idx = request.args.get("idx", type=int)
-        if idx:
-            result = MedicalBloodPressures.query.filter_by(
-                user_id=user_id, idx=idx
-            ).one_or_none()
-            if not result:
-                raise BadRequest(f"Blood pressure result {idx} not found.")
+        _id = request.args.get("_id", type=str)
 
-            # ensure logged in user is the reporter for this pressure reasing
-            self.check_ehr_permissions(result)
+        # validate the _id as a valid ObjectId
+        if not ObjectId.is_valid(_id):
+            raise BadRequest("Invalid _id.")
 
-            db.session.delete(result)
-            db.session.commit()
-        else:
-            raise BadRequest("idx must be an integer.")
+        # convert to ObjectId and delete from MongoDB
+        mongo.db.wearables.delete_one({"_id": ObjectId(_id)})
+        return
 
 
 @ns.route("/medicalgeneralinfo/<int:user_id>/")
