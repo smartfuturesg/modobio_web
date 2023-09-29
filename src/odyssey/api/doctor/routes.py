@@ -49,34 +49,40 @@ class MedBloodPressures(BaseResource):
     # Multiple blood pressure measurements per user allowed
     __check_resource__ = False
 
-    @token_auth.login_required(
-        user_type=("client", "provider"), resources=("blood_pressure",)
-    )
-    @responds(schema=MedicalBloodPressureInsertRespondSchema, api=ns, status_code=201)
-    def get(self, user_id):
-        """
-        This request gets the users submitted blood pressure if it exists
-        """
-        self.check_user(user_id, user_type="client")
-        bp_info = MedicalBloodPressures.query.filter_by(user_id=user_id).all()
+    # @token_auth.login_required(
+    #     user_type=("client", "provider"), resources=("blood_pressure",)
+    # )
+    # @responds(schema=MedicalBloodPressureInsertRespondSchema, api=ns, status_code=201)
+    # def get(self, user_id):
+    #     """
+    #     This request gets the user's manually blood pressures only.
+    #     """
+    #     # search mongodb for bp measurements having user_id and "MANUAL" in wearable
 
-        reporter_pics = {}  # key = user_id, value =  dict of pic links
-        for data in bp_info:
-            reporter = User.query.filter_by(user_id=data.reporter_id).one_or_none()
-            data.reporter_firstname = reporter.firstname
-            data.reporter_lastname = reporter.lastname
+    #     results = mongo.db.wearables.find(
+    #         {
+    #             "user_id": user_id,
+    #             "wearable": "MANUAL",
+    #         }
+    #     )
 
-            if data.reporter_id != user_id and data.reporter_id not in reporter_pics:
-                reporter_pics[data.reporter_id] = get_profile_pictures(
-                    data.reporter_id, True
-                )
-            elif data.reporter_id not in reporter_pics:
-                reporter_pics[data.reporter_id] = get_profile_pictures(user_id, False)
+    #     reporter_pics = {}  # key = user_id, value =  dict of pic links
+    #     for data in bp_info:
+    #         reporter = User.query.filter_by(user_id=data.reporter_id).one_or_none()
+    #         data.reporter_firstname = reporter.firstname
+    #         data.reporter_lastname = reporter.lastname
 
-            data.reporter_profile_pictures = reporter_pics[data.reporter_id]
+    #         if data.reporter_id != user_id and data.reporter_id not in reporter_pics:
+    #             reporter_pics[data.reporter_id] = get_profile_pictures(
+    #                 data.reporter_id, True
+    #             )
+    #         elif data.reporter_id not in reporter_pics:
+    #             reporter_pics[data.reporter_id] = get_profile_pictures(user_id, False)
 
-        payload = {"items": bp_info, "total_items": len(bp_info)}
-        return payload
+    #         data.reporter_profile_pictures = reporter_pics[data.reporter_id]
+
+    #     payload = {"items": bp_info, "total_items": len(bp_info)}
+    #     return payload
 
     @token_auth.login_required(
         user_type=("client", "provider"),
@@ -161,8 +167,14 @@ class MedBloodPressures(BaseResource):
         if not ObjectId.is_valid(_id):
             raise BadRequest("Invalid _id.")
 
-        # convert to ObjectId and delete from MongoDB
-        mongo.db.wearables.delete_one({"_id": ObjectId(_id)})
+        # convert to ObjectId and delete from MongoDB. only delete manual readings
+        mongo.db.wearables.delete_one(
+            {
+                "_id": ObjectId(_id),
+                "wearable": {"$regex": f".*MANUAL.*", "$options": "i"},
+            }
+        )
+
         return
 
 
