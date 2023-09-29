@@ -229,14 +229,14 @@ The default telehealth duration in minutes.
 """
 
 # Celery settings.
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-""" Celery default broker URL.
+# CELERY_BROKER_URL = "redis://localhost:6379/0"
+# """ Celery default broker URL.
 
-This must be a URL in the form of: ``transport://userid:password@hostname:port/virtual_host``
+# This must be a URL in the form of: ``transport://userid:password@hostname:port/virtual_host``
 
-This variable will be converted to ``broker_url`` (lower case) to work with
-Celery's new config system.
-"""
+# This variable will be converted to ``broker_url`` (lower case) to work with
+# Celery's new config system.
+# """
 
 CELERY_RESULT_BACKEND = ""
 """ Celery default backend to store results.
@@ -247,7 +247,7 @@ This variable will be converted to ``result_backend`` (lower case) to work with
 Celery's new config system.
 """
 
-CELERY_REDBEAT_REDIS_URL = CELERY_BROKER_URL
+CELERY_REDBEAT_REDIS_URL = "redis://localhost:6379/0"
 """ Celery-redbeat will use redis to store a persistent celerybeat schedule
 
 This variable will be converted to ``redbeat_redis_url`` (lower case) to work with

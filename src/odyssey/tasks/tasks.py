@@ -459,7 +459,7 @@ def update_client_subscription_task(user_id: int, auto_renew: bool = True):
     db.session.commit()
 
     # connect to redis and delete task key
-    redis_conn = redis.Redis.from_url(conf.broker_url)
+    redis_conn = redis.Redis.from_url(conf.redbeat_redis_url)
     redis_conn.delete(f"task_subscription_update_{user_id}")
     return
 
