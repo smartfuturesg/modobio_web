@@ -30,6 +30,7 @@ app.conf.task_routes = {
 app.conf.beat_max_loop_interval = 120  # max time between beat ticks
 app.conf.redbeat_lock_timeout = app.conf.beat_max_loop_interval * 5
 app.conf.redbeat_redis_url = conf.redbeat_redis_url
+app.conf.broker_url = conf.redbeat_redis_url
 
 if conf.FLASK_DEBUG or conf.TESTING:
     app.conf.mongodb_backend_settings = {"database": "modobio-dev"}
