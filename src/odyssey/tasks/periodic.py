@@ -440,7 +440,7 @@ def deploy_subscription_update_tasks(interval: int):
 
     """
     # connect to redis using CELERY_BROKER_URL
-    redis_conn = redis.from_url(conf.broker_url)
+    redis_conn = redis.from_url(conf.redbeat_redis_url)
 
     # Use a lock to ensure only one instance of the task is running at a time
     lock = redis_conn.lock("deploy_subscription_update_tasks_lock", blocking_timeout=10)
