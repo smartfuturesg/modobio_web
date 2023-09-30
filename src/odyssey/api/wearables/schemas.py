@@ -417,6 +417,18 @@ class WearablesV2RawBPSchema(Schema):
     bpm = fields.Integer()
     wearable = fields.String()
     _id = fields.String()
+    reporter_id = fields.Integer()
+    reporter_firstname = fields.String(
+        metadata={"description": "first name of reporting physician"},
+        dump_only=True,
+    )
+    reporter_lastname = fields.String(
+        metadata={"description": "last name of reporting physician"},
+        dump_only=True,
+    )
+    reporter_profile_pictures = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), dump_only=True
+    )
 
 
 class WearablesV2RawBPOutputSchema(Schema):

@@ -15,7 +15,8 @@ from sqlalchemy import select
 from sqlalchemy.sql import text
 from werkzeug.exceptions import BadRequest, Unauthorized
 
-from odyssey import mongo
+from odyssey import db, mongo
+from odyssey.api.user.models import User
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
 from odyssey.integrations.active_campaign import ActiveCampaign
@@ -29,6 +30,7 @@ from odyssey.utils.constants import (
     WEARABLE_DEVICE_TYPES,
     WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES,
 )
+from odyssey.utils.files import get_profile_pictures
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
     create_wearables_filter_query,
@@ -3770,6 +3772,26 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
 
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
         bp_data = list(bp_cursor)
+
+        reporter_pics = {}  # key = user_id, value =  dict of pic links
+        user_cache = {}
+
+        for data in bp_data:
+            reporter_id = data.get("reporter_id", user_id)
+            data["reporter_id"] = reporter_id
+            if reporter_id not in user_cache:
+                user_cache[reporter_id] = (
+                    db.session.query(User).filter_by(user_id=reporter_id).one_or_none()
+                )
+            reporter = user_cache[reporter_id]
+            data["reporter_firstname"] = reporter.firstname
+            data["reporter_lastname"] = reporter.lastname
+            if reporter_id != user_id and reporter_id not in reporter_pics:
+                reporter_pics[reporter_id] = get_profile_pictures(reporter_id, True)
+            elif reporter_id not in reporter_pics:
+                reporter_pics[reporter_id] = get_profile_pictures(user_id, False)
+            data["reporter_profile_pictures"] = reporter_pics[reporter_id]
+
         payload = {
             "items": bp_data,
             "total_items": len(bp_data),

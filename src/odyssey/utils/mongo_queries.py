@@ -328,6 +328,7 @@ def bp_raw_data_aggregation(user_id: int, start_date: datetime, end_date: dateti
                                             "diastolic_bp": "$$bp.diastolic_bp",
                                             "wearable": "$wearable",
                                             "_id": {"$toString": "$_id"},
+                                            "reporter_id": "$data.body.metadata.reporter_id",
                                         },
                                         "$$REMOVE",
                                     ]
