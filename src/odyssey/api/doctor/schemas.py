@@ -73,15 +73,6 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
         metadata={"description": "Name of device the reading came from"}
     )
 
-    # @post_load
-    # def make_object(self, data, **kwargs):
-    #     # convert datetime_taken to datetime object using dateutil parser
-    #     breakpoint()
-
-    #     data["datetime_taken"] = parse(data["datetime_taken"])
-
-    #     return data
-
 
 class MedicalBloodPressuresOutputSchema(Schema):
     items = fields.Nested(MedicalBloodPressuresSchema(many=True), missing=[])
