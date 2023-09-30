@@ -49,41 +49,6 @@ class MedBloodPressures(BaseResource):
     # Multiple blood pressure measurements per user allowed
     __check_resource__ = False
 
-    # @token_auth.login_required(
-    #     user_type=("client", "provider"), resources=("blood_pressure",)
-    # )
-    # @responds(schema=MedicalBloodPressureInsertRespondSchema, api=ns, status_code=201)
-    # def get(self, user_id):
-    #     """
-    #     This request gets the user's manually blood pressures only.
-    #     """
-    #     # search mongodb for bp measurements having user_id and "MANUAL" in wearable
-
-    #     results = mongo.db.wearables.find(
-    #         {
-    #             "user_id": user_id,
-    #             "wearable": "MANUAL",
-    #         }
-    #     )
-
-    #     reporter_pics = {}  # key = user_id, value =  dict of pic links
-    #     for data in bp_info:
-    #         reporter = User.query.filter_by(user_id=data.reporter_id).one_or_none()
-    #         data.reporter_firstname = reporter.firstname
-    #         data.reporter_lastname = reporter.lastname
-
-    #         if data.reporter_id != user_id and data.reporter_id not in reporter_pics:
-    #             reporter_pics[data.reporter_id] = get_profile_pictures(
-    #                 data.reporter_id, True
-    #             )
-    #         elif data.reporter_id not in reporter_pics:
-    #             reporter_pics[data.reporter_id] = get_profile_pictures(user_id, False)
-
-    #         data.reporter_profile_pictures = reporter_pics[data.reporter_id]
-
-    #     payload = {"items": bp_info, "total_items": len(bp_info)}
-    #     return payload
-
     @token_auth.login_required(
         user_type=("client", "provider"),
         staff_role=("medical_doctor",),
