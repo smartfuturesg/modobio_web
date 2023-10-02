@@ -71,7 +71,7 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
 
 import terra.api.api_responses
 from marshmallow_dataclass import class_schema
-from terra.models.user import User
+from terra.models.user import User as TerraUser
 from terra.models.v2.activity import Activity
 from terra.models.v2.athlete import Athlete
 from terra.models.v2.body import Body
@@ -117,7 +117,7 @@ WearablesV2DailySchema = class_schema(Daily, WearablesV2BaseSchema)
 WearablesV2MenstruationSchema = class_schema(Menstruation, WearablesV2BaseSchema)
 WearablesV2NutritionSchema = class_schema(Nutrition, WearablesV2BaseSchema)
 WearablesV2SleepSchema = class_schema(Sleep, WearablesV2BaseSchema)
-WearablesV2UserSchema = class_schema(User, WearablesV2BaseSchema)
+WearablesV2UserSchema = class_schema(TerraUser, WearablesV2BaseSchema)
 
 # Add extra field
 WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict(
