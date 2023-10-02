@@ -55,6 +55,7 @@ class MedBloodPressures(BaseResource):
         resources=("blood_pressure",),
     )
     @accepts(schema=MedicalBloodPressuresSchema, api=ns)
+    @responds(schema=MedicalBloodPressuresSchema, status_code=201, api=ns)
     def post(self, user_id):
         """
         Post request to store the client's blood pressure.
@@ -120,7 +121,7 @@ class MedBloodPressures(BaseResource):
             "_id": "Object Id for the blood pressure reading",
         }
     )
-    @responds(status_code=204, api=ns)
+    @responds(schema=MedicalBloodPressureDeleteSchema, status_code=200, api=ns)
     def delete(self, user_id):
         """
         Delete request for a client's blood pressure
@@ -133,14 +134,17 @@ class MedBloodPressures(BaseResource):
             raise BadRequest("Invalid _id.")
 
         # convert to ObjectId and delete from MongoDB. only delete manual readings
-        mongo.db.wearables.delete_one(
+        result = mongo.db.wearables.delete_one(
             {
                 "_id": ObjectId(_id),
                 "wearable": {"$regex": f".*MANUAL.*", "$options": "i"},
             }
         )
 
-        return
+        if result.deleted_count == 1:
+            return {"message": "Delete successful.", "delete_ok": True}
+        else:
+            return {"message": "No matching documents found.", "delete_ok": False}
 
 
 @ns.route("/medicalgeneralinfo/<int:user_id>/")
