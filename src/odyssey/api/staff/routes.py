@@ -58,7 +58,6 @@ from odyssey.utils.constants import (
     MIN_CUSTOM_REFRESH_TOKEN_LIFETIME,
 )
 from odyssey.utils.files import FileDownload, ImageUpload, get_profile_pictures
-from odyssey.utils.misc import check_staff_existence
 
 logger = logging.getLogger(__name__)
 
@@ -421,8 +420,6 @@ class StaffProfilePage(BaseResource):
     @responds(schema=StaffProfilePageGetSchema, api=ns, status_code=200)
     def get(self, user_id):
         """get details for a staff member's profile page"""
-        # ensure this user id is for a valid staff member
-        check_staff_existence(user_id)
 
         user = User.query.filter_by(user_id=user_id).one_or_none()
 
@@ -458,8 +455,6 @@ class StaffProfilePage(BaseResource):
         "profile_picture": file (allowed types are '.png', '.jpg', '.jpeg')
         "dob": date type
         """
-        # ensure this user id is for a valid staff member
-        check_staff_existence(user_id)
 
         if not request.form and not request.files:
             raise BadRequest("No data provided.")

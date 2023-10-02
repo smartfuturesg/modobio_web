@@ -76,7 +76,7 @@ DATETIME_MINUS_THREE_WEEKS = datetime.utcnow() - timedelta(weeks=3)
 DATETIME_MINUS_THREE_WEEKS_HOUR_7 = DATETIME_MINUS_THREE_WEEKS.replace(hour=7)
 
 blood_glucose_data_1 = {
-    "user_id": 17,
+    "user_id": 16,
     "wearable": BLOOD_GLUCOSE_WEARABLE,
     "data": {
         "body": {
@@ -95,7 +95,7 @@ blood_glucose_data_1 = {
 }
 
 blood_glucose_data_2 = {
-    "user_id": 17,
+    "user_id": 16,
     "wearable": BLOOD_GLUCOSE_WEARABLE,
     "data": {
         "body": {
@@ -213,7 +213,7 @@ test_8100_data_week_to_month_ago = {
 }
 
 blood_pressure_data_1 = {
-    "user_id": 17,
+    "user_id": 16,
     "wearable": BLOOD_PRESSURE_WEARABLE,
     "data": {
         "body": {
@@ -249,7 +249,7 @@ blood_pressure_data_1 = {
 }
 
 blood_pressure_data_2 = {
-    "user_id": 17,
+    "user_id": 16,
     "wearable": BLOOD_PRESSURE_WEARABLE,
     "data": {
         "body": {
@@ -291,7 +291,7 @@ blood_pressure_data_2 = {
 }
 
 wearables_fitbit_data_1 = {
-    "user_id": 17,
+    "user_id": 16,
     "wearable": "FITBIT",
     "data": {
         "Activity": {
@@ -318,7 +318,7 @@ wearables_fitbit_data_1 = {
 }
 
 wearables_fitbit_data_2 = {
-    "user_id": 17,
+    "user_id": 16,
     "wearable": "FITBIT",
     "data": {
         "Athlete": {
@@ -339,7 +339,7 @@ wearables_fitbit_data_2 = {
 
 sample_cmg_data = {
     "timestamp": parser.parse("2023-04-14T05:00:00.000Z"),
-    "user_id": 17,
+    "user_id": 16,
     "wearable": "FREESTYLELIBRE",
     "data": {
         "body": {
@@ -550,7 +550,7 @@ oura_wearable_daily_and_sleep_data = [
     {
         "_id": "6501eed9ab0cb7214bafee16",
         "timestamp": parser.parse("2023-09-12T23:47:30.000+0000"),
-        "user_id": 17,
+        "user_id": 16,
         "wearable": "OURA",
         "data": {
             "sleep": {
@@ -2190,7 +2190,7 @@ oura_wearable_daily_and_sleep_data = [
     {
         "_id": "6500baadab0cb7214baf22dc",
         "timestamp": parser.parse("2023-09-12T00:00:00.000+0000"),
-        "user_id": 17,
+        "user_id": 16,
         "wearable": "OURA",
         "data": {
             "daily": {
@@ -8065,7 +8065,7 @@ oura_wearable_daily_and_sleep_data = [
     {
         "_id": "6500b6adab0cb7214baf16b2",
         "timestamp": parser.parse("2023-09-11T23:29:46.000+0000"),
-        "user_id": 17,
+        "user_id": 16,
         "wearable": "OURA",
         "data": {
             "sleep": {
@@ -9749,7 +9749,7 @@ oura_wearable_daily_and_sleep_data = [
     {
         "_id": "6500b6adab0cb7214baf16b0",
         "timestamp": parser.parse("2023-09-11T00:12:32.000+0000"),
-        "user_id": 17,
+        "user_id": 16,
         "wearable": "OURA",
         "data": {
             "sleep": {
@@ -11501,7 +11501,7 @@ oura_wearable_daily_and_sleep_data = [
     {
         "_id": "6500b6b0ab0cb7214baf16be",
         "timestamp": parser.parse("2023-09-11T00:00:00.000+0000"),
-        "user_id": 17,
+        "user_id": 16,
         "wearable": "OURA",
         "data": {
             "daily": {
