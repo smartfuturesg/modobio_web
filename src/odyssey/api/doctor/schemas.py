@@ -34,13 +34,8 @@ class PaginationLinks(Schema):
     _prev = fields.String()
 
 
-class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = MedicalBloodPressures
-        exclude = ("created_at", "updated_at")
-        dump_only = ("timestamp", "idx", "reporter_id", "user_id")
-        include_fk = True
-
+class MedicalBloodPressuresSchema(Schema):
+    _id = fields.String()  # mongo objectID
     timestamp = fields.DateTime()
     systolic = fields.Integer(metadata={"description": "units mmHg"}, required=True)
     diastolic = fields.Integer(metadata={"description": "units mmHg"}, required=True)
@@ -556,3 +551,10 @@ def mongo_bloodpressure_schema(
             },
         }
     }
+
+
+class MedicalBloodPressureDeleteSchema(Schema):
+    """Serialized response for manual blood pressure delete"""
+
+    message = fields.String()
+    delete_ok = fields.Boolean()
