@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -33,22 +34,17 @@ class PaginationLinks(Schema):
     _prev = fields.String()
 
 
-class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = MedicalBloodPressures
-        exclude = ("created_at", "updated_at")
-        dump_only = ("timestamp", "idx", "reporter_id", "user_id")
-        include_fk = True
-
+class MedicalBloodPressuresSchema(Schema):
+    _id = fields.String()  # mongo objectID
     timestamp = fields.DateTime()
-    systolic = fields.Float(metadata={"description": "units mmHg"}, required=True)
-    diastolic = fields.Float(metadata={"description": "units mmHg"}, required=True)
+    systolic = fields.Integer(metadata={"description": "units mmHg"}, required=True)
+    diastolic = fields.Integer(metadata={"description": "units mmHg"}, required=True)
     pulse = fields.Integer(
         metadata={"description": "units beats/minute"},
         missing=None,
         validate=validate.Range(min=MIN_VALID_PULSE, max=MAX_VALID_PULSE),
     )
-    datetime_taken = fields.String(
+    datetime_taken = fields.DateTime(
         metadata={"description": "Date and time the blood pressure was taken"},
         required=True,
     )
@@ -71,10 +67,6 @@ class MedicalBloodPressuresSchema(ma.SQLAlchemyAutoSchema):
     device_name = fields.String(
         metadata={"description": "Name of device the reading came from"}
     )
-
-    @post_load
-    def make_object(self, data, **kwargs):
-        return MedicalBloodPressures(**data)
 
 
 class MedicalBloodPressuresOutputSchema(Schema):
@@ -510,3 +502,59 @@ class MedicalSurgeriesSchema(ma.SQLAlchemyAutoSchema):
     @post_load
     def make_object(self, data, **kwargs):
         return MedicalSurgeries(**data)
+
+
+class MedicalBloodPressureInsertRespondSchema(Schema):
+    """Serialized response for manual blood pressure insert"""
+
+    _id = fields.String()  # mongo objectID
+
+
+def mongo_bloodpressure_schema(
+    reporter_id: int,
+    datetime_taken: datetime,
+    utc_offset: int,
+    reported_timestamp: datetime,
+    systolic: int,
+    diastolic: int,
+    pulse: int,
+) -> dict:
+    return {
+        "body": {
+            "heart_data": {
+                "heart_rate_data": {
+                    "detailed": {
+                        "hr_samples": [
+                            {
+                                "bpm": pulse,
+                                "timestamp": datetime_taken,
+                            }
+                        ]
+                    },
+                }
+            },
+            "blood_pressure_data": {
+                "blood_pressure_samples": [
+                    {
+                        "systolic_bp": systolic,
+                        "diastolic_bp": diastolic,
+                        "timestamp": datetime_taken,
+                    }
+                ],
+            },
+            "metadata": {
+                "end_time": datetime_taken,
+                "start_time": datetime_taken,
+                "tz_offset": utc_offset,
+                "reported_timestamp": reported_timestamp,
+                "reporter_id": reporter_id,
+            },
+        }
+    }
+
+
+class MedicalBloodPressureDeleteSchema(Schema):
+    """Serialized response for manual blood pressure delete"""
+
+    message = fields.String()
+    delete_ok = fields.Boolean()

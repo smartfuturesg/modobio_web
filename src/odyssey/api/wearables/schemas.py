@@ -71,7 +71,7 @@ class WearablesFreeStyleActivateSchema(ma.SQLAlchemyAutoSchema):
 
 import terra.api.api_responses
 from marshmallow_dataclass import class_schema
-from terra.models.user import User
+from terra.models.user import User as TerraUser
 from terra.models.v2.activity import Activity
 from terra.models.v2.athlete import Athlete
 from terra.models.v2.body import Body
@@ -117,7 +117,7 @@ WearablesV2DailySchema = class_schema(Daily, WearablesV2BaseSchema)
 WearablesV2MenstruationSchema = class_schema(Menstruation, WearablesV2BaseSchema)
 WearablesV2NutritionSchema = class_schema(Nutrition, WearablesV2BaseSchema)
 WearablesV2SleepSchema = class_schema(Sleep, WearablesV2BaseSchema)
-WearablesV2UserSchema = class_schema(User, WearablesV2BaseSchema)
+WearablesV2UserSchema = class_schema(TerraUser, WearablesV2BaseSchema)
 
 # Add extra field
 WearablesV2UserAuthUrlSchema = WearablesV2UserAuthUrlSchema.from_dict(
@@ -408,3 +408,29 @@ class WearablesV2DashboardOutputSchema(Schema):
     avg_in_bed_duration = fields.Float()
     avg_calories = fields.Float()
     avg_active_calories = fields.Float()
+
+
+class WearablesV2RawBPSchema(Schema):
+    timestamp = fields.DateTime()
+    systolic_bp = fields.Integer()
+    diastolic_bp = fields.Integer()
+    bpm = fields.Integer()
+    wearable = fields.String()
+    _id = fields.String()
+    reporter_id = fields.Integer()
+    reporter_firstname = fields.String(
+        metadata={"description": "first name of reporting physician"},
+        dump_only=True,
+    )
+    reporter_lastname = fields.String(
+        metadata={"description": "last name of reporting physician"},
+        dump_only=True,
+    )
+    reporter_profile_pictures = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), dump_only=True
+    )
+
+
+class WearablesV2RawBPOutputSchema(Schema):
+    items = fields.List(fields.Nested(WearablesV2RawBPSchema))
+    total_items = fields.Integer(required=True)
