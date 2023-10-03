@@ -13,7 +13,7 @@ def test_blood_glucose_calculations_default_date_filters(
         headers=test_client.provider_auth_header,
         content_type="application/json",
     )
-
+    
     assert response.status_code == 200
     assert response.json.get("user_id") == test_client.client_id
     assert response.json.get("wearable") == BLOOD_GLUCOSE_WEARABLE

@@ -342,8 +342,8 @@ def test_blood_pressure_monitoring_statistics_start_date_param(
 def test_blood_pressure_monitoring_statistics_unauthorized(
     test_client, add_blood_pressure_data
 ):
-    # Test client 16 using client 17 auth header. This should fail
-    other_client_id = 16
+    # Test client 17 using client 16 auth header. This should fail
+    other_client_id = 17
 
     response = test_client.get(
         f"/v2/wearables/calculations/blood-pressure/monitoring-statistics/{other_client_id}/{BLOOD_PRESSURE_WEARABLE}",

@@ -15,7 +15,8 @@ from sqlalchemy import select
 from sqlalchemy.sql import text
 from werkzeug.exceptions import BadRequest, Unauthorized
 
-from odyssey import mongo
+from odyssey import db, mongo
+from odyssey.api.user.models import User
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
 from odyssey.integrations.active_campaign import ActiveCampaign
@@ -29,6 +30,7 @@ from odyssey.utils.constants import (
     WEARABLE_DEVICE_TYPES,
     WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES,
 )
+from odyssey.utils.files import get_profile_pictures
 from odyssey.utils.json import JSONProvider
 from odyssey.utils.misc import (
     create_wearables_filter_query,
@@ -1835,7 +1837,7 @@ class WearablesV2BloodGlucoseTimeInRangesCalculationsEndpoint(BaseResource):
 @ns_v2.route(
     "/calculations/blood-glucose/cgm/percentiles/<int:user_id>/<string:wearable>"
 )
-class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
+class WearablesV2BloodGlucosePercentilesCalculationEndpoint(BaseResource):
     @token_auth.login_required(
         user_type=("client", "provider"), resources=("blood_glucose",)
     )
@@ -3740,4 +3742,58 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
             "avg_active_calories": avg_active_calories,
         }
 
+        return payload
+
+
+@ns_v2.route("/data/blood-pressure/<int:user_id>")
+class WearablesV2BloodPressureEndpoint(BaseResource):
+    @token_auth.login_required(
+        user_type=("client", "provider"), resources=("blood_pressure",)
+    )
+    @responds(schema=WearablesV2RawBPOutputSchema, status_code=200, api=ns_v2)
+    @ns_v2.doc(
+        params={
+            "start_date": "Start of specified date range in ISO format or full ISO timestamp",
+            "end_date": "End of specified date range in ISO format or full ISO timestamp",
+        }
+    )
+    def get(self, user_id):
+        """
+        Get raw blood pressure readings for user from all sources
+        """
+
+        start_date, end_date = date_range(
+            start_time=request.args.get("start_date", ""),
+            end_time=request.args.get("end_date", ""),
+            time_range=timedelta(days=14),
+        )
+
+        bp_query = bp_raw_data_aggregation(user_id, start_date, end_date)
+
+        bp_cursor = mongo.db.wearables.aggregate(bp_query)
+        bp_data = list(bp_cursor)
+
+        reporter_pics = {}  # key = user_id, value =  dict of pic links
+        user_cache = {}
+
+        for data in bp_data:
+            reporter_id = data.get("reporter_id", user_id)
+            data["reporter_id"] = reporter_id
+            if reporter_id not in user_cache:
+                user_cache[reporter_id] = (
+                    db.session.query(User).filter_by(user_id=reporter_id).one_or_none()
+                )
+            reporter = user_cache[reporter_id]
+            data["reporter_firstname"] = reporter.firstname
+            data["reporter_lastname"] = reporter.lastname
+            if reporter_id != user_id and reporter_id not in reporter_pics:
+                reporter_pics[reporter_id] = get_profile_pictures(reporter_id, True)
+            elif reporter_id not in reporter_pics:
+                reporter_pics[reporter_id] = get_profile_pictures(user_id, False)
+            data["reporter_profile_pictures"] = reporter_pics[reporter_id]
+
+        payload = {
+            "items": bp_data,
+            "total_items": len(bp_data),
+        }
         return payload

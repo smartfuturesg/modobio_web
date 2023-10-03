@@ -13,5 +13,4 @@ VALUES
 (26, 'Support Staff', 'US-SUPSTF'),
 (27, 'Support Staff', 'US-SUPSTF'),
 (28, 'Support Staff', 'US-SUPSTF'),
-(29, 'Support Staff', 'US-SUPSTF'),
-(30, 'Support Staff', 'US-SUPSTF');
+(29, 'Support Staff', 'US-SUPSTF');

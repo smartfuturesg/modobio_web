@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -628,7 +629,7 @@ class BasicAuth(object):
             password = ""
         return self.verify_password(username, password)
 
-    def current_user(self):
+    def current_user(self) -> Any:
         """current_user method returns the current instance
         user, flask_httpauth_user, if it exists."""
         if hasattr(g, "flask_httpauth_user"):
