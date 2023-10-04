@@ -3647,7 +3647,10 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
 
         # Calculate the average resting heart rate
         total_hr = sum([entry["resting_hr"] for entry in collated_results.values()])
-        avg_resting_hr = round(total_hr / len(collated_results), 2)
+        if total_hr > 0:
+            avg_resting_hr = round(total_hr / len(collated_results), 2)
+        else:
+            avg_resting_hr = None
 
         num_entries = 0
         asleep_duration_sum = 0
