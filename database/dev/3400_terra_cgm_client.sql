@@ -23,10 +23,10 @@ BEGIN
         gender,
         dob)
     VALUES (
-        'fitbit@modobio.com',
+        'cgm@modobio.com',
         'TCFBJASDFF12',
         'Terra',
-        'Fitbit',
+        'CGM',
         false,
 		false,
         true,
@@ -76,7 +76,7 @@ BEGIN
     VALUES
         (
          _user_id,
-         'FITBIT',
+         'FREESTYLELIBRE',
          'dfbb1e18-9732-43e0-a01c-02f565115fb0'
         );
 
