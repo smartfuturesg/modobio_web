@@ -2167,6 +2167,17 @@ class WearablesV2BloodGlucosePercentilesCalculationEndpoint(BaseResource):
 
         data = list(cursor)
 
+        # Calculate average glucose for the date range
+        avg_glucose_cursor = mongo.db.wearables.aggregate(
+            blood_glucose_average_aggregation(user_id, wearable, start_date, end_date)
+        )
+        avg_glucose_data = list(avg_glucose_cursor)
+
+        if len(avg_glucose_data) > 0:
+            avg_glucose = avg_glucose_data[0].get("average_glucose")
+        else:
+            avg_glucose = None
+
         # Build and return payload
         payload = {
             "user_id": user_id,
@@ -2175,6 +2186,7 @@ class WearablesV2BloodGlucosePercentilesCalculationEndpoint(BaseResource):
             "wearable": wearable,
             "data": data,
             "bin_size_mins": increments,
+            "average_glucose_mg_per_dL": avg_glucose,
         }
 
         return payload
