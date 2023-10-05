@@ -210,6 +210,7 @@ class WearablesV2CGMPercentilesOutputSchema(Schema):
     bin_size_mins = fields.Integer()
     start_time = fields.DateTime()
     end_time = fields.DateTime()
+    average_glucose_mg_per_dL = fields.Float()
 
 
 class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
