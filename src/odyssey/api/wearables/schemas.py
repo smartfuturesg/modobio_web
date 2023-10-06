@@ -210,6 +210,7 @@ class WearablesV2CGMPercentilesOutputSchema(Schema):
     bin_size_mins = fields.Integer()
     start_time = fields.DateTime()
     end_time = fields.DateTime()
+    average_glucose_mg_per_dL = fields.Float()
 
 
 class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
@@ -227,28 +228,28 @@ class WearablesV2BloodPressureCalculationTimeBlockSchema(Schema):
 class WearablesV2BloodPressureCalculationOutputSchema(Schema):
     user_id = fields.Integer(required=True)
     wearable = fields.String(required=True)
-    block_one = fields.Nested(
+    block_0_3 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
-    block_two = fields.Nested(
+    block_3_6 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
-    block_three = fields.Nested(
+    block_6_9 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
-    block_four = fields.Nested(
+    block_9_12 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
-    block_five = fields.Nested(
+    block_12_15 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
-    block_six = fields.Nested(
+    block_15_18 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
-    block_seven = fields.Nested(
+    block_18_21 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
-    block_eight = fields.Nested(
+    block_21_24 = fields.Nested(
         WearablesV2BloodPressureCalculationTimeBlockSchema, default={}
     )
 

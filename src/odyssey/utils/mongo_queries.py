@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from math import e
 
@@ -342,4 +343,41 @@ def bp_raw_data_aggregation(user_id: int, start_date: datetime, end_date: dateti
         {"$project": {"collated_data": 1}},
         {"$unwind": "$collated_data"},
         {"$replaceRoot": {"newRoot": "$collated_data"}},
+    ]
+
+
+def blood_glucose_average_aggregation(
+    user_id: int, wearable: str, start_date: datetime, end_date: datetime
+):
+    """Average blood glucose values across a range of dates"""
+
+    return [
+        {
+            "$match": {
+                "user_id": user_id,
+                "wearable": wearable,
+                "timestamp": {
+                    "$gte": start_date - timedelta(days=1),
+                    "$lte": end_date,
+                },
+            }
+        },
+        {"$unwind": "$data.body.glucose_data.blood_glucose_samples"},
+        {
+            "$match": {
+                "data.body.glucose_data.blood_glucose_samples.timestamp": {
+                    "$gte": start_date,
+                    "$lte": end_date,
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "average_glucose": {
+                    "$avg": "$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL"
+                },
+            }
+        },
+        {"$addFields": {"average_glucose": {"$round": ["$average_glucose", 2]}}},
     ]
