@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 
 from base64 import b64decode
 from functools import wraps
+from typing import Any, Callable, Iterable, NoReturn, Optional
 
 import jwt
 from flask import current_app, g, request
@@ -31,19 +32,21 @@ class BasicAuth(object):
     the ModoBio project. It's primary function is to do basic
     authentications."""
 
-    def __init__(self, scheme=None, header=None):
+    def __init__(
+        self, scheme: Optional[str] = None, header: Optional[str] = None
+    ) -> None:
         self.scheme = scheme
         self.header = header
 
     def login_required(
         self,
-        f=None,
-        user_type=("staff", "client", "provider"),
-        staff_role=None,
-        email_required=True,
-        resources=(),
-        check_staff_telehealth_access=False,
-    ):
+        f: Optional[Callable] = None,
+        user_type: tuple[str, ...] = ("staff", "client", "provider"),
+        staff_role: Optional[tuple[str, ...]] = None,
+        email_required: bool = True,
+        resources: tuple[str, ...] = (),
+        check_staff_telehealth_access: bool = False,
+    ) -> Callable:
         """The login_required method is the main method that we will be using
         for authenticating both tokens and basic authorizations.
         This method decorates each CRUD request and verifies the person
@@ -82,9 +85,9 @@ class BasicAuth(object):
                 # Validate
                 self.validate_roles(staff_role, ACCESS_ROLES)
 
-        def login_required_internal(f):
+        def login_required_internal(f: Callable[..., Any]) -> Callable[..., Any]:
             @wraps(f)
-            def decorated(*args, **kwargs):
+            def decorated(*args, **kwargs) -> Any:
                 """
                 Steps to authentication and authorization
                 1. Pull auth details from headers (basic or bearer token)
@@ -161,7 +164,9 @@ class BasicAuth(object):
             return login_required_internal(f)
         return login_required_internal
 
-    def user_role_check(self, user: User, user_login: UserLogin, user_context: str):
+    def user_role_check(
+        self, user: User, user_login: UserLogin, user_context: str
+    ) -> None:
         """user_role_check is to determine if the user accessing the API
         is a Staff member or Client"""
         # user is logged in as a modobio user, they may access the endpoint
@@ -255,7 +260,7 @@ class BasicAuth(object):
         else:
             raise Unauthorized
 
-    def client_access_check(self, user):
+    def client_access_check(self, user: User) -> None:
         """
         Clients can access content in one of two scenarios:
             1. They are attempting to access their own content.
@@ -319,7 +324,7 @@ class BasicAuth(object):
                     raise Unauthorized
         return
 
-    def staff_access_check(self, user):
+    def staff_access_check(self, user: User):
         """Check whether staff member has access rights.
 
         staff_access_check method will be used to determine if a Staff
@@ -404,7 +409,7 @@ class BasicAuth(object):
         # authorization checks all end here
         return
 
-    def provider_access_check(self, user: User):
+    def provider_access_check(self, user: User) -> None:
         """Check whether staff member has access rights.
 
         provider_access_check method will be used to determine if a Staff
@@ -550,14 +555,16 @@ class BasicAuth(object):
         # authorization checks all end here
         return
 
-    def validate_roles(self, roles, constants):
+    def validate_roles(self, roles: Iterable[str], constants: Iterable[str]) -> None:
         # Validate
         for role in roles:
             if role not in constants:
                 ValueError("{} is not in {}".format(role, constants))
         return
 
-    def verify_password(self, username, password):
+    def verify_password(
+        self, username: str, password: str
+    ) -> tuple[User, UserLogin, str]:
         """This method is used as a decorator and to store
         the basic authorization password check
         that is defined in auth.py"""
@@ -596,7 +603,7 @@ class BasicAuth(object):
             db.session.commit()
             raise Unauthorized
 
-    def get_auth(self):
+    def get_auth(self) -> Optional[Authorization]:
         """This method is to authorize basic connections"""
         # this version of the Authorization header parser is more flexible
         # than Werkzeug's, as it also accepts other schemes besides "Basic"
@@ -617,7 +624,7 @@ class BasicAuth(object):
             },
         )
 
-    def authenticate(self, auth):
+    def authenticate(self, auth) -> tuple[User, UserLogin, str]:
         """authenticate method will use the verify_password_callback method
         to return the person's basic authentication."""
         if auth:
@@ -628,7 +635,7 @@ class BasicAuth(object):
             password = ""
         return self.verify_password(username, password)
 
-    def current_user(self):
+    def current_user(self) -> Optional[tuple[User, UserLogin]]:
         """current_user method returns the current instance
         user, flask_httpauth_user, if it exists."""
         if hasattr(g, "flask_httpauth_user"):
@@ -644,7 +651,7 @@ class TokenAuth(BasicAuth):
 
         self.verify_token_callback = None
 
-    def verify_token(self, token):
+    def verify_token(self, token: str) -> tuple[User, UserLogin, str]:
         """verify_token is a method that is used as a decorator to store
         the token checking process that is defined in auth.py"""
         if not token:
@@ -671,9 +678,9 @@ class TokenAuth(BasicAuth):
         g.user_type = decoded_token.get("utype")
         return user, user_login, decoded_token.get("utype")
 
-    def get_auth(self):
+    def get_auth(self) -> Optional[Authorization]:
         """This method is to authorize tokens"""
-        auth = None
+        auth: Optional[Authorization] = None
         if self.header is None or self.header == "Authorization":
             auth = request.authorization
             if auth is None and "Authorization" in request.headers:
@@ -699,7 +706,7 @@ class TokenAuth(BasicAuth):
 
         return auth
 
-    def authenticate(self, auth):
+    def authenticate(self, auth: Optional[dict[str]]) -> tuple[User, UserLogin, str]:
         """This authenticate method overrides the authenticate method in
         the OdyBasicAuth authenticate method and returns an object defined
         in verify_token_callback"""
