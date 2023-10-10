@@ -340,7 +340,7 @@ USSTATES: tuple[tuple[str, str]] = (
     ("WY", "Wyoming"),
 )
 
-USSTATES_2: [abbreviation for abbreviation, _ in USSTATES]
+USSTATES_2: list[str] = [abbreviation for abbreviation, _ in USSTATES]
 """ Names of US states and their 2-letter codes.
 
 :type: tuple(tuple)
@@ -484,9 +484,6 @@ Provider roles are external. They work directly with clients and will require ca
 :type: tuple
 """
 
-MedicalConditionDict = TypeVar(
-    "MedicalConditionDict", bound=[None | [dict[str, "MedicalConditionDict"]]]
-)
 MEDICAL_CONDITIONS = {
     "Autoimmune": {
         "Diabetes type 1": None,
