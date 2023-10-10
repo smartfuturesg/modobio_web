@@ -90,7 +90,7 @@ cors = CORS()
 ma = Marshmallow()
 mongo = PyMongo()
 
-celery = Celery(__name__, broker=conf.broker_url, backend=conf.result_backend)
+celery = Celery(__name__, broker=conf.redbeat_redis_url, backend=conf.result_backend)
 
 
 def create_app():

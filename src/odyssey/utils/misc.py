@@ -1566,18 +1566,18 @@ def date_range(
         start_time and end_time datetime objects.
     """
     if start_time and end_time:
-        start_time = iso_string_to_iso_datetime(start_time)
-        end_time = iso_string_to_iso_datetime(end_time)
-        if start_time > end_time:
+        start_dt = iso_string_to_iso_datetime(start_time)
+        end_dt = iso_string_to_iso_datetime(end_time)
+        if start_dt > end_dt:
             raise BadRequest("start_time must occur before end_time")
     elif start_time:
-        start_time = iso_string_to_iso_datetime(start_time)
-        end_time = start_time + time_range
+        start_dt = iso_string_to_iso_datetime(start_time)
+        end_dt = start_dt + time_range
     elif end_time:
-        end_time = iso_string_to_iso_datetime(end_time)
-        start_time = end_time - time_range
+        end_dt = iso_string_to_iso_datetime(end_time)
+        start_dt = end_dt - time_range
     else:
-        end_time = datetime.utcnow()
-        start_time = end_time - time_range
+        end_dt = datetime.utcnow()
+        start_dt = end_dt - time_range
 
-    return start_time, end_time
+    return start_dt, end_dt

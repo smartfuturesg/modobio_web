@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from math import e
 
@@ -276,4 +277,107 @@ def calories_aggregation(
                 "active_calories": 1,
             }
         },
+    ]
+
+
+def bp_raw_data_aggregation(user_id: int, start_date: datetime, end_date: datetime):
+    return [
+        {
+            "$match": {
+                "user_id": user_id,
+                "timestamp": {"$gte": start_date, "$lte": end_date},
+                "data.body": {
+                    "$exists": True,
+                    "$ne": None,
+                },
+            }
+        },
+        {
+            "$addFields": {
+                "collated_data": {
+                    "$map": {
+                        "input": "$data.body.heart_data.heart_rate_data.detailed.hr_samples",
+                        "as": "hr",
+                        "in": {
+                            "$let": {
+                                "vars": {
+                                    "bp": {
+                                        "$arrayElemAt": [
+                                            {
+                                                "$filter": {
+                                                    "input": "$data.body.blood_pressure_data.blood_pressure_samples",
+                                                    "as": "bp",
+                                                    "cond": {
+                                                        "$eq": [
+                                                            "$$bp.timestamp",
+                                                            "$$hr.timestamp",
+                                                        ]
+                                                    },
+                                                }
+                                            },
+                                            0,
+                                        ]
+                                    }
+                                },
+                                "in": {
+                                    "$cond": [
+                                        "$$bp",
+                                        {
+                                            "timestamp": "$$hr.timestamp",
+                                            "bpm": "$$hr.bpm",
+                                            "systolic_bp": "$$bp.systolic_bp",
+                                            "diastolic_bp": "$$bp.diastolic_bp",
+                                            "wearable": "$wearable",
+                                            "_id": {"$toString": "$_id"},
+                                            "reporter_id": "$data.body.metadata.reporter_id",
+                                        },
+                                        "$$REMOVE",
+                                    ]
+                                },
+                            }
+                        },
+                    }
+                }
+            }
+        },
+        {"$project": {"collated_data": 1}},
+        {"$unwind": "$collated_data"},
+        {"$replaceRoot": {"newRoot": "$collated_data"}},
+    ]
+
+
+def blood_glucose_average_aggregation(
+    user_id: int, wearable: str, start_date: datetime, end_date: datetime
+):
+    """Average blood glucose values across a range of dates"""
+
+    return [
+        {
+            "$match": {
+                "user_id": user_id,
+                "wearable": wearable,
+                "timestamp": {
+                    "$gte": start_date - timedelta(days=1),
+                    "$lte": end_date,
+                },
+            }
+        },
+        {"$unwind": "$data.body.glucose_data.blood_glucose_samples"},
+        {
+            "$match": {
+                "data.body.glucose_data.blood_glucose_samples.timestamp": {
+                    "$gte": start_date,
+                    "$lte": end_date,
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "average_glucose": {
+                    "$avg": "$data.body.glucose_data.blood_glucose_samples.blood_glucose_mg_per_dL"
+                },
+            }
+        },
+        {"$addFields": {"average_glucose": {"$round": ["$average_glucose", 2]}}},
     ]
