@@ -1,14 +1,14 @@
 import base64
 import logging
 import secrets
+import urllib.parse
 from datetime import time, timedelta
 from math import ceil
-import urllib.parse
 
 import boto3
 from boto3.dynamodb.conditions import Key
 from dateutil import parser
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, redirect, request, url_for
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
@@ -20,7 +20,7 @@ from odyssey import db, mongo
 from odyssey.api.user.models import User
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
-from odyssey.defaults import DEXCOM_BASE_URL, DEXCOM_CLIENT_ID
+from odyssey.defaults import DEXCOM_BASE_URL, DEXCOM_CLIENT_ID, TERRA_DEXCOM_AUTH_URL
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.terra import TerraClient
 from odyssey.tasks.tasks import deauthenticate_terra_user
@@ -1062,15 +1062,19 @@ class WearablesV2DataEndpoint(BaseResource):
         if wearable == "DEXCOM":
             # generate dexcom auth url
             params = {
-                'client_id': DEXCOM_CLIENT_ID,
-                'redirect_uri': redirect_uri,
-                'response_type': 'code',
-                'scope': 'offline_access',
-                'state': user_id
+                "client_id": DEXCOM_CLIENT_ID,
+                "redirect_uri": url_for(
+                    "api_v2.wearables_wearables_v2_dexcom_auth_proxy_endpoint",
+                    _external=True,
+                ),
+                "response_type": "code",
+                "scope": "offline_access",
+                "state": user_id,
             }
             query_string = urllib.parse.urlencode(params)
-            auth_url = f'{DEXCOM_BASE_URL}/oauth2/login?{query_string}'
-            return {"auth_url": "https://www.dexcom.com/"}
+            auth_url = f"{DEXCOM_BASE_URL}/oauth2/login?{query_string}"
+
+            return {"expires_in": 60, "auth_url": auth_url}
         # API based providers
         elif wearable in supported_wearables()["providers"]:
             # For local testing, set the redirect urls to something like http://localhost/xyz
@@ -1144,6 +1148,26 @@ class WearablesV2DataEndpoint(BaseResource):
             return
 
         deauthenticate_terra_user(user_id, wearable_obj=user_wearable, delete_data=True)
+
+
+@ns_v2.route("/dexcom/auth/proxy")
+class WearablesV2DexcomAuthProxyEndpoint(BaseResource):
+    @ns_v2.doc(params={"code": "auth code from Dexcom"})
+    def get(self):
+        """Handle Dexcom OAuth2 callback.
+        Redirect to Terra with all parameters from original request.
+        """
+        logger.debug(
+            f"Dexcom auth proxy request received from user {request.args.get('state')}"
+        )
+
+        query_params = request.args
+        query_string = "&".join(
+            f"{key}={urllib.parse.quote(str(value))}"
+            for key, value in query_params.items()
+        )
+        redirect_url = f"{TERRA_DEXCOM_AUTH_URL}?{query_string}"
+        return redirect(redirect_url)
 
 
 @ns_v2.route("/sync/<int:user_id>")
