@@ -3775,7 +3775,7 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
         # shift end date by 1 day and set time to 00:00:00
         end_date = end_date + timedelta(days=1)
         end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        bp_query = bp_raw_data_aggregation(user_id,wearable, start_date, end_date)
+        bp_query = bp_raw_data_aggregation(user_id, wearable, start_date, end_date)
 
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
         bp_data = list(bp_cursor)

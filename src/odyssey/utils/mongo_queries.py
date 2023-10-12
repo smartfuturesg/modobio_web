@@ -279,7 +279,9 @@ def calories_aggregation(
     ]
 
 
-def bp_raw_data_aggregation(user_id: int, device: str, start_date: datetime, end_date: datetime):
+def bp_raw_data_aggregation(
+    user_id: int, device: str, start_date: datetime, end_date: datetime
+):
     return [
         {
             "$match": {
