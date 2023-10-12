@@ -279,11 +279,14 @@ def calories_aggregation(
     ]
 
 
-def bp_raw_data_aggregation(user_id: int, start_date: datetime, end_date: datetime):
+def bp_raw_data_aggregation(
+    user_id: int, device: str, start_date: datetime, end_date: datetime
+):
     return [
         {
             "$match": {
                 "user_id": user_id,
+                "wearable": device,
                 "timestamp": {"$gte": start_date, "$lte": end_date},
                 "data.body": {
                     "$exists": True,

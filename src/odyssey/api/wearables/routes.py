@@ -3748,7 +3748,7 @@ class WearablesV2DataDashboardEndpoint(BaseResource):
         return payload
 
 
-@ns_v2.route("/data/blood-pressure/<int:user_id>")
+@ns_v2.route("/data/blood-pressure/<int:user_id>/<string:wearable>")
 class WearablesV2BloodPressureEndpoint(BaseResource):
     @token_auth.login_required(
         user_type=("client", "provider"), resources=("blood_pressure",)
@@ -3760,18 +3760,22 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
             "end_date": "End of specified date range in ISO format or full ISO timestamp",
         }
     )
-    def get(self, user_id):
+    def get(self, user_id, wearable):
         """
         Get raw blood pressure readings for user from all sources
         """
-
         start_date, end_date = date_range(
             start_time=request.args.get("start_date", ""),
             end_time=request.args.get("end_date", ""),
             time_range=timedelta(days=14),
         )
-
-        bp_query = bp_raw_data_aggregation(user_id, start_date, end_date)
+        # Shift start and end dates so that all data is included for specified date range
+        # set time on start_date to 00:00:00
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        # shift end date by 1 day and set time to 00:00:00
+        end_date = end_date + timedelta(days=1)
+        end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        bp_query = bp_raw_data_aggregation(user_id, wearable, start_date, end_date)
 
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
         bp_data = list(bp_cursor)
