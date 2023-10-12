@@ -414,14 +414,22 @@ TERRA_BASE_URL = "https://api.tryterra.co/v2"
 :type: str
 """
 
-DEXCOM_CLIENT_ID = "9LcRGpaoGjGpROLSTRdPw7ZpvFtleaaV"
+TERRA_DEXCOM_AUTH_URL = "https://api.tryterra.co/v2/auth/dexcom/oauth2"
+"""URL for Terra API to authenticate with Dexcom.
+We use this as a proxy to authenticate with Dexcom.
+
+:type: str
+"""
+
+
+DEXCOM_CLIENT_ID = ""
 """
 DEXCOM client ID. See in https://developer.dexcom.com/account/apps 
 
 :type: str
 """
 
-DEXCOM_CLIENT_SECRET = "41I6WEqK4LO0vVpn"
+DEXCOM_CLIENT_SECRET = ""
 """
 DEXCOM client secret. See in https://developer.dexcom.com/account/apps
 
@@ -434,4 +442,3 @@ Base URL for DEXCOM API. For production, use https://api.dexcom.com/v2
 
 :type: str
 """
-
