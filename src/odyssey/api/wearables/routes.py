@@ -3,6 +3,7 @@ import logging
 import secrets
 from datetime import time, timedelta
 from math import ceil
+import urllib.parse
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -19,6 +20,7 @@ from odyssey import db, mongo
 from odyssey.api.user.models import User
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
+from odyssey.defaults import DEXCOM_BASE_URL, DEXCOM_CLIENT_ID
 from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.terra import TerraClient
 from odyssey.tasks.tasks import deauthenticate_terra_user
@@ -1057,8 +1059,20 @@ class WearablesV2DataEndpoint(BaseResource):
         # user_id = self.check_user(uid, user_type='client').user_id
         wearable = parse_wearable(wearable)
 
+        if wearable == "DEXCOM":
+            # generate dexcom auth url
+            params = {
+                'client_id': DEXCOM_CLIENT_ID,
+                'redirect_uri': redirect_uri,
+                'response_type': 'code',
+                'scope': 'offline_access',
+                'state': user_id
+            }
+            query_string = urllib.parse.urlencode(params)
+            auth_url = f'{DEXCOM_BASE_URL}/oauth2/login?{query_string}'
+            return {"auth_url": "https://www.dexcom.com/"}
         # API based providers
-        if wearable in supported_wearables()["providers"]:
+        elif wearable in supported_wearables()["providers"]:
             # For local testing, set the redirect urls to something like http://localhost/xyz
             # When you copy the URL into a browser and allow access, Terra will redirect back
             # to localhost. It will give an error in the browser, but the URL in the address
