@@ -413,3 +413,25 @@ TERRA_BASE_URL = "https://api.tryterra.co/v2"
 
 :type: str
 """
+
+DEXCOM_CLIENT_ID = "9LcRGpaoGjGpROLSTRdPw7ZpvFtleaaV"
+"""
+DEXCOM client ID. See in https://developer.dexcom.com/account/apps 
+
+:type: str
+"""
+
+DEXCOM_CLIENT_SECRET = "41I6WEqK4LO0vVpn"
+"""
+DEXCOM client secret. See in https://developer.dexcom.com/account/apps
+
+:type: str
+"""
+
+DEXCOM_BASE_URL = "https://sandbox-api.dexcom.com/v2"
+"""
+Base URL for DEXCOM API. For production, use https://api.dexcom.com/v2
+
+:type: str
+"""
+
