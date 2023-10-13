@@ -1,4 +1,5 @@
 import base64
+from bdb import Breakpoint
 import logging
 import secrets
 import urllib.parse
@@ -1059,24 +1060,8 @@ class WearablesV2DataEndpoint(BaseResource):
         # user_id = self.check_user(uid, user_type='client').user_id
         wearable = parse_wearable(wearable)
 
-        if wearable == "DEXCOM":
-            # generate dexcom auth url
-            params = {
-                "client_id": DEXCOM_CLIENT_ID,
-                "redirect_uri": url_for(
-                    "api_v2.wearables_wearables_v2_dexcom_auth_proxy_endpoint",
-                    _external=True,
-                ),
-                "response_type": "code",
-                "scope": "offline_access",
-                "state": user_id,
-            }
-            query_string = urllib.parse.urlencode(params)
-            auth_url = f"{DEXCOM_BASE_URL}/oauth2/login?{query_string}"
-
-            return {"expires_in": 60, "auth_url": auth_url}
         # API based providers
-        elif wearable in supported_wearables()["providers"]:
+        if wearable in supported_wearables()["providers"]:
             # For local testing, set the redirect urls to something like http://localhost/xyz
             # When you copy the URL into a browser and allow access, Terra will redirect back
             # to localhost. It will give an error in the browser, but the URL in the address
@@ -1161,13 +1146,33 @@ class WearablesV2DexcomAuthProxyEndpoint(BaseResource):
             f"Dexcom auth proxy request received from user {request.args.get('state')}"
         )
 
+        # payload = {
+        #     "grant_type": "authorization_code",
+        #     "code": request.args["code"],
+        #     "redirect_uri": "http://68.231.27.32:3000/v2/wearables/dexcom/auth/proxy",
+        #     "client_id": current_app.config["DEXCOM_CLIENT_ID"],
+        #     "client_secret": current_app.config["DEXCOM_CLIENT_SECRET"]
+        #     }
+
+        # headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+        # response = requests.post(current_app.config['DEXCOM_BASE_URL']+"/oauth2/token", data=payload, headers=headers)
+        # breakpoint()
         query_params = request.args
         query_string = "&".join(
             f"{key}={urllib.parse.quote(str(value))}"
             for key, value in query_params.items()
         )
-        redirect_url = f"{TERRA_DEXCOM_AUTH_URL}?{query_string}"
-        return redirect(redirect_url)
+        redirect_url = f"{current_app.config['TERRA_DEXCOM_AUTH_URL']}?{query_string}"
+        response = redirect(redirect_url)
+        # breakpoint()
+        # headers = {
+        # "accept": "application/json",
+        # "dev-id": current_app.config["TERRA_DEV_ID"],
+        # "x-api-key": current_app.config["TERRA_API_KEY"],
+        # }
+        # response.headers.update(headers)
+        return response
 
 
 @ns_v2.route("/sync/<int:user_id>")
