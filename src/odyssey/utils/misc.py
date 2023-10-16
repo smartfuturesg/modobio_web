@@ -8,7 +8,7 @@ import random
 import re
 import statistics
 import textwrap
-from typing import Optional
+from typing import Any, Callable, Optional
 from datetime import datetime, time, timedelta
 from time import monotonic
 
@@ -240,11 +240,11 @@ class DecoratorVisitor(ast.NodeVisitor):
 
 
 def find_decorator_value(
-    function: t.Callable,
+    function: Callable,
     decorator: str,
     argument: int = None,
     keyword: str = None,
-) -> t.Any:
+) -> Any:
     """Return the value of an argument or keyword passed to a decorator placed on a function or class.
 
     For example, in the code
