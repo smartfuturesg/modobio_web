@@ -13,16 +13,10 @@ def sleep_durations_aggregation(
                 "wearable": device,
                 "data.sleep": {"$exists": True, "$ne": None},
                 "timestamp": {
-                    "$gte": start_date - timedelta(days=1),
-                    "$lte": end_date + timedelta(days=1),
-                },  # timestamp filters start of sleep event. we are interested in when the sleep event ends
-                "data.sleep.metadata.end_time": {
                     "$gte": start_date,
-                    "$lte": end_date
-                    + timedelta(
-                        days=1
-                    ),  # added an extra day to ensure we get the last sleep event
-                },
+                    "$lte": end_date,
+                },  # timestamp filters start of sleep event. we are interested in when the sleep event ends
+                "data.sleep.metadata.end_time": {"$gte": start_date, "$lte": end_date},
             }
         },
         {
@@ -150,16 +144,10 @@ def resting_hr_sleep_aggregation(
                 "user_id": user_id,
                 "wearable": device,
                 "timestamp": {
-                    "$gte": start_date - timedelta(days=1),
-                    "$lte": end_date + timedelta(days=1),
-                },
-                "data.sleep.metadata.end_time": {
                     "$gte": start_date,
-                    "$lte": end_date
-                    + timedelta(
-                        days=1
-                    ),  # added an extra day to ensure we get the last sleep event
+                    "$lte": end_date,
                 },
+                "data.sleep.metadata.end_time": {"$gte": start_date, "$lte": end_date},
             }
         },
         {
