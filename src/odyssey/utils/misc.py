@@ -1580,4 +1580,8 @@ def date_range(
         end_dt = datetime.utcnow()
         start_dt = end_dt - time_range
 
+    # ensure full date range for start and end_dts
+    start_dt = start_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_dt = end_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
+
     return start_dt, end_dt
