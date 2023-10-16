@@ -8,7 +8,7 @@ import random
 import re
 import statistics
 import textwrap
-import typing as t
+from typing import Optional
 from datetime import datetime, time, timedelta
 from time import monotonic
 
@@ -1546,7 +1546,7 @@ def create_wearables_filter_query(
 
 
 def date_range(
-    start_time: str, end_time: str, time_range: timedelta = timedelta(days=7)
+    start_time: Optional[str] = None, end_time: Optional[str] = None, time_range: timedelta = timedelta(days=7)
 ):
     """
     Generate a start and end range for wearables data retrieval.
