@@ -2825,6 +2825,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Default dates
         end_date = datetime.utcnow()
+        # end date at very end of day
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
         start_date = end_date - THIRTY_DAYS
         days = 30
 
@@ -2832,6 +2834,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         # We will then return data for start_date -> current date and then start_date minus the delta between orginal start_date and current_date -> start_date
         if request.args.get("start_date"):
             start_date = iso_string_to_iso_datetime(request.args.get("start_date"))
+            # start at the beginning of the day
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
             # Get time delta in days for average_readings_per_day calculation
             duration = end_date - start_date
             days = duration.days
