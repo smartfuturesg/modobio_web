@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 from base64 import b64decode
 from functools import wraps
-from typing import Any, Callable, Iterable, NoReturn, Optional
+from typing import Any, Callable, Iterable, Optional
 
 import jwt
 from flask import current_app, g, request
@@ -707,7 +707,7 @@ class TokenAuth(BasicAuth):
 
         return auth
 
-    def authenticate(self, auth: Optional[dict[str]]) -> tuple[User, UserLogin, str]:
+    def authenticate(self, auth: Optional[Authorization]) -> tuple[User, UserLogin, str]:
         """This authenticate method overrides the authenticate method in
         the OdyBasicAuth authenticate method and returns an object defined
         in verify_token_callback"""
