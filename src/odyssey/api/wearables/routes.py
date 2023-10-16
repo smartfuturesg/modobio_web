@@ -1320,6 +1320,10 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         elif request.args.get("start_date") or request.args.get("end_date"):
             raise BadRequest("Provide both or neither start_date and end_date.")
 
+        # set start_date to midnight, end date to 11:59:59.999999
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+
         # Calculate Average Glucose
         # Begin with defining each stage of the pipeline
 
@@ -2246,7 +2250,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         wearable = parse_wearable(wearable)
 
         # Default dates
-        end_date = datetime.utcnow() + timedelta(seconds=2)
+        end_date = datetime.utcnow()
         start_date = end_date - THIRTY_DAYS
 
         if request.args.get("start_date") and request.args.get("end_date"):
@@ -2254,15 +2258,19 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
             end_date = iso_string_to_iso_datetime(request.args.get("end_date"))
         elif request.args.get("start_date") or request.args.get("end_date"):
             raise BadRequest("Provide both or neither start_date and end_date.")
-        """Calculate Average Blood Pressures"""
+
+        # ensure full dates are used
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+
         # Define each stage of the pipeline
         # Filter documents on user_id, wearable, and date range
         stage_match_user_id_and_wearable = {
             "$match": {
                 "user_id": user_id,
                 "wearable": wearable,
-                "timestamp": {  # search just outside of range to make sure we get objects that encompass the start_date
-                    "$gte": start_date - timedelta(days=1),
+                "timestamp": {
+                    "$gte": start_date,
                     "$lte": end_date,
                 },
             }
@@ -2546,6 +2554,10 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         elif request.args.get("start_date") or request.args.get("end_date"):
             raise BadRequest("Provide both or neither start_date and end_date.")
 
+        # ensure full days are being used
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+
         # Stages for blood pressure calculations
 
         # Filter documents on user_id, wearable
@@ -2554,7 +2566,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
                 "user_id": user_id,
                 "wearable": wearable,
                 "timestamp": {  # search just outside of range to make sure we get objects that encompass the start_date
-                    "$gte": start_date - timedelta(days=1),
+                    "$gte": start_date,
                     "$lte": end_date,
                 },
             }
@@ -2825,6 +2837,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Default dates
         end_date = datetime.utcnow()
+        # end date at very end of day
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
         start_date = end_date - THIRTY_DAYS
         days = 30
 
@@ -2832,9 +2846,14 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         # We will then return data for start_date -> current date and then start_date minus the delta between orginal start_date and current_date -> start_date
         if request.args.get("start_date"):
             start_date = iso_string_to_iso_datetime(request.args.get("start_date"))
+            # start at the beginning of the day
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
             # Get time delta in days for average_readings_per_day calculation
             duration = end_date - start_date
             days = duration.days
+
+        prev_start_date = start_date - timedelta(days=days + 1)
+        prev_end_date = start_date - timedelta(microseconds=1)
 
         ### Stages for blood pressure monitoring statistics calculations ###
 
@@ -2844,7 +2863,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 "user_id": user_id,
                 "wearable": wearable,
                 "timestamp": {  # search just outside of range to make sure we get objects that encompass the start_date
-                    "$gte": start_date - timedelta(days=1),
+                    "$gte": start_date,
                     "$lte": end_date,
                 },
             }
@@ -2856,8 +2875,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
                 "user_id": user_id,
                 "wearable": wearable,
                 "timestamp": {  # search just outside of range to make sure we get objects that encompass the start_date
-                    "$gte": start_date - timedelta(days=days),
-                    "$lte": start_date,
+                    "$gte": prev_start_date,
+                    "$lte": prev_end_date,
                 },
             }
         }
@@ -2881,8 +2900,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         stage_match_date_range_bp_prev = {
             "$match": {
                 "data.body.blood_pressure_data.blood_pressure_samples.timestamp": {
-                    "$gte": start_date - timedelta(days=days),
-                    "$lte": start_date,
+                    "$gte": prev_start_date,
+                    "$lte": prev_end_date,
                 }
             }
         }
@@ -3157,8 +3176,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         stage_match_date_range_pulse_prev = {
             "$match": {
                 "data.body.heart_data.heart_rate_data.detailed.hr_samples.timestamp": {
-                    "$gte": start_date - timedelta(days=days),
-                    "$lte": start_date,
+                    "$gte": prev_start_date,
+                    "$lte": prev_end_date,
                 }
             }
         }
@@ -3254,8 +3273,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Add general info to current_block in the payload
         payload["current_block"] = {}
-        payload["current_block"]["start_date"] = start_date
-        payload["current_block"]["end_date"] = end_date
+        payload["current_block"]["start_date"] = start_date.date()
+        payload["current_block"]["end_date"] = end_date.date()
         payload["current_block"]["general_data"] = {}
         payload["current_block"]["general_data"]["average_systolic"] = data.get(
             "average_systolic"
@@ -3331,8 +3350,8 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
 
         # Add general info to prev_block in the payload
         payload["prev_block"] = {}
-        payload["prev_block"]["start_date"] = start_date - timedelta(days=days)
-        payload["prev_block"]["end_date"] = start_date
+        payload["prev_block"]["start_date"] = prev_start_date.date()
+        payload["prev_block"]["end_date"] = prev_end_date.date()
         payload["prev_block"]["general_data"] = {}
         payload["prev_block"]["general_data"]["average_systolic"] = data.get(
             "average_systolic"
@@ -3765,16 +3784,11 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
         Get raw blood pressure readings for user from all sources
         """
         start_date, end_date = date_range(
-            start_time=request.args.get("start_date", ""),
-            end_time=request.args.get("end_date", ""),
+            start_time=request.args.get("start_date"),
+            end_time=request.args.get("end_date"),
             time_range=timedelta(days=14),
         )
-        # Shift start and end dates so that all data is included for specified date range
-        # set time on start_date to 00:00:00
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        # shift end date by 1 day and set time to 00:00:00
-        end_date = end_date + timedelta(days=1)
-        end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
+
         bp_query = bp_raw_data_aggregation(user_id, wearable, start_date, end_date)
 
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
