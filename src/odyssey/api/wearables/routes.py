@@ -3784,8 +3784,8 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
         Get raw blood pressure readings for user from all sources
         """
         start_date, end_date = date_range(
-            start_time=request.args.get("start_date", ""),
-            end_time=request.args.get("end_date", ""),
+            start_time=request.args.get("start_date"),
+            end_time=request.args.get("end_date"),
             time_range=timedelta(days=14),
         )
 
