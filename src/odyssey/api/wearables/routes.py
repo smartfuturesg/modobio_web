@@ -1320,6 +1320,12 @@ class WearablesV2BloodGlucoseCalculationEndpoint(BaseResource):
         elif request.args.get("start_date") or request.args.get("end_date"):
             raise BadRequest("Provide both or neither start_date and end_date.")
 
+        # set start_date to midnight, end date to 11:59:59.999999
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = end_date.replace(
+            hour=23, minute=59, second=59, microsecond=999999
+        )
+
         # Calculate Average Glucose
         # Begin with defining each stage of the pipeline
 
@@ -3773,12 +3779,7 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
             end_time=request.args.get("end_date", ""),
             time_range=timedelta(days=14),
         )
-        # Shift start and end dates so that all data is included for specified date range
-        # set time on start_date to 00:00:00
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        # shift end date by 1 day and set time to 00:00:00
-        end_date = end_date + timedelta(days=1)
-        end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
+
         bp_query = bp_raw_data_aggregation(user_id, wearable, start_date, end_date)
 
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
