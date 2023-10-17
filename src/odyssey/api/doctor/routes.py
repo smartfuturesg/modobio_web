@@ -70,7 +70,7 @@ class MedBloodPressures(BaseResource):
         # fit the source and device info into one field
         if request.parsed_obj.get("device_name"):
             measurement_method = (
-                "MANUAL - " + request.parsed_obj.get("device_name").upper()
+                "MANUAL-" + request.parsed_obj.get("device_name").upper()
             )
         else:
             measurement_method = "MANUAL"
