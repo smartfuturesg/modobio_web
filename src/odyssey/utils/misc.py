@@ -8,9 +8,9 @@ import random
 import re
 import statistics
 import textwrap
-import typing as t
 from datetime import datetime, time, timedelta
 from time import monotonic
+from typing import Any, Callable, Optional
 
 import jwt
 from dateutil import parser
@@ -240,11 +240,11 @@ class DecoratorVisitor(ast.NodeVisitor):
 
 
 def find_decorator_value(
-    function: t.Callable,
+    function: Callable,
     decorator: str,
     argument: int = None,
     keyword: str = None,
-) -> t.Any:
+) -> Any:
     """Return the value of an argument or keyword passed to a decorator placed on a function or class.
 
     For example, in the code
@@ -1546,7 +1546,9 @@ def create_wearables_filter_query(
 
 
 def date_range(
-    start_time: str, end_time: str, time_range: timedelta = timedelta(days=7)
+    start_time: Optional[str] = None,
+    end_time: Optional[str] = None,
+    time_range: timedelta = timedelta(days=7),
 ):
     """
     Generate a start and end range for wearables data retrieval.
@@ -1579,5 +1581,9 @@ def date_range(
     else:
         end_dt = datetime.utcnow()
         start_dt = end_dt - time_range
+
+    # ensure full date range for start and end_dts
+    start_dt = start_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_dt = end_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
 
     return start_dt, end_dt
