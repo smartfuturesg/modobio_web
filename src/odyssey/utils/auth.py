@@ -707,7 +707,9 @@ class TokenAuth(BasicAuth):
 
         return auth
 
-    def authenticate(self, auth: Optional[Authorization]) -> tuple[User, UserLogin, str]:
+    def authenticate(
+        self, auth: Optional[Authorization]
+    ) -> tuple[User, UserLogin, str]:
         """This authenticate method overrides the authenticate method in
         the OdyBasicAuth authenticate method and returns an object defined
         in verify_token_callback"""
