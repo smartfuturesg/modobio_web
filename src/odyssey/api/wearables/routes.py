@@ -1,8 +1,8 @@
 import base64
-from bdb import Breakpoint
 import logging
 import secrets
 import urllib.parse
+from bdb import Breakpoint
 from datetime import time, timedelta
 from math import ceil
 
@@ -1153,7 +1153,7 @@ class WearablesV2DexcomAuthProxyEndpoint(BaseResource):
         )
         redirect_url = f"{current_app.config['TERRA_DEXCOM_AUTH_URL']}?{query_string}"
         response = redirect(redirect_url)
-        
+
         return response
 
 
