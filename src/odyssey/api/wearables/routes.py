@@ -1146,18 +1146,6 @@ class WearablesV2DexcomAuthProxyEndpoint(BaseResource):
             f"Dexcom auth proxy request received from user {request.args.get('state')}"
         )
 
-        # payload = {
-        #     "grant_type": "authorization_code",
-        #     "code": request.args["code"],
-        #     "redirect_uri": "http://68.231.27.32:3000/v2/wearables/dexcom/auth/proxy",
-        #     "client_id": current_app.config["DEXCOM_CLIENT_ID"],
-        #     "client_secret": current_app.config["DEXCOM_CLIENT_SECRET"]
-        #     }
-
-        # headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-        # response = requests.post(current_app.config['DEXCOM_BASE_URL']+"/oauth2/token", data=payload, headers=headers)
-        # breakpoint()
         query_params = request.args
         query_string = "&".join(
             f"{key}={urllib.parse.quote(str(value))}"
@@ -1165,13 +1153,7 @@ class WearablesV2DexcomAuthProxyEndpoint(BaseResource):
         )
         redirect_url = f"{current_app.config['TERRA_DEXCOM_AUTH_URL']}?{query_string}"
         response = redirect(redirect_url)
-        # breakpoint()
-        # headers = {
-        # "accept": "application/json",
-        # "dev-id": current_app.config["TERRA_DEV_ID"],
-        # "x-api-key": current_app.config["TERRA_API_KEY"],
-        # }
-        # response.headers.update(headers)
+        
         return response
 
 
