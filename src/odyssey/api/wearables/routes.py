@@ -2,27 +2,23 @@ import base64
 import logging
 import secrets
 import urllib.parse
-from bdb import Breakpoint
 from datetime import time, timedelta
 from math import ceil
 
 import boto3
 from boto3.dynamodb.conditions import Key
 from dateutil import parser
-from flask import current_app, jsonify, redirect, request, url_for
+from flask import current_app, jsonify, redirect, request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace
 from requests_oauthlib import OAuth2Session
 from sqlalchemy import select
-from sqlalchemy.sql import text
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from odyssey import db, mongo
 from odyssey.api.user.models import User
 from odyssey.api.wearables.models import *
 from odyssey.api.wearables.schemas import *
-from odyssey.defaults import DEXCOM_BASE_URL, DEXCOM_CLIENT_ID, TERRA_DEXCOM_AUTH_URL
-from odyssey.integrations.active_campaign import ActiveCampaign
 from odyssey.integrations.terra import TerraClient
 from odyssey.tasks.tasks import deauthenticate_terra_user
 from odyssey.utils.auth import token_auth
@@ -31,7 +27,6 @@ from odyssey.utils.constants import (
     START_TIME_TO_THREE_HOUR_TIME_BLOCKS,
     THREE_HOUR_TIME_BLOCK_START_TIMES_LIST,
     WEARABLE_DEVICE_TYPES,
-    WEARABLES_TO_ACTIVE_CAMPAIGN_DEVICE_NAMES,
 )
 from odyssey.utils.files import get_profile_pictures
 from odyssey.utils.json import JSONProvider

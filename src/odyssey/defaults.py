@@ -420,25 +420,3 @@ We use this as a proxy to authenticate with Dexcom.
 
 :type: str
 """
-
-
-DEXCOM_CLIENT_ID = ""
-"""
-DEXCOM client ID. See in https://developer.dexcom.com/account/apps 
-
-:type: str
-"""
-
-DEXCOM_CLIENT_SECRET = ""
-"""
-DEXCOM client secret. See in https://developer.dexcom.com/account/apps
-
-:type: str
-"""
-
-DEXCOM_BASE_URL = "https://sandbox-api.dexcom.com/v2"
-"""
-Base URL for DEXCOM API. For production, use https://api.dexcom.com/v2
-
-:type: str
-"""
