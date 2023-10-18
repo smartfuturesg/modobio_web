@@ -918,7 +918,7 @@ def supported_wearables() -> dict:
     return result
 
 
-def parse_wearable(wearable: str) -> str:
+def parse_wearable(wearable: str, terra_only=False) -> str:
     """Parse wearable path parameter.
 
     Clean up path parameter and check against list of supported devices.
@@ -946,10 +946,13 @@ def parse_wearable(wearable: str) -> str:
     if (
         wearable_clean in SUPPORTED_WEARABLES["providers"]
         or wearable_clean in SUPPORTED_WEARABLES["sdk_providers"]
-        or wearable_clean == "ALL"
     ):
         return wearable_clean
+    elif not terra_only and wearable_clean == "ALL" or "MANUAL" in wearable_clean:
+        return wearable_clean
+
     raise BadRequest(f"Unknown wearable {wearable}")
+
 
 def create_wearable_filter(wearable: str) -> str | dict[str, bool]:
     """Filter for mongodb matching queries on wearable field."""
@@ -958,7 +961,7 @@ def create_wearable_filter(wearable: str) -> str | dict[str, bool]:
         return {"$exists": True}
     else:
         return wearable
-    
+
 
 @ns_v2.route("")
 class WearablesV2Endpoint(BaseResource):
@@ -3838,7 +3841,9 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
             time_range=timedelta(days=14),
         )
 
-        bp_query = bp_raw_data_aggregation(user_id, wearable_filter, start_date, end_date)
+        bp_query = bp_raw_data_aggregation(
+            user_id, wearable_filter, start_date, end_date
+        )
 
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
         bp_data = list(bp_cursor)
