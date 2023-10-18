@@ -1066,7 +1066,7 @@ class WearablesV2DataEndpoint(BaseResource):
     def post(self, user_id, wearable):
         """Register a new wearable device for this user."""
         # user_id = self.check_user(uid, user_type='client').user_id
-        wearable = parse_wearable(wearable)
+        wearable = parse_wearable(wearable, terra_only=True)
 
         # API based providers
         if wearable in supported_wearables()["providers"]:
@@ -1129,7 +1129,7 @@ class WearablesV2DataEndpoint(BaseResource):
     def delete(self, user_id, wearable):
         """Revoke access for this wearable device."""
         # user_id = self.check_user(uid, user_type='client').user_id
-        wearable = parse_wearable(wearable)
+        wearable = parse_wearable(wearable, terra_only=True)
 
         user_wearable = db.session.get(WearablesV2, (user_id, wearable))
 
@@ -1195,7 +1195,7 @@ class WearablesV2ResyncEndpoint(BaseResource):
         wearables_query = WearablesV2().query.filter_by(user_id=user_id)
 
         if "wearable" in request.args:
-            wearable = parse_wearable(request.args["wearable"])
+            wearable = parse_wearable(request.args["wearable"], terra_only=True)
             wearables_query = wearables_query.filter_by(wearable=wearable)
 
         wearables = wearables_query.all()
