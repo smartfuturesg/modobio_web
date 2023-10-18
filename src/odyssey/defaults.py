@@ -413,3 +413,10 @@ TERRA_BASE_URL = "https://api.tryterra.co/v2"
 
 :type: str
 """
+
+TERRA_DEXCOM_AUTH_URL = "https://api.tryterra.co/v2/auth/dexcom/oauth2"
+"""URL for Terra API to authenticate with Dexcom.
+We use this as a proxy to authenticate with Dexcom.
+
+:type: str
+"""
