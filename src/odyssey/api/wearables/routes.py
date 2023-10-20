@@ -918,7 +918,7 @@ def supported_wearables() -> dict:
     return result
 
 
-def parse_wearable(wearable: str, terra_only=False) -> str:
+def parse_wearable(wearable: str, terra_only: bool = False) -> str:
     """Parse wearable path parameter.
 
     Clean up path parameter and check against list of supported devices.
