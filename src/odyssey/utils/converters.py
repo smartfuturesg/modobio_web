@@ -10,7 +10,7 @@ from datetime import date, datetime, time
 import dateutil
 from werkzeug.routing import BaseConverter
 
-__all__ = [
+__all__: list[str] = [
     "UUIDConverter",
     "DateTimeConverter",
     "DateConverter",
@@ -21,7 +21,7 @@ __all__ = [
 class UUIDConverter(BaseConverter):
     """Convert path parameter into UUID."""
 
-    name = "uuid"
+    name: str = "uuid"
 
     def to_python(self, value: str) -> uuid.UUID:
         return uuid.UUID(value)
@@ -37,7 +37,7 @@ class DateTimeConverter(BaseConverter):
     It will be a naive object otherwise.
     """
 
-    name = "datetime"
+    name: str = "datetime"
 
     def to_python(self, value: str) -> datetime:
         return dateutil.parser.isoparse(value)
@@ -52,7 +52,7 @@ class DateConverter(BaseConverter):
     :class:`datetime.date` objects are never timezone-aware.
     """
 
-    name = "date"
+    name: str = "date"
 
     def to_python(self, value: str) -> date:
         return date.fromisoformat(value)
@@ -68,7 +68,7 @@ class TimeConverter(BaseConverter):
     It will be a naive object otherwise.
     """
 
-    name = "time"
+    name: str = "time"
 
     def to_python(self, value: str) -> time:
         d = dateutil.parser.parse(value)
