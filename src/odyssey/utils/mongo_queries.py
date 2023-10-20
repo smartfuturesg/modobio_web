@@ -1,6 +1,4 @@
-import re
 from datetime import datetime, timedelta
-from math import e
 
 
 def sleep_durations_aggregation(
@@ -269,7 +267,10 @@ def calories_aggregation(
 
 
 def bp_raw_data_aggregation(
-    user_id: int, device: str, start_date: datetime, end_date: datetime
+    user_id: int,
+    device: str | dict[str, bool],
+    start_date: datetime,
+    end_date: datetime,
 ):
     return [
         {

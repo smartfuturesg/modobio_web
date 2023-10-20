@@ -918,7 +918,7 @@ def supported_wearables() -> dict:
     return result
 
 
-def parse_wearable(wearable: str) -> str:
+def parse_wearable(wearable: str, terra_only: bool = False) -> str:
     """Parse wearable path parameter.
 
     Clean up path parameter and check against list of supported devices.
@@ -948,7 +948,19 @@ def parse_wearable(wearable: str) -> str:
         or wearable_clean in SUPPORTED_WEARABLES["sdk_providers"]
     ):
         return wearable_clean
+    elif not terra_only and wearable_clean == "ALL" or "MANUAL" in wearable_clean:
+        return wearable_clean
+
     raise BadRequest(f"Unknown wearable {wearable}")
+
+
+def create_wearable_filter(wearable: str) -> str | dict[str, bool]:
+    """Filter for mongodb matching queries on wearable field."""
+
+    if wearable == "ALL":
+        return {"$exists": True}
+    else:
+        return wearable
 
 
 @ns_v2.route("")
@@ -981,6 +993,7 @@ class WearablesV2UserEndpoint(BaseResource):
 
 @ns_v2.route("/<int:user_id>/<wearable>")
 class WearablesV2DataEndpoint(BaseResource):
+    @ns_v2.deprecated
     @token_auth.login_required(
         user_type=("client", "provider"), resources=("wearable_data",)
     )
@@ -1053,7 +1066,7 @@ class WearablesV2DataEndpoint(BaseResource):
     def post(self, user_id, wearable):
         """Register a new wearable device for this user."""
         # user_id = self.check_user(uid, user_type='client').user_id
-        wearable = parse_wearable(wearable)
+        wearable = parse_wearable(wearable, terra_only=True)
 
         # API based providers
         if wearable in supported_wearables()["providers"]:
@@ -1116,7 +1129,7 @@ class WearablesV2DataEndpoint(BaseResource):
     def delete(self, user_id, wearable):
         """Revoke access for this wearable device."""
         # user_id = self.check_user(uid, user_type='client').user_id
-        wearable = parse_wearable(wearable)
+        wearable = parse_wearable(wearable, terra_only=True)
 
         user_wearable = db.session.get(WearablesV2, (user_id, wearable))
 
@@ -1182,7 +1195,7 @@ class WearablesV2ResyncEndpoint(BaseResource):
         wearables_query = WearablesV2().query.filter_by(user_id=user_id)
 
         if "wearable" in request.args:
-            wearable = parse_wearable(request.args["wearable"])
+            wearable = parse_wearable(request.args["wearable"], terra_only=True)
             wearables_query = wearables_query.filter_by(wearable=wearable)
 
         wearables = wearables_query.all()
@@ -2281,6 +2294,8 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
 
         wearable = parse_wearable(wearable)
 
+        wearable_filter = create_wearable_filter(wearable)
+
         # Default dates
         end_date = datetime.utcnow()
         start_date = end_date - THIRTY_DAYS
@@ -2300,7 +2315,7 @@ class WearablesV2BloodPressureVariationCalculationEndpoint(BaseResource):
         stage_match_user_id_and_wearable = {
             "$match": {
                 "user_id": user_id,
-                "wearable": wearable,
+                "wearable": wearable_filter,
                 "timestamp": {
                     "$gte": start_date,
                     "$lte": end_date,
@@ -2575,7 +2590,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
 
         payload = {}
         wearable = parse_wearable(wearable)
-
+        wearable_filter = create_wearable_filter(wearable)
         # Default dates
         end_date = datetime.utcnow()
         start_date = end_date - THIRTY_DAYS
@@ -2596,7 +2611,7 @@ class WearablesV2BloodPressureCalculationEndpoint(BaseResource):
         stage_match_user_id_and_wearable = {
             "$match": {
                 "user_id": user_id,
-                "wearable": wearable,
+                "wearable": wearable_filter,
                 "timestamp": {  # search just outside of range to make sure we get objects that encompass the start_date
                     "$gte": start_date,
                     "$lte": end_date,
@@ -2866,6 +2881,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         """
 
         wearable = parse_wearable(wearable)
+        wearable_filter = create_wearable_filter(wearable)
 
         # Default dates
         end_date = datetime.utcnow()
@@ -2893,7 +2909,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         stage_match_user_id_and_wearable = {
             "$match": {
                 "user_id": user_id,
-                "wearable": wearable,
+                "wearable": wearable_filter,
                 "timestamp": {  # search just outside of range to make sure we get objects that encompass the start_date
                     "$gte": start_date,
                     "$lte": end_date,
@@ -2905,7 +2921,7 @@ class WearablesV2BloodPressureMonitoringStatisticsCalculationEndpoint(BaseResour
         stage_match_user_id_and_wearable_prev = {
             "$match": {
                 "user_id": user_id,
-                "wearable": wearable,
+                "wearable": wearable_filter,
                 "timestamp": {  # search just outside of range to make sure we get objects that encompass the start_date
                     "$gte": prev_start_date,
                     "$lte": prev_end_date,
@@ -3489,6 +3505,8 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
         dict
             JSON encoded dict containing:
         """
+        wearable = parse_wearable(wearable)
+        wearable_filter = create_wearable_filter(wearable)
 
         start_date, end_date = date_range(
             start_time=request.args.get("start_date"),
@@ -3499,7 +3517,7 @@ class WearablesV2BloodPressureDailyAvgCalculationEndpoint(BaseResource):
         stage_1_match_user_id_and_wearable = {
             "$match": {
                 "user_id": user_id,
-                "wearable": wearable,
+                "wearable": wearable_filter,
                 "timestamp": {
                     "$gte": start_date,
                     "$lte": end_date,
@@ -3815,13 +3833,17 @@ class WearablesV2BloodPressureEndpoint(BaseResource):
         """
         Get raw blood pressure readings for user from all sources
         """
+        wearable = parse_wearable(wearable)
+        wearable_filter = create_wearable_filter(wearable)
         start_date, end_date = date_range(
             start_time=request.args.get("start_date"),
             end_time=request.args.get("end_date"),
             time_range=timedelta(days=14),
         )
 
-        bp_query = bp_raw_data_aggregation(user_id, wearable, start_date, end_date)
+        bp_query = bp_raw_data_aggregation(
+            user_id, wearable_filter, start_date, end_date
+        )
 
         bp_cursor = mongo.db.wearables.aggregate(bp_query)
         bp_data = list(bp_cursor)
